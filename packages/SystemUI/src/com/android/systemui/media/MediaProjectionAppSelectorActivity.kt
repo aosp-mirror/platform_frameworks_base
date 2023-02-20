@@ -228,7 +228,7 @@ class MediaProjectionAppSelectorActivity(
             putExtra(Intent.EXTRA_INTENT, queryIntent)
 
             // Update the title of the chooser
-            val title = resources.getString(R.string.media_projection_permission_app_selector_title)
+            val title = resources.getString(R.string.screen_share_permission_app_selector_title)
             putExtra(Intent.EXTRA_TITLE, title)
 
             // Select host app's profile tab by default

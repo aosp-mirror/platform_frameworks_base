@@ -251,25 +251,22 @@
     <string name="app_clips_save_add_to_note">Add to note</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
-    <string name="screenrecord_name">Screen Recorder</string>
+    <string name="screenrecord_title">Screen Recorder</string>
     <!-- Processing screen recoding video in the background [CHAR LIMIT=30]-->
     <string name="screenrecord_background_processing_label">Processing screen recording</string>
     <!-- Description of the screen recording notification channel [CHAR LIMIT=NONE]-->
     <string name="screenrecord_channel_description">Ongoing notification for a screen record session</string>
+
+    <!-- For updated Screen Recording permission dialog (i.e. with PSS)-->
     <!-- Title for the screen prompting the user to begin recording their screen [CHAR LIMIT=NONE]-->
-    <string name="screenrecord_start_label">Start Recording?</string>
-    <!-- Message reminding the user that sensitive information may be captured during a screen recording [CHAR_LIMIT=NONE]-->
-    <string name="screenrecord_description">While recording, Android System can capture any sensitive information that\u2019s visible on your screen or played on your device. This includes passwords, payment info, photos, messages, and audio.</string>
-    <!-- Dropdown option to record the entire screen [CHAR_LIMIT=30]-->
-    <string name="screenrecord_option_entire_screen">Record entire screen</string>
-    <!-- Dropdown option to record a single app [CHAR_LIMIT=30]-->
-    <string name="screenrecord_option_single_app">Record a single app</string>
+    <string name="screenrecord_permission_dialog_title">Start Recording?</string>
     <!-- Message reminding the user that sensitive information may be captured during a full screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
-    <string name="screenrecord_warning_entire_screen">While you\'re recording, Android has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen">While you’re recording, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Message reminding the user that sensitive information may be captured during a single app screen recording for the updated dialog that includes partial screen sharing option [CHAR_LIMIT=350]-->
-    <string name="screenrecord_warning_single_app">While you\'re recording an app, Android has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <string name="screenrecord_permission_dialog_warning_single_app">While you’re recording an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
     <!-- Button to start a screen recording in the updated screen record dialog that allows to select an app to record [CHAR LIMIT=50]-->
-    <string name="screenrecord_start_recording">Start recording</string>
+    <string name="screenrecord_permission_dialog_continue">Start recording</string>
+
     <!-- Label for a switch to enable recording audio [CHAR LIMIT=NONE]-->
     <string name="screenrecord_audio_label">Record audio</string>
     <!-- Label for the option to record audio from the device [CHAR LIMIT=NONE]-->
@@ -281,7 +278,7 @@
     <!-- Label for an option to record audio from both device and microphone [CHAR LIMIT=NONE]-->
     <string name="screenrecord_device_audio_and_mic_label">Device audio and microphone</string>
     <!-- Button to start a screen recording [CHAR LIMIT=50]-->
-    <string name="screenrecord_start">Start</string>
+    <string name="screenrecord_continue">Start</string>
     <!-- Notification text displayed when we are recording the screen [CHAR LIMIT=100]-->
     <string name="screenrecord_ongoing_screen_only">Recording screen</string>
     <!-- Notification text displayed when we are recording both the screen and audio [CHAR LIMIT=100]-->
@@ -1037,47 +1034,52 @@
     <!-- Label for button in confirmation dialog when exiting guest session [CHAR LIMIT=35] -->
     <string name="user_remove_user_remove">Remove</string>
 
-    <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_text"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
-
-    <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_text">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
-
-    <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_dialog_service_title">Start recording or casting?</string>
-
+    <!-- Media projection without Partial Screenshare -->
     <!-- Media projection permission dialog warning title. [CHAR LIMIT=NONE] -->
     <string name="media_projection_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g>?</string>
+    <!-- Media projection permission dialog warning text. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_dialog_warning"><xliff:g id="app_seeking_permission" example="Hangouts">%s</xliff:g> will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
+    <!-- Media projection permission dialog warning title for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_sys_service_dialog_title">Start recording or casting?</string>
+    <!-- Media projection permission dialog warning text for system services. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_sys_service_dialog_warning">The service providing this function will have access to all of the information that is visible on your screen or played from your device while recording or casting. This includes information such as passwords, payment details, photos, messages, and audio that you play.</string>
 
-    <!-- Media projection permission dialog title. [CHAR LIMIT=NONE] -->
-    <string name="media_projection_permission_dialog_title">Allow <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> to share or record?</string>
-
-    <!-- Media projection permission dropdown option for capturing the whole screen. [CHAR LIMIT=30] -->
-    <string name="media_projection_permission_dialog_option_entire_screen">Entire screen</string>
-
-    <!-- Media projection permission dropdown option for capturing single app. [CHAR LIMIT=30] -->
-    <string name="media_projection_permission_dialog_option_single_app">A single app</string>
-
-    <!-- Media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_warning_entire_screen">When you\'re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
-
-    <!-- Media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_warning_single_app">When you\'re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
-
-    <!-- Media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
-    <string name="media_projection_permission_dialog_continue">Continue</string>
-
+    <!-- Permission dropdown option for sharing or recording the whole screen. [CHAR LIMIT=30] -->
+    <string name="screen_share_permission_dialog_option_entire_screen">Entire screen</string>
+    <!-- Permission dropdown option for sharing or recording single app. [CHAR LIMIT=30] -->
+    <string name="screen_share_permission_dialog_option_single_app">A single app</string>
     <!-- Title of the dialog that allows to select an app to share or record [CHAR LIMIT=NONE] -->
-    <string name="media_projection_permission_app_selector_title">Share or record an app</string>
+    <string name="screen_share_permission_app_selector_title">Share or record an app</string>
 
-    <!-- Media projection permission dialog title when there is no app name (e.g. it could be a system service when casting). [CHAR LIMIT=100] -->
-    <string name="media_projection_permission_dialog_system_service_title">Allow this app to share or record?</string>
+    <!-- Media projection that launched from 1P/3P apps -->
+    <!-- 1P/3P app media projection permission dialog title. [CHAR LIMIT=NONE] -->
+    <string name="media_projection_entry_app_permission_dialog_title">Start recording or casting with <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g>?</string>
+    <!-- 1P/3P app media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen">When you’re sharing, recording, or casting, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- 1P/3P app media projection permission warning for capturing an app. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, <xliff:g id="app_seeking_permission" example="Meet">%s</xliff:g> has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- 1P/3P apps media projection permission button to continue with app selection or recording [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_app_permission_dialog_continue">Start</string>
 
-    <!-- Media projection permission warning for capturing the whole screen when a system service requests it (e.g. when casting). [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen">When you\'re sharing, recording, or casting, this app has access to anything visible on your screen or played on your device. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <!-- Casting that launched by SysUI (i.e. when there is no app name) -->
+    <!-- System casting media projection permission dialog title. [CHAR LIMIT=100] -->
+    <string name="media_projection_entry_cast_permission_dialog_title">Start casting?</string>
+    <!-- System casting media projection permission warning for capturing the whole screen when SysUI casting requests it. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen">When you’re casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System casting media projection permission warning for capturing a single app when SysUI casting requests it. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app">When you’re casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System casting media projection permission button to continue for SysUI casting. [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_cast_permission_dialog_continue">Start casting</string>
 
-    <!-- Media projection permission warning for capturing a single app when a system service requests it (e.g. when casting). [CHAR LIMIT=350] -->
-    <string name="media_projection_permission_dialog_system_service_warning_single_app">When you\'re sharing, recording, or casting an app, this app has access to anything shown or played on that app. So be careful with passwords, payment details, messages, or other sensitive information.</string>
+    <!-- Other sharing (not recording nor casting) that launched by SysUI (currently not in use) -->
+    <!-- System sharing media projection permission dialog title. [CHAR LIMIT=100] -->
+    <string name="media_projection_entry_generic_permission_dialog_title">Start sharing?</string>
+    <!-- System sharing media projection permission warning for capturing the whole screen. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen">When you’re sharing, recording, or casting, Android has access to anything visible on your screen or played on your device. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System sharing media projection permission warning for capturing a single app. [CHAR LIMIT=350] -->
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app">When you’re sharing, recording, or casting an app, Android has access to anything shown or played on that app. So be careful with things like passwords, payment details, messages, photos, and audio and video.</string>
+    <!-- System sharing media projection permission button to continue. [CHAR LIMIT=60] -->
+    <string name="media_projection_entry_generic_permission_dialog_continue">Start</string>
 
     <!-- Title for the dialog that is shown when screen capturing is disabled by enterprise policy. [CHAR LIMIT=100] -->
     <string name="screen_capturing_disabled_by_policy_dialog_title">Blocked by your IT admin</string>
