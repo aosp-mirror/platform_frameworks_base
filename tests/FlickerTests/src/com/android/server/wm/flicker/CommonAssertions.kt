@@ -18,12 +18,13 @@
 
 package com.android.server.wm.flicker
 
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.component.matchers.IComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
-import com.android.server.wm.traces.common.subjects.region.RegionSubject
-import com.android.server.wm.traces.common.windowmanager.WindowManagerTrace
+import android.tools.common.PlatformConsts
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.datatypes.component.IComponentNameMatcher
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.common.traces.wm.WindowManagerTrace
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.helpers.WindowUtils
 
 /**
  * Checks that [ComponentNameMatcher.STATUS_BAR] window is visible and above the app windows in all
@@ -208,7 +209,7 @@ fun FlickerTest.statusBarLayerPositionAtStart(
     wmTrace: WindowManagerTrace? = this.reader.readWmTrace()
 ) {
     // collect navbar position for the equivalent WM state
-    val state = wmTrace?.firstOrNull() ?: error("WM state missing in $this")
+    val state = wmTrace?.entries?.firstOrNull() ?: error("WM state missing in $this")
     val display = state.getDisplay(PlatformConsts.DEFAULT_DISPLAY) ?: error("Display not found")
     val navBarPosition = WindowUtils.getExpectedStatusBarPosition(display)
     assertLayersStart {
@@ -224,7 +225,7 @@ fun FlickerTest.statusBarLayerPositionAtEnd(
     wmTrace: WindowManagerTrace? = this.reader.readWmTrace()
 ) {
     // collect navbar position for the equivalent WM state
-    val state = wmTrace?.lastOrNull() ?: error("WM state missing in $this")
+    val state = wmTrace?.entries?.lastOrNull() ?: error("WM state missing in $this")
     val display = state.getDisplay(PlatformConsts.DEFAULT_DISPLAY) ?: error("Display not found")
     val navBarPosition = WindowUtils.getExpectedStatusBarPosition(display)
     assertLayersEnd {

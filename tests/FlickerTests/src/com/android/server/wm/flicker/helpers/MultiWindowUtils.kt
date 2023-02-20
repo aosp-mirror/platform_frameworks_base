@@ -19,9 +19,10 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.content.Context
 import android.provider.Settings
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
 import android.util.Log
 import com.android.compatibility.common.util.SystemUtil
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import java.io.IOException
 
 class MultiWindowUtils(

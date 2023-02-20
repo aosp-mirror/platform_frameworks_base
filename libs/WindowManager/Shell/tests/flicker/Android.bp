@@ -41,6 +41,8 @@ android_test {
     static_libs: [
         "androidx.test.ext.junit",
         "flickerlib",
+        "flickerlib-apphelpers",
+        "flickerlib-helpers",
         "truth-prebuilt",
         "app-helpers-core",
         "launcher-helper-lib",

@@ -18,13 +18,13 @@
 
 package com.android.wm.shell.flicker
 
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
-import com.android.server.wm.traces.common.region.Region
-import com.android.server.wm.traces.common.service.PlatformConsts
-import com.android.server.wm.traces.common.subjects.layers.LayerTraceEntrySubject
-import com.android.server.wm.traces.common.subjects.layers.LayersTraceSubject
+import android.tools.common.Rotation
+import android.tools.common.datatypes.Region
+import android.tools.common.datatypes.component.IComponentMatcher
+import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.helpers.WindowUtils
 
 fun FlickerTest.appPairsDividerIsVisibleAtEnd() {
     assertLayersEnd { this.isVisible(APP_PAIR_SPLIT_DIVIDER_COMPONENT) }
@@ -247,7 +247,7 @@ fun LayersTraceSubject.splitAppLayerBoundsSnapToDivider(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean,
-    rotation: PlatformConsts.Rotation
+    rotation: Rotation
 ): LayersTraceSubject {
     return invoke("splitAppLayerBoundsSnapToDivider") {
         it.splitAppLayerBoundsSnapToDivider(component, landscapePosLeft, portraitPosTop, rotation)
@@ -258,7 +258,7 @@ fun LayerTraceEntrySubject.splitAppLayerBoundsSnapToDivider(
     component: IComponentMatcher,
     landscapePosLeft: Boolean,
     portraitPosTop: Boolean,
-    rotation: PlatformConsts.Rotation
+    rotation: Rotation
 ): LayerTraceEntrySubject {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return invoke {
@@ -369,7 +369,7 @@ fun FlickerTest.dockedStackDividerNotExistsAtEnd() {
 }
 
 fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
-    rotation: PlatformConsts.Rotation,
+    rotation: Rotation,
     primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -381,7 +381,7 @@ fun FlickerTest.appPairsPrimaryBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
-    rotation: PlatformConsts.Rotation,
+    rotation: Rotation,
     primaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -393,7 +393,7 @@ fun FlickerTest.dockedStackPrimaryBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
-    rotation: PlatformConsts.Rotation,
+    rotation: Rotation,
     secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -405,7 +405,7 @@ fun FlickerTest.appPairsSecondaryBoundsIsVisibleAtEnd(
 }
 
 fun FlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
-    rotation: PlatformConsts.Rotation,
+    rotation: Rotation,
     secondaryComponent: IComponentMatcher
 ) {
     assertLayersEnd {
@@ -416,7 +416,7 @@ fun FlickerTest.dockedStackSecondaryBoundsIsVisibleAtEnd(
     }
 }
 
-fun getPrimaryRegion(dividerRegion: Region, rotation: PlatformConsts.Rotation): Region {
+fun getPrimaryRegion(dividerRegion: Region, rotation: Rotation): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation.isRotated()) {
         Region.from(
@@ -435,7 +435,7 @@ fun getPrimaryRegion(dividerRegion: Region, rotation: PlatformConsts.Rotation): 
     }
 }
 
-fun getSecondaryRegion(dividerRegion: Region, rotation: PlatformConsts.Rotation): Region {
+fun getSecondaryRegion(dividerRegion: Region, rotation: Rotation): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation.isRotated()) {
         Region.from(
