@@ -587,6 +587,7 @@ package android.app {
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
     method @RequiresPermission(value="android.permission.WATCH_APPOPS", conditional=true) public void startWatchingNoted(@NonNull String[], @NonNull android.app.AppOpsManager.OnOpNotedListener);
+    method @RequiresPermission(value="android.permission.WATCH_APPOPS", conditional=true) public void startWatchingNoted(@NonNull String[], @NonNull java.util.concurrent.Executor, @NonNull android.app.AppOpsManager.OnOpNotedListener);
     method public void stopWatchingNoted(@NonNull android.app.AppOpsManager.OnOpNotedListener);
     field public static final int HISTORY_FLAGS_ALL = 3; // 0x3
     field public static final int HISTORY_FLAG_AGGREGATE = 1; // 0x1
