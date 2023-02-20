@@ -868,15 +868,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final int USER_ACTION_NOT_NEEDED = 0;
     private static final int USER_ACTION_REQUIRED = 1;
     private static final int USER_ACTION_PENDING_APK_PARSING = 2;
-    private static final int USER_ACTION_REQUIRED_UPDATE_OWNER_CHANGED = 3;
-    private static final int USER_ACTION_REQUIRED_UPDATE_OWNER_RETAINED = 4;
+    private static final int USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER = 3;
 
     @IntDef({
             USER_ACTION_NOT_NEEDED,
             USER_ACTION_REQUIRED,
             USER_ACTION_PENDING_APK_PARSING,
-            USER_ACTION_REQUIRED_UPDATE_OWNER_CHANGED,
-            USER_ACTION_REQUIRED_UPDATE_OWNER_RETAINED
+            USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER,
     })
     @interface UserActionRequirement {}
 
@@ -937,7 +935,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 : null;
         final boolean isInstallerOfRecord = isUpdate
                 && Objects.equals(existingInstallerPackageName, getInstallerPackageName());
-        final boolean isUpdateOwner = Objects.equals(existingUpdateOwnerPackageName,
+        final boolean isUpdateOwner = TextUtils.equals(existingUpdateOwnerPackageName,
                 getInstallerPackageName());
         final boolean isSelfUpdate = targetPackageUid == mInstallerUid;
         final boolean isPermissionGranted = isInstallPermissionGranted
@@ -947,6 +945,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isInstallerRoot = (mInstallerUid == Process.ROOT_UID);
         final boolean isInstallerSystem = (mInstallerUid == Process.SYSTEM_UID);
         final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
+        final boolean isFromManagedUserOrProfile =
+                (params.installFlags & PackageManager.INSTALL_FROM_MANAGED_USER_OR_PROFILE) != 0;
         final boolean isUpdateOwnershipEnforcementEnabled =
                 mPm.isUpdateOwnershipEnforcementAvailable()
                         && existingUpdateOwnerPackageName != null;
@@ -963,12 +963,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (isUpdateOwnershipEnforcementEnabled
                 && !isApexSession()
                 && !isUpdateOwner
-                && !isInstallerShell) {
-            final boolean isRequestUpdateOwner =
-                    (params.installFlags & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
-
-            return isRequestUpdateOwner ? USER_ACTION_REQUIRED_UPDATE_OWNER_CHANGED
-                    : USER_ACTION_REQUIRED_UPDATE_OWNER_RETAINED;
+                && !isInstallerShell
+                // We don't enforce the update ownership for the managed user and profile.
+                && !isFromManagedUserOrProfile) {
+            return USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER;
         }
 
         if (isPermissionGranted) {
@@ -2361,8 +2359,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         userActionRequirement = session.computeUserActionRequirement();
         session.updateUserActionRequirement(userActionRequirement);
         if (userActionRequirement == USER_ACTION_REQUIRED
-                || userActionRequirement == USER_ACTION_REQUIRED_UPDATE_OWNER_CHANGED
-                || userActionRequirement == USER_ACTION_REQUIRED_UPDATE_OWNER_RETAINED) {
+                || userActionRequirement == USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER) {
             session.sendPendingUserActionIntent(target);
             return true;
         }
@@ -2425,9 +2422,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static @UserActionReason int userActionRequirementToReason(
             @UserActionRequirement int requirement) {
         switch (requirement) {
-            case USER_ACTION_REQUIRED_UPDATE_OWNER_CHANGED:
-                return PackageInstaller.REASON_OWNERSHIP_CHANGED;
-            case USER_ACTION_REQUIRED_UPDATE_OWNER_RETAINED:
+            case USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER:
                 return PackageInstaller.REASON_REMIND_OWNERSHIP;
             default:
                 return PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE;
