@@ -20,7 +20,6 @@ import android.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,9 +27,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -39,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -134,10 +134,11 @@ private fun PeopleScreenWithConversations(
             )
         }
 
-        LazyColumn(
-            Modifier.fillMaxWidth().sysuiResTag("scroll_view"),
-            contentPadding =
-                PaddingValues(
+        Column(
+            Modifier.fillMaxWidth()
+                .sysuiResTag("scroll_view")
+                .verticalScroll(rememberScrollState())
+                .padding(
                     top = 16.dp,
                     bottom = PeopleSpacePadding,
                     start = 8.dp,
@@ -151,7 +152,7 @@ private fun PeopleScreenWithConversations(
 
             if (recentTiles.isNotEmpty()) {
                 if (hasPriorityConversations) {
-                    item { Spacer(Modifier.height(35.dp)) }
+                    Spacer(Modifier.height(35.dp))
                 }
 
                 ConversationList(R.string.recent_conversations, recentTiles, onTileClicked)
@@ -160,33 +161,30 @@ private fun PeopleScreenWithConversations(
     }
 }
 
-private fun LazyListScope.ConversationList(
+@Composable
+private fun ConversationList(
     @StringRes headerTextResource: Int,
     tiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit
 ) {
-    item {
-        Text(
-            stringResource(headerTextResource),
-            Modifier.padding(start = 16.dp),
-            style = MaterialTheme.typography.labelLarge,
-            color = LocalAndroidColorScheme.current.deprecated.colorAccentPrimaryVariant,
-        )
+    Text(
+        stringResource(headerTextResource),
+        Modifier.padding(start = 16.dp),
+        style = MaterialTheme.typography.labelLarge,
+        color = LocalAndroidColorScheme.current.deprecated.colorAccentPrimaryVariant,
+    )
 
-        Spacer(Modifier.height(10.dp))
-    }
+    Spacer(Modifier.height(10.dp))
 
     tiles.forEachIndexed { index, tile ->
         if (index > 0) {
-            item {
-                Divider(
-                    color = LocalAndroidColorScheme.current.deprecated.colorBackground,
-                    thickness = 2.dp,
-                )
-            }
+            Divider(
+                color = LocalAndroidColorScheme.current.deprecated.colorBackground,
+                thickness = 2.dp,
+            )
         }
 
-        item(tile.key.toString()) {
+        key(tile.key.toString()) {
             Tile(
                 tile,
                 onTileClicked,
