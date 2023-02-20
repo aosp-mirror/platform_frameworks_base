@@ -51,7 +51,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
@@ -1649,7 +1648,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             wouldBlockActivitySwitchIgnoringFlags = !pair.second;
             if (wouldBlockActivitySwitchIgnoringFlags) {
                 ActivityRecord topActivity =  task.getActivity(ar ->
-                        !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+                        !ar.finishing && !ar.isAlwaysOnTop());
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
                         /* caller_uid */
                         callingUid,
@@ -1672,7 +1671,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         /* action */
                         FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
                         /* version */
-                        3,
+                        ActivitySecurityModelFeatureFlags.ASM_VERSION,
                         /* multi_window */
                         false,
                         /* bal_code */
@@ -1700,16 +1699,19 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                                     ? "Returning home due to "
                                     : "Would return home due to ")
                                     + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                            Toast.LENGTH_SHORT).show());
+                            Toast.LENGTH_LONG).show());
                 }
 
                 // If the activity switch should be restricted, return home rather than the
                 // previously top task, to prevent users from being confused which app they're
                 // viewing
                 if (restrictActivitySwitch) {
-                    Slog.w(TAG, "Return to home as source uid: " + callingUid
+                    Slog.w(TAG, "[ASM] Return to home as source uid: " + callingUid
                             + "is not on top of task t: " + task);
                     task.getTaskDisplayArea().moveHomeActivityToTop("taskRemoved");
+                } else {
+                    Slog.i(TAG, "[ASM] Would return to home as source uid: " + callingUid
+                            + "is not on top of task t: " + task);
                 }
             }
         } finally {
@@ -1743,7 +1745,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Consider the source activity, whether or not it is finishing. Do not consider any other
         // finishing activity.
         Predicate<ActivityRecord> topOfStackPredicate = (ar) -> ar.equals(sourceRecord)
-                || (!ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+                || (!ar.finishing && !ar.isAlwaysOnTop());
 
         // Check top of stack (or the first task fragment for embedding).
         ActivityRecord topActivity = task.getActivity(topOfStackPredicate);
