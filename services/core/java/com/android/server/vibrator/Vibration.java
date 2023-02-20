@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * The base class for all vibrations.
  */
-class Vibration {
+abstract class Vibration {
     private static final SimpleDateFormat DEBUG_DATE_FORMAT =
             new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
     // Used to generate globally unique vibration ids.
@@ -96,6 +96,9 @@ class Vibration {
         this.callerToken = token;
         this.callerInfo = callerInfo;
     }
+
+    /** Return true if vibration is a repeating vibration. */
+    abstract boolean isRepeating();
 
     /**
      * Holds lightweight immutable info on the process that triggered the vibration. This data
