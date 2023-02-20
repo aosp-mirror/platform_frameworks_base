@@ -318,7 +318,10 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.
-     * This broadcast is only sent to registered receivers.
+     *
+     * <p>This broadcast is only sent to registered receivers and (starting from
+     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
+     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
      *
      * @hide
      */
@@ -338,7 +341,10 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of getNotificationPolicy() changes.
-     * This broadcast is only sent to registered receivers.
+     *
+     * <p>This broadcast is only sent to registered receivers and (starting from
+     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
+     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NOTIFICATION_POLICY_CHANGED
@@ -346,7 +352,10 @@ public class NotificationManager {
 
     /**
      * Intent that is broadcast when the state of getCurrentInterruptionFilter() changes.
-     * This broadcast is only sent to registered receivers.
+     *
+     * <p>This broadcast is only sent to registered receivers and (starting from
+     * {@link Build.VERSION_CODES#Q}) receivers in packages that have been granted Do Not
+     * Disturb access (see {@link #isNotificationPolicyAccessGranted()}).
      */
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_INTERRUPTION_FILTER_CHANGED
