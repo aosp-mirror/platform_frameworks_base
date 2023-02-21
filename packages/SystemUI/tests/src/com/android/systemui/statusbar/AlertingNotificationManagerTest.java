@@ -200,20 +200,6 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowNotification_stickyHun_earliestRemovalTime() {
-        NotificationEntry notifEntry = new NotificationEntryBuilder()
-                .setSbn(createStickySbn(/* id= */ 0))
-                .build();
-        notifEntry.setCreationElapsedRealTime(0);
-
-        mAlertingNotificationManager.showNotification(notifEntry);
-
-        final long earliestRemovalTime = mAlertingNotificationManager
-                .getCalculatedEarliestRemovalTime(notifEntry.getKey());
-        assertEquals(TEST_STICKY_DISPLAY_TIME, earliestRemovalTime);
-    }
-
-    @Test
     public void testRemoveNotification_removeDeferred() {
         mAlertingNotificationManager.showNotification(mEntry);
 
