@@ -14,7 +14,7 @@
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"São guardadas num gestor de palavras-passe para que possa iniciar sessão noutros dispositivos"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"Mais acerca das chaves de acesso"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tecnologia sem palavras-passe"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"As chaves de acesso permitem-lhe iniciar sessão sem depender das palavras-passe. Basta usar a impressão digital, o reconhecimento facial, o PIN ou o padrão de deslize para validar a sua identidade e criar uma chave de acesso."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"As chaves de acesso permitem-lhe iniciar sessão sem depender das palavras-passe. Basta usar a impressão digital, o reconhecimento facial, o PIN ou o padrão de deslize para validar a sua identidade e criar uma token de acesso."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Criptografia de chaves públicas"</string>
     <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Baseadas na FIDO Alliance e no W3C, as palavras de acesso usam pares de chaves criptográficas. Ao contrário do nome de utilizador e da string de carateres das palavras-passe, cria-se um par de chaves públicas/privadas para a app ou Website. A chave privada é armazenada de forma segura no dispositivo ou gestor de palavras-passe e confirma a identidade. A chave pública é partilhada com o servidor do Website ou app. Com as chaves correspondentes, pode registar-se e iniciar sessão instantaneamente."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Segurança melhorada nas contas"</string>
@@ -23,17 +23,17 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"À medida que avançamos para um futuro sem palavras-passe, as palavras-passe continuam disponíveis juntamente com as chaves de acesso."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Escolha onde guardar as suas <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Selecione um gestor de palavras-passe para guardar as suas informações e iniciar sessão mais rapidamente da próxima vez"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Criar uma chave de acesso para a app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Criar uma token de acesso para a app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Guardar a palavra-passe da app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Guardar as informações de início de sessão da app <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="passkey" msgid="632353688396759522">"chave de acesso"</string>
+    <string name="passkey" msgid="632353688396759522">"token de acesso"</string>
     <string name="password" msgid="6738570945182936667">"palavra-passe"</string>
     <string name="passkeys" msgid="5733880786866559847">"chaves de acesso"</string>
     <string name="passwords" msgid="5419394230391253816">"palavras-passe"</string>
     <string name="sign_ins" msgid="4710739369149469208">"inícios de sessão"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"informações de início de sessão"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Guarde <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> em"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Criar chave de acesso noutro dispositivo?"</string>
+    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Criar token de acesso noutro dispositivo?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Usar <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> para todos os seus inícios de sessão?"</string>
     <string name="use_provider_for_all_description" msgid="8466427781848268490">"Este gestor de palavras-passe armazena as suas palavras-passe e chaves de acesso para ajudar a iniciar sessão facilmente"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Definir como predefinição"</string>
@@ -47,8 +47,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Outros gestores de palavras-passe"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Fechar folha"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Volte à página anterior"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Feche a sugestão de ação do Gestor de credenciais apresentada na parte inferior do ecrã"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar a sua chave de acesso guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Fechar"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Usar a sua token de acesso guardada na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Usar o seu início de sessão guardado na app <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Escolha um início de sessão guardado para a app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Iniciar sessão de outra forma"</string>
@@ -59,6 +59,7 @@
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Gestores de palavras-passe bloqueados"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Tocar para desbloquear"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Sem informações de início de sessão"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Sem informações de início de sessão em <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Faça a gestão dos inícios de sessão"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"De outro dispositivo"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Use um dispositivo diferente"</string>
