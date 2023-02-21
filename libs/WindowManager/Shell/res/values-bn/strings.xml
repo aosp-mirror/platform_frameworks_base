@@ -47,14 +47,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"শীর্ষ ৫০%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"শীর্ষ ৩০%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"নীচের অংশ নিয়ে পূর্ণ স্ক্রিন"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"স্ক্রিনের বাঁদিকে স্প্লিট করুন"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"স্ক্রিনের ডানদিকে স্প্লিট করুন"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"স্ক্রিনের উপরের দিকে স্প্লিট করুন"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"স্প্লিট করার বোতাম"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"\'এক হাতে ব্যবহার করার মোড\'-এর ব্যবহার"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"বেরিয়ে আসার জন্য, স্ক্রিনের নিচ থেকে উপরের দিকে সোয়াইপ করুন অথবা অ্যাপ আইকনের উপরে যেকোনও জায়গায় ট্যাপ করুন"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"\'এক হাতে ব্যবহার করার মোড\' শুরু করুন"</string>
@@ -100,19 +96,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"বন্ধ করুন"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ফিরে যান"</string>
     <string name="handle_text" msgid="1766582106752184456">"হাতল"</string>
-    <!-- no translation found for app_icon_text (2823268023931811747) -->
-    <skip />
+    <string name="app_icon_text" msgid="2823268023931811747">"অ্যাপ আইকন"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ফুলস্ক্রিন"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ডেস্কটপ মোড"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"স্প্লিট স্ক্রিন"</string>
     <string name="more_button_text" msgid="3655388105592893530">"আরও"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ফ্লোট"</string>
-    <!-- no translation found for select_text (5139083974039906583) -->
-    <skip />
-    <!-- no translation found for screenshot_text (1477704010087786671) -->
-    <skip />
-    <!-- no translation found for close_text (4986518933445178928) -->
-    <skip />
-    <!-- no translation found for collapse_menu_text (7515008122450342029) -->
-    <skip />
+    <string name="select_text" msgid="5139083974039906583">"বেছে নিন"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"স্ক্রিনশট"</string>
+    <string name="close_text" msgid="4986518933445178928">"বন্ধ করুন"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"\'মেনু\' বন্ধ করুন"</string>
 </resources>
