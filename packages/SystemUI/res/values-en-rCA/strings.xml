@@ -198,6 +198,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Notification shade."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Quick settings."</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Quick settings and Notification shade."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Lock screen."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Work lock screen"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Close"</string>
@@ -614,84 +615,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notifications"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Keyboard Shortcuts"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Switch keyboard layout"</string>
-    <!-- no translation found for keyboard_shortcut_clear_text (4679927133259287577) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_title (1156178106617830429) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_hint (5982623262974326746) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_no_result (6819302191660875501) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_system (1151182120757052669) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_input (5440558509904296233) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_open_apps (1450959949739257562) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_current_app (2011953559133734491) -->
-    <skip />
-    <!-- no translation found for group_system_access_notification_shade (7116898151485382275) -->
-    <skip />
-    <!-- no translation found for group_system_full_screenshot (7389040853798023211) -->
-    <skip />
-    <!-- no translation found for group_system_access_system_app_shortcuts (4421497579210445641) -->
-    <skip />
-    <!-- no translation found for group_system_go_back (8838454003680364227) -->
-    <skip />
-    <!-- no translation found for group_system_access_home_screen (1857344316928441909) -->
-    <skip />
-    <!-- no translation found for group_system_overview_open_apps (6897128761003265350) -->
-    <skip />
-    <!-- no translation found for group_system_cycle_forward (9202444850838205990) -->
-    <skip />
-    <!-- no translation found for group_system_cycle_back (5163464503638229131) -->
-    <skip />
-    <!-- no translation found for group_system_access_all_apps_search (488070738028991753) -->
-    <skip />
-    <!-- no translation found for group_system_hide_reshow_taskbar (3809304065624351131) -->
-    <skip />
-    <!-- no translation found for group_system_access_system_settings (7961639365383008053) -->
-    <skip />
-    <!-- no translation found for group_system_access_google_assistant (1186152943161483864) -->
-    <skip />
-    <!-- no translation found for group_system_lock_screen (7391191300363416543) -->
-    <skip />
-    <!-- no translation found for group_system_quick_memo (2914234890158583919) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_multitasking (1065232949510862593) -->
-    <skip />
-    <!-- no translation found for system_multitasking_rhs (6593269428880305699) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (8839380725557952846) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (1962084334200006297) -->
-    <skip />
-    <!-- no translation found for system_multitasking_replace (844285282472557186) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_input (6888282716546625610) -->
-    <skip />
-    <!-- no translation found for input_switch_input_language_next (3394291576873633793) -->
-    <skip />
-    <!-- no translation found for input_switch_input_language_previous (8823659252918609216) -->
-    <skip />
-    <!-- no translation found for input_access_emoji (8105642858900406351) -->
-    <skip />
-    <!-- no translation found for input_access_voice_typing (7291201476395326141) -->
-    <skip />
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Clear text"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Shortcuts"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Search shortcuts"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"No shortcuts found"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"System"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Input"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Open apps"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Current app"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Access notification shade"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Take a full screenshot"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Access list of system / apps shortcuts"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"Back: go back to previous state (back button)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Access home screen"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Overview of open apps"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Cycle through recent apps (forward)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Cycle through recent apps (back)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Access list of all apps and search (i.e. Search/Launcher)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Hide and (re)show taskbar"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Access system settings"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Access Google Assistant"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Lock screen"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"Pull up Notes app for quick memo"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"System multitasking"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Enter Split screen with current app to RHS"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Enter Split screen with current app to LHS"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Switch from Split screen to full screen"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"During Split screen: replace an app from one to another"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Input"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Switch input language (next language)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Switch input language (previous language)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Access emoji"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Access voice typing"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Applications"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assist"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (7328131901589876868) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Browser (Chrome as default)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contacts"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_email (7480359963463803511) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Email (Gmail as default)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Music"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6316043911946540137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7312554713993114342) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Do Not Disturb"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Volume buttons shortcut"</string>
     <string name="battery" msgid="769686279459897127">"Battery"</string>
@@ -854,12 +819,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"screen recording"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"No title"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Font Size"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Make smaller"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Make larger"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Magnification Window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Magnification Window Controls"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Zoom in"</string>
@@ -1148,4 +1110,10 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Switch to work profile"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Close"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Lock screen settings"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi not available"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Camera blocked"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera and microphone blocked"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microphone blocked"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Priority mode on"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant attention on"</string>
 </resources>

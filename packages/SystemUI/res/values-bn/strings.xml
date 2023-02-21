@@ -198,6 +198,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"বিজ্ঞপ্তি শেড৷"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"দ্রুত সেটিংস৷"</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"লক স্ক্রিন।"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"কর্মস্থলের স্ক্রিন লক"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"বন্ধ করুন"</string>
@@ -258,8 +260,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"উজ্জ্বলতা"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"কালার ইনভার্সন"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"রঙ সংশোধন"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"ফন্ট সাইজ"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"ব্যবহারকারীদের ম্যানেজ করুন"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"সম্পন্ন হয়েছে"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"বন্ধ করুন"</string>
@@ -615,84 +616,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"বিজ্ঞপ্তি"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"কীবোর্ড শর্টকাট"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"কীবোর্ড লে-আউট পাল্টান"</string>
-    <!-- no translation found for keyboard_shortcut_clear_text (4679927133259287577) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_title (1156178106617830429) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_hint (5982623262974326746) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_no_result (6819302191660875501) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_system (1151182120757052669) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_input (5440558509904296233) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_open_apps (1450959949739257562) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_current_app (2011953559133734491) -->
-    <skip />
-    <!-- no translation found for group_system_access_notification_shade (7116898151485382275) -->
-    <skip />
-    <!-- no translation found for group_system_full_screenshot (7389040853798023211) -->
-    <skip />
-    <!-- no translation found for group_system_access_system_app_shortcuts (4421497579210445641) -->
-    <skip />
-    <!-- no translation found for group_system_go_back (8838454003680364227) -->
-    <skip />
-    <!-- no translation found for group_system_access_home_screen (1857344316928441909) -->
-    <skip />
-    <!-- no translation found for group_system_overview_open_apps (6897128761003265350) -->
-    <skip />
-    <!-- no translation found for group_system_cycle_forward (9202444850838205990) -->
-    <skip />
-    <!-- no translation found for group_system_cycle_back (5163464503638229131) -->
-    <skip />
-    <!-- no translation found for group_system_access_all_apps_search (488070738028991753) -->
-    <skip />
-    <!-- no translation found for group_system_hide_reshow_taskbar (3809304065624351131) -->
-    <skip />
-    <!-- no translation found for group_system_access_system_settings (7961639365383008053) -->
-    <skip />
-    <!-- no translation found for group_system_access_google_assistant (1186152943161483864) -->
-    <skip />
-    <!-- no translation found for group_system_lock_screen (7391191300363416543) -->
-    <skip />
-    <!-- no translation found for group_system_quick_memo (2914234890158583919) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_multitasking (1065232949510862593) -->
-    <skip />
-    <!-- no translation found for system_multitasking_rhs (6593269428880305699) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (8839380725557952846) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (1962084334200006297) -->
-    <skip />
-    <!-- no translation found for system_multitasking_replace (844285282472557186) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_input (6888282716546625610) -->
-    <skip />
-    <!-- no translation found for input_switch_input_language_next (3394291576873633793) -->
-    <skip />
-    <!-- no translation found for input_switch_input_language_previous (8823659252918609216) -->
-    <skip />
-    <!-- no translation found for input_access_emoji (8105642858900406351) -->
-    <skip />
-    <!-- no translation found for input_access_voice_typing (7291201476395326141) -->
-    <skip />
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"টেক্সট মুছুন"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"শর্টকাট"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"শর্টকাট সার্চ করুন"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"কোনও শর্টকার্ট পাওয়া যায়নি"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"সিস্টেম"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"ইনপুট"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"খুলে রাখা অ্যাপ"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"বর্তমান অ্যাপ"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"বিজ্ঞপ্তি শেড অ্যাক্সেস করুন"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"সম্পূর্ণ স্ক্রিনশট নিন"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"সিস্টেমের তালিকা / অ্যাপ শর্টকাটের তালিকা অ্যাক্সেস করুন"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"ফিরে আসা: আগের স্ট্যাটাসে ফিরে আসুন (ফিরে যাওয়ার বোতাম)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"হোম স্ক্রিন অ্যাক্সেস করুন"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"এক নজরে অফিসের অ্যাপ"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"সাম্প্রতিক অ্যাপ দেখুন (পরবর্তীতে যান)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"সাম্প্রতিক অ্যাপ দেখুন (আগে ফিরে যান)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"সব অ্যাপ ও সার্চের ফলাফলের তালিকা অ্যাক্সেস করুন (যেমন, সার্চ/লঞ্চার)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"টাস্কবার লুকান এবং (আবার)দেখুন"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"সিস্টেমের সেটিংস অ্যাক্সেস করুন"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google Assistant অ্যাক্সেস করুন"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"লক স্ক্রিন"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"দ্রুত মেমোর জন্য Notes অ্যাপ উপরের দিকে তুলুন"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"সিস্টেম মাল্টিটাস্কিং"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"ডান দিকে থাকা বর্তমান অ্যাপ ব্যবহার করে স্প্লিট স্ক্রিন যোগ করুন"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"বাঁদিকে থাকা বর্তমান অ্যাপ ব্যবহার করে স্প্লিট স্ক্রিন যোগ করুন"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"স্প্লিট স্ক্রিন থেকে ফুল স্ক্রিনে পাল্টান"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"স্প্লিট স্ক্রিন থাকাকালীন: একটি অ্যাপ থেকে অন্যটিতে পরিবর্তন করুন"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ইনপুট"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"লেখার ভাষা পাল্টান (পরবর্তী ভাষা)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"লেখার ভাষা পাল্টান (আগের ভাষা)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"ইমোজি অ্যাক্সেস করুন"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"ভয়েস টাইপিং অ্যাক্সেস করুন"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"অ্যাপ্লিকেশন"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"সহযোগিতা"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (7328131901589876868) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"ব্রাউজার (ডিফল্ট হিসেবে Chrome)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"পরিচিতি"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_email (7480359963463803511) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"ইমেল (ডিফল্ট হিসেবে Gmail)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"সংগীত"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendar"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6316043911946540137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7312554713993114342) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"ক্যালকুলেটর"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"ম্যাপ"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"বিরক্ত করবে না"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"ভলিউম বোতামের শর্টকাট"</string>
     <string name="battery" msgid="769686279459897127">"ব্যাটারি"</string>
@@ -855,12 +820,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"স্ক্রিন রেকর্ডিং"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"কোনও শীর্ষক নেই"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"ফন্ট সাইজ"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"আরও ছোট করুন"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"আরও বড় করুন"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"উইন্ডো কন্ট্রোল বড় করে দেখা"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"বড় করুন"</string>
@@ -1122,7 +1084,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>-কে ডিভাইসের সব লগ অ্যাক্সেসের অনুমতি দিতে চান?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"এককালীন অ্যাক্সেসের অনুমতি দিন"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"অনুমতি দেবেন না"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজে লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারকও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।"</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"ডিভাইস লগে আপনার ডিভাইসে করা অ্যাক্টিভিটি রেকর্ড করা হয়। অ্যাপ, সমস্যা খুঁজে তা সমাধান করতে এইসব লগ ব্যবহার করতে পারে।\n\nকিছু লগে সংবেদনশীল তথ্য থাকতে পারে, তাই বিশ্বাস করেন শুধুমাত্র এমন অ্যাপকেই সব ডিভাইসের লগ অ্যাক্সেসের অনুমতি দিন। \n\nআপনি এই অ্যাপকে ডিভাইসের সব লগ অ্যাক্সেস করার অনুমতি না দিলেও, এটি নিজের লগ অ্যাক্সেস করতে পারবে। ডিভাইস প্রস্তুতকারক এখনও আপনার ডিভাইসের কিছু লগ বা তথ্য হয়ত অ্যাক্সেস করতে পারবে।"</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"আরও জানুন"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"আরও জানতে <xliff:g id="URL">%s</xliff:g>-এ যান"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> খুলুন"</string>
@@ -1133,16 +1095,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অন্তত একটি ডিভাইস উপলভ্য"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শর্টকাট টাচ করে ধরে রাখুন"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"এখন স্ক্রিন পাল্টান"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"ফোন আনফোল্ড করুন"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"স্ক্রিন পাল্টাবেন?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"আরও বেশি রেজোলিউশনের জন্য, রিয়ার ক্যামেরা ব্যবহার করুন"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"আরও বেশি রেজোলিউশনের জন্য, ফোন ফ্লিপ করুন"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ফোল্ড করা যায় এমন ডিভাইস খোলা হচ্ছে"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ফোল্ড করা যায় এমন ডিভাইস উল্টানো হচ্ছে"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ব্যাটারির চার্জ বাকি আছে"</string>
@@ -1154,4 +1111,16 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"অফিস প্রোফাইলে পাল্টে নিন"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"বন্ধ করুন"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"লক স্ক্রিন সেটিংস"</string>
+    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
+    <skip />
+    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
+    <skip />
+    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
+    <skip />
+    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
+    <skip />
+    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
+    <skip />
+    <!-- no translation found for assistant_attention_content_description (6830215897604642875) -->
+    <skip />
 </resources>

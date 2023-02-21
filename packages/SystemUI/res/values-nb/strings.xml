@@ -198,6 +198,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Varselskygge."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Hurtiginnstillinger."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Låseskjerm."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Låseskjerm for arbeid"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Lukk"</string>
@@ -258,8 +260,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Lysstyrke"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Fargeinvertering"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Fargekorrigering"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Skriftstørrelse"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrer brukere"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Ferdig"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Lukk"</string>
@@ -615,84 +616,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Varsler"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Hurtigtaster"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Bytt tastaturoppsett"</string>
-    <!-- no translation found for keyboard_shortcut_clear_text (4679927133259287577) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_title (1156178106617830429) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_hint (5982623262974326746) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_list_no_result (6819302191660875501) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_system (1151182120757052669) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_input (5440558509904296233) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_open_apps (1450959949739257562) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_search_category_current_app (2011953559133734491) -->
-    <skip />
-    <!-- no translation found for group_system_access_notification_shade (7116898151485382275) -->
-    <skip />
-    <!-- no translation found for group_system_full_screenshot (7389040853798023211) -->
-    <skip />
-    <!-- no translation found for group_system_access_system_app_shortcuts (4421497579210445641) -->
-    <skip />
-    <!-- no translation found for group_system_go_back (8838454003680364227) -->
-    <skip />
-    <!-- no translation found for group_system_access_home_screen (1857344316928441909) -->
-    <skip />
-    <!-- no translation found for group_system_overview_open_apps (6897128761003265350) -->
-    <skip />
-    <!-- no translation found for group_system_cycle_forward (9202444850838205990) -->
-    <skip />
-    <!-- no translation found for group_system_cycle_back (5163464503638229131) -->
-    <skip />
-    <!-- no translation found for group_system_access_all_apps_search (488070738028991753) -->
-    <skip />
-    <!-- no translation found for group_system_hide_reshow_taskbar (3809304065624351131) -->
-    <skip />
-    <!-- no translation found for group_system_access_system_settings (7961639365383008053) -->
-    <skip />
-    <!-- no translation found for group_system_access_google_assistant (1186152943161483864) -->
-    <skip />
-    <!-- no translation found for group_system_lock_screen (7391191300363416543) -->
-    <skip />
-    <!-- no translation found for group_system_quick_memo (2914234890158583919) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_system_multitasking (1065232949510862593) -->
-    <skip />
-    <!-- no translation found for system_multitasking_rhs (6593269428880305699) -->
-    <skip />
-    <!-- no translation found for system_multitasking_lhs (8839380725557952846) -->
-    <skip />
-    <!-- no translation found for system_multitasking_full_screen (1962084334200006297) -->
-    <skip />
-    <!-- no translation found for system_multitasking_replace (844285282472557186) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_input (6888282716546625610) -->
-    <skip />
-    <!-- no translation found for input_switch_input_language_next (3394291576873633793) -->
-    <skip />
-    <!-- no translation found for input_switch_input_language_previous (8823659252918609216) -->
-    <skip />
-    <!-- no translation found for input_access_emoji (8105642858900406351) -->
-    <skip />
-    <!-- no translation found for input_access_voice_typing (7291201476395326141) -->
-    <skip />
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Fjern teksten"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Hurtigtaster"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Søk etter hurtigtaster"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Fant ingen hurtigtaster"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"System"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Inndata"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Åpne apper"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Aktiv app"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Åpne varselpanelet"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Ta en skjermdump av hele skjermen"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Se hurtigtastene for systemet/apper"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"Tilbake: Gå tilbake til forrige tilstand (tilbakeknapp)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Åpne startskjermen"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Oversikt over åpne apper"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Bla gjennom nylige apper (fremover)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Bla gjennom nylige apper (bakover)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Se alle apper og søk (dvs. Søk/Appoversikt)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Skjul og vis oppgavelinjen"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Åpne systeminnstillingene"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Aktiver Google-assistenten"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Låseskjerm"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"Åpne Notes-appen for å ta notater raskt"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Multitasking på systemet"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Åpne delt skjerm med den aktive appen til høyre"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Åpne delt skjerm med den aktive appen til venstre"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Bytt fra delt skjerm til fullskjerm"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"I delt skjerm: Bytt ut en app"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Skrivespråk"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Bytt skrivespråk (neste språk)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Bytt skrivespråk (forrige språk)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Se emojier"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Bruk stemmestyrt skriving"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Apper"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Assist"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_browser (7328131901589876868) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Nettleser (Chrome som standard)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontakter"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_email (7480359963463803511) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"E-post (Gmail som standard)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Musikk"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalender"</string>
-    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6316043911946540137) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_group_applications_maps (7312554713993114342) -->
-    <skip />
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Kalkulator"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ikke forstyrr"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Hurtigtast for volumknappene"</string>
     <string name="battery" msgid="769686279459897127">"Batteri"</string>
@@ -855,12 +820,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"skjermopptak"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen tittel"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ventemodus"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Skriftstørrelse"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Gjør mindre"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Gjør større"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Forstørringsvindu"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontroller for forstørringsvindu"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Zoom inn"</string>
@@ -1005,10 +967,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Kan ikke kringkaste"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Kan ikke lagre. Prøv på nytt."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Kan ikke lagre."</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Bruk minst 4 tegn"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Bruk færre enn 16 tegn"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Delversjonsnummer"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Delversjonsnummeret er kopiert til utklippstavlen."</string>
     <string name="basic_status" msgid="2315371112182658176">"Åpen samtale"</string>
@@ -1135,16 +1095,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• minst én enhet er tilgjengelig"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på og hold inne snarveien"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bytt skjerm nå"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Brett ut telefonen"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Vil du bytte skjerm?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Bruk baksidekameraet for å få høyere oppløsning"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Brett ut telefonen for å få høyere oppløsning"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"En sammenleggbar enhet blir brettet ut"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"En sammenleggbar enhet blir snudd"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> batteri gjenstår"</string>
@@ -1156,4 +1111,10 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Bytt til jobbprofilen"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Lukk"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Innstillinger for låseskjermen"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi er ikke tilgjengelig"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kameraet er blokkert"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kameraet og mikrofonen er blokkert"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofonen er blokkert"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioriteringsmodus er på"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistentoppmerksomhet er på"</string>
 </resources>
