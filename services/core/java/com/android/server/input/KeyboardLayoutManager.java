@@ -150,6 +150,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     @Override
     public void onInputDeviceAdded(int deviceId) {
         onInputDeviceChanged(deviceId);
+        if (useNewSettingsUi()) {
+            // Force native callback to set up keyboard layout overlay for newly added keyboards
+            reloadKeyboardLayouts();
+        }
     }
 
     @Override
