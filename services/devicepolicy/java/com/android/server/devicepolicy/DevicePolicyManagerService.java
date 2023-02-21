@@ -11324,7 +11324,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setBackwardsCompatibleAppRestrictions(
                     packageName, restrictions, caller.getUserHandle());
         } else {
-            Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
                     || (caller.hasPackage() && isCallerDelegate(caller,
