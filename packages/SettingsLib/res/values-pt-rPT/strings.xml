@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Cancelar"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"A sincronização concede acesso aos seus contactos e ao histórico de chamadas quando tem uma ligação estabelecida."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou chave de acesso incorreto."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Não foi possível sincronizar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g> devido a PIN ou token de acesso incorreto."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Não é possível comunicar com <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Emparelhamento rejeitado por <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Computador"</string>
@@ -349,7 +349,7 @@
     <string name="debug_app" msgid="8903350241392391766">"Selecionar a aplicação a depurar"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Nenhuma aplicação a depurar definida"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"A depurar aplicação: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="2543228890535466325">"Selecionar aplicação"</string>
+    <string name="select_application" msgid="2543228890535466325">"Selecionar app"</string>
     <string name="no_application" msgid="9038334538870247690">"Nenhuma"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Aguarde pelo depurador"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"A aplicação depurada aguarda a anexação do depurador antes da execução"</string>
