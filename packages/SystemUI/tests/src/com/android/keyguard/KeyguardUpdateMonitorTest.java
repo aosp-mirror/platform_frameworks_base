@@ -49,6 +49,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -2415,8 +2416,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testUsbComplianceIntent_refreshBatteryInfo() {
         Context contextSpy = getSpyContext();
-        when(contextSpy.registerReceiver(eq(null), any(IntentFilter.class)))
-                .thenReturn(getBatteryIntent());
 
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(
                 contextSpy, new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED));
@@ -2429,8 +2428,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testUsbComplianceIntent_refreshBatteryInfoWithIncompatibleCharger() {
         Context contextSpy = getSpyContext();
         setupIncompatibleCharging();
-        when(contextSpy.registerReceiver(eq(null), any(IntentFilter.class)))
-                .thenReturn(getBatteryIntent());
 
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(
                 contextSpy, new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED));
@@ -2740,10 +2737,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private Context getSpyContext() {
+        mContext.addMockSystemService(UsbManager.class, mUsbManager);
         Context contextSpy = spy(mContext);
-        when(contextSpy.getSystemService(UsbManager.class)).thenReturn(mUsbManager);
-        when(contextSpy.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED)))
-                .thenReturn(new Intent(Intent.ACTION_BATTERY_CHANGED));
+        doReturn(getBatteryIntent()).when(contextSpy).registerReceiver(eq(null),
+                any(IntentFilter.class));
         return contextSpy;
     }
 
