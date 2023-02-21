@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"Продолжи"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Повеќе опции"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Дознајте повеќе"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Прикажи ја лозинката"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Сокриј ја лозинката"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Побезбедно со криптографски клучеви"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Со криптографските клучеви нема потреба да создавате или да помните сложени лозинки"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Криптографските клучеви се шифрирани дигитални клучеви што ги создавате со вашиот отпечаток, лик или заклучување екран"</string>
@@ -49,7 +47,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"Други управници со лозинки"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Затворете го листот"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Врати се на претходната страница"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Затворете го предложеното дејство за „Управникот со акредитиви“ што се појавува најдолу на екранот"</string>
+    <!-- no translation found for accessibility_close_button (1163435587545377687) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Да се користи вашиот зачуван криптографски клуч за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Да се користи вашето зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Изберете зачувано најавување за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -59,9 +58,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Опции за најавување"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"За <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Заклучени управници со лозинки"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Допрете за да отклучите"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Нема податоци за најавување"</string>
+    <!-- no translation found for no_sign_in_info_in (2641118151920288356) -->
     <skip />
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Управувајте со најавувањата"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Од друг уред"</string>

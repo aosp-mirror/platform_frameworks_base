@@ -47,7 +47,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"Boshqa parol menejerlari"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Varaqni yopish"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Avvalgi sahifaga qaytish"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Ekranning pastki qismida chiqadigan Hisob maʼlumotlari menejeri amali taklifini yoping"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Yopish"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun saqlangan kalit ishlatilsinmi?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun saqlangan maʼlumotlar ishlatilsinmi?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> hisob maʼlumotlarini tanlang"</string>
@@ -57,10 +57,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Kirish parametrlari"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> uchun"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Qulfli parol menejerlari"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Qulfni ochish uchun bosing"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Kirishga oid axborot topilmadi"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> kirish axboroti mavjud emas"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Hisob maʼlumotlarini boshqarish"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Boshqa qurilmada"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Boshqa qurilmadan foydalanish"</string>
