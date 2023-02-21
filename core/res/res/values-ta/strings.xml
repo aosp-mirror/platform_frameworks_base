@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"பணிக் கணக்கை ஆன் செய்யும் வரை உங்கள் தனிப்பட்ட ஆப்ஸ் தடுக்கப்பட்டிருக்கும்"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"<xliff:g id="DATE">%1$s</xliff:g> அன்று <xliff:g id="TIME">%2$s</xliff:g> நேரத்தில் தனிப்பட்ட ஆப்ஸ் தடுக்கப்படும். பணிக் கணக்கை <xliff:g id="NUMBER">%3$d</xliff:g> நாட்களுக்கு மேல் ஆஃப் செய்து வைத்திருப்பதை உங்கள் IT நிர்வாகி அனுமதிக்கவில்லை."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ஆன் செய்"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"நான்"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"டேப்லெட் விருப்பங்கள்"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV விருப்பத்தேர்வுகள்"</string>
@@ -338,6 +344,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"சாதனத்தின் கைரேகை சென்சார்மேல் செய்யப்படும் சைகைகளைக் கேப்ட்சர் செய்ய முடியும்."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ஸ்கிரீன்ஷாட்டை எடுக்கும்"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"டிஸ்ப்ளேவை ஸ்கிரீன்ஷாட் எடுக்க முடியும்."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"நிலைப் பட்டியில் இருக்கும்"</string>
@@ -1358,8 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB மூலமாக PTP பயன்முறை ஆன் செய்யப்பட்டது"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB இணைப்பு முறை ஆன் செய்யப்பட்டது"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB மூலமாக MIDI பயன்முறை ஆன் செய்யப்பட்டது"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"சாதனம் வெப்கேமாக இணைக்கப்பட்டுள்ளது"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB துணைக்கருவி இணைக்கப்பட்டது"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"மேலும் விருப்பங்களுக்கு, தட்டவும்."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"இணைக்கப்பட்ட சாதனத்தைச் சார்ஜ் செய்கிறது. கூடுதல் விருப்பங்களுக்கு, தட்டவும்."</string>
@@ -1708,8 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"முடிந்தது"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ஷார்ட்கட்டை முடக்கு"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ஷார்ட்கட்டைப் பயன்படுத்து"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"கலர் இன்வெர்ஷன்"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"கலர் கரெக்‌ஷன்"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ஒற்றைக் கைப் பயன்முறை"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"மிகக் குறைவான வெளிச்சம்"</string>

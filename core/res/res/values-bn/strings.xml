@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"আপনার অফিসের প্রোফাইল চালু না করা পর্যন্ত আপনার ব্যক্তিগত অ্যাপ ব্লক থাকে"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ব্যক্তিগত অ্যাপ <xliff:g id="DATE">%1$s</xliff:g>-এ <xliff:g id="TIME">%2$s</xliff:g>টার সময় ব্লক করা হবে। আপনার আইটি অ্যাডমিন আপনার অফিস প্রোফাইল <xliff:g id="NUMBER">%3$d</xliff:g> দিনের বেশি পজ করে রাখার অনুমতি দেয় না।"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"চালু করুন"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"আমাকে"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ট্যাবলেট বিকল্পগুলি"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-র বিকল্প"</string>
@@ -338,6 +344,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"স্ক্রিনশট নিন"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ডিসপ্লের একটি স্ক্রিনশট নিতে পারেন।"</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দন্ডে থাকুন"</string>

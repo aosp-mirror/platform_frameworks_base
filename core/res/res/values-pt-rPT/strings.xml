@@ -208,6 +208,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As suas apps pessoais estão bloqueadas até ativar o seu perfil de trabalho."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"As apps pessoais serão bloqueadas a <xliff:g id="DATE">%1$s</xliff:g> à(s) <xliff:g id="TIME">%2$s</xliff:g>. O seu administrador de TI não permite que o seu perfil de trabalho fique desativado mais de <xliff:g id="NUMBER">%3$d</xliff:g> dias."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ativar"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opções do tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opções do Android TV"</string>
@@ -339,6 +345,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pode capturar gestos realizados no sensor de impressões digitais do dispositivo."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fazer captura de ecrã"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"É possível tirar uma captura de ecrã."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pré-visualização, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desativar ou modificar barra de estado"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permite à app desativar a barra de estado ou adicionar e remover ícones do sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ser apresentada na barra de estado"</string>
@@ -1236,7 +1243,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> foi concebida para uma versão incompatível do SO Android e pode ter um comportamento inesperado. Pode estar disponível uma versão atualizada da app."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar sempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verificar atualizações"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Rever atualizações"</string>
     <string name="smv_application" msgid="3775183542777792638">"A app <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) violou a política StrictMode auto-imposta."</string>
     <string name="smv_process" msgid="1398801497130695446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode auto-imposta."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"O telemóvel está a atualizar…"</string>
@@ -1359,8 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"O PTP por USB está ativado"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"A ligação USB via telemóvel está ativada"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"O MIDI através de USB está ativado"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositivo ligado como câmara Web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Acessório USB ligado"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Toque para obter mais opções."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"A carregar o dispositivo ligado. Toque para obter mais opções."</string>
@@ -1709,8 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desativar atalho"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atalho"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correção da cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mais escuro"</string>
@@ -1975,7 +1980,7 @@
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Não é possível aceder a esta app no seu dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Não é possível aceder a esta app no seu dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>. Em alternativa, experimente no telemóvel."</string>
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Esta app foi criada para uma versão mais antiga do Android. Pode não funcionar corretamente e não inclui as proteções de privacidade e segurança mais recentes. Verifique se existem atualizações ou contacte o programador da app."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verificar atualizações"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rever atualizações"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tem mensagens novas"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abra a app de SMS para ver"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algumas funcionalidades limitadas"</string>
@@ -2299,7 +2304,7 @@
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Uma app ainda está ativa"</string>
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A app <xliff:g id="APP">%1$s</xliff:g> está a ser executada em segundo plano Toque para gerir a utilização da bateria."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A app <xliff:g id="APP">%1$s</xliff:g> pode afetar a autonomia da bateria. Toque para rever as apps ativas."</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativas"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Rever apps ativas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível aceder à câmara do telemóvel a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível aceder à câmara do tablet a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Não é possível aceder a isto durante o streaming. Em alternativa, experimente no telemóvel."</string>
