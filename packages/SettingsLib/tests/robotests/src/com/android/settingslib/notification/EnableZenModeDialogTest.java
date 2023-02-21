@@ -16,6 +16,8 @@
 
 package com.android.settingslib.notification;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -78,6 +80,8 @@ public class EnableZenModeDialogTest {
         mController.mForeverId =  Condition.newId(mContext).appendPath("forever").build();
         when(mContext.getString(com.android.internal.R.string.zen_mode_forever))
                 .thenReturn("testSummary");
+        when(mContext.getString(com.android.internal.R.string.selected))
+                .thenReturn("selected");
         NotificationManager.Policy alarmsEnabledPolicy = new NotificationManager.Policy(
                 NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS, 0, 0, 0);
         doReturn(alarmsEnabledPolicy).when(mNotificationManager).getNotificationPolicy();
@@ -189,5 +193,26 @@ public class EnableZenModeDialogTest {
 
         // alarm warning should NOT be null
         assertNotNull(mController.computeAlarmWarningText(null));
+    }
+
+    @Test
+    public void testAccessibility() {
+        mController.bindConditions(null);
+        EnableZenModeDialog.ConditionTag forever = mController.getConditionTagAt(
+                ZenDurationDialog.FOREVER_CONDITION_INDEX);
+        EnableZenModeDialog.ConditionTag countdown = mController.getConditionTagAt(
+                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        EnableZenModeDialog.ConditionTag alwaysAsk = mController.getConditionTagAt(
+                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX);
+
+        forever.rb.setChecked(true);
+        assertThat(forever.line1.getStateDescription().toString()).isEqualTo("selected");
+        assertThat(countdown.line1.getStateDescription()).isNull();
+        assertThat(alwaysAsk.line1.getStateDescription()).isNull();
+
+        alwaysAsk.rb.setChecked(true);
+        assertThat(forever.line1.getStateDescription()).isNull();
+        assertThat(countdown.line1.getStateDescription()).isNull();
+        assertThat(alwaysAsk.line1.getStateDescription().toString()).isEqualTo("selected");
     }
 }
