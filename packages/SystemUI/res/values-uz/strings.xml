@@ -93,8 +93,8 @@
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Oʻng chegara <xliff:g id="PERCENT">%1$d</xliff:g> foiz"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Ish profilidagi <xliff:g id="APP">%1$s</xliff:g> ilovasiga saqlandi"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Fayllar"</string>
-    <string name="screenshot_detected_template" msgid="7940376642921719915">"Bu skrinshotda <xliff:g id="APPNAME">%1$s</xliff:g> aniqlandi."</string>
-    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Bu skrinshotda <xliff:g id="APPNAME">%1$s</xliff:g> va boshqa ochiq ilovalar aniqlandi"</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> skrinshot olinganini aniqladi."</string>
+    <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> va boshqa ochiq ilovalar skrinshot olinganini aniqladi."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Ekrandan yozib olish"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran yozib olinmoqda"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
@@ -187,8 +187,8 @@
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Batareya <xliff:g id="PERCENTAGE">%1$d</xliff:g> foiz, <xliff:g id="TIME">%2$s</xliff:g> yetadi."</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batareya quvvat olmoqda, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> foiz."</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Batareya <xliff:g id="PERCENTAGE">%d</xliff:g> foiz, batareya himoyasi uchun quvvatlash toʻxtatildi."</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Batareya <xliff:g id="PERCENTAGE">%1$d</xliff:g> foiz, <xliff:g id="TIME">%2$s</xliff:g> yetadi, batareya himoyasi uchun quvvatlash toʻxtatildi."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Batareya <xliff:g id="PERCENTAGE">%d</xliff:g> foiz, batareya himoyasi uchun quvvatlash pauza qilindi."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Batareya <xliff:g id="PERCENTAGE">%1$d</xliff:g> foiz, <xliff:g id="TIME">%2$s</xliff:g>, batareya himoyasi uchun quvvatlash pauza qilindi."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Barcha bildirishnomalarni ko‘rish"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter yoqildi."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibratsiyali qo‘ng‘iroq"</string>
@@ -197,6 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Xabarnoma soyasi."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Tezkor sozlamalar."</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Tezkor sozlamalar va eslatma soyasi."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Qulflash ekrani."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Ishchi ekran qulfi"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Yopish"</string>
@@ -257,8 +258,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Yorqinlik"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Ranglarni akslantirish"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Ranglarni tuzatish"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Shrift oʻlchami"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Foydalanuvchilarni boshqarish"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Tayyor"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Yopish"</string>
@@ -779,12 +779,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"ekranni yozuvi"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Nomsiz"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Kutib turing"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Shrift oʻlchami"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Kichiklashtirish"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Kattalashtirish"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Kattalashtirish oynasi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kattalashtirish oynasi sozlamalari"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Yaqinlashtirish"</string>
@@ -1030,16 +1027,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Kamida bitta qurilma mavjud"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Bosib turish yorligʻi"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Bekor qilish"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Ekranlarni hozir almashtirish"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Telefonni yoying"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Ekranlar almashtirilsinmi?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Yuqori aniqlik uchun orqa kameradan foydalaning"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Yuqori aniqlik uchun telefonni aylantiring"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Buklanadigan qurilma ochilmoqda"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Buklanadigan qurilma aylantirilmoqda"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Batareya quvvati: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
@@ -1051,4 +1043,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Ish profiliga almashish"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Yopish"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Qulflangan ekran sozlamalari"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi mavjud emas"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera bloklangan"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera va mikrofon bloklangan"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon bloklangan"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Imtiyozli rejim yoniq"</string>
 </resources>

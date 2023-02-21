@@ -93,7 +93,7 @@
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"مرز سمت راست <xliff:g id="PERCENT">%1$d</xliff:g> درصد"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"در برنامه <xliff:g id="APP">%1$s</xliff:g> در نمایه کاری ذخیره شد"</string>
     <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
-    <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> این نماگرفت را تشخیص داد."</string>
+    <string name="screenshot_detected_template" msgid="7940376642921719915">"‫«<xliff:g id="APPNAME">%1$s</xliff:g>» این نماگرفت را تشخیص داد."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> و سایر برنامه‌های باز این نماگرفت را تشخیص دادند."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"ضبط‌کننده صفحه‌نمایش"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"درحال پردازش ضبط صفحه‌نمایش"</string>
@@ -187,8 +187,8 @@
     <string name="accessibility_battery_level" msgid="5143715405241138822">"باتری <xliff:g id="NUMBER">%d</xliff:g> درصد."</string>
     <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"درصد شارژ باتری: <xliff:g id="PERCENTAGE">%1$d</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"در حال شارژ باتری، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> درصد"</string>
-    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"درصد شارژ باتری: <xliff:g id="PERCENTAGE">%d</xliff:g>، شارژ شدن برای محافظت از باتری موقتاً متوقف شد."</string>
-    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"درصد شارژ باتری: <xliff:g id="PERCENTAGE">%1$d</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>، شارژ شدن برای محافظت از باتری موقتاً متوقف شد."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"شارژ باتری <xliff:g id="PERCENTAGE">%d</xliff:g> درصد است. شارژ شدن برای محافظت از باتری موقتاً متوقف شد."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"شارژ باتری <xliff:g id="PERCENTAGE">%1$d</xliff:g> درصد، <xliff:g id="TIME">%2$s</xliff:g>. شارژ شدن برای محافظت از باتری موقتاً متوقف شد."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"دیدن همه اعلان‌ها"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"تله‌تایپ فعال شد."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"زنگ لرزشی."</string>
@@ -197,6 +197,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"تنظیمات سریع."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"صفحه قفل."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"صفحه قفل کاری"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"بستن"</string>
@@ -257,8 +259,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"روشنایی"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"وارونگی رنگ"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"تصحیح رنگ"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"اندازه قلم"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"مدیریت کاربران"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"تمام"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"بستن"</string>
@@ -779,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"ضبط صفحه‌نمایش"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بدون عنوان"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"آماده‌به‌کار"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"اندازه قلم"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"کوچک‌تر کردن"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"بزرگ‌تر کردن"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"پنجره درشت‌نمایی"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"کنترل‌های پنجره درشت‌نمایی"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"زوم‌پیش کردن"</string>
@@ -1030,16 +1028,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• حداقل یک دستگاه دردسترس باشد"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"میان‌بر را لمس کنید و نگه دارید"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"لغو کردن"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"صفحه‌ها اکنون جابه‌جا می‌شود"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"باز کردن تلفن"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"صفحه‌ها جابه‌جا شود؟"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"برای وضوح بیشتر، از دوربین پشت استفاده کنید"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"برای وضوح بیشتر، تلفن را برگردانید"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"دستگاه تاشو درحال باز شدن"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"دستگاه تاشو درحال چرخش به اطراف"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> باتری باقی مانده است"</string>
@@ -1051,4 +1044,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"رفتن به نمایه کاری"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"بستن"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"تنظیمات صفحه قفل"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"‏Wi-Fi دردسترس نیست"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"دوربین مسدود شده است"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"دوربین و میکروفون مسدود شده‌اند"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"میکروفون مسدود شده است"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"حالت اولویت روشن است"</string>
 </resources>
