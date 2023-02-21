@@ -663,7 +663,7 @@ public final class DisplayPowerControllerTest {
                 mContextSpy, injector, mDisplayPowerCallbacksMock, mHandler,
                 mSensorManagerMock, mDisplayBlankerMock, display,
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
-                hbmMetadata, false);
+                hbmMetadata, /* bootCompleted= */ false);
 
         return new DisplayPowerControllerHolder(dpc, displayPowerState, brightnessSetting, animator,
                 automaticBrightnessController, screenOffBrightnessSensorController, hbmMetadata);
