@@ -2416,7 +2416,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (wallpaperMayMove) {
                         displayContent.mWallpaperController.adjustWallpaperWindows();
                     }
-                    focusMayChange = tryStartExitingAnimation(win, winAnimator, focusMayChange);
+                    tryStartExitingAnimation(win, winAnimator);
                 }
             }
 
@@ -2601,8 +2601,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator,
-            boolean focusMayChange) {
+    private void tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator) {
         // Try starting an animation; if there isn't one, we
         // can destroy the surface right away.
         int transit = WindowManagerPolicy.TRANSIT_EXIT;
@@ -2610,39 +2609,30 @@ public class WindowManagerService extends IWindowManager.Stub
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
 
-        if (win.isWinVisibleLw() && win.mDisplayContent.okToAnimate()) {
+        if (win.isVisible() && win.isDisplayed() && win.mDisplayContent.okToAnimate()) {
             String reason = null;
             if (winAnimator.applyAnimationLocked(transit, false)) {
                 // This is a WMCore-driven window animation.
                 reason = "applyAnimation";
-                focusMayChange = true;
-                win.mAnimatingExit = true;
-            } else if (
-                    // This is already animating via a WMCore-driven window animation
-                    win.isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)
-                    // Or already animating as part of a legacy app-transition
-                    || win.isAnimating(PARENTS | TRANSITION,
-                            ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
-                    // Or already animating as part of a shell-transition.
-                    || (win.inTransition()
-                            // Filter out non-app windows since transitions don't animate those
-                            // (but may still "wait" on them for readiness)
-                            && (win.mActivityRecord != null || win.mIsWallpaper))) {
-                // TODO(b/247005789): set mAnimatingExit somewhere in shell-transitions setup.
-                reason = "animating";
-                win.mAnimatingExit = true;
-            } else if (win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
-                    && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
-                reason = "isWallpaperTarget";
-                // If the wallpaper is currently behind this app window, they should be updated
-                // in a transaction to avoid artifacts.
-                // For NotificationShade, sysui is in charge of running window animation and it
-                // updates the client view visibility only after both NotificationShade and the
-                // wallpaper are hidden. So the exit animation is not needed and can destroy its
-                // surface immediately.
-                win.mAnimatingExit = true;
+            } else if (win.isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)) {
+                // This is already animating via a WMCore-driven window animation.
+                reason = "selfAnimating";
+            } else {
+                if (win.mTransitionController.isShellTransitionsEnabled()) {
+                    // Already animating as part of a shell-transition. Currently this only handles
+                    // activity window because other types should be WMCore-driven.
+                    if ((win.mActivityRecord != null && win.mActivityRecord.inTransition())) {
+                        win.mTransitionController.mAnimatingExitWindows.add(win);
+                        reason = "inTransition";
+                    }
+                } else if (win.isAnimating(PARENTS | TRANSITION,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+                    // Already animating as part of a legacy app-transition.
+                    reason = "inLegacyTransition";
+                }
             }
             if (reason != null) {
+                win.mAnimatingExit = true;
                 ProtoLog.d(WM_DEBUG_ANIM,
                         "Set animatingExit: reason=startExitingAnimation/%s win=%s", reason, win);
             }
@@ -2658,8 +2648,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.onWindowTransition(win, transit);
         }
-
-        return focusMayChange;
     }
 
     private int createSurfaceControl(SurfaceControl outSurfaceControl, int result,
