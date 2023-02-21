@@ -36,7 +36,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -48,7 +47,7 @@ import android.window.TransitionInfo;
 import android.window.TransitionInfo.Change;
 
 import java.util.ArrayList;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 /**
  * Some utility methods for creating {@link RemoteAnimationTarget} instances.
@@ -145,6 +144,18 @@ public class RemoteAnimationTargetCompat {
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             TransitionInfo info, SurfaceControl.Transaction t,
             @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
+        final SurfaceControl leash = createLeash(info, change, order, t);
+        if (leashMap != null) {
+            leashMap.put(change.getLeash(), leash);
+        }
+        return newTarget(change, order, leash);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change and leash
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            SurfaceControl leash) {
         int taskId;
         boolean isNotInRecents;
         ActivityManager.RunningTaskInfo taskInfo;
@@ -169,7 +180,7 @@ public class RemoteAnimationTargetCompat {
                 newModeToLegacyMode(change.getMode()),
                 // TODO: once we can properly sync transactions across process,
                 // then get rid of this leash.
-                createLeash(info, change, order, t),
+                leash,
                 (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
                 null,
                 // TODO(shell-transitions): we need to send content insets? evaluate how its used.
@@ -190,9 +201,6 @@ public class RemoteAnimationTargetCompat {
         target.setWillShowImeOnTarget(
                 (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0);
         target.setRotationChange(change.getEndRotation() - change.getStartRotation());
-        if (leashMap != null) {
-            leashMap.put(change.getLeash(), target.leash);
-        }
         return target;
     }
 
@@ -204,18 +212,7 @@ public class RemoteAnimationTargetCompat {
      */
     public static RemoteAnimationTarget[] wrapApps(TransitionInfo info,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
-        SparseBooleanArray childTaskTargets = new SparseBooleanArray();
-        return wrap(info, t, leashMap, (change, taskInfo) -> {
-            // Children always come before parent since changes are in top-to-bottom z-order.
-            if ((taskInfo == null) || childTaskTargets.get(taskInfo.taskId)) {
-                // has children, so not a leaf. Skip.
-                return false;
-            }
-            if (taskInfo.hasParentTask()) {
-                childTaskTargets.put(taskInfo.parentTaskId, true);
-            }
-            return true;
-        });
+        return wrap(info, t, leashMap, new LeafTaskFilter());
     }
 
     /**
@@ -228,21 +225,56 @@ public class RemoteAnimationTargetCompat {
      */
     public static RemoteAnimationTarget[] wrapNonApps(TransitionInfo info, boolean wallpapers,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
-        return wrap(info, t, leashMap, (change, taskInfo) -> (taskInfo == null)
-                && wallpapers == change.hasFlags(FLAG_IS_WALLPAPER)
-                && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY));
+        return wrap(info, t, leashMap, (change) ->
+                (wallpapers ? isWallpaper(change) : isNonApp(change)));
     }
 
     private static RemoteAnimationTarget[] wrap(TransitionInfo info,
             SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap,
-            BiPredicate<Change, TaskInfo> filter) {
+            Predicate<Change> filter) {
         final ArrayList<RemoteAnimationTarget> out = new ArrayList<>();
         for (int i = 0; i < info.getChanges().size(); i++) {
             TransitionInfo.Change change = info.getChanges().get(i);
-            if (filter.test(change, change.getTaskInfo())) {
+            if (filter.test(change)) {
                 out.add(newTarget(change, info.getChanges().size() - i, info, t, leashMap));
             }
         }
         return out.toArray(new RemoteAnimationTarget[out.size()]);
+    }
+
+    /** Returns `true` if `change` is a wallpaper. */
+    public static boolean isWallpaper(Change change) {
+        return (change.getTaskInfo() == null)
+                && change.hasFlags(FLAG_IS_WALLPAPER)
+                && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+    }
+
+    /** Returns `true` if `change` is not an app window or wallpaper. */
+    public static boolean isNonApp(Change change) {
+        return (change.getTaskInfo() == null)
+                && !change.hasFlags(FLAG_IS_WALLPAPER)
+                && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+    }
+
+    /**
+     * Filter that selects leaf-tasks only. THIS IS ORDER-DEPENDENT! For it to work properly, you
+     * MUST call `test` in the same order that the changes appear in the TransitionInfo.
+     */
+    public static class LeafTaskFilter implements Predicate<Change> {
+        private final SparseBooleanArray mChildTaskTargets = new SparseBooleanArray();
+
+        @Override
+        public boolean test(Change change) {
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            // Children always come before parent since changes are in top-to-bottom z-order.
+            if ((taskInfo == null) || mChildTaskTargets.get(taskInfo.taskId)) {
+                // has children, so not a leaf. Skip.
+                return false;
+            }
+            if (taskInfo.hasParentTask()) {
+                mChildTaskTargets.put(taskInfo.parentTaskId, true);
+            }
+            return true;
+        }
     }
 }

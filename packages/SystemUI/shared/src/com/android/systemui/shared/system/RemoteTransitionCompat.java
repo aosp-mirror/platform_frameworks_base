@@ -72,71 +72,23 @@ public class RemoteTransitionCompat {
             public void startAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishedCallback) {
-                final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
-                final RemoteAnimationTarget[] apps =
-                        RemoteAnimationTargetCompat.wrapApps(info, t, leashMap);
-                final RemoteAnimationTarget[] wallpapers =
-                        RemoteAnimationTargetCompat.wrapNonApps(
-                                info, true /* wallpapers */, t, leashMap);
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
                 mToken = transition;
-                // This transition is for opening recents, so recents is on-top. We want to draw
-                // the current going-away tasks on top of recents, though, so move them to front.
-                // Note that we divide up the "layer space" into 3 regions each the size of
-                // the change count. This way we can easily move changes into above/below/between
-                // while maintaining their relative ordering.
-                final ArrayList<WindowContainerToken> pausingTasks = new ArrayList<>();
-                WindowContainerToken pipTask = null;
-                WindowContainerToken recentsTask = null;
-                int recentsTaskId = -1;
-                for (int i = apps.length - 1; i >= 0; --i) {
-                    final ActivityManager.RunningTaskInfo taskInfo = apps[i].taskInfo;
-                    if (apps[i].mode == MODE_CLOSING) {
-                        t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
-                        if (taskInfo == null) {
-                            continue;
-                        }
-                        // Add to front since we are iterating backwards.
-                        pausingTasks.add(0, taskInfo.token);
-                        if (taskInfo.pictureInPictureParams != null
-                                && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
-                            pipTask = taskInfo.token;
-                        }
-                    } else if (taskInfo != null
-                            && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
-                        // This task is for recents, keep it on top.
-                        t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
-                        recentsTask = taskInfo.token;
-                        recentsTaskId = taskInfo.taskId;
-                    } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
-                        recentsTask = taskInfo.token;
-                        recentsTaskId = taskInfo.taskId;
-                    }
-                }
-                // Also make all the wallpapers opaque since we want the visible from the start
-                for (int i = wallpapers.length - 1; i >= 0; --i) {
-                    t.setAlpha(wallpapers[i].leash, 1);
-                }
-                t.apply();
-                mRecentsSession.setup(controller, info, finishedCallback, pausingTasks, pipTask,
-                        recentsTask, recentsTaskId, leashMap, mToken,
-                        (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0);
-                recents.onAnimationStart(mRecentsSession, apps, wallpapers, new Rect(0, 0, 0, 0),
-                        new Rect());
+                mRecentsSession.start(controller, recents, mToken, info, t, finishedCallback);
             }
 
             @Override
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishedCallback) {
-                if (mergeTarget.equals(mToken) && mRecentsSession.merge(info, t, recents)) {
+                if (mergeTarget.equals(mToken) && mRecentsSession.merge(info, t)) {
                     try {
                         finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Error merging transition.", e);
                     }
                     // commit taskAppeared after merge transition finished.
-                    mRecentsSession.commitTasksAppearedIfNeeded(recents);
+                    mRecentsSession.commitTasksAppearedIfNeeded();
                 } else {
                     t.close();
                     info.releaseAllSurfaces();
@@ -152,6 +104,7 @@ public class RemoteTransitionCompat {
      */
     @VisibleForTesting
     static class RecentsControllerWrap extends RecentsAnimationControllerCompat {
+        private RecentsAnimationListener mListener = null;
         private RecentsAnimationControllerCompat mWrapped = null;
         private IRemoteTransitionFinishedCallback mFinishCB = null;
         private ArrayList<WindowContainerToken> mPausingTasks = null;
@@ -160,7 +113,7 @@ public class RemoteTransitionCompat {
         private int mRecentsTaskId = 0;
         private TransitionInfo mInfo = null;
         private ArrayList<SurfaceControl> mOpeningLeashes = null;
-        private boolean mOpeningHome = false;
+        private boolean mOpeningSeparateHome = false;
         private ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = null;
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
@@ -168,34 +121,74 @@ public class RemoteTransitionCompat {
         private RemoteAnimationTarget[] mAppearedTargets;
         private boolean mWillFinishToHome = false;
 
-        void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
-                IRemoteTransitionFinishedCallback finishCB,
-                ArrayList<WindowContainerToken> pausingTasks, WindowContainerToken pipTask,
-                WindowContainerToken recentsTask, int recentsTaskId, ArrayMap<SurfaceControl,
-                SurfaceControl> leashMap, IBinder transition, boolean keyguardLocked) {
+        void start(RecentsAnimationControllerCompat wrapped, RecentsAnimationListener listener,
+                IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
+                IRemoteTransitionFinishedCallback finishedCallback) {
             if (mInfo != null) {
                 throw new IllegalStateException("Trying to run a new recents animation while"
                         + " recents is already active.");
             }
+            mListener = listener;
             mWrapped = wrapped;
             mInfo = info;
-            mFinishCB = finishCB;
-            mPausingTasks = pausingTasks;
-            mPipTask = pipTask;
-            mRecentsTask = recentsTask;
-            mRecentsTaskId = recentsTaskId;
-            mLeashMap = leashMap;
+            mFinishCB = finishedCallback;
+            mPausingTasks = new ArrayList<>();
+            mPipTask = null;
+            mRecentsTask = null;
+            mRecentsTaskId = -1;
+            mLeashMap = new ArrayMap<>();
             mTransition = transition;
-            mKeyguardLocked = keyguardLocked;
+            mKeyguardLocked = (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0;
+
+            final RemoteAnimationTarget[] apps =
+                    RemoteAnimationTargetCompat.wrapApps(info, t, mLeashMap);
+            final RemoteAnimationTarget[] wallpapers =
+                    RemoteAnimationTargetCompat.wrapNonApps(
+                            info, true /* wallpapers */, t, mLeashMap);
+
+            // This transition is for opening recents, so recents is on-top. We want to draw
+            // the current going-away tasks on top of recents, though, so move them to front.
+            // Note that we divide up the "layer space" into 3 regions each the size of
+            // the change count. This way we can easily move changes into above/below/between
+            // while maintaining their relative ordering.
+            for (int i = apps.length - 1; i >= 0; --i) {
+                final ActivityManager.RunningTaskInfo taskInfo = apps[i].taskInfo;
+                if (apps[i].mode == MODE_CLOSING) {
+                    t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
+                    if (taskInfo == null) {
+                        continue;
+                    }
+                    // Add to front since we are iterating backwards.
+                    mPausingTasks.add(0, taskInfo.token);
+                    if (taskInfo.pictureInPictureParams != null
+                            && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
+                        mPipTask = taskInfo.token;
+                    }
+                } else if (taskInfo != null
+                        && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
+                    // This task is for recents, keep it on top.
+                    t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
+                    mRecentsTask = taskInfo.token;
+                    mRecentsTaskId = taskInfo.taskId;
+                } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
+                    mRecentsTask = taskInfo.token;
+                    mRecentsTaskId = taskInfo.taskId;
+                }
+            }
+            // Also make all the wallpapers opaque since we want the visible from the start
+            for (int i = wallpapers.length - 1; i >= 0; --i) {
+                t.setAlpha(wallpapers[i].leash, 1);
+            }
+            t.apply();
+            mListener.onAnimationStart(this, apps, wallpapers, new Rect(0, 0, 0, 0), new Rect());
         }
 
         @SuppressLint("NewApi")
-        boolean merge(TransitionInfo info, SurfaceControl.Transaction t,
-                RecentsAnimationListener recents) {
+        boolean merge(TransitionInfo info, SurfaceControl.Transaction t) {
             SparseArray<TransitionInfo.Change> openingTasks = null;
             mAppearedTargets = null;
-            boolean cancelRecents = false;
-            boolean homeGoingAway = false;
+            boolean foundHomeOpening = false;
+            boolean foundRecentsClosing = false;
             boolean hasChangingApp = false;
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
@@ -203,8 +196,8 @@ public class RemoteTransitionCompat {
                     final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                     if (taskInfo != null) {
                         if (taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
-                            // canceling recents animation
-                            cancelRecents = true;
+                            // This is usually a 3p launcher
+                            foundHomeOpening = true;
                         }
                         if (openingTasks == null) {
                             openingTasks = new SparseArray<>();
@@ -219,19 +212,18 @@ public class RemoteTransitionCompat {
                 } else if (change.getMode() == TRANSIT_CLOSE
                         || change.getMode() == TRANSIT_TO_BACK) {
                     if (mRecentsTask.equals(change.getContainer())) {
-                        homeGoingAway = true;
+                        foundRecentsClosing = true;
                     }
                 } else if (change.getMode() == TRANSIT_CHANGE) {
                     hasChangingApp = true;
                 }
             }
-            if (hasChangingApp && homeGoingAway) {
+            if (hasChangingApp && foundRecentsClosing) {
                 // This happens when a visible app is expanding (usually PiP). In this case,
-                // The transition probably has a special-purpose animation, so finish recents
+                // that transition probably has a special-purpose animation, so finish recents
                 // now and let it do its animation (since recents is going to be occluded).
-                if (!recents.onSwitchToScreenshot(() -> {
-                    finish(true /* toHome */, false /* userLeaveHint */);
-                })) {
+                if (!mListener.onSwitchToScreenshot(
+                        () -> finish(true /* toHome */, false /* userLeaveHint */))) {
                     Log.w(TAG, "Recents callback doesn't support support switching to screenshot"
                             + ", there might be a flicker.");
                     finish(true /* toHome */, false /* userLeaveHint */);
@@ -240,7 +232,7 @@ public class RemoteTransitionCompat {
             }
             if (openingTasks == null) return false;
             int pauseMatches = 0;
-            if (!cancelRecents) {
+            if (!foundHomeOpening) {
                 for (int i = 0; i < openingTasks.size(); ++i) {
                     if (mPausingTasks.contains(openingTasks.valueAt(i).getContainer())) {
                         ++pauseMatches;
@@ -262,7 +254,7 @@ public class RemoteTransitionCompat {
             }
             final int layer = mInfo.getChanges().size() * 3;
             mOpeningLeashes = new ArrayList<>();
-            mOpeningHome = cancelRecents;
+            mOpeningSeparateHome = foundHomeOpening;
             final RemoteAnimationTarget[] targets =
                     new RemoteAnimationTarget[openingTasks.size()];
             for (int i = 0; i < openingTasks.size(); ++i) {
@@ -280,9 +272,9 @@ public class RemoteTransitionCompat {
             return true;
         }
 
-        private void commitTasksAppearedIfNeeded(RecentsAnimationListener recents) {
+        private void commitTasksAppearedIfNeeded() {
             if (mAppearedTargets != null) {
-                recents.onTasksAppeared(mAppearedTargets);
+                mListener.onTasksAppeared(mAppearedTargets);
                 mAppearedTargets = null;
             }
         }
@@ -352,7 +344,7 @@ public class RemoteTransitionCompat {
                 if (!mKeyguardLocked && mRecentsTask != null) {
                     wct.restoreTransientOrder(mRecentsTask);
                 }
-            } else if (toHome && mOpeningHome && mPausingTasks != null) {
+            } else if (toHome && mOpeningSeparateHome && mPausingTasks != null) {
                 // Special situaition where 3p launcher was changed during recents (this happens
                 // during tapltests...). Here we get both "return to home" AND "home opening".
                 // This is basically going home, but we have to restore recents order and also
@@ -404,11 +396,13 @@ public class RemoteTransitionCompat {
             mInfo.releaseAllSurfaces();
             // Reset all members.
             mWrapped = null;
+            mListener = null;
             mFinishCB = null;
             mPausingTasks = null;
+            mAppearedTargets = null;
             mInfo = null;
             mOpeningLeashes = null;
-            mOpeningHome = false;
+            mOpeningSeparateHome = false;
             mLeashMap = null;
             mTransition = null;
         }
