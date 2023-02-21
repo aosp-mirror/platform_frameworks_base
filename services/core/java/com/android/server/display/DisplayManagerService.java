@@ -2104,8 +2104,7 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    // TODO (b/264979880) - Add unit test for HDR output control methods.
-    private void setHdrConversionModeInternal(HdrConversionMode hdrConversionMode) {
+    void setHdrConversionModeInternal(HdrConversionMode hdrConversionMode) {
         if (!mInjector.getHdrOutputConversionSupport()) {
             return;
         }
@@ -2139,7 +2138,7 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private HdrConversionMode getHdrConversionModeSettingInternal() {
+    HdrConversionMode getHdrConversionModeSettingInternal() {
         if (!mInjector.getHdrOutputConversionSupport()) {
             return HDR_CONVERSION_MODE_UNSUPPORTED;
         }
