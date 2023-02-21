@@ -369,7 +369,9 @@ public class DragLayout extends LinearLayout {
 
         // Start animating the drop UI out with the drag surface
         hide(event, dropCompleteCallback);
-        hideDragSurface(dragSurface);
+        if (handledDrop) {
+            hideDragSurface(dragSurface);
+        }
         return handledDrop;
     }
 
