@@ -34,6 +34,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -57,6 +58,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     private final MetricsLogger mMetricsLogger;
 
     private EmergencyButtonCallback mEmergencyButtonCallback;
+    private LockPatternUtils mLockPatternUtils;
 
     private final KeyguardUpdateMonitorCallback mInfoCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -83,7 +85,8 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             KeyguardUpdateMonitor keyguardUpdateMonitor, TelephonyManager telephonyManager,
             PowerManager powerManager, ActivityTaskManager activityTaskManager,
             ShadeController shadeController,
-            @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger) {
+            @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
+            LockPatternUtils lockPatternUtils) {
         super(view);
         mConfigurationController = configurationController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -93,6 +96,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         mShadeController = shadeController;
         mTelecomManager = telecomManager;
         mMetricsLogger = metricsLogger;
+        mLockPatternUtils = lockPatternUtils;
     }
 
     @Override
@@ -116,10 +120,12 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     private void updateEmergencyCallButton() {
         if (mView != null) {
             mView.updateEmergencyCallButton(
-                    mTelecomManager != null && mTelecomManager.isInCall(),
-                    getContext().getPackageManager().hasSystemFeature(
+                    /* isInCall= */ mTelecomManager != null && mTelecomManager.isInCall(),
+                    /* hasTelephonyRadio= */ getContext().getPackageManager().hasSystemFeature(
                             PackageManager.FEATURE_TELEPHONY),
-                    mKeyguardUpdateMonitor.isSimPinVoiceSecure());
+                    /* simLocked= */ mKeyguardUpdateMonitor.isSimPinVoiceSecure(),
+                    /* isSecure= */
+                    mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser()));
         }
     }
 
@@ -178,13 +184,15 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         @Nullable
         private final TelecomManager mTelecomManager;
         private final MetricsLogger mMetricsLogger;
+        private final LockPatternUtils mLockPatternUtils;
 
         @Inject
         public Factory(ConfigurationController configurationController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor, TelephonyManager telephonyManager,
                 PowerManager powerManager, ActivityTaskManager activityTaskManager,
                 ShadeController shadeController,
-                @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger) {
+                @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
+                LockPatternUtils lockPatternUtils) {
 
             mConfigurationController = configurationController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -194,6 +202,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             mShadeController = shadeController;
             mTelecomManager = telecomManager;
             mMetricsLogger = metricsLogger;
+            mLockPatternUtils = lockPatternUtils;
         }
 
         /** Construct an {@link com.android.keyguard.EmergencyButtonController}. */
@@ -201,7 +210,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
             return new EmergencyButtonController(view, mConfigurationController,
                     mKeyguardUpdateMonitor, mTelephonyManager, mPowerManager, mActivityTaskManager,
                     mShadeController,
-                    mTelecomManager, mMetricsLogger);
+                    mTelecomManager, mMetricsLogger, mLockPatternUtils);
         }
     }
 }
