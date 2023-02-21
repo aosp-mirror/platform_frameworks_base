@@ -83,7 +83,7 @@ public class UninstallUninstalling extends Activity implements
                 }
 
                 UserManager customUserManager = UninstallUninstalling.this
-                        .createContextAsUser(UserHandle.of(user.getIdentifier()), 0)
+                        .createContextAsUser(user, 0)
                         .getSystemService(UserManager.class);
                 if (customUserManager.isUserOfType(UserManager.USER_TYPE_PROFILE_CLONE)) {
                     isCloneUser = true;
@@ -117,7 +117,7 @@ public class UninstallUninstalling extends Activity implements
                 int flags = allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
-                getPackageManager().getPackageInstaller().uninstall(
+                createContextAsUser(user, 0).getPackageManager().getPackageInstaller().uninstall(
                         new VersionedPackage(mAppInfo.packageName,
                                 PackageManager.VERSION_CODE_HIGHEST),
                         flags, pendingIntent.getIntentSender());
