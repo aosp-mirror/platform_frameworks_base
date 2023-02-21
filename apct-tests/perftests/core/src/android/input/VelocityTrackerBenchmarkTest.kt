@@ -23,33 +23,133 @@ import android.view.VelocityTracker
 import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
 
+import java.time.Duration
+
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private fun createScrollMotionEvent(scrollAmount: Float, eventTimeMs: Long): MotionEvent {
-    val props = MotionEvent.PointerProperties()
-    props.id = 0
-    val coords = MotionEvent.PointerCoords()
-    coords.setAxisValue(MotionEvent.AXIS_SCROLL, scrollAmount)
-    return MotionEvent.obtain(
-        /*downTime=*/0,
-        eventTimeMs,
-        MotionEvent.ACTION_SCROLL,
-        /*pointerCount=*/1,
-        arrayOf(props),
-        arrayOf(coords),
-        /*metaState=*/0,
-        /*buttonState=*/0,
-        /*xPrecision=*/0f,
-        /*yPrecision=*/0f,
-        /*deviceId=*/1,
-        /*edgeFlags=*/0,
-        InputDevice.SOURCE_ROTARY_ENCODER,
-        /*flags=*/0
-    )
+/**
+ * Helper class to maintain [MotionEvent]s for tests.
+ *
+ * This is primarily used to create [MotionEvent]s for tests, in a way where a sequence of
+ * [MotionEvent]s created in multiple test runs are exactly the same, as long as [reset] is called
+ * between consecutive sequences of [MotionEvent]s.
+ *
+ * Furthermore, it also contains convenience methods to run any queries/verifications of the
+ * generated [MotionEvent]s.
+ */
+abstract class MotionState {
+    /** Current time, in ms. */
+    protected var currentTime = START_TIME
+
+    /** Resets the state of this instance. */
+    open fun reset() {
+        currentTime = START_TIME
+    }
+
+    /** Creates a [MotionEvent]. */
+    abstract fun createMotionEvent(): MotionEvent
+
+    /** Asserts that the current velocity is not zero, just for verifying there's motion. */
+    abstract fun assertNonZeroVelocity(velocityTracker: VelocityTracker)
+
+    companion object {
+        /** Arbitrarily chosen start time. */
+        val START_TIME = Duration.ofMillis(100)
+        /**
+         * A small enough time jump, which won't be considered by the tracker as big enough to
+         * deduce that a pointer has stopped.
+         */
+        val DEFAULT_TIME_JUMP = Duration.ofMillis(2)
+    }
+}
+
+/** An implementation of [MotionState] for [MotionEvent.AXIS_SCROLL]. */
+private class ScrollMotionState : MotionState() {
+    override fun createMotionEvent(): MotionEvent {
+        val props = MotionEvent.PointerProperties()
+        props.id = 0
+        val coords = MotionEvent.PointerCoords()
+        coords.setAxisValue(MotionEvent.AXIS_SCROLL, DEFAULT_SCROLL_AMOUNT)
+        val motionEvent = MotionEvent.obtain(
+            /*downTime=*/0,
+            currentTime.toMillis(),
+            MotionEvent.ACTION_SCROLL,
+            /*pointerCount=*/1,
+            arrayOf(props),
+            arrayOf(coords),
+            /*metaState=*/0,
+            /*buttonState=*/0,
+            /*xPrecision=*/0f,
+            /*yPrecision=*/0f,
+            /*deviceId=*/1,
+            /*edgeFlags=*/0,
+            InputDevice.SOURCE_ROTARY_ENCODER,
+            /*flags=*/0
+        )
+
+        currentTime = currentTime.plus(DEFAULT_TIME_JUMP)
+
+        return motionEvent
+    }
+
+    override fun assertNonZeroVelocity(velocityTracker: VelocityTracker) {
+        Assert.assertTrue(velocityTracker.getAxisVelocity(MotionEvent.AXIS_SCROLL) != 0f)
+    }
+
+    companion object {
+        private val DEFAULT_SCROLL_AMOUNT: Float = 30f
+    }
+}
+
+/** An implementation of [MotionState] for [MotionEvent.AXIS_X] and [MotionEvent.AXIS_Y]. */
+private class PlanarMotionState : MotionState() {
+    private var x: Float = DEFAULT_X
+    private var y: Float = DEFAULT_Y
+    private var downEventCreated = false
+
+    override fun createMotionEvent(): MotionEvent {
+        val action: Int = if (downEventCreated) MotionEvent.ACTION_MOVE else MotionEvent.ACTION_DOWN
+        val motionEvent = MotionEvent.obtain(
+            /*downTime=*/START_TIME.toMillis(),
+            currentTime.toMillis(),
+            action,
+            x,
+            y,
+            /*metaState=*/0)
+
+        if (downEventCreated) {
+            x += INCREMENT
+            y += INCREMENT
+        } else {
+            downEventCreated = true
+        }
+        currentTime = currentTime.plus(DEFAULT_TIME_JUMP)
+
+        return motionEvent
+    }
+
+    override fun assertNonZeroVelocity(velocityTracker: VelocityTracker) {
+        Assert.assertTrue(velocityTracker.getAxisVelocity(MotionEvent.AXIS_X) != 0f)
+        Assert.assertTrue(velocityTracker.getAxisVelocity(MotionEvent.AXIS_Y) != 0f)
+    }
+
+    override fun reset() {
+        super.reset()
+        x = DEFAULT_X
+        y = DEFAULT_Y
+        downEventCreated = false
+    }
+
+    companion object {
+        /** Arbitrarily chosen constants. No need to have varying velocity for now. */
+        private val DEFAULT_X: Float = 2f
+        private val DEFAULT_Y: Float = 4f
+        private val INCREMENT: Float = 0.7f
+    }
 }
 
 /**
@@ -72,65 +172,80 @@ class VelocityTrackerBenchmarkTest {
 
     @Test
     fun addMovement_axisScroll() {
+        testAddMovement(ScrollMotionState())
+    }
+
+    @Test
+    fun computeCurrentVelocity_computeAfterAllAdditions_axisScroll() {
+        testComputeCurrentVelocity_computeAfterAllAdditions(ScrollMotionState())
+    }
+
+    @Test
+    fun computeCurrentVelocity_computeAfterEachAdd_axisScroll() {
+        testComputeCurrentVelocity_computeAfterEachAdd(ScrollMotionState())
+    }
+
+    @Test
+    fun addMovementTest_planarAxes() {
+        testAddMovement(PlanarMotionState())
+    }
+
+    @Test
+    fun computeCurrentVelocity_computeAfterAllAdditions_planarAxes() {
+        testComputeCurrentVelocity_computeAfterAllAdditions(PlanarMotionState())
+    }
+
+    private fun testAddMovement(motionState: MotionState) {
         val state = perfStatusReporter.getBenchmarkState()
         while (state.keepRunning()) {
             state.pauseTiming()
-            var eventTimeMs: Long = 100
-            val scrollAmount = 30f
             for (i in 0 until TEST_NUM_DATAPOINTS) {
+                val motionEvent = motionState.createMotionEvent()
                 state.resumeTiming()
-                velocityTracker.addMovement(createScrollMotionEvent(scrollAmount, eventTimeMs))
+                velocityTracker.addMovement(motionEvent)
                 state.pauseTiming()
-                eventTimeMs += 2
             }
             velocityTracker.computeCurrentVelocity(1000)
-            Assert.assertTrue(velocityTracker.getAxisVelocity(MotionEvent.AXIS_SCROLL) > 0)
+            motionState.assertNonZeroVelocity(velocityTracker)
             // Clear the tracker for the next run
             velocityTracker.clear()
+            motionState.reset()
             state.resumeTiming()
         }
     }
 
-    @Test
-    fun computeCurrentVelocity_constantVelocity_axisScroll_computeAfterAllAdditions() {
+    private fun testComputeCurrentVelocity_computeAfterAllAdditions(motionState: MotionState) {
         val state = perfStatusReporter.getBenchmarkState()
         while (state.keepRunning()) {
             // Add the data points
             state.pauseTiming()
-            var eventTimeMs: Long = 100
-            val scrollAmount = 30f
             for (i in 0 until TEST_NUM_DATAPOINTS) {
-                velocityTracker.addMovement(createScrollMotionEvent(scrollAmount, eventTimeMs))
-                eventTimeMs += 2
+                velocityTracker.addMovement(motionState.createMotionEvent())
             }
 
             // Do the velocity computation
             state.resumeTiming()
             velocityTracker.computeCurrentVelocity(1000)
 
-            // Clear the tracker for the next run
             state.pauseTiming()
-            Assert.assertTrue(velocityTracker.getAxisVelocity(MotionEvent.AXIS_SCROLL) > 0)
+            motionState.assertNonZeroVelocity(velocityTracker)
+            // Clear the tracker for the next run
             velocityTracker.clear()
             state.resumeTiming()
         }
     }
 
-    @Test
-    fun computeCurrentVelocity_constantVelocity_axisScroll_computeAfterEachAdd() {
+    private fun testComputeCurrentVelocity_computeAfterEachAdd(motionState: MotionState) {
         val state = perfStatusReporter.getBenchmarkState()
         while (state.keepRunning()) {
             state.pauseTiming()
-            var eventTimeMs: Long = 100
-            val scrollAmount = 30f
             for (i in 0 until TEST_NUM_DATAPOINTS) {
-                velocityTracker.addMovement(createScrollMotionEvent(scrollAmount, eventTimeMs))
+                velocityTracker.addMovement(motionState.createMotionEvent())
                 state.resumeTiming()
                 velocityTracker.computeCurrentVelocity(1000)
                 state.pauseTiming()
-                eventTimeMs += 2
             }
-            Assert.assertTrue(velocityTracker.getAxisVelocity(MotionEvent.AXIS_SCROLL) > 0)
+            motionState.assertNonZeroVelocity(velocityTracker)
             // Clear the tracker for the next run
             velocityTracker.clear()
             state.resumeTiming()
