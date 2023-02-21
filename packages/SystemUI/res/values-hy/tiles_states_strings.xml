@@ -176,7 +176,9 @@
     <item msgid="8014986104355098744">"Անջատված է"</item>
     <item msgid="5966994759929723339">"Միացված է"</item>
   </string-array>
-    <!-- no translation found for tile_states_font_scaling:0 (3173069902082305985) -->
-    <!-- no translation found for tile_states_font_scaling:1 (2478289035899842865) -->
-    <!-- no translation found for tile_states_font_scaling:2 (5137565285664080143) -->
+  <string-array name="tile_states_font_scaling">
+    <item msgid="3173069902082305985">"Հասանելի չէ"</item>
+    <item msgid="2478289035899842865">"Անջատված է"</item>
+    <item msgid="5137565285664080143">"Միացված է"</item>
+  </string-array>
 </resources>
