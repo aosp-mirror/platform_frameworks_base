@@ -62,7 +62,7 @@ public class PreviewPositionHelper {
      */
     public void updateThumbnailMatrix(Rect thumbnailBounds, ThumbnailData thumbnailData,
             int canvasWidth, int canvasHeight, int screenWidthPx, int screenHeightPx,
-            int taskbarSize, boolean isTablet,
+            int taskbarSize, boolean isLargeScreen,
             int currentRotation, boolean isRtl) {
         boolean isRotated = false;
         boolean isOrientationDifferent;
@@ -95,7 +95,7 @@ public class PreviewPositionHelper {
             canvasScreenRatio = (float) canvasWidth / screenWidthPx;
         }
         scaledTaskbarSize = taskbarSize * canvasScreenRatio;
-        thumbnailClipHint.bottom = isTablet ? scaledTaskbarSize : 0;
+        thumbnailClipHint.bottom = isLargeScreen ? scaledTaskbarSize : 0;
 
         float scale = thumbnailData.scale;
         final float thumbnailScale;
@@ -103,7 +103,7 @@ public class PreviewPositionHelper {
         // Landscape vs portrait change.
         // Note: Disable rotation in grid layout.
         boolean windowingModeSupportsRotation =
-                thumbnailData.windowingMode == WINDOWING_MODE_FULLSCREEN && !isTablet;
+                thumbnailData.windowingMode == WINDOWING_MODE_FULLSCREEN && !isLargeScreen;
         isOrientationDifferent = isOrientationChange(deltaRotate)
                 && windowingModeSupportsRotation;
         if (canvasWidth == 0 || canvasHeight == 0 || scale == 0) {
