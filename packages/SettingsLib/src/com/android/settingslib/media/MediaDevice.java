@@ -33,7 +33,6 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION_MANAGED;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED;
-import static android.media.RouteListingPreference.Item.SELECTION_BEHAVIOR_TRANSFER;
 import static android.media.RouteListingPreference.Item.SUBTEXT_AD_ROUTING_DISALLOWED;
 import static android.media.RouteListingPreference.Item.SUBTEXT_CUSTOM;
 import static android.media.RouteListingPreference.Item.SUBTEXT_DEVICE_LOW_POWER;
@@ -45,6 +44,7 @@ import static android.media.RouteListingPreference.Item.SUBTEXT_TRACK_UNSUPPORTE
 import static android.media.RouteListingPreference.Item.SUBTEXT_UNAUTHORIZED;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -93,6 +93,17 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         int TYPE_BLUETOOTH_DEVICE = 5;
         int TYPE_CAST_DEVICE = 6;
         int TYPE_CAST_GROUP_DEVICE = 7;
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SelectionBehavior.SELECTION_BEHAVIOR_NONE,
+            SELECTION_BEHAVIOR_TRANSFER,
+            SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP
+    })
+    public @interface SelectionBehavior {
+        int SELECTION_BEHAVIOR_NONE = 0;
+        int SELECTION_BEHAVIOR_TRANSFER = 1;
+        int SELECTION_BEHAVIOR_GO_TO_APP = 2;
     }
 
     @VisibleForTesting
@@ -213,7 +224,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      *
      * @return selection behavior of device
      */
-    @RouteListingPreference.Item.SubText
+    @SelectionBehavior
     public int getSelectionBehavior() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && mItem != null
                 ? mItem.getSelectionBehavior() : SELECTION_BEHAVIOR_TRANSFER;
