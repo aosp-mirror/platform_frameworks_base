@@ -49,6 +49,7 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManagerInternal;
@@ -121,18 +122,14 @@ public class VibrationSettingsTest {
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     @Mock private VibrationSettings.OnVibratorSettingsChanged mListenerMock;
-    @Mock
-    private PowerManagerInternal mPowerManagerInternalMock;
-    @Mock
-    private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
-    @Mock
-    private PackageManagerInternal mPackageManagerInternalMock;
-    @Mock
-    private VibrationConfig mVibrationConfigMock;
+    @Mock private PowerManagerInternal mPowerManagerInternalMock;
+    @Mock private VirtualDeviceManagerInternal mVirtualDeviceManagerInternalMock;
+    @Mock private PackageManagerInternal mPackageManagerInternalMock;
+    @Mock private AudioManager mAudioManagerMock;
+    @Mock private VibrationConfig mVibrationConfigMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
-    private AudioManager mAudioManager;
     private VibrationSettings mVibrationSettings;
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
     private VirtualDeviceManagerInternal.VirtualDisplayListener mRegisteredVirtualDisplayListener;
@@ -146,6 +143,7 @@ public class VibrationSettingsTest {
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
+        when(mContextSpy.getSystemService(eq(Context.AUDIO_SERVICE))).thenReturn(mAudioManagerMock);
         doAnswer(invocation -> {
             mRegisteredPowerModeListener = invocation.getArgument(0);
             return null;
@@ -165,7 +163,6 @@ public class VibrationSettingsTest {
         addServicesForTest();
 
         setDefaultIntensity(VIBRATION_INTENSITY_MEDIUM);
-        mAudioManager = mContextSpy.getSystemService(AudioManager.class);
         mVibrationSettings = new VibrationSettings(mContextSpy,
                 new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
 
@@ -211,9 +208,34 @@ public class VibrationSettingsTest {
     }
 
     @Test
+    public void addListener_switchUserTriggerListener() {
+        mVibrationSettings.addListener(mListenerMock);
+
+        // Testing the broadcast flow manually.
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(Intent.ACTION_USER_SWITCHED));
+
+        verify(mListenerMock).onChange();
+    }
+
+    @Test
+    public void addListener_ringerModeChangeTriggerListener() {
+        mVibrationSettings.addListener(mListenerMock);
+
+        // Testing the broadcast flow manually.
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+
+        verify(mListenerMock, times(2)).onChange();
+    }
+
+    @Test
     public void addListener_settingsChangeTriggerListener() {
         mVibrationSettings.addListener(mListenerMock);
 
+        // Testing the broadcast flow manually.
         mVibrationSettings.mSettingObserver.onChange(false);
         mVibrationSettings.mSettingObserver.onChange(false);
 
@@ -224,6 +246,7 @@ public class VibrationSettingsTest {
     public void addListener_lowPowerModeChangeTriggerListener() {
         mVibrationSettings.addListener(mListenerMock);
 
+        // Testing the broadcast flow manually.
         mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE);
         mRegisteredPowerModeListener.onLowPowerModeChanged(NORMAL_POWER_STATE); // No change.
@@ -235,13 +258,20 @@ public class VibrationSettingsTest {
     public void removeListener_noMoreCallbacksToListener() {
         mVibrationSettings.addListener(mListenerMock);
 
-        setUserSetting(Settings.System.RING_VIBRATION_INTENSITY, 0);
+        mVibrationSettings.mSettingObserver.onChange(false);
         verify(mListenerMock).onChange();
 
         mVibrationSettings.removeListener(mListenerMock);
 
+        // Trigger multiple observers manually.
+        mVibrationSettings.mSettingObserver.onChange(false);
+        mRegisteredPowerModeListener.onLowPowerModeChanged(LOW_POWER_STATE);
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(Intent.ACTION_USER_SWITCHED));
+        mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
+                new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
+
         verifyNoMoreInteractions(mListenerMock);
-        setUserSetting(Settings.System.VIBRATE_INPUT_DEVICES, 1);
     }
 
     @Test
@@ -482,7 +512,7 @@ public class VibrationSettingsTest {
         assertVibrationNotIgnoredForUsage(USAGE_RINGTONE);
 
         // Testing the broadcast flow manually.
-        mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
+        when(mAudioManagerMock.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
 
@@ -787,7 +817,6 @@ public class VibrationSettingsTest {
                                 .build()));
     }
 
-
     private String errorMessageForUsage(int usage) {
         return "Error for usage " + VibrationAttributes.usageToString(usage);
     }
@@ -816,8 +845,8 @@ public class VibrationSettingsTest {
     }
 
     private void setRingerMode(int ringerMode) {
-        mAudioManager.setRingerModeInternal(ringerMode);
-        assertEquals(ringerMode, mAudioManager.getRingerModeInternal());
+        when(mAudioManagerMock.getRingerModeInternal()).thenReturn(ringerMode);
+        // Mock AudioManager broadcast of internal ringer mode change.
         mVibrationSettings.mSettingChangeReceiver.onReceive(mContextSpy,
                 new Intent(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
     }

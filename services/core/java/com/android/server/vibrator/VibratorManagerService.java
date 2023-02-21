@@ -414,7 +414,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
             if (attrs.isFlagSet(VibrationAttributes.FLAG_INVALIDATE_SETTINGS_CACHE)) {
                 // Force update of user settings before checking if this vibration effect should
                 // be ignored or scaled.
-                mVibrationSettings.mSettingObserver.onChange(false);
+                mVibrationSettings.update();
             }
 
             synchronized (mLock) {
