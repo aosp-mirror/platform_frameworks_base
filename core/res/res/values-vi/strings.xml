@@ -207,6 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Ứng dụng cá nhân của bạn bị chặn cho tới khi bạn bật hồ sơ công việc"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Ứng dụng cá nhân sẽ bị chặn lúc <xliff:g id="TIME">%2$s</xliff:g> vào <xliff:g id="DATE">%1$s</xliff:g>. Quản trị viên CNTT không cho phép bạn tắt hồ sơ công việc quá <xliff:g id="NUMBER">%3$d</xliff:g> ngày."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Bật"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Ngưng nhận cuộc gọi và tin nhắn"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Bạn đã tạm dừng các ứng dụng công việc. Bạn sẽ không nhận được cuộc gọi hoặc tin nhắn văn bản nào."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Dùng ứng dụng công việc"</string>
     <string name="me" msgid="6207584824693813140">"Tôi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tùy chọn máy tính bảng"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Tùy chọn dành cho Android TV"</string>
@@ -338,6 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Có thể ghi lại các cử chỉ được thực hiện trên cảm biến vân tay của thiết bị."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Chụp ảnh màn hình"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Có thể chụp ảnh màn hình."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Bản xem trước, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"trở thành thanh trạng thái"</string>
@@ -1358,8 +1362,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Đã bật chế độ PTP qua USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Đã bật tính năng chia sẻ Internet qua USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Đã bật chế độ MIDI qua USB"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Đã kết nối thiết bị dưới dạng webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Đã kết nối phụ kiện USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Nhấn để biết thêm tùy chọn."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Đang sạc thiết bị được kết nối. Hãy nhấn để biết thêm các tùy chọn."</string>
@@ -1708,8 +1711,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Xong"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tắt phím tắt"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Đảo màu"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Chỉnh màu"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Chế độ một tay"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Siêu tối"</string>
