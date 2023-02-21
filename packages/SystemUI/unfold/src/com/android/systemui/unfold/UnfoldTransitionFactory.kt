@@ -19,8 +19,8 @@ package com.android.systemui.unfold
 
 import android.content.Context
 import android.hardware.SensorManager
+import android.hardware.display.DisplayManager
 import android.os.Handler
-import android.view.IWindowManager
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
@@ -47,7 +47,7 @@ fun createUnfoldSharedComponent(
         mainExecutor: Executor,
         singleThreadBgExecutor: Executor,
         tracingTagPrefix: String,
-        windowManager: IWindowManager,
+        displayManager: DisplayManager,
 ): UnfoldSharedComponent =
         DaggerUnfoldSharedComponent.factory()
                 .create(
@@ -61,7 +61,7 @@ fun createUnfoldSharedComponent(
                         mainExecutor,
                         singleThreadBgExecutor,
                         tracingTagPrefix,
-                        windowManager,
+                        displayManager,
                 )
 
 /**
@@ -73,16 +73,18 @@ fun createRemoteUnfoldSharedComponent(
         context: Context,
         config: UnfoldTransitionConfig,
         mainExecutor: Executor,
+        mainHandler: Handler,
         singleThreadBgExecutor: Executor,
         tracingTagPrefix: String,
-        windowManager: IWindowManager,
+        displayManager: DisplayManager,
         ): RemoteUnfoldSharedComponent =
         DaggerRemoteUnfoldSharedComponent.factory()
                 .create(
                         context,
                         config,
                         mainExecutor,
+                        mainHandler,
                         singleThreadBgExecutor,
-                        windowManager,
+                        displayManager,
                         tracingTagPrefix,
                 )
