@@ -16,10 +16,10 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION;
-import static android.os.PowerManager.LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN;
 import static android.os.PowerManager.LowPowerStandbyPortDescription.MATCH_PORT_LOCAL;
 import static android.os.PowerManager.LowPowerStandbyPortDescription.PROTOCOL_TCP;
 import static android.os.PowerManager.LowPowerStandbyPortDescription.PROTOCOL_UDP;
@@ -571,17 +571,17 @@ public class LowPowerStandbyControllerTest {
         mController.setEnabled(false);
         mTestLooper.dispatchAll();
 
-        assertTrue(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        assertTrue(mController.isAllowed(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
     }
 
     @Test
     public void testSetAllowedFeatures_isAllowedWhenEnabled() throws Exception {
         mController.systemReady();
         mController.setEnabled(true);
-        mController.setPolicy(policyWithAllowedFeatures(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        mController.setPolicy(policyWithAllowedFeatures(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
         mTestLooper.dispatchAll();
 
-        assertTrue(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        assertTrue(mController.isAllowed(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
     }
 
     @Test
@@ -590,7 +590,7 @@ public class LowPowerStandbyControllerTest {
         mController.setEnabled(true);
         mTestLooper.dispatchAll();
 
-        assertFalse(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        assertFalse(mController.isAllowed(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
     }
 
     @Test

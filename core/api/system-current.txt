@@ -10719,15 +10719,15 @@ package android.os {
 
   public static final class PowerManager.LowPowerStandbyPortDescription {
     ctor public PowerManager.LowPowerStandbyPortDescription(int, int, int);
-    ctor public PowerManager.LowPowerStandbyPortDescription(int, int, int, @Nullable android.net.LinkAddress);
-    method @Nullable public android.net.LinkAddress getBindAddress();
+    ctor public PowerManager.LowPowerStandbyPortDescription(int, int, int, @Nullable java.net.InetAddress);
+    method @Nullable public java.net.InetAddress getLocalAddress();
     method public int getPortMatcher();
     method public int getPortNumber();
     method public int getProtocol();
     field public static final int MATCH_PORT_LOCAL = 1; // 0x1
     field public static final int MATCH_PORT_REMOTE = 2; // 0x2
-    field public static final int PROTOCOL_TCP = 1; // 0x1
-    field public static final int PROTOCOL_UDP = 2; // 0x2
+    field public static final int PROTOCOL_TCP = 6; // 0x6
+    field public static final int PROTOCOL_UDP = 17; // 0x11
   }
 
   public final class PowerManager.LowPowerStandbyPortsLock {

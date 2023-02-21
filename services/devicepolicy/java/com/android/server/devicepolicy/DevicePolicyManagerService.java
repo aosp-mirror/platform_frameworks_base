@@ -18611,9 +18611,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public StringParceledListSlice getOwnerInstalledCaCerts(@NonNull UserHandle user) {
         final int userId = user.getIdentifier();
         final CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization((userId == caller.getUserId())
-                || isProfileOwner(caller) || isDefaultDeviceOwner(caller)
-                || hasFullCrossUsersPermission(caller, userId));
+        Preconditions.checkCallAuthorization(
+                (isProfileOwner(caller) || isDefaultDeviceOwner(caller) || canQueryAdminPolicy(
+                        caller)) && hasFullCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
             return new StringParceledListSlice(

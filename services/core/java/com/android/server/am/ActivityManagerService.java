@@ -191,7 +191,6 @@ import android.app.ApplicationStartInfo;
 import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
-import android.app.ComponentOptions;
 import android.app.ContentProviderHolder;
 import android.app.ForegroundServiceDelegationOptions;
 import android.app.IActivityController;
@@ -7029,6 +7028,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void getProviderMimeTypeAsync(Uri uri, int userId, RemoteCallback resultCallback) {
         mCpHelper.getProviderMimeTypeAsync(uri, userId, resultCallback);
+    }
+
+    /**
+     * Filters calls to getType based on permission. If the caller has required permission,
+     * then it returns the contentProvider#getType.
+     * Else, it returns the contentProvider#getTypeAnonymous, which does not
+     * reveal any internal information which should be protected by any permission.
+     */
+    @Override
+    public void getMimeTypeFilterAsync(Uri uri, int userId, RemoteCallback resultCallback) {
+        mCpHelper.getMimeTypeFilterAsync(uri, userId, resultCallback);
     }
 
     // =========================================================
