@@ -1255,6 +1255,15 @@ public class SatelliteManager {
      *                     SOS_SMS or LOCATION_SHARING.
      * @param datagram encoded gateway datagram which is encrypted by the caller.
      *                 Datagram will be passed down to modem without any encoding or encryption.
+     * @param needFullScreenPointingUI If set to true, this indicates pointingUI app to open in full
+     *                                 screen mode if satellite communication needs pointingUI.
+     *                                 If this is set to false, pointingUI may be presented to the
+     *                                 user in collapsed view. Application may decide to mark this
+     *                                 flag as true when the user is sending data for the first time
+     *                                 or whenever there is a considerable idle time between
+     *                                 satellite activity. This decision should be done based upon
+     *                                 user activity and the application's ability to determine the
+     *                                 best possible UX experience for the user.
      * @param executor The executor on which the result listener will be called.
      * @param callback The callback object to which the result will be returned.
      *                 If datagram is sent successfully, then
@@ -1267,7 +1276,8 @@ public class SatelliteManager {
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
     public void sendSatelliteDatagram(long datagramId, @DatagramType int datagramType,
-            @NonNull SatelliteDatagram datagram, @NonNull @CallbackExecutor Executor executor,
+            @NonNull SatelliteDatagram datagram, boolean needFullScreenPointingUI,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull OutcomeReceiver<Long, SatelliteException> callback) {
         Objects.requireNonNull(datagram);
         Objects.requireNonNull(executor);
@@ -1299,7 +1309,7 @@ public class SatelliteManager {
                     }
                 };
                 telephony.sendSatelliteDatagram(mSubId, datagramId, datagramType, datagram,
-                        receiver);
+                        needFullScreenPointingUI, receiver);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
