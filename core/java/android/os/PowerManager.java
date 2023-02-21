@@ -32,7 +32,6 @@ import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.net.LinkAddress;
 import android.service.dreams.Sandman;
 import android.sysprop.InitProperties;
 import android.util.ArrayMap;
@@ -45,6 +44,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -3048,7 +3049,7 @@ public final class PowerManager {
      *
      * @see #isAllowedInLowPowerStandby(String)
      */
-    public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN =
+    public static final String FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY =
             "com.android.lowpowerstandby.WAKE_ON_LAN";
 
     /**
@@ -3130,10 +3131,25 @@ public final class PowerManager {
         @LowPowerStandbyAllowedReason
         private final int mAllowedReasons;
 
-        /** Features that are allowed to be used in Low Power Standby. */
+        /**
+         * Features that are allowed to be used in Low Power Standby.
+         *
+         * @see #FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY
+         */
         @NonNull
         private final Set<String> mAllowedFeatures;
 
+        /**
+         * Create a policy that defines the restrictions enforced by Low Power Standby.
+         *
+         * @param identifier Name of the policy, used for debugging & metrics.
+         * @param exemptPackages Packages that are exempt from Low Power Standby restrictions.
+         * @param allowedReasons Reasons that this policy allows apps to be automatically exempted
+         *                       from Low Power Standby restrictions for.
+         * @param allowedFeatures Features that are allowed to be used in Low Power Standby.
+         *                        Features are declared as strings, see
+         *                        {@link #FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY} as an example.
+         */
         public LowPowerStandbyPolicy(@NonNull String identifier,
                 @NonNull Set<String> exemptPackages,
                 @LowPowerStandbyAllowedReason int allowedReasons,
@@ -3244,11 +3260,11 @@ public final class PowerManager {
         /**
          * Constant to indicate the {@link LowPowerStandbyPortDescription} refers to a TCP port.
          */
-        public static final int PROTOCOL_TCP = 1;
+        public static final int PROTOCOL_TCP = 6;
         /**
          * Constant to indicate the {@link LowPowerStandbyPortDescription} refers to a UDP port.
          */
-        public static final int PROTOCOL_UDP = 2;
+        public static final int PROTOCOL_UDP = 17;
 
         /** @hide */
         @IntDef(prefix = { "MATCH_PORT_" }, value = {
@@ -3277,7 +3293,7 @@ public final class PowerManager {
         private final int mPortMatcher;
         private final int mPortNumber;
         @Nullable
-        private final LinkAddress mBindAddress;
+        private final InetAddress mLocalAddress;
 
         /**
          * Describes a port.
@@ -3296,7 +3312,7 @@ public final class PowerManager {
             this.mProtocol = protocol;
             this.mPortMatcher = portMatcher;
             this.mPortNumber = portNumber;
-            this.mBindAddress = null;
+            this.mLocalAddress = null;
         }
 
         /**
@@ -3308,16 +3324,16 @@ public final class PowerManager {
          *                    ({@link #MATCH_PORT_REMOTE}), or the destination port
          *                    ({@link #MATCH_PORT_LOCAL}).
          * @param portNumber The port number to match.
-         * @param bindAddress The bind address to match.
+         * @param localAddress The local address to match.
          *
          * @see #newLowPowerStandbyPortsLock(List)
          */
         public LowPowerStandbyPortDescription(@Protocol int protocol, @PortMatcher int portMatcher,
-                int portNumber, @Nullable LinkAddress bindAddress) {
+                int portNumber, @Nullable InetAddress localAddress) {
             this.mProtocol = protocol;
             this.mPortMatcher = portMatcher;
             this.mPortNumber = portNumber;
-            this.mBindAddress = bindAddress;
+            this.mLocalAddress = localAddress;
         }
 
         private String protocolToString(int protocol) {
@@ -3383,8 +3399,8 @@ public final class PowerManager {
          * @see #getProtocol()
          */
         @Nullable
-        public LinkAddress getBindAddress() {
-            return mBindAddress;
+        public InetAddress getLocalAddress() {
+            return mLocalAddress;
         }
 
         @Override
@@ -3393,7 +3409,7 @@ public final class PowerManager {
                     + "mProtocol=" + protocolToString(mProtocol)
                     + ", mPortMatcher=" + portMatcherToString(mPortMatcher)
                     + ", mPortNumber=" + mPortNumber
-                    + ", mBindAddress=" + mBindAddress
+                    + ", mLocalAddress=" + mLocalAddress
                     + '}';
         }
 
@@ -3403,13 +3419,13 @@ public final class PowerManager {
             if (!(o instanceof LowPowerStandbyPortDescription)) return false;
             LowPowerStandbyPortDescription that = (LowPowerStandbyPortDescription) o;
             return mProtocol == that.mProtocol && mPortMatcher == that.mPortMatcher
-                    && mPortNumber == that.mPortNumber && Objects.equals(mBindAddress,
-                    that.mBindAddress);
+                    && mPortNumber == that.mPortNumber && Objects.equals(mLocalAddress,
+                    that.mLocalAddress);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mProtocol, mPortMatcher, mPortNumber, mBindAddress);
+            return Objects.hash(mProtocol, mPortMatcher, mPortNumber, mLocalAddress);
         }
 
         /** @hide */
@@ -3424,8 +3440,8 @@ public final class PowerManager {
             parcelablePortDescription.protocol = portDescription.mProtocol;
             parcelablePortDescription.portMatcher = portDescription.mPortMatcher;
             parcelablePortDescription.portNumber = portDescription.mPortNumber;
-            if (portDescription.mBindAddress != null) {
-                parcelablePortDescription.bindAddress = portDescription.mBindAddress.toString();
+            if (portDescription.mLocalAddress != null) {
+                parcelablePortDescription.localAddress = portDescription.mLocalAddress.getAddress();
             }
             return parcelablePortDescription;
         }
@@ -3451,15 +3467,19 @@ public final class PowerManager {
                 return null;
             }
 
-            LinkAddress bindAddress = null;
-            if (parcelablePortDescription.bindAddress != null) {
-                bindAddress = new LinkAddress(parcelablePortDescription.bindAddress);
+            InetAddress localAddress = null;
+            if (parcelablePortDescription.localAddress != null) {
+                try {
+                    localAddress = InetAddress.getByAddress(parcelablePortDescription.localAddress);
+                } catch (UnknownHostException e) {
+                    Log.w(TAG, "Address has invalid length", e);
+                }
             }
             return new LowPowerStandbyPortDescription(
                     parcelablePortDescription.protocol,
                     parcelablePortDescription.portMatcher,
                     parcelablePortDescription.portNumber,
-                    bindAddress);
+                    localAddress);
         }
 
         /** @hide */

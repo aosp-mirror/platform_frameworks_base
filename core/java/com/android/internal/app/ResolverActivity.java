@@ -739,6 +739,11 @@ public class ResolverActivity extends Activity implements
     }
 
     protected UserHandle fetchPersonalProfileUserHandle() {
+        // ActivityManager.getCurrentUser() refers to the current Foreground user. When clone/work
+        // profile is active, we always make the personal tab from the foreground user.
+        // Outside profiles, current foreground user is potentially the same as the sharesheet
+        // process's user (UserHandle.myUserId()), so we continue to create personal tab with the
+        // current foreground user.
         mPersonalProfileUserHandle = UserHandle.of(ActivityManager.getCurrentUser());
         return mPersonalProfileUserHandle;
     }
@@ -768,10 +773,11 @@ public class ResolverActivity extends Activity implements
     }
 
     private UserHandle fetchTabOwnerUserHandleForLaunch() {
-        if (isLaunchedAsCloneProfile()) {
-            return getPersonalProfileUserHandle();
-        }
-        return mLaunchedFromUserHandle;
+        // If we are in work profile's process, return WorkProfile user as owner, otherwise we
+        // always return PersonalProfile user as owner
+        return UserHandle.of(UserHandle.myUserId()).equals(getWorkProfileUserHandle())
+                ? getWorkProfileUserHandle()
+                : getPersonalProfileUserHandle();
     }
 
     private boolean hasWorkProfile() {

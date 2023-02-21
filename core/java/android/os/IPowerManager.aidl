@@ -104,7 +104,7 @@ interface IPowerManager
         int protocol;
         int portMatcher;
         int portNumber;
-        @nullable String bindAddress;
+        @nullable byte[] localAddress;
     }
 
     @UnsupportedAppUsage
