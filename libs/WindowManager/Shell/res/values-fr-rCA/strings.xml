@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"50 % dans le haut"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"30 % dans le haut"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Plein écran dans le bas"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Diviser à gauche"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Diviser à droite"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Diviser dans la partie supérieure"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Diviser dans la partie inférieure"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Utiliser le mode Une main"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Pour quitter, balayez l\'écran du bas vers le haut, ou touchez n\'importe où sur l\'écran en haut de l\'application"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Démarrer le mode Une main"</string>
@@ -102,9 +98,19 @@
     <string name="close_button_text" msgid="2913281996024033299">"Fermer"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Retour"</string>
     <string name="handle_text" msgid="1766582106752184456">"Identifiant"</string>
+    <!-- no translation found for app_icon_text (2823268023931811747) -->
+    <skip />
     <string name="fullscreen_text" msgid="1162316685217676079">"Plein écran"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Mode Bureau"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Écran partagé"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Plus"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Flottant"</string>
+    <!-- no translation found for select_text (5139083974039906583) -->
+    <skip />
+    <!-- no translation found for screenshot_text (1477704010087786671) -->
+    <skip />
+    <!-- no translation found for close_text (4986518933445178928) -->
+    <skip />
+    <!-- no translation found for collapse_menu_text (7515008122450342029) -->
+    <skip />
 </resources>

@@ -98,9 +98,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"Close"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Back"</string>
     <string name="handle_text" msgid="1766582106752184456">"Handle"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"App Icon"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Fullscreen"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Desktop Mode"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Split Screen"</string>
     <string name="more_button_text" msgid="3655388105592893530">"More"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Float"</string>
+    <string name="select_text" msgid="5139083974039906583">"Select"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
+    <string name="close_text" msgid="4986518933445178928">"Close"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Close Menu"</string>
 </resources>
