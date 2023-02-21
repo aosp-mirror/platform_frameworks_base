@@ -68,7 +68,7 @@ interface IFaceService {
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void prepareForAuthentication(int sensorId, boolean requireConfirmation, IBinder token,
+    void prepareForAuthentication(boolean requireConfirmation, IBinder token,
             long operationId, IBiometricSensorReceiver sensorReceiver,
             in FaceAuthenticateOptions options, long requestId, int cookie,
             boolean allowBackgroundAuthentication);

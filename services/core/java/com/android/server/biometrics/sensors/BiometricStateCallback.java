@@ -92,7 +92,7 @@ public class BiometricStateCallback<T extends BiometricServiceProvider<P>,
         final int previousBiometricState = mBiometricState;
 
         if (client instanceof AuthenticationClient) {
-            final AuthenticationClient<?> authClient = (AuthenticationClient<?>) client;
+            final AuthenticationClient<?, ?> authClient = (AuthenticationClient<?, ?>) client;
             if (authClient.isKeyguard()) {
                 mBiometricState = STATE_KEYGUARD_AUTH;
             } else if (authClient.isBiometricPrompt()) {

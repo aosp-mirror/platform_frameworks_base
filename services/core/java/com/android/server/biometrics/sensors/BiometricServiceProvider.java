@@ -17,6 +17,7 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.util.proto.ProtoOutputStream;
 
@@ -39,7 +40,7 @@ public interface BiometricServiceProvider<T extends SensorPropertiesInternal> {
     List<T> getSensorProperties();
 
     /** Properties for the given sensor id. */
-    @NonNull
+    @Nullable
     T getSensorProperties(int sensorId);
 
     boolean isHardwareDetected(int sensorId);

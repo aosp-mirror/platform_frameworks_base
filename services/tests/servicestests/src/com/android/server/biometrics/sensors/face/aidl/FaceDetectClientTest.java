@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.face.ISession;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -112,8 +113,13 @@ public class FaceDetectClientTest {
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
         return new FaceDetectClient(mContext, () -> aidl, mToken,
-                99 /* requestId */, mClientMonitorCallbackConverter, USER_ID,
-                "own-it", 5 /* sensorId */, mBiometricLogger, mBiometricContext,
+                99 /* requestId */, mClientMonitorCallbackConverter,
+                new FaceAuthenticateOptions.Builder()
+                        .setUserId(USER_ID)
+                        .setSensorId(5)
+                        .setOpPackageName("own-it")
+                        .build(),
+                mBiometricLogger, mBiometricContext,
                 false /* isStrongBiometric */, null /* sensorPrivacyManager */);
     }
 }

@@ -64,9 +64,10 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
             long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
             String opPackageName, long requestId, int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
-        mFaceService.prepareForAuthentication(mSensorId, requireConfirmation, token, operationId,
+        mFaceService.prepareForAuthentication(requireConfirmation, token, operationId,
                 sensorReceiver, new FaceAuthenticateOptions.Builder()
                         .setUserId(userId)
+                        .setSensorId(mSensorId)
                         .setOpPackageName(opPackageName)
                         .build(),
                 requestId, cookie, allowBackgroundAuthentication);

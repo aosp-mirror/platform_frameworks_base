@@ -73,8 +73,8 @@ interface IFingerprintService {
     // by BiometricService. To start authentication after the clients are ready, use
     // startPreparedClient().
     @EnforcePermission("MANAGE_BIOMETRIC")
-    void prepareForAuthentication(int sensorId, IBinder token, long operationId, int userId,
-            IBiometricSensorReceiver sensorReceiver, String opPackageName, long requestId,
+    void prepareForAuthentication(IBinder token, long operationId,
+            IBiometricSensorReceiver sensorReceiver, in FingerprintAuthenticateOptions options, long requestId,
             int cookie, boolean allowBackgroundAuthentication);
 
     // Starts authentication with the previously prepared client.

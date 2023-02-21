@@ -83,18 +83,19 @@ public interface ServiceProvider extends BiometricServiceProvider<FaceSensorProp
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 
-    long scheduleFaceDetect(int sensorId, @NonNull IBinder token, int userId,
-            @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
+    long scheduleFaceDetect(@NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FaceAuthenticateOptions options,
             int statsClient);
 
     void cancelFaceDetect(int sensorId, @NonNull IBinder token, long requestId);
 
-    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+    long scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull FaceAuthenticateOptions options,
             boolean restricted, int statsClient, boolean allowBackgroundAuthentication);
 
-    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+    void scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull FaceAuthenticateOptions options, long requestId,
             boolean restricted, int statsClient, boolean allowBackgroundAuthentication);
