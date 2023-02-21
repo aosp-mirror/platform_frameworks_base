@@ -68,6 +68,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test RescueParty.
@@ -94,6 +95,9 @@ public class RescuePartyTest {
             "persist.device_config.configuration.disable_rescue_party";
     private static final String PROP_DISABLE_FACTORY_RESET_FLAG =
             "persist.device_config.configuration.disable_rescue_party_factory_reset";
+    private static final String PROP_LAST_FACTORY_RESET_TIME_MS = "persist.sys.last_factory_reset";
+
+    private static final int THROTTLING_DURATION_MIN = 10;
 
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
@@ -456,6 +460,53 @@ public class RescuePartyTest {
         noteBoot(mitigationCount + 1);
         assertTrue(RescueParty.isAttemptingFactoryReset());
         assertTrue(RescueParty.isFactoryResetPropertySet());
+    }
+
+    @Test
+    public void testThrottlingOnBootFailures() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i);
+        }
+        assertFalse(RescueParty.isAttemptingFactoryReset());
+    }
+
+    @Test
+    public void testThrottlingOnAppCrash() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long beforeTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN - 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(beforeTimeout));
+        for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
+            noteAppCrash(i + 1, true);
+        }
+        assertFalse(RescueParty.isAttemptingFactoryReset());
+    }
+
+    @Test
+    public void testNotThrottlingAfterTimeoutOnBootFailures() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        for (int i = 1; i <= LEVEL_FACTORY_RESET; i++) {
+            noteBoot(i);
+        }
+        assertTrue(RescueParty.isAttemptingFactoryReset());
+    }
+    @Test
+    public void testNotThrottlingAfterTimeoutOnAppCrash() {
+        SystemProperties.set(RescueParty.PROP_ATTEMPTING_REBOOT, Boolean.toString(false));
+        long now = System.currentTimeMillis();
+        long afterTimeout = now - TimeUnit.MINUTES.toMillis(THROTTLING_DURATION_MIN + 1);
+        SystemProperties.set(PROP_LAST_FACTORY_RESET_TIME_MS, Long.toString(afterTimeout));
+        for (int i = 0; i <= LEVEL_FACTORY_RESET; i++) {
+            noteAppCrash(i + 1, true);
+        }
+        assertTrue(RescueParty.isAttemptingFactoryReset());
     }
 
     @Test
