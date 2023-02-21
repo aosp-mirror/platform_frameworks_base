@@ -68,9 +68,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MergedConfiguration;
+import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -102,7 +104,6 @@ import com.android.internal.view.BaseSurfaceHolder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -177,8 +178,7 @@ public abstract class WallpaperService extends Service {
 
     private static final long DIMMING_ANIMATION_DURATION_MS = 300L;
 
-    private final ArrayList<Engine> mActiveEngines
-            = new ArrayList<Engine>();
+    private final ArrayMap<IBinder, IWallpaperEngineWrapper> mActiveEngines = new ArrayMap<>();
 
     static final class WallpaperCommand {
         String action;
@@ -2231,7 +2231,6 @@ public abstract class WallpaperService extends Service {
         final DisplayManager mDisplayManager;
         final Display mDisplay;
         final WallpaperManager mWallpaperManager;
-        private final AtomicBoolean mDetached = new AtomicBoolean();
 
         Engine mEngine;
         @SetWallpaperFlags int mWhich;
@@ -2346,18 +2345,15 @@ public abstract class WallpaperService extends Service {
             mEngine.removeLocalColorsAreas(regions);
         }
 
-        public void destroy() {
-            Message msg = mCaller.obtainMessage(DO_DETACH);
-            mCaller.sendMessage(msg);
-        }
-
-        public void detach() {
-            mDetached.set(true);
-        }
-
         public void applyDimming(float dimAmount) throws RemoteException {
             Message msg = mCaller.obtainMessageI(MSG_UPDATE_DIMMING,
                     Float.floatToIntBits(dimAmount));
+            mCaller.sendMessage(msg);
+        }
+
+        public void destroy() {
+            Message msg = mCaller.obtainMessage(DO_DETACH);
+            mCaller.getHandler().removeCallbacksAndMessages(null);
             mCaller.sendMessage(msg);
         }
 
@@ -2383,25 +2379,27 @@ public abstract class WallpaperService extends Service {
                 engine.detach();
                 Log.w(TAG, "Wallpaper host disappeared", e);
                 return;
+            } catch (IllegalStateException e) {
+                Log.w(TAG, "Connector instance already destroyed, "
+                                + "can't attach engine to non existing connector", e);
+                return;
             } finally {
                 Trace.endSection();
             }
-            mActiveEngines.add(engine);
             Trace.beginSection("WPMS.engine.attach");
             engine.attach(this);
             Trace.endSection();
         }
 
         private void doDetachEngine() {
-            mActiveEngines.remove(mEngine);
-            mEngine.detach();
             // Some wallpapers will not trigger the rendering threads of the remaining engines even
             // if they are visible, so we need to toggle the state to get their attention.
-            if (!mDetached.get()) {
-                for (Engine eng : mActiveEngines) {
-                    if (eng.mVisible) {
-                        eng.doVisibilityChanged(false);
-                        eng.doVisibilityChanged(true);
+            if (!mEngine.mDestroyed) {
+                mEngine.detach();
+                for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                    if (engineWrapper.mEngine != null && engineWrapper.mEngine.mVisible) {
+                        engineWrapper.mEngine.doVisibilityChanged(false);
+                        engineWrapper.mEngine.doVisibilityChanged(true);
                     }
                 }
             }
@@ -2409,12 +2407,6 @@ public abstract class WallpaperService extends Service {
 
         @Override
         public void executeMessage(Message message) {
-            if (mDetached.get()) {
-                if (mActiveEngines.contains(mEngine)) {
-                    doDetachEngine();
-                }
-                return;
-            }
             switch (message.what) {
                 case DO_ATTACH: {
                     Trace.beginSection("WPMS.DO_ATTACH");
@@ -2525,7 +2517,6 @@ public abstract class WallpaperService extends Service {
      */
     class IWallpaperServiceWrapper extends IWallpaperService.Stub {
         private final WallpaperService mTarget;
-        private IWallpaperEngineWrapper mEngineWrapper;
 
         public IWallpaperServiceWrapper(WallpaperService context) {
             mTarget = context;
@@ -2536,14 +2527,27 @@ public abstract class WallpaperService extends Service {
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
                 int displayId, @SetWallpaperFlags int which) {
             Trace.beginSection("WPMS.ServiceWrapper.attach");
-            mEngineWrapper = new IWallpaperEngineWrapper(mTarget, conn, windowToken,
-                    windowType, isPreview, reqWidth, reqHeight, padding, displayId, which);
+            IWallpaperEngineWrapper engineWrapper =
+                    new IWallpaperEngineWrapper(mTarget, conn, windowToken, windowType,
+                            isPreview, reqWidth, reqHeight, padding, displayId, which);
+            mActiveEngines.put(windowToken, engineWrapper);
+            if (DEBUG) {
+                Slog.v(TAG, "IWallpaperServiceWrapper Attaching window token " + windowToken);
+            }
             Trace.endSection();
         }
 
         @Override
-        public void detach() {
-            mEngineWrapper.detach();
+        public void detach(IBinder windowToken) {
+            IWallpaperEngineWrapper engineWrapper = mActiveEngines.remove(windowToken);
+            if (engineWrapper == null) {
+                Log.w(TAG, "Engine for window token " + windowToken + " already detached");
+                return;
+            }
+            if (DEBUG) {
+                Slog.v(TAG, "IWallpaperServiceWrapper Detaching window token " + windowToken);
+            }
+            engineWrapper.destroy();
         }
     }
 
@@ -2558,8 +2562,8 @@ public abstract class WallpaperService extends Service {
     public void onDestroy() {
         Trace.beginSection("WPMS.onDestroy");
         super.onDestroy();
-        for (int i=0; i<mActiveEngines.size(); i++) {
-            mActiveEngines.get(i).detach();
+        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+            engineWrapper.destroy();
         }
         mActiveEngines.clear();
         Trace.endSection();
@@ -2586,8 +2590,12 @@ public abstract class WallpaperService extends Service {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {
         out.print("State of wallpaper "); out.print(this); out.println(":");
-        for (int i=0; i<mActiveEngines.size(); i++) {
-            Engine engine = mActiveEngines.get(i);
+        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+            Engine engine = engineWrapper.mEngine;
+            if (engine == null) {
+                Slog.w(TAG, "Engine for wrapper " + engineWrapper + " not attached");
+                continue;
+            }
             out.print("  Engine "); out.print(engine); out.println(":");
             engine.dump("    ", fd, out, args);
         }
