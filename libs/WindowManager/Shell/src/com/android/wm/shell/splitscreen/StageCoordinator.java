@@ -20,7 +20,6 @@ import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED;
 import static android.app.ComponentOptions.KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -660,6 +659,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        prepareEvictChildTasksIfSplitActive(wct);
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
@@ -674,6 +674,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             @SplitPosition int splitPosition, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        prepareEvictChildTasksIfSplitActive(wct);
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
@@ -687,6 +688,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
             float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        prepareEvictChildTasksIfSplitActive(wct);
         setSideStagePosition(splitPosition, wct);
         options1 = options1 != null ? options1 : new Bundle();
         addActivityOptions(options1, mSideStage);
@@ -705,10 +707,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void startWithTask(WindowContainerTransaction wct, int mainTaskId,
             @Nullable Bundle mainOptions, float splitRatio,
             @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
-        if (mMainStage.isActive()) {
-            mMainStage.evictAllChildren(wct);
-            mSideStage.evictAllChildren(wct);
-        } else {
+        if (!mMainStage.isActive()) {
             // Build a request WCT that will launch both apps such that task 0 is on the main stage
             // while task 1 is on the side stage.
             mMainStage.activate(wct, false /* reparent */);
@@ -1018,6 +1017,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     void prepareEvictInvisibleChildTasks(WindowContainerTransaction wct) {
         mMainStage.evictInvisibleChildren(wct);
         mSideStage.evictInvisibleChildren(wct);
+    }
+
+    void prepareEvictChildTasksIfSplitActive(WindowContainerTransaction wct) {
+        if (mMainStage.isActive()) {
+            mMainStage.evictAllChildren(wct);
+            mSideStage.evictAllChildren(wct);
+        }
     }
 
     Bundle resolveStartStage(@StageType int stage, @SplitPosition int position,
@@ -2151,19 +2157,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
             } else if (isOpening && inFullscreen) {
                 final int activityType = triggerTask.getActivityType();
-                if (activityType == ACTIVITY_TYPE_ASSISTANT) {
-                    // We don't want assistant panel to dismiss split screen, so do nothing.
-                } else if (activityType == ACTIVITY_TYPE_HOME
+                if (activityType == ACTIVITY_TYPE_HOME
                         || activityType == ACTIVITY_TYPE_RECENTS) {
                     // Enter overview panel, so start recent transition.
                     mSplitTransitions.setRecentTransition(transition, request.getRemoteTransition(),
                             mRecentTransitionFinishedCallback);
-                } else if (mSplitTransitions.mPendingRecent == null) {
-                    // If split-task is not controlled by recents animation
-                    // and occluded by the other fullscreen task, dismiss both.
-                    prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
-                    mSplitTransitions.setDismissTransition(
-                            transition, STAGE_TYPE_UNDEFINED, EXIT_REASON_UNKNOWN);
                 }
             }
         } else {

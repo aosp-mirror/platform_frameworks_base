@@ -284,41 +284,6 @@ public class SplitTransitionTests extends ShellTestCase {
 
     @Test
     @UiThreadTest
-    public void testDismissFromBeingOccluded() {
-        enterSplit();
-
-        ActivityManager.RunningTaskInfo normalTask = new TestRunningTaskInfoBuilder()
-                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
-                .build();
-
-        // Create a request to bring a normal task forward
-        TransitionRequestInfo request =
-                new TransitionRequestInfo(TRANSIT_TO_FRONT, normalTask, null);
-        IBinder transition = mock(IBinder.class);
-        WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
-
-        assertTrue(containsSplitExit(result));
-
-        // make sure we haven't made any local changes yet (need to wait until transition is ready)
-        assertTrue(mStageCoordinator.isSplitScreenVisible());
-
-        // simulate the transition
-        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TO_FRONT, 0)
-                .addChange(TRANSIT_TO_FRONT, normalTask)
-                .addChange(TRANSIT_TO_BACK, mMainChild)
-                .addChange(TRANSIT_TO_BACK, mSideChild)
-                .build();
-        mMainStage.onTaskVanished(mMainChild);
-        mSideStage.onTaskVanished(mSideChild);
-        mStageCoordinator.startAnimation(transition, info,
-                mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class),
-                mock(Transitions.TransitionFinishCallback.class));
-        assertFalse(mStageCoordinator.isSplitScreenVisible());
-    }
-
-    @Test
-    @UiThreadTest
     public void testDismissFromMultiWindowSupport() {
         enterSplit();
 
