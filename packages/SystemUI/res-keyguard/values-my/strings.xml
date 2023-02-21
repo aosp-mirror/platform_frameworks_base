@@ -31,6 +31,8 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အမြန်အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • နှေးကွေးစွာ အားသွင်းနေသည်"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ဘက်ထရီကာကွယ်ရန် အားသွင်းခြင်းကို အကောင်းဆုံးပြင်ဆင်ထားသည်"</string>
+    <!-- no translation found for keyguard_plugged_in_incompatible_charger (5712938022567388098) -->
+    <skip />
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ဆင်းမ်မရှိပါ"</string>
