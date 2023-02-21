@@ -131,7 +131,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             mShellExecutor.execute(() -> {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.startShortcut(mContext.getPackageName(), shortcut, options.toBundle());
-                mTaskViewTransitions.startTaskView(wct, this);
+                mTaskViewTransitions.startTaskView(wct, this, options.getLaunchCookie());
             });
             return;
         }
@@ -158,7 +158,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             mShellExecutor.execute(() -> {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.sendPendingIntent(pendingIntent, fillInIntent, options.toBundle());
-                mTaskViewTransitions.startTaskView(wct, this);
+                mTaskViewTransitions.startTaskView(wct, this, options.getLaunchCookie());
             });
             return;
         }

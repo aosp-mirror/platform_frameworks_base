@@ -347,7 +347,7 @@ interface IActivityManager {
     String getProviderMimeType(in Uri uri, int userId);
 
     oneway void getProviderMimeTypeAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
-
+    oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
             boolean runGc, in String path, in ParcelFileDescriptor fd,

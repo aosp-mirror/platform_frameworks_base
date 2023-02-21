@@ -16,13 +16,12 @@
 
 package com.android.server.policy;
 
-import static android.view.KeyEvent.KEYCODE_A;
 import static android.view.KeyEvent.KEYCODE_ALT_LEFT;
 import static android.view.KeyEvent.KEYCODE_B;
 import static android.view.KeyEvent.KEYCODE_C;
 import static android.view.KeyEvent.KEYCODE_CTRL_LEFT;
 import static android.view.KeyEvent.KEYCODE_E;
-import static android.view.KeyEvent.KEYCODE_L;
+import static android.view.KeyEvent.KEYCODE_K;
 import static android.view.KeyEvent.KEYCODE_M;
 import static android.view.KeyEvent.KEYCODE_META_LEFT;
 import static android.view.KeyEvent.KEYCODE_N;
@@ -31,6 +30,7 @@ import static android.view.KeyEvent.KEYCODE_S;
 import static android.view.KeyEvent.KEYCODE_SLASH;
 import static android.view.KeyEvent.KEYCODE_SPACE;
 import static android.view.KeyEvent.KEYCODE_TAB;
+import static android.view.KeyEvent.KEYCODE_U;
 import static android.view.KeyEvent.KEYCODE_Z;
 
 import android.content.Intent;
@@ -42,11 +42,11 @@ import org.junit.Test;
 public class ModifierShortcutTests extends ShortcutKeyTestBase {
     private static final SparseArray<String> META_SHORTCUTS =  new SparseArray<>();
     static {
-        META_SHORTCUTS.append(KEYCODE_A, Intent.CATEGORY_APP_CALCULATOR);
+        META_SHORTCUTS.append(KEYCODE_U, Intent.CATEGORY_APP_CALCULATOR);
         META_SHORTCUTS.append(KEYCODE_B, Intent.CATEGORY_APP_BROWSER);
         META_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CONTACTS);
         META_SHORTCUTS.append(KEYCODE_E, Intent.CATEGORY_APP_EMAIL);
-        META_SHORTCUTS.append(KEYCODE_L, Intent.CATEGORY_APP_CALENDAR);
+        META_SHORTCUTS.append(KEYCODE_K, Intent.CATEGORY_APP_CALENDAR);
         META_SHORTCUTS.append(KEYCODE_M, Intent.CATEGORY_APP_MAPS);
         META_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_MUSIC);
         META_SHORTCUTS.append(KEYCODE_S, Intent.CATEGORY_APP_MESSAGING);

@@ -1117,7 +1117,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          * @param actionId Identifier of the action.  This will be either the
          * identifier you supplied, or {@link EditorInfo#IME_NULL
          * EditorInfo.IME_NULL} if being called due to the enter key
-         * being pressed.
+         * being pressed. Starting from Android 14, the action identifier will
+         * also be included when triggered by an enter key if the input is
+         * constrained to a single line.
          * @param event If triggered by an enter key, this is the event;
          * otherwise, this is null.
          * @return Return true if you have consumed the action, else false.
@@ -9272,7 +9274,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         // chance to consume the event.
                         if (mEditor.mInputContentType.onEditorActionListener != null
                                 && mEditor.mInputContentType.onEditorActionListener.onEditorAction(
-                                        this, EditorInfo.IME_NULL, event)) {
+                                        this,
+                                        getActionIdForEnterEvent(),
+                                        event)) {
                             mEditor.mInputContentType.enterDown = true;
                             // We are consuming the enter key for them.
                             return KEY_EVENT_HANDLED;
@@ -9495,7 +9499,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             && mEditor.mInputContentType.enterDown) {
                         mEditor.mInputContentType.enterDown = false;
                         if (mEditor.mInputContentType.onEditorActionListener.onEditorAction(
-                                this, EditorInfo.IME_NULL, event)) {
+                                this, getActionIdForEnterEvent(), event)) {
                             return true;
                         }
                     }
@@ -9557,6 +9561,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return super.onKeyUp(keyCode, event);
+    }
+
+    private int getActionIdForEnterEvent() {
+        // If it's not single line, no action
+        if (!isSingleLine()) {
+            return EditorInfo.IME_NULL;
+        }
+        // Return the action that was specified for Enter
+        return getImeOptions() & EditorInfo.IME_MASK_ACTION;
     }
 
     @Override

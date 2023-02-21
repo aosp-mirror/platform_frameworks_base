@@ -206,4 +206,9 @@ public interface DisplayPowerControllerInterface {
      * @param follower The DPC to remove from the followers list
      */
     void removeDisplayBrightnessFollower(DisplayPowerControllerInterface follower);
+
+    /**
+     * Indicate that boot has been completed and the screen is ready to update.
+     */
+    void onBootCompleted();
 }

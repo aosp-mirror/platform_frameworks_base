@@ -57,12 +57,21 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         final @NonNull TaskViewTaskController mTaskView;
         IBinder mClaimed;
 
+        /**
+         * This is needed because arbitrary activity launches can still "intrude" into any
+         * transition since `startActivity` is a synchronous call. Once that is solved, we can
+         * remove this.
+         */
+        final IBinder mLaunchCookie;
+
         PendingTransition(@WindowManager.TransitionType int type,
                 @Nullable WindowContainerTransaction wct,
-                @NonNull TaskViewTaskController taskView) {
+                @NonNull TaskViewTaskController taskView,
+                @Nullable IBinder launchCookie) {
             mType = type;
             mWct = wct;
             mTaskView = taskView;
+            mLaunchCookie = launchCookie;
         }
     }
 
@@ -142,7 +151,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         if (!Transitions.isClosingType(request.getType())) return null;
         PendingTransition pending = findPending(taskView, true /* closing */, false /* latest */);
         if (pending == null) {
-            pending = new PendingTransition(request.getType(), null, taskView);
+            pending = new PendingTransition(request.getType(), null, taskView, null /* cookie */);
         }
         if (pending.mClaimed != null) {
             throw new IllegalStateException("Task is closing in 2 collecting transitions?"
@@ -162,8 +171,9 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return null;
     }
 
-    void startTaskView(WindowContainerTransaction wct, TaskViewTaskController taskView) {
-        mPending.add(new PendingTransition(TRANSIT_OPEN, wct, taskView));
+    void startTaskView(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskViewTaskController taskView, @NonNull IBinder launchCookie) {
+        mPending.add(new PendingTransition(TRANSIT_OPEN, wct, taskView, launchCookie));
         startNextTransition();
     }
 
@@ -180,7 +190,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(taskView.getTaskInfo().token, !visible /* hidden */);
         pending = new PendingTransition(
-                visible ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK, wct, taskView);
+                visible ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK, wct, taskView, null /* cookie */);
         mPending.add(pending);
         startNextTransition();
         // visibility is reported in transition.
@@ -197,57 +207,91 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     @Override
+    public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
+            @NonNull SurfaceControl.Transaction finishTransaction) {
+        if (!aborted) return;
+        final PendingTransition pending = findPending(transition);
+        if (pending == null) return;
+        mPending.remove(pending);
+        startNextTransition();
+    }
+
+    @Override
     public boolean startAnimation(@NonNull IBinder transition,
             @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         PendingTransition pending = findPending(transition);
-        if (pending == null) return false;
-        mPending.remove(pending);
-        TaskViewTaskController taskView = pending.mTaskView;
-        final ArrayList<TransitionInfo.Change> tasks = new ArrayList<>();
+        if (pending != null) {
+            mPending.remove(pending);
+        }
+        if (mTaskViews.isEmpty()) {
+            if (pending != null) {
+                Slog.e(TAG, "Pending taskview transition but no task-views");
+            }
+            return false;
+        }
+        boolean stillNeedsMatchingLaunch = pending != null && pending.mLaunchCookie != null;
+        int changesHandled = 0;
+        WindowContainerTransaction wct = null;
         for (int i = 0; i < info.getChanges().size(); ++i) {
             final TransitionInfo.Change chg = info.getChanges().get(i);
             if (chg.getTaskInfo() == null) continue;
-            tasks.add(chg);
-        }
-        if (tasks.isEmpty()) {
-            Slog.e(TAG, "Got a TaskView transition with no task.");
-            return false;
-        }
-        WindowContainerTransaction wct = null;
-        for (int i = 0; i < tasks.size(); ++i) {
-            TransitionInfo.Change chg = tasks.get(i);
             if (Transitions.isClosingType(chg.getMode())) {
                 final boolean isHide = chg.getMode() == TRANSIT_TO_BACK;
                 TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
                 if (tv == null) {
-                    throw new IllegalStateException("TaskView transition is closing a "
-                            + "non-taskview task ");
+                    if (pending != null) {
+                        Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
+                                + "shouldn't happen, so there may be a visual artifact: "
+                                + chg.getTaskInfo().taskId);
+                    }
+                    continue;
                 }
                 if (isHide) {
                     tv.prepareHideAnimation(finishTransaction);
                 } else {
                     tv.prepareCloseAnimation();
                 }
+                changesHandled++;
             } else if (Transitions.isOpeningType(chg.getMode())) {
                 final boolean taskIsNew = chg.getMode() == TRANSIT_OPEN;
-                if (wct == null) wct = new WindowContainerTransaction();
-                TaskViewTaskController tv = taskView;
-                if (!taskIsNew) {
+                final TaskViewTaskController tv;
+                if (taskIsNew) {
+                    if (pending == null
+                            || !chg.getTaskInfo().containsLaunchCookie(pending.mLaunchCookie)) {
+                        Slog.e(TAG, "Found a launching TaskView in the wrong transition. All "
+                                + "TaskView launches should be initiated by shell and in their "
+                                + "own transition: " + chg.getTaskInfo().taskId);
+                        continue;
+                    }
+                    stillNeedsMatchingLaunch = false;
+                    tv = pending.mTaskView;
+                } else {
                     tv = findTaskView(chg.getTaskInfo());
                     if (tv == null) {
-                        throw new IllegalStateException("TaskView transition is showing a "
-                            + "non-taskview task ");
+                        if (pending != null) {
+                            Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
+                                    + "shouldn't happen, so there may be a visual artifact: "
+                                    + chg.getTaskInfo().taskId);
+                        }
+                        continue;
                     }
                 }
+                if (wct == null) wct = new WindowContainerTransaction();
                 tv.prepareOpenAnimation(taskIsNew, startTransaction, finishTransaction,
                         chg.getTaskInfo(), chg.getLeash(), wct);
-            } else {
-                throw new IllegalStateException("Claimed transition isn't an opening or closing"
-                        + " type: " + chg.getMode());
+                changesHandled++;
             }
+        }
+        if (stillNeedsMatchingLaunch) {
+            throw new IllegalStateException("Expected a TaskView launch in this transition but"
+                    + " didn't get one.");
+        }
+        if (wct == null && pending == null && changesHandled != info.getChanges().size()) {
+            // Just some house-keeping, let another handler animate.
+            return false;
         }
         // No animation, just show it immediately.
         startTransaction.apply();
