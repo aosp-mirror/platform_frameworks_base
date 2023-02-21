@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Gore 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Gore 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Donji ekran kao cijeli ekran"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Podjela ulijevo"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Podjela udesno"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Podjela nagore"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Podjela nadolje"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Korištenje načina rada jednom rukom"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Da izađete, prevucite s dna ekrana prema gore ili dodirnite bilo gdje iznad aplikacije"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Započinjanje načina rada jednom rukom"</string>
@@ -102,9 +98,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"Zatvaranje"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Nazad"</string>
     <string name="handle_text" msgid="1766582106752184456">"Identifikator"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Ikona aplikacije"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Cijeli ekran"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Način rada radne površine"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Podijeljeni ekran"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Više"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Lebdeći"</string>
+    <string name="select_text" msgid="5139083974039906583">"Odabir"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Snimak ekrana"</string>
+    <string name="close_text" msgid="4986518933445178928">"Zatvaranje"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Zatvaranje menija"</string>
 </resources>
