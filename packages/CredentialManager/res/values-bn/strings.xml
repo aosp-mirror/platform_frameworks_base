@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"চালিয়ে যান"</string>
     <string name="string_more_options" msgid="7990658711962795124">"আরও বিকল্প"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"আরও জানুন"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"পাসওয়ার্ড দেখুন"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"পাসওয়ার্ড লুকান"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"\'পাসকী\'-এর সাথে সুরক্ষিত"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"\'পাসকী\' ব্যবহার করলে জটিল পাসওয়ার্ড তৈরি করার বা মনে রাখার কোনও প্রয়োজন নেই"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"আপনার ফিঙ্গারপ্রিন্ট, ফেস মডেল বা \'স্ক্রিন লক\' ব্যবহার করে আপনি যে এনক্রিপটেড ডিজিটাল \'কী\' তৈরি করেন সেগুলিই হল \'পাসকী\'"</string>

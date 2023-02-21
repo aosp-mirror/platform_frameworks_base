@@ -8072,7 +8072,7 @@ public class Editor {
             final boolean isSingleLine = mTextView.isSingleLine();
             mInsertModeTransformationMethod = new InsertModeTransformationMethod(offset,
                     isSingleLine, oldTransformationMethod);
-            mTextView.setTransformationMethod(mInsertModeTransformationMethod);
+            mTextView.setTransformationMethodInternal(mInsertModeTransformationMethod);
             Selection.setSelection((Spannable) mTextView.getText(), offset);
 
             mIsInsertModeActive = true;
@@ -8083,11 +8083,6 @@ public class Editor {
             if (!mIsInsertModeActive) return;
             if (mInsertModeTransformationMethod == null
                     || mInsertModeTransformationMethod != mTextView.getTransformationMethod()) {
-                // If mInsertionModeTransformationMethod doesn't match the one on TextView,
-                // something else have changed the TextView's TransformationMethod while the
-                // insertion mode is active. We don't need to restore the oldTransformationMethod.
-                // TODO(265871733): support the case where setTransformationMethod is called in
-                // the insert mode.
                 mIsInsertModeActive = false;
                 return;
             }
@@ -8097,7 +8092,7 @@ public class Editor {
             final int selectionEnd = mTextView.getSelectionEnd();
             final TransformationMethod oldTransformationMethod =
                     mInsertModeTransformationMethod.getOldTransformationMethod();
-            mTextView.setTransformationMethod(oldTransformationMethod);
+            mTextView.setTransformationMethodInternal(oldTransformationMethod);
             Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
             mIsInsertModeActive = false;
         }
@@ -8118,6 +8113,25 @@ public class Editor {
                 layout.getSelection(highlightStart, highlightEnd, consumer);
             }
         }
+
+        /**
+         * Notify the {@link InsertModeController} before the TextView's
+         * {@link TransformationMethod} is updated. If it's not in the insert mode,
+         * the given method is directly returned. Otherwise, it will wrap the given transformation
+         * method with an {@link InsertModeTransformationMethod} and then return.
+         *
+         * @param oldTransformationMethod the new {@link TransformationMethod} to be set on the
+         *                             TextView.
+         * @return the updated {@link TransformationMethod} to be set on the Textview.
+         */
+        TransformationMethod updateTransformationMethod(
+                TransformationMethod oldTransformationMethod) {
+            if (!mIsInsertModeActive) return oldTransformationMethod;
+
+            mInsertModeTransformationMethod = mInsertModeTransformationMethod.update(
+                    oldTransformationMethod, mTextView.isSingleLine());
+            return mInsertModeTransformationMethod;
+        }
     }
 
     boolean enterInsertMode(int offset) {
@@ -8131,6 +8145,26 @@ public class Editor {
     void exitInsertMode() {
         if (mInsertModeController == null) return;
         mInsertModeController.exitInsertMode();
+    }
+
+    /**
+     * Called by the {@link TextView} when the {@link TransformationMethod} is updated.
+     *
+     * @param method the {@link TransformationMethod} to be set on the TextView.
+     */
+    void setTransformationMethod(TransformationMethod method) {
+        if (mInsertModeController == null || !mInsertModeController.mIsInsertModeActive) {
+            mTextView.setTransformationMethodInternal(method);
+            return;
+        }
+
+        // Changing TransformationMethod will reset selection range to [0, 0), we need to
+        // manually restore the old selection range.
+        final int selectionStart = mTextView.getSelectionStart();
+        final int selectionEnd = mTextView.getSelectionEnd();
+        method = mInsertModeController.updateTransformationMethod(method);
+        mTextView.setTransformationMethodInternal(method);
+        Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
     }
 
     /**

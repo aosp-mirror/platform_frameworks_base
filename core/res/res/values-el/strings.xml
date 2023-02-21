@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Οι προσωπικές σας εφαρμογές αποκλείονται μέχρι να ενεργοποιήσετε το προφίλ εργασίας σας."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Οι προσωπικές εφαρμογές θα αποκλειστούν στις <xliff:g id="DATE">%1$s</xliff:g> και ώρα <xliff:g id="TIME">%2$s</xliff:g>. Ο διαχειριστής IT δεν επιτρέπει το προφίλ εργασίας να παραμένει απενεργοποιημένο για περισσότερες από <xliff:g id="NUMBER">%3$d</xliff:g> ημέρες."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ενεργοποίηση"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Για εμένα"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Επιλογές tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Επιλογές Android TV"</string>
@@ -338,6 +344,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Μπορεί να αναγνωρίσει κινήσεις που εκτελούνται στον αισθητήρα δακτυλικού αποτυπώματος της συσκευής."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Λήψη στιγμιότυπου οθόνης"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Μπορεί να τραβήξει στιγμιότυπο της οθόνης."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"απενεργοποιεί ή να τροποποιεί την γραμμή κατάστασης"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Επιτρέπει στην εφαρμογή να απενεργοποιεί τη γραμμή κατάστασης ή να προσθέτει και να αφαιρεί εικονίδια συστήματος."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ορίζεται ως γραμμή κατάστασης"</string>
@@ -1358,8 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Η λειτουργία PTP μέσω USB ενεργοποιήθηκε"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Η σύνδεση μέσω USB ενεργοποιήθηκε"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Η λειτουργία MIDI μέσω USB ενεργοποιήθηκε"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Η συσκευή συνδέθηκε ως webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Συνδέθηκε αξεσουάρ USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Πατήστε για περισσότερες επιλογές."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Φόρτιση συνδεδεμένης συσκευής. Πατήστε για περισσότερες επιλογές."</string>
@@ -1708,8 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Τέλος"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Απενεργοποίηση συντόμευσης"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Χρήση συντόμευσης"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Αντιστροφή χρωμάτων"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Διόρθωση χρωμάτων"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Λειτουργία ενός χεριού"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Επιπλέον μείωση φωτεινότητας"</string>

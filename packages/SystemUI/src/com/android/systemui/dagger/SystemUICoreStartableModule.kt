@@ -32,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
+import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
@@ -293,6 +294,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(StylusUsiPowerStartable::class)
     abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(PhysicalKeyboardCoreStartable::class)
+    abstract fun bindKeyboardCoreStartable(listener: PhysicalKeyboardCoreStartable): CoreStartable
 
     /** Inject into MuteQuickAffordanceCoreStartable*/
     @Binds

@@ -45,6 +45,7 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Slog;
 
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.PendingIntentRecord;
 
 import java.lang.annotation.Retention;
@@ -176,22 +177,24 @@ public class BackgroundActivityStartController {
             if (callingUid == Process.ROOT_UID
                     || callingAppId == Process.SYSTEM_UID
                     || callingAppId == Process.NFC_UID) {
-                return logStartAllowedAndReturnCode(/*background*/ false, callingUid,
-                        BAL_ALLOW_ALLOWLISTED_UID, "Important callingUid");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_UID, /*background*/ false,
+                        callingUid, realCallingUid, intent, "Important callingUid");
             }
 
             // Always allow home application to start activities.
             if (isHomeApp(callingUid, callingPackage)) {
-                return logStartAllowedAndReturnCode(/*background*/ false, callingUid,
-                        BAL_ALLOW_ALLOWLISTED_COMPONENT, "Home app");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                        /*background*/ false, callingUid, realCallingUid, intent,
+                        "Home app");
             }
 
             // IME should always be allowed to start activity, like IME settings.
             final WindowState imeWindow =
                     mService.mRootWindowContainer.getCurrentInputMethodWindow();
             if (imeWindow != null && callingAppId == imeWindow.mOwnerUid) {
-                return logStartAllowedAndReturnCode(/*background*/ false, callingUid,
-                        BAL_ALLOW_ALLOWLISTED_COMPONENT, "Active ime");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                        /*background*/ false, callingUid, realCallingUid, intent,
+                        "Active ime");
             }
         }
 
@@ -218,8 +221,8 @@ public class BackgroundActivityStartController {
                                 && callingUidHasAnyVisibleWindow)
                         || isCallingUidPersistentSystemProcess;
         if (useCallingUidState && allowCallingUidStartActivity) {
-            return logStartAllowedAndReturnCode(/*background*/ false,
-                    BAL_ALLOW_VISIBLE_WINDOW,
+            return logStartAllowedAndReturnCode(BAL_ALLOW_VISIBLE_WINDOW,
+                    /*background*/ false, callingUid, realCallingUid, intent,
                     "callingUidHasAnyVisibleWindow = "
                             + callingUid
                             + ", isCallingUidPersistentSystemProcess = "
@@ -254,8 +257,8 @@ public class BackgroundActivityStartController {
                     Process.getAppUidForSdkSandboxUid(UserHandle.getAppId(realCallingUid));
 
             if (mService.hasActiveVisibleWindow(realCallingSdkSandboxUidToAppUid)) {
-                return logStartAllowedAndReturnCode(/*background*/ false, realCallingUid,
-                        BAL_ALLOW_SDK_SANDBOX,
+                return logStartAllowedAndReturnCode(BAL_ALLOW_SDK_SANDBOX,
+                        /*background*/ false, callingUid, realCallingUid, intent,
                         "uid in SDK sandbox has visible (non-toast) window");
             }
         }
@@ -276,16 +279,16 @@ public class BackgroundActivityStartController {
                                     -1,
                                     true)
                             == PackageManager.PERMISSION_GRANTED) {
-                return logStartAllowedAndReturnCode(/*background*/ false, callingUid,
-                        BAL_ALLOW_PENDING_INTENT,
+                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, callingUid, realCallingUid, intent,
                         "realCallingUid has BAL permission. realCallingUid: " + realCallingUid);
             }
 
             // don't abort if the realCallingUid has a visible window
             // TODO(b/171459802): We should check appSwitchAllowed also
             if (realCallingUidHasAnyVisibleWindow) {
-                return logStartAllowedAndReturnCode(/*background*/ false,
-                        callingUid, BAL_ALLOW_PENDING_INTENT,
+                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, callingUid, realCallingUid, intent,
                         "realCallingUid has visible (non-toast) window. realCallingUid: "
                                 + realCallingUid);
             }
@@ -293,9 +296,8 @@ public class BackgroundActivityStartController {
             // wasn't allowed to start an activity
             if (isRealCallingUidPersistentSystemProcess
                     && backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
-                return logStartAllowedAndReturnCode(/*background*/ false,
-                        callingUid,
-                        BAL_ALLOW_PENDING_INTENT,
+                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, callingUid, realCallingUid, intent,
                         "realCallingUid is persistent system process AND intent "
                                 + "sender allowed (allowBackgroundActivityStart = true). "
                                 + "realCallingUid: " + realCallingUid);
@@ -303,8 +305,9 @@ public class BackgroundActivityStartController {
             // don't abort if the realCallingUid is an associated companion app
             if (mService.isAssociatedCompanionApp(
                     UserHandle.getUserId(realCallingUid), realCallingUid)) {
-                return logStartAllowedAndReturnCode(/*background*/ false, callingUid,
-                        BAL_ALLOW_PENDING_INTENT,  "realCallingUid is a companion app. "
+                return logStartAllowedAndReturnCode(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, callingUid, realCallingUid, intent,
+                        "realCallingUid is a companion app. "
                                 + "realCallingUid: " + realCallingUid);
             }
         }
@@ -312,25 +315,28 @@ public class BackgroundActivityStartController {
             // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
             if (ActivityTaskManagerService.checkPermission(START_ACTIVITIES_FROM_BACKGROUND,
                     callingPid, callingUid) == PERMISSION_GRANTED) {
-                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                    BAL_ALLOW_PERMISSION,
+                return logStartAllowedAndReturnCode(BAL_ALLOW_PERMISSION,
+                        /*background*/ true, callingUid, realCallingUid, intent,
                         "START_ACTIVITIES_FROM_BACKGROUND permission granted");
             }
             // don't abort if the caller has the same uid as the recents component
             if (mSupervisor.mRecentTasks.isCallerRecents(callingUid)) {
-                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                        BAL_ALLOW_ALLOWLISTED_COMPONENT, "Recents Component");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                        /*background*/ true, callingUid, realCallingUid,
+                        intent, "Recents Component");
             }
             // don't abort if the callingUid is the device owner
             if (mService.isDeviceOwner(callingUid)) {
-                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                        BAL_ALLOW_ALLOWLISTED_COMPONENT, "Device Owner");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                        /*background*/ true, callingUid, realCallingUid,
+                        intent, "Device Owner");
             }
             // don't abort if the callingUid has companion device
             final int callingUserId = UserHandle.getUserId(callingUid);
             if (mService.isAssociatedCompanionApp(callingUserId, callingUid)) {
-                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                        BAL_ALLOW_ALLOWLISTED_COMPONENT, "Companion App");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                        /*background*/ true, callingUid, realCallingUid,
+                        intent, "Companion App");
             }
             // don't abort if the callingUid has SYSTEM_ALERT_WINDOW permission
             if (mService.hasSystemAlertWindowPermission(callingUid, callingPid, callingPackage)) {
@@ -339,8 +345,9 @@ public class BackgroundActivityStartController {
                         "Background activity start for "
                                 + callingPackage
                                 + " allowed because SYSTEM_ALERT_WINDOW permission is granted.");
-                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                        BAL_ALLOW_SAW_PERMISSION, "SYSTEM_ALERT_WINDOW permission is granted");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_SAW_PERMISSION,
+                        /*background*/ true, callingUid, realCallingUid,
+                        intent, "SYSTEM_ALERT_WINDOW permission is granted");
             }
             // don't abort if the callingUid and callingPackage have the
             // OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop
@@ -349,9 +356,9 @@ public class BackgroundActivityStartController {
                     callingUid,
                     callingPackage)
                     == AppOpsManager.MODE_ALLOWED) {
-                return logStartAllowedAndReturnCode(/*background*/ true, callingUid,
-                    BAL_ALLOW_PERMISSION,
-                    "OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop is granted");
+                return logStartAllowedAndReturnCode(BAL_ALLOW_PERMISSION,
+                        /*background*/ true, callingUid, realCallingUid, intent,
+                        "OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION appop is granted");
             }
         }
         // If we don't have callerApp at this point, no caller was provided to startActivity().
@@ -369,7 +376,8 @@ public class BackgroundActivityStartController {
             @BalCode int balAllowedForCaller = callerApp
                     .areBackgroundActivityStartsAllowed(appSwitchState);
             if (balAllowedForCaller != BAL_BLOCK) {
-                return logStartAllowedAndReturnCode(/*background*/ true, balAllowedForCaller,
+                return logStartAllowedAndReturnCode(balAllowedForCaller,
+                        /*background*/ true, callingUid, realCallingUid, intent,
                         "callerApp process (pid = " + callerApp.getPid()
                                 + ", uid = " + callerAppUid + ") is allowed");
             }
@@ -382,7 +390,8 @@ public class BackgroundActivityStartController {
                     int balAllowedForUid = proc.areBackgroundActivityStartsAllowed(appSwitchState);
                     if (proc != callerApp
                             && balAllowedForUid != BAL_BLOCK) {
-                        return logStartAllowedAndReturnCode(/*background*/ true, balAllowedForUid,
+                        return logStartAllowedAndReturnCode(balAllowedForUid,
+                                /*background*/ true, callingUid, realCallingUid, intent,
                                 "process" + proc.getPid()
                                         + " from uid " + callerAppUid + " is allowed");
                     }
@@ -448,27 +457,21 @@ public class BackgroundActivityStartController {
         return BAL_BLOCK;
     }
 
-    private int logStartAllowedAndReturnCode(boolean background, int callingUid, int code,
-            String msg) {
-        if (DEBUG_ACTIVITY_STARTS) {
-            return logStartAllowedAndReturnCode(background, code,
-                    msg, "callingUid: " + callingUid);
-        }
-        return code;
+    static @BalCode int logStartAllowedAndReturnCode(@BalCode int code, boolean background,
+            int callingUid, int realCallingUid, Intent intent, int pid, String msg) {
+        return logStartAllowedAndReturnCode(code, background, callingUid, realCallingUid, intent,
+                DEBUG_ACTIVITY_STARTS ?  ("[Process(" + pid + ")]" + msg) : "");
     }
 
-    private int logStartAllowedAndReturnCode(boolean background, int code,
-            String... msg) {
+    static @BalCode int logStartAllowedAndReturnCode(@BalCode int code, boolean background,
+            int callingUid, int realCallingUid, Intent intent, String msg) {
+        statsLogBalAllowed(code, callingUid, realCallingUid, intent);
         if (DEBUG_ACTIVITY_STARTS) {
             StringBuilder builder = new StringBuilder();
             if (background) {
                 builder.append("Background ");
             }
-            builder.append("Activity start allowed: ");
-            for (int i = 0; i < msg.length; i++) {
-                builder.append(msg[i]);
-                builder.append(". ");
-            }
+            builder.append("Activity start allowed: " + msg + ". callingUid: " + callingUid + ". ");
             builder.append("BAL Code: ");
             builder.append(code);
             Slog.d(TAG,  builder.toString());
@@ -481,5 +484,28 @@ public class BackgroundActivityStartController {
                 NAMESPACE_WINDOW_MANAGER,
                 /* name= */ "system_exempt_from_activity_bg_start_restriction_enabled",
                 /* defaultValue= */ true);
+    }
+
+    private static void statsLogBalAllowed(
+            @BalCode int code, int callingUid, int realCallingUid, Intent intent) {
+        if (code == BAL_ALLOW_PENDING_INTENT
+                && (callingUid == Process.SYSTEM_UID || realCallingUid == Process.SYSTEM_UID)) {
+            String activityName =
+                    intent != null ? intent.getComponent().flattenToShortString() : "";
+            FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                    activityName,
+                    code,
+                    callingUid,
+                    realCallingUid);
+        }
+        if (code == BAL_ALLOW_PERMISSION || code == BAL_ALLOW_FOREGROUND
+                    || code == BAL_ALLOW_SAW_PERMISSION) {
+            // We don't need to know which activity in this case.
+            FrameworkStatsLog.write(FrameworkStatsLog.BAL_ALLOWED,
+                    /*activityName*/ "",
+                    code,
+                    callingUid,
+                    realCallingUid);
+        }
     }
 }

@@ -28,7 +28,9 @@ import android.testing.AndroidTestingRunner
 import android.view.InputDevice
 import androidx.core.app.NotificationManagerCompat
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
@@ -64,12 +66,13 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
     @Mock lateinit var btStylusDevice: InputDevice
 
     @Mock lateinit var uiEventLogger: UiEventLogger
-
     @Captor lateinit var notificationCaptor: ArgumentCaptor<Notification>
 
     private lateinit var stylusUsiPowerUi: StylusUsiPowerUI
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var contextSpy: Context
+
+    private val instanceIdSequenceFake = InstanceIdSequenceFake(10)
 
     private val uid = ActivityManager.getCurrentUser()
 
@@ -92,6 +95,8 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
 
         stylusUsiPowerUi =
             StylusUsiPowerUI(contextSpy, notificationManager, inputManager, handler, uiEventLogger)
+        stylusUsiPowerUi.instanceIdSequence = instanceIdSequenceFake
+
         broadcastReceiver = stylusUsiPowerUi.receiver
     }
 
@@ -212,10 +217,11 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         stylusUsiPowerUi.updateBatteryState(0, FixedCapacityBatteryState(0.1f))
 
         verify(uiEventLogger, times(1))
-            .logWithPosition(
+            .logWithInstanceIdAndPosition(
                 StylusUiEvent.STYLUS_LOW_BATTERY_NOTIFICATION_SHOWN,
                 uid,
                 contextSpy.packageName,
+                InstanceId.fakeInstanceId(instanceIdSequenceFake.lastInstanceId),
                 10
             )
     }
@@ -250,10 +256,11 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         broadcastReceiver.onReceive(contextSpy, intent)
 
         verify(uiEventLogger, times(1))
-            .logWithPosition(
+            .logWithInstanceIdAndPosition(
                 StylusUiEvent.STYLUS_LOW_BATTERY_NOTIFICATION_CLICKED,
                 uid,
                 contextSpy.packageName,
+                InstanceId.fakeInstanceId(instanceIdSequenceFake.lastInstanceId),
                 100
             )
     }
@@ -264,10 +271,11 @@ class StylusUsiPowerUiTest : SysuiTestCase() {
         broadcastReceiver.onReceive(contextSpy, intent)
 
         verify(uiEventLogger, times(1))
-            .logWithPosition(
+            .logWithInstanceIdAndPosition(
                 StylusUiEvent.STYLUS_LOW_BATTERY_NOTIFICATION_DISMISSED,
                 uid,
                 contextSpy.packageName,
+                InstanceId.fakeInstanceId(instanceIdSequenceFake.lastInstanceId),
                 100
             )
     }

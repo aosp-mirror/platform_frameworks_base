@@ -164,4 +164,14 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         // TODO: Replace with properly defined error type
         respondToClientWithErrorAndFinish("UNKNOWN", "All providers failed");
     }
+
+    @Override
+    public void onUiCancellation(boolean isUserCancellation) {
+        // Not needed since UI is not involved
+    }
+
+    @Override
+    public void onUiSelectorInvocationFailure() {
+        // Not needed since UI is not involved
+    }
 }

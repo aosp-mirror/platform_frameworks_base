@@ -155,7 +155,7 @@ final class HalVibration extends Vibration {
         return mStatus != Status.RUNNING;
     }
 
-    /** Return true is effect is a repeating vibration. */
+    @Override
     public boolean isRepeating() {
         return mEffect.getDuration() == Long.MAX_VALUE;
     }

@@ -335,7 +335,7 @@
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktifkan aplikasi terminal yang menawarkan akses kerangka lokal"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Pemeriksaan HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Setel perilaku pemeriksaan HDCP"</string>
-    <string name="debug_debugging_category" msgid="535341063709248842">"Debugging"</string>
+    <string name="debug_debugging_category" msgid="535341063709248842">"Proses debug"</string>
     <string name="debug_app" msgid="8903350241392391766">"Pilih aplikasi debug"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Tidak ada aplikasi debug yang disetel"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikasi debug: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ponsel ini"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tablet ini"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ponsel ini"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Tidak dapat memutar di perangkat ini"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Upgrade akun untuk beralih"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Tidak dapat memutar hasil download di sini"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Coba lagi setelah iklan"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Mengaktifkan perangkat untuk memutar di sini"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Perangkat tidak disetujui untuk memutar"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Tidak dapat memutar media ini di sini"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Ada masalah saat menghubungkan. Nonaktifkan perangkat &amp; aktifkan kembali"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Perangkat audio berkabel"</string>
     <string name="help_label" msgid="3528360748637781274">"Bantuan &amp; masukan"</string>

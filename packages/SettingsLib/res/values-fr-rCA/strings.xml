@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ce téléphone"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Cette tablette"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ce téléphone"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossible de faire jouer le contenu sur cet appareil"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à jour le compte pour passer à la version payante"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Lecture des téléchargements impossible ici"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Réessayez après l\'annonce"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activer l\'appareil pour faire jouer le contenu ici"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"L\'appareil n\'est pas autorisé à faire jouer le contenu"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Impossible de faire jouer ce contenu multimédia ici"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteingez et rallumez l\'appareil"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Appareil audio à câble"</string>
     <string name="help_label" msgid="3528360748637781274">"Aide et commentaires"</string>

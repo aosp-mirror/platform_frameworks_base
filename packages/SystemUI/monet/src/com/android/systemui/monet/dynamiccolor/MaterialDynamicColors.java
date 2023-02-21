@@ -252,49 +252,49 @@ public final class MaterialDynamicColors {
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor primaryFixedDarker =
+    public static final DynamicColor primaryFixedDim =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onPrimaryFixed =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 10.0,
-                    (s) -> primaryFixedDarker);
+                    (s) -> primaryFixedDim);
 
     public static final DynamicColor onPrimaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 30.0,
-                    (s) -> primaryFixedDarker);
+                    (s) -> primaryFixedDim);
 
     public static final DynamicColor secondaryFixed =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor secondaryFixedDarker =
+    public static final DynamicColor secondaryFixedDim =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onSecondaryFixed =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 10.0,
-                    (s) -> secondaryFixedDarker);
+                    (s) -> secondaryFixedDim);
 
     public static final DynamicColor onSecondaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 30.0,
-                    (s) -> secondaryFixedDarker);
+                    (s) -> secondaryFixedDim);
 
     public static final DynamicColor tertiaryFixed =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor tertiaryFixedDarker =
+    public static final DynamicColor tertiaryFixedDim =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onTertiaryFixed =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 10.0,
-                    (s) -> tertiaryFixedDarker);
+                    (s) -> tertiaryFixedDim);
 
     public static final DynamicColor onTertiaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 30.0,
-                    (s) -> tertiaryFixedDarker);
+                    (s) -> tertiaryFixedDim);
 
     /**
      * These colors were present in Android framework before Android U, and used by MDC controls.

@@ -248,7 +248,8 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
-     * @hide
+     *
+     * The default value is true.
      */
     public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
             "additional_settings_caller_id_visibility_bool";
@@ -256,7 +257,8 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if the "Call Waiting" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
-     * @hide
+     *
+     * The default value is true.
      */
     public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
             "additional_settings_call_waiting_visibility_bool";

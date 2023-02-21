@@ -57,7 +57,7 @@ public class ComponentOptions {
      * Corresponds to {@link #setInteractive(boolean)}
      * @hide
      */
-    public static final String KEY_INTERACTIVE = "android:component.isInteractive";
+    private static final String KEY_INTERACTIVE = "android:component.isInteractive";
 
     private @Nullable Boolean mPendingIntentBalAllowed = null;
     private boolean mPendingIntentBalAllowedByPermission = false;
@@ -236,5 +236,10 @@ public class ComponentOptions {
             b.putBoolean(KEY_INTERACTIVE, true);
         }
         return b;
+    }
+
+    /** @hide */
+    public static @Nullable ComponentOptions fromBundle(@Nullable Bundle options) {
+        return (options != null) ? new ComponentOptions(options) : null;
     }
 }

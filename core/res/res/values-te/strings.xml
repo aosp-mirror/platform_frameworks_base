@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ప్రారంభించే వరకు, మీ వ్యక్తిగత యాప్‌లు బ్లాక్ చేయబడతాయి"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"<xliff:g id="DATE">%1$s</xliff:g> తేదీన <xliff:g id="TIME">%2$s</xliff:g>కు వ్యక్తిగత యాప్‌లు బ్లాక్ చేయబడతాయి. <xliff:g id="NUMBER">%3$d</xliff:g> రోజులకు మించి మీ కార్యాలయ ప్రొఫైల్‌ను ఆఫ్‌లో ఉంచటానికి మీ IT అడ్మిన్ అనుమతించరు."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ఆన్ చేయి"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"టాబ్లెట్ ఎంపికలు"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ఎంపికలు"</string>
@@ -338,6 +344,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"పరికర వేలిముద్ర సెన్సార్‌లో ఉపయోగించిన సంజ్ఞలను క్యాప్చర్ చేయవచ్చు."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"స్క్రీన్‌షాట్‌ను తీయండి"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"డిస్‌ప్లే యొక్క స్క్రీన్‌షాట్ తీసుకోవచ్చు."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"స్టేటస్‌ బార్‌ను డిజేబుల్ చేయడం లేదా మార్చడం"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"స్టేటస్‌ బార్‌ను డిజేబుల్ చేయడానికి లేదా సిస్టమ్ చిహ్నాలను జోడించడానికి మరియు తీసివేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"స్టేటస్‌ పట్టీగా ఉండటం"</string>
@@ -1358,8 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB ద్వారా PTP ఆన్ చేయబడింది"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB టెథెరింగ్ ఆన్ చేయబడింది"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB ద్వారా MIDI ఆన్ చేయబడింది"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"పరికరం వెబ్‌క్యామ్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ఉపకరణం కనెక్ట్ చేయబడింది"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"కనెక్ట్ చేయబడిన పరికరాన్ని ఛార్జ్ చేస్తోంది. మరిన్ని ఎంపికల కోసం నొక్కండి."</string>
@@ -1708,8 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"షార్ట్‌కట్‌ను ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"షార్ట్‌కట్‌ను ఉపయోగించండి"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"కలర్ మార్పిడి"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"కలర్ కరెక్షన్"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ఎక్స్‌ట్రా డిమ్"</string>

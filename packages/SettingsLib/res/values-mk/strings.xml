@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Овој телефон"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Овој таблет"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Овој телефон"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не може да се пушти на уредов"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надградете ја сметката за да се префрлите"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Не може да се пуштаат преземања тука"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"Обидете се повторно по рекламата"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Разбудете го уредот за да пуштате овде"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Уредот не е одобрен за репродукција"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Не може да се пуштат аудиовизуелните содржини овде"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем со поврзување. Исклучете го уредот и повторно вклучете го"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичен аудиоуред"</string>
     <string name="help_label" msgid="3528360748637781274">"Помош и повратни информации"</string>

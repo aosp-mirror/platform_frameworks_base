@@ -50,9 +50,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.controls.ui.MediaHost;
-import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -60,6 +58,7 @@ import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -87,13 +86,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     private final Rect mQsBounds = new Rect();
     private final SysuiStatusBarStateController mStatusBarStateController;
-    private final FalsingManager mFalsingManager;
     private final KeyguardBypassController mBypassController;
     private boolean mQsExpanded;
     private boolean mHeaderAnimating;
     private boolean mStackScrollerOverscrolling;
-
-    private long mDelay;
 
     private QSAnimator mQSAnimator;
     private HeightListener mPanelView;
@@ -115,8 +111,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final MediaHost mQqsMediaHost;
     private final QSFragmentComponent.Factory mQsComponentFactory;
     private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
-    private final QSTileHost mHost;
-    private final FeatureFlags mFeatureFlags;
+    private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
@@ -149,11 +144,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      */
     private boolean mTransitioningToFullShade;
 
-    /**
-     * Whether the next Quick settings
-     */
-    private boolean mAnimateNextQsUpdate;
-
     private final DumpManager mDumpManager;
 
     /**
@@ -177,14 +167,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
-            QSTileHost qsTileHost,
             SysuiStatusBarStateController statusBarStateController, CommandQueue commandQueue,
             @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory,
             QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
-            FalsingManager falsingManager, DumpManager dumpManager, FeatureFlags featureFlags,
+            DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
@@ -192,13 +181,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mQqsMediaHost = qqsMediaHost;
         mQsComponentFactory = qsComponentFactory;
         mQsFragmentDisableFlagsLogger = qsFragmentDisableFlagsLogger;
+        mLogger = qsLogger;
         commandQueue.observe(getLifecycle(), this);
-        mHost = qsTileHost;
-        mFalsingManager = falsingManager;
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
         mDumpManager = dumpManager;
-        mFeatureFlags = featureFlags;
         mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
@@ -715,8 +702,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private void setAlphaAnimationProgress(float progress) {
         final View view = getView();
         if (progress == 0 && view.getVisibility() != View.INVISIBLE) {
+            mLogger.logVisibility("QS fragment", View.INVISIBLE);
             view.setVisibility(View.INVISIBLE);
         } else if (progress > 0 && view.getVisibility() != View.VISIBLE) {
+            mLogger.logVisibility("QS fragment", View.VISIBLE);
             view.setVisibility((View.VISIBLE));
         }
         view.setAlpha(interpolateAlphaAnimationProgress(progress));
@@ -913,7 +902,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             getView().getViewTreeObserver().removeOnPreDrawListener(this);
             getView().animate()
                     .translationY(0f)
-                    .setStartDelay(mDelay)
                     .setDuration(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setListener(mAnimateHeaderSlidingInListener)

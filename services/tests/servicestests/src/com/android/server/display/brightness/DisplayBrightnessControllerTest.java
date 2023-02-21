@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.os.HandlerExecutor;
 import android.os.PowerManager;
 import android.view.Display;
 
@@ -58,6 +59,9 @@ public final class DisplayBrightnessControllerTest {
     @Mock
     private Runnable mOnBrightnessChangeRunnable;
 
+    @Mock
+    private HandlerExecutor mBrightnessChangeExecutor;
+
     private DisplayBrightnessController mDisplayBrightnessController;
 
     @Before
@@ -72,7 +76,8 @@ public final class DisplayBrightnessControllerTest {
         };
         when(mBrightnessSetting.getBrightness()).thenReturn(Float.NaN);
         mDisplayBrightnessController = new DisplayBrightnessController(mContext, injector,
-                DISPLAY_ID, DEFAULT_BRIGHTNESS, mBrightnessSetting, mOnBrightnessChangeRunnable);
+                DISPLAY_ID, DEFAULT_BRIGHTNESS, mBrightnessSetting, mOnBrightnessChangeRunnable,
+                mBrightnessChangeExecutor);
     }
 
     @Test
@@ -90,7 +95,7 @@ public final class DisplayBrightnessControllerTest {
                 targetDisplayState)).thenReturn(displayBrightnessStrategy);
         mDisplayBrightnessController.updateBrightness(displayPowerRequest, targetDisplayState);
         verify(displayBrightnessStrategy).updateBrightness(displayPowerRequest);
-        assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategyLocked(),
+        assertEquals(mDisplayBrightnessController.getCurrentDisplayBrightnessStrategy(),
                 displayBrightnessStrategy);
     }
 
@@ -116,14 +121,14 @@ public final class DisplayBrightnessControllerTest {
         // Current Screen brightness is set as expected when a different value than the current
         // is set
         float currentScreenBrightness = 0.4f;
-        mDisplayBrightnessController.setCurrentScreenBrightness(currentScreenBrightness);
+        mDisplayBrightnessController.setAndNotifyCurrentScreenBrightness(currentScreenBrightness);
         assertEquals(mDisplayBrightnessController.getCurrentBrightness(),
                 currentScreenBrightness, 0.0f);
-        verify(mOnBrightnessChangeRunnable).run();
+        verify(mBrightnessChangeExecutor).execute(mOnBrightnessChangeRunnable);
 
         // No change to the current screen brightness is same as the existing one
-        mDisplayBrightnessController.setCurrentScreenBrightness(currentScreenBrightness);
-        verifyNoMoreInteractions(mOnBrightnessChangeRunnable);
+        mDisplayBrightnessController.setAndNotifyCurrentScreenBrightness(currentScreenBrightness);
+        verifyNoMoreInteractions(mBrightnessChangeExecutor);
     }
 
     @Test
@@ -146,7 +151,7 @@ public final class DisplayBrightnessControllerTest {
                 TemporaryBrightnessStrategy.class);
         when(mDisplayBrightnessStrategySelector.getTemporaryDisplayBrightnessStrategy()).thenReturn(
                 temporaryBrightnessStrategy);
-        mDisplayBrightnessController.setCurrentScreenBrightness(currentBrightness);
+        mDisplayBrightnessController.setAndNotifyCurrentScreenBrightness(currentBrightness);
         mDisplayBrightnessController.setPendingScreenBrightness(currentBrightness);
         mDisplayBrightnessController.setTemporaryBrightness(currentBrightness);
         assertFalse(mDisplayBrightnessController.updateUserSetScreenBrightness());
@@ -159,7 +164,7 @@ public final class DisplayBrightnessControllerTest {
         currentBrightness = 0.4f;
         float pendingScreenBrightness = 0.3f;
         float temporaryScreenBrightness = 0.2f;
-        mDisplayBrightnessController.setCurrentScreenBrightness(currentBrightness);
+        mDisplayBrightnessController.setAndNotifyCurrentScreenBrightness(currentBrightness);
         mDisplayBrightnessController.setPendingScreenBrightness(pendingScreenBrightness);
         mDisplayBrightnessController.setTemporaryBrightness(temporaryScreenBrightness);
         assertTrue(mDisplayBrightnessController.updateUserSetScreenBrightness());
@@ -167,7 +172,8 @@ public final class DisplayBrightnessControllerTest {
                 pendingScreenBrightness, 0.0f);
         assertEquals(mDisplayBrightnessController.getLastUserSetScreenBrightness(),
                 pendingScreenBrightness, 0.0f);
-        verify(mOnBrightnessChangeRunnable, times(2)).run();
+        verify(mBrightnessChangeExecutor, times(2))
+                .execute(mOnBrightnessChangeRunnable);
         verify(temporaryBrightnessStrategy, times(2))
                 .setTemporaryScreenBrightness(PowerManager.BRIGHTNESS_INVALID_FLOAT);
         assertEquals(mDisplayBrightnessController.getPendingScreenBrightness(),
@@ -181,7 +187,7 @@ public final class DisplayBrightnessControllerTest {
         mDisplayBrightnessController.registerBrightnessSettingChangeListener(
                 brightnessSettingListener);
         verify(mBrightnessSetting).registerListener(brightnessSettingListener);
-        assertEquals(mDisplayBrightnessController.getBrightnessSettingListenerLocked(),
+        assertEquals(mDisplayBrightnessController.getBrightnessSettingListener(),
                 brightnessSettingListener);
     }
 
@@ -225,19 +231,20 @@ public final class DisplayBrightnessControllerTest {
         mDisplayBrightnessController.updateScreenBrightnessSetting(brightnessValue);
         assertEquals(mDisplayBrightnessController.getCurrentBrightness(), brightnessValue,
                 0.0f);
-        verify(mOnBrightnessChangeRunnable).run();
+        verify(mBrightnessChangeExecutor).execute(mOnBrightnessChangeRunnable);
         verify(mBrightnessSetting).setBrightness(brightnessValue);
 
         // Does nothing if the value is invalid
         mDisplayBrightnessController.updateScreenBrightnessSetting(Float.NaN);
-        verifyNoMoreInteractions(mOnBrightnessChangeRunnable, mBrightnessSetting);
+        verifyNoMoreInteractions(mBrightnessChangeExecutor, mBrightnessSetting);
 
         // Does nothing if the value is same as the current brightness
         brightnessValue = 0.2f;
-        mDisplayBrightnessController.setCurrentScreenBrightness(brightnessValue);
-        verify(mOnBrightnessChangeRunnable, times(2)).run();
+        mDisplayBrightnessController.setAndNotifyCurrentScreenBrightness(brightnessValue);
+        verify(mBrightnessChangeExecutor, times(2))
+                .execute(mOnBrightnessChangeRunnable);
         mDisplayBrightnessController.updateScreenBrightnessSetting(brightnessValue);
-        verifyNoMoreInteractions(mOnBrightnessChangeRunnable, mBrightnessSetting);
+        verifyNoMoreInteractions(mBrightnessChangeExecutor, mBrightnessSetting);
     }
 
     @Test

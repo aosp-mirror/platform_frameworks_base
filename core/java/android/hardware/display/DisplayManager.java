@@ -66,7 +66,16 @@ import java.util.concurrent.Executor;
 public final class DisplayManager {
     private static final String TAG = "DisplayManager";
     private static final boolean DEBUG = false;
-    private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = false;
+    private static final boolean ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE = true;
+
+    /**
+     * The hdr output control feature flag, the value should be read via
+     * {@link android.provider.DeviceConfig#getBoolean(String, String, boolean)} with
+     * {@link android.provider.DeviceConfig#NAMESPACE_DISPLAY_MANAGER} as the namespace.
+     * @hide
+     */
+    @TestApi
+    public static final String HDR_OUTPUT_CONTROL_FLAG = "enable_hdr_output_control";
 
     private final Context mContext;
     private final DisplayManagerGlobal mGlobal;

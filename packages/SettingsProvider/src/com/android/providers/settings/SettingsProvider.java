@@ -1293,40 +1293,30 @@ public class SettingsProvider extends ContentProvider {
             boolean makeDefault, int operation, int mode) {
         enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
         final String callingPackage = resolveCallingPackage();
-        boolean someSettingChanged = false;
+
         // Perform the mutation.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
-                    someSettingChanged = mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
+                    return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, name, value, null, makeDefault, true,
                             callingPackage, false, null,
                             /* overrideableByRestore */ false);
-                    break;
                 }
 
                 case MUTATION_OPERATION_DELETE: {
-                    someSettingChanged = mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_CONFIG,
+                    return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, name, false, null);
-                    break;
                 }
 
                 case MUTATION_OPERATION_RESET: {
-                    someSettingChanged = mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
+                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, callingPackage, mode, null, prefix);
-                    break;
-                }
+                } return true;
             }
         }
 
-        if (Settings.IPC_DATA_CACHE_ENABLED) {
-            if (someSettingChanged) {
-                Settings.Config.invalidateValueCache();
-                Settings.Config.invalidateNamespaceCache();
-            }
-        }
-
-        return someSettingChanged;
+        return false;
     }
 
     private HashMap<String, String> getAllConfigFlags(@Nullable String prefix) {
@@ -1487,45 +1477,36 @@ public class SettingsProvider extends ContentProvider {
         }
 
         final String callingPackage = getCallingPackage();
-        boolean someSettingChanged = false;
 
         // Perform the mutation.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
-                    someSettingChanged = mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_GLOBAL,
+                    return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
                             callingPackage, forceNotify,
                             CRITICAL_GLOBAL_SETTINGS, overrideableByRestore);
-                    break;
                 }
 
                 case MUTATION_OPERATION_DELETE: {
-                    someSettingChanged = mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_GLOBAL,
+                    return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, forceNotify, CRITICAL_GLOBAL_SETTINGS);
-                    break;
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
-                    someSettingChanged = mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_GLOBAL,
+                    return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
                             callingPackage, forceNotify, CRITICAL_GLOBAL_SETTINGS);
-                    break;
                 }
 
                 case MUTATION_OPERATION_RESET: {
-                    someSettingChanged = mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_GLOBAL,
+                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_GLOBAL,
                             UserHandle.USER_SYSTEM, callingPackage, mode, tag);
-                    break;
-                }
+                } return true;
             }
         }
 
-        if (Settings.IPC_DATA_CACHE_ENABLED && someSettingChanged) {
-            Settings.Global.invalidateValueCache();
-        }
-
-        return someSettingChanged;
+        return false;
     }
 
     private PackageInfo getCallingPackageInfo(int userId) {
@@ -1968,39 +1949,31 @@ public class SettingsProvider extends ContentProvider {
             cacheFile.delete();
         }
 
-        boolean someSettingChanged = false;
         // Mutate the value.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     validateSystemSettingValue(name, value);
-                    someSettingChanged = mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, value, null, false, callingPackage,
                             false, null, overrideableByRestore);
-                    break;
                 }
 
                 case MUTATION_OPERATION_DELETE: {
-                    someSettingChanged = mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, false, null);
-                    break;
                 }
 
                 case MUTATION_OPERATION_UPDATE: {
                     validateSystemSettingValue(name, value);
-                    someSettingChanged = mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
+                    return mSettingsRegistry.updateSettingLocked(SETTINGS_TYPE_SYSTEM,
                             owningUserId, name, value, null, false, callingPackage,
                             false, null);
-                    break;
                 }
-                default:
-                    Slog.e(LOG_TAG, "Unknown operation code: " + operation);
             }
+            Slog.e(LOG_TAG, "Unknown operation code: " + operation);
+            return false;
         }
-        if (Settings.IPC_DATA_CACHE_ENABLED && someSettingChanged) {
-            Settings.System.invalidateValueCache();
-        }
-        return someSettingChanged;
     }
 
     private boolean hasWriteSecureSettingsPermission() {
@@ -2991,9 +2964,6 @@ public class SettingsProvider extends ContentProvider {
             final int systemKey = makeKey(SETTINGS_TYPE_SYSTEM, userId);
             final SettingsState systemSettingsState = mSettingsStates.get(systemKey);
             if (systemSettingsState != null) {
-                if (Settings.IPC_DATA_CACHE_ENABLED) {
-                    Settings.System.invalidateValueCache();
-                }
                 if (permanently) {
                     mSettingsStates.remove(systemKey);
                     systemSettingsState.destroyLocked(null);
@@ -3011,9 +2981,6 @@ public class SettingsProvider extends ContentProvider {
             final int secureKey = makeKey(SETTINGS_TYPE_SECURE, userId);
             final SettingsState secureSettingsState = mSettingsStates.get(secureKey);
             if (secureSettingsState != null) {
-                if (Settings.IPC_DATA_CACHE_ENABLED) {
-                    Settings.Secure.invalidateValueCache();
-                }
                 if (permanently) {
                     mSettingsStates.remove(secureKey);
                     secureSettingsState.destroyLocked(null);
@@ -3168,25 +3135,25 @@ public class SettingsProvider extends ContentProvider {
             return settingsState.getSettingLocked(name);
         }
 
-        public boolean resetSettingsLocked(int type, int userId, String packageName, int mode,
+        public void resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag) {
-            return resetSettingsLocked(type, userId, packageName, mode, tag, /*prefix=*/
+            resetSettingsLocked(type, userId, packageName, mode, tag, /*prefix=*/
                     null);
         }
 
-        public boolean resetSettingsLocked(int type, int userId, String packageName, int mode,
+        public void resetSettingsLocked(int type, int userId, String packageName, int mode,
                 String tag, @Nullable String prefix) {
             final int key = makeKey(type, userId);
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState == null) {
-                return false;
+                return;
             }
 
             banConfigurationIfNecessary(type, prefix, settingsState);
-            boolean someSettingChanged = false;
             switch (mode) {
                 case Settings.RESET_MODE_PACKAGE_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (packageName.equals(setting.getPackageName())) {
                             if ((tag != null && !tag.equals(setting.getTag()))
@@ -3207,6 +3174,7 @@ public class SettingsProvider extends ContentProvider {
 
                 case Settings.RESET_MODE_UNTRUSTED_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
@@ -3227,6 +3195,7 @@ public class SettingsProvider extends ContentProvider {
 
                 case Settings.RESET_MODE_UNTRUSTED_CHANGES: {
                     for (String name : settingsState.getSettingNamesLocked()) {
+                        boolean someSettingChanged = false;
                         Setting setting = settingsState.getSettingLocked(name);
                         if (!SettingsState.isSystemPackage(getContext(),
                                 setting.getPackageName())) {
@@ -3254,6 +3223,7 @@ public class SettingsProvider extends ContentProvider {
                 case Settings.RESET_MODE_TRUSTED_DEFAULTS: {
                     for (String name : settingsState.getSettingNamesLocked()) {
                         Setting setting = settingsState.getSettingLocked(name);
+                        boolean someSettingChanged = false;
                         if (prefix != null && !setting.getName().startsWith(prefix)) {
                             continue;
                         }
@@ -3274,7 +3244,6 @@ public class SettingsProvider extends ContentProvider {
                     }
                 } break;
             }
-            return someSettingChanged;
         }
 
         public void removeSettingsForPackageLocked(String packageName, int userId) {

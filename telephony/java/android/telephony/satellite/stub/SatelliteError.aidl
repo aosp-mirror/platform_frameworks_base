@@ -32,60 +32,60 @@ enum SatelliteError {
     /**
      * Error received from the satellite server.
      */
-    SATELLITE_SERVER_ERROR = 2,
+    SERVER_ERROR = 2,
     /**
      * Error received from the vendor service. This generic error code should be used
      * only when the error cannot be mapped to other specific service error codes.
      */
-    SATELLITE_SERVICE_ERROR = 3,
+    SERVICE_ERROR = 3,
     /**
      * Error received from satellite modem. This generic error code should be used only when
      * the error cannot be mapped to other specific modem error codes.
      */
-    SATELLITE_MODEM_ERROR = 4,
+    MODEM_ERROR = 4,
     /**
      * Error received from the satellite network. This generic error code should be used only when
      * the error cannot be mapped to other specific network error codes.
      */
-    SATELLITE_NETWORK_ERROR = 5,
+    NETWORK_ERROR = 5,
     /**
      * Telephony is not in a valid state to receive requests from clients.
      */
-    SATELLITE_INVALID_TELEPHONY_STATE = 6,
+    INVALID_TELEPHONY_STATE = 6,
     /**
      * Satellite modem is not in a valid state to receive requests from clients.
      */
-    SATELLITE_INVALID_MODEM_STATE = 7,
+    INVALID_MODEM_STATE = 7,
     /**
      * Either vendor service, or modem, or Telephony framework has received a request with
      * invalid arguments from its clients.
      */
-    SATELLITE_INVALID_ARGUMENTS = 8,
+    INVALID_ARGUMENTS = 8,
     /**
      * Telephony framework failed to send a request or receive a response from the vendor service
      * or satellite modem due to internal error.
      */
-    SATELLITE_REQUEST_FAILED = 9,
+    REQUEST_FAILED = 9,
     /**
      * Radio did not start or is resetting.
      */
-    SATELLITE_RADIO_NOT_AVAILABLE = 10,
+    RADIO_NOT_AVAILABLE = 10,
     /**
      * The request is not supported by either the satellite modem or the network.
      */
-    SATELLITE_REQUEST_NOT_SUPPORTED = 11,
+    REQUEST_NOT_SUPPORTED = 11,
     /**
      * Satellite modem or network has no resources available to handle requests from clients.
      */
-    SATELLITE_NO_RESOURCES = 12,
+    NO_RESOURCES = 12,
     /**
      * Satellite service is not provisioned yet.
      */
-    SATELLITE_SERVICE_NOT_PROVISIONED = 13,
+    SERVICE_NOT_PROVISIONED = 13,
     /**
      * Satellite service provision is already in progress.
      */
-    SATELLITE_SERVICE_PROVISION_IN_PROGRESS = 14,
+    SERVICE_PROVISION_IN_PROGRESS = 14,
     /**
      * The ongoing request was aborted by either the satellite modem or the network.
      */
@@ -98,7 +98,7 @@ enum SatelliteError {
      * Satellite modem timeout to receive ACK or response from the satellite network after
      * sending a request to the network.
      */
-    SATELLITE_NETWORK_TIMEOUT = 17,
+    NETWORK_TIMEOUT = 17,
     /**
      * Satellite network is not reachable from the modem.
      */

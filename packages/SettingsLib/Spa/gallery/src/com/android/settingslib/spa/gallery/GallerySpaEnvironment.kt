@@ -22,7 +22,7 @@ import com.android.settingslib.spa.framework.common.SettingsPageProviderReposito
 import com.android.settingslib.spa.framework.common.SpaEnvironment
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
-import com.android.settingslib.spa.gallery.dialog.AlterDialogPageProvider
+import com.android.settingslib.spa.gallery.dialog.AlertDialogPageProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
 import com.android.settingslib.spa.gallery.itemList.ItemListPageProvider
 import com.android.settingslib.spa.gallery.itemList.ItemOperatePageProvider
@@ -80,7 +80,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 ProgressBarPageProvider,
                 LoadingBarPageProvider,
                 ChartPageProvider,
-                AlterDialogPageProvider,
+                AlertDialogPageProvider,
                 ItemListPageProvider,
                 ItemOperatePageProvider,
                 OperateListPageProvider,

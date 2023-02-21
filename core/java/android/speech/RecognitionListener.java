@@ -117,6 +117,36 @@ public interface RecognitionListener {
     default void onEndOfSegmentedSession() {}
 
     /**
+     * Called when the language detection (and switching) results are available. This callback
+     * can be invoked on any number of occasions at any time between {@link #onBeginningOfSpeech()}
+     * and {@link #onEndOfSpeech()}, depending on the speech recognition service implementation.
+     *
+     * <p> To request language detection,
+     * use {@link RecognizerIntent#EXTRA_ENABLE_LANGUAGE_DETECTION}.
+     * <p> To request automatic language switching,
+     * use {@link RecognizerIntent#EXTRA_ENABLE_LANGUAGE_SWITCH}.
+     *
+     * @param results the returned language detection (and switching) results.
+     *        <p> To retrieve the most confidently detected language IETF tag
+     *        (as defined by BCP 47, e.g., "en-US", "de-DE"),
+     *        use {@link Bundle#getString(String)}
+     *        with {@link SpeechRecognizer#DETECTED_LANGUAGE} as the parameter.
+     *        <p> To retrieve the language detection confidence level represented by a value
+     *        prefixed by {@code LANGUAGE_DETECTION_CONFIDENCE_LEVEL_} and
+     *        defined in {@link SpeechRecognizer}, use {@link Bundle#getInt(String)}
+     *        with {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL} as the parameter.
+     *        <p> To retrieve the alternative locales for the same language
+     *        retrieved by the key {@link SpeechRecognizer#DETECTED_LANGUAGE},
+     *        use {@link Bundle#getStringArrayList(String)}
+     *        with {@link SpeechRecognizer#TOP_LOCALE_ALTERNATIVES} as the parameter.
+     *        <p> To retrieve the language switching results represented by a value
+     *        prefixed by {@code LANGUAGE_SWITCH_RESULT_} and defined in {@link SpeechRecognizer},
+     *        use {@link Bundle#getInt(String)}
+     *        with {@link SpeechRecognizer#LANGUAGE_SWITCH_RESULT} as the parameter.
+     */
+    default void onLanguageDetection(@NonNull Bundle results) {}
+
+    /**
      * Reserved for adding future events.
      * 
      * @param eventType the type of the occurred event

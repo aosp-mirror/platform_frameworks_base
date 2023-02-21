@@ -208,6 +208,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Les teves aplicacions personals estan bloquejades fins que activis el perfil de treball"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Les aplicacions personals es bloquejaran el dia <xliff:g id="DATE">%1$s</xliff:g> a les <xliff:g id="TIME">%2$s</xliff:g>. L\'administrador de TI no permet desactivar el teu perfil de treball durant més de: <xliff:g id="NUMBER">%3$d</xliff:g> dies."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activa"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcions de la tauleta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcions d\'Android TV"</string>
@@ -339,6 +345,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pot capturar els gestos fets en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fer una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pot fer una captura de la pantalla."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>
@@ -1359,8 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"S\'ha activat el mode PTP per USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"S\'ha activat la compartició de xarxa per USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"S\'ha activat el mode MIDI per USB"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositiu connectat com a càmera web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"S\'ha connectat un accessori USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Toca per veure més opcions."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
@@ -1709,8 +1716,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversió de colors"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correcció de color"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode d\'una mà"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Atenuació extra"</string>

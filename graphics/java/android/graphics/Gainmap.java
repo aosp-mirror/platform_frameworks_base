@@ -18,6 +18,8 @@ package android.graphics;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -76,7 +78,7 @@ import libcore.util.NativeAllocationRegistry;
  *
  * In the above math, log() is a natural logarithm and exp() is natural exponentiation.
  */
-public final class Gainmap {
+public final class Gainmap implements Parcelable {
 
     // Use a Holder to allow static initialization of Gainmap in the boot image.
     private static class NoImagePreloadHolder {
@@ -284,6 +286,50 @@ public final class Gainmap {
         return nGetDisplayRatioSdr(mNativePtr);
     }
 
+    /**
+     * No special parcel contents.
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Write the gainmap to the parcel.
+     *
+     * @param dest Parcel object to write the gainmap data into
+     * @param flags Additional flags about how the object should be written.
+     */
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
+        if (mNativePtr == 0) {
+            throw new IllegalStateException("Cannot be written to a parcel");
+        }
+        dest.writeTypedObject(mGainmapContents, flags);
+        // write gainmapinfo into parcel
+        nWriteGainmapToParcel(mNativePtr, dest);
+    }
+
+    public static final @NonNull Parcelable.Creator<Gainmap> CREATOR =
+            new Parcelable.Creator<Gainmap>() {
+            /**
+             * Rebuilds a gainmap previously stored with writeToParcel().
+             *
+             * @param in Parcel object to read the gainmap from
+             * @return a new gainmap created from the data in the parcel
+             */
+            public Gainmap createFromParcel(Parcel in) {
+                Gainmap gm = new Gainmap(in.readTypedObject(Bitmap.CREATOR));
+                // read gainmapinfo from parcel
+                nReadGainmapFromParcel(gm.mNativePtr, in);
+                return gm;
+            }
+
+            public Gainmap[] newArray(int size) {
+                return new Gainmap[size];
+            }
+        };
+
     private static native long nGetFinalizer();
     private static native long nCreateEmpty();
 
@@ -309,4 +355,6 @@ public final class Gainmap {
 
     private static native void nSetDisplayRatioSdr(long ptr, float min);
     private static native float nGetDisplayRatioSdr(long ptr);
+    private static native void nWriteGainmapToParcel(long ptr, Parcel dest);
+    private static native void nReadGainmapFromParcel(long ptr, Parcel src);
 }

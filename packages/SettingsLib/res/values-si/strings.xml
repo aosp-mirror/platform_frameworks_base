@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"මෙම දුරකථනය"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"මෙම ටැබ්ලටය"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"මෙම දුරකථනය"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"මෙම උපාංගය මත ධාවනය කළ නොහැක"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"මාරු වීමට ගිණුම උත්ශ්‍රේණි කරන්න"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"මෙහි බාගැනීම් වාදනය කළ නොහැක"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"දැන්වීමෙන් පසු නැවත උත්සාහ කරන්න"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"මෙහි වාදනය කිරීමට උපාංගය අවදි කරන්න"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"උපාංගය වාදනය කිරීමට අනුමත කර නැත"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"මෙම මාධ්‍ය මෙහි වාදනය කළ නොහැක"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"සම්බන්ධ කිරීමේ ගැටලුවකි උපාංගය ක්‍රියාවිරහිත කර &amp; ආපසු ක්‍රියාත්මක කරන්න"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"රැහැන්ගත කළ ඕඩියෝ උපාංගය"</string>
     <string name="help_label" msgid="3528360748637781274">"උදවු &amp; ප්‍රතිපෝෂණ"</string>

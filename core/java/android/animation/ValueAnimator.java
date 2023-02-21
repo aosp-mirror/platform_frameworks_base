@@ -1110,24 +1110,14 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
 
     private void notifyStartListeners(boolean isReversing) {
         if (mListeners != null && !mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationStart(this, isReversing);
-            }
+            notifyListeners(AnimatorCaller.ON_START, isReversing);
         }
         mStartListenersCalled = true;
     }
 
     private void notifyEndListeners(boolean isReversing) {
         if (mListeners != null && mStartListenersCalled) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            int numListeners = tmpListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                tmpListeners.get(i).onAnimationEnd(this, isReversing);
-            }
+            notifyListeners(AnimatorCaller.ON_END, isReversing);
         }
         mStartListenersCalled = false;
     }
@@ -1224,15 +1214,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                 // If it's not yet running, then start listeners weren't called. Call them now.
                 notifyStartListeners(mReversing);
             }
-            int listenersSize = mListeners.size();
-            if (listenersSize > 0) {
-                ArrayList<AnimatorListener> tmpListeners =
-                        (ArrayList<AnimatorListener>) mListeners.clone();
-                for (int i = 0; i < listenersSize; i++) {
-                    AnimatorListener listener = tmpListeners.get(i);
-                    listener.onAnimationCancel(this);
-                }
-            }
+            notifyListeners(AnimatorCaller.ON_CANCEL, false);
         }
         endAnimation();
 
@@ -1435,12 +1417,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
                 done = true;
             } else if (newIteration && !lastIterationFinished) {
                 // Time to repeat
-                if (mListeners != null) {
-                    int numListeners = mListeners.size();
-                    for (int i = 0; i < numListeners; ++i) {
-                        mListeners.get(i).onAnimationRepeat(this);
-                    }
-                }
+                notifyListeners(AnimatorCaller.ON_REPEAT, false);
             } else if (lastIterationFinished) {
                 done = true;
             }
@@ -1494,12 +1471,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             lastIteration = Math.min(lastIteration, mRepeatCount);
 
             if (iteration != lastIteration) {
-                if (mListeners != null) {
-                    int numListeners = mListeners.size();
-                    for (int i = 0; i < numListeners; ++i) {
-                        mListeners.get(i).onAnimationRepeat(this);
-                    }
-                }
+                notifyListeners(AnimatorCaller.ON_REPEAT, false);
             }
         }
 
@@ -1697,12 +1669,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         for (int i = 0; i < numValues; ++i) {
             mValues[i].calculateValue(fraction);
         }
-        if (mUpdateListeners != null) {
-            int numListeners = mUpdateListeners.size();
-            for (int i = 0; i < numListeners; ++i) {
-                mUpdateListeners.get(i).onAnimationUpdate(this);
-            }
-        }
+        callOnList(mUpdateListeners, AnimatorCaller.ON_UPDATE, this, false);
     }
 
     @Override

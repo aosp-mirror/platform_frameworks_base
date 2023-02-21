@@ -176,14 +176,6 @@ public class InputMethodSubtypeTest {
         // Auxiliary subtype not suitable.
         assertFalse(getValidBuilder.get().setIsAuxiliary(true).build()
                 .isSuitableForPhysicalKeyboardLayoutMapping());
-
-        // languageTag == null is not suitable.
-        assertFalse(getValidBuilder.get().setLanguageTag(null).build()
-                .isSuitableForPhysicalKeyboardLayoutMapping());
-
-        // languageTag == "und" is not suitable.
-        assertFalse(getValidBuilder.get().setLanguageTag("und").build()
-                .isSuitableForPhysicalKeyboardLayoutMapping());
     }
 
     private static InputMethodSubtype cloneViaParcel(final InputMethodSubtype original) {

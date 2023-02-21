@@ -16,29 +16,39 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.lowPowerStandbyAllowedReasonsToString;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.IActivityManager;
+import android.app.IForegroundServiceObserver;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.LowPowerStandbyAllowedReason;
 import android.os.PowerManager.LowPowerStandbyPolicy;
+import android.os.PowerManager.LowPowerStandbyPortDescription;
 import android.os.PowerManagerInternal;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -49,6 +59,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
@@ -78,6 +89,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Controls Low Power Standby state.
@@ -111,6 +123,8 @@ public class LowPowerStandbyController {
     private static final int MSG_NOTIFY_ACTIVE_CHANGED = 1;
     private static final int MSG_NOTIFY_ALLOWLIST_CHANGED = 2;
     private static final int MSG_NOTIFY_POLICY_CHANGED = 3;
+    private static final int MSG_FOREGROUND_SERVICE_STATE_CHANGED = 4;
+    private static final int MSG_NOTIFY_STANDBY_PORTS_CHANGED = 5;
 
     private static final String TAG_ROOT = "low-power-standby-policy";
     private static final String TAG_IDENTIFIER = "identifier";
@@ -122,6 +136,7 @@ public class LowPowerStandbyController {
     private final Handler mHandler;
     private final SettingsObserver mSettingsObserver;
     private final DeviceConfigWrapper mDeviceConfig;
+    private final Supplier<IActivityManager> mActivityManager;
     private final File mPolicyFile;
     private final Object mLock = new Object();
 
@@ -131,9 +146,11 @@ public class LowPowerStandbyController {
             this::onStandbyTimeoutExpired;
     private final LowPowerStandbyControllerInternal mLocalService = new LocalService();
     private final SparseIntArray mUidAllowedReasons = new SparseIntArray();
+    private final List<StandbyPortsLock> mStandbyPortLocks = new ArrayList<>();
 
     @GuardedBy("mLock")
     private boolean mEnableCustomPolicy;
+    private boolean mEnableStandbyPorts;
 
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -153,6 +170,7 @@ public class LowPowerStandbyController {
     };
     private final TempAllowlistChangeListener mTempAllowlistChangeListener =
             new TempAllowlistChangeListener();
+    private final PhoneCallServiceTracker mPhoneCallServiceTracker = new PhoneCallServiceTracker();
 
     private final BroadcastReceiver mPackageBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -189,10 +207,54 @@ public class LowPowerStandbyController {
         }
     };
 
+    private final class StandbyPortsLock implements IBinder.DeathRecipient {
+        private final IBinder mToken;
+        private final int mUid;
+        private final List<LowPowerStandbyPortDescription> mPorts;
+
+        StandbyPortsLock(IBinder token, int uid, List<LowPowerStandbyPortDescription> ports) {
+            mToken = token;
+            mUid = uid;
+            mPorts = ports;
+        }
+
+        public boolean linkToDeath() {
+            try {
+                mToken.linkToDeath(this, 0);
+                return true;
+            } catch (RemoteException e) {
+                Slog.i(TAG, "StandbyPorts token already died");
+                return false;
+            }
+        }
+
+        public void unlinkToDeath() {
+            mToken.unlinkToDeath(this, 0);
+        }
+
+        public IBinder getToken() {
+            return mToken;
+        }
+
+        public int getUid() {
+            return mUid;
+        }
+
+        public List<LowPowerStandbyPortDescription> getPorts() {
+            return mPorts;
+        }
+
+        @Override
+        public void binderDied() {
+            releaseStandbyPorts(mToken);
+        }
+    }
+
     @GuardedBy("mLock")
     private AlarmManager mAlarmManager;
     @GuardedBy("mLock")
     private PowerManager mPowerManager;
+    private ActivityManagerInternal mActivityManagerInternal;
     @GuardedBy("mLock")
     private boolean mSupportedConfig;
     @GuardedBy("mLock")
@@ -264,18 +326,20 @@ public class LowPowerStandbyController {
 
     public LowPowerStandbyController(Context context, Looper looper) {
         this(context, looper, SystemClock::elapsedRealtime,
-                new DeviceConfigWrapper(),
+                new DeviceConfigWrapper(), () -> ActivityManager.getService(),
                 new File(Environment.getDataSystemDirectory(), "low_power_standby_policy.xml"));
     }
 
     @VisibleForTesting
     LowPowerStandbyController(Context context, Looper looper, Clock clock,
-            DeviceConfigWrapper deviceConfig, File policyFile) {
+            DeviceConfigWrapper deviceConfig, Supplier<IActivityManager> activityManager,
+            File policyFile) {
         mContext = context;
         mHandler = new LowPowerStandbyHandler(looper);
         mClock = clock;
         mSettingsObserver = new SettingsObserver(mHandler);
         mDeviceConfig = deviceConfig;
+        mActivityManager = activityManager;
         mPolicyFile = policyFile;
     }
 
@@ -293,6 +357,7 @@ public class LowPowerStandbyController {
 
             mAlarmManager = mContext.getSystemService(AlarmManager.class);
             mPowerManager = mContext.getSystemService(PowerManager.class);
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
             mStandbyTimeoutConfig = resources.getInteger(
                     R.integer.config_lowPowerStandbyNonInteractiveTimeout);
@@ -311,6 +376,7 @@ public class LowPowerStandbyController {
             mDeviceConfig.registerPropertyUpdateListener(mContext.getMainExecutor(),
                     properties -> onDeviceConfigFlagsChanged());
             mEnableCustomPolicy = mDeviceConfig.enableCustomPolicy();
+            mEnableStandbyPorts = mDeviceConfig.enableStandbyPorts();
 
             if (mEnableCustomPolicy) {
                 mPolicy = loadPolicy();
@@ -336,6 +402,8 @@ public class LowPowerStandbyController {
                 enqueueNotifyAllowlistChangedLocked();
                 mEnableCustomPolicy = enableCustomPolicy;
             }
+
+            mEnableStandbyPorts = mDeviceConfig.enableStandbyPorts();
         }
     }
 
@@ -654,6 +722,8 @@ public class LowPowerStandbyController {
 
         PowerAllowlistInternal pai = LocalServices.getService(PowerAllowlistInternal.class);
         pai.registerTempAllowlistChangeListener(mTempAllowlistChangeListener);
+
+        mPhoneCallServiceTracker.register();
     }
 
     private void unregisterListeners() {
@@ -861,6 +931,78 @@ public class LowPowerStandbyController {
         }
     }
 
+    private int findIndexOfStandbyPorts(@NonNull IBinder token) {
+        for (int i = 0; i < mStandbyPortLocks.size(); i++) {
+            if (mStandbyPortLocks.get(i).getToken() == token) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void acquireStandbyPorts(@NonNull IBinder token, int uid,
+            @NonNull List<LowPowerStandbyPortDescription> ports) {
+        validatePorts(ports);
+
+        StandbyPortsLock standbyPortsLock = new StandbyPortsLock(token, uid, ports);
+        synchronized (mLock) {
+            if (findIndexOfStandbyPorts(token) != -1) {
+                return;
+            }
+
+            if (standbyPortsLock.linkToDeath()) {
+                mStandbyPortLocks.add(standbyPortsLock);
+                if (mEnableStandbyPorts && isEnabled() && isPackageExempt(uid)) {
+                    enqueueNotifyStandbyPortsChangedLocked();
+                }
+            }
+        }
+    }
+
+    void validatePorts(@NonNull List<LowPowerStandbyPortDescription> ports) {
+        for (LowPowerStandbyPortDescription portDescription : ports) {
+            int port = portDescription.getPortNumber();
+            if (port < 0 || port > 0xFFFF) {
+                throw new IllegalArgumentException("port out of range:" + port);
+            }
+        }
+    }
+
+    void releaseStandbyPorts(@NonNull IBinder token) {
+        synchronized (mLock) {
+            int index = findIndexOfStandbyPorts(token);
+            if (index == -1) {
+                return;
+            }
+
+            StandbyPortsLock standbyPortsLock = mStandbyPortLocks.remove(index);
+            standbyPortsLock.unlinkToDeath();
+            if (mEnableStandbyPorts && isEnabled() && isPackageExempt(standbyPortsLock.getUid())) {
+                enqueueNotifyStandbyPortsChangedLocked();
+            }
+        }
+    }
+
+    @NonNull
+    List<LowPowerStandbyPortDescription> getActiveStandbyPorts() {
+        List<LowPowerStandbyPortDescription> activeStandbyPorts = new ArrayList<>();
+        synchronized (mLock) {
+            if (!isEnabled() || !mEnableStandbyPorts) {
+                return activeStandbyPorts;
+            }
+
+            List<Integer> exemptPackageAppIds = getExemptPackageAppIdsLocked();
+            for (StandbyPortsLock standbyPortsLock : mStandbyPortLocks) {
+                int standbyPortsAppid = UserHandle.getAppId(standbyPortsLock.getUid());
+                if (exemptPackageAppIds.contains(standbyPortsAppid)) {
+                    activeStandbyPorts.addAll(standbyPortsLock.getPorts());
+                }
+            }
+
+            return activeStandbyPorts;
+        }
+    }
+
     private boolean policyChangeAffectsAllowlistLocked(
             @Nullable LowPowerStandbyPolicy oldPolicy, @Nullable LowPowerStandbyPolicy newPolicy) {
         final LowPowerStandbyPolicy policyA = policyOrDefault(oldPolicy);
@@ -941,6 +1083,17 @@ public class LowPowerStandbyController {
                 }
             }
             ipw.decreaseIndent();
+
+            final List<LowPowerStandbyPortDescription> activeStandbyPorts = getActiveStandbyPorts();
+            if (!activeStandbyPorts.isEmpty()) {
+                ipw.println();
+                ipw.println("Active standby ports locks:");
+                ipw.increaseIndent();
+                for (LowPowerStandbyPortDescription portDescription : activeStandbyPorts) {
+                    ipw.print(portDescription.toString());
+                }
+                ipw.decreaseIndent();
+            }
         }
         ipw.decreaseIndent();
     }
@@ -1005,6 +1158,13 @@ public class LowPowerStandbyController {
                     break;
                 case MSG_NOTIFY_POLICY_CHANGED:
                     notifyPolicyChanged((LowPowerStandbyPolicy) msg.obj);
+                    break;
+                case MSG_FOREGROUND_SERVICE_STATE_CHANGED:
+                    final int uid = msg.arg1;
+                    mPhoneCallServiceTracker.foregroundServiceStateChanged(uid);
+                    break;
+                case MSG_NOTIFY_STANDBY_PORTS_CHANGED:
+                    notifyStandbyPortsChanged();
                     break;
             }
         }
@@ -1172,6 +1332,29 @@ public class LowPowerStandbyController {
         npmi.setLowPowerStandbyAllowlist(allowlistUids);
     }
 
+    @GuardedBy("mLock")
+    private void enqueueNotifyStandbyPortsChangedLocked() {
+        final long now = mClock.elapsedRealtime();
+
+        if (DEBUG) {
+            Slog.d(TAG, "enqueueNotifyStandbyPortsChangedLocked");
+        }
+
+        final Message msg = mHandler.obtainMessage(MSG_NOTIFY_STANDBY_PORTS_CHANGED);
+        mHandler.sendMessageAtTime(msg, now);
+    }
+
+    private void notifyStandbyPortsChanged() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyStandbyPortsChanged");
+        }
+
+        final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
+                Manifest.permission.MANAGE_LOW_POWER_STANDBY);
+    }
+
     /**
      * Class that is used to read device config for low power standby configuration.
      */
@@ -1179,6 +1362,7 @@ public class LowPowerStandbyController {
     public static class DeviceConfigWrapper {
         public static final String NAMESPACE = "low_power_standby";
         public static final String FEATURE_FLAG_ENABLE_POLICY = "enable_policy";
+        public static final String FEATURE_FLAG_ENABLE_STANDBY_PORTS = "enable_standby_ports";
 
         /**
          * Returns true if custom policies are enabled.
@@ -1186,6 +1370,14 @@ public class LowPowerStandbyController {
          */
         public boolean enableCustomPolicy() {
             return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_POLICY, false);
+        }
+
+        /**
+         * Returns true if standby ports are enabled.
+         * Otherwise, returns false, and {@link #getActiveStandbyPorts()} will always be empty.
+         */
+        public boolean enableStandbyPorts() {
+            return DeviceConfig.getBoolean(NAMESPACE, FEATURE_FLAG_ENABLE_STANDBY_PORTS, false);
         }
 
         /**
@@ -1233,6 +1425,83 @@ public class LowPowerStandbyController {
         public void onAppRemoved(int uid) {
             removeFromAllowlistInternal(uid,
                     LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST);
+        }
+    }
+
+    final class PhoneCallServiceTracker extends IForegroundServiceObserver.Stub {
+        private boolean mRegistered = false;
+        private final SparseBooleanArray mUidsWithPhoneCallService = new SparseBooleanArray();
+
+        public void register() {
+            if (mRegistered) {
+                return;
+            }
+            try {
+                mActivityManager.get().registerForegroundServiceObserver(this);
+                mRegistered = true;
+            } catch (RemoteException e) {
+                // call within system server
+            }
+        }
+
+        @Override
+        public void onForegroundStateChanged(IBinder serviceToken, String packageName,
+                int userId, boolean isForeground) {
+            try {
+                final long now = mClock.elapsedRealtime();
+                final int uid = mContext.getPackageManager()
+                        .getPackageUidAsUser(packageName, userId);
+                final Message message =
+                        mHandler.obtainMessage(MSG_FOREGROUND_SERVICE_STATE_CHANGED, uid, 0);
+                mHandler.sendMessageAtTime(message, now);
+            } catch (PackageManager.NameNotFoundException e) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onForegroundStateChanged: Unknown package: " + packageName
+                            + ", userId=" + userId);
+                }
+            }
+        }
+
+        public void foregroundServiceStateChanged(int uid) {
+            if (DEBUG) {
+                Slog.d(TAG, "foregroundServiceStateChanged: uid=" + uid);
+            }
+
+            final boolean hadPhoneCallService = mUidsWithPhoneCallService.get(uid);
+            final boolean hasPhoneCallService =
+                    mActivityManagerInternal.hasRunningForegroundService(uid,
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL);
+
+            if (DEBUG) {
+                Slog.d(TAG, "uid=" + uid + ", hasPhoneCallService=" + hasPhoneCallService
+                        + ", hadPhoneCallService=" + hadPhoneCallService);
+            }
+
+            if (hasPhoneCallService == hadPhoneCallService) {
+                return;
+            }
+
+            if (hasPhoneCallService) {
+                mUidsWithPhoneCallService.append(uid, true);
+                uidStartedPhoneCallService(uid);
+            } else {
+                mUidsWithPhoneCallService.delete(uid);
+                uidStoppedPhoneCallService(uid);
+            }
+        }
+
+        private void uidStartedPhoneCallService(int uid) {
+            if (DEBUG) {
+                Slog.d(TAG, "FGS of type phoneCall started: uid=" + uid);
+            }
+            addToAllowlistInternal(uid, LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL);
+        }
+
+        private void uidStoppedPhoneCallService(int uid) {
+            if (DEBUG) {
+                Slog.d(TAG, "FGSs of type phoneCall stopped: uid=" + uid);
+            }
+            removeFromAllowlistInternal(uid, LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL);
         }
     }
 }

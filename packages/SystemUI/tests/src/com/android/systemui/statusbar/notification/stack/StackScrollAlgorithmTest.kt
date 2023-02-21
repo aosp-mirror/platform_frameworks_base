@@ -518,7 +518,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = true,
                 fullyVisible = false,
-                headerVisibleAmount = 1f,
+                headerVisibleAmount = 1f
         )
         val algorithmState = StackScrollAlgorithm.StackScrollAlgorithmState()
         algorithmState.visibleChildren.add(childHunView)
@@ -526,6 +526,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
+                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -545,7 +546,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = true,
                 fullyVisible = false,
-                headerVisibleAmount = 1f,
+                headerVisibleAmount = 1f
         )
         // Use half of the HUN's height as overlap
         childHunView.viewState.yTranslation = (childHunView.viewState.height + 1 shr 1).toFloat()
@@ -555,6 +556,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
+                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -578,7 +580,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = true,
                 fullyVisible = true,
-                headerVisibleAmount = 1f,
+                headerVisibleAmount = 1f
         )
         // HUN doesn't overlap with QQS Panel
         childHunView.viewState.yTranslation = ambientState.topPadding +
@@ -589,6 +591,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
+                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -608,7 +611,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = false,
                 fullyVisible = false,
-                headerVisibleAmount = 0f,
+                headerVisibleAmount = 0f
         )
         childHunView.viewState.yTranslation = 0f
         // Shade is closed, thus childHunView's headerVisibleAmount is 0
@@ -619,6 +622,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
+                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -638,7 +642,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val childHunView = createHunViewMock(
                 isShadeOpen = false,
                 fullyVisible = false,
-                headerVisibleAmount = 0.5f,
+                headerVisibleAmount = 0.5f
         )
         childHunView.viewState.yTranslation = 0f
         // Shade is being opened, thus childHunView's headerVisibleAmount is between 0 and 1
@@ -650,6 +654,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // When: updateChildZValue() is called for the top HUN
         stackScrollAlgorithm.updateChildZValue(
                 /* i= */ 0,
+                /* childrenOnTop= */ 0.0f,
                 /* StackScrollAlgorithmState= */ algorithmState,
                 /* ambientState= */ ambientState,
                 /* shouldElevateHun= */ true
@@ -664,7 +669,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private fun createHunViewMock(
             isShadeOpen: Boolean,
             fullyVisible: Boolean,
-            headerVisibleAmount: Float,
+            headerVisibleAmount: Float
     ) =
             mock<ExpandableNotificationRow>().apply {
                 val childViewStateMock = createHunChildViewState(isShadeOpen, fullyVisible)
@@ -675,10 +680,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             }
 
 
-    private fun createHunChildViewState(
-            isShadeOpen: Boolean,
-            fullyVisible: Boolean,
-    ) =
+    private fun createHunChildViewState(isShadeOpen: Boolean, fullyVisible: Boolean) =
             ExpandableViewState().apply {
                 // Mock the HUN's height with ambientState.topPadding +
                 // ambientState.stackTranslation

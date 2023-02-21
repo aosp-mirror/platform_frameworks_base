@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"ଜାରି ରଖନ୍ତୁ"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ଅଧିକ ବିକଳ୍ପ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ଅଧିକ ଜାଣନ୍ତୁ"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"ପାସୱାର୍ଡ ଦେଖାନ୍ତୁ"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"ପାସୱାର୍ଡ ଲୁଚାନ୍ତୁ"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"ପାସକୀ ସହ ଅଧିକ ସୁରକ୍ଷିତ"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"ପାସକୀଗୁଡ଼ିକ ସହ ଆପଣଙ୍କୁ ଜଟିଳ ପାସୱାର୍ଡଗୁଡ଼ିକ ତିଆରି କରିବା କିମ୍ବା ମନେରଖିବାର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"ପାସକୀଗୁଡ଼ିକ ହେଉଛି ଆପଣ ଆପଣଙ୍କ ଟିପଚିହ୍ନ, ଫେସ କିମ୍ବା ସ୍କ୍ରିନ ଲକ ବ୍ୟବହାର କରି ତିଆରି କରୁଥିବା ଏକକ୍ରିପ୍ଟ କରାଯାଇଥିବା ଡିଜିଟାଲ କୀ"</string>

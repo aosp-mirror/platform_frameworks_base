@@ -332,6 +332,7 @@ public final class CredentialManager {
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<Void, ClearCredentialStateException> callback) {
+        requireNonNull(request, "request must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 

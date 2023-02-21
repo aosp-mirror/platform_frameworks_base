@@ -581,7 +581,7 @@ public class PackageInstaller {
 
     /**
      * Indicate the user intervention is required because the update ownership enforcement is
-     * enabled, and remind the update owner will retain.
+     * enabled, and remind the update owner is a different package.
      *
      * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
      * @see InstallSourceInfo#getUpdateOwnerPackageName
@@ -2914,10 +2914,10 @@ public class PackageInstaller {
          *     <li>{@code requireUserAction} is set to {@link #USER_ACTION_NOT_REQUIRED}.</li>
          *     <li>The app being installed targets:
          *          <ul>
-         *              <li>{@link android.os.Build.VERSION_CODES#Q API 29} or higher on
-         *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
-         *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher after
-         *              Android S ({@link android.os.Build.VERSION_CODES#S API 31})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#R API 30} or higher on
+         *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
+         *              <li>{@link android.os.Build.VERSION_CODES#S API 31} or higher <b>after</b>
+         *              Android T ({@link android.os.Build.VERSION_CODES#TIRAMISU API 33})</li>
          *          </ul>
          *     </li>
          *     <li>The installer is:
@@ -2978,8 +2978,7 @@ public class PackageInstaller {
          * permission. Default to {@code false}.
          *
          * The update ownership enforcement can only be enabled on initial installation. Set
-         * this to {@code true} on package update indicates the installer package wants to be
-         * the update owner if the update ownership enforcement has enabled.
+         * this to {@code true} on package update is a no-op.
          *
          * Note: To enable the update ownership enforcement, the installer must have the
          * {@link android.Manifest.permission#ENFORCE_UPDATE_OWNERSHIP ENFORCE_UPDATE_OWNERSHIP}

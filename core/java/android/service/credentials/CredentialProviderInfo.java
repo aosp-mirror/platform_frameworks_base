@@ -16,6 +16,8 @@
 
 package android.service.credentials;
 
+import static java.util.Objects.requireNonNull;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -112,10 +114,9 @@ public final class CredentialProviderInfo {
                         "Provider is not a valid system provider: " + serviceInfo);
             }
         }
-
         mIsSystemProvider = isSystemProvider;
-        mContext = context;
-        mServiceInfo = serviceInfo;
+        mContext =  requireNonNull(context, "context must not be null");
+        mServiceInfo = requireNonNull(serviceInfo, "serviceInfo must not be null");
         mCapabilities = new ArrayList<>();
         mIcon = mServiceInfo.loadIcon(mContext.getPackageManager());
         mLabel =
@@ -300,6 +301,7 @@ public final class CredentialProviderInfo {
             @NonNull Context context,
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests) {
+        requireNonNull(context, "context must not be null");
         final List<CredentialProviderInfo> providerInfos = new ArrayList<>();
         for (ServiceInfo si :
                 getAvailableSystemServiceInfos(
@@ -381,6 +383,8 @@ public final class CredentialProviderInfo {
             int userId,
             boolean disableSystemAppVerificationForTests,
             int providerFilter) {
+        requireNonNull(context, "context must not be null");
+
         // Get the device policy.
         PackagePolicy pp = getDeviceManagerPolicy(context);
 

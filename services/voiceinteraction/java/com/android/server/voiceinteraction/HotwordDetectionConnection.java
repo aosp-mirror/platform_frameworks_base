@@ -690,8 +690,8 @@ final class HotwordDetectionConnection {
             //TODO(b265535257): report error to either service only.
             synchronized (HotwordDetectionConnection.this.mLock) {
                 runForEachDetectorSessionLocked((session) -> {
-                    session.reportErrorLocked(
-                            DetectorSession.HOTWORD_DETECTION_SERVICE_DIED);
+                    session.reportErrorLocked(DetectorSession.HOTWORD_DETECTION_SERVICE_DIED,
+                            "Detection service is dead.");
                 });
             }
             // Can improve to log exit reason if needed

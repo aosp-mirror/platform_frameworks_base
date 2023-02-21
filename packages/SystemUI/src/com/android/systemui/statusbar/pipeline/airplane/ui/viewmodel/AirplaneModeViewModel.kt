@@ -18,9 +18,10 @@ package com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger.Companion.logOutputChange
+import com.android.systemui.statusbar.pipeline.dagger.AirplaneTableLog
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,7 +47,7 @@ class AirplaneModeViewModelImpl
 @Inject
 constructor(
     interactor: AirplaneModeInteractor,
-    logger: ConnectivityPipelineLogger,
+    @AirplaneTableLog logger: TableLogBuffer,
     @Application private val scope: CoroutineScope,
 ) : AirplaneModeViewModel {
     override val isAirplaneModeIconVisible: StateFlow<Boolean> =
@@ -56,6 +57,11 @@ constructor(
                 isAirplaneMode && !isAirplaneIconForceHidden
             }
             .distinctUntilChanged()
-            .logOutputChange(logger, "isAirplaneModeIconVisible")
+            .logDiffsForTable(
+                logger,
+                columnPrefix = "",
+                columnName = "isAirplaneModeIconVisible",
+                initialValue = false,
+            )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 }

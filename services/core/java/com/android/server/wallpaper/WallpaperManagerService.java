@@ -297,7 +297,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     if (DEBUG) {
                         Slog.v(TAG, "Wallpaper restore; reloading metadata");
                     }
-                    loadSettingsLocked(wallpaper.userId, true);
+                    loadSettingsLocked(wallpaper.userId, true, FLAG_SYSTEM | FLAG_LOCK);
                 }
                 if (DEBUG) {
                     Slog.v(TAG, "Wallpaper written; generating crop");
@@ -440,7 +440,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 if (DEBUG) {
                                     Slog.v(TAG, "moved-to, therefore restore; reloading metadata");
                                 }
-                                loadSettingsLocked(wallpaper.userId, true);
+                                loadSettingsLocked(wallpaper.userId, true, FLAG_SYSTEM | FLAG_LOCK);
                             }
                             mWallpaperCropper.generateCrop(wallpaper);
                             if (DEBUG) {
@@ -772,7 +772,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     DisplayConnector connector =
                             targetWallpaper.connection.getDisplayConnectorOrCreate(displayId);
                     if (connector == null) return;
-                    connector.disconnectLocked();
+                    connector.disconnectLocked(targetWallpaper.connection);
                     targetWallpaper.connection.removeDisplayConnector(displayId);
                     mWallpaperDisplayHelper.removeDisplayData(displayId);
                 }
@@ -859,7 +859,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (fallbackConnection.mDisplayConnector.size() != 0) {
                 fallbackConnection.forEachDisplayConnector(connector -> {
                     if (connector.mEngine != null) {
-                        connector.disconnectLocked();
+                        connector.disconnectLocked(fallbackConnection);
                     }
                 });
                 fallbackConnection.mDisplayConnector.clear();
@@ -940,16 +940,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             t.traceEnd();
         }
 
-        void disconnectLocked() {
+        void disconnectLocked(WallpaperConnection connection) {
             if (DEBUG) Slog.v(TAG, "Removing window token: " + mToken);
             mWindowManagerInternal.removeWindowToken(mToken, false/* removeWindows */,
                     mDisplayId);
             try {
-                if (mEngine != null) {
-                    mEngine.destroy();
-                }
+                connection.mService.detach(mToken);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Engine.destroy() threw a RemoteException");
+                Slog.w(TAG, "connection.mService.destroy() threw a RemoteException");
             }
             mEngine = null;
         }
@@ -1249,12 +1247,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             synchronized (mLock) {
                 final DisplayConnector connector = getDisplayConnectorOrCreate(displayId);
                 if (connector == null) {
-                    try {
-                        engine.destroy();
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failed to destroy engine", e);
-                    }
-                    return;
+                    throw new IllegalStateException("Connector has already been destroyed");
                 }
                 connector.mEngine = engine;
                 connector.ensureStatusHandled();
@@ -1628,7 +1621,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         // Initialize state from the persistent store, then guarantee that the
         // WallpaperData for the system imagery is instantiated & active, creating
         // it from defaults if necessary.
-        loadSettingsLocked(UserHandle.USER_SYSTEM, false);
+        loadSettingsLocked(UserHandle.USER_SYSTEM, false, FLAG_SYSTEM | FLAG_LOCK);
         getWallpaperSafeLocked(UserHandle.USER_SYSTEM, FLAG_SYSTEM);
     }
 
@@ -1943,7 +1936,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             wallpaper = mWallpaperMap.get(userId);
             if (wallpaper == null) {
                 // Might need to bring it in the first time to establish our rewrite
-                loadSettingsLocked(userId, false);
+                loadSettingsLocked(userId, false, FLAG_SYSTEM);
                 wallpaper = mWallpaperMap.get(userId);
             }
         }
@@ -2041,7 +2034,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 WallpaperData wd = mWallpaperMap.get(user.id);
                 if (wd == null) {
                     // User hasn't started yet, so load their settings to peek at the wallpaper
-                    loadSettingsLocked(user.id, false);
+                    loadSettingsLocked(user.id, false, FLAG_SYSTEM | FLAG_LOCK);
                     wd = mWallpaperMap.get(user.id);
                 }
                 if (wd != null && name.equals(wd.name)) {
@@ -2917,8 +2910,16 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         liveSync.complete();
                     }
                 };
+
+                /*
+                 * If we have a shared system+lock wallpaper, and we reapply the same wallpaper
+                 * to system only, force rebind: the current wallpaper will be migrated to lock
+                 * and a new engine with the same wallpaper will be applied to system.
+                 */
+                boolean forceRebind = same && systemIsBoth && which == FLAG_SYSTEM;
+
                 boolean bindSuccess = bindWallpaperComponentLocked(name, /* force */
-                        false, /* fromUser */ true, newWallpaper, callback);
+                        forceRebind, /* fromUser */ true, newWallpaper, callback);
                 if (bindSuccess) {
                     if (!same) {
                         newWallpaper.primaryColors = null;
@@ -3261,20 +3262,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 wallpaper.connection.mReply = null;
             }
-            try {
-                // It can be null if user switching happens before service connection.
-                if (wallpaper.connection.mService != null) {
-                    wallpaper.connection.mService.detach();
-                }
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed detaching wallpaper service ", e);
-            }
-            try {
-                mContext.unbindService(wallpaper.connection);
-            } catch (IllegalArgumentException e) {
-                Slog.w(TAG, "Attempted to unbind unregistered service");
-            }
-            wallpaper.connection.forEachDisplayConnector(DisplayConnector::disconnectLocked);
+            wallpaper.connection.forEachDisplayConnector(
+                    connector -> connector.disconnectLocked(wallpaper.connection));
             wallpaper.connection.mService = null;
             wallpaper.connection.mDisplayConnector.clear();
 
@@ -3284,6 +3273,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mContext.getMainThreadHandler().removeCallbacks(
                     wallpaper.connection.mTryToRebindRunnable);
 
+            mContext.unbindService(wallpaper.connection);
             wallpaper.connection = null;
             if (wallpaper == mLastWallpaper) {
                 mLastWallpaper = null;
@@ -3452,7 +3442,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (wallpaper == null) {
             // common case, this is the first lookup post-boot of the system or
             // unified lock, so we bring up the saved state lazily now and recheck.
-            loadSettingsLocked(userId, false);
+            int whichLoad = (which == FLAG_LOCK) ? FLAG_LOCK : FLAG_SYSTEM;
+            loadSettingsLocked(userId, false, whichLoad);
             wallpaper = whichSet.get(userId);
             if (wallpaper == null) {
                 // if it's still null here, this is likely a lock-only operation and there is not
@@ -3473,18 +3464,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return wallpaper;
     }
 
-    private void loadSettingsLocked(int userId, boolean keepDimensionHints) {
+    private void loadSettingsLocked(int userId, boolean keepDimensionHints, int which) {
         initializeFallbackWallpaper();
         WallpaperData wallpaperData = mWallpaperMap.get(userId);
         WallpaperData lockWallpaperData = mLockWallpaperMap.get(userId);
         WallpaperDataParser.WallpaperLoadingResult result = mWallpaperDataParser.loadSettingsLocked(
-                userId, keepDimensionHints, wallpaperData, lockWallpaperData);
+                userId, keepDimensionHints, wallpaperData, lockWallpaperData, which);
 
-        mWallpaperMap.put(userId, result.getSystemWallpaperData());
-        if (result.success()) {
-            mLockWallpaperMap.put(userId, result.getLockWallpaperData());
-        } else {
-            mLockWallpaperMap.remove(userId);
+        boolean updateSystem = !mEnableSeparateLockScreenEngine || (which & FLAG_SYSTEM) != 0;
+        boolean updateLock = !mEnableSeparateLockScreenEngine || (which & FLAG_LOCK) != 0;
+
+        if (updateSystem) mWallpaperMap.put(userId, result.getSystemWallpaperData());
+        if (updateLock) {
+            if (result.success()) {
+                mLockWallpaperMap.put(userId, result.getLockWallpaperData());
+            } else {
+                mLockWallpaperMap.remove(userId);
+            }
         }
     }
 
@@ -3511,7 +3507,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData wallpaper = null;
         boolean success = false;
         synchronized (mLock) {
-            loadSettingsLocked(UserHandle.USER_SYSTEM, false);
+            loadSettingsLocked(UserHandle.USER_SYSTEM, false, FLAG_SYSTEM | FLAG_LOCK);
             wallpaper = mWallpaperMap.get(UserHandle.USER_SYSTEM);
             wallpaper.wallpaperId = makeWallpaperIdLocked();    // always bump id at restore
             wallpaper.allowBackup = true;   // by definition if it was restored

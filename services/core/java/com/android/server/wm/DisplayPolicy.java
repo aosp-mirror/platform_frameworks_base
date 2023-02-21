@@ -1940,7 +1940,8 @@ public class DisplayPolicy {
         final @InsetsType int restorePositionTypes = (Type.statusBars() | Type.navigationBars())
                 & controlTarget.getRequestedVisibleTypes();
 
-        if (swipeTarget == mNavigationBar
+        final InsetsSourceProvider sp = swipeTarget.getControllableInsetProvider();
+        if (sp != null && sp.getSource().getType() == Type.navigationBars()
                 && (restorePositionTypes & Type.navigationBars()) != 0) {
             // Don't show status bar when swiping on already visible navigation bar.
             // But restore the position of navigation bar if it has been moved by the control

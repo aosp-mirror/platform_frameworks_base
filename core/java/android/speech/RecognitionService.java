@@ -651,6 +651,39 @@ public abstract class RecognitionService extends Service {
         }
 
         /**
+         * The service should call this method when the language detection (and switching)
+         * results are available. This method can be called on any number of occasions
+         * at any time between {@link #beginningOfSpeech()} and {@link #endOfSpeech()},
+         * depending on the speech recognition service implementation.
+         *
+         * @param results the returned language detection (and switching) results.
+         *        <p> To retrieve the most confidently detected language IETF tag
+         *        (as defined by BCP 47, e.g., "en-US", "de-DE"),
+         *        use {@link Bundle#getString(String)}
+         *        with {@link SpeechRecognizer#DETECTED_LANGUAGE} as the parameter.
+         *        <p> To retrieve the language detection confidence level represented by a value
+         *        prefixed by {@code LANGUAGE_DETECTION_CONFIDENCE_LEVEL_} defined in
+         *        {@link SpeechRecognizer}, use {@link Bundle#getInt(String)} with
+         *        {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL} as the parameter.
+         *        <p> To retrieve the alternative locales for the same language
+         *        retrieved by the key {@link SpeechRecognizer#DETECTED_LANGUAGE},
+         *        use {@link Bundle#getStringArrayList(String)}
+         *        with {@link SpeechRecognizer#TOP_LOCALE_ALTERNATIVES} as the parameter.
+         *        <p> To retrieve the language switching results represented by a value
+         *        prefixed by {@code LANGUAGE_SWITCH_RESULT_}
+         *        and defined in {@link SpeechRecognizer}, use {@link Bundle#getInt(String)}
+         *        with {@link SpeechRecognizer#LANGUAGE_SWITCH_RESULT} as the parameter.
+         */
+        @SuppressLint("CallbackMethodName") // For consistency with existing methods.
+        public void languageDetection(@NonNull Bundle results) {
+            try {
+                mListener.onLanguageDetection(results);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Return the Linux uid assigned to the process that sent you the current transaction that
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */

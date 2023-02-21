@@ -290,9 +290,9 @@ public class BtHelper {
         if (mA2dp == null) {
             return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
-        final BluetoothCodecStatus btCodecStatus = null;
+        BluetoothCodecStatus btCodecStatus = null;
         try {
-            mA2dp.getCodecStatus(device);
+            btCodecStatus = mA2dp.getCodecStatus(device);
         } catch (Exception e) {
             Log.e(TAG, "Exception while getting status of " + device, e);
         }

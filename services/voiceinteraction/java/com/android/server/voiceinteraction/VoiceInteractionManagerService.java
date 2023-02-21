@@ -377,7 +377,8 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
-                @NonNull Identity originatorIdentity, IBinder client) {
+                @NonNull Identity originatorIdentity, IBinder client,
+                @NonNull ModuleProperties moduleProperties) {
             Objects.requireNonNull(originatorIdentity);
             boolean forHotwordDetectionService;
             synchronized (VoiceInteractionManagerServiceStub.this) {
@@ -396,7 +397,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 originatorIdentity.uid = Binder.getCallingUid();
                 originatorIdentity.pid = Binder.getCallingPid();
                 session = new SoundTriggerSessionPermissionsDecorator(
-                        createSoundTriggerSessionForSelfIdentity(client),
+                        createSoundTriggerSessionForSelfIdentity(client, moduleProperties),
                         mContext,
                         originatorIdentity);
             } else {
@@ -405,23 +406,33 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
                 try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                         originatorIdentity)) {
-                    session = new SoundTriggerSession(mSoundTriggerInternal.attach(client));
+                    session = new SoundTriggerSession(mSoundTriggerInternal.attach(client,
+                                moduleProperties));
                 }
             }
             return new SoundTriggerSessionBinderProxy(session);
         }
 
         private IVoiceInteractionSoundTriggerSession createSoundTriggerSessionForSelfIdentity(
-                IBinder client) {
+                IBinder client, ModuleProperties moduleProperties) {
             Identity identity = new Identity();
             identity.uid = Process.myUid();
             identity.pid = Process.myPid();
             identity.packageName = ActivityThread.currentOpPackageName();
             return Binder.withCleanCallingIdentity(() -> {
                 try (SafeCloseable ignored = IdentityContext.create(identity)) {
-                    return new SoundTriggerSession(mSoundTriggerInternal.attach(client));
+                    return new SoundTriggerSession(
+                            mSoundTriggerInternal.attach(client, moduleProperties));
                 }
             });
+        }
+
+        @Override
+        public List<ModuleProperties> listModuleProperties(Identity originatorIdentity) {
+            synchronized (VoiceInteractionManagerServiceStub.this) {
+                enforceIsCurrentVoiceInteractionService();
+            }
+            return mSoundTriggerInternal.listModuleProperties(originatorIdentity);
         }
 
         // TODO: VI Make sure the caller is the current user or profile
@@ -1038,7 +1049,8 @@ public class VoiceInteractionManagerService extends SystemService {
 
         @Override
         public int startAssistantActivity(@NonNull IBinder token, @NonNull Intent intent,
-                @Nullable String resolvedType, @Nullable String attributionTag) {
+                @Nullable String resolvedType, @NonNull String attributionTag,
+                @NonNull Bundle bundle) {
             synchronized (this) {
                 if (mImpl == null) {
                     Slog.w(TAG, "startAssistantActivity without running voice interaction service");
@@ -1049,7 +1061,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     return mImpl.startAssistantActivityLocked(attributionTag, callingPid,
-                            callingUid, token, intent, resolvedType);
+                            callingUid, token, intent, resolvedType, bundle);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }

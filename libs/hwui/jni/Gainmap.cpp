@@ -16,8 +16,13 @@
 
 #include <Gainmap.h>
 
+#ifdef __ANDROID__
+#include <binder/Parcel.h>
+#endif
+
 #include "Bitmap.h"
 #include "GraphicsJNI.h"
+#include "ScopedParcel.h"
 #include "graphics_jni_helpers.h"
 
 namespace android {
@@ -154,6 +159,81 @@ static jfloat Gainmap_getDisplayRatioSdr(JNIEnv*, jobject, jlong gainmapPtr) {
     return fromJava(gainmapPtr)->info.fDisplayRatioSdr;
 }
 
+// ----------------------------------------------------------------------------
+// Serialization
+// ----------------------------------------------------------------------------
+
+static void Gainmap_writeToParcel(JNIEnv* env, jobject, jlong nativeObject, jobject parcel) {
+#ifdef __ANDROID__  // Layoutlib does not support parcel
+    if (parcel == NULL) {
+        ALOGD("write null parcel\n");
+        return;
+    }
+    ScopedParcel p(env, parcel);
+    SkGainmapInfo info = fromJava(nativeObject)->info;
+    // write gainmap to parcel
+    // ratio min
+    p.writeFloat(info.fGainmapRatioMin.fR);
+    p.writeFloat(info.fGainmapRatioMin.fG);
+    p.writeFloat(info.fGainmapRatioMin.fB);
+    // ratio max
+    p.writeFloat(info.fGainmapRatioMax.fR);
+    p.writeFloat(info.fGainmapRatioMax.fG);
+    p.writeFloat(info.fGainmapRatioMax.fB);
+    // gamma
+    p.writeFloat(info.fGainmapGamma.fR);
+    p.writeFloat(info.fGainmapGamma.fG);
+    p.writeFloat(info.fGainmapGamma.fB);
+    // epsilonsdr
+    p.writeFloat(info.fEpsilonSdr.fR);
+    p.writeFloat(info.fEpsilonSdr.fG);
+    p.writeFloat(info.fEpsilonSdr.fB);
+    // epsilonhdr
+    p.writeFloat(info.fEpsilonHdr.fR);
+    p.writeFloat(info.fEpsilonHdr.fG);
+    p.writeFloat(info.fEpsilonHdr.fB);
+    // display ratio sdr
+    p.writeFloat(info.fDisplayRatioSdr);
+    // display ratio hdr
+    p.writeFloat(info.fDisplayRatioHdr);
+    // base image type
+    p.writeInt32(static_cast<int32_t>(info.fBaseImageType));
+    // type
+    p.writeInt32(static_cast<int32_t>(info.fType));
+#else
+    doThrowRE(env, "Cannot use parcels outside of Android!");
+#endif
+}
+
+static void Gainmap_readFromParcel(JNIEnv* env, jobject, jlong nativeObject, jobject parcel) {
+#ifdef __ANDROID__  // Layoutlib does not support parcel
+    if (parcel == NULL) {
+        jniThrowNullPointerException(env, "parcel cannot be null");
+        return;
+    }
+    ScopedParcel p(env, parcel);
+
+    SkGainmapInfo info;
+    info.fGainmapRatioMin = {p.readFloat(), p.readFloat(), p.readFloat(), 1.f};
+    info.fGainmapRatioMax = {p.readFloat(), p.readFloat(), p.readFloat(), 1.f};
+    info.fGainmapGamma = {p.readFloat(), p.readFloat(), p.readFloat(), 1.f};
+    info.fEpsilonSdr = {p.readFloat(), p.readFloat(), p.readFloat(), 1.f};
+    info.fEpsilonHdr = {p.readFloat(), p.readFloat(), p.readFloat(), 1.f};
+    info.fDisplayRatioSdr = p.readFloat();
+    info.fDisplayRatioHdr = p.readFloat();
+    info.fBaseImageType = static_cast<SkGainmapInfo::BaseImageType>(p.readInt32());
+    info.fType = static_cast<SkGainmapInfo::Type>(p.readInt32());
+
+    fromJava(nativeObject)->info = info;
+#else
+    jniThrowRuntimeException(env, "Cannot use parcels outside of Android");
+#endif
+}
+
+// ----------------------------------------------------------------------------
+// JNI Glue
+// ----------------------------------------------------------------------------
+
 static const JNINativeMethod gGainmapMethods[] = {
         {"nGetFinalizer", "()J", (void*)Gainmap_getNativeFinalizer},
         {"nCreateEmpty", "()J", (void*)Gainmap_createEmpty},
@@ -172,6 +252,8 @@ static const JNINativeMethod gGainmapMethods[] = {
         {"nGetDisplayRatioHdr", "(J)F", (void*)Gainmap_getDisplayRatioHdr},
         {"nSetDisplayRatioSdr", "(JF)V", (void*)Gainmap_setDisplayRatioSdr},
         {"nGetDisplayRatioSdr", "(J)F", (void*)Gainmap_getDisplayRatioSdr},
+        {"nWriteGainmapToParcel", "(JLandroid/os/Parcel;)V", (void*)Gainmap_writeToParcel},
+        {"nReadGainmapFromParcel", "(JLandroid/os/Parcel;)V", (void*)Gainmap_readFromParcel},
 };
 
 int register_android_graphics_Gainmap(JNIEnv* env) {

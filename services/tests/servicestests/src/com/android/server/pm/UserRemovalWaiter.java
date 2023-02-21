@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import java.io.Closeable;
@@ -36,9 +35,8 @@ import java.util.concurrent.TimeUnit;
 public class UserRemovalWaiter extends BroadcastReceiver implements Closeable {
 
     private final Context mContext;
-    private final UserManager mUserManager;
     private final String mTag;
-    private final long mTimeoutMillis;
+    private final long mTimeoutInSeconds;
     private final Map<Integer, CountDownLatch> mMap = new ConcurrentHashMap<>();
 
     private CountDownLatch getLatch(final int userId) {
@@ -47,9 +45,8 @@ public class UserRemovalWaiter extends BroadcastReceiver implements Closeable {
 
     public UserRemovalWaiter(Context context, String tag, int timeoutInSeconds) {
         mContext = context;
-        mUserManager = UserManager.get(mContext);
         mTag = tag;
-        mTimeoutMillis = timeoutInSeconds * 1000L;
+        mTimeoutInSeconds = timeoutInSeconds;
 
         mContext.registerReceiver(this, new IntentFilter(Intent.ACTION_USER_REMOVED));
     }
@@ -73,28 +70,17 @@ public class UserRemovalWaiter extends BroadcastReceiver implements Closeable {
      */
     public void waitFor(int userId) {
         Log.i(mTag, "Waiting for user " + userId + " to be removed");
-        CountDownLatch latch = getLatch(userId);
+
         long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < mTimeoutMillis) {
-            if (hasUserGone(userId) || waitLatchForOneSecond(latch)) {
+        try {
+            if (getLatch(userId).await(mTimeoutInSeconds, TimeUnit.SECONDS)) {
                 Log.i(mTag, "User " + userId + " is removed in "
                         + (System.currentTimeMillis() - startTime) + " ms");
-                return;
+            } else {
+                fail("Timeout waiting for user removal. userId = " + userId);
             }
-        }
-        fail("Timeout waiting for user removal. userId = " + userId);
-    }
-
-    private boolean hasUserGone(int userId) {
-        return mUserManager.getAliveUsers().stream().noneMatch(x -> x.id == userId);
-    }
-
-    private boolean waitLatchForOneSecond(CountDownLatch latch) {
-        try {
-            return latch.await(1, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            Log.e(mTag, "Thread interrupted unexpectedly.", e);
-            return false;
+            throw new AssertionError("Thread interrupted unexpectedly.", e);
         }
     }
 }

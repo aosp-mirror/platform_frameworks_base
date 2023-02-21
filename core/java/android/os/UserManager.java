@@ -1817,6 +1817,13 @@ public class UserManager {
     public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
 
     /**
+     * A response code indicating that the specified user is removable.
+     *
+     * @hide
+     */
+    public static final int REMOVE_RESULT_USER_IS_REMOVABLE = 3;
+
+    /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
      * an unknown error occurred that prevented the user from being removed or set as ephemeral.
      *
@@ -1871,6 +1878,7 @@ public class UserManager {
             REMOVE_RESULT_REMOVED,
             REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
+            REMOVE_RESULT_USER_IS_REMOVABLE,
             REMOVE_RESULT_ERROR_USER_RESTRICTION,
             REMOVE_RESULT_ERROR_USER_NOT_FOUND,
             REMOVE_RESULT_ERROR_SYSTEM_USER,
@@ -3049,6 +3057,19 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
         return result;
+    }
+
+    /**
+     * See {@link com.android.server.pm.UserManagerInternal#getDisplayAssignedToUser(int)}.
+     *
+     * @hide
+     */
+    public int getDisplayIdAssignedToUser() {
+        try {
+            return mService.getDisplayIdAssignedToUser();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -4368,11 +4389,16 @@ public class UserManager {
     }
 
     /**
-     * Returns information for Primary user.
+     * Returns information for Primary user (which in practice is the same as the System user).
      *
      * @return the Primary user, null if not found.
+     * @deprecated For the system user, call {@link #getUserInfo} on {@link UserHandle#USER_SYSTEM},
+     *             or just use {@link UserHandle#SYSTEM} or {@link UserHandle#USER_SYSTEM}.
+     *             For the designated MainUser, use {@link #getMainUser()}.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @Nullable UserInfo getPrimaryUser() {
         try {
@@ -5574,7 +5600,17 @@ public class UserManager {
      * if there are no saved restrictions.
      *
      * @see #KEY_RESTRICTIONS_PENDING
+     *
+     * @deprecated Use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
+     * possible for there to be multiple managing agents on the device with the ability to set
+     * restrictions. This API will only to return the restrictions set by device policy controllers
+     * (DPCs)
+     *
+     * @see DevicePolicyManager
      */
+    @Deprecated
     @WorkerThread
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public Bundle getApplicationRestrictions(String packageName) {
@@ -5587,8 +5623,12 @@ public class UserManager {
     }
 
     /**
+     * @deprecated Use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     *
      * @hide
      */
+    @Deprecated
     @WorkerThread
     public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {

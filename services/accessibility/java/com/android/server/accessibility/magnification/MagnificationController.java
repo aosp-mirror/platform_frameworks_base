@@ -48,6 +48,7 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
@@ -149,6 +150,9 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
                 FEATURE_WINDOW_MAGNIFICATION);
+
+        AlwaysOnMagnificationFeatureFlag.addOnChangedListener(
+                ConcurrentUtils.DIRECT_EXECUTOR, mAms::updateAlwaysOnMagnification);
     }
 
     @VisibleForTesting

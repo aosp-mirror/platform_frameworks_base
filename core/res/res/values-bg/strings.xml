@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Личните ви приложения са блокирани, докато не включите служебния си потребителски профил"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Личните приложения ще бъдат блокирани на <xliff:g id="DATE">%1$s</xliff:g> в <xliff:g id="TIME">%2$s</xliff:g>. Системният ви администратор не разрешава служебният ви потребителски профил да бъде изключен за повече от <xliff:g id="NUMBER">%3$d</xliff:g> дни."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Включване"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Аз"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Опции за таблета"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Опции за Android TV"</string>
@@ -338,6 +344,8 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да улавя жестовете, извършени върху сензора за отпечатъци на устройството."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Създаване на екранна снимка"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да създава екранни снимки."</string>
+    <!-- no translation found for dream_preview_title (5570751491996100804) -->
+    <skip />
     <string name="permlab_statusBar" msgid="8798267849526214017">"деактивиране или промяна на лентата на състоянието"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Разрешава на приложението да деактивира лентата на състоянието или да добавя и премахва системни икони."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"изпълняване на ролята на лента на състоянието"</string>
@@ -1358,8 +1366,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режимът PTP през USB е включен"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Тетърингът през USB е включен"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режимът MIDI през USB е включен"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Устройството е свързано като уебкамера"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Аксесоарът за USB е свързан"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Докоснете за още опции."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Свързаното устройство се зарежда. Докоснете за още опции."</string>
@@ -1708,8 +1715,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Изключване на прекия път"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Инвертиране на цветовете"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Корекция на цветове"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Работа с една ръка"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Доп. затъмн."</string>

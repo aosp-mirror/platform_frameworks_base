@@ -53,6 +53,7 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_TASK_LAUNCHING_BEHIND;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
 
@@ -877,6 +878,25 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                             "  Commit wallpaper becoming invisible: %s", wt);
                     wt.commitVisibility(false /* visible */);
+                }
+                continue;
+            }
+            final Task tr = participant.asTask();
+            if (tr != null && tr.isVisibleRequested() && tr.inPinnedWindowingMode()) {
+                final ActivityRecord top = tr.getTopNonFinishingActivity();
+                if (top != null && !top.inPinnedWindowingMode()) {
+                    mController.mStateValidators.add(() -> {
+                        if (!tr.isAttached() || !tr.isVisibleRequested()
+                                || !tr.inPinnedWindowingMode()) return;
+                        final ActivityRecord currTop = tr.getTopNonFinishingActivity();
+                        if (currTop.inPinnedWindowingMode()) return;
+                        Slog.e(TAG, "Enter-PIP was started but not completed, this is a Shell/SysUI"
+                                + " bug. This state breaks gesture-nav, so attempting clean-up.");
+                        // We don't know the destination bounds, so we can't actually finish the
+                        // operation. So, to prevent the half-pipped task from covering everything,
+                        // abort the action (which moves the task to back).
+                        tr.abortPipEnter(currTop);
+                    });
                 }
             }
         }
@@ -2210,6 +2230,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     if (topActivity.mAtmService.mBackNavigationController
                             .isMonitorTransitionTarget(topActivity)) {
                         flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+                    }
+                    if (topActivity != null && topActivity.mLaunchTaskBehind) {
+                        Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
+                        flags |= FLAG_TASK_LAUNCHING_BEHIND;
                     }
                 } else {
                     if (task.mAtmService.mBackNavigationController

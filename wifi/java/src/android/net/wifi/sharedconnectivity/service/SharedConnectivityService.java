@@ -59,7 +59,7 @@ public abstract class SharedConnectivityService extends Service {
     private static final String TAG = SharedConnectivityService.class.getSimpleName();
     private static final boolean DEBUG = true;
 
-    private  final Handler mHandler;
+    private  Handler mHandler;
     private final List<ISharedConnectivityCallback> mCallbacks = new ArrayList<>();
     // Used to find DeathRecipient when unregistering a callback to call unlinkToDeath.
     private final Map<ISharedConnectivityCallback, DeathRecipient> mDeathRecipientMap =
@@ -70,14 +70,6 @@ public abstract class SharedConnectivityService extends Service {
     private SharedConnectivitySettingsState mSettingsState;
     private TetherNetworkConnectionStatus mTetherNetworkConnectionStatus;
     private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus;
-
-    public SharedConnectivityService() {
-        mHandler = new Handler(getMainLooper());
-    }
-
-    public SharedConnectivityService(@NonNull Handler handler) {
-        mHandler = handler;
-    }
 
     private final class DeathRecipient implements IBinder.DeathRecipient {
         ISharedConnectivityCallback mCallback;
@@ -97,6 +89,7 @@ public abstract class SharedConnectivityService extends Service {
     @Nullable
     public final IBinder onBind(@NonNull Intent intent) {
         if (DEBUG) Log.i(TAG, "onBind intent=" + intent);
+        mHandler = new Handler(getMainLooper());
         return new ISharedConnectivityService.Stub() {
             @Override
             public void registerCallback(ISharedConnectivityCallback callback) {
@@ -117,9 +110,9 @@ public abstract class SharedConnectivityService extends Service {
             }
 
             @Override
-            public void disconnectTetherNetwork() {
+            public void disconnectTetherNetwork(TetherNetwork network) {
                 checkPermissions();
-                mHandler.post(() -> onDisconnectTetherNetwork());
+                mHandler.post(() -> onDisconnectTetherNetwork(network));
             }
 
             @Override
@@ -323,8 +316,10 @@ public abstract class SharedConnectivityService extends Service {
      * Implementing application should implement this method.
      *
      * Implementation should initiate a disconnection from the active Tether Network.
+     *
+     * @param network Object identifying the Tether Network the user has requested to disconnect.
      */
-    public abstract void onDisconnectTetherNetwork();
+    public abstract void onDisconnectTetherNetwork(@NonNull TetherNetwork network);
 
     /**
      * Implementing application should implement this method.

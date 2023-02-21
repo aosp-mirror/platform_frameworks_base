@@ -17,11 +17,13 @@
 package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_NO_DISMISS;
@@ -175,6 +177,7 @@ import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.LoggingOnly;
+import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -226,6 +229,8 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.VibrationEffect;
+import android.permission.PermissionCheckerManager;
+import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
@@ -528,6 +533,7 @@ public class NotificationManagerService extends SystemService {
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
     PackageManagerInternal mPackageManagerInternal;
+    private PermissionManager mPermissionManager;
     private PermissionPolicyInternal mPermissionPolicyInternal;
     AudioManager mAudioManager;
     AudioManagerInternal mAudioManagerInternal;
@@ -2226,7 +2232,8 @@ public class NotificationManagerService extends SystemService {
             MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
             UsageStatsManagerInternal usageStatsManagerInternal,
             TelecomManager telecomManager, NotificationChannelLogger channelLogger,
-            SystemUiSystemPropertiesFlags.FlagResolver flagResolver) {
+            SystemUiSystemPropertiesFlags.FlagResolver flagResolver,
+            PermissionManager permissionManager) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2243,6 +2250,7 @@ public class NotificationManagerService extends SystemService {
         mPackageManager = packageManager;
         mPackageManagerClient = packageManagerClient;
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mPermissionManager = permissionManager;
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
         mUmInternal = LocalServices.getService(UserManagerInternal.class);
         mUsageStatsManagerInternal = usageStatsManagerInternal;
@@ -2557,7 +2565,8 @@ public class NotificationManagerService extends SystemService {
                         AppGlobals.getPermissionManager()),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 getContext().getSystemService(TelecomManager.class),
-                new NotificationChannelLoggerImpl(), SystemUiSystemPropertiesFlags.getResolver());
+                new NotificationChannelLoggerImpl(), SystemUiSystemPropertiesFlags.getResolver(),
+                getContext().getSystemService(PermissionManager.class));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -4539,6 +4548,27 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public void requestUnbindListenerComponent(ComponentName component) {
+            checkCallerIsSameApp(component.getPackageName());
+            int uid = Binder.getCallingUid();
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    ManagedServices manager =
+                            mAssistants.isComponentEnabledForCurrentProfiles(component)
+                                    ? mAssistants
+                                    : mListeners;
+                    if (manager.isPackageOrComponentAllowed(component.flattenToString(),
+                            UserHandle.getUserId(uid))) {
+                        manager.setComponentState(component, UserHandle.getUserId(uid), false);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void setNotificationsShownFromListener(INotificationListener token, String[] keys) {
             final long identity = Binder.clearCallingIdentity();
             try {
@@ -6488,9 +6518,17 @@ public class NotificationManagerService extends SystemService {
 
         checkRestrictedCategories(notification);
 
+        // Notifications passed to setForegroundService() have FLAG_FOREGROUND_SERVICE,
+        // but it's also possible that the app has called notify() with an update to an
+        // FGS notification that hasn't yet been displayed.  Make sure we check for any
+        // FGS-related situation up front, outside of any locks so it's safe to call into
+        // the Activity Manager.
+        final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
+                notification, tag, id, pkg, userId);
+
         // Fix the notification as best we can.
         try {
-            fixNotification(notification, pkg, tag, id, userId, notificationUid);
+            fixNotification(notification, pkg, tag, id, userId, notificationUid, policy);
         } catch (Exception e) {
             if (notification.isForegroundService()) {
                 throw new SecurityException("Invalid FGS notification", e);
@@ -6499,13 +6537,7 @@ public class NotificationManagerService extends SystemService {
             return;
         }
 
-        // Notifications passed to setForegroundService() have FLAG_FOREGROUND_SERVICE,
-        // but it's also possible that the app has called notify() with an update to an
-        // FGS notification that hasn't yet been displayed.  Make sure we check for any
-        // FGS-related situation up front, outside of any locks so it's safe to call into
-        // the Activity Manager.
-        final ServiceNotificationPolicy policy = mAmi.applyForegroundServiceNotification(
-                notification, tag, id, pkg, userId);
+
         if (policy == ServiceNotificationPolicy.UPDATE_ONLY) {
             // Proceed if the notification is already showing/known, otherwise ignore
             // because the service lifecycle logic has retained responsibility for its
@@ -6666,14 +6698,28 @@ public class NotificationManagerService extends SystemService {
         handleSavePolicyFile();
     }
 
+    private void makeStickyHun(Notification notification) {
+        notification.flags |= FLAG_FSI_REQUESTED_BUT_DENIED;
+        if (notification.contentIntent == null) {
+            // On notification click, if contentIntent is null, SystemUI launches the
+            // fullScreenIntent instead.
+            notification.contentIntent = notification.fullScreenIntent;
+        }
+        notification.fullScreenIntent = null;
+    }
+
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
-            @UserIdInt int userId, int notificationUid) throws NameNotFoundException,
-            RemoteException {
+            @UserIdInt int userId, int notificationUid, ServiceNotificationPolicy fgsPolicy)
+            throws NameNotFoundException, RemoteException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
         Notification.addFieldsFromContext(ai, notification);
+
+        if (notification.isForegroundService() && fgsPolicy == NOT_FOREGROUND_SERVICE) {
+            notification.flags &= ~FLAG_FOREGROUND_SERVICE;
+        }
 
         // Only notifications that can be non-dismissible can have the flag FLAG_NO_DISMISS
         if (mFlagResolver.isEnabled(ALLOW_DISMISS_ONGOING)) {
@@ -6707,13 +6753,40 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        notification.flags &= ~FLAG_FSI_REQUESTED_BUT_DENIED;
+
         if (notification.fullScreenIntent != null && ai.targetSdkVersion >= Build.VERSION_CODES.Q) {
-            int fullscreenIntentPermission = getContext().checkPermission(
-                    android.Manifest.permission.USE_FULL_SCREEN_INTENT, -1, notificationUid);
-            if (fullscreenIntentPermission != PERMISSION_GRANTED) {
-                notification.fullScreenIntent = null;
-                Slog.w(TAG, "Package " + pkg +
-                        ": Use of fullScreenIntent requires the USE_FULL_SCREEN_INTENT permission");
+            final boolean forceDemoteFsiToStickyHun = mFlagResolver.isEnabled(
+                    SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE);
+
+            final boolean showStickyHunIfDenied = mFlagResolver.isEnabled(
+                    SystemUiSystemPropertiesFlags.NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI);
+
+            if (forceDemoteFsiToStickyHun) {
+                makeStickyHun(notification);
+
+            } else if (showStickyHunIfDenied) {
+
+                final AttributionSource source = new AttributionSource.Builder(notificationUid)
+                        .setPackageName(pkg)
+                        .build();
+
+                final int permissionResult = mPermissionManager.checkPermissionForDataDelivery(
+                        Manifest.permission.USE_FULL_SCREEN_INTENT, source, /* message= */ null);
+
+                if (permissionResult != PermissionCheckerManager.PERMISSION_GRANTED) {
+                    makeStickyHun(notification);
+                }
+
+            } else {
+                int fullscreenIntentPermission = getContext().checkPermission(
+                        android.Manifest.permission.USE_FULL_SCREEN_INTENT, -1, notificationUid);
+
+                if (fullscreenIntentPermission != PERMISSION_GRANTED) {
+                    notification.fullScreenIntent = null;
+                    Slog.w(TAG, "Package " + pkg + ": Use of fullScreenIntent requires the"
+                            + "USE_FULL_SCREEN_INTENT permission");
+                }
             }
         }
 
@@ -6790,11 +6863,7 @@ public class NotificationManagerService extends SystemService {
      * A notification should be dismissible, unless it's exempted for some reason.
      */
     private boolean canBeNonDismissible(ApplicationInfo ai, Notification notification) {
-        // Check if the app is on the system partition, or an update to an app on the system
-        // partition.
-        boolean isSystemAppExempt = (ai.flags
-                & (ApplicationInfo.FLAG_UPDATED_SYSTEM_APP | ApplicationInfo.FLAG_SYSTEM)) > 0;
-        return isSystemAppExempt || notification.isMediaNotification() || isEnterpriseExempted(ai);
+        return notification.isMediaNotification() || isEnterpriseExempted(ai);
     }
 
     private boolean isEnterpriseExempted(ApplicationInfo ai) {
@@ -8628,6 +8697,9 @@ public class NotificationManagerService extends SystemService {
             if (interceptBefore && !record.isIntercepted()
                     && record.isNewEnoughForAlerting(System.currentTimeMillis())) {
                 buzzBeepBlinkLocked(record);
+
+                // Log alert after change in intercepted state to Zen Log as well
+                ZenLog.traceAlertOnUpdatedIntercept(record);
             }
         }
         if (changed) {

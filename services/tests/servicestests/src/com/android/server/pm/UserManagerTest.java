@@ -1122,7 +1122,7 @@ public final class UserManagerTest {
 
     @Nullable
     private UserInfo getUser(int id) {
-        List<UserInfo> list = mUserManager.getAliveUsers();
+        List<UserInfo> list = mUserManager.getUsers();
 
         for (UserInfo user : list) {
             if (user.id == id) {
@@ -1277,7 +1277,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testConcurrentUserCreate() throws Exception {
-        int userCount = mUserManager.getAliveUsers().size();
+        int userCount = mUserManager.getUsers().size();
         int maxSupportedUsers = UserManager.getMaxSupportedUsers();
         int canBeCreatedCount = maxSupportedUsers - userCount;
         // Test exceeding the limit while running in parallel
@@ -1300,7 +1300,7 @@ public final class UserManagerTest {
                 "Could not create " + createUsersCount + " users in " + timeout + " seconds")
                 .that(es.awaitTermination(timeout, TimeUnit.SECONDS))
                 .isTrue();
-        assertThat(mUserManager.getAliveUsers().size()).isEqualTo(maxSupportedUsers);
+        assertThat(mUserManager.getUsers().size()).isEqualTo(maxSupportedUsers);
         assertThat(created.get()).isEqualTo(canBeCreatedCount);
     }
 

@@ -24,7 +24,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_DEPRECATED_SDK_VE
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PACKAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_DUPLICATE_PERMISSION_GROUP;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
@@ -103,6 +102,7 @@ import android.app.AppOpsManager;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.app.BroadcastOptions;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.IBackupManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -145,6 +145,7 @@ import android.provider.DeviceConfig;
 import android.stats.storage.StorageEnums;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -318,10 +319,16 @@ final class InstallPackageHelper {
 
         InstallSource installSource = request.getInstallSource();
         final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
+        final boolean pkgAlreadyExists = oldPkgSetting != null;
+        final boolean isAllowUpdateOwnership = parsedPackage.isAllowUpdateOwnership();
+        final String oldUpdateOwner =
+                pkgAlreadyExists ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
         final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
                 : mPm.mInjector.getSystemConfig().getSystemAppUpdateOwnerPackageName(
                         parsedPackage.getPackageName());
-        // For new install (standard install), the installSource isn't null.
+        final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
+
+        // For standard install (install via session), the installSource isn't null.
         if (installSource != null) {
             // If this is part of a standard install, set the initiating package name, else rely on
             // previous device state.
@@ -335,39 +342,68 @@ final class InstallPackageHelper {
             }
 
             // Handle the update ownership enforcement for APK
-            if (updateOwnerFromSysconfig != null) {
-                // For system app, we always use the update owner from sysconfig if presented.
-                installSource = installSource.setUpdateOwnerPackageName(updateOwnerFromSysconfig);
-            } else if (!parsedPackage.isAllowUpdateOwnership()) {
+            if (!isAllowUpdateOwnership) {
                 // If the app wants to opt-out of the update ownership enforcement via manifest,
                 // it overrides the installer's use of #setRequestUpdateOwnership.
                 installSource = installSource.setUpdateOwnerPackageName(null);
             } else if (!isApex) {
-                final boolean isUpdate = oldPkgSetting != null;
-                final String oldUpdateOwner =
-                        isUpdate ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
-                final boolean isUpdateOwnershipEnabled = oldUpdateOwner != null;
+                // User installer UID as "current" userId if present; otherwise, use the userId
+                // from InstallRequest.
+                final int userId = installSource.mInstallerPackageUid != Process.INVALID_UID
+                        ? UserHandle.getUserId(installSource.mInstallerPackageUid)
+                        : request.getUserId();
+                // Whether the parsedPackage is installed on the userId
+                // If the oldPkgSetting doesn't exist, this package isn't installed for all users.
+                final boolean isUpdate = pkgAlreadyExists && (userId >= UserHandle.USER_SYSTEM
+                        // If userID >= 0, we could check via oldPkgSetting.getInstalled(userId).
+                        ? oldPkgSetting.getInstalled(userId)
+                        // When userId is -1 (USER_ALL) and it's not installed for any user,
+                        // treat it as not installed.
+                        : oldPkgSetting.getNotInstalledUserIds().length
+                                <= (UserManager.isHeadlessSystemUserMode() ? 1 : 0));
                 final boolean isRequestUpdateOwnership = (request.getInstallFlags()
                         & PackageManager.INSTALL_REQUEST_UPDATE_OWNERSHIP) != 0;
+                final boolean isSameUpdateOwner =
+                        TextUtils.equals(oldUpdateOwner, installSource.mInstallerPackageName);
 
-                // Here we assign the update owner for the package, and the rules are:
-                // -. If the installer doesn't request update ownership on initial installation,
-                //    keep the update owner as null.
-                // -. If the installer doesn't want to be the owner to provide the subsequent
-                //    update (doesn't request to be the update owner), e.g., non-store installer
-                //    (file manager), ADB, or DO/PO, we should not update the owner.
-                // -. Else, the installer requests update ownership on initial installation or
-                //    update, we use installSource.mUpdateOwnerPackageName as the update owner.
-                if (!isRequestUpdateOwnership || (isUpdate && !isUpdateOwnershipEnabled)) {
-                    installSource = installSource.setUpdateOwnerPackageName(oldUpdateOwner);
+                // Here we handle the update owner for the package, and the rules are:
+                // -. Only enabling update ownership enforcement on initial installation if the
+                //    installer has requested.
+                // -. Once the installer changes and users agree to proceed, clear the update
+                //    owner (package state in other users are taken into account as well).
+                if (!isUpdate) {
+                    if (!isRequestUpdateOwnership) {
+                        installSource = installSource.setUpdateOwnerPackageName(null);
+                    } else if ((!isUpdateOwnershipEnabled && pkgAlreadyExists)
+                            || (isUpdateOwnershipEnabled && !isSameUpdateOwner)) {
+                        installSource = installSource.setUpdateOwnerPackageName(null);
+                    }
+                } else if (!isSameUpdateOwner || !isUpdateOwnershipEnabled) {
+                    installSource = installSource.setUpdateOwnerPackageName(null);
                 }
             }
 
             pkgSetting.setInstallSource(installSource);
-        // non-standard install (addForInit and install existing packages), installSource is null.
-        } else if (updateOwnerFromSysconfig != null) {
-            // For system app, we always use the update owner from sysconfig if presented.
-            pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
+        // For non-standard install (addForInit), installSource is null.
+        } else if (pkgSetting.isSystem()) {
+            // We still honor the manifest attr if the system app wants to opt-out of it.
+            if (!isAllowUpdateOwnership) {
+                pkgSetting.setUpdateOwnerPackage(null);
+            } else {
+                final boolean isSameUpdateOwner = isUpdateOwnershipEnabled
+                        && TextUtils.equals(oldUpdateOwner, updateOwnerFromSysconfig);
+
+                // Here we handle the update owner for the system package, and the rules are:
+                // -. We use the update owner from sysconfig as the initial value.
+                // -. Once an app becomes to system app later via OTA, only retains the update
+                //    owner if it's consistence with sysconfig.
+                // -. Clear the update owner when update owner changes from sysconfig.
+                if (!pkgAlreadyExists || isSameUpdateOwner) {
+                    pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
+                } else {
+                    pkgSetting.setUpdateOwnerPackage(null);
+                }
+            }
         }
 
         if ((scanFlags & SCAN_AS_APK_IN_APEX) != 0) {
@@ -642,6 +678,18 @@ final class InstallPackageHelper {
             }
 
             if (installed) {
+                final String updateOwner = pkgSetting.getInstallSource().mUpdateOwnerPackageName;
+                final var dpmi = mInjector.getLocalService(DevicePolicyManagerInternal.class);
+                final boolean isFromManagedUserOrProfile =
+                        dpmi != null && dpmi.isUserOrganizationManaged(userId);
+                // Here we handle the update owner when install existing package, and the rules are:
+                // -. Retain the update owner when enable a system app in managed user or profile.
+                // -. Retain the update owner if the installer is the same.
+                // -. Clear the update owner when update owner changes.
+                if (!preLockSnapshot.isCallerSameApp(updateOwner, callingUid)
+                        && (!pkgSetting.isSystem() || !isFromManagedUserOrProfile)) {
+                    pkgSetting.setUpdateOwnerPackage(null);
+                }
                 if (pkgSetting.getPkg() != null) {
                     final PermissionManagerServiceInternal.PackageInstalledParams.Builder
                             permissionParamsBuilder =
@@ -1093,6 +1141,7 @@ final class InstallPackageHelper {
 
             // Determine if enforcement is in strict mode
             boolean strictMode = false;
+
             if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     "MinInstallableTargetSdk__install_block_strict_mode_enabled",
                     false)) {
@@ -1490,8 +1539,9 @@ final class InstallPackageHelper {
             synchronized (mPm.mLock) {
                 final PackageSetting ps = mPm.mSettings.getPackageLPr(pkgName);
                 if (ps == null) {
-                    request.setError(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Missing settings for moved package " + pkgName);
+                    request.setError(PackageManagerException.ofInternalError(
+                            "Missing settings for moved package " + pkgName,
+                            PackageManagerException.INTERNAL_ERROR_MISSING_SETTING_FOR_MOVE));
                 }
 
                 // We moved the entire application as-is, so bring over the
@@ -1523,8 +1573,9 @@ final class InstallPackageHelper {
                 derivedAbi.second.applyTo(parsedPackage);
             } catch (PackageManagerException pme) {
                 Slog.e(TAG, "Error deriving application ABI", pme);
-                throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Error deriving application ABI: " + pme.getMessage());
+                throw PrepareFailure.ofInternalError(
+                        "Error deriving application ABI: " + pme.getMessage(),
+                        PackageManagerException.INTERNAL_ERROR_DERIVING_ABI);
             }
         }
 
@@ -1535,8 +1586,9 @@ final class InstallPackageHelper {
                 setUpFsVerity(parsedPackage);
             } catch (Installer.InstallerException | IOException | DigestException
                     | NoSuchAlgorithmException e) {
-                throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                        "Failed to set up verity: " + e);
+                throw PrepareFailure.ofInternalError(
+                        "Failed to set up verity: " + e,
+                        PackageManagerException.INTERNAL_ERROR_VERITY_SETUP);
             }
         } else {
             // Use the path returned by apexd
@@ -3215,8 +3267,9 @@ final class InstallPackageHelper {
         // uncompress the binary to its eventual destination on /data
         final File scanFile = decompressPackage(stubPkg.getPackageName(), stubPkg.getPath());
         if (scanFile == null) {
-            throw new PackageManagerException(
-                    "Unable to decompress stub at " + stubPkg.getPath());
+            throw PackageManagerException.ofInternalError(
+                    "Unable to decompress stub at " + stubPkg.getPath(),
+                    PackageManagerException.INTERNAL_ERROR_DECOMPRESS_STUB);
         }
         synchronized (mPm.mLock) {
             mPm.mSettings.disableSystemPackageLPw(stubPkg.getPackageName(), true /*replaced*/);
@@ -4174,10 +4227,12 @@ final class InstallPackageHelper {
             // This is relevant for cases where the disabled system package is used for flags or
             // other metadata.
             parsedPackage.hideAsFinal();
-            throw new PackageManagerException(Log.WARN, "Package " + parsedPackage.getPackageName()
+            throw PackageManagerException.ofInternalError(
+                    "Package " + parsedPackage.getPackageName()
                     + " at " + parsedPackage.getPath() + " ignored: updated version "
                     + (pkgAlreadyExists ? String.valueOf(pkgSetting.getVersionCode()) : "unknown")
-                    + " better than this " + parsedPackage.getLongVersionCode());
+                    + " better than this " + parsedPackage.getLongVersionCode(),
+                    PackageManagerException.INTERNAL_ERROR_UPDATED_VERSION_BETTER_THAN_SYSTEM);
         }
 
         // Verify certificates against what was last scanned. Force re-collecting certificate in two
@@ -4449,8 +4504,9 @@ final class InstallPackageHelper {
                 // but we still want the base name to be unique.
                 if ((scanFlags & SCAN_NEW_INSTALL) == 0
                         && mPm.mPackages.containsKey(pkg.getManifestPackageName())) {
-                    throw new PackageManagerException(
-                            "Duplicate static shared lib provider package");
+                    throw PackageManagerException.ofInternalError(
+                            "Duplicate static shared lib provider package",
+                            PackageManagerException.INTERNAL_ERROR_DUP_STATIC_SHARED_LIB_PROVIDER);
                 }
                 ScanPackageUtils.assertStaticSharedLibraryIsValid(pkg, scanFlags);
                 assertStaticSharedLibraryVersionCodeIsValid(pkg);
@@ -4543,8 +4599,9 @@ final class InstallPackageHelper {
         }
         if (pkg.getLongVersionCode() < minVersionCode
                 || pkg.getLongVersionCode() > maxVersionCode) {
-            throw new PackageManagerException("Static shared"
-                    + " lib version codes must be ordered as lib versions");
+            throw PackageManagerException.ofInternalError("Static shared"
+                    + " lib version codes must be ordered as lib versions",
+                    PackageManagerException.INTERNAL_ERROR_STATIC_SHARED_LIB_VERSION_CODES_ORDER);
         }
     }
 
@@ -4559,9 +4616,10 @@ final class InstallPackageHelper {
                 // This must be an update to a system overlay. Immutable overlays cannot be
                 // upgraded.
                 if (!mPm.isOverlayMutable(pkg.getPackageName())) {
-                    throw new PackageManagerException("Overlay "
+                    throw PackageManagerException.ofInternalError("Overlay "
                             + pkg.getPackageName()
-                            + " is static and cannot be upgraded.");
+                            + " is static and cannot be upgraded.",
+                            PackageManagerException.INTERNAL_ERROR_SYSTEM_OVERLAY_STATIC);
                 }
             } else {
                 if ((scanFlags & SCAN_AS_VENDOR) != 0) {
@@ -4591,10 +4649,11 @@ final class InstallPackageHelper {
                 }
                 if (!comparePackageSignatures(platformPkgSetting,
                         pkg.getSigningDetails().getSignatures())) {
-                    throw new PackageManagerException("Overlay "
+                    throw PackageManagerException.ofInternalError("Overlay "
                             + pkg.getPackageName()
                             + " must target Q or later, "
-                            + "or be signed with the platform certificate");
+                            + "or be signed with the platform certificate",
+                            PackageManagerException.INTERNAL_ERROR_OVERLAY_LOW_TARGET_SDK);
                 }
             }
 
@@ -4615,11 +4674,12 @@ final class InstallPackageHelper {
                             pkg.getSigningDetails().getSignatures())) {
                         // check reference signature
                         if (mPm.mOverlayConfigSignaturePackage == null) {
-                            throw new PackageManagerException("Overlay "
+                            throw PackageManagerException.ofInternalError("Overlay "
                                     + pkg.getPackageName() + " and target "
                                     + pkg.getOverlayTarget() + " signed with"
                                     + " different certificates, and the overlay lacks"
-                                    + " <overlay android:targetName>");
+                                    + " <overlay android:targetName>",
+                                    PackageManagerException.INTERNAL_ERROR_OVERLAY_SIGNATURE1);
                         }
                         final PackageSetting refPkgSetting;
                         synchronized (mPm.mLock) {
@@ -4628,11 +4688,12 @@ final class InstallPackageHelper {
                         }
                         if (!comparePackageSignatures(refPkgSetting,
                                 pkg.getSigningDetails().getSignatures())) {
-                            throw new PackageManagerException("Overlay "
+                            throw PackageManagerException.ofInternalError("Overlay "
                                     + pkg.getPackageName() + " signed with a different "
                                     + "certificate than both the reference package and "
                                     + "target " + pkg.getOverlayTarget() + ", and the "
-                                    + "overlay lacks <overlay android:targetName>");
+                                    + "overlay lacks <overlay android:targetName>",
+                                    PackageManagerException.INTERNAL_ERROR_OVERLAY_SIGNATURE2);
                         }
                     }
                 }
@@ -4659,10 +4720,11 @@ final class InstallPackageHelper {
                 }
                 if (!comparePackageSignatures(platformPkgSetting,
                         pkg.getSigningDetails().getSignatures())) {
-                    throw new PackageManagerException("Apps that share a user with a "
+                    throw PackageManagerException.ofInternalError("Apps that share a user with a "
                             + "privileged app must themselves be marked as privileged. "
                             + pkg.getPackageName() + " shares privileged user "
-                            + pkg.getSharedUserId() + ".");
+                            + pkg.getSharedUserId() + ".",
+                            PackageManagerException.INTERNAL_ERROR_NOT_PRIV_SHARED_USER);
                 }
             }
         }

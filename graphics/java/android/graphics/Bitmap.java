@@ -2175,23 +2175,26 @@ public final class Bitmap implements Parcelable {
 
     public static final @NonNull Parcelable.Creator<Bitmap> CREATOR
             = new Parcelable.Creator<Bitmap>() {
-        /**
-         * Rebuilds a bitmap previously stored with writeToParcel().
-         *
-         * @param p    Parcel object to read the bitmap from
-         * @return a new bitmap created from the data in the parcel
-         */
-        public Bitmap createFromParcel(Parcel p) {
-            Bitmap bm = nativeCreateFromParcel(p);
-            if (bm == null) {
-                throw new RuntimeException("Failed to unparcel Bitmap");
-            }
-            return bm;
-        }
-        public Bitmap[] newArray(int size) {
-            return new Bitmap[size];
-        }
-    };
+                /**
+                 * Rebuilds a bitmap previously stored with writeToParcel().
+                 *
+                 * @param p    Parcel object to read the bitmap from
+                 * @return a new bitmap created from the data in the parcel
+                 */
+                public Bitmap createFromParcel(Parcel p) {
+                    Bitmap bm = nativeCreateFromParcel(p);
+                    if (bm == null) {
+                        throw new RuntimeException("Failed to unparcel Bitmap");
+                    }
+                    if (p.readBoolean()) {
+                        bm.setGainmap(p.readTypedObject(Gainmap.CREATOR));
+                    }
+                    return bm;
+                }
+                public Bitmap[] newArray(int size) {
+                    return new Bitmap[size];
+                }
+            };
 
     /**
      * No special parcel contents.
@@ -2214,6 +2217,12 @@ public final class Bitmap implements Parcelable {
         noteHardwareBitmapSlowCall();
         if (!nativeWriteToParcel(mNativePtr, mDensity, p)) {
             throw new RuntimeException("native writeToParcel failed");
+        }
+        if (hasGainmap()) {
+            p.writeBoolean(true);
+            p.writeTypedObject(mGainmap, flags);
+        } else {
+            p.writeBoolean(false);
         }
     }
 

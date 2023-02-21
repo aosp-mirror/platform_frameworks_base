@@ -49,12 +49,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -91,7 +91,6 @@ import com.android.compatibility.common.util.AdoptShellPermissionsRule;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 /**
@@ -102,9 +101,6 @@ import org.junit.runner.RunWith;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class WindowManagerServiceTests extends WindowTestsBase {
-
-    @Rule
-    public ExpectedException mExpectedException = ExpectedException.none();
 
     @Rule
     public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
@@ -198,16 +194,20 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     public void testRelayoutExitingWindow() {
         final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
         final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
-        doReturn(true).when(surfaceController).hasSurface();
-        spyOn(win);
-        doReturn(true).when(win).isAnimationRunningSelfOrParent();
         win.mWinAnimator.mSurfaceController = surfaceController;
+        win.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        doReturn(true).when(surfaceController).hasSurface();
+        spyOn(win.mTransitionController);
+        doReturn(true).when(win.mTransitionController).isShellTransitionsEnabled();
+        doReturn(true).when(win.mTransitionController).inTransition(
+                eq(win.mActivityRecord));
         win.mViewVisibility = View.VISIBLE;
         win.mHasSurface = true;
         win.mActivityRecord.mAppStopped = true;
-        win.mActivityRecord.setVisibleRequested(false);
-        win.mActivityRecord.setVisible(false);
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
+        spyOn(mWm.mWindowPlacerLocked);
+        // Skip unnecessary operations of relayout.
+        doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
         final int w = 100;
         final int h = 200;
         final ClientWindowFrames outFrames = new ClientWindowFrames();
@@ -216,6 +216,17 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final InsetsState outInsetsState = new InsetsState();
         final InsetsSourceControl.Array outControls = new InsetsSourceControl.Array();
         final Bundle outBundle = new Bundle();
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        // The window is in transition, so its destruction is deferred.
+        assertTrue(win.mAnimatingExit);
+        assertFalse(win.mDestroying);
+        assertTrue(win.mTransitionController.mAnimatingExitWindows.contains(win));
+
+        win.mAnimatingExit = false;
+        win.mViewVisibility = View.VISIBLE;
+        win.mActivityRecord.setVisibleRequested(false);
+        win.mActivityRecord.setVisible(false);
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
         // Because the window is already invisible, it doesn't need to apply exiting animation

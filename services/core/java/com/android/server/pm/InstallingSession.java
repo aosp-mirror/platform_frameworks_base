@@ -19,7 +19,6 @@ package com.android.server.pm;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.content.pm.PackageInstaller.SessionParams.MODE_INHERIT_EXISTING;
 import static android.content.pm.PackageInstaller.SessionParams.USER_ACTION_UNSPECIFIED;
-import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -341,11 +340,15 @@ class InstallingSession {
                 handle = NativeLibraryHelper.Handle.create(request.getCodeFile());
                 ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
                         request.getAbiOverride(), isIncremental);
+                if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                    final String errorMessage = "Failed to copy native libraries";
+                    request.setError(ret, errorMessage);
+                }
             } catch (IOException e) {
                 final String errorMessage = "Copying native libraries failed";
                 Slog.e(TAG, errorMessage, e);
-                ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                request.setError(ret, errorMessage);
+                request.setError(PackageManagerException.ofInternalError(errorMessage,
+                        PackageManagerException.INTERNAL_ERROR_NATIVE_LIBRARY_COPY));
             } finally {
                 IoUtils.closeQuietly(handle);
             }
@@ -368,10 +371,10 @@ class InstallingSession {
                         mMoveInfo.mTargetSdkVersion, mMoveInfo.mFromCodePath);
             } catch (Installer.InstallerException e) {
                 final String errorMessage = "Failed to move app";
-                final int ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
-                request.setError(ret, errorMessage);
+                request.setError(PackageManagerException.ofInternalError(errorMessage,
+                        PackageManagerException.INTERNAL_ERROR_MOVE));
                 Slog.w(TAG, errorMessage, e);
-                return ret;
+                return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             }
         }
 
@@ -594,13 +597,15 @@ class InstallingSession {
             final File dir = request.getOriginInfo().mResolvedFile;
             final File[] apexes = dir.listFiles();
             if (apexes == null) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                        dir.getAbsolutePath() + " is not a directory");
+                throw PackageManagerException.ofInternalError(
+                        dir.getAbsolutePath() + " is not a directory",
+                        PackageManagerException.INTERNAL_ERROR_APEX_NOT_DIRECTORY);
             }
             if (apexes.length != 1) {
-                throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
+                throw PackageManagerException.ofInternalError(
                         "Expected exactly one .apex file under " + dir.getAbsolutePath()
-                                + " got: " + apexes.length);
+                                + " got: " + apexes.length,
+                        PackageManagerException.INTERNAL_ERROR_APEX_MORE_THAN_ONE_FILE);
             }
             try (PackageParser2 packageParser = mPm.mInjector.getScanningPackageParser()) {
                 ApexInfo apexInfo = mPm.mApexManager.installPackage(apexes[0]);
@@ -638,7 +643,8 @@ class InstallingSession {
                 PackageManagerService pm)
                 throws PackageManagerException {
             if (childInstallingSessions.size() == 0) {
-                throw new PackageManagerException("No child sessions found!");
+                throw PackageManagerException.ofInternalError("No child sessions found!",
+                        PackageManagerException.INTERNAL_ERROR_INSTALL_MISSING_CHILD_SESSIONS);
             }
             mPm = pm;
             mUser = user;

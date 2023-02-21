@@ -184,6 +184,18 @@ genrule {
         "$(location :frameworks-base-api-module-lib-current.txt)",
 }
 
+genrule {
+    name: "frameworks-base-api-current.srcjar",
+    tools: ["merge_zips"],
+    out: ["current.srcjar"],
+    cmd: "$(location merge_zips) $(out) $(in)",
+    srcs: [
+        ":api-stubs-docs-non-updatable",
+        ":all-modules-public-stubs-source",
+    ],
+    visibility: ["//visibility:private"], // Used by make module in //development, mind
+}
+
 // This produces the same annotations.zip as framework-doc-stubs, but by using
 // outputs from individual modules instead of all the source code.
 genrule_defaults {

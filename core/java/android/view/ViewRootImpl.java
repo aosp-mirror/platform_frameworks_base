@@ -1135,6 +1135,10 @@ public final class ViewRootImpl implements ViewParent,
         updateLastConfigurationFromResources(getConfiguration());
         // Make sure to report the completion of draw for relaunch with preserved window.
         reportNextDraw("rebuilt");
+        // Make sure to resume this root view when relaunching its host activity which was stopped.
+        if (mStopped && getHostVisibility() != View.GONE) {
+            setWindowStopped(false);
+        }
     }
 
     private Configuration getConfiguration() {

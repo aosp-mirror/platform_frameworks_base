@@ -175,7 +175,7 @@ please see themes_device_defaults.xml.
         <item name="windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
-        <item name="navigationBarColor">@color/black</item>
+        <item name="navigationBarColor">@color/navigation_bar_default</item>
         <item name="windowEnterTransition">@transition/fade</item>
         <item name="windowSharedElementEnterTransition">@transition/move</item>
         <item name="windowSharedElementExitTransition">@transition/move</item>
@@ -548,7 +548,7 @@ please see themes_device_defaults.xml.
         <item name="windowDrawsSystemBarBackgrounds">true</item>
         <item name="windowActionBarFullscreenDecorLayout">@layout/screen_toolbar</item>
         <item name="statusBarColor">?attr/colorPrimaryDark</item>
-        <item name="navigationBarColor">@color/black</item>
+        <item name="navigationBarColor">@color/navigation_bar_default</item>
         <item name="windowEnterTransition">@transition/fade</item>
         <item name="windowSharedElementEnterTransition">@transition/move</item>
         <item name="windowSharedElementExitTransition">@transition/move</item>
