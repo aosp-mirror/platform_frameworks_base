@@ -1193,17 +1193,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
             loadScreenOffBrightnessSensor();
             int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
-            // TODO (b/265793751): Don't instantiate ScreenOffBrightnessSensorController if this is
-            // a complementary display
             if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
-                mScreenOffBrightnessSensorController = new ScreenOffBrightnessSensorController(
-                        mSensorManager,
-                        mScreenOffBrightnessSensor,
-                        mHandler,
-                        SystemClock::uptimeMillis,
-                        sensorValueToLux,
-                        mInteractiveModeBrightnessMapper
-                );
+                mScreenOffBrightnessSensorController =
+                        mInjector.getScreenOffBrightnessSensorController(
+                                mSensorManager,
+                                mScreenOffBrightnessSensor,
+                                mHandler,
+                                SystemClock::uptimeMillis,
+                                sensorValueToLux,
+                                mInteractiveModeBrightnessMapper);
             }
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
@@ -1395,8 +1393,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         if (mScreenOffBrightnessSensorController != null) {
             mScreenOffBrightnessSensorController.setLightSensorEnabled(mUseAutoBrightness
-                    && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
-                    && !mAllowAutoBrightnessWhileDozingConfig)));
+                    && mIsEnabled && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
+                    && !mAllowAutoBrightnessWhileDozingConfig))
+                    && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
         }
 
         boolean skipRampBecauseOfProximityChangeToNegative = false;
@@ -2544,11 +2543,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
-        mHandler.post(() -> {
+        mHandler.postAtTime(() -> {
             mUseAutoBrightness = screenBrightnessModeSetting
                     == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
             updatePowerState();
-        });
+        }, mClock.uptimeMillis());
     }
 
     private float getAutoBrightnessAdjustmentSetting() {
@@ -3445,6 +3444,23 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     darkeningThresholdsPercentages, brighteningThresholdLevels,
                     darkeningThresholdLevels, minDarkeningThreshold, minBrighteningThreshold,
                     potentialOldBrightnessRange);
+        }
+
+        ScreenOffBrightnessSensorController getScreenOffBrightnessSensorController(
+                SensorManager sensorManager,
+                Sensor lightSensor,
+                Handler handler,
+                ScreenOffBrightnessSensorController.Clock clock,
+                int[] sensorValueToLux,
+                BrightnessMappingStrategy brightnessMapper) {
+            return new ScreenOffBrightnessSensorController(
+                    sensorManager,
+                    lightSensor,
+                    handler,
+                    clock,
+                    sensorValueToLux,
+                    brightnessMapper
+            );
         }
     }
 
