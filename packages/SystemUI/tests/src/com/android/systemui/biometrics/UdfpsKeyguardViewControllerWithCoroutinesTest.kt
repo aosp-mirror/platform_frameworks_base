@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.Dispatchers
@@ -91,6 +92,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(
+                mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
                 mock(BiometricSettingsRepository::class.java),
                 mock(DeviceEntryFingerprintAuthRepository::class.java),
