@@ -75,7 +75,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
     private var radius: Float = 0f
         set(value) {
-            rippleShader.setMaxSize(value * 2f, value * 2f)
+            rippleShader.rippleSize.setMaxSize(value * 2f, value * 2f)
             field = value
         }
     private var origin: Point = Point()
@@ -364,7 +364,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
         if (drawRipple) {
             canvas?.drawCircle(origin.x.toFloat(), origin.y.toFloat(),
-                    rippleShader.currentWidth, ripplePaint)
+                    rippleShader.rippleSize.currentWidth, ripplePaint)
         }
     }
 }
