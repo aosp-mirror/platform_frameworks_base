@@ -530,6 +530,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * The client that is currently bound to an input method.
      */
+    @Nullable
     private ClientState mCurClient;
 
     /**
@@ -555,9 +556,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurFocusedWindowSoftInputMode;
 
     /**
-     * The client by which {@link #mCurFocusedWindow} was reported.
+     * The client by which {@link #mCurFocusedWindow} was reported. This gets updated whenever an
+     * IME-focusable window gained focus (without necessarily starting an input connection),
+     * while {@link #mCurClient} only gets updated when we actually start an input connection.
+     *
+     * @see #mCurFocusedWindow
      */
+    @Nullable
     ClientState mCurFocusedWindowClient;
+
+    /**
+     * The editor info by which {@link #mCurFocusedWindow} was reported. This differs from
+     * {@link #mCurEditorInfo} the same way {@link #mCurFocusedWindowClient} differs
+     * from {@link #mCurClient}.
+     *
+     * @see #mCurFocusedWindow
+     */
+    @Nullable
+    EditorInfo mCurFocusedWindowEditorInfo;
 
     /**
      * The {@link IRemoteInputConnection} last provided by the current client.
@@ -578,6 +594,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * The {@link EditorInfo} last provided by the current client.
      */
+    @Nullable
     EditorInfo mCurEditorInfo;
 
     /**
@@ -2263,6 +2280,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 if (mCurFocusedWindowClient == cs) {
                     mCurFocusedWindowClient = null;
+                    mCurFocusedWindowEditorInfo = null;
                 }
             }
         }
@@ -3373,10 +3391,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
-            // TODO(b/261565259): to avoid using null, add package name in ClientState
-            final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
-            final int uid = mCurClient != null ? mCurClient.mUid : -1;
-            statsToken = ImeTracker.forLogging().onRequestShow(packageName, uid,
+            statsToken = createStatsTokenForFocusedClient(true /* show */,
                     ImeTracker.ORIGIN_SERVER_START_INPUT, reason);
         }
 
@@ -3450,17 +3465,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
-            // TODO(b/261565259): to avoid using null, add package name in ClientState
-            final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
-            final int uid;
-            if (mCurClient != null) {
-                uid = mCurClient.mUid;
-            } else if (mCurFocusedWindowClient != null) {
-                uid = mCurFocusedWindowClient.mUid;
-            } else {
-                uid = -1;
-            }
-            statsToken = ImeTracker.forLogging().onRequestHide(packageName, uid,
+            statsToken = createStatsTokenForFocusedClient(false /* show */,
                     ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason);
         }
 
@@ -3695,6 +3700,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mCurFocusedWindow = windowToken;
         mCurFocusedWindowSoftInputMode = softInputMode;
         mCurFocusedWindowClient = cs;
+        mCurFocusedWindowEditorInfo = editorInfo;
         mCurPerceptible = true;
 
         // We want to start input before showing the IME, but after closing
@@ -4623,7 +4629,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mWindowManagerInternal.onToggleImeRequested(
                         show, mCurFocusedWindow, requestToken, mCurTokenDisplayId);
         mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                mCurFocusedWindowClient, mCurEditorInfo, info.focusedWindowName,
+                mCurFocusedWindowClient, mCurFocusedWindowEditorInfo, info.focusedWindowName,
                 mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                 info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName,
                 info.imeSurfaceParentName));
@@ -5664,9 +5670,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // We cannot simply distinguish a bad IME that reports an arbitrary package name from
             // an unfortunate IME whose internal state is already obsolete due to the asynchronous
             // nature of our system.  Let's compare it with our internal record.
-            if (!TextUtils.equals(mCurEditorInfo.packageName, packageName)) {
+            final var curPackageName = mCurEditorInfo != null
+                    ? mCurEditorInfo.packageName : null;
+            if (!TextUtils.equals(curPackageName, packageName)) {
                 Slog.e(TAG, "Ignoring createInputContentUriToken mCurEditorInfo.packageName="
-                        + mCurEditorInfo.packageName + " packageName=" + packageName);
+                        + curPackageName + " packageName=" + packageName);
                 return null;
             }
             // This user ID can never bee spoofed.
@@ -6425,6 +6433,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public IImeTracker getImeTrackerService() {
         return mImeTrackerService;
+    }
+
+    /**
+     * Creates an IME request tracking token for the current focused client.
+     *
+     * @param show whether this is a show or a hide request.
+     * @param origin the origin of the IME request.
+     * @param reason the reason why the IME request was created.
+     */
+    @NonNull
+    private ImeTracker.Token createStatsTokenForFocusedClient(boolean show,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+        final int uid = mCurFocusedWindowClient != null
+                ? mCurFocusedWindowClient.mUid
+                : -1;
+        final var packageName = mCurFocusedWindowEditorInfo != null
+                ? mCurFocusedWindowEditorInfo.packageName
+                : "uid(" + uid + ")";
+
+        if (show) {
+            return ImeTracker.forLogging().onRequestShow(packageName, uid, origin, reason);
+        } else {
+            return ImeTracker.forLogging().onRequestHide(packageName, uid, origin, reason);
+        }
     }
 
     private static final class InputMethodPrivilegedOperationsImpl
