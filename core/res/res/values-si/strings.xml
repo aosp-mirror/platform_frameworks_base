@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ඔබ ඔබගේ කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන තෙක් ඔබගේ පෞද්ගලික යෙදුම් අවහිර කර ඇත"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"පෞද්ගලික යෙදුම් <xliff:g id="DATE">%1$s</xliff:g> දින <xliff:g id="TIME">%2$s</xliff:g>ට අවහිර වනු ඇත. ඔබේ IT පරිපාලක ඔබේ කාර්යාල පැතිකඩ දින <xliff:g id="NUMBER">%3$d</xliff:g>කට වඩා ඉවත් කර තැබීමට ඉඩ නොදේ."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ක්‍රියාත්මක කරන්න"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ඇමතුම් සහ පණිවිඩ ක්‍රියා විරහිතයි"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ඔබ කාර්යාල යෙදුම් විරාම කර ඇත. ඔබට දුරකථන ඇමතුම් හෝ පෙළ පණිවිඩ නොලැබෙනු ඇත."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"කාර්යාල යෙදුම් විරාමය නොකරන්න"</string>
     <string name="me" msgid="6207584824693813140">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ටැබ්ලට විකල්ප"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV විකල්ප"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"උපාංගයෙහි ඇඟිලි සලකුණු සංවේදකය මත සිදු කරන ඉංගිත ග්‍රහණය කළ හැකිය."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"තිර රුව ගන්න"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"සංදර්ශකයේ තිර රුවක් ගැනීමට හැකිය."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"පෙරදසුන, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"තත්ව තීරුව අබල කරන්න හෝ වෙනස් කරන්න"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"තත්ව තීරුව අක්‍රිය කිරීමට හෝ පද්ධති නිරූපක එකතු හෝ ඉවත් කිරීමට යෙදුමට අවසර දේ."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"තත්ත්ව තීරුව බවට පත්වීම"</string>

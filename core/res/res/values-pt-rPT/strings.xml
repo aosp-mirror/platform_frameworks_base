@@ -208,12 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As suas apps pessoais estão bloqueadas até ativar o seu perfil de trabalho."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"As apps pessoais serão bloqueadas a <xliff:g id="DATE">%1$s</xliff:g> à(s) <xliff:g id="TIME">%2$s</xliff:g>. O seu administrador de TI não permite que o seu perfil de trabalho fique desativado mais de <xliff:g id="NUMBER">%3$d</xliff:g> dias."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ativar"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Chamadas e mensagens desativadas"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Pausou as apps de trabalho. Não vai receber chamadas nem mensagens de texto."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Retom. apps tr."</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opções do tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opções do Android TV"</string>

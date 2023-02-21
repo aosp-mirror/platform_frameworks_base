@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Naka-block ang iyong mga personal na app hangga\'t hindi mo ino-on ang profile sa trabaho mo"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Iba-block ang mga personal na app sa <xliff:g id="DATE">%1$s</xliff:g> nang <xliff:g id="TIME">%2$s</xliff:g>. Hindi pinapayagan ng iyong IT admin na manatiling naka-off ang profile mo sa trabaho nang mahigit <xliff:g id="NUMBER">%3$d</xliff:g> (na) araw."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"I-on"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Naka-off ang mga tawag at mensahe"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Na-pause mo ang mga app para sa trabaho. Hindi ka makakatanggap ng mga tawag sa telepono o text message."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"I-unpause ang app para sa trabaho"</string>
     <string name="me" msgid="6207584824693813140">"Ako"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Mga pagpipilian sa tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Mga opsyon sa Android TV"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Makukunan ang mga galaw na ginawa sa sensor para sa fingerprint ng device."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Kumuha ng screenshot"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Puwedeng kumuha ng screenshot ng display."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Preview, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"i-disable o baguhin ang status bar"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pinapayagan ang app na i-disable ang status bar o magdagdag at mag-alis ng mga icon ng system."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"maging status bar"</string>

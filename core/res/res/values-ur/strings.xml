@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"آپ کے ذاتی ایپس کو اس وقت تک بلاک کر دیا جاتا ہے جب تک کہ آپ اپنے ورک پروفایل کو آن نہیں کرتے"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"‏‫<xliff:g id="DATE">%1$s</xliff:g> کو <xliff:g id="TIME">%2$s</xliff:g> بجے ذاتی ایپس کو مسدود کر دیا جائے گا۔ آپ کا IT منتظم آپ کی دفتری پروفائل کو <xliff:g id="NUMBER">%3$d</xliff:g> دن سے زیادہ بند رکھنے کی اجازت نہیں دیتا ہے۔"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"آن کریں"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"کالز اور پیغامات آف ہیں"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"آپ نے ورک ایپس کو موقوف کر دیا ہے۔ آپ کو فون کالز یا ٹیکسٹ پیغامات موصول نہیں ہوں گے۔"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ورک ایپس کو غیر موقوف کریں"</string>
     <string name="me" msgid="6207584824693813140">"میں"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ٹیبلیٹ کے اختیارات"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏Android TV اختیارات"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"آلہ کے فنگر پرنٹ سینسر پر کیے گئے اشاروں کو کیپچر کر سکتا ہے۔"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"اسکرین شاٹ لیں"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ڈسپلے کا اسکرین شاٹ لیا جا سکتا ہے۔"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"پیش منظر، <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"اسٹیٹس بار کو غیر فعال یا اس میں ترمیم کریں"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ایپ کو اسٹیٹس بار غیر فعال کرنے یا سسٹم آئیکنز شامل کرنے اور ہٹانے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"بطور اسٹیٹس بار کام لیں"</string>

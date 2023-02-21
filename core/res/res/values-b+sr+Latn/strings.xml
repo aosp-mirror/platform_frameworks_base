@@ -208,12 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Lične aplikacije su blokirane dok ne uključite poslovni profil"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Lične aplikacije će biti blokirane: <xliff:g id="DATE">%1$s</xliff:g> u <xliff:g id="TIME">%2$s</xliff:g>. IT administrator ne dozvoljava da poslovni profil bude isključen duže od <xliff:g id="NUMBER">%3$d</xliff:g> dana."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Uključi"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Pozivi i poruke su isključeni"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Pauzirali ste poslovne aplikacije. Nećete dobijati telefonske pozive i SMS-ove."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Uključi poslovne"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije za tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcije Android TV-a"</string>
@@ -345,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Može da registruje pokrete na senzoru za otisak prsta na uređaju."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Napravi snimak ekrana"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Može da napravi snimak ekrana."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pregled, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"onemogućavanje ili izmena statusne trake"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Dozvoljava aplikaciji da onemogući statusnu traku ili da dodaje i uklanja sistemske ikone."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"funkcionisanje kao statusna traka"</string>

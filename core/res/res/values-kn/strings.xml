@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವವರೆಗೆ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳನ್ನು <xliff:g id="DATE">%1$s</xliff:g> ರಂದು <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯಕ್ಕೆ ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಐಟಿ ನಿರ್ವಾಹಕರು ನಿಮ್ಮ ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು <xliff:g id="NUMBER">%3$d</xliff:g> ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಉಳಿಯಲು ಅನುಮತಿಸುವುದಿಲ್ಲ."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ಆನ್"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ಕರೆಗಳು ಮತ್ತು ಸಂದೇಶಗಳು ಆಫ್ ಆಗಿವೆ"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ನೀವು ವಿರಾಮಗೊಳಿಸಿದ್ದೀರಿ ನೀವು ಫೋನ್ ಕರೆಗಳು ಅಥವಾ ಪಠ್ಯ ಸಂದೇಶಗಳನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್ ವಿರಾಮ ರದ್ದುಮಾಡಿ"</string>
     <string name="me" msgid="6207584824693813140">"ನಾನು"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ಟ್ಯಾಬ್ಲೆಟ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ಆಯ್ಕೆಗಳು"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ಸಾಧನದ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌ನಲ್ಲಿ ನಡೆಸಿದ ಗೆಶ್ಚರ್‌ಗಳನ್ನು ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಿ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ಪ್ರದರ್ಶನದ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಲ್ಲದು."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"ಪೂರ್ವವೀಕ್ಷಣೆ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇಲ್ಲವೇ ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಥವಾ ಸೇರಿಸಲು ಮತ್ತು ಸಿಸ್ಟಂ ಐಕಾನ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ಸ್ಥಿತಿ ಪಟ್ಟಿಯಾಗಿರಲು"</string>

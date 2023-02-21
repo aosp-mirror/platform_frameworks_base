@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ଆପଣ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଆପଣଙ୍କର ବ୍ୟକ୍ତିଗତ ଆପ୍ସ ବ୍ଲକ୍ କରାଯାଇଛି"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>ରେ ଆପଣଙ୍କ ବ୍ୟକ୍ତିଗତ ଆପ୍ସକୁ ବ୍ଲକ୍ କରାଯିବ। ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କ ୱାର୍କ ପ୍ରୋଫାଇଲକୁ <xliff:g id="NUMBER">%3$d</xliff:g>ରୁ ଅଧିକ ଦିନ ପାଇଁ ବନ୍ଦ କରିବାକୁ ଅନୁମତି ଦିଅନ୍ତି ନାହିଁ।"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ଚାଲୁ କରନ୍ତୁ"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"କଲ ଏବଂ ମେସେଜଗୁଡ଼ିକ ବନ୍ଦ ଅଛି"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ଆପଣ ୱାର୍କ ଆପ୍ସକୁ ବିରତ କରିଦେଇଛନ୍ତି। ଆପଣ ଫୋନ କଲ କିମ୍ବା ଟେକ୍ସଟ ମେସେଜ ପାଇବେ ନାହିଁ।"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ୱାର୍କ ଆପ୍ସ ପୁଣି ଚାଲୁ କର"</string>
     <string name="me" msgid="6207584824693813140">"ମୁଁ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ଟାବଲେଟ୍‌ର ବିକଳ୍ପ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TVର ବିକଳ୍ପଗୁଡ଼ିକ"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ଡିଭାଇସ୍‌ର ଟିପଚିହ୍ନ ସେନସର୍ ଉପରେ ଜେଶ୍ଚର୍‍ କ୍ୟାପଚର୍‍ କାର୍ଯ୍ୟ କରାଯାଇପାରିବ।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ସ୍କ୍ରିନସଟ୍ ନିଅନ୍ତୁ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ଡିସପ୍ଲେର ଏକ ସ୍କ୍ରିନସଟ୍ ନିଆଯାଇପାରେ।"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"ପ୍ରିଭ୍ୟୁ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ଷ୍ଟାଟସ୍‌ ବାର୍‌କୁ ଅକ୍ଷମ କିମ୍ୱା ସଂଶୋଧନ କରନ୍ତୁ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ଆପ୍‍କୁ, ସ୍ଥିତି ବାର୍‍ ଅକ୍ଷମ କରିବାକୁ କିମ୍ବା ସିଷ୍ଟମ୍‍ ଆଇକନ୍‍ ଯୋଡ଼ିବା କିମ୍ବା ବାହାର କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ଷ୍ଟାଟସ୍‍ ବାର୍‍ ରହିବାକୁ ଦିଅନ୍ତୁ"</string>

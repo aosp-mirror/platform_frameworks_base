@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"แอปส่วนตัวจะถูกบล็อกไว้จนกว่าคุณจะเปิดโปรไฟล์งาน"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"แอปส่วนตัวจะถูกบล็อกในวันที่ <xliff:g id="DATE">%1$s</xliff:g> เวลา <xliff:g id="TIME">%2$s</xliff:g> ผู้ดูแลระบบไอทีไม่อนุญาตให้หยุดใช้โปรไฟล์งานเกิน <xliff:g id="NUMBER">%3$d</xliff:g> วัน"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"เปิด"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"การโทรและข้อความปิดอยู่"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"คุณหยุดแอปงานไว้ชั่วคราว และจะไม่ได้รับสายโทรเข้ารวมถึง SMS"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"เลิกหยุดแอปงาน"</string>
     <string name="me" msgid="6207584824693813140">"ฉัน"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ตัวเลือกของแท็บเล็ต"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ตัวเลือกของ Android TV"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"สามารถจับท่าทางสัมผัสที่เกิดขึ้นบนเซ็นเซอร์ลายนิ้วมือของอุปกรณ์"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ถ่ายภาพหน้าจอ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ถ่ายภาพหน้าจอได้"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"ตัวอย่าง <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ปิดการใช้งานหรือแก้ไขแถบสถานะ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"อนุญาตให้แอปพลิเคชันปิดใช้งานแถบสถานะหรือเพิ่มและนำไอคอนระบบออก"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"เป็นแถบสถานะ"</string>
