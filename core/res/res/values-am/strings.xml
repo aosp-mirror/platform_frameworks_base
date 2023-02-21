@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"በመሣሪያው የጣት አሻራ ዳሳሽ ላይ የተከናወኑ የጣት ምልክቶችን መያዝ ይችላል።"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ቅጽበታዊ ገጽ እይታን ያነሳል"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"የማሳያው ቅጽበታዊ ገጽ እይታን ማንሳት ይችላል።"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"ቅድመ ዕይታ፣ <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"የሁኔቴ አሞሌ አቦዝን ወይም ቀይር"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"የስርዓት አዶዎችን ወደ ሁኔታ አሞሌ ላለማስቻል ወይም ለማከል እና ለማስወገድ ለመተግበሪያው ይፈቅዳሉ፡፡"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"የሁኔታ አሞሌ መሆን"</string>

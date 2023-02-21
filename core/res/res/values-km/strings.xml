@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"អាចចាប់យក​ចលនា​ដែលធ្វើនៅលើ​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍បាន។"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ថត​អេក្រង់"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"អាច​ថត​អេក្រង់​នៃ​ផ្ទាំង​អេក្រង់​បាន។"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"មើល​សាកល្បង <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ធ្វើជារបារស្ថានភាព"</string>

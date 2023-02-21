@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"சாதனத்தின் கைரேகை சென்சார்மேல் செய்யப்படும் சைகைகளைக் கேப்ட்சர் செய்ய முடியும்."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ஸ்கிரீன்ஷாட்டை எடுக்கும்"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"டிஸ்ப்ளேவை ஸ்கிரீன்ஷாட் எடுக்க முடியும்."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"மாதிரிக்காட்சி, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"நிலைப் பட்டியை முடக்குதல் அல்லது மாற்றுதல்"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"நிலைப் பட்டியை முடக்க அல்லது முறைமையில் ஐகான்களைச் சேர்க்க மற்றும் அகற்ற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"நிலைப் பட்டியில் இருக்கும்"</string>

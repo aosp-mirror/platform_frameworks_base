@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Ingathatha ukuthinta okwenziwe kunzwa yezigxivizo zeminwe zedivayisi."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Thatha isithombe-skrini"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ingathatha isithombe-skrini sesiboniso"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Hlola kuqala, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"khubaza noma guqula ibha yomumo"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ivumela uhlelo lokusebenza ukuthi yenze umudwa ochaza ngesimo ukuthi ungasebenzi noma ukufaka noma ukukhipha izithonjana zohlelo."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"yiba yibha yesimo"</string>

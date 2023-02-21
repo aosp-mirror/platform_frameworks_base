@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може да улавя жестовете, извършени върху сензора за отпечатъци на устройството."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Създаване на екранна снимка"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може да създава екранни снимки."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Визуализация на „<xliff:g id="DREAM_NAME">%1$s</xliff:g>“"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"деактивиране или промяна на лентата на състоянието"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Разрешава на приложението да деактивира лентата на състоянието или да добавя и премахва системни икони."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"изпълняване на ролята на лента на състоянието"</string>
