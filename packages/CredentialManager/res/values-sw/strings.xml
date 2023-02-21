@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"Endelea"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Chaguo zaidi"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Pata maelezo zaidi"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Onyesha nenosiri"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Ficha nenosiri"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Ni salama ukitumia funguo za siri"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Kwa kutumia funguo za siri, huhitaji kuunda au kukumbuka manenosiri changamano"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Funguo za siri ni funguo dijitali zilizosimbwa kwa njia fiche unazounda kwa kutumia alama yako ya kidole, uso au mbinu ya kufunga skrini"</string>

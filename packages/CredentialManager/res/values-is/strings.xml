@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"Áfram"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Fleiri valkostir"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Nánar"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Sýna aðgangsorð"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Fela aðgangsorð"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Aukið öryggi með aðgangslyklum"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Með aðgangslyklum þarftu hvorki að búa til né muna flókin aðgangsorð"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Aðgangslyklar eru dulkóðaðir stafrænir lyklar sem þú býrð til með fingrafarinu þínu, andliti eða skjálás."</string>

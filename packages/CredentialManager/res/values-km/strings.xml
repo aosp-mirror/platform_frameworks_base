@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"បន្ត"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ជម្រើសច្រើនទៀត"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ស្វែងយល់បន្ថែម"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"បង្ហាញពាក្យសម្ងាត់"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"លាក់​ពាក្យ​សម្ងាត់"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"កាន់តែមានសុវត្ថិភាពដោយប្រើកូដសម្ងាត់"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"តាមរយៈ​កូដសម្ងាត់ អ្នកមិនចាំបាច់​បង្កើត ឬចងចាំពាក្យសម្ងាត់ស្មុគស្មាញ​នោះទេ"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"កូដសម្ងាត់​ត្រូវបានអ៊ីនគ្រីប​ឃីឌីជីថលដែលអ្នកបង្កើតដោយប្រើ​ស្នាមម្រាមដៃ មុខ ឬចាក់សោអេក្រង់​របស់អ្នក"</string>

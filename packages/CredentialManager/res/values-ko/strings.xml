@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"계속"</string>
     <string name="string_more_options" msgid="7990658711962795124">"옵션 더보기"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"자세히 알아보기"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"비밀번호 표시"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"비밀번호 숨기기"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"패스키로 더 안전하게"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"패스키를 사용하면 복잡한 비밀번호를 만들거나 기억하지 않아도 됩니다."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"패스키는 지문, 얼굴 또는 화면 잠금으로 생성하는 암호화된 디지털 키입니다."</string>
