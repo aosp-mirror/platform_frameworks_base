@@ -11338,7 +11338,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_APPLICATION_RESTRICTIONS)
                 .setAdmin(caller.getPackageName())
-                .setBoolean(/* isDelegate */ who == null)
+                .setBoolean(/* isDelegate */ isCallerDelegate(caller))
                 .setStrings(packageName)
                 .write();
     }
@@ -13379,7 +13379,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_APPLICATION_HIDDEN)
                 .setAdmin(caller.getPackageName())
-                .setBoolean(/* isDelegate */ who == null)
+                .setBoolean(/* isDelegate */ isCallerDelegate(caller))
                 .setStrings(packageName, hidden ? "hidden" : "not_hidden",
                         parent ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT)
                 .write();
@@ -13731,7 +13731,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_UNINSTALL_BLOCKED)
                 .setAdmin(caller.getPackageName())
-                .setBoolean(/* isDelegate */ who == null)
+                .setBoolean(/* isDelegate */ isCallerDelegate(caller))
                 .setStrings(packageName)
                 .write();
     }
@@ -16281,7 +16281,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                                 .setAdmin(caller.getPackageName())
                                                 .setStrings(permission)
                                                 .setInt(grantState)
-                                                .setBoolean(/* isDelegate */ admin == null)
+                                                .setBoolean(
+                                                        /* isDelegate */ isCallerDelegate(caller))
                                                 .write();
 
                                         callback.sendResult(Bundle.EMPTY);
@@ -22184,6 +22185,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private static final HashMap<String, String> DELEGATE_SCOPES = new HashMap<>();
     {
         DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, DELEGATION_PERMISSION_GRANT);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_APP_RESTRICTIONS, DELEGATION_APP_RESTRICTIONS);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_APPS_CONTROL, DELEGATION_BLOCK_UNINSTALL);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, DELEGATION_SECURITY_LOGGING);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_PACKAGE_STATE, DELEGATION_PACKAGE_ACCESS);
     }
 
     private static final HashMap<String, String> CROSS_USER_PERMISSIONS =
@@ -22372,6 +22377,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     + permission
                     + ", "
                     + CROSS_USER_PERMISSIONS.get(permission)
+                    + "(if calling cross-user)"
                     + "}");
         }
     }
