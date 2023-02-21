@@ -332,6 +332,19 @@ final class LogicalDisplay {
     }
 
     /**
+     * Updates layoutLimitedRefreshRate
+     *
+     * @param layoutLimitedRefreshRate refresh rate limited by layout or null.
+     */
+    public void updateLayoutLimitedRefreshRateLocked(
+            @Nullable SurfaceControl.RefreshRateRange layoutLimitedRefreshRate) {
+        if (!Objects.equals(layoutLimitedRefreshRate, mBaseDisplayInfo.layoutLimitedRefreshRate)) {
+            mBaseDisplayInfo.layoutLimitedRefreshRate = layoutLimitedRefreshRate;
+            mInfo.set(null);
+        }
+    }
+
+    /**
      * Updates the state of the logical display based on the available display devices.
      * The logical display might become invalid if it is attached to a display device
      * that no longer exists.
