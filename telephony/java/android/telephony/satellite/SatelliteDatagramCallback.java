@@ -55,9 +55,9 @@ public class SatelliteDatagramCallback {
     }
 
     /**
-     * Called when there are incoming datagrams to be received.
+     * Called when there is an incoming datagram to be received.
      * @param datagramId An id that uniquely identifies incoming datagram.
-     * @param datagram datagram to be received over satellite.
+     * @param datagram Datagram to be received over satellite.
      * @param pendingCount Number of datagrams yet to be received by the app.
      * @param callback This callback will be used by datagram receiver app to send ack back to
      *                 Telephony.
@@ -67,13 +67,13 @@ public class SatelliteDatagramCallback {
         // Base Implementation
     }
 
-    /**@hide*/
+    /** @hide */
     @NonNull
     public final ISatelliteDatagramCallback getBinder() {
         return mBinder;
     }
 
-    /**@hide*/
+    /** @hide */
     public void setExecutor(@NonNull Executor executor) {
         mBinder.setExecutor(executor);
     }

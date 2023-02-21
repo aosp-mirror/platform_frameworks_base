@@ -48,10 +48,10 @@ public final class PointingInfo implements Parcelable {
     /**
      * @hide
      */
-    public PointingInfo(float satelliteAzimuthDegress, float satelliteElevationDegress,
+    public PointingInfo(float satelliteAzimuthDegrees, float satelliteElevationDegrees,
             float antennaAzimuthDegrees, float antennaPitchDegrees, float antennaRollDegrees) {
-        mSatelliteAzimuthDegrees = satelliteAzimuthDegress;
-        mSatelliteElevationDegrees = satelliteElevationDegress;
+        mSatelliteAzimuthDegrees = satelliteAzimuthDegrees;
+        mSatelliteElevationDegrees = satelliteElevationDegrees;
         mAntennaAzimuthDegrees = antennaAzimuthDegrees;
         mAntennaPitchDegrees = antennaPitchDegrees;
         mAntennaRollDegrees = antennaRollDegrees;
