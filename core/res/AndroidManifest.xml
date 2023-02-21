@@ -7695,8 +7695,11 @@
         </activity>
         <activity android:name="com.android.internal.app.IntentForwarderActivity"
                 android:finishOnCloseSystemDialogs="true"
-                android:theme="@style/Theme.Translucent.NoTitleBar"
+                android:theme="@style/Theme.DeviceDefault.Resolver"
                 android:excludeFromRecents="true"
+                android:documentLaunchMode="never"
+                android:relinquishTaskIdentity="true"
+                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:label="@string/user_owner_label"
                 android:exported="true"
                 android:visibleToInstantApps="true"
