@@ -258,6 +258,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"밝기"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"색상 반전"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"색상 보정"</string>
+    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
+    <skip />
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"사용자 관리"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"완료"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"닫기"</string>
@@ -613,14 +615,84 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"알림"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"단축키"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"키보드 레이아웃 전환"</string>
+    <!-- no translation found for keyboard_shortcut_clear_text (4679927133259287577) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_title (1156178106617830429) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_hint (5982623262974326746) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_no_result (6819302191660875501) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_system (1151182120757052669) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_input (5440558509904296233) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_open_apps (1450959949739257562) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_current_app (2011953559133734491) -->
+    <skip />
+    <!-- no translation found for group_system_access_notification_shade (7116898151485382275) -->
+    <skip />
+    <!-- no translation found for group_system_full_screenshot (7389040853798023211) -->
+    <skip />
+    <!-- no translation found for group_system_access_system_app_shortcuts (4421497579210445641) -->
+    <skip />
+    <!-- no translation found for group_system_go_back (8838454003680364227) -->
+    <skip />
+    <!-- no translation found for group_system_access_home_screen (1857344316928441909) -->
+    <skip />
+    <!-- no translation found for group_system_overview_open_apps (6897128761003265350) -->
+    <skip />
+    <!-- no translation found for group_system_cycle_forward (9202444850838205990) -->
+    <skip />
+    <!-- no translation found for group_system_cycle_back (5163464503638229131) -->
+    <skip />
+    <!-- no translation found for group_system_access_all_apps_search (488070738028991753) -->
+    <skip />
+    <!-- no translation found for group_system_hide_reshow_taskbar (3809304065624351131) -->
+    <skip />
+    <!-- no translation found for group_system_access_system_settings (7961639365383008053) -->
+    <skip />
+    <!-- no translation found for group_system_access_google_assistant (1186152943161483864) -->
+    <skip />
+    <!-- no translation found for group_system_lock_screen (7391191300363416543) -->
+    <skip />
+    <!-- no translation found for group_system_quick_memo (2914234890158583919) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_system_multitasking (1065232949510862593) -->
+    <skip />
+    <!-- no translation found for system_multitasking_rhs (6593269428880305699) -->
+    <skip />
+    <!-- no translation found for system_multitasking_lhs (8839380725557952846) -->
+    <skip />
+    <!-- no translation found for system_multitasking_full_screen (1962084334200006297) -->
+    <skip />
+    <!-- no translation found for system_multitasking_replace (844285282472557186) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_input (6888282716546625610) -->
+    <skip />
+    <!-- no translation found for input_switch_input_language_next (3394291576873633793) -->
+    <skip />
+    <!-- no translation found for input_switch_input_language_previous (8823659252918609216) -->
+    <skip />
+    <!-- no translation found for input_access_emoji (8105642858900406351) -->
+    <skip />
+    <!-- no translation found for input_access_voice_typing (7291201476395326141) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"애플리케이션"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"지원"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"브라우저"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (7328131901589876868) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"연락처"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"이메일"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_email (7480359963463803511) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"음악"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"캘린더"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6316043911946540137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7312554713993114342) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"방해 금지 모드"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"볼륨 버튼 단축키"</string>
     <string name="battery" msgid="769686279459897127">"배터리"</string>
@@ -783,6 +855,12 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"화면 녹화"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"제목 없음"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
+    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
+    <skip />
+    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
+    <skip />
+    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
+    <skip />
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"확대"</string>
@@ -815,7 +893,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"접근성 기능을 열려면 탭하세요. 설정에서 이 버튼을 맞춤설정하거나 교체할 수 있습니다.\n\n"<annotation id="link">"설정 보기"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"버튼을 가장자리로 옮겨서 일시적으로 숨기세요."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"실행취소"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"바로가기 <xliff:g id="FEATURE_NAME">%s</xliff:g>개 삭제됨"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> 바로가기 삭제됨"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{바로가기 #개 삭제됨}other{바로가기 #개 삭제됨}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"왼쪽 상단으로 이동"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"오른쪽 상단으로 이동"</string>
@@ -1057,11 +1135,16 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 1대 이상의 기기를 사용할 수 있습니다."</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"바로가기를 길게 터치하세요."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"취소"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"지금 뒤집기"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"휴대전화를 열어서 더 나은 셀카를 찍어보세요"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"전면 디스플레이가 보이도록 뒤집어서 더 나은 셀카를 찍어보세요"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"후면 카메라를 통해 넓은 각도로 해상도가 높은 사진을 찍어보세요."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ 이 화면이 꺼집니다."</b></string>
+    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
+    <skip />
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"폴더블 기기를 펼치는 모습"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"폴더블 기기를 뒤집는 모습"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"배터리 <xliff:g id="PERCENTAGE">%s</xliff:g> 남음"</string>
