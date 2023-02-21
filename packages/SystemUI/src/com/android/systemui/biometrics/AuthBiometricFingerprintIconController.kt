@@ -97,7 +97,6 @@ open class AuthBiometricFingerprintIconController(
         val iconContentDescription = getIconContentDescription(newState)
         if (iconContentDescription != null) {
             iconView.contentDescription = iconContentDescription
-            iconViewOverlay.contentDescription = iconContentDescription
         }
 
         iconView.frame = 0
@@ -152,7 +151,7 @@ open class AuthBiometricFingerprintIconController(
             STATE_AUTHENTICATING_ANIMATING_IN,
             STATE_AUTHENTICATING,
             STATE_PENDING_CONFIRMATION,
-            STATE_AUTHENTICATED -> R.string.accessibility_fingerprint_dialog_fingerprint_icon
+            STATE_AUTHENTICATED -> R.string.security_settings_sfps_enroll_find_sensor_message
             STATE_ERROR,
             STATE_HELP -> R.string.biometric_dialog_try_again
             else -> null
