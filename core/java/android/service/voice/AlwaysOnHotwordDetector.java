@@ -1771,7 +1771,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         mExternalCallback.onDetected((EventPayload) message.obj);
                         break;
                     case MSG_DETECTION_ERROR:
-                        mExternalCallback.onFailure((DetectorFailure) msg.obj);
+                        mExternalCallback.onFailure((DetectorFailure) message.obj);
                         break;
                     case MSG_DETECTION_PAUSE:
                         mExternalCallback.onRecognitionPaused();
