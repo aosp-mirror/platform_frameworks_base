@@ -1352,6 +1352,8 @@ public class DisplayModeDirector {
                     return "PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE";
                 case PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE:
                     return "PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE";
+                case PRIORITY_LAYOUT_LIMITED_FRAME_RATE:
+                    return "PRIORITY_LAYOUT_LIMITED_FRAME_RATE";
                 default:
                     return Integer.toString(priority);
             }

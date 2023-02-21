@@ -166,4 +166,16 @@ public class LogicalDisplayTest {
         assertEquals(Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY,
                 mLogicalDisplay.getDisplayInfoLocked().removeMode);
     }
+
+    @Test
+    public void testLayoutLimitedRefreshRateNotClearedAfterUpdate() {
+        SurfaceControl.RefreshRateRange refreshRateRange = new SurfaceControl.RefreshRateRange(1,
+                2);
+        mLogicalDisplay.updateLayoutLimitedRefreshRateLocked(refreshRateRange);
+        mLogicalDisplay.updateDisplayGroupIdLocked(1);
+
+        DisplayInfo result = mLogicalDisplay.getDisplayInfoLocked();
+
+        assertEquals(refreshRateRange, result.layoutLimitedRefreshRate);
+    }
 }
