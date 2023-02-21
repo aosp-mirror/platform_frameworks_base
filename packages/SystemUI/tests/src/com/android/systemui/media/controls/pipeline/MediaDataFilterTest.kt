@@ -17,6 +17,7 @@
 package com.android.systemui.media.controls.pipeline
 
 import android.app.smartspace.SmartspaceAction
+import android.os.Bundle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -25,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
+import com.android.systemui.media.controls.models.recommendation.EXTRA_KEY_TRIGGER_RESUME
 import com.android.systemui.media.controls.models.recommendation.SmartspaceMediaData
 import com.android.systemui.media.controls.ui.MediaPlayerData
 import com.android.systemui.media.controls.util.MediaFlags
@@ -75,6 +77,7 @@ class MediaDataFilterTest : SysuiTestCase() {
     @Mock private lateinit var smartspaceMediaRecommendationItem: SmartspaceAction
     @Mock private lateinit var logger: MediaUiEventLogger
     @Mock private lateinit var mediaFlags: MediaFlags
+    @Mock private lateinit var cardAction: SmartspaceAction
 
     private lateinit var mediaDataFilter: MediaDataFilter
     private lateinit var dataMain: MediaData
@@ -122,6 +125,7 @@ class MediaDataFilterTest : SysuiTestCase() {
         whenever(smartspaceData.headphoneConnectionTimeMillis)
             .thenReturn(clock.currentTimeMillis() - 100)
         whenever(smartspaceData.instanceId).thenReturn(SMARTSPACE_INSTANCE_ID)
+        whenever(smartspaceData.cardAction).thenReturn(cardAction)
     }
 
     private fun setUser(id: Int) {
@@ -573,5 +577,56 @@ class MediaDataFilterTest : SysuiTestCase() {
         verify(mediaDataManager).setRecommendationInactive(eq(SMARTSPACE_KEY))
         verify(mediaDataManager, never())
             .dismissSmartspaceRecommendation(eq(SMARTSPACE_KEY), anyLong())
+    }
+
+    @Test
+    fun testSmartspaceLoaded_shouldTriggerResume_doesTrigger() {
+        // WHEN we have media that was recently played, but not currently active
+        val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
+        mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+        verify(listener)
+            .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
+
+        // AND we get a smartspace signal with extra to trigger resume
+        val extras = Bundle().apply { putBoolean(EXTRA_KEY_TRIGGER_RESUME, true) }
+        whenever(cardAction.extras).thenReturn(extras)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        // THEN we should tell listeners to treat the media as active instead
+        val dataCurrentAndActive = dataCurrent.copy(active = true)
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(KEY),
+                eq(dataCurrentAndActive),
+                eq(true),
+                eq(100),
+                eq(true)
+            )
+        assertThat(mediaDataFilter.hasActiveMediaOrRecommendation()).isTrue()
+        // And send the smartspace data, but not prioritized
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
+    }
+
+    @Test
+    fun testSmartspaceLoaded_notShouldTriggerResume_doesNotTrigger() {
+        // WHEN we have media that was recently played, but not currently active
+        val dataCurrent = dataMain.copy(active = false, lastActive = clock.elapsedRealtime())
+        mediaDataFilter.onMediaDataLoaded(KEY, null, dataCurrent)
+        verify(listener)
+            .onMediaDataLoaded(eq(KEY), eq(null), eq(dataCurrent), eq(true), eq(0), eq(false))
+
+        // AND we get a smartspace signal with extra to not trigger resume
+        val extras = Bundle().apply { putBoolean(EXTRA_KEY_TRIGGER_RESUME, false) }
+        whenever(cardAction.extras).thenReturn(extras)
+        mediaDataFilter.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
+
+        // THEN listeners are not updated to show media
+        verify(listener, never())
+            .onMediaDataLoaded(eq(KEY), eq(KEY), any(), eq(true), eq(100), eq(true))
+        // But the smartspace update is still propagated
+        verify(listener)
+            .onSmartspaceMediaDataLoaded(eq(SMARTSPACE_KEY), eq(smartspaceData), eq(false))
     }
 }
