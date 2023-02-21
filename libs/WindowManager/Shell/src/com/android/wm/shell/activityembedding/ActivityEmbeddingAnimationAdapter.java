@@ -29,7 +29,7 @@ import android.window.TransitionInfo;
 
 import androidx.annotation.NonNull;
 
-import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 /**
  * Wrapper to handle the ActivityEmbedding animation update in one
@@ -90,7 +90,7 @@ class ActivityEmbeddingAnimationAdapter {
         mChange = change;
         mLeash = leash;
         mWholeAnimationBounds.set(wholeAnimationBounds);
-        if (Transitions.isClosingType(change.getMode())) {
+        if (TransitionUtil.isClosingType(change.getMode())) {
             // When it is closing, we want to show the content at the start position in case the
             // window is resizing as well. For example, when the activities is changing from split
             // to stack, the bottom TaskFragment will be resized to fullscreen when hiding.

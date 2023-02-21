@@ -44,6 +44,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.splitscreen.StageCoordinator;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -149,7 +150,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
             mSplitHandler.addEnterOrExitIfNeeded(request, out);
             return out;
         } else if (request.getRemoteTransition() != null
-                && Transitions.isOpeningType(request.getType())
+                && TransitionUtil.isOpeningType(request.getType())
                 && (request.getTriggerTask() == null
                 || (request.getTriggerTask().topActivityType != ACTIVITY_TYPE_HOME
                         && request.getTriggerTask().topActivityType != ACTIVITY_TYPE_RECENTS))) {
