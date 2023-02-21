@@ -1317,7 +1317,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         if (mScreenOffBrightnessSensorController != null) {
             mScreenOffBrightnessSensorController.setLightSensorEnabled(mUseAutoBrightness
-                    && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
+                    && mIsEnabled && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
                     && !mAllowAutoBrightnessWhileDozingConfig)));
         }
 
