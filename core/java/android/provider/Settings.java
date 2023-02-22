@@ -10784,6 +10784,15 @@ public final class Settings {
                 "low_power_warning_acknowledged";
 
         /**
+         * Whether the "first time extra battery saver warning" dialog needs to be shown
+         * (0: default) or not (1).
+         *
+         * @hide
+         */
+        public static final String EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED =
+                "extra_low_power_warning_acknowledged";
+
+        /**
          * 0 (default) Auto battery saver suggestion has not been suppressed. 1) it has been
          * suppressed.
          * @hide
@@ -15197,6 +15206,12 @@ public final class Settings {
         @TestApi
         @Readable
         public static final String LOW_POWER_MODE = "low_power";
+
+        /**
+         * If 1 extra low power mode is enabled.
+         * @hide
+         */
+        public static final String EXTRA_LOW_POWER_MODE = "extra_low_power";
 
         /**
          * If 1, battery saver ({@link #LOW_POWER_MODE}) will be re-activated after the device
