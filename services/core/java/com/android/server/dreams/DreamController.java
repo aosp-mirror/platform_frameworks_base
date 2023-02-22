@@ -42,7 +42,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 /**
  * Internal controller for starting and stopping the current dream and managing related state.
@@ -120,20 +119,10 @@ final class DreamController {
                     + ", isPreviewMode=" + isPreviewMode + ", canDoze=" + canDoze
                     + ", userId=" + userId + ", reason='" + reason + "'");
 
-            final DreamRecord oldDream = mCurrentDream;
-            mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
-            if (oldDream != null) {
-                if (!oldDream.mWakingGently) {
-                    // We will stop these previous dreams once the new dream is started.
-                    mPreviousDreams.add(oldDream);
-                } else if (Objects.equals(oldDream.mName, mCurrentDream.mName)) {
-                    // We are attempting to start a dream that is currently waking up gently.
-                    // Let's silently stop the old instance here to clear the dream state.
-                    // This should happen after the new mCurrentDream is set to avoid announcing
-                    // a "dream stopped" state.
-                    stopDreamInstance(/* immediately */ true, "restarting same dream", oldDream);
-                }
+            if (mCurrentDream != null) {
+                mPreviousDreams.add(mCurrentDream);
             }
+            mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
 
             mCurrentDream.mDreamStartTime = SystemClock.elapsedRealtime();
             MetricsLogger.visible(mContext,
