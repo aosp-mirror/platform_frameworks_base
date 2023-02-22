@@ -169,6 +169,7 @@ class SideFpsControllerTest : SysuiTestCase() {
         isReverseDefaultRotation: Boolean = false,
         initInfo: DisplayInfo.() -> Unit = {},
         windowInsets: WindowInsets = insetsForSmallNavbar(),
+        inRearDisplayMode: Boolean = false,
         block: () -> Unit
     ) {
         this.deviceConfig = deviceConfig
@@ -227,6 +228,12 @@ class SideFpsControllerTest : SysuiTestCase() {
         sideFpsControllerContext.orCreateTestableResources.addOverride(
             com.android.internal.R.bool.config_reverseDefaultRotation,
             isReverseDefaultRotation
+        )
+
+        val rearDisplayDeviceStates = if (inRearDisplayMode) intArrayOf(3) else intArrayOf()
+        sideFpsControllerContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.array.config_rearDisplayDeviceStates,
+            rearDisplayDeviceStates
         )
 
         sideFpsController =
@@ -542,8 +549,60 @@ class SideFpsControllerTest : SysuiTestCase() {
             { rotation = Surface.ROTATION_270 }
         ) { verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true) }
 
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_0() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_0 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_90() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_90 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_180() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_180 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_270() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_270 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
     private fun verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible: Boolean) {
         sideFpsController.overlayOffsets = sensorLocation
+    }
+
+    private fun verifySfpsIndicator_notAdded_InRearDisplayMode() {
+        sideFpsController.overlayOffsets = sensorLocation
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager, never()).addView(any(), any())
     }
 
     fun alternateBouncerVisibility_showAndHideSideFpsUI() = testWithDisplay {
@@ -582,7 +641,7 @@ class SideFpsControllerTest : SysuiTestCase() {
      * in other rotations have been omitted.
      */
     @Test
-    fun verifiesIndicatorPlacementForXAlignedSensor_0() {
+    fun verifiesIndicatorPlacementForXAlignedSensor_0() =
         testWithDisplay(
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = false,
@@ -599,7 +658,6 @@ class SideFpsControllerTest : SysuiTestCase() {
             assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
             assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
         }
-    }
 
     /**
      * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_270
@@ -608,7 +666,7 @@ class SideFpsControllerTest : SysuiTestCase() {
      * correctly, tests for indicator placement in other rotations have been omitted.
      */
     @Test
-    fun verifiesIndicatorPlacementForXAlignedSensor_InReverseDefaultRotation_270() {
+    fun verifiesIndicatorPlacementForXAlignedSensor_InReverseDefaultRotation_270() =
         testWithDisplay(
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = true,
@@ -625,7 +683,6 @@ class SideFpsControllerTest : SysuiTestCase() {
             assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
             assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
         }
-    }
 
     /**
      * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_0,
