@@ -273,6 +273,18 @@
     <!-- The space between two actions in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
 
+    <!-- The corner radius of the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_button_radius">12dp</dimen>
+
+    <!-- The horizontal padding for the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_horizontal_padding">16dp</dimen>
+
+    <!-- The vertical padding for the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_vertical_padding">8dp</dimen>
+
+    <!-- The insets for the buttons in the letterbox education dialog -->
+    <dimen name="letterbox_education_dialog_vertical_inset">6dp</dimen>
+
     <!-- The margin between the dialog container and its parent. -->
     <dimen name="letterbox_restart_dialog_margin">24dp</dimen>
 
@@ -305,6 +317,15 @@
 
     <!-- The corner radius of the buttons in the restart dialog -->
     <dimen name="letterbox_restart_dialog_button_radius">18dp</dimen>
+
+    <!-- The insets for the buttons in the letterbox restart dialog -->
+    <dimen name="letterbox_restart_dialog_vertical_inset">6dp</dimen>
+
+    <!-- The horizontal padding for the buttons in the letterbox restart dialog -->
+    <dimen name="letterbox_restart_dialog_horizontal_padding">16dp</dimen>
+
+    <!-- The vertical padding for the buttons in the letterbox restart dialog -->
+    <dimen name="letterbox_restart_dialog_vertical_padding">8dp</dimen>
 
     <!-- The width of the brand image on staring surface. -->
     <dimen name="starting_surface_brand_image_width">200dp</dimen>
