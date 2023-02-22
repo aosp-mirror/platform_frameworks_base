@@ -244,10 +244,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     @Override
     public FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry) {
-        if (mFlags.disableFsi()) {
-            return FullScreenIntentDecision.NO_FSI_DISABLED;
-        }
-
         if (entry.getSbn().getNotification().fullScreenIntent == null) {
             if (entry.isStickyAndNotDemoted()) {
                 return FullScreenIntentDecision.NO_FSI_SHOW_STICKY_HUN;
@@ -342,9 +338,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         switch (decision) {
             case NO_FSI_SHOW_STICKY_HUN:
                 mLogger.logNoFullscreen(entry, "Permission denied, show sticky HUN");
-                return;
-            case NO_FSI_DISABLED:
-                mLogger.logNoFullscreen(entry, "Disabled");
                 return;
             case NO_FULL_SCREEN_INTENT:
                 return;
