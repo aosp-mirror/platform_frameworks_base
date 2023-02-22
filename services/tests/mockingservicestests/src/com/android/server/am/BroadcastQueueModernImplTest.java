@@ -78,18 +78,15 @@ import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.am.BroadcastQueueTest.SyncBarrier;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -98,8 +95,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
-@RunWith(MockitoJUnitRunner.class)
-public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
+public final class BroadcastQueueModernImplTest {
     private static final int TEST_UID = android.os.Process.FIRST_APPLICATION_UID;
     private static final int TEST_UID2 = android.os.Process.FIRST_APPLICATION_UID + 1;
 
@@ -118,15 +114,13 @@ public class BroadcastQueueModernImplTest extends ExtendedMockitoTestCase {
 
     BroadcastProcessQueue mHead;
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(FrameworkStatsLog.class);
-    }
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(FrameworkStatsLog.class)
+            .build();
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-
         mHandlerThread = new HandlerThread(getClass().getSimpleName());
         mHandlerThread.start();
 

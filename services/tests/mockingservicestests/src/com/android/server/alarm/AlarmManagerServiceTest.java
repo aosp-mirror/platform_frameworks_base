@@ -159,7 +159,6 @@ import android.util.SparseArray;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.MockedVoidMethod;
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
@@ -168,7 +167,7 @@ import com.android.server.AlarmManagerInternal;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.SystemService;
@@ -182,6 +181,7 @@ import com.android.server.usage.AppStandbyInternal;
 import libcore.util.EmptyArray;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -204,7 +204,7 @@ import java.util.function.LongConsumer;
 @Presubmit
 @SuppressWarnings("GuardedBy")  // This test enforces synchronous behavior.
 @RunWith(AndroidJUnit4.class)
-public final class AlarmManagerServiceTest extends ExtendedMockitoTestCase {
+public final class AlarmManagerServiceTest {
     private static final String TAG = AlarmManagerServiceTest.class.getSimpleName();
     private static final int SYSTEM_UI_UID = 12345;
     private static final int TEST_CALLING_USER = UserHandle.getUserId(TEST_CALLING_UID);
@@ -411,14 +411,9 @@ public final class AlarmManagerServiceTest extends ExtendedMockitoTestCase {
         }
     }
 
-    @Override
-    protected Strictness getSessionStrictness() {
-        return Strictness.WARN;
-    }
-
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .setStrictness(Strictness.WARN)
             .spyStatic(ActivityManager.class)
             .mockStatic(CompatChanges.class)
             .spyStatic(DateFormat.class)
@@ -431,8 +426,10 @@ public final class AlarmManagerServiceTest extends ExtendedMockitoTestCase {
             .mockStatic(ServiceManager.class)
             .mockStatic(Settings.Global.class)
             .mockStatic(SystemProperties.class)
-            .spyStatic(UserHandle.class);
-    }
+            .spyStatic(UserHandle.class)
+            .afterSessionFinished(
+                    () -> LocalServices.removeServiceForTest(AlarmManagerInternal.class))
+            .build();
 
     @Before
     public final void setUp() {
@@ -3804,10 +3801,5 @@ public final class AlarmManagerServiceTest extends ExtendedMockitoTestCase {
 
         mListener.removeListenerAlarmsForCachedUid(TEST_CALLING_UID_2);
         assertEquals(2, mService.mAlarmsPerUid.get(TEST_CALLING_UID_2));
-    }
-
-    @Override
-    public void afterSessionFinished() {
-        LocalServices.removeServiceForTest(AlarmManagerInternal.class);
     }
 }
