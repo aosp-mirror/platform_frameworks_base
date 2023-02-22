@@ -165,26 +165,11 @@ class QSPanelTest : SysuiTestCase() {
     }
 
     @Test
-    fun testTopPadding_notCombinedHeaders() {
-        qsPanel.setUsingCombinedHeaders(false)
+    fun testTopPadding() {
         val padding = 10
         val paddingCombined = 100
         context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        context.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
-
-        qsPanel.updatePadding()
-        assertThat(qsPanel.paddingTop).isEqualTo(padding)
-    }
-
-    @Test
-    fun testTopPadding_combinedHeaders() {
-        qsPanel.setUsingCombinedHeaders(true)
-        val padding = 10
-        val paddingCombined = 100
-        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, padding)
-        context.orCreateTestableResources.addOverride(
-                R.dimen.qs_panel_padding_top_combined_headers, paddingCombined)
+        context.orCreateTestableResources.addOverride(R.dimen.qs_panel_padding_top, paddingCombined)
 
         qsPanel.updatePadding()
         assertThat(qsPanel.paddingTop).isEqualTo(paddingCombined)
