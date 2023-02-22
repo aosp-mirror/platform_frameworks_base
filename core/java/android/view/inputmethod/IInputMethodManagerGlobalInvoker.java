@@ -505,6 +505,40 @@ final class IInputMethodManagerGlobalInvoker {
     }
 
     @AnyThread
+    static void prepareStylusHandwritingDelegation(
+            @NonNull IInputMethodClient client,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return;
+        }
+        try {
+            service.prepareStylusHandwritingDelegation(
+                    client, delegatePackageName, delegatorPackageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
+    static boolean acceptStylusHandwritingDelegation(
+            @NonNull IInputMethodClient client,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        final IInputMethodManager service = getService();
+        if (service == null) {
+            return false;
+        }
+        try {
+            return service.acceptStylusHandwritingDelegation(
+                    client, delegatePackageName, delegatorPackageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @AnyThread
     @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional = true)
     static boolean isStylusHandwritingAvailableAsUser(@UserIdInt int userId) {
         final IInputMethodManager service = getService();
