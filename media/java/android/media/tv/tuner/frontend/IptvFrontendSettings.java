@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class IptvFrontendSettings extends FrontendSettings {
+public final class IptvFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(prefix = "PROTOCOL_",
             value = {PROTOCOL_UNDEFINED, PROTOCOL_UDP, PROTOCOL_RTP})
@@ -181,14 +181,6 @@ public class IptvFrontendSettings extends FrontendSettings {
     }
 
     /**
-     * Creates a builder for {@link IptvFrontendSettings}.
-     */
-    @NonNull
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
      * Builder for {@link IptvFrontendSettings}.
      */
     public static final class Builder {
@@ -202,7 +194,7 @@ public class IptvFrontendSettings extends FrontendSettings {
         private long mBitrate = 0;
         private String mContentUrl = "";
 
-        private Builder() {
+        public Builder() {
         }
 
         /**
@@ -309,8 +301,8 @@ public class IptvFrontendSettings extends FrontendSettings {
          */
         @NonNull
         public IptvFrontendSettings build() {
-            return new IptvFrontendSettings(mSrcIpAddress, mDstIpAddress, mSrcPort,
-                    mDstPort, mFec, mProtocol, mIgmp, mBitrate, mContentUrl);
+            return new IptvFrontendSettings(mSrcIpAddress, mDstIpAddress, mSrcPort, mDstPort,
+                    mFec, mProtocol, mIgmp, mBitrate, mContentUrl);
         }
     }
 
