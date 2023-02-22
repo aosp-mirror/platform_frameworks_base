@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ডিভাইসের আঙ্গুলের ছাপের সেন্সরের উপরে ইঙ্গিত করলে বুঝতে পারে।"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"স্ক্রিনশট নিন"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ডিসপ্লের একটি স্ক্রিনশট নিতে পারেন।"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"প্রিভিউ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"স্ট্যাটাস বার নিষ্ক্রিয় অথবা সংশোধন করে"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"অ্যাপ্লিকেশনকে স্ট্যাটাস বার অক্ষম করতে এবং সিস্টেম আইকনগুলি সরাতে দেয়৷"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"স্থিতি দন্ডে থাকুন"</string>

@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Barmoq izi skanerida kiritilgan ishoralarni taniy oladi."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Skrinshot olish"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ekrandan skrinshot olishi mumkin."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Razm solish, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"holat panelini o‘zgartirish yoki o‘chirish"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ilova holat panelini o‘chirib qo‘yishi hamda tizim ikonkalarini qo‘shishi yoki olib tashlashi mumkin."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"holat qatorida ko‘rinishi"</string>
@@ -2052,8 +2051,8 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"O‘CHIRIB TASHLASH"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BARIBIR OCHILSIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Zararli ilova aniqlandi"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> ilovasining qurilmadagi barcha jurnallarga kirishiga ruxsat berilsinmi?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> uchun qurilmadagi barcha jurnallarga kirish ruxsati berilsinmi?"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir martalik ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi.\n\nBatafsil: g.co/android/devicelogs."</string>

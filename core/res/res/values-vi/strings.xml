@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Có thể ghi lại các cử chỉ được thực hiện trên cảm biến vân tay của thiết bị."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Chụp ảnh màn hình"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Có thể chụp ảnh màn hình."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Bản xem trước, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"vô hiệu hóa hoặc sửa đổi thanh trạng thái"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Cho phép ứng dụng vô hiệu hóa thanh trạng thái hoặc thêm và xóa biểu tượng hệ thống."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"trở thành thanh trạng thái"</string>

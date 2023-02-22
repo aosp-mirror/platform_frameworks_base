@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以捕捉在设备指纹传感器上执行的手势。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"截取屏幕截图"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可截取显示画面的屏幕截图。"</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"预览，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"用作状态栏"</string>

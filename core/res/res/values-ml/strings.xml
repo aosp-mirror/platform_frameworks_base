@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"പ്രിവ്യൂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>

@@ -342,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ડિવાઇસના ફિંગરપ્રિન્ટ સેન્સર પર કરવામાં આવેલા સંકેતો કૅપ્ચર કરી શકે છે."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"સ્ક્રીનશૉટ લો"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ડિસ્પ્લેનો સ્ક્રીનશૉટ લઈ શકે છે."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"પ્રીવ્યૂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"સ્ટેટસ બારમાં બતાવો"</string>
