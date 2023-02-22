@@ -1778,7 +1778,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (animate && !isFullyCollapsed()) {
             animateCloseQs(true);
         } else {
-            mQsController.closeQs();
+            closeQsIfPossible();
         }
         mNotificationStackScrollLayoutController.setOverScrollAmount(0f, true /* onTop */, animate,
                 !animate /* cancelAnimators */);
@@ -4030,9 +4030,17 @@ public final class NotificationPanelViewController implements Dumpable {
         return mExpandingFromHeadsUp;
     }
 
-    /** TODO: remove need for this delegate (b/254870148) */
-    public void closeQs() {
-        mQsController.closeQs();
+    /**
+     * We don't always want to close QS when requested as shade might be in a different state
+     * already e.g. when going from collapse to expand very quickly. In that case StatusBar
+     * window might send signal to collapse QS but we might be already expanding and in split
+     * shade QS are always expanded
+     */
+    private void closeQsIfPossible() {
+        boolean openOrOpening = isShadeFullyOpen() || isExpanding();
+        if (!(mSplitShadeEnabled && openOrOpening)) {
+            mQsController.closeQs();
+        }
     }
 
     /** TODO: remove need for this delegate (b/254870148) */
