@@ -60,7 +60,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
-import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
@@ -478,13 +477,21 @@ public final class CameraExtensionSessionImpl extends CameraExtensionSession {
         ArrayList<CaptureStageImpl> sessionParamsList = new ArrayList<>();
         ArrayList<OutputConfiguration> outputList = new ArrayList<>();
         initializeRepeatingRequestPipeline();
-        outputList.add(new OutputConfiguration(mCameraRepeatingSurface));
+        OutputConfiguration previewOutput = new OutputConfiguration(mCameraRepeatingSurface);
+        // The extension processing logic needs to be able to match images to capture results via
+        // image and result timestamps.
+        previewOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
+        previewOutput.setReadoutTimestampEnabled(false);
+        outputList.add(previewOutput);
         CaptureStageImpl previewSessionParams = mPreviewExtender.onPresetSession();
         if (previewSessionParams != null) {
             sessionParamsList.add(previewSessionParams);
         }
         initializeBurstCapturePipeline();
-        outputList.add(new OutputConfiguration(mCameraBurstSurface));
+        OutputConfiguration captureOutput = new OutputConfiguration(mCameraBurstSurface);
+        captureOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
+        captureOutput.setReadoutTimestampEnabled(false);
+        outputList.add(captureOutput);
         CaptureStageImpl stillCaptureSessionParams = mImageExtender.onPresetSession();
         if (stillCaptureSessionParams != null) {
             sessionParamsList.add(stillCaptureSessionParams);
