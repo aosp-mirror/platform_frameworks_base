@@ -20,6 +20,9 @@ import android.view.MotionEvent
 import com.android.systemui.log.dagger.ShadeLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE
+import com.android.systemui.shade.NotificationPanelViewController.FLING_EXPAND
+import com.android.systemui.shade.NotificationPanelViewController.FLING_HIDE
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -241,18 +244,40 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
         )
     }
 
-    fun logLastFlingWasExpanding(
-            expand: Boolean
-    ) {
+    fun logLastFlingWasExpanding(expand: Boolean) {
         buffer.log(
-                TAG,
-                LogLevel.VERBOSE,
-                {
-                    bool1 = expand
-                },
-                {
-                    "NPVC mLastFlingWasExpanding set to: $bool1"
-                }
+            TAG,
+            LogLevel.VERBOSE,
+            { bool1 = expand },
+            { "NPVC mLastFlingWasExpanding set to: $bool1" }
+        )
+    }
+
+    fun flingQs(flingType: Int, isClick: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = flingTypeToString(flingType)
+                bool1 = isClick
+            },
+            { "QS fling with type $str1, originated from click: $isClick" }
+        )
+    }
+
+    private fun flingTypeToString(flingType: Int) = when (flingType) {
+        FLING_EXPAND -> "FLING_EXPAND"
+        FLING_COLLAPSE -> "FLING_COLLAPSE"
+        FLING_HIDE -> "FLING_HIDE"
+        else -> "UNKNOWN"
+    }
+
+    fun logSplitShadeChanged(splitShadeEnabled: Boolean) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            { bool1 = splitShadeEnabled },
+            { "Split shade state changed: split shade ${if (bool1) "enabled" else "disabled"}" }
         )
     }
 }
