@@ -753,7 +753,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mKeyguardMessageAreaController.setMessage("");
         }
         mBypassController.setAltBouncerShowing(isShowingAlternateBouncer);
-        mKeyguardUpdateManager.setUdfpsBouncerShowing(isShowingAlternateBouncer);
+        mKeyguardUpdateManager.setAlternateBouncerShowing(isShowingAlternateBouncer);
 
         if (updateScrim) {
             mCentralSurfaces.updateScrimController();
