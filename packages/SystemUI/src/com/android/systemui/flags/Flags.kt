@@ -268,6 +268,12 @@ object Flags {
     @JvmField
     val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
 
+    /** Enables new QS Edit Mode visual refresh */
+    // TODO(b/269787742): Tracking Bug
+    @JvmField
+    val ENABLE_NEW_QS_EDIT_MODE =
+        unreleasedFlag(510, "enable_new_qs_edit_mode", teamfood = false)
+
     // 600- status bar
 
     // TODO(b/256614753): Tracking Bug
