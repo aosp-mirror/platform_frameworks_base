@@ -650,6 +650,11 @@ public class AccessibilityShortcutController {
          *
          */
         private void setEmptyShortcutTargetIfNeeded() {
+            if (hasFeatureLeanback()) {
+                // Do not disable the default shortcut on TV.
+                return;
+            }
+
             final ContentResolver contentResolver = mContext.getContentResolver();
 
             final String shortcutTargets = Settings.Secure.getStringForUser(contentResolver,
