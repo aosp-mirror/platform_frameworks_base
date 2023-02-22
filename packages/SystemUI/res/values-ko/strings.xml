@@ -198,6 +198,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"알림 세부정보"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"빠른 설정"</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"화면을 잠급니다."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"업무용 잠금 화면"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"닫기"</string>
@@ -258,8 +260,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"밝기"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"색상 반전"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"색상 보정"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"글꼴 크기"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"사용자 관리"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"완료"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"닫기"</string>
@@ -1005,10 +1006,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"방송할 수 없음"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"저장할 수 없습니다. 다시 시도해 주세요."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"저장할 수 없습니다."</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"4자 이상 입력하세요."</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16자 미만이어야 합니다."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"빌드 번호"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"빌드 번호가 클립보드에 복사되었습니다."</string>
     <string name="basic_status" msgid="2315371112182658176">"대화 열기"</string>
@@ -1121,12 +1120,12 @@
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"알 수 없음"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
-    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 전체 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"일회성 액세스 허용"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"허용 안함"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 전체 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"자세히 알아보기"</string>
-    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g>에서 자세히 알아보기"</string>
+    <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"<xliff:g id="URL">%s</xliff:g>에서 자세히 알아보세요."</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> 열기"</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• 앱이 설정되어 있습니다."</string>
     <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• 1개 이상의 카드가 월렛에 추가되어 있습니다."</string>
@@ -1135,16 +1134,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• 1대 이상의 기기를 사용할 수 있습니다."</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"바로가기를 길게 터치하세요."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"취소"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"지금 화면 전환"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"휴대전화 펼치기"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"화면을 전환할까요?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"해상도를 높이려면 후면 카메라를 사용하세요."</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"해상도를 높이려면 후면 카메라를 사용하세요."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"폴더블 기기를 펼치는 모습"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"폴더블 기기를 뒤집는 모습"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"배터리 <xliff:g id="PERCENTAGE">%s</xliff:g> 남음"</string>
@@ -1156,4 +1150,16 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"직장 프로필로 전환"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"닫기"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"잠금 화면 설정"</string>
+    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
+    <skip />
+    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
+    <skip />
+    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
+    <skip />
+    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
+    <skip />
+    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
+    <skip />
+    <!-- no translation found for assistant_attention_content_description (6830215897604642875) -->
+    <skip />
 </resources>
