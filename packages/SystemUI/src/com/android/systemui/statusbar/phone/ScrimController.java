@@ -359,9 +359,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
     }
 
-    /**
-     * Sets corner radius of scrims.
-     */
+    // TODO(b/270984686) recompute scrim height accurately, based on shade contents.
+    /** Set corner radius of the bottom edge of the Notification scrim. */
+    public void setNotificationBottomRadius(float radius) {
+        if (mNotificationsScrim == null) {
+            return;
+        }
+        mNotificationsScrim.setBottomEdgeRadius(radius);
+    }
+
+    /** Sets corner radius of scrims. */
     public void setScrimCornerRadius(int radius) {
         if (mScrimBehind == null || mNotificationsScrim == null) {
             return;
@@ -523,6 +530,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             states[i].setScrimBehindAlphaKeyguard(scrimBehindAlphaKeyguard);
         }
         scheduleUpdate();
+    }
+
+    /** This is used by the predictive back gesture animation to scale the Shade. */
+    public void applyBackScaling(float scale) {
+        mNotificationsScrim.setScaleX(scale);
+        mNotificationsScrim.setScaleY(scale);
     }
 
     public void onTrackingStarted() {

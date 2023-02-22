@@ -104,6 +104,8 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.DateTimeView;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 
@@ -507,6 +509,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSliderController.Factory mBrightnessSliderFactory;
     private final FeatureFlags mFeatureFlags;
+    private final boolean mAnimateBack;
     private final FragmentService mFragmentService;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final WallpaperController mWallpaperController;
@@ -653,11 +656,39 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private final InteractionJankMonitor mJankMonitor;
 
+    /** Existing callback that handles back gesture invoked for the Shade. */
     private final OnBackInvokedCallback mOnBackInvokedCallback = () -> {
         if (DEBUG) {
             Log.d(TAG, "mOnBackInvokedCallback() called");
         }
         onBackPressed();
+    };
+
+    private boolean shouldBackBeHandled() {
+        return (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED
+                && !isBouncerShowingOverDream());
+    }
+
+    /**
+     *  New callback that handles back gesture invoked, cancel, progress
+     *  and provides feedback via Shade animation.
+     *  (enabled via the WM_SHADE_ANIMATE_BACK_GESTURE flag)
+     */
+    private final OnBackAnimationCallback mOnBackAnimationCallback = new OnBackAnimationCallback() {
+        @Override
+        public void onBackInvoked() {
+            onBackPressed();
+        }
+
+        @Override
+        public void onBackProgressed(BackEvent event) {
+            if (shouldBackBeHandled()) {
+                if (mNotificationPanelViewController.canPanelBeCollapsed()) {
+                    float fraction = event.getProgress();
+                    mNotificationPanelViewController.onBackProgressed(fraction);
+                }
+            }
+        }
     };
 
     /**
@@ -882,6 +913,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI)) {
             mContext.getApplicationInfo().setEnableOnBackInvokedCallback(true);
         }
+        // Based on teamfood flag, enable predictive back animation for the Shade.
+        mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
     }
 
     @Override
@@ -2699,7 +2732,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 if (viewRootImpl != null) {
                     viewRootImpl.getOnBackInvokedDispatcher()
                             .registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                                    mOnBackInvokedCallback);
+                                    mAnimateBack ? mOnBackAnimationCallback
+                                            : mOnBackInvokedCallback);
                     mIsBackCallbackRegistered = true;
                     if (DEBUG) Log.d(TAG, "is now VISIBLE to user AND callback registered");
                 }
@@ -2714,7 +2748,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                 ViewRootImpl viewRootImpl = getViewRootImpl();
                 if (viewRootImpl != null) {
                     viewRootImpl.getOnBackInvokedDispatcher()
-                            .unregisterOnBackInvokedCallback(mOnBackInvokedCallback);
+                            .unregisterOnBackInvokedCallback(
+                                    mAnimateBack ? mOnBackAnimationCallback
+                                            : mOnBackInvokedCallback);
                     mIsBackCallbackRegistered = false;
                     if (DEBUG) Log.d(TAG, "is NOT VISIBLE to user, AND callback unregistered");
                 }
@@ -3256,9 +3292,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mNotificationPanelViewController.closeUserSwitcherIfOpen()) {
             return true;
         }
-        if (mState != StatusBarState.KEYGUARD && mState != StatusBarState.SHADE_LOCKED
-                && !isBouncerShowingOverDream()) {
+        if (shouldBackBeHandled()) {
             if (mNotificationPanelViewController.canPanelBeCollapsed()) {
+                // this is the Shade dismiss animation, so make sure QQS closes when it ends.
+                mNotificationPanelViewController.onBackPressed();
                 mShadeController.animateCollapseShade();
             }
             return true;

@@ -20,6 +20,7 @@ import static java.lang.Float.isNaN;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -37,6 +38,7 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.util.LargeScreenUtils;
 
 import java.util.concurrent.Executor;
 
@@ -102,6 +104,13 @@ public class ScrimView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mDrawable.getAlpha() > 0) {
+            Resources res = getResources();
+            // Scrim behind notification shade has sharp (not rounded) corners on large screens
+            // which scrim itself cannot know, so we set it here.
+            if (mDrawable instanceof ScrimDrawable) {
+                ((ScrimDrawable) mDrawable).setShouldUseLargeScreenSize(
+                        LargeScreenUtils.shouldUseLargeScreenShadeHeader(res));
+            }
             mDrawable.draw(canvas);
         }
     }
@@ -168,6 +177,15 @@ public class ScrimView extends View {
             }
             updateColorWithTint(animated);
         });
+    }
+
+    /**
+     * Set corner radius of the bottom edge of the Notification scrim.
+     */
+    public void setBottomEdgeRadius(float radius) {
+        if (mDrawable instanceof ScrimDrawable) {
+            ((ScrimDrawable) mDrawable).setBottomEdgeRadius(radius);
+        }
     }
 
     @VisibleForTesting

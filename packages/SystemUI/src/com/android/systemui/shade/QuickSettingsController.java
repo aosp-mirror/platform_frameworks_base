@@ -31,6 +31,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.app.Fragment;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.util.Log;
@@ -40,6 +41,9 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 
@@ -63,6 +67,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.transition.ShadeTransitionController;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -83,9 +88,9 @@ import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.LargeScreenUtils;
 
-import javax.inject.Inject;
-
 import dagger.Lazy;
+
+import javax.inject.Inject;
 
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
@@ -216,6 +221,13 @@ public class QuickSettingsController {
      * need to take this into account in our panel height calculation.
      */
     private boolean mAnimatorExpand;
+
+    /**
+     * The gesture inset currently in effect -- used to decide whether a back gesture should
+     * receive a horizontal swipe inwards from the left/right vertical edge of the screen.
+     * We cache this on ACTION_DOWN, and query it during both ACTION_DOWN and ACTION_MOVE events.
+     */
+    private Insets mCachedGestureInsets;
 
     /**
      * The amount of progress we are currently in if we're transitioning to the full shade.
@@ -401,6 +413,7 @@ public class QuickSettingsController {
         mQuickQsHeaderHeight = mLargeScreenShadeHeaderHeight;
 
         mEnableClipping = mResources.getBoolean(R.bool.qs_enable_clipping);
+        updateGestureInsetsCache();
     }
 
     // TODO (b/265054088): move this and others to a CoreStartable
@@ -462,6 +475,26 @@ public class QuickSettingsController {
     private boolean isSplitShadeAndTouchXOutsideQs(float touchX) {
         return mSplitShadeEnabled && touchX < mQsFrame.getX()
                 || touchX > mQsFrame.getX() + mQsFrame.getWidth();
+    }
+
+    /**
+     *  Computes (and caches) the gesture insets for the current window. Intended to be called
+     *  on ACTION_DOWN, and safely queried repeatedly thereafter during ACTION_MOVE events.
+     */
+    public void updateGestureInsetsCache() {
+        WindowManager wm = this.mPanelView.getContext().getSystemService(WindowManager.class);
+        WindowMetrics windowMetrics = wm.getCurrentWindowMetrics();
+        mCachedGestureInsets = windowMetrics.getWindowInsets().getInsets(
+                WindowInsets.Type.systemGestures());
+    }
+
+    /**
+     *  Returns whether x coordinate lies in the vertical edges of the screen
+     *  (the only place where a back gesture can be initiated).
+     */
+    public boolean shouldBackBypassQuickSettings(float touchX) {
+        return (touchX < mCachedGestureInsets.left)
+                || (touchX > mKeyguardStatusBar.getWidth() - mCachedGestureInsets.right);
     }
 
     /** Returns whether touch is within QS area */
@@ -912,6 +945,10 @@ public class QuickSettingsController {
                 getHeaderTranslation(),
                 squishiness
         );
+        if (QuickStepContract.ALLOW_BACK_GESTURE_IN_SHADE
+                && mPanelViewControllerLazy.get().mAnimateBack) {
+            mPanelViewControllerLazy.get().adjustBackAnimationScale(adjustedExpansionFraction);
+        }
         mMediaHierarchyManager.setQsExpansion(qsExpansionFraction);
         int qsPanelBottomY = calculateBottomPosition(qsExpansionFraction);
         mScrimController.setQsPosition(qsExpansionFraction, qsPanelBottomY);
@@ -1099,6 +1136,7 @@ public class QuickSettingsController {
             float screenCornerRadius = mRecordingController.isRecording() ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
+            mScrimController.setNotificationBottomRadius(radius);
         }
         if (isQsFragmentCreated()) {
             float qsTranslation = 0;
@@ -1491,18 +1529,31 @@ public class QuickSettingsController {
     }
 
     private void handleDown(MotionEvent event) {
-        if (event.getActionMasked() == MotionEvent.ACTION_DOWN
-                && shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
-            mFalsingCollector.onQsDown();
-            mShadeLog.logMotionEvent(event, "handleQsDown: down action, QS tracking enabled");
-            mTracking = true;
-            onExpansionStarted();
-            mInitialHeightOnTouch = mExpansionHeight;
-            mInitialTouchY = event.getY();
-            mInitialTouchX = event.getX();
-            // TODO (b/265193930): remove dependency on NPVC
-            // If we interrupt an expansion gesture here, make sure to update the state correctly.
-            mPanelViewControllerLazy.get().notifyExpandingFinished();
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            // When the shade is fully-expanded, an inward swipe from the L/R edge should first
+            // allow the back gesture's animation to preview the shade animation (if enabled).
+            // (swipes starting closer to the center of the screen will not be affected)
+            if (QuickStepContract.ALLOW_BACK_GESTURE_IN_SHADE
+                    && mPanelViewControllerLazy.get().mAnimateBack) {
+                updateGestureInsetsCache();
+                if (shouldBackBypassQuickSettings(event.getX())) {
+                    return;
+                }
+            }
+            if (shouldQuickSettingsIntercept(event.getX(), event.getY(), -1)) {
+                mFalsingCollector.onQsDown();
+                mShadeLog.logMotionEvent(event,
+                        "handleQsDown: down action, QS tracking enabled");
+                mTracking = true;
+                onExpansionStarted();
+                mInitialHeightOnTouch = mExpansionHeight;
+                mInitialTouchY = event.getY();
+                mInitialTouchX = event.getX();
+                // TODO (b/265193930): remove dependency on NPVC
+                // If we interrupt an expansion gesture here, make sure to update the state
+                // correctly.
+                mPanelViewControllerLazy.get().notifyExpandingFinished();
+            }
         }
     }
 

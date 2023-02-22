@@ -77,6 +77,8 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewRootImpl;
 import android.view.WindowManager;
+import android.window.BackEvent;
+import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
@@ -181,6 +183,8 @@ import com.android.systemui.volume.VolumeComponent;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.startingsurface.StartingSurface;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -192,8 +196,6 @@ import org.mockito.MockitoAnnotations;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.Optional;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -331,6 +333,10 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
         // Set default value to avoid IllegalStateException.
         mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
+        // For the Shade to respond to Back gesture, we must enable the event routing
+        mFeatureFlags.set(Flags.WM_SHADE_ALLOW_BACK_GESTURE, true);
+        // For the Shade to animate during the Back gesture, we must enable the animation flag.
+        mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -850,6 +856,50 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
         mOnBackInvokedCallback.getValue().onBackInvoked();
         verify(mShadeController).animateCollapseShade();
+    }
+
+    /**
+     * When back progress is at 100%, the onBackProgressed animation driver inside
+     * NotificationPanelViewController should be invoked appropriately (with 1.0f passed in).
+     */
+    @Test
+    public void testPredictiveBackAnimation_progressMaxScalesPanel() {
+        mCentralSurfaces.setNotificationShadeWindowViewController(
+                mNotificationShadeWindowViewController);
+        mCentralSurfaces.handleVisibleToUserChanged(true);
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
+                mOnBackInvokedCallback.capture());
+
+        OnBackAnimationCallback onBackAnimationCallback =
+                (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
+        when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
+
+        BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 100.0f, 1.0f, BackEvent.EDGE_LEFT);
+        onBackAnimationCallback.onBackProgressed(fakeSwipeInFromLeftEdge);
+        verify(mNotificationPanelViewController).onBackProgressed(eq(1.0f));
+    }
+
+    /**
+     * When back progress is at 0%, the onBackProgressed animation driver inside
+     * NotificationPanelViewController should be invoked appropriately (with 0.0f passed in).
+     */
+    @Test
+    public void testPredictiveBackAnimation_progressMinScalesPanel() {
+        mCentralSurfaces.setNotificationShadeWindowViewController(
+                mNotificationShadeWindowViewController);
+        mCentralSurfaces.handleVisibleToUserChanged(true);
+        verify(mOnBackInvokedDispatcher).registerOnBackInvokedCallback(
+                eq(OnBackInvokedDispatcher.PRIORITY_DEFAULT),
+                mOnBackInvokedCallback.capture());
+
+        OnBackAnimationCallback onBackAnimationCallback =
+                (OnBackAnimationCallback) (mOnBackInvokedCallback.getValue());
+        when(mNotificationPanelViewController.canPanelBeCollapsed()).thenReturn(true);
+
+        BackEvent fakeSwipeInFromLeftEdge = new BackEvent(20.0f, 10.0f, 0.0f, BackEvent.EDGE_LEFT);
+        onBackAnimationCallback.onBackProgressed(fakeSwipeInFromLeftEdge);
+        verify(mNotificationPanelViewController).onBackProgressed(eq(0.0f));
     }
 
     @Test
