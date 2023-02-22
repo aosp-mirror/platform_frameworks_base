@@ -19,6 +19,7 @@ package com.android.internal.telecom;
 import static android.telecom.TelecomManager.TELECOM_TRANSACTION_SUCCESS;
 
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.OutcomeReceiver;
 import android.os.ResultReceiver;
 import android.telecom.CallAttributes;
@@ -148,6 +149,7 @@ public class ClientTransactionalServiceWrapper {
         private static final String ON_AVAILABLE_CALL_ENDPOINTS = "onAvailableCallEndpointsChanged";
         private static final String ON_MUTE_STATE_CHANGED = "onMuteStateChanged";
         private static final String ON_CALL_STREAMING_FAILED = "onCallStreamingFailed";
+        private static final String ON_EVENT = "onEvent";
 
         private void handleHandshakeCallback(String action, String callId, int code,
                 ResultReceiver ackResultReceiver) {
@@ -313,6 +315,24 @@ public class ClientTransactionalServiceWrapper {
         public void onCallStreamingFailed(String callId, int reason) {
             Log.i(TAG, TextUtils.formatSimple("oCSF: id=[%s], reason=[%s]", callId, reason));
             handleEventCallback(callId, ON_CALL_STREAMING_FAILED, reason);
+        }
+
+        @Override
+        public void onEvent(String callId, String event, Bundle extras) {
+            // lookup the callEventCallback associated with the particular call
+            TransactionalCall call = mCallIdToTransactionalCall.get(callId);
+            if (call != null) {
+                CallEventCallback callback = call.getCallStateCallback();
+                Executor executor = call.getExecutor();
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        callback.onEvent(event, extras);
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
         }
     };
 }

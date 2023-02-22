@@ -17,6 +17,7 @@
 package android.telecom;
 
 import android.annotation.NonNull;
+import android.os.Bundle;
 
 import java.util.List;
 
@@ -56,4 +57,17 @@ public interface CallEventCallback {
      * @param reason Code to indicate the reason of this failure
      */
     void onCallStreamingFailed(@CallStreamingService.StreamingFailedReason int reason);
+
+    /**
+     * Informs this {@link android.telecom.CallEventCallback} on events raised from a
+     * {@link android.telecom.InCallService} presenting this call. The event key and extra values
+     * are defined in AndroidX. This enables alternative calling surfaces, such as an automotive
+     * UI, to relay requests to perform other non-standard call actions to the app. For example,
+     * an automotive calling solution may offer the ability for the user to raise their hand
+     * during a meeting.
+     *
+     * @param event that is defined in AndroidX (ex. the number of participants changed)
+     * @param extras the updated value in relation to the event (ex. 4 participants)
+     */
+    void onEvent(@NonNull String event, @NonNull Bundle extras);
 }
