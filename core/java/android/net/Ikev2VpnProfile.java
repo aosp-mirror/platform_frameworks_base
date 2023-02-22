@@ -1108,6 +1108,11 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         /**
          * Sets the enabled state of the automatic NAT-T keepalive timers
          *
+         * Note that if this builder was constructed with a {@link IkeTunnelConnectionParams},
+         * but this is called with {@code true}, the framework will automatically choose the
+         * appropriate keepalive timer and ignore the settings in the session params embedded
+         * in the connection params.
+         *
          * @param isEnabled {@code true} to enable automatic keepalive timers, based on internal
          *     platform signals. Defaults to {@code false}.
          * @return this {@link Builder} object to facilitate chaining of method calls
