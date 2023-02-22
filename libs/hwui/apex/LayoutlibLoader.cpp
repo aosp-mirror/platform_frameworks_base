@@ -66,6 +66,7 @@ extern int register_android_graphics_fonts_FontFamily(JNIEnv* env);
 extern int register_android_graphics_text_LineBreaker(JNIEnv* env);
 extern int register_android_graphics_text_MeasuredText(JNIEnv* env);
 extern int register_android_graphics_text_TextShaper(JNIEnv* env);
+extern int register_android_graphics_text_GraphemeBreak(JNIEnv* env);
 
 extern int register_android_util_PathParser(JNIEnv* env);
 extern int register_android_view_DisplayListCanvas(JNIEnv* env);
@@ -125,6 +126,8 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.text.MeasuredText",
          REG_JNI(register_android_graphics_text_MeasuredText)},
         {"android.graphics.text.TextRunShaper", REG_JNI(register_android_graphics_text_TextShaper)},
+        {"android.graphics.text.GraphemeBreak",
+         REG_JNI(register_android_graphics_text_GraphemeBreak)},
         {"android.util.PathParser", REG_JNI(register_android_util_PathParser)},
 };
 
