@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -84,6 +85,7 @@ public class ExpandableNotificationRowController implements NodeController {
     private final boolean mAllowLongPress;
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
     private final Optional<BubblesManager> mBubblesManagerOptional;
+    private final IStatusBarService mStatusBarService;
 
     @Inject
     public ExpandableNotificationRowController(
@@ -109,7 +111,8 @@ public class ExpandableNotificationRowController implements NodeController {
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             PeopleNotificationIdentifier peopleNotificationIdentifier,
-            Optional<BubblesManager> bubblesManagerOptional) {
+            Optional<BubblesManager> bubblesManagerOptional,
+            IStatusBarService statusBarService) {
         mView = view;
         mListContainer = listContainer;
         mActivatableNotificationViewController = activatableNotificationViewController;
@@ -134,6 +137,7 @@ public class ExpandableNotificationRowController implements NodeController {
         mFalsingCollector = falsingCollector;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesManagerOptional = bubblesManagerOptional;
+        mStatusBarService = statusBarService;
     }
 
     /**
@@ -160,7 +164,8 @@ public class ExpandableNotificationRowController implements NodeController {
                 mPeopleNotificationIdentifier,
                 mOnUserInteractionCallback,
                 mBubblesManagerOptional,
-                mNotificationGutsManager
+                mNotificationGutsManager,
+                mStatusBarService
         );
         mView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         if (mAllowLongPress) {
