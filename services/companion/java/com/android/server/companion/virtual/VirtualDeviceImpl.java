@@ -100,6 +100,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     private static final String TAG = "VirtualDeviceImpl";
 
+    private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
+            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
+                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
+
     /**
      * Timeout until {@link #launchPendingIntent} stops waiting for an activity to be launched.
      */
@@ -272,7 +280,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      * device.
      */
     int getBaseVirtualDisplayFlags() {
-        int flags = 0;
+        int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
         if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
         }
