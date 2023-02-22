@@ -33,6 +33,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.shared.condition.Condition;
 import com.android.systemui.shared.condition.Monitor;
@@ -65,6 +67,9 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     @Mock
     private View mBcSmartspaceView;
 
+    @Mock
+    private FeatureFlags mFeatureFlags;
+
     private Monitor mMonitor;
 
     private final Set<Condition> mPreconditions = new HashSet<>();
@@ -73,6 +78,8 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mMonitor = SelfExecutingMonitor.createInstance();
+
+        when(mFeatureFlags.isEnabled(Flags.HIDE_SMARTSPACE_ON_DREAM_OVERLAY)).thenReturn(false);
     }
 
     /**
@@ -85,12 +92,22 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
         verify(mDreamOverlayStateController, never()).addComplication(eq(mComplication));
     }
 
-    private SmartSpaceComplication.Registrant getRegistrant() {
-        return new SmartSpaceComplication.Registrant(
-                mDreamOverlayStateController,
-                mComplication,
-                mSmartspaceController,
-                mMonitor);
+    @Test
+    public void testRegistrantStart_featureEnabled_addOverlayStateCallback() {
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        verify(mDreamOverlayStateController).addCallback(any());
+    }
+
+    @Test
+    public void testRegistrantStart_featureDisabled_doesNotAddOverlayStateCallback() {
+        when(mFeatureFlags.isEnabled(Flags.HIDE_SMARTSPACE_ON_DREAM_OVERLAY)).thenReturn(true);
+
+        final SmartSpaceComplication.Registrant registrant = getRegistrant();
+        registrant.start();
+
+        verify(mDreamOverlayStateController, never()).addCallback(any());
     }
 
     @Test
@@ -187,5 +204,14 @@ public class SmartSpaceComplicationTest extends SysuiTestCase {
                         mSmartspaceController, mock(ComplicationLayoutParams.class));
         when(mSmartspaceController.buildAndConnectView(any())).thenReturn(mBcSmartspaceView);
         assertEquals(viewHolder.getView(), viewHolder.getView());
+    }
+
+    private SmartSpaceComplication.Registrant getRegistrant() {
+        return new SmartSpaceComplication.Registrant(
+                mDreamOverlayStateController,
+                mComplication,
+                mSmartspaceController,
+                mMonitor,
+                mFeatureFlags);
     }
 }
