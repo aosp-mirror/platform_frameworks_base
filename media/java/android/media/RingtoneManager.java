@@ -841,7 +841,7 @@ public class RingtoneManager {
         if (ringtoneUri != null) {
             final Uri cacheUri = getCacheForType(type, context.getUserId());
             try (InputStream in = openRingtone(context, ringtoneUri);
-                    OutputStream out = resolver.openOutputStream(cacheUri)) {
+                    OutputStream out = resolver.openOutputStream(cacheUri, "wt")) {
                 FileUtils.copy(in, out);
             } catch (IOException e) {
                 Log.w(TAG, "Failed to cache ringtone: " + e);
