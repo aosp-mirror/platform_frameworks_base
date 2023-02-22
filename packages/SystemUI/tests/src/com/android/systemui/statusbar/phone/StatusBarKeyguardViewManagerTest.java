@@ -38,6 +38,8 @@ import android.testing.TestableLooper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
@@ -65,8 +67,10 @@ import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInt
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.navigationbar.TaskbarDelegate;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -123,6 +127,9 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Mock private BouncerView mBouncerView;
     @Mock private BouncerViewDelegate mBouncerViewDelegate;
     @Mock private OnBackAnimationCallback mBouncerViewDelegateBackCallback;
+    @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Mock private WindowInsetsController mWindowInsetsController;
+    @Mock private TaskbarDelegate mTaskbarDelegate;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback
@@ -150,6 +157,11 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mFeatureFlags
                 .isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM))
                 .thenReturn(true);
+
+        when(mCentralSurfaces.getNotificationShadeWindowView())
+                .thenReturn(mNotificationShadeWindowView);
+        when(mNotificationShadeWindowView.getWindowInsetsController())
+                .thenReturn(mWindowInsetsController);
 
         mStatusBarKeyguardViewManager =
                 new StatusBarKeyguardViewManager(
@@ -637,6 +649,14 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         when(mDreamOverlayStateController.isOverlayActive()).thenReturn(true);
         mBouncerExpansionCallback.onVisibilityChanged(false);
         verify(mCentralSurfaces).setBouncerShowingOverDream(false);
+    }
+
+    @Test
+    public void testHideTaskbar() {
+        when(mTaskbarDelegate.isInitialized()).thenReturn(true);
+        mStatusBarKeyguardViewManager.setTaskbarDelegate(mTaskbarDelegate);
+        mStatusBarKeyguardViewManager.updateNavigationBarVisibility(false);
+        verify(mWindowInsetsController).hide(WindowInsets.Type.navigationBars());
     }
 
     @Test
