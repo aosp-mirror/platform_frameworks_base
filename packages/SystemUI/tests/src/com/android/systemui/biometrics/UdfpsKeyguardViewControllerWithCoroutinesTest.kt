@@ -86,8 +86,9 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
                 mock(PrimaryBouncerCallbackInteractor::class.java),
                 mock(FalsingCollector::class.java),
                 mock(DismissCallbackRegistry::class.java),
+                context,
+                mKeyguardUpdateMonitor,
                 mock(KeyguardBypassController::class.java),
-                mKeyguardUpdateMonitor
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(
