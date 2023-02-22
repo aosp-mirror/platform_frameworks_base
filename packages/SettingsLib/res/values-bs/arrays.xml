@@ -70,9 +70,9 @@
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
     <item msgid="6348114316510677939">"Onemogućeno"</item>
-    <item msgid="5884245882825346396">"Čarolija"</item>
+    <item msgid="5884245882825346396">"Magija"</item>
     <item msgid="6569400572915342949">"Zaglavlje"</item>
-    <item msgid="1239386221416967664">"Potpuni filtar"</item>
+    <item msgid="1239386221416967664">"Potpuni filter"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (zadano)"</item>

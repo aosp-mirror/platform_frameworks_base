@@ -63,13 +63,17 @@
     <item msgid="6336372935919715515">"已啟用篩選結果"</item>
     <item msgid="2779123106632690576">"已啟用"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:0 (5118179698172834473) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:1 (4818549483446395865) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:2 (8207123990453243311) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:0 (6348114316510677939) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:1 (5884245882825346396) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:2 (6569400572915342949) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:3 (1239386221416967664) -->
+  <string-array name="bt_hci_snoop_log_filters_entries">
+    <item msgid="5118179698172834473">"已篩選標頭"</item>
+    <item msgid="4818549483446395865">"已篩選 A2DP 媒體封包"</item>
+    <item msgid="8207123990453243311">"已篩選 RFCOMM 管道"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_profile_filter_entries">
+    <item msgid="6348114316510677939">"已停用"</item>
+    <item msgid="5884245882825346396">"按偏好排序"</item>
+    <item msgid="6569400572915342949">"標頭"</item>
+    <item msgid="1239386221416967664">"完整篩選器"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (預設)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
