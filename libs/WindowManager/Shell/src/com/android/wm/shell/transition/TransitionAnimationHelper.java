@@ -142,8 +142,12 @@ public class TransitionAnimationHelper {
         Animation a = null;
         if (animAttr != 0) {
             if (overrideType == ANIM_FROM_STYLE && !isTask) {
-                a = loadCustomActivityTransition(animAttr, options, enter, transitionAnimation);
-                if (a == null) {
+                final TransitionInfo.AnimationOptions.CustomActivityTransition customTransition =
+                        getCustomActivityTransition(animAttr, options);
+                if (customTransition != null) {
+                    a = loadCustomActivityTransition(
+                            customTransition, options, enter, transitionAnimation);
+                } else {
                     a = transitionAnimation
                             .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
                                     animAttr, translucent);
@@ -160,10 +164,8 @@ public class TransitionAnimationHelper {
         return a;
     }
 
-    static Animation loadCustomActivityTransition(int animAttr,
-            TransitionInfo.AnimationOptions options, boolean enter,
-            TransitionAnimation transitionAnimation) {
-        Animation a = null;
+    static TransitionInfo.AnimationOptions.CustomActivityTransition getCustomActivityTransition(
+            int animAttr, TransitionInfo.AnimationOptions options) {
         boolean isOpen = false;
         switch (animAttr) {
             case R.styleable.WindowAnimation_activityOpenEnterAnimation:
@@ -177,17 +179,19 @@ public class TransitionAnimationHelper {
                 return null;
         }
 
-        final TransitionInfo.AnimationOptions.CustomActivityTransition transitionAnim =
-                options.getCustomActivityTransition(isOpen);
-        if (transitionAnim != null) {
-            a = transitionAnimation.loadAppTransitionAnimation(options.getPackageName(),
-                    enter ? transitionAnim.getCustomEnterResId()
-                            : transitionAnim.getCustomExitResId());
-            if (a != null && transitionAnim.getCustomBackgroundColor() != 0) {
-                a.setBackdropColor(transitionAnim.getCustomBackgroundColor());
-            }
-        }
+        return options.getCustomActivityTransition(isOpen);
+    }
 
+    static Animation loadCustomActivityTransition(
+            @NonNull TransitionInfo.AnimationOptions.CustomActivityTransition transitionAnim,
+            TransitionInfo.AnimationOptions options, boolean enter,
+            TransitionAnimation transitionAnimation) {
+        final Animation a = transitionAnimation.loadAppTransitionAnimation(options.getPackageName(),
+                enter ? transitionAnim.getCustomEnterResId()
+                        : transitionAnim.getCustomExitResId());
+        if (a != null && transitionAnim.getCustomBackgroundColor() != 0) {
+            a.setBackdropColor(transitionAnim.getCustomBackgroundColor());
+        }
         return a;
     }
 
