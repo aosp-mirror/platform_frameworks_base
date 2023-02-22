@@ -211,6 +211,32 @@
             <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap" maxOccurs="unbounded">
                 <xs:annotation name="final"/>
             </xs:element>
+            <xs:element type="refreshRateThrottlingMap" name="refreshRateThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateThrottlingMap">
+        <xs:attribute name="id" type="xs:string" />
+        <xs:sequence>
+            <xs:element name="refreshRateThrottlingPoint" type="refreshRateThrottlingPoint" maxOccurs="unbounded">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="refreshRateRange" name="refreshRateRange">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 
