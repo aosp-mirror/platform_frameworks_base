@@ -6286,7 +6286,7 @@
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
          permission for staging HealthConnect's remote data. The digest should be computed over the
          DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
-    <string-array name="config_healthConnectStagingDataKnownSigners">
+    <string-array name="config_healthConnectRestoreKnownSigners">
     </string-array>
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner Health
         Connect Migration permissions. The digest should be computed over the DER encoding of the
@@ -6322,4 +6322,9 @@
 
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
+
+    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
+    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
+    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
+    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
 </resources>

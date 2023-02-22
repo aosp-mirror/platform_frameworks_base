@@ -18,10 +18,10 @@ package com.android.server.hdmi;
 
 import android.hardware.tv.hdmi.earc.IEArcStatus;
 
-final class FakeEArcNativeWrapper implements HdmiEarcController.EArcNativeWrapper {
-    private static final String TAG = "FakeEArcNativeWrapper";
+final class FakeEarcNativeWrapper implements HdmiEarcController.EarcNativeWrapper {
+    private static final String TAG = "FakeEarcNativeWrapper";
 
-    private boolean mIsEArcEnabled = true;
+    private boolean mIsEarcEnabled = true;
 
     @Override
     public boolean nativeInit() {
@@ -29,13 +29,13 @@ final class FakeEArcNativeWrapper implements HdmiEarcController.EArcNativeWrappe
     }
 
     @Override
-    public void nativeSetEArcEnabled(boolean enabled) {
-        mIsEArcEnabled = enabled;
+    public void nativeSetEarcEnabled(boolean enabled) {
+        mIsEarcEnabled = enabled;
     }
 
     @Override
-    public boolean nativeIsEArcEnabled() {
-        return mIsEArcEnabled;
+    public boolean nativeIsEarcEnabled() {
+        return mIsEarcEnabled;
     }
 
     @Override

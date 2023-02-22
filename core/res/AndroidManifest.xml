@@ -7564,7 +7564,7 @@
          HealthConnect can later integrate it. -->
     <permission android:name="android.permission.STAGE_HEALTH_CONNECT_REMOTE_DATA"
                 android:protectionLevel="signature|knownSigner"
-                android:knownCerts="@array/config_healthConnectStagingDataKnownSigners"/>
+                android:knownCerts="@array/config_healthConnectRestoreKnownSigners"/>
 
     <!-- @hide @TestApi Allows an application to clear HealthConnect's staged remote data for
          testing only. For security reasons, this is a platform-only permission. -->
@@ -7695,8 +7695,11 @@
         </activity>
         <activity android:name="com.android.internal.app.IntentForwarderActivity"
                 android:finishOnCloseSystemDialogs="true"
-                android:theme="@style/Theme.Translucent.NoTitleBar"
+                android:theme="@style/Theme.DeviceDefault.Resolver"
                 android:excludeFromRecents="true"
+                android:documentLaunchMode="never"
+                android:relinquishTaskIdentity="true"
+                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:label="@string/user_owner_label"
                 android:exported="true"
                 android:visibleToInstantApps="true"

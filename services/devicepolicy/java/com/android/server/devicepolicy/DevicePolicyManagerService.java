@@ -11324,7 +11324,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             setBackwardsCompatibleAppRestrictions(
                     packageName, restrictions, caller.getUserHandle());
         } else {
-            Objects.requireNonNull(who, "ComponentName is null");
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
                     && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
                     || (caller.hasPackage() && isCallerDelegate(caller,
@@ -22467,7 +22466,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else {
                     // If the permission maps to no policy (null) this means that any active admin
                     // has permission.
-                    return getActiveAdminForUidLocked(null, caller.getUid()) != null;
+                    return isCallerActiveAdminOrDelegate(caller, null);
                 }
             } catch (SecurityException e) {
                 // A security exception means there is not an active admin with permission and
@@ -22506,23 +22505,25 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private EnforcingAdmin getEnforcingAdminForCaller(@Nullable ComponentName who,
             String callerPackageName) {
-        CallerIdentity caller = getCallerIdentity(callerPackageName);
+        CallerIdentity caller = getCallerIdentity(who, callerPackageName);
         int userId = caller.getUserId();
         ActiveAdmin admin;
-        synchronized (getLockObject()) {
-            admin = getActiveAdminUncheckedLocked(who, userId);
+        if (isDeviceOwner(caller) || isProfileOwner(caller) || isCallerDelegate(caller)) {
+            ComponentName component;
+            synchronized (getLockObject()) {
+                if (who != null) {
+                    admin = getActiveAdminUncheckedLocked(who, userId);
+                    component = who;
+                } else {
+                    admin = getDeviceOrProfileOwnerAdminLocked(userId);
+                    component = admin.info.getComponent();
+                }
+            }
+            return EnforcingAdmin.createEnterpriseEnforcingAdmin(component, userId, admin);
         }
-        if (isDeviceOwner(caller) || isProfileOwner(caller)) {
-            return EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userId, admin);
-        }
-        if (isCallerDelegate(caller)) {
-            ComponentName profileOwner = mOwners.getProfileOwnerComponent(caller.getUserId());
-            ComponentName dpc = profileOwner != null ? profileOwner :
-                    mOwners.getDeviceOwnerComponent();
-            ActiveAdmin dpcAdmin = getDeviceOrProfileOwnerAdminLocked(caller.getUserId());
-            return EnforcingAdmin.createEnterpriseEnforcingAdmin(dpc, userId, dpcAdmin);
-        }
-        if (getActiveAdminUncheckedLocked(who, userId) != null) {
+        // Check for non-DPC active admins.
+        admin = getActiveAdminForCaller(who, caller);
+        if (admin != null) {
             return EnforcingAdmin.createDeviceAdminEnforcingAdmin(who, userId, admin);
         }
         if (admin == null) {
@@ -23135,6 +23136,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             return delegateScope != null && isCallerDelegate(caller, delegateScope);
         });
+    }
+
+    private ActiveAdmin getActiveAdminForCaller(@Nullable ComponentName who,
+            CallerIdentity caller) {
+        synchronized (getLockObject()) {
+            if (who != null) {
+                return getActiveAdminUncheckedLocked(who, caller.getUserId());
+            }
+            return mInjector.binderWithCleanCallingIdentity(() -> {
+                List<ComponentName> activeAdmins = getActiveAdmins(caller.getUserId());
+                if (activeAdmins != null) {
+                    for (ComponentName admin : activeAdmins) {
+                        if (admin.getPackageName().equals(caller.getPackageName())) {
+                            return getActiveAdminUncheckedLocked(admin, caller.getUserId());
+                        }
+                    }
+                }
+                return null;
+            });
+        }
     }
 
     // TODO(b/266808047): This will return false for DeviceAdmins not targetting U, which is
