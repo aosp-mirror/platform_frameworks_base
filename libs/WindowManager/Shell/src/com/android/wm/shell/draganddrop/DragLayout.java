@@ -118,7 +118,7 @@ public class DragLayout extends LinearLayout {
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        mInsets = insets.getInsets(Type.systemBars() | Type.displayCutout());
+        mInsets = insets.getInsets(Type.tappableElement() | Type.displayCutout());
         recomputeDropTargets();
 
         final int orientation = getResources().getConfiguration().orientation;
