@@ -16,7 +16,6 @@
 package com.android.systemui.notetask
 
 import android.app.KeyguardManager
-import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -30,7 +29,6 @@ import com.android.systemui.notetask.NoteTaskController.Companion.INTENT_EXTRA_U
 import com.android.systemui.notetask.NoteTaskController.ShowNoteTaskUiEvent
 import com.android.systemui.notetask.NoteTaskInfoResolver.NoteTaskInfo
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -41,7 +39,6 @@ import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
@@ -67,8 +64,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Mock lateinit var optionalUserManager: Optional<UserManager>
     @Mock lateinit var userManager: UserManager
     @Mock lateinit var uiEventLogger: UiEventLogger
-    @Mock private lateinit var userTracker: UserTracker
-    @Mock private lateinit var devicePolicyManager: DevicePolicyManager
 
     @Before
     fun setUp() {
@@ -80,13 +75,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         whenever(optionalKeyguardManager.orElse(null)).thenReturn(keyguardManager)
         whenever(optionalUserManager.orElse(null)).thenReturn(userManager)
         whenever(userManager.isUserUnlocked).thenReturn(true)
-        whenever(
-                devicePolicyManager.getKeyguardDisabledFeatures(
-                    /* admin= */ eq(null),
-                    /* userHandle= */ anyInt()
-                )
-            )
-            .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_NONE)
     }
 
     private fun createNoteTaskController(isEnabled: Boolean = true): NoteTaskController {
@@ -96,10 +84,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             optionalBubbles = optionalBubbles,
             optionalKeyguardManager = optionalKeyguardManager,
             optionalUserManager = optionalUserManager,
-            devicePolicyManager = devicePolicyManager,
             isEnabled = isEnabled,
             uiEventLogger = uiEventLogger,
-            userTracker = userTracker,
         )
     }
 
@@ -302,86 +288,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
         val expected = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
         assertThat(argument.value.flattenToString()).isEqualTo(expected.flattenToString())
-    }
-    // endregion
-
-    // region keyguard policy
-    @Test
-    fun showNoteTask_keyguardLocked_keyguardDisableShortcutsAll_shouldDoNothing() {
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(true)
-        whenever(
-                devicePolicyManager.getKeyguardDisabledFeatures(
-                    /* admin= */ eq(null),
-                    /* userHandle= */ anyInt()
-                )
-            )
-            .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
-
-        createNoteTaskController().showNoteTask(isInMultiWindowMode = false, uiEvent = null)
-
-        verifyZeroInteractions(context, bubbles, uiEventLogger)
-    }
-
-    @Test
-    fun showNoteTask_keyguardLocked_keyguardDisableFeaturesAll_shouldDoNothing() {
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(true)
-        whenever(
-                devicePolicyManager.getKeyguardDisabledFeatures(
-                    /* admin= */ eq(null),
-                    /* userHandle= */ anyInt()
-                )
-            )
-            .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
-
-        createNoteTaskController().showNoteTask(isInMultiWindowMode = false, uiEvent = null)
-
-        verifyZeroInteractions(context, bubbles, uiEventLogger)
-    }
-
-    @Test
-    fun showNoteTask_keyguardUnlocked_keyguardDisableShortcutsAll_shouldStartBubble() {
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(false)
-        whenever(
-                devicePolicyManager.getKeyguardDisabledFeatures(
-                    /* admin= */ eq(null),
-                    /* userHandle= */ anyInt()
-                )
-            )
-            .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
-
-        createNoteTaskController().showNoteTask(isInMultiWindowMode = false, uiEvent = null)
-
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
-        intentCaptor.value.let { intent ->
-            assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
-            assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
-        }
-    }
-
-    @Test
-    fun showNoteTask_keyguardUnlocked_keyguardDisableFeaturesAll_shouldStartBubble() {
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(false)
-        whenever(
-                devicePolicyManager.getKeyguardDisabledFeatures(
-                    /* admin= */ eq(null),
-                    /* userHandle= */ anyInt()
-                )
-            )
-            .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
-
-        createNoteTaskController().showNoteTask(isInMultiWindowMode = false, uiEvent = null)
-
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
-        intentCaptor.value.let { intent ->
-            assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
-            assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
-        }
     }
     // endregion
 
