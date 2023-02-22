@@ -96,8 +96,10 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
@@ -2951,7 +2953,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                             // Trigger the fingerprint success path so the bouncer can be shown
                             handleFingerprintAuthenticated(user, isStrongBiometric);
                         },
-                        userId);
+                        new FingerprintAuthenticateOptions.Builder()
+                                .setUserId(userId)
+                                .build());
             } else {
                 mLogger.v("startListeningForFingerprint - authenticate");
                 mFpm.authenticate(null /* crypto */, mFingerprintCancelSignal,
@@ -2997,7 +3001,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 if (supportsFaceDetection && !udfpsFingerprintAuthRunning) {
                     // Run face detection. (If a face is detected, show the bouncer.)
                     mLogger.v("startListeningForFace - detect");
-                    mFaceManager.detectFace(mFaceCancelSignal, mFaceDetectionCallback, userId);
+                    mFaceManager.detectFace(mFaceCancelSignal, mFaceDetectionCallback,
+                            new FaceAuthenticateOptions.Builder()
+                                    .setUserId(userId)
+                                    .build());
                 } else {
                     // Don't run face detection. Instead, inform the user
                     // face auth is unavailable and how to proceed.
@@ -3016,7 +3023,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 final boolean isBypassEnabled = mKeyguardBypassController != null
                         && mKeyguardBypassController.isBypassEnabled();
                 mFaceManager.authenticate(null /* crypto */, mFaceCancelSignal,
-                        mFaceAuthenticationCallback, null /* handler */, userId, isBypassEnabled);
+                        mFaceAuthenticationCallback, null /* handler */, userId);
             }
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }

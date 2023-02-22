@@ -45,6 +45,7 @@ import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintServiceReceiver;
@@ -252,15 +253,15 @@ public class FingerprintService extends SystemService {
         public long authenticate(
                 final IBinder token,
                 final long operationId,
-                final int sensorId,
-                final int userId,
                 final IFingerprintServiceReceiver receiver,
-                final String opPackageName,
-                final String attributionTag,
-                boolean ignoreEnrollmentState) {
+                final FingerprintAuthenticateOptions options) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
+            final String opPackageName = options.getOpPackageName();
+            final String attributionTag = options.getAttributionTag();
+            final int userId = options.getUserId();
+            final int sensorId = options.getSensorId();
 
             if (!canUseFingerprint(
                     opPackageName,
@@ -314,7 +315,8 @@ public class FingerprintService extends SystemService {
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
                 try {
                     return authenticateWithPrompt(operationId, sensorProps, callingUid,
-                            callingUserId, receiver, opPackageName, ignoreEnrollmentState);
+                            callingUserId, receiver, opPackageName,
+                            options.isIgnoreEnrollmentState());
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.e(TAG, "Invalid package", e);
                     return -1;
@@ -412,16 +414,18 @@ public class FingerprintService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
-        public long detectFingerprint(final IBinder token, final int userId,
-                final IFingerprintServiceReceiver receiver, final String opPackageName) {
+        public long detectFingerprint(final IBinder token,
+                final IFingerprintServiceReceiver receiver,
+                final FingerprintAuthenticateOptions options) {
             super.detectFingerprint_enforcePermission();
 
+            final String opPackageName = options.getOpPackageName();
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "detectFingerprint called from non-sysui package: " + opPackageName);
                 return -1;
             }
 
-            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, userId)) {
+            if (!Utils.isUserEncryptedOrLockdown(mLockPatternUtils, options.getUserId())) {
                 // If this happens, something in KeyguardUpdateMonitor is wrong. This should only
                 // ever be invoked when the user is encrypted or lockdown.
                 Slog.e(TAG, "detectFingerprint invoked when user is not encrypted or lockdown");
@@ -434,7 +438,7 @@ public class FingerprintService extends SystemService {
                 return -1;
             }
 
-            return provider.second.scheduleFingerDetect(provider.first, token, userId,
+            return provider.second.scheduleFingerDetect(provider.first, token, options.getUserId(),
                     new ClientMonitorCallbackConverter(receiver), opPackageName,
                     BiometricsProtoEnums.CLIENT_KEYGUARD);
         }
