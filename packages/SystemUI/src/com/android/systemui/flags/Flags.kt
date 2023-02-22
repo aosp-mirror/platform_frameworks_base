@@ -249,6 +249,9 @@ object Flags {
             "qs_user_detail_shortcut"
         )
 
+    @JvmField
+    val QS_PIPELINE_NEW_HOST = unreleasedFlag(504, "qs_pipeline_new_host", teamfood = false)
+
     // TODO(b/254512383): Tracking Bug
     @JvmField
     val FULL_SCREEN_USER_SWITCHER =
