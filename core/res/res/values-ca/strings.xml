@@ -208,12 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Les teves aplicacions personals estan bloquejades fins que activis el perfil de treball"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Les aplicacions personals es bloquejaran el dia <xliff:g id="DATE">%1$s</xliff:g> a les <xliff:g id="TIME">%2$s</xliff:g>. L\'administrador de TI no permet desactivar el teu perfil de treball durant més de: <xliff:g id="NUMBER">%3$d</xliff:g> dies."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activa"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Trucades i missatges desactivats"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Has posat en pausa les aplicacions de treball. No rebràs trucades ni missatges de text."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Reac. apps treball"</string>
     <string name="me" msgid="6207584824693813140">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcions de la tauleta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcions d\'Android TV"</string>
@@ -345,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Pot capturar els gestos fets en el sensor d\'empremtes digitals del dispositiu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Fer una captura de pantalla"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pot fer una captura de la pantalla."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Previsualitza, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desactivar o modificar la barra d\'estat"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet que l\'aplicació desactivi la barra d\'estat o afegeixi i elimini icones del sistema."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"aparèixer a la barra d\'estat"</string>

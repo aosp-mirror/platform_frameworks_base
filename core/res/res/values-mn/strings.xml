@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Та ажлын профайлыг асаах хүртэл таны хувийн аппуудыг хориглосон"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Хувийн аппуудыг <xliff:g id="DATE">%1$s</xliff:g>-н <xliff:g id="TIME">%2$s</xliff:g>-д блоклоно. Таны IT админ таны ажлын профайлыг <xliff:g id="NUMBER">%3$d</xliff:g>-с олон хоног унтраалттай байхыг зөвшөөрдөггүй."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Асаах"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Дуудлага болон мессеж унтраалттай байна"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Та ажлын аппуудыг түр зогсоосон. Та утасны дуудлага эсвэл мессеж хүлээн авахгүй."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Ажлын аппыг үргэлжлүүл"</string>
     <string name="me" msgid="6207584824693813140">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-н сонголт"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Төхөөрөмжийн хурууны хээ мэдрэгчид зангасан зангааг танина."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Дэлгэцийн зургийг дарах"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дэлгэцийн зургийг дарах боломжтой."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Урьдчилан үзэх, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"статус самбарыг идэвхгүй болгох болон өөрчлөх"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Апп нь статус самбарыг идэвхгүй болгох эсвэл систем дүрсийг нэмэх, хасах боломжтой."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"статусын хэсэг болох"</string>

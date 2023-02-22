@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Жұмыс профиліңізді қоспайынша, жеке қолданбалар бөгеледі."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Жеке қолданбалардың бөгелетін уақыты: <xliff:g id="DATE">%1$s</xliff:g>, сағат <xliff:g id="TIME">%2$s</xliff:g>. Әкімші жұмыс профилін <xliff:g id="NUMBER">%3$d</xliff:g> күннен аса мерзімге өшіруге рұқсат бермейді."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Қосу"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Қоңыраулар мен хабарлар өшірулі"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Жұмыс қолданбаларының жұмысын тоқтатып қойдыңыз. Телефон қоңырауларын қабылдай не мәтіндік хабарлар ала алмайсыз."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Жұмыс қолданбаларының жұмысын қайта жалғастыру"</string>
     <string name="me" msgid="6207584824693813140">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Планшет опциялары"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV опциялары"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Құрылғының саусақ ізі сенсорында орындалған қимылдарды сақтайды."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Скриншот жасау"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дисплейдің скриншотын жасай аласыз."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Алғы көрініс, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"күйін көрсету тақтасын өшіру немесе өзгерту"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Қолданбаға күй жолағын өшіруге немесе жүйелік белгішелерді қосуға және жоюға рұқсат береді."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"күй жолағы болу"</string>
