@@ -2241,46 +2241,46 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get an array of subscription ids for specified logical SIM slot Index.
+     * Get an array of subscription ids for the specified logical SIM slot Index. The maximum size
+     * of the array is 1. This API was mistakenly designed to return multiple subscription ids,
+     * which is not possible in the current Android telephony architecture.
      *
      * @param slotIndex The logical SIM slot index.
      *
-     * @return subscription Ids or {@code null} if the given slot index is not valid or there are
-     * no active subscription in the slot. In the implementation today, there will be no more
-     * than one subscriptions per logical SIM slot.
+     * @return Subscription id of the active subscription on the specified logical SIM slot index.
+     * If SIM is absent on the slot, a single element array of {@link #INVALID_SUBSCRIPTION_ID} will
+     * be returned. {@code null} if the provided {@code slotIndex} is not valid.
      *
      * @deprecated Use {@link #getSubscriptionId(int)} instead.
      */
     @Deprecated
     @Nullable
     public int[] getSubscriptionIds(int slotIndex) {
-        int subId = getSubscriptionId(slotIndex);
-        if (!isValidSubscriptionId(subId)) {
+        if (!isValidSlotIndex(slotIndex)) {
             return null;
         }
         return new int[]{getSubscriptionId(slotIndex)};
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
+    /**
+     * Get an array of subscription ids for the specified logical SIM slot Index. The maximum size
+     * of the array is 1. This API was mistakenly designed to return multiple subscription ids,
+     * which is not possible in the current Android telephony architecture.
+     *
+     * @param slotIndex The logical SIM slot index.
+     *
+     * @return Subscription id of the active subscription on the specified logical SIM slot index.
+     * If SIM is absent on the slot, a single element array of {@link #INVALID_SUBSCRIPTION_ID} will
+     * be returned. {@code null} if the provided {@code slotIndex} is not valid.
+     *
+     * @deprecated Use {@link #getSubscriptionId(int)} instead.
+     * @hide
+     */
     public static int[] getSubId(int slotIndex) {
         if (!isValidSlotIndex(slotIndex)) {
-            logd("[getSubId]- fail");
             return null;
         }
-
-        int[] subId = null;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                subId = iSub.getSubIds(slotIndex);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return subId;
+        return new int[]{getSubscriptionId(slotIndex)};
     }
 
     /**
