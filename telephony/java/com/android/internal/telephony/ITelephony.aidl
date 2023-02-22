@@ -2728,6 +2728,29 @@ interface ITelephony {
     void requestIsSatelliteEnabled(int subId, in ResultReceiver receiver);
 
     /**
+     * Request to enable or disable the satellite service demo mode.
+     *
+     * @param subId The subId of the subscription to enable or disable the satellite demo mode for.
+     * @param enable True to enable the satellite demo mode and false to disable.
+     * @param callback The callback to get the error code of the request.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestSatelliteDemoModeEnabled(int subId, boolean enable, in IIntegerConsumer callback);
+
+    /**
+     * Request to get whether the satellite service demo mode is enabled.
+     *
+     * @param subId The subId of the subscription to request whether the satellite demo mode is
+     *              enabled for.
+     * @param receiver Result receiver to get the error code of the request and whether the
+     *                 satellite demo mode is enabled.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void requestIsSatelliteDemoModeEnabled(int subId, in ResultReceiver receiver);
+
+    /**
      * Request to get whether the satellite service is supported on the device.
      *
      * @param subId The subId of the subscription to check whether satellite is supported for.
@@ -2815,9 +2838,9 @@ interface ITelephony {
 
 
     /**
-     * Register for the satellite provision state change.
+     * Registers for provision state changed from satellite modem.
      *
-     * @param subId The subId of the subscription to register for provision state changes.
+     * @param subId The subId of the subscription to register for provision state changed.
      * @param callback The callback to handle the satellite provision state changed event.
      *
      * @return The {@link SatelliteError} result of the operation.
@@ -2828,10 +2851,10 @@ interface ITelephony {
             in ISatelliteProvisionStateCallback callback);
 
     /**
-     * Unregister for the satellite provision state change.
+     * Unregisters for provision state changed from satellite modem.
      * If callback was not registered before, the request will be ignored.
      *
-     * @param subId The subId of the subscription to unregister for provision state changes.
+     * @param subId The subId of the subscription to unregister for provision state changed.
      * @param callback The callback that was passed to registerForSatelliteProvisionStateChanged.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
@@ -2851,27 +2874,27 @@ interface ITelephony {
     void requestIsSatelliteProvisioned(int subId, in ResultReceiver receiver);
 
     /**
-     * Register for listening to satellite modem state changes.
+     * Registers for modem state changed from satellite modem.
      *
-     * @param subId The subId of the subscription to register for satellite modem state changes.
+     * @param subId The subId of the subscription to register for satellite modem state changed.
      * @param callback The callback to handle the satellite modem state changed event.
      *
      * @return The {@link SatelliteError} result of the operation.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    int registerForSatelliteModemStateChange(int subId, ISatelliteStateCallback callback);
+    int registerForSatelliteModemStateChanged(int subId, ISatelliteStateCallback callback);
 
     /**
-     * Unregister to stop listening to satellite modem state changes.
+     * Unregisters for modem state changed from satellite modem.
      * If callback was not registered before, the request will be ignored.
      *
-     * @param subId The subId of the subscription to unregister for satellite modem state changes.
-     * @param callback The callback that was passed to registerForSatelliteStateChange.
+     * @param subId The subId of the subscription to unregister for satellite modem state changed.
+     * @param callback The callback that was passed to registerForSatelliteStateChanged.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void unregisterForSatelliteModemStateChange(int subId, ISatelliteStateCallback callback);
+    void unregisterForSatelliteModemStateChanged(int subId, ISatelliteStateCallback callback);
 
    /**
      * Register to receive incoming datagrams over satellite.

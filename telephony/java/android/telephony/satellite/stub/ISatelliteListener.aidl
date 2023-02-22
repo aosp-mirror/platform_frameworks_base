@@ -19,6 +19,7 @@ package android.telephony.satellite.stub;
 import android.telephony.satellite.stub.NTRadioTechnology;
 import android.telephony.satellite.stub.PointingInfo;
 import android.telephony.satellite.stub.SatelliteDatagram;
+import android.telephony.satellite.stub.SatelliteError;
 import android.telephony.satellite.stub.SatelliteModemState;
 
 /**
@@ -35,10 +36,10 @@ oneway interface ISatelliteListener {
     /**
      * Indicates that new datagrams have been received on the device.
      *
-     * @param datagrams New datagrams received.
+     * @param datagrams Array of new datagrams received.
      * @param pendingCount The number of datagrams that are pending.
      */
-    void onNewDatagrams(in SatelliteDatagram[] datagrams, in int pendingCount);
+    void onSatelliteDatagramsReceived(in SatelliteDatagram[] datagrams, in int pendingCount);
 
     /**
      * Indicates that the satellite has pending datagrams for the device to be pulled.
@@ -52,27 +53,19 @@ oneway interface ISatelliteListener {
      *
      * @param pointingInfo The current pointing info.
      */
-    void onSatellitePointingInfoChanged(in PointingInfo pointingInfo);
+    void onSatellitePositionChanged(in PointingInfo pointingInfo);
 
     /**
      * Indicates that the satellite modem state has changed.
      *
-     * @param mode The current satellite modem state.
+     * @param state The current satellite modem state.
      */
-    void onSatelliteModemStateChanged(in SatelliteModemState mode);
+    void onSatelliteModemStateChanged(in SatelliteModemState state);
 
     /**
      * Indicates that the satellite radio technology has changed.
      *
-     * @param technology The current satellite service mode.
+     * @param technology The current satellite radio technology.
      */
     void onSatelliteRadioTechnologyChanged(in NTRadioTechnology technology);
-
-    /**
-     * Indicates that datagram transfer is complete and all datagrams have been delivered.
-     *
-     * @param delivered True means all datagrams have been delivered and false means there was an
-     *                  error in delivering all datagrams.
-     */
-    void onDatagramsDelivered(in boolean delivered);
 }
