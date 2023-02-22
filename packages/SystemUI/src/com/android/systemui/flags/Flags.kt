@@ -87,9 +87,6 @@ object Flags {
     val NOTIFICATION_GROUP_DISMISSAL_ANIMATION =
         releasedFlag(259217907, "notification_group_dismissal_animation")
 
-    // TODO(b/257506350): Tracking Bug
-    @JvmField val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
-
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
         unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
