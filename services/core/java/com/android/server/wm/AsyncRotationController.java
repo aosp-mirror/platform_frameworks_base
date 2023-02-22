@@ -217,6 +217,34 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         if (DEBUG) Slog.d(TAG, "Requested to sync draw transaction");
     }
 
+    /**
+     * If an async window is not requested to redraw or its surface is removed, then complete its
+     * operation directly to avoid waiting until timeout.
+     */
+    void updateTargetWindows() {
+        if (mTransitionOp == OP_LEGACY || !mIsStartTransactionCommitted) return;
+        for (int i = mTargetWindowTokens.size() - 1; i >= 0; i--) {
+            final Operation op = mTargetWindowTokens.valueAt(i);
+            if (op.mIsCompletionPending || op.mAction == Operation.ACTION_SEAMLESS) {
+                // Skip completed target. And seamless windows use the signal from blast sync.
+                continue;
+            }
+            final WindowToken token = mTargetWindowTokens.keyAt(i);
+            int readyCount = 0;
+            final int childCount = token.getChildCount();
+            for (int j = childCount - 1; j >= 0; j--) {
+                final WindowState w = token.getChildAt(j);
+                // If the token no longer contains pending drawn windows, then it is ready.
+                if (w.isDrawn() || !w.mWinAnimator.getShown()) {
+                    readyCount++;
+                }
+            }
+            if (readyCount == childCount) {
+                mDisplayContent.finishAsyncRotation(token);
+            }
+        }
+    }
+
     /** Lets the window fit in new rotation naturally. */
     private void finishOp(WindowToken windowToken) {
         final Operation op = mTargetWindowTokens.remove(windowToken);
