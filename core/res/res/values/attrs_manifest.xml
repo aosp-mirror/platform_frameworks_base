@@ -1714,7 +1714,7 @@
             this type.
         -->
         <flag name="remoteMessaging" value="0x200" />
-        <!-- The system exmpted foreground service use cases.
+        <!-- The system exempted foreground service use cases.
             <p>Requires the app to hold the permission
             {@link android.Manifest.permission#FOREGROUND_SERVICE_SYSTEM_EXEMPTED} in order to use
             this type. Apps are allowed to use this type only in the use cases listed in
