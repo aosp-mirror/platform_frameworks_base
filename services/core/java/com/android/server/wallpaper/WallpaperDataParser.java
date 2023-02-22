@@ -29,6 +29,7 @@ import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
 
 import android.annotation.Nullable;
 import android.app.WallpaperColors;
+import android.app.WallpaperManager.SetWallpaperFlags;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.ComponentName;
 import android.content.Context;
@@ -124,6 +125,8 @@ class WallpaperDataParser {
     }
 
     /**
+     * TODO(b/197814683) adapt comment once flag is removed
+     *
      * Load the system wallpaper (and the lock wallpaper, if it exists) from disk
      * @param userId the id of the user for which the wallpaper should be loaded
      * @param keepDimensionHints if false, parse and set the
@@ -132,17 +135,21 @@ class WallpaperDataParser {
      *                      If null, a new object will be created.
      * @param lockWallpaper the lock wallpaper object to reuse to do the modifications.
      *                      If null, a new object will be created.
+     * @param which The wallpaper(s) to load. If {@link #mEnableSeparateLockScreenEngine} is false,
+     *                      this flag has no effect and both wallpapers will always be loaded.
      * @return a {@link WallpaperLoadingResult} object containing the wallpaper data.
      *                      This object will contain the {@code wallpaper} and
      *                      {@code lockWallpaper} provided as parameters, if they are not null.
      */
     public WallpaperLoadingResult loadSettingsLocked(int userId, boolean keepDimensionHints,
-            WallpaperData wallpaper, WallpaperData lockWallpaper) {
+            WallpaperData wallpaper, WallpaperData lockWallpaper, @SetWallpaperFlags int which) {
         JournaledFile journal = makeJournaledFile(userId);
         FileInputStream stream = null;
         File file = journal.chooseForRead();
 
         boolean migrateFromOld = wallpaper == null;
+        boolean loadSystem = !mEnableSeparateLockScreenEngine || (which & FLAG_SYSTEM) != 0;
+        boolean loadLock = !mEnableSeparateLockScreenEngine || (which & FLAG_LOCK) != 0;
 
         // don't reuse the wallpaper objects in the new version
         if (mEnableSeparateLockScreenEngine) {
@@ -150,7 +157,7 @@ class WallpaperDataParser {
             lockWallpaper = null;
         }
 
-        if (wallpaper == null) {
+        if (wallpaper == null && loadSystem) {
             // Do this once per boot
             if (migrateFromOld) migrateFromOld();
             wallpaper = new WallpaperData(userId, FLAG_SYSTEM);
@@ -176,8 +183,8 @@ class WallpaperDataParser {
                 type = parser.next();
                 if (type == XmlPullParser.START_TAG) {
                     String tag = parser.getName();
-                    if ("wp".equals(tag)
-                            || ("kwp".equals(tag) && mEnableSeparateLockScreenEngine)) {
+                    if (("wp".equals(tag) && loadSystem)
+                            || ("kwp".equals(tag) && mEnableSeparateLockScreenEngine && loadLock)) {
 
                         if ("kwp".equals(tag) && lockWallpaper == null) {
                             lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
@@ -206,9 +213,8 @@ class WallpaperDataParser {
                             Slog.v(TAG, "mNextWallpaperComponent:"
                                     + wallpaper.nextWallpaperComponent);
                         }
-                    } else if ("kwp".equals(tag)) {
-                        // keyguard-specific wallpaper for this user
-
+                    } else if ("kwp".equals(tag) && !mEnableSeparateLockScreenEngine) {
+                        // keyguard-specific wallpaper for this user (legacy code)
                         if (lockWallpaper == null) {
                             lockWallpaper = new WallpaperData(userId, FLAG_LOCK);
                         }
@@ -232,29 +238,32 @@ class WallpaperDataParser {
         }
         IoUtils.closeQuietly(stream);
 
-        if (!success) {
-            wallpaper.cropHint.set(0, 0, 0, 0);
-            wpdData.mPadding.set(0, 0, 0, 0);
-            wallpaper.name = "";
-            lockWallpaper = null;
-        } else {
-            if (wallpaper.wallpaperId <= 0) {
-                wallpaper.wallpaperId = makeWallpaperIdLocked();
-                if (DEBUG) {
-                    Slog.w(TAG, "Didn't set wallpaper id in loadSettingsLocked(" + userId
-                            + "); now " + wallpaper.wallpaperId);
+        mWallpaperDisplayHelper.ensureSaneWallpaperDisplaySize(wpdData, DEFAULT_DISPLAY);
+
+        if (loadSystem) {
+            if (!success) {
+                wallpaper.cropHint.set(0, 0, 0, 0);
+                wpdData.mPadding.set(0, 0, 0, 0);
+                wallpaper.name = "";
+            } else {
+                if (wallpaper.wallpaperId <= 0) {
+                    wallpaper.wallpaperId = makeWallpaperIdLocked();
+                    if (DEBUG) {
+                        Slog.w(TAG, "Didn't set wallpaper id in loadSettingsLocked(" + userId
+                                + "); now " + wallpaper.wallpaperId);
+                    }
                 }
             }
+            ensureSaneWallpaperData(wallpaper);
+            wallpaper.mWhich = lockWallpaper != null ? FLAG_SYSTEM : FLAG_SYSTEM | FLAG_LOCK;
         }
 
-        mWallpaperDisplayHelper.ensureSaneWallpaperDisplaySize(wpdData, DEFAULT_DISPLAY);
-        ensureSaneWallpaperData(wallpaper);
-        if (lockWallpaper != null) {
-            ensureSaneWallpaperData(lockWallpaper);
-            lockWallpaper.mWhich = FLAG_LOCK;
-            wallpaper.mWhich = FLAG_SYSTEM;
-        } else {
-            wallpaper.mWhich = FLAG_SYSTEM | FLAG_LOCK;
+        if (loadLock) {
+            if (!success) lockWallpaper = null;
+            if (lockWallpaper != null) {
+                ensureSaneWallpaperData(lockWallpaper);
+                lockWallpaper.mWhich = FLAG_LOCK;
+            }
         }
 
         return new WallpaperLoadingResult(wallpaper, lockWallpaper, success);

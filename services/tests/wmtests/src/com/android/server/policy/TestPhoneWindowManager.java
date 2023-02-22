@@ -415,9 +415,9 @@ class TestPhoneWindowManager {
         verify(mStatusBarManagerInternal).showRecentApps(anyBoolean());
     }
 
-    void assertSwitchKeyboardLayout() {
+    void assertSwitchKeyboardLayout(int direction) {
         waitForIdle();
-        verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), anyInt());
+        verify(mWindowManagerFuncsImpl).switchKeyboardLayout(anyInt(), eq(direction));
     }
 
     void assertTakeBugreport() {

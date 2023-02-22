@@ -324,12 +324,18 @@ public class FalsingDataProviderTest extends ClassifierTest {
     @Test
     public void test_FoldedState_Folded() {
         when(mFoldStateListener.getFolded()).thenReturn(true);
-        assertThat(mDataProvider.isFolded()).isTrue();
+        assertThat(mDataProvider.isUnfolded()).isFalse();
     }
 
     @Test
     public void test_FoldedState_Unfolded() {
         when(mFoldStateListener.getFolded()).thenReturn(false);
-        assertThat(mDataProvider.isFolded()).isFalse();
+        assertThat(mDataProvider.isUnfolded()).isTrue();
+    }
+
+    @Test
+    public void test_FoldedState_NotFoldable() {
+        when(mFoldStateListener.getFolded()).thenReturn(null);
+        assertThat(mDataProvider.isUnfolded()).isFalse();
     }
 }

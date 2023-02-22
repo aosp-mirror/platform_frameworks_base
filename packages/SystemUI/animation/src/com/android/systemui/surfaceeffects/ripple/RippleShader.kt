@@ -15,9 +15,10 @@
  */
 package com.android.systemui.surfaceeffects.ripple
 
-import android.graphics.PointF
 import android.graphics.RuntimeShader
+import android.util.Log
 import android.util.MathUtils
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.surfaceeffects.shaderutil.SdfShaderLibrary
 import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
@@ -44,6 +45,8 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     }
     // language=AGSL
     companion object {
+        private val TAG = RippleShader::class.simpleName
+
         // Default fade in/ out values. The value range is [0,1].
         const val DEFAULT_FADE_IN_START = 0f
         const val DEFAULT_FADE_OUT_END = 1f
@@ -99,7 +102,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             vec4 main(vec2 p) {
                 float sparkleRing = soften(roundedBoxRing(p-in_center, in_size, in_cornerRadius,
                     in_thickness), in_blur);
-                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.2, in_cornerRadius),
+                float inside = soften(sdRoundedBox(p-in_center, in_size * 1.25, in_cornerRadius),
                     in_blur);
                 float sparkle = sparkles(p - mod(p, in_pixelDensity * 0.8), in_time * 0.00175)
                     * (1.-sparkleRing) * in_fadeSparkle;
@@ -184,12 +187,17 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
         setFloatUniform("in_center", x, y)
     }
 
-    /** Max width of the ripple. */
-    private var maxSize: PointF = PointF()
-    fun setMaxSize(width: Float, height: Float) {
-        maxSize.x = width
-        maxSize.y = height
-    }
+    /**
+     * Blur multipliers for the ripple.
+     *
+     * <p>It interpolates from [blurStart] to [blurEnd] based on the [progress]. Increase number to
+     * add more blur.
+     */
+    var blurStart: Float = 1.25f
+    var blurEnd: Float = 0.5f
+
+    /** Size of the ripple. */
+    val rippleSize = RippleSize()
 
     /**
      * Linear progress of the ripple. Float value between [0, 1].
@@ -209,15 +217,19 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     /** Progress with Standard easing curve applied. */
     private var progress: Float = 0.0f
         set(value) {
-            currentWidth = maxSize.x * value
-            currentHeight = maxSize.y * value
-            setFloatUniform("in_size", currentWidth, currentHeight)
+            field = value
 
-            setFloatUniform("in_thickness", maxSize.y * value * 0.5f)
-            // radius should not exceed width and height values.
-            setFloatUniform("in_cornerRadius", Math.min(maxSize.x, maxSize.y) * value)
+            rippleSize.update(value)
 
-            setFloatUniform("in_blur", MathUtils.lerp(1.25f, 0.5f, value))
+            setFloatUniform("in_size", rippleSize.currentWidth, rippleSize.currentHeight)
+            setFloatUniform("in_thickness", rippleSize.currentHeight * 0.5f)
+            // Corner radius is always max of the min between the current width and height.
+            setFloatUniform(
+                "in_cornerRadius",
+                Math.min(rippleSize.currentWidth, rippleSize.currentHeight)
+            )
+
+            setFloatUniform("in_blur", MathUtils.lerp(blurStart, blurEnd, value))
         }
 
     /** Play time since the start of the effect. */
@@ -263,12 +275,6 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
             field = value
             setFloatUniform("in_pixelDensity", value)
         }
-
-    var currentWidth: Float = 0f
-        private set
-
-    var currentHeight: Float = 0f
-        private set
 
     /** Parameters that are used to fade in/ out of the sparkle ring. */
     val sparkleRingFadeParams =
@@ -342,4 +348,101 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
         /** The endpoint of the fade out, given that the animation goes from 0 to 1. */
         var fadeOutEnd: Float = DEFAULT_FADE_OUT_END,
     )
+
+    /**
+     * Desired size of the ripple at a point t in [progress].
+     *
+     * <p>Note that [progress] is curved and normalized. Below is an example usage:
+     * SizeAtProgress(t= 0f, width= 0f, height= 0f), SizeAtProgress(t= 0.2f, width= 500f, height=
+     * 700f), SizeAtProgress(t= 1f, width= 100f, height= 300f)
+     *
+     * <p>For simple ripple effects, you will want to use [setMaxSize] as it is translated into:
+     * SizeAtProgress(t= 0f, width= 0f, height= 0f), SizeAtProgress(t= 1f, width= maxWidth, height=
+     * maxHeight)
+     */
+    data class SizeAtProgress(
+        /** Time t in [0,1] progress range. */
+        var t: Float,
+        /** Target width size of the ripple at time [t]. */
+        var width: Float,
+        /** Target height size of the ripple at time [t]. */
+        var height: Float
+    )
+
+    /** Updates and stores the ripple size. */
+    inner class RippleSize {
+        @VisibleForTesting var sizes = mutableListOf<SizeAtProgress>()
+        @VisibleForTesting var currentSizeIndex = 0
+        @VisibleForTesting val initialSize = SizeAtProgress(0f, 0f, 0f)
+
+        var currentWidth: Float = 0f
+            private set
+        var currentHeight: Float = 0f
+            private set
+
+        /**
+         * Sets the max size of the ripple.
+         *
+         * <p>Use this if the ripple shape simply changes linearly.
+         */
+        fun setMaxSize(width: Float, height: Float) {
+            setSizeAtProgresses(initialSize, SizeAtProgress(1f, width, height))
+        }
+
+        /**
+         * Sets the list of [sizes].
+         *
+         * <p>Note that setting this clears the existing sizes.
+         */
+        fun setSizeAtProgresses(vararg sizes: SizeAtProgress) {
+            // Reset everything.
+            this.sizes.clear()
+            currentSizeIndex = 0
+
+            this.sizes.addAll(sizes)
+            this.sizes.sortBy { it.t }
+        }
+
+        /**
+         * Updates the current ripple size based on the progress.
+         *
+         * <p>Should be called when progress updates.
+         */
+        fun update(progress: Float) {
+            val targetIndex = updateTargetIndex(progress)
+            val prevIndex = Math.max(targetIndex - 1, 0)
+
+            val targetSize = sizes[targetIndex]
+            val prevSize = sizes[prevIndex]
+
+            val subProgress = subProgress(prevSize.t, targetSize.t, progress)
+
+            currentWidth = targetSize.width * subProgress + prevSize.width
+            currentHeight = targetSize.height * subProgress + prevSize.height
+        }
+
+        private fun updateTargetIndex(progress: Float): Int {
+            if (sizes.isEmpty()) {
+                // It could be empty on init.
+                if (progress > 0f) {
+                    Log.e(
+                        TAG,
+                        "Did you forget to set the ripple size? Use [setMaxSize] or " +
+                            "[setSizeAtProgresses] before playing the animation."
+                    )
+                }
+                // If there's no size is set, we set everything to 0.
+                setSizeAtProgresses(initialSize)
+            }
+
+            var candidate = sizes[currentSizeIndex]
+
+            while (progress > candidate.t) {
+                currentSizeIndex = Math.min(currentSizeIndex + 1, sizes.size - 1)
+                candidate = sizes[currentSizeIndex]
+            }
+
+            return currentSizeIndex
+        }
+    }
 }

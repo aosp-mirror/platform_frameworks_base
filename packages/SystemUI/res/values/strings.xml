@@ -481,6 +481,8 @@
     <string name="accessibility_desc_notification_shade">Notification shade.</string>
     <!-- Content description for the quick settings panel (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_quick_settings">Quick settings.</string>
+    <!-- Content description for the split notification shade that also includes QS (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_desc_qs_notification_shade">Quick settings and Notification shade.</string>
     <!-- Content description for the lock screen (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_desc_lock_screen">Lock screen.</string>
     <!-- Content description for the work profile lock screen. This prevents work profile apps from being used, but personal apps can be used as normal (not shown on the screen). [CHAR LIMIT=NONE] -->

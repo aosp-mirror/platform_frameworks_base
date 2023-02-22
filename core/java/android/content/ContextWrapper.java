@@ -1209,6 +1209,14 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
+    public int getAssociatedDisplayId() {
+        return mBase.getAssociatedDisplayId();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void updateDisplay(int displayId) {
         mBase.updateDisplay(displayId);
     }

@@ -342,15 +342,16 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             final int enumCheckUriPermission =
                     GET_TYPE_ACCESSED_WITHOUT_PERMISSION__LOCATION__PROVIDER_CHECK_URI_PERMISSION;
             if (permissionCheckPassed) {
-                // Just for logging for mediaProvider cases
-                final ProviderInfo cpi = mContext.getPackageManager()
-                        .resolveContentProvider(uri.getAuthority(),
-                                PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
-                final int callingUserId = UserHandle.getUserId(callingUid);
-                final Uri userUri = (mSingleUser
-                        && !UserHandle.isSameUser(mMyUid, callingUid))
-                        ? maybeAddUserId(uri, callingUserId) : uri;
                 try {
+                    // Just for logging for mediaProvider cases
+                    final ProviderInfo cpi = mContext.getPackageManager()
+                            .resolveContentProvider(uri.getAuthority(),
+                                    PackageManager.ComponentInfoFlags.of(
+                                            PackageManager.GET_META_DATA));
+                    final int callingUserId = UserHandle.getUserId(callingUid);
+                    final Uri userUri = (mSingleUser
+                            && !UserHandle.isSameUser(mMyUid, callingUid))
+                            ? maybeAddUserId(uri, callingUserId) : uri;
                     if (cpi.forceUriPermissions
                             && mInterface.checkUriPermission(uri,
                             callingUid, Intent.FLAG_GRANT_READ_URI_PERMISSION)
