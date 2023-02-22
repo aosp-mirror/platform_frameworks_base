@@ -363,7 +363,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                                 enumCheckUriPermission,
                                 callingUid, uri.getAuthority(), type);
                     }
-                } catch (RemoteException e) {
+                } catch (Exception e) {
                     //does nothing
                 }
             } else {
