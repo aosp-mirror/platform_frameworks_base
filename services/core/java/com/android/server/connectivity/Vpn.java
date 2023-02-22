@@ -25,6 +25,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
+import static android.net.ipsec.ike.IkeSessionParams.ESP_ENCAP_TYPE_AUTO;
+import static android.net.ipsec.ike.IkeSessionParams.ESP_IP_VERSION_AUTO;
 import static android.os.PowerWhitelistManager.REASON_VPN;
 import static android.os.UserHandle.PER_USER_RANGE;
 
@@ -250,6 +252,13 @@ public class Vpn {
      * The initial token value of IKE session.
      */
     private static final int STARTING_TOKEN = -1;
+
+    // TODO : read this from carrier config instead of a constant
+    @VisibleForTesting
+    public static final int AUTOMATIC_KEEPALIVE_DELAY_SECONDS = 30;
+
+    // Default keepalive timeout for carrier config is 5 minutes. Mimic this.
+    private static final int DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = 5 * 60;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -3071,6 +3080,7 @@ public class Vpn {
                             prepareStatusIntent();
                         }
                         agentConnect(this::onValidationStatus);
+                        mSession.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
                         return; // Link properties are already sent.
                     } else {
                         // Underlying networks also set in agentConnect()
@@ -3179,6 +3189,7 @@ public class Vpn {
                     if (!removedAddrs.isEmpty()) {
                         startNewNetworkAgent(
                                 mNetworkAgent, "MTU too low for IPv6; restarting network agent");
+                        mSession.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
 
                         for (LinkAddress removed : removedAddrs) {
                             mTunnelIface.removeAddress(
@@ -3251,14 +3262,22 @@ public class Vpn {
         private IkeSessionParams getIkeSessionParams(@NonNull Network underlyingNetwork) {
             final IkeTunnelConnectionParams ikeTunConnParams =
                     mProfile.getIkeTunnelConnectionParams();
+            final IkeSessionParams.Builder builder;
             if (ikeTunConnParams != null) {
-                final IkeSessionParams.Builder builder =
-                        new IkeSessionParams.Builder(ikeTunConnParams.getIkeSessionParams())
-                                .setNetwork(underlyingNetwork);
-                return builder.build();
+                builder = new IkeSessionParams.Builder(ikeTunConnParams.getIkeSessionParams())
+                        .setNetwork(underlyingNetwork);
             } else {
-                return VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, underlyingNetwork);
+                builder = VpnIkev2Utils.makeIkeSessionParamsBuilder(mContext, mProfile,
+                        underlyingNetwork);
             }
+            if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
+                builder.setNattKeepAliveDelaySeconds(guessNattKeepaliveTimerForNetwork());
+            }
+            if (mProfile.isAutomaticIpVersionSelectionEnabled()) {
+                builder.setIpVersion(guessEspIpVersionForNetwork());
+                builder.setEncapType(guessEspEncapTypeForNetwork());
+            }
+            return builder.build();
         }
 
         @NonNull
@@ -3322,6 +3341,23 @@ public class Vpn {
             startIkeSession(underlyingNetwork);
         }
 
+        private int guessEspIpVersionForNetwork() {
+            // TODO : guess the IP version based on carrier if auto IP version selection is enabled
+            return ESP_IP_VERSION_AUTO;
+        }
+
+        private int guessEspEncapTypeForNetwork() {
+            // TODO : guess the ESP encap type based on carrier if auto IP version selection is
+            // enabled
+            return ESP_ENCAP_TYPE_AUTO;
+        }
+
+        private int guessNattKeepaliveTimerForNetwork() {
+            // TODO : guess the keepalive delay based on carrier if auto keepalive timer is
+            // enabled
+            return AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
+        }
+
         boolean maybeMigrateIkeSession(@NonNull Network underlyingNetwork) {
             if (mSession == null || !mMobikeEnabled) return false;
 
@@ -3331,7 +3367,20 @@ public class Vpn {
                     + mCurrentToken
                     + " to network "
                     + underlyingNetwork);
-            mSession.setNetwork(underlyingNetwork);
+            final int ipVersion = mProfile.isAutomaticIpVersionSelectionEnabled()
+                    ? guessEspIpVersionForNetwork() : ESP_IP_VERSION_AUTO;
+            final int encapType = mProfile.isAutomaticIpVersionSelectionEnabled()
+                    ? guessEspEncapTypeForNetwork() : ESP_ENCAP_TYPE_AUTO;
+            final int keepaliveDelaySeconds;
+            if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
+                keepaliveDelaySeconds = guessNattKeepaliveTimerForNetwork();
+            } else if (mProfile.getIkeTunnelConnectionParams() != null) {
+                keepaliveDelaySeconds = mProfile.getIkeTunnelConnectionParams()
+                        .getIkeSessionParams().getNattKeepAliveDelaySeconds();
+            } else {
+                keepaliveDelaySeconds = DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT;
+            }
+            mSession.setNetwork(underlyingNetwork, ipVersion, encapType, keepaliveDelaySeconds);
             return true;
         }
 
@@ -4661,8 +4710,14 @@ public class Vpn {
         }
 
         /** Update the underlying network of the IKE Session */
-        public void setNetwork(@NonNull Network network) {
-            mImpl.setNetwork(network);
+        public void setNetwork(@NonNull Network network, int ipVersion, int encapType,
+                int keepaliveDelaySeconds) {
+            mImpl.setNetwork(network, ipVersion, encapType, keepaliveDelaySeconds);
+        }
+
+        /** Set the underpinned network */
+        public void setUnderpinnedNetwork(@NonNull Network underpinnedNetwork) {
+            mImpl.setUnderpinnedNetwork(underpinnedNetwork);
         }
 
         /** Forcibly terminate the IKE Session */
