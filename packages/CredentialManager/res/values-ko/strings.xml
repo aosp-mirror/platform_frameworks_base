@@ -47,7 +47,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"기타 비밀번호 관리자"</string>
     <string name="close_sheet" msgid="1393792015338908262">"시트 닫기"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"이전 페이지로 돌아가기"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"화면 하단에 표시되는 인증 관리자 작업 제안 닫기"</string>
+    <!-- no translation found for accessibility_close_button (1163435587545377687) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 패스키를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보를 사용하시겠습니까?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱용 저장된 로그인 정보 선택"</string>
@@ -57,9 +58,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"로그인 옵션"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g>님의 로그인 정보"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"잠긴 비밀번호 관리자"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"탭하여 잠금 해제"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"로그인 정보 없음"</string>
+    <!-- no translation found for no_sign_in_info_in (2641118151920288356) -->
     <skip />
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"로그인 관리"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"다른 기기에서"</string>
