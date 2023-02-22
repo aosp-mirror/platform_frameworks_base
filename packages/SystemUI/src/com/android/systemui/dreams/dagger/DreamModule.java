@@ -29,7 +29,7 @@ import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dreams.touch.scrim.dagger.ScrimModule;
-import com.android.systemui.process.condition.UserProcessCondition;
+import com.android.systemui.process.condition.SystemProcessCondition;
 import com.android.systemui.shared.condition.Condition;
 import com.android.systemui.shared.condition.Monitor;
 
@@ -126,7 +126,7 @@ public interface DreamModule {
     @Binds
     @IntoSet
     @Named(DREAM_PRETEXT_CONDITIONS)
-    Condition bindsUserProcessCondition(UserProcessCondition condition);
+    Condition bindSystemProcessCondition(SystemProcessCondition condition);
 
     /** */
     @Provides
