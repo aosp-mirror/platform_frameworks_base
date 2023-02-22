@@ -258,7 +258,8 @@ public class Vpn {
     public static final int AUTOMATIC_KEEPALIVE_DELAY_SECONDS = 30;
 
     // Default keepalive timeout for carrier config is 5 minutes. Mimic this.
-    private static final int DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = 5 * 60;
+    @VisibleForTesting
+    static final int DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = 5 * 60;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
