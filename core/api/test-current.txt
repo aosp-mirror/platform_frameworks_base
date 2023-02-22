@@ -3310,6 +3310,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
+    method public static boolean hasWindowExtensionsEnabled();
     method public default void holdLock(android.os.IBinder, int);
     method public default boolean isGlobalKey(int);
     method public default boolean isTaskSnapshotSupported();
