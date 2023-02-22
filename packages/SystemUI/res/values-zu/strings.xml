@@ -197,6 +197,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Umthunzi wesaziso."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Izilingiselelo ezisheshayo."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Khiya isikrini."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Ukukhiya isikrini somsebenzi"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Vala"</string>
@@ -257,8 +259,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Ukugqama"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Ukuguqulwa kombala"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Ukulungiswa kombala"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Usayizi wefonti"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Phatha abasebenzisi"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Kwenziwe"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Vala"</string>
@@ -779,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"ukurekhoda isikrini"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Asikho isihloko"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ilindile"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Usayizi Wefonti"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Yenza kube kuncane"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Yenza kube kukhulu"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Iwindi Lesikhulisi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Izilawuli Zewindi Lesikhulisi"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Sondeza"</string>
@@ -1030,16 +1028,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Okungenani idivayisi eyodwa iyatholakala"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Thinta futhi ubambe isinqamuleli"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Khansela"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Shintsha izikrini manje"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Vula ifoni"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Shintsha izikrini?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Ukuze uthole ukulungiswa okuphezulu, sebenzisa ikhamera yangemuva"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Ukuze uthole ukulungiswa okuphezulu, phendula ifoni"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Idivayisi egoqekayo iyembulwa"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Idivayisi egoqekayo iphendulwa nxazonke"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> ibhethri elisele"</string>
@@ -1051,4 +1044,14 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Shintshela kuphrofayela yomsebenzi"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Vala"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Amasethingi okukhiya isikrini"</string>
+    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
+    <skip />
+    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
+    <skip />
+    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
+    <skip />
+    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
+    <skip />
+    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
+    <skip />
 </resources>

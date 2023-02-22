@@ -197,6 +197,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"දැනුම්දීම් ආවරණය."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ක්ෂණික සැකසීම්."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"අගුළු තිරය."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"කාර්යාල අගුලු තිරය"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"වසන්න"</string>
@@ -257,8 +259,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"දීප්තිමත් බව"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"වර්ණ අපවර්තනය"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"වර්ණ නිවැරදි කිරීම"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"අකුරු විශාලත්වය"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"නිමයි"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"වසන්න"</string>
@@ -779,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"තිර පටිගත කිරීම"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"මාතෘකාවක් නැත"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"පොරොත්තු"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"අකුරු විශාලත්වය"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"වඩා කුඩා කරන්න"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"වඩා විශාල කරන්න"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"විශාලන කවුළුව"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"විශාලනය කිරීමේ කවුළු පාලන"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"විශාලනය වැඩි කරන්න"</string>
@@ -909,10 +907,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"විකාශනය කළ නොහැකිය"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"සුරැකිය නොහැකිය. නැවත උත්සාහ කරන්න."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"සුරැකිය නොහැකිය."</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"අවම වශයෙන් අනුලකුණු 4ක් භාවිතා කරන්න"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"අනුලකුණු 16කට වඩා අඩුවෙන් භාවිතා කරන්න"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"නිමැවුම් අංකය"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"නිමැවුම් අංකය පසුරු පුවරුවට පිටපත් කරන ලදි."</string>
     <string name="basic_status" msgid="2315371112182658176">"සංවාදය විවෘත කරන්න"</string>
@@ -1032,16 +1028,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• අවම වශයෙන් එක උපාංගයක් ලැබේ"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ස්පර්ශ කර අල්ලා සිටීමේ කෙටිමඟ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"අවලංගු කරන්න"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"දැන් තිර මාරු කරන්න"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"දුරකථනය දිගහරින්න"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"තිර මාරු කරන්න ද?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"ඉහළ විභේදනය සඳහා, පසුපස කැමරාව භාවිතා කරන්න"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ඉහළ විභේදනය සඳහා, දුරකථනය හරවන්න"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"දිග හැරෙමින් පවතින නැමිය හැකි උපාංගය"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"වටා පෙරළෙමින් තිබෙන නැමිය හැකි උපාංගය"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> බැටරිය ඉතිරිව ඇත"</string>
@@ -1053,4 +1044,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"කාර්යාල පැතිකඩ වෙත මාරු වන්න"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"වසන්න"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"අගුළු තිර සැකසීම්"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ලද නොහැක"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"කැමරාව අවහිරයි"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"කැමරාව සහ මයික්‍රොෆෝනය අවහිරයි"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"මයික්‍රොෆෝනය අවහිරයි"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"ප්‍රමුඛතා මාදිලිය සක්‍රීයයි"</string>
 </resources>

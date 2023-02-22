@@ -197,6 +197,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Πλαίσιο σκίασης ειδοποιήσεων."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Γρήγορες ρυθμίσεις."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Οθόνη κλειδώματος"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Οθόνη κλειδωμένης εργασίας"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Κλείσιμο"</string>
@@ -257,8 +259,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Φωτεινότητα"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Αντιστροφή χρωμάτων"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Διόρθωση χρωμάτων"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Μέγεθος γραμματοσειράς"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Διαχείριση χρηστών"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Τέλος"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Κλείσιμο"</string>
@@ -779,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"εγγραφή οθόνης"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Χωρίς τίτλο"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Κατάσταση αναμονής"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Μέγεθος γραμματοσειράς"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Να μικρύνουν"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Να μεγαλώσουν"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Παράθυρο μεγέθυνσης"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Στοιχεία ελέγχου παραθύρου μεγέθυνσης"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Μεγέθυνση"</string>
@@ -909,10 +907,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Δεν είναι δυνατή η μετάδοση"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Δεν είναι δυνατή η αποθήκευση. Δοκιμάστε ξανά."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Δεν είναι δυνατή η αποθήκευση."</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Χρησιμοποιήστε τουλάχιστον 4 χαρακτήρες"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Χρησιμοποιήστε λιγότερους από 16 χαρακτήρες"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Αριθμός έκδοσης"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Ο αριθμός έκδοσης αντιγράφηκε στο πρόχειρο."</string>
     <string name="basic_status" msgid="2315371112182658176">"Άνοιγμα συνομιλίας"</string>
@@ -1032,16 +1028,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Είναι διαθέσιμη τουλάχιστον μία συσκευή"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Παρατεταμένο άγγιγμα συντόμευσης"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Ακύρωση"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Εναλλαγή οθονών τώρα"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Ξεδιπλώστε το τηλέφωνο"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Αλλαγή οθονών;"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Για υψηλότερη ανάλυση, χρησιμοποιήστε την πίσω κάμερα"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Για υψηλότερη ανάλυση, αναστρέψτε το τηλέφωνο"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Αναδιπλούμενη συσκευή που ξεδιπλώνει"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Αναδιπλούμενη συσκευή που διπλώνει"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Απομένει το <xliff:g id="PERCENTAGE">%s</xliff:g> της μπαταρίας"</string>
@@ -1053,4 +1044,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Εναλλαγή σε προφίλ εργασίας"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Κλείσιμο"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Ρυθμίσεις κλειδώματος οθόνης"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Δεν υπάρχει διαθέσιμο δίκτυο Wi-Fi"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Η κάμερα έχει αποκλειστεί"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Η κάμερα και το μικρόφωνο έχουν αποκλειστεί"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Το μικρόφωνο έχει αποκλειστεί"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Η λειτουργία προτεραιότητας είναι ενεργοποιημένη"</string>
 </resources>

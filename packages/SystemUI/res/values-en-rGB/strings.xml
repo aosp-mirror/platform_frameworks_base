@@ -197,6 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Notification shade."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Quick settings."</string>
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Quick Settings and notification shade."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Lock screen."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Work lock screen"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Close"</string>
@@ -778,12 +779,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"screen recording"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"No title"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Font size"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Make smaller"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Make larger"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Magnification window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Magnification window controls"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Zoom in"</string>
@@ -1045,4 +1043,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Switch to work profile"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Close"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Lock screen settings"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi not available"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Camera is blocked"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Camera and microphone blocked"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microphone is blocked"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Priority mode on"</string>
 </resources>
