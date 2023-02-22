@@ -121,7 +121,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 CredentialProviderService
                         .EXTRA_GET_CREDENTIAL_REQUEST,
                 new android.service.credentials.GetCredentialRequest(
-                        mCallingAppInfo, mProviderRequest));
+                        mCallingAppInfo, List.of(mProviderRequest)));
         return intent;
     }
 

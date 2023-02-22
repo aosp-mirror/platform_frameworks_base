@@ -38,6 +38,7 @@ import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.GetCredentialRequest;
+import android.service.credentials.RemoteEntry;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -298,7 +299,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
         return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
                 new GetCredentialRequest(
-                        mCallingAppInfo, mBeginGetOptionToCredentialOptionMap.get(id)));
+                        mCallingAppInfo, List.of(mBeginGetOptionToCredentialOptionMap.get(id))));
     }
 
     private Intent setUpFillInIntentWithQueryRequest() {
@@ -467,7 +468,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         private final Map<String, Pair<Action, AuthenticationEntry>> mUiAuthenticationEntries =
                 new HashMap<>();
 
-        @Nullable private Pair<String, Pair<CredentialEntry, Entry>> mUiRemoteEntry = null;
+        @Nullable private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
         ProviderResponseDataHandler(ComponentName expectedRemoteEntryProviderService) {
             mExpectedRemoteEntryProviderService = expectedRemoteEntryProviderService;
@@ -475,7 +476,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
         public void addResponseContent(List<CredentialEntry> credentialEntries,
                 List<Action> actions, List<Action> authenticationActions,
-                CredentialEntry remoteEntry) {
+                RemoteEntry remoteEntry) {
             credentialEntries.forEach(this::addCredentialEntry);
             actions.forEach(this::addAction);
             authenticationActions.forEach(
@@ -517,7 +518,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             mUiAuthenticationEntries.remove(id);
         }
 
-        public void setRemoteEntry(@Nullable CredentialEntry remoteEntry) {
+        public void setRemoteEntry(@Nullable RemoteEntry remoteEntry) {
             if (remoteEntry == null) {
                 return;
             }
@@ -528,8 +529,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             }
             String id = generateUniqueId();
             Entry entry = new Entry(REMOTE_ENTRY_KEY,
-                    id, remoteEntry.getSlice(), setUpFillInIntent(
-                            remoteEntry.getBeginGetCredentialOption().getId()));
+                    id, remoteEntry.getSlice(), setUpFillInIntentForRemoteEntry());
             mUiRemoteEntry = new Pair<>(generateUniqueId(), new Pair<>(remoteEntry, entry));
         }
 
@@ -599,7 +599,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
 
         @Nullable
-        public CredentialEntry getRemoteEntry(String entryKey) {
+        public RemoteEntry getRemoteEntry(String entryKey) {
             return mUiRemoteEntry.first.equals(entryKey) && mUiRemoteEntry.second != null
                     ? mUiRemoteEntry.second.first : null;
         }
@@ -651,5 +651,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     from.getSlice(), toStatus,
                     from.getFrameworkExtrasIntent());
         }
+    }
+
+    private Intent setUpFillInIntentForRemoteEntry() {
+        return new Intent().putExtra(CredentialProviderService.EXTRA_GET_CREDENTIAL_REQUEST,
+                new GetCredentialRequest(
+                        mCallingAppInfo, mCompleteRequest.getCredentialOptions()));
     }
 }
