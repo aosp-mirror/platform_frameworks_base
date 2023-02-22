@@ -1915,7 +1915,6 @@ public final class NotificationPanelViewController implements Dumpable {
         // we want to perform an overshoot animation when flinging open
         final boolean addOverscroll =
                 expand
-                        && !mSplitShadeEnabled // Split shade has its own overscroll logic
                         && mStatusBarStateController.getState() != KEYGUARD
                         && mOverExpansion == 0.0f
                         && vel >= 0;
@@ -2591,9 +2590,14 @@ public final class NotificationPanelViewController implements Dumpable {
             return;
         }
         mOverExpansion = overExpansion;
-        // Translating the quick settings by half the overexpansion to center it in the background
-        // frame
-        mQsController.updateQsFrameTranslation();
+        if (mSplitShadeEnabled) {
+            mQsController.setOverScrollAmount((int) overExpansion);
+            mScrimController.setNotificationsOverScrollAmount((int) overExpansion);
+        } else {
+            // Translating the quick settings by half the overexpansion to center it in the
+            // background frame
+            mQsController.updateQsFrameTranslation();
+        }
         mNotificationStackScrollLayoutController.setOverExpansion(overExpansion);
     }
 
@@ -3595,7 +3599,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private void fling(float vel, boolean expand, float collapseSpeedUpFactor,
             boolean expandBecauseOfFalsing) {
-        float target = expand ? getMaxPanelHeight() : 0;
+        float target = expand ? getMaxPanelTransitionDistance() : 0;
         if (!expand) {
             setClosing(true);
         }
@@ -3680,7 +3684,7 @@ public final class NotificationPanelViewController implements Dumpable {
             float maxPanelHeight = getMaxPanelTransitionDistance();
             if (mHeightAnimator == null) {
                 // Split shade has its own overscroll logic
-                if (mTracking && !mSplitShadeEnabled) {
+                if (mTracking) {
                     float overExpansionPixels = Math.max(0, h - maxPanelHeight);
                     setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
                 }
