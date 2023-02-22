@@ -18,6 +18,8 @@ package com.android.wm.shell.draganddrop;
 
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.content.pm.ActivityInfo.CONFIG_ASSETS_PATHS;
+import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -72,6 +74,7 @@ public class DragLayout extends LinearLayout {
     private final SplitScreenController mSplitScreenController;
     private final IconProvider mIconProvider;
     private final StatusBarManager mStatusBarManager;
+    private final Configuration mLastConfiguration = new Configuration();
 
     private DragAndDropPolicy.Target mCurrentTarget = null;
     private DropZoneView mDropZoneView1;
@@ -92,6 +95,7 @@ public class DragLayout extends LinearLayout {
         mIconProvider = iconProvider;
         mPolicy = new DragAndDropPolicy(context, splitScreenController);
         mStatusBarManager = context.getSystemService(StatusBarManager.class);
+        mLastConfiguration.setTo(context.getResources().getConfiguration());
 
         mDisplayMargin = context.getResources().getDimensionPixelSize(
                 R.dimen.drop_layout_display_margin);
@@ -132,11 +136,6 @@ public class DragLayout extends LinearLayout {
         return super.onApplyWindowInsets(insets);
     }
 
-    public void onThemeChange() {
-        mDropZoneView1.onThemeChange();
-        mDropZoneView2.onThemeChange();
-    }
-
     public void onConfigChanged(Configuration newConfig) {
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE
                 && getOrientation() != HORIZONTAL) {
@@ -147,6 +146,15 @@ public class DragLayout extends LinearLayout {
             setOrientation(LinearLayout.VERTICAL);
             updateContainerMargins(newConfig.orientation);
         }
+
+        final int diff = newConfig.diff(mLastConfiguration);
+        final boolean themeChanged = (diff & CONFIG_ASSETS_PATHS) != 0
+                || (diff & CONFIG_UI_MODE) != 0;
+        if (themeChanged) {
+            mDropZoneView1.onThemeChange();
+            mDropZoneView2.onThemeChange();
+        }
+        mLastConfiguration.setTo(newConfig);
     }
 
     private void updateContainerMarginsForSingleTask() {
