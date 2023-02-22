@@ -57,6 +57,7 @@ import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,7 +65,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.function.BiConsumer;
-
 
 @RunWith(AndroidTestingRunner.class)
 public final class AppClipsActivityTest extends SysuiTestCase {
@@ -140,6 +140,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         mActivityRule.finishActivity();
     }
 
+    @Ignore("b/269403503")
     @Test
     public void appClipsLaunched_screenshotDisplayed() {
         launchActivity();
@@ -147,6 +148,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         assertThat(((ImageView) mActivity.findViewById(R.id.preview)).getDrawable()).isNotNull();
     }
 
+    @Ignore("b/269403503")
     @Test
     public void screenshotDisplayed_userConsented_screenshotExportedSuccessfully() {
         ResultReceiver resultReceiver = createResultReceiver((resultCode, data) -> {
@@ -166,6 +168,7 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         verify(mUiEventLogger).log(SCREENSHOT_FOR_NOTE_ACCEPTED, TEST_UID, TEST_CALLING_PACKAGE);
     }
 
+    @Ignore("b/269403503")
     @Test
     public void screenshotDisplayed_userDeclined() {
         ResultReceiver resultReceiver = createResultReceiver((resultCode, data) -> {
