@@ -189,12 +189,13 @@ data class ClockSettings(
     val clockId: ClockId? = null,
     val seedColor: Int? = null,
 ) {
-    var _applied_timestamp: Long? = null
+    // Exclude metadata from equality checks
+    var metadata: JSONObject = JSONObject()
 
     companion object {
         private val KEY_CLOCK_ID = "clockId"
         private val KEY_SEED_COLOR = "seedColor"
-        private val KEY_TIMESTAMP = "_applied_timestamp"
+        private val KEY_METADATA = "metadata"
 
         fun serialize(setting: ClockSettings?): String {
             if (setting == null) {
@@ -204,7 +205,7 @@ data class ClockSettings(
             return JSONObject()
                 .put(KEY_CLOCK_ID, setting.clockId)
                 .put(KEY_SEED_COLOR, setting.seedColor)
-                .put(KEY_TIMESTAMP, setting._applied_timestamp)
+                .put(KEY_METADATA, setting.metadata)
                 .toString()
         }
 
@@ -216,11 +217,11 @@ data class ClockSettings(
             val json = JSONObject(jsonStr)
             val result =
                 ClockSettings(
-                    json.getString(KEY_CLOCK_ID),
+                    if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null,
                     if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
                 )
-            if (!json.isNull(KEY_TIMESTAMP)) {
-                result._applied_timestamp = json.getLong(KEY_TIMESTAMP)
+            if (!json.isNull(KEY_METADATA)) {
+                result.metadata = json.getJSONObject(KEY_METADATA)
             }
             return result
         }
