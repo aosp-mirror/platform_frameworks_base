@@ -207,6 +207,12 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"직장 프로필을 사용 설정할 때까지 개인 앱이 차단됩니다."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"개인 앱이 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g>에 차단됩니다. IT 관리자가 <xliff:g id="NUMBER">%3$d</xliff:g>일 넘게 직장 프로필을 중지하도록 허용하지 않습니다."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"사용 설정"</string>
+    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
+    <skip />
+    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"나"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"태블릿 옵션"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 옵션"</string>
@@ -338,6 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"기기 지문 센서에서 동작을 캡처합니다."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"스크린샷 촬영"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"디스플레이 스크린샷을 촬영할 수 있습니다."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"미리보기, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"상태 표시줄 사용 중지 또는 수정"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"앱이 상태 표시줄을 사용중지하거나 시스템 아이콘을 추가 및 제거할 수 있도록 허용합니다."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"상태 표시줄에 위치"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB를 통해 PTP 사용 설정됨"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB 테더링 사용 설정됨"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB를 통해 MIDI 사용 설정됨"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"기기가 웹캠으로 연결됨"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 액세서리 연결됨"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"옵션을 더 보려면 탭하세요."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"연결된 기기를 충전합니다. 옵션을 더 보려면 탭하세요."</string>
@@ -1708,8 +1714,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"완료"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"단축키 사용 중지"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"단축키 사용"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"색상 반전"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"색상 보정"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"한 손 모드"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"더 어둡게"</string>
