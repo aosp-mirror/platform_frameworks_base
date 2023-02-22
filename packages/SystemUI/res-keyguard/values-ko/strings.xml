@@ -31,6 +31,8 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 배터리 보호를 위해 충전 최적화됨"</string>
+    <!-- no translation found for keyguard_plugged_in_incompatible_charger (5712938022567388098) -->
+    <skip />
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"잠금 해제하려면 메뉴를 누르세요."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"네트워크 잠김"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM 없음"</string>
