@@ -838,6 +838,7 @@ public class PipTransition extends PipTransitionController {
                     + mOneShotAnimationType);
         }
         animator.setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
+                .setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler())
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration);
         if (rotationDelta != Surface.ROTATION_0 && mInFixedRotation) {
@@ -964,7 +965,8 @@ public class PipTransition extends PipTransitionController {
     }
 
     private void finishResizeForMenu(Rect destinationBounds) {
-        mPipMenuController.movePipMenu(null, null, destinationBounds);
+        mPipMenuController.movePipMenu(null, null, destinationBounds,
+                PipMenuController.ALPHA_NO_CHANGE);
         mPipMenuController.updateMenuBounds(destinationBounds);
     }
 }

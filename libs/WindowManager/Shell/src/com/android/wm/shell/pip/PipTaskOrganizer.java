@@ -238,7 +238,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }, null);
     }
 
-    private boolean shouldSyncPipTransactionWithMenu() {
+    protected boolean shouldSyncPipTransactionWithMenu() {
         return mPipMenuController.isMenuVisible();
     }
 
@@ -266,9 +266,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             new PipAnimationController.PipTransactionHandler() {
                 @Override
                 public boolean handlePipTransaction(SurfaceControl leash,
-                        SurfaceControl.Transaction tx, Rect destinationBounds) {
+                        SurfaceControl.Transaction tx, Rect destinationBounds, float alpha) {
                     if (shouldSyncPipTransactionWithMenu()) {
-                        mPipMenuController.movePipMenu(leash, tx, destinationBounds);
+                        mPipMenuController.movePipMenu(leash, tx, destinationBounds, alpha);
                         return true;
                     }
                     return false;
@@ -370,6 +370,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     public PipTransitionController getTransitionController() {
         return mPipTransitionController;
+    }
+
+    PipAnimationController.PipTransactionHandler getPipTransactionHandler() {
+        return mPipTransactionHandler;
     }
 
     public Rect getCurrentOrAnimatingBounds() {
@@ -1375,7 +1379,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 .scale(tx, mLeash, startBounds, toBounds, degrees)
                 .round(tx, mLeash, startBounds, toBounds);
         if (shouldSyncPipTransactionWithMenu()) {
-            mPipMenuController.movePipMenu(mLeash, tx, toBounds);
+            mPipMenuController.movePipMenu(mLeash, tx, toBounds, PipMenuController.ALPHA_NO_CHANGE);
         } else {
             tx.apply();
         }
@@ -1541,7 +1545,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (!isInPip()) {
             return;
         }
-        mPipMenuController.movePipMenu(null, null, destinationBounds);
+        mPipMenuController.movePipMenu(null, null, destinationBounds,
+                PipMenuController.ALPHA_NO_CHANGE);
         mPipMenuController.updateMenuBounds(destinationBounds);
     }
 

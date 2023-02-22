@@ -250,7 +250,7 @@ public class PipAnimationController {
          * @return true if handled by the handler, false otherwise.
          */
         public boolean handlePipTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
-                Rect destinationBounds) {
+                Rect destinationBounds, float alpha) {
             return false;
         }
     }
@@ -351,9 +351,10 @@ public class PipAnimationController {
         }
 
         boolean handlePipTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
-                Rect destinationBounds) {
+                Rect destinationBounds, float alpha) {
             if (mPipTransactionHandler != null) {
-                return mPipTransactionHandler.handlePipTransaction(leash, tx, destinationBounds);
+                return mPipTransactionHandler.handlePipTransaction(
+                        leash, tx, destinationBounds, alpha);
             }
             return false;
         }
@@ -498,7 +499,9 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper().alpha(tx, leash, alpha)
                             .round(tx, leash, shouldApplyCornerRadius())
                             .shadow(tx, leash, shouldApplyShadowRadius());
-                    tx.apply();
+                    if (!handlePipTransaction(leash, tx, destinationBounds, alpha)) {
+                        tx.apply();
+                    }
                 }
 
                 @Override
@@ -613,7 +616,7 @@ public class PipAnimationController {
                                     .shadow(tx, leash, shouldApplyShadowRadius());
                         }
                     }
-                    if (!handlePipTransaction(leash, tx, bounds)) {
+                    if (!handlePipTransaction(leash, tx, bounds, /* alpha= */ 1f)) {
                         tx.apply();
                     }
                 }
