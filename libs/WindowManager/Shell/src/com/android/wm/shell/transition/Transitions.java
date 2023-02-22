@@ -709,15 +709,22 @@ public class Transitions implements RemoteCallable<Transitions> {
         for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
             final ActiveTransition toMerge = mActiveTransitions.get(iA);
             if (!toMerge.mMerged) break;
-            // aborted transitions have no start/finish transactions
-            if (mActiveTransitions.get(iA).mStartT == null) break;
-            if (fullFinish == null) {
-                fullFinish = new SurfaceControl.Transaction();
-            }
             // Include start. It will be a no-op if it was already applied. Otherwise, we need it
             // to maintain consistent state.
-            fullFinish.merge(mActiveTransitions.get(iA).mStartT);
-            fullFinish.merge(mActiveTransitions.get(iA).mFinishT);
+            if (toMerge.mStartT != null) {
+                if (fullFinish == null) {
+                    fullFinish = toMerge.mStartT;
+                } else {
+                    fullFinish.merge(toMerge.mStartT);
+                }
+            }
+            if (toMerge.mFinishT != null) {
+                if (fullFinish == null) {
+                    fullFinish = toMerge.mFinishT;
+                } else {
+                    fullFinish.merge(toMerge.mFinishT);
+                }
+            }
         }
         if (fullFinish != null) {
             fullFinish.apply();
