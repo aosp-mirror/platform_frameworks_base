@@ -1711,8 +1711,8 @@ public class PackageInstaller {
          * performed on the session. In case of device reboot or data loader transient failure
          * before the session has been finalized, you may commit the session again.
          * <p>
-         * If the installer is the device owner or the affiliated profile owner, there will be no
-         * user intervention.
+         * If the installer is the device owner, the affiliated profile owner, or has received
+         * user pre-approval of this session, there will be no user intervention.
          *
          * @param statusReceiver Called when the state of the session changes. Intents
          *                       sent to this receiver contain {@link #EXTRA_STATUS}. Refer to the
@@ -1722,6 +1722,7 @@ public class PackageInstaller {
          *             {@link #openWrite(String, long, long)} are still open.
          *
          * @see android.app.admin.DevicePolicyManager
+         * @see #requestUserPreapproval
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
@@ -1987,14 +1988,22 @@ public class PackageInstaller {
          * {@link android.Manifest.permission#REQUEST_INSTALL_PACKAGES REQUEST_INSTALL_PACKAGES}
          * permission, they can request the approval from users before
          * {@link Session#commit(IntentSender)} is called. This may require user intervention as
-         * well. The result of the request will be reported through the given callback.
+         * well. When user intervention is required, installers will receive a
+         * {@link #STATUS_PENDING_USER_ACTION} callback, and {@link #STATUS_SUCCESS} otherwise.
+         * In case that requesting user pre-approval is not available, installers will receive
+         * {@link #STATUS_FAILURE_BLOCKED} instead. Note that if the users decline the request,
+         * this session will be abandoned.
+         *
+         * If user intervention is required but never resolved, or requesting user
+         * pre-approval is not available, you may still call {@link Session#commit(IntentSender)}
+         * as the typical installation.
          *
          * @param details the adequate context to this session for requesting the approval from
          *                users prior to commit.
          * @param statusReceiver called when the state of the session changes.
-         *                       Intents sent to this receiver contain
-         *                       {@link #EXTRA_STATUS}. Refer to the individual
-         *                       status codes on how to handle them.
+         *                       Intents sent to this receiver contain {@link #EXTRA_STATUS}
+         *                       and the {@link #EXTRA_PRE_APPROVAL} would be {@code true}.
+         *                       Refer to the individual status codes on how to handle them.
          *
          * @throws IllegalArgumentException when {@link PreapprovalDetails} is {@code null}.
          * @throws IllegalArgumentException if {@link IntentSender} is {@code null}.
@@ -2003,6 +2012,7 @@ public class PackageInstaller {
          * @throws IllegalStateException if called again after this method has been called on
          *                               this session.
          * @throws SecurityException when the caller does not own this session.
+         * @throws SecurityException if called after the session has been committed or abandoned.
          */
         public void requestUserPreapproval(@NonNull PreapprovalDetails details,
                 @NonNull IntentSender statusReceiver) {
