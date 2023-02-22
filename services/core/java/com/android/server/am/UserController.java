@@ -365,13 +365,13 @@ class UserController implements Handler.Callback {
     private volatile ArraySet<String> mCurWaitingUserSwitchCallbacks;
 
     /**
-     * Messages for for switching from {@link android.os.UserHandle#SYSTEM}.
+     * Messages for switching from {@link android.os.UserHandle#SYSTEM}.
      */
     @GuardedBy("mLock")
     private String mSwitchingFromSystemUserMessage;
 
     /**
-     * Messages for for switching to {@link android.os.UserHandle#SYSTEM}.
+     * Messages for switching to {@link android.os.UserHandle#SYSTEM}.
      */
     @GuardedBy("mLock")
     private String mSwitchingToSystemUserMessage;
@@ -383,6 +383,16 @@ class UserController implements Handler.Callback {
     private ArraySet<String> mTimeoutUserSwitchCallbacks;
 
     private final LockPatternUtils mLockPatternUtils;
+
+    // TODO(b/266158156): remove this once we improve/refactor the way broadcasts are sent for
+    //  the system user in HSUM.
+    @GuardedBy("mLock")
+    private boolean mIsBroadcastSentForSystemUserStarted;
+
+    // TODO(b/266158156): remove this once we improve/refactor the way broadcasts are sent for
+    //  the system user in HSUM.
+    @GuardedBy("mLock")
+    private boolean mIsBroadcastSentForSystemUserStarting;
 
     volatile boolean mBootCompleted;
 
@@ -635,7 +645,7 @@ class UserController implements Handler.Callback {
                 // user transitions to RUNNING_LOCKED.  However, in "headless system user mode", the
                 // system user is explicitly started before the device has finished booting.  In
                 // that case, we need to wait until onBootComplete() to send the broadcast.
-                if (!(UserManager.isHeadlessSystemUserMode() && uss.mHandle.isSystem())) {
+                if (!(mInjector.isHeadlessSystemUserMode() && uss.mHandle.isSystem())) {
                     // ACTION_LOCKED_BOOT_COMPLETED
                     sendLockedBootCompletedBroadcast(resultTo, userId);
                 }
@@ -1823,15 +1833,17 @@ class UserController implements Handler.Callback {
                 needStart = false;
             }
 
-            if (needStart) {
-                // Send USER_STARTED broadcast
-                Intent intent = new Intent(Intent.ACTION_USER_STARTED);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                        | Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                mInjector.broadcastIntent(intent,
-                        null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID, callingUid, callingPid, userId);
+            // In most cases, broadcast for the system user starting/started is sent by
+            // ActivityManagerService#systemReady(). However on some HSUM devices (e.g. tablets)
+            // the user switches from the system user to a secondary user while running
+            // ActivityManagerService#systemReady(), thus broadcast is not sent for the system user.
+            // Therefore we send the broadcast for the system user here as well in HSUM.
+            // TODO(b/266158156): Improve/refactor the way broadcasts are sent for the system user
+            // in HSUM. Ideally it'd be best to have one single place that sends this notification.
+            final boolean isSystemUserInHeadlessMode = (userId == UserHandle.USER_SYSTEM)
+                    && mInjector.isHeadlessSystemUserMode();
+            if (needStart || isSystemUserInHeadlessMode) {
+                sendUserStartedBroadcast(userId, callingUid, callingPid);
             }
             t.traceEnd();
 
@@ -1845,23 +1857,9 @@ class UserController implements Handler.Callback {
                 t.traceEnd();
             }
 
-            if (needStart) {
+            if (needStart || isSystemUserInHeadlessMode) {
                 t.traceBegin("sendRestartBroadcast");
-                Intent intent = new Intent(Intent.ACTION_USER_STARTING);
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                mInjector.broadcastIntent(intent,
-                        null, new IIntentReceiver.Stub() {
-                            @Override
-                            public void performReceive(Intent intent, int resultCode,
-                                    String data, Bundle extras, boolean ordered,
-                                    boolean sticky,
-                                    int sendingUser) throws RemoteException {
-                            }
-                        }, 0, null, null,
-                        new String[]{INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE,
-                        null, true, false, MY_PID, SYSTEM_UID, callingUid, callingPid,
-                        UserHandle.USER_ALL);
+                sendUserStartingBroadcast(userId, callingUid, callingPid);
                 t.traceEnd();
             }
         } finally {
@@ -2283,6 +2281,62 @@ class UserController implements Handler.Callback {
         EventLogTags.writeAmSwitchUser(newUserId);
     }
 
+    // The two methods sendUserStartedBroadcast() and sendUserStartingBroadcast()
+    // could be merged for better reuse. However, the params they are calling broadcastIntent()
+    // with are different - resultCode receiver, permissions, ordered, and userId, etc. Therefore,
+    // we decided to keep two separate methods for better code readability/clarity.
+    // TODO(b/266158156): Improve/refactor the way broadcasts are sent for the system user
+    // in HSUM. Ideally it'd be best to have one single place that sends this notification.
+    /** Sends {@code ACTION_USER_STARTED} broadcast. */
+    void sendUserStartedBroadcast(@UserIdInt int userId, int callingUid, int callingPid) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            synchronized (mLock) {
+                // Make sure that the broadcast is sent only once for the system user.
+                if (mIsBroadcastSentForSystemUserStarted) {
+                    return;
+                }
+                mIsBroadcastSentForSystemUserStarted = true;
+            }
+        }
+        final Intent intent = new Intent(Intent.ACTION_USER_STARTED);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        mInjector.broadcastIntent(intent, /* resolvedType= */ null, /* resultTo= */ null,
+                /* resultCode= */ 0, /* resultData= */ null, /* resultExtras= */ null,
+                /* requiredPermissions= */ null, AppOpsManager.OP_NONE, /* bOptions= */ null,
+                /* ordered= */ false, /* sticky= */ false, MY_PID, SYSTEM_UID,
+                callingUid, callingPid, userId);
+    }
+
+    /** Sends {@code ACTION_USER_STARTING} broadcast. */
+    void sendUserStartingBroadcast(@UserIdInt int userId, int callingUid, int callingPid) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            synchronized (mLock) {
+                // Make sure that the broadcast is sent only once for the system user.
+                if (mIsBroadcastSentForSystemUserStarting) {
+                    return;
+                }
+                mIsBroadcastSentForSystemUserStarting = true;
+            }
+        }
+        final Intent intent = new Intent(Intent.ACTION_USER_STARTING);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        mInjector.broadcastIntent(intent, /* resolvedType= */ null,
+                new IIntentReceiver.Stub() {
+                    @Override
+                    public void performReceive(Intent intent, int resultCode,
+                            String data, Bundle extras, boolean ordered,
+                            boolean sticky,
+                            int sendingUser) throws RemoteException {
+                    }
+                }, /* resultCode= */ 0, /* resultData= */ null, /* resultExtras= */ null,
+                new String[]{INTERACT_ACROSS_USERS}, AppOpsManager.OP_NONE, /* bOptions= */ null,
+                /* ordered= */ true, /* sticky= */ false, MY_PID, SYSTEM_UID,
+                callingUid, callingPid, UserHandle.USER_ALL);
+    }
+
     void sendUserSwitchBroadcasts(int oldUserId, int newUserId) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -2568,7 +2622,7 @@ class UserController implements Handler.Callback {
         for (int i = 0; i < startedUsers.size(); i++) {
             int userId = startedUsers.keyAt(i);
             UserState uss = startedUsers.valueAt(i);
-            if (!UserManager.isHeadlessSystemUserMode()) {
+            if (!mInjector.isHeadlessSystemUserMode()) {
                 finishUserBoot(uss, resultTo);
             } else {
                 if (userId == UserHandle.USER_SYSTEM) {
@@ -2589,9 +2643,9 @@ class UserController implements Handler.Callback {
         mInjector.reportCurWakefulnessUsageEvent();
     }
 
-    // TODO(b/242195409): remove this method if initial system user boot logic is refactored?
+    // TODO(b/266158156): remove this method if initial system user boot logic is refactored?
     void onSystemUserStarting() {
-        if (!UserManager.isHeadlessSystemUserMode()) {
+        if (!mInjector.isHeadlessSystemUserMode()) {
             // Don't need to call on HSUM because it will be called when the system user is
             // restarted on background
             mInjector.onUserStarting(UserHandle.USER_SYSTEM);
@@ -3059,6 +3113,10 @@ class UserController implements Handler.Callback {
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
             pw.println("  mUserSwitchUiEnabled:" + mUserSwitchUiEnabled);
             pw.println("  mInitialized:" + mInitialized);
+            pw.println("  mIsBroadcastSentForSystemUserStarted:"
+                    + mIsBroadcastSentForSystemUserStarted);
+            pw.println("  mIsBroadcastSentForSystemUserStarting:"
+                    + mIsBroadcastSentForSystemUserStarting);
             if (mSwitchingFromSystemUserMessage != null) {
                 pw.println("  mSwitchingFromSystemUserMessage: " + mSwitchingFromSystemUserMessage);
             }
@@ -3747,6 +3805,10 @@ class UserController implements Handler.Callback {
                     mHandler.post(runOnce);
                 }
             }, /* message= */ null);
+        }
+
+        boolean isHeadlessSystemUserMode() {
+            return UserManager.isHeadlessSystemUserMode();
         }
 
         boolean isUsersOnSecondaryDisplaysEnabled() {
