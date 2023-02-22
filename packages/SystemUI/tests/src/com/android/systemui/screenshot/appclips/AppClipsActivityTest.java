@@ -22,10 +22,10 @@ import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_
 import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,33 +34,35 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.ResultReceiver;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.widget.ImageView;
 
-import androidx.lifecycle.MutableLiveData;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.intercepting.SingleActivityFactory;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.screenshot.ImageExporter;
 import com.android.systemui.settings.UserTracker;
+
+import com.google.common.util.concurrent.Futures;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.UUID;
+import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 
 @RunWith(AndroidTestingRunner.class)
@@ -75,18 +77,16 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     private static final String TEST_CALLING_PACKAGE = "test-calling-package";
 
     @Mock
-    private AppClipsViewModel.Factory mViewModelFactory;
+    private AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
+    @Mock
+    private ImageExporter mImageExporter;
     @Mock
     private PackageManager mPackageManager;
     @Mock
     private UserTracker mUserTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
-    @Mock
-    private AppClipsViewModel mViewModel;
 
-    private MutableLiveData<Bitmap> mScreenshotLiveData;
-    private MutableLiveData<Uri> mResultLiveData;
     private AppClipsActivity mActivity;
 
     // Using the deprecated ActivityTestRule and SingleActivityFactory to help with injecting mocks.
@@ -94,8 +94,11 @@ public final class AppClipsActivityTest extends SysuiTestCase {
             new SingleActivityFactory<>(AppClipsActivityTestable.class) {
                 @Override
                 protected AppClipsActivityTestable create(Intent unUsed) {
-                    return new AppClipsActivityTestable(mViewModelFactory, mPackageManager,
-                            mUserTracker, mUiEventLogger);
+                    return new AppClipsActivityTestable(
+                            new AppClipsViewModel.Factory(mAppClipsCrossProcessHelper,
+                                    mImageExporter, getContext().getMainExecutor(),
+                                    directExecutor()), mPackageManager, mUserTracker,
+                            mUiEventLogger);
                 }
             };
 
@@ -107,29 +110,17 @@ public final class AppClipsActivityTest extends SysuiTestCase {
     public void setUp() throws PackageManager.NameNotFoundException {
         MockitoAnnotations.initMocks(this);
 
-        mScreenshotLiveData = new MutableLiveData<>();
-        mResultLiveData = new MutableLiveData<>();
-        MutableLiveData<Integer> errorLiveData = new MutableLiveData<>();
-
-        when(mViewModelFactory.create(any(Class.class))).thenReturn(mViewModel);
-        when(mViewModel.getScreenshot()).thenReturn(mScreenshotLiveData);
-        when(mViewModel.getResultLiveData()).thenReturn(mResultLiveData);
-        when(mViewModel.getErrorLiveData()).thenReturn(errorLiveData);
         when(mUserTracker.getUserId()).thenReturn(TEST_USER_ID);
-
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = TEST_UID;
         when(mPackageManager.getApplicationInfoAsUser(eq(TEST_CALLING_PACKAGE),
                 any(ApplicationInfoFlags.class), eq(TEST_USER_ID))).thenReturn(applicationInfo);
 
-        doAnswer(invocation -> {
-            runOnMainThread(() -> mScreenshotLiveData.setValue(TEST_BITMAP));
-            return null;
-        }).when(mViewModel).performScreenshot();
-        doAnswer(invocation -> {
-            runOnMainThread(() -> mResultLiveData.setValue(TEST_URI));
-            return null;
-        }).when(mViewModel).saveScreenshotThenFinish(any(Drawable.class), any(Rect.class));
+        when(mAppClipsCrossProcessHelper.takeScreenshot()).thenReturn(TEST_BITMAP);
+        ImageExporter.Result result = new ImageExporter.Result();
+        result.uri = TEST_URI;
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), any(Bitmap.class),
+                any(UserHandle.class))).thenReturn(Futures.immediateFuture(result));
     }
 
     @After
@@ -137,7 +128,6 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         mActivityRule.finishActivity();
     }
 
-    @Ignore("b/269403503")
     @Test
     public void appClipsLaunched_screenshotDisplayed() {
         launchActivity();
@@ -145,7 +135,6 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         assertThat(((ImageView) mActivity.findViewById(R.id.preview)).getDrawable()).isNotNull();
     }
 
-    @Ignore("b/269403503")
     @Test
     public void screenshotDisplayed_userConsented_screenshotExportedSuccessfully() {
         ResultReceiver resultReceiver = createResultReceiver((resultCode, data) -> {
@@ -165,7 +154,6 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         verify(mUiEventLogger).log(SCREENSHOT_FOR_NOTE_ACCEPTED, TEST_UID, TEST_CALLING_PACKAGE);
     }
 
-    @Ignore("b/269403503")
     @Test
     public void screenshotDisplayed_userDeclined() {
         ResultReceiver resultReceiver = createResultReceiver((resultCode, data) -> {
