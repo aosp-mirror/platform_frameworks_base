@@ -196,7 +196,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         }
         animator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     onAnimationEnd?.run()
                 }
             }
@@ -221,10 +221,10 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
     /** Indicates whether the ripple animation is playing. */
     fun rippleInProgress(): Boolean = animator.isRunning
 
-    override fun onDraw(canvas: Canvas?) {
-        if (canvas == null || !canvas.isHardwareAccelerated) {
-            // Drawing with the ripple shader requires hardware acceleration, so skip
-            // if it's unsupported.
+    override fun onDraw(canvas: Canvas) {
+        if (!canvas.isHardwareAccelerated) {
+            // Drawing with the ripple shader requires hardware acceleration, so skip if it's
+            // unsupported.
             return
         }
         // To reduce overdraw, we mask the effect to a circle or a rectangle that's bigger than the
