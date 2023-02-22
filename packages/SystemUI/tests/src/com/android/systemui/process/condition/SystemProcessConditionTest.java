@@ -26,7 +26,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.process.ProcessWrapper;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.condition.Condition;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -41,10 +40,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
-public class UserProcessConditionTest extends SysuiTestCase {
-    @Mock
-    UserTracker mUserTracker;
-
+public class SystemProcessConditionTest extends SysuiTestCase {
     @Mock
     ProcessWrapper mProcessWrapper;
 
@@ -59,15 +55,14 @@ public class UserProcessConditionTest extends SysuiTestCase {
     }
 
     /**
-     * Verifies condition reports false when tracker reports a different user id than the
-     * identifier from the process handle.
+     * Verifies condition reports false when tracker reports the process is being ran by the
+     * system user.
      */
     @Test
-    public void testConditionFailsWithDifferentIds() {
+    public void testConditionFailsWithNonSystemProcess() {
 
-        final Condition condition = new UserProcessCondition(mProcessWrapper, mUserTracker);
-        when(mProcessWrapper.getUserHandleIdentifier()).thenReturn(0);
-        when(mUserTracker.getUserId()).thenReturn(1);
+        final Condition condition = new SystemProcessCondition(mProcessWrapper);
+        when(mProcessWrapper.isSystemUser()).thenReturn(false);
 
         final Monitor monitor = new Monitor(mExecutor);
 
@@ -81,15 +76,14 @@ public class UserProcessConditionTest extends SysuiTestCase {
     }
 
     /**
-     * Verifies condition reports false when tracker reports a different user id than the
-     * identifier from the process handle.
+     * Verifies condition reports true when tracker reports the process is being ran by the
+     * system user.
      */
     @Test
-    public void testConditionSucceedsWithSameIds() {
+    public void testConditionSucceedsWithSystemProcess() {
 
-        final Condition condition = new UserProcessCondition(mProcessWrapper, mUserTracker);
-        when(mProcessWrapper.getUserHandleIdentifier()).thenReturn(0);
-        when(mUserTracker.getUserId()).thenReturn(0);
+        final Condition condition = new SystemProcessCondition(mProcessWrapper);
+        when(mProcessWrapper.isSystemUser()).thenReturn(true);
 
         final Monitor monitor = new Monitor(mExecutor);
 
@@ -101,5 +95,4 @@ public class UserProcessConditionTest extends SysuiTestCase {
 
         verify(mCallback).onConditionsChanged(true);
     }
-
 }
