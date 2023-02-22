@@ -1743,7 +1743,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (historyDirectory == null) {
             mCheckinFile = null;
             mStatsFile = null;
-            mHistory = new BatteryStatsHistory(mStepDetailsCalculator, mClock);
+            mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_FILES,
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         } else {
             mCheckinFile = new AtomicFile(new File(historyDirectory, "batterystats-checkin.bin"));
             mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
@@ -10881,14 +10882,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (systemDir == null) {
             mStatsFile = null;
-            mHistory = new BatteryStatsHistory(mStepDetailsCalculator, mClock);
+            mCheckinFile = null;
+            mDailyFile = null;
+            mHistory = new BatteryStatsHistory(mConstants.MAX_HISTORY_FILES,
+                    mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         } else {
             mStatsFile = new AtomicFile(new File(systemDir, "batterystats.bin"));
+            mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
+            mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
             mHistory = new BatteryStatsHistory(systemDir, mConstants.MAX_HISTORY_FILES,
                     mConstants.MAX_HISTORY_BUFFER, mStepDetailsCalculator, mClock);
         }
-        mCheckinFile = new AtomicFile(new File(systemDir, "batterystats-checkin.bin"));
-        mDailyFile = new AtomicFile(new File(systemDir, "batterystats-daily.xml"));
         mStartCount++;
         initTimersAndCounters();
         mOnBattery = mOnBatteryInternal = false;
