@@ -431,8 +431,9 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
                             "[setSizeAtProgresses] before playing the animation."
                     )
                 }
-                // If there's no size is set, we set everything to 0.
+                // If there's no size is set, we set everything to 0 and return early.
                 setSizeAtProgresses(initialSize)
+                return currentSizeIndex
             }
 
             var candidate = sizes[currentSizeIndex]
