@@ -2431,4 +2431,31 @@ public final class AccessibilityManager {
             return true;
         }
     }
+
+    /**
+     * Retrieves the window's transformation matrix and magnification spec.
+     *
+     * <p>
+     * Used by callers outside of the AccessibilityManagerService process which need
+     * this information, like {@link android.view.accessibility.DirectAccessibilityConnection}.
+     * </p>
+     *
+     * @return The transformation spec
+     * @hide
+     */
+    public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
+            int windowId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return null;
+            }
+        }
+        try {
+            return service.getWindowTransformationSpec(windowId);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }

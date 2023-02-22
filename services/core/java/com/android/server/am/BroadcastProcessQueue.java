@@ -155,6 +155,12 @@ class BroadcastProcessQueue {
     private boolean mActiveViaColdStart;
 
     /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * to a package that was in the stopped state.
+     */
+    private boolean mActiveWasStopped;
+
+    /**
      * Number of consecutive urgent broadcasts that have been dispatched
      * since the last non-urgent dispatch.
      */
@@ -229,14 +235,19 @@ class BroadcastProcessQueue {
      * When defined, this receiver is considered "blocked" until at least the
      * given count of other receivers have reached a terminal state; typically
      * used for ordered broadcasts and priority traunches.
+     *
+     * @return the existing broadcast record in the queue that was replaced with a newer broadcast
+     *         sent with {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} or {@code null} if there
+     *         wasn't any broadcast that was replaced.
      */
-    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            @NonNull BroadcastConsumer replacedBroadcastConsumer, boolean wouldBeSkipped) {
+    @Nullable
+    public BroadcastRecord enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record,
+            int recordIndex, boolean wouldBeSkipped) {
         if (record.isReplacePending()) {
-            final boolean didReplace = replaceBroadcast(record, recordIndex,
-                    replacedBroadcastConsumer, wouldBeSkipped);
-            if (didReplace) {
-                return;
+            final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex,
+                    wouldBeSkipped);
+            if (replacedBroadcastRecord != null) {
+                return replacedBroadcastRecord;
             }
         }
 
@@ -253,34 +264,37 @@ class BroadcastProcessQueue {
         // with implicit responsiveness expectations.
         getQueueForBroadcast(record).addLast(newBroadcastArgs);
         onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
+        return null;
     }
 
     /**
      * Searches from newest to oldest in the pending broadcast queues, and at the first matching
      * pending broadcast it finds, replaces it in-place and returns -- does not attempt to handle
      * "duplicate" broadcasts in the queue.
-     * <p>
-     * @return {@code true} if it found and replaced an existing record in the queue;
-     * {@code false} otherwise.
+     *
+     * @return the existing broadcast record in the queue that was replaced with a newer broadcast
+     *         sent with {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} or {@code null} if there
+     *         wasn't any broadcast that was replaced.
      */
-    private boolean replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            @NonNull BroadcastConsumer replacedBroadcastConsumer, boolean wouldBeSkipped) {
+    @Nullable
+    private BroadcastRecord replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
+            boolean wouldBeSkipped) {
         final ArrayDeque<SomeArgs> queue = getQueueForBroadcast(record);
-        return replaceBroadcastInQueue(queue, record, recordIndex,
-                replacedBroadcastConsumer, wouldBeSkipped);
+        return replaceBroadcastInQueue(queue, record, recordIndex, wouldBeSkipped);
     }
 
     /**
      * Searches from newest to oldest, and at the first matching pending broadcast
      * it finds, replaces it in-place and returns -- does not attempt to handle
      * "duplicate" broadcasts in the queue.
-     * <p>
-     * @return {@code true} if it found and replaced an existing record in the queue;
-     * {@code false} otherwise.
+     *
+     * @return the existing broadcast record in the queue that was replaced with a newer broadcast
+     *         sent with {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} or {@code null} if there
+     *         wasn't any broadcast that was replaced.
      */
-    private boolean replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
+    @Nullable
+    private BroadcastRecord replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
             @NonNull BroadcastRecord record, int recordIndex,
-            @NonNull BroadcastConsumer replacedBroadcastConsumer,
             boolean wouldBeSkipped) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
@@ -302,11 +316,10 @@ class BroadcastProcessQueue {
                 record.copyEnqueueTimeFrom(testRecord);
                 onBroadcastDequeued(testRecord, testRecordIndex, testWouldBeSkipped);
                 onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
-                replacedBroadcastConsumer.accept(testRecord, testRecordIndex);
-                return true;
+                return testRecord;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -454,8 +467,16 @@ class BroadcastProcessQueue {
         mActiveViaColdStart = activeViaColdStart;
     }
 
+    public void setActiveWasStopped(boolean activeWasStopped) {
+        mActiveWasStopped = activeWasStopped;
+    }
+
     public boolean getActiveViaColdStart() {
         return mActiveViaColdStart;
+    }
+
+    public boolean getActiveWasStopped() {
+        return mActiveWasStopped;
     }
 
     /**
@@ -477,6 +498,7 @@ class BroadcastProcessQueue {
         final boolean wouldBeSkipped = (next.argi2 == 1);
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
+        mActiveWasStopped = false;
         next.recycle();
         onBroadcastDequeued(mActive, mActiveIndex, wouldBeSkipped);
     }
@@ -726,6 +748,22 @@ class BroadcastProcessQueue {
      */
     public boolean isPendingManifest() {
         return mCountManifest > 0;
+    }
+
+    /**
+     * Quickly determine if this queue has ordered broadcasts waiting to be delivered,
+     * which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingOrdered() {
+        return mCountOrdered > 0;
+    }
+
+    /**
+     * Quickly determine if this queue has broadcasts waiting to be delivered for which result is
+     * expected from the senders, which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingResultTo() {
+        return mCountResultTo > 0;
     }
 
     /**

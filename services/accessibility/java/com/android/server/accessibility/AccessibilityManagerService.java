@@ -529,6 +529,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public IAccessibilityManager.WindowTransformationSpec getWindowTransformationSpec(
+            int windowId) {
+        IAccessibilityManager.WindowTransformationSpec windowTransformationSpec =
+                new IAccessibilityManager.WindowTransformationSpec();
+        Pair<float[], MagnificationSpec> result =
+                getWindowTransformationMatrixAndMagnificationSpec(windowId);
+        windowTransformationSpec.transformationMatrix = result.first;
+        windowTransformationSpec.magnificationSpec = result.second;
+        return windowTransformationSpec;
+    }
+
+    @Override
     public void onServiceInfoChangedLocked(AccessibilityUserState userState) {
         mSecurityPolicy.onBoundServicesChangedLocked(userState.mUserId,
                 userState.mBoundServices);
@@ -3807,20 +3819,30 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     + "proxy-ed");
         }
 
-        mProxyManager.registerProxy(client, displayId, mContext,
-                sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
-                mWindowManagerService, mA11yWindowManager);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mProxyManager.registerProxy(client, displayId, mContext,
+                    sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
+                    mWindowManagerService, mA11yWindowManager);
 
-        synchronized (mLock) {
-            notifyClearAccessibilityCacheLocked();
+            synchronized (mLock) {
+                notifyClearAccessibilityCacheLocked();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
         return true;
     }
 
     @Override
-    public boolean unregisterProxyForDisplay(int displayId) throws RemoteException {
+    public boolean unregisterProxyForDisplay(int displayId) {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
-        return mProxyManager.unregisterProxy(displayId);
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mProxyManager.unregisterProxy(displayId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     boolean isDisplayProxyed(int displayId) {
@@ -4555,6 +4577,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return false;
     }
 
+    /**
+     * Called when always on magnification feature flag flips to check if the feature should be
+     * enabled for current user state.
+     */
+    public void updateAlwaysOnMagnification() {
+        synchronized (mLock) {
+            readAlwaysOnMagnificationLocked(getCurrentUserState());
+        }
+    }
+
+    @GuardedBy("mLock")
     boolean readAlwaysOnMagnificationLocked(AccessibilityUserState userState) {
         final boolean isSettingsAlwaysOnEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),

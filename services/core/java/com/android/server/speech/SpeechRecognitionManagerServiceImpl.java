@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.permission.PermissionManager;
+import android.speech.IModelDownloadListener;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
@@ -183,13 +184,33 @@ final class SpeechRecognitionManagerServiceImpl extends
                         @Override
                         public void checkRecognitionSupport(
                                 Intent recognizerIntent,
+                                AttributionSource attributionSource,
                                 IRecognitionSupportCallback callback) {
-                            service.checkRecognitionSupport(recognizerIntent, callback);
+                            service.checkRecognitionSupport(
+                                    recognizerIntent, attributionSource, callback);
                         }
 
                         @Override
-                        public void triggerModelDownload(Intent recognizerIntent) {
-                            service.triggerModelDownload(recognizerIntent);
+                        public void triggerModelDownload(
+                                Intent recognizerIntent,
+                                AttributionSource attributionSource) {
+                            service.triggerModelDownload(recognizerIntent, attributionSource);
+                        }
+
+                        @Override
+                        public void setModelDownloadListener(
+                                Intent recognizerIntent,
+                                AttributionSource attributionSource,
+                                IModelDownloadListener listener) throws RemoteException {
+                            service.setModelDownloadListener(
+                                    recognizerIntent, attributionSource, listener);
+                        }
+
+                        @Override
+                        public void clearModelDownloadListener(
+                                Intent recognizerIntent,
+                                AttributionSource attributionSource) throws RemoteException {
+                            service.clearModelDownloadListener(recognizerIntent, attributionSource);
                         }
                     });
                 } catch (RemoteException e) {

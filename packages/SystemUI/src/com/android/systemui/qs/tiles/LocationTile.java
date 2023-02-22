@@ -48,6 +48,8 @@ import javax.inject.Inject;
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
+    public static final String TILE_SPEC = "location";
+
     private final LocationController mController;
     private final KeyguardStateController mKeyguard;
     private final Callback mCallback = new Callback();

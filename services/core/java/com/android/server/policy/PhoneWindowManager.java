@@ -3409,7 +3409,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SPACE:
                 if (down && repeatCount == 0) {
                     // Handle keyboard layout switching. (CTRL + SPACE)
-                    if (KeyEvent.metaStateHasModifiers(metaState, KeyEvent.META_CTRL_ON)) {
+                    if (KeyEvent.metaStateHasModifiers(metaState & ~KeyEvent.META_SHIFT_MASK,
+                            KeyEvent.META_CTRL_ON)) {
                         int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                         mWindowManagerFuncs.switchKeyboardLayout(event.getDeviceId(), direction);
                         return true;
@@ -3501,8 +3502,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void onKeyguardOccludedChangedLw(boolean occluded) {
-        if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
+    public void onKeyguardOccludedChangedLw(boolean occluded, boolean waitAppTransition) {
+        if (mKeyguardDelegate != null && waitAppTransition) {
             mPendingKeyguardOccluded = occluded;
             mKeyguardOccludedChanged = true;
         } else {

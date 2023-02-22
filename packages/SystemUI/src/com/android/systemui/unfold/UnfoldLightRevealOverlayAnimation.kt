@@ -166,7 +166,8 @@ constructor(
 
         overlayAddReason = reason
 
-        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm)
+        val newRoot = SurfaceControlViewHost(context, context.display!!, wwm,
+                "UnfoldLightRevealOverlayAnimation")
         val params = getLayoutParams()
         val newView =
             LightRevealScrim(

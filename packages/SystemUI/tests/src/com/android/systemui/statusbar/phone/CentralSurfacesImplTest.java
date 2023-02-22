@@ -126,6 +126,7 @@ import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeControllerImpl;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -218,6 +219,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationPanelView mNotificationPanelView;
+    @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
     @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
@@ -327,6 +329,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // CentralSurfacesImpl's runtime flag check fails if the flag is absent.
         // This value is unused, because test manifest is opted in.
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_SYSUI, false);
+        // Set default value to avoid IllegalStateException.
+        mFeatureFlags.set(Flags.SHORTCUT_LIST_SEARCH_LAYOUT, false);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -546,6 +550,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // initialized automatically and make NPVC private.
         mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mCentralSurfaces.mNotificationPanelViewController = mNotificationPanelViewController;
+        mCentralSurfaces.mQsController = mQuickSettingsController;
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
         mCentralSurfaces.mPresenter = mNotificationPresenter;
         mCentralSurfaces.mKeyguardIndicationController = mKeyguardIndicationController;

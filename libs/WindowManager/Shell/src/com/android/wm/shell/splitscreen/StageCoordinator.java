@@ -499,6 +499,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             break;
                         }
                     }
+                } else if (mSideStage.getChildCount() != 0) {
+                    // There are chances the entering app transition got canceled by performing
+                    // rotation transition. Checks if there is any child task existed in split
+                    // screen before fallback to cancel entering flow.
+                    openingToSide = true;
                 }
 
                 if (isEnteringSplit && !openingToSide) {
@@ -515,7 +520,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     }
                 }
 
-                if (!isEnteringSplit && openingToSide) {
+                if (!isEnteringSplit && apps != null) {
                     final WindowContainerTransaction evictWct = new WindowContainerTransaction();
                     prepareEvictNonOpeningChildTasks(position, apps, evictWct);
                     mSyncQueue.queue(evictWct);
@@ -535,6 +540,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         RemoteAnimationAdapter wrappedAdapter = new RemoteAnimationAdapter(wrapper,
                 0 /* duration */, 0 /* statusBarTransitionDelay */);
         ActivityOptions activityOptions = ActivityOptions.fromBundle(options);
+        // Flag this as a no-user-action launch to prevent sending user leaving event to the current
+        // top activity since it's going to be put into another side of the split. This prevents the
+        // current top activity from going into pip mode due to user leaving event.
+        activityOptions.setApplyNoUserActionFlagForShortcut(true);
         activityOptions.update(ActivityOptions.makeRemoteAnimation(wrappedAdapter));
         try {
             LauncherApps launcherApps = mContext.getSystemService(LauncherApps.class);
@@ -594,6 +603,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             break;
                         }
                     }
+                } else if (mSideStage.getChildCount() != 0) {
+                    // There are chances the entering app transition got canceled by performing
+                    // rotation transition. Checks if there is any child task existed in split
+                    // screen before fallback to cancel entering flow.
+                    openingToSide = true;
                 }
 
                 if (isEnteringSplit && !openingToSide && apps != null) {
@@ -620,7 +634,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 }
 
 
-                if (!isEnteringSplit && openingToSide) {
+                if (!isEnteringSplit && apps != null) {
                     final WindowContainerTransaction evictWct = new WindowContainerTransaction();
                     prepareEvictNonOpeningChildTasks(position, apps, evictWct);
                     mSyncQueue.queue(evictWct);
@@ -1222,8 +1236,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
             if (shouldBreakPairedTaskInRecents(exitReason) && mShouldUpdateRecents) {
-                recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
-                recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
+                recentTasks.removeSplitPair(mMainStage.getLastVisibleTaskId());
+                recentTasks.removeSplitPair(mSideStage.getLastVisibleTaskId());
             }
         });
         mShouldUpdateRecents = false;
@@ -1691,9 +1705,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> {
-            setDividerVisibility(mainStageVisible, t);
-        });
+        setDividerVisibility(mainStageVisible, null);
     }
 
     private void setDividerVisibility(boolean visible, @Nullable SurfaceControl.Transaction t) {
@@ -1775,6 +1787,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (dividerLeash != null && dividerLeash.isValid()) {
+                        transaction.setAlpha(dividerLeash, 1);
+                        transaction.apply();
+                    }
                     mTransactionPool.release(transaction);
                     mDividerFadeInAnimator = null;
                 }

@@ -230,7 +230,7 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
-    fun pluginRemoved_clockChanged() {
+    fun pluginRemoved_clockAndListChanged() {
         val plugin1 = FakeClockPlugin()
             .addClock("clock_1", "clock 1")
             .addClock("clock_2", "clock 2")
@@ -239,19 +239,35 @@ class ClockRegistryTest : SysuiTestCase() {
             .addClock("clock_3", "clock 3", { mockClock })
             .addClock("clock_4", "clock 4")
 
-        registry.applySettings(ClockSettings("clock_3", null))
-        pluginListener.onPluginConnected(plugin1, mockContext)
-        pluginListener.onPluginConnected(plugin2, mockContext)
 
         var changeCallCount = 0
-        registry.registerClockChangeListener { changeCallCount++ }
+        var listChangeCallCount = 0
+        registry.registerClockChangeListener(object : ClockRegistry.ClockChangeListener {
+            override fun onCurrentClockChanged() { changeCallCount++ }
+            override fun onAvailableClocksChanged() { listChangeCallCount++ }
+        })
+
+        registry.applySettings(ClockSettings("clock_3", null))
+        assertEquals(0, changeCallCount)
+        assertEquals(0, listChangeCallCount)
+
+        pluginListener.onPluginConnected(plugin1, mockContext)
+        assertEquals(0, changeCallCount)
+        assertEquals(1, listChangeCallCount)
+
+        pluginListener.onPluginConnected(plugin2, mockContext)
+        assertEquals(1, changeCallCount)
+        assertEquals(2, listChangeCallCount)
 
         pluginListener.onPluginDisconnected(plugin1)
-        assertEquals(0, changeCallCount)
+        assertEquals(1, changeCallCount)
+        assertEquals(3, listChangeCallCount)
 
         pluginListener.onPluginDisconnected(plugin2)
-        assertEquals(1, changeCallCount)
+        assertEquals(2, changeCallCount)
+        assertEquals(4, listChangeCallCount)
     }
+
 
     @Test
     fun jsonDeserialization_gotExpectedObject() {

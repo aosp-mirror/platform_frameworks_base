@@ -133,6 +133,7 @@ public class UserControllerTest {
     private static final int TEST_USER_ID1 = 101;
     private static final int TEST_USER_ID2 = 102;
     private static final int TEST_USER_ID3 = 103;
+    private static final int SYSTEM_USER_ID = UserHandle.SYSTEM.getIdentifier();
     private static final int NONEXIST_USER_ID = 2;
     private static final int TEST_PRE_CREATED_USER_ID = 103;
 
@@ -228,6 +229,31 @@ public class UserControllerTest {
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testStartUser_sendsNoBroadcastsForSystemUserInNonHeadlessMode() {
+        setUpUser(SYSTEM_USER_ID, UserInfo.FLAG_SYSTEM, /* preCreated= */ false,
+                UserManager.USER_TYPE_FULL_SYSTEM);
+        mockIsHeadlessSystemUserMode(false);
+
+        mUserController.startUser(SYSTEM_USER_ID, USER_START_MODE_FOREGROUND);
+
+        assertWithMessage("Broadcasts for starting the system user in non-headless mode")
+                .that(mInjector.mSentIntents).isEmpty();
+    }
+
+    @Test
+    public void testStartUser_sendsBroadcastsForSystemUserInHeadlessMode() {
+        setUpUser(SYSTEM_USER_ID, UserInfo.FLAG_SYSTEM, /* preCreated= */ false,
+                UserManager.USER_TYPE_SYSTEM_HEADLESS);
+        mockIsHeadlessSystemUserMode(true);
+
+        mUserController.startUser(SYSTEM_USER_ID, USER_START_MODE_FOREGROUND);
+
+        assertWithMessage("Broadcasts for starting the system user in headless mode")
+                .that(getActions(mInjector.mSentIntents)).containsExactly(
+                        Intent.ACTION_USER_STARTED, Intent.ACTION_USER_STARTING);
     }
 
     @Test
@@ -708,7 +734,8 @@ public class UserControllerTest {
     public void testStartProfile_fullUserFails() {
         setUpUser(TEST_USER_ID1, 0);
         assertThrows(IllegalArgumentException.class,
-                () -> mUserController.startProfile(TEST_USER_ID1));
+                () -> mUserController.startProfile(TEST_USER_ID1, /* evenWhenDisabled= */ false,
+                        /* unlockListener= */ null));
 
         verifyUserNeverAssignedToDisplay();
     }
@@ -725,7 +752,8 @@ public class UserControllerTest {
     public void testStartProfile_disabledProfileFails() {
         setUpUser(TEST_USER_ID1, UserInfo.FLAG_PROFILE | UserInfo.FLAG_DISABLED, /* preCreated= */
                 false, UserManager.USER_TYPE_PROFILE_MANAGED);
-        assertThat(mUserController.startProfile(TEST_USER_ID1)).isFalse();
+        assertThat(mUserController.startProfile(TEST_USER_ID1, /* evenWhenDisabled=*/ false,
+                /* unlockListener= */ null)).isFalse();
 
         verifyUserNeverAssignedToDisplay();
     }
@@ -906,7 +934,8 @@ public class UserControllerTest {
 
     private void setUpAndStartProfileInBackground(int userId) throws Exception {
         setUpUser(userId, UserInfo.FLAG_PROFILE, false, UserManager.USER_TYPE_PROFILE_MANAGED);
-        assertThat(mUserController.startProfile(userId)).isTrue();
+        assertThat(mUserController.startProfile(userId, /* evenWhenDisabled=*/ false,
+                /* unlockListener= */ null)).isTrue();
 
         verify(mInjector.mLockPatternUtilsMock, times(1)).unlockUserKeyIfUnsecured(userId);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
@@ -994,6 +1023,10 @@ public class UserControllerTest {
             });
             lock.wait(waitTimeMs);
         }
+    }
+
+    private void mockIsHeadlessSystemUserMode(boolean value) {
+        when(mInjector.isHeadlessSystemUserMode()).thenReturn(value);
     }
 
     private void mockIsUsersOnSecondaryDisplaysEnabled(boolean value) {

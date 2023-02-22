@@ -1014,6 +1014,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing
                         |= w.mAttrs.preferMinimalPostProcessing;
 
+                mTmpApplySurfaceChangesTransactionState.disableHdrConversion
+                        |= !(w.mAttrs.isHdrConversionEnabled());
+
                 final int preferredModeId = getDisplayPolicy().getRefreshRatePolicy()
                         .getPreferredModeId(w);
 
@@ -2152,17 +2155,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mDisplayManagerInternal.performTraversal(transaction);
         scheduleAnimation();
 
-        for (int i = mWmService.mRotationWatchers.size() - 1; i >= 0; i--) {
-            final WindowManagerService.RotationWatcher rotationWatcher
-                    = mWmService.mRotationWatchers.get(i);
-            if (rotationWatcher.mDisplayId == mDisplayId) {
-                try {
-                    rotationWatcher.mWatcher.onRotationChanged(rotation);
-                } catch (RemoteException e) {
-                    // Ignore
-                }
-            }
-        }
+        mWmService.mRotationWatcherController.dispatchDisplayRotationChange(mDisplayId, rotation);
     }
 
     void configureDisplayPolicy() {
@@ -4596,7 +4589,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
-        if (!ImeTargetVisibilityPolicy.isReadyToComputeImeParent(mImeLayeringTarget,
+        if (!ImeTargetVisibilityPolicy.isValidToComputeImeParent(mImeLayeringTarget,
                 mImeInputTarget)) {
             return null;
         }
@@ -4768,6 +4761,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void updateWindowsForAnimator() {
         forAllWindows(mUpdateWindowsForAnimator, true /* traverseTopToBottom */);
+        if (mAsyncRotationController != null) {
+            mAsyncRotationController.updateTargetWindows();
+        }
     }
 
     boolean isInputMethodClientFocus(int uid, int pid) {
@@ -4891,6 +4887,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTmpApplySurfaceChangesTransactionState.preferredMinRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferredMaxRefreshRate,
                     mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
+                    mTmpApplySurfaceChangesTransactionState.disableHdrConversion,
                     true /* inTraversal, must call performTraversalInTrans... below */);
         }
         // If the display now has content, or no longer has content, update recording.
@@ -5095,6 +5092,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         public int preferredModeId;
         public float preferredMinRefreshRate;
         public float preferredMaxRefreshRate;
+        public boolean disableHdrConversion;
 
         void reset() {
             displayHasContent = false;
@@ -5105,6 +5103,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             preferredModeId = 0;
             preferredMinRefreshRate = 0;
             preferredMaxRefreshRate = 0;
+            disableHdrConversion = false;
         }
     }
 
@@ -5662,8 +5661,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Rect df = state.getDisplayFrame();
         final Insets gestureInsets = state.calculateInsets(df, systemGestures(),
                 false /* ignoreVisibility */);
-        mSystemGestureFrameLeft.set(df.left, df.top, gestureInsets.left, df.bottom);
-        mSystemGestureFrameRight.set(gestureInsets.right, df.top, df.right, df.bottom);
+        mSystemGestureFrameLeft.set(df.left, df.top, df.left + gestureInsets.left, df.bottom);
+        mSystemGestureFrameRight.set(df.right - gestureInsets.right, df.top, df.right, df.bottom);
 
         final Region touchableRegion = Region.obtain();
         final Region local = Region.obtain();

@@ -93,6 +93,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -126,9 +127,6 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -1233,25 +1231,23 @@ public class ApplicationPackageManager extends PackageManager {
     public PersistableBundle getAppMetadata(@NonNull String packageName)
             throws NameNotFoundException {
         PersistableBundle appMetadata = null;
-        String path = null;
+        ParcelFileDescriptor pfd = null;
         try {
-            path = mPM.getAppMetadataPath(packageName, getUserId());
+            pfd = mPM.getAppMetadataFd(packageName, getUserId());
         } catch (ParcelableException e) {
             e.maybeRethrow(NameNotFoundException.class);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        if (path != null) {
-            File file = new File(path);
-            try (InputStream inputStream = new FileInputStream(file)) {
+        if (pfd != null) {
+            try (InputStream inputStream = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
                 appMetadata = PersistableBundle.readFromStream(inputStream);
-            } catch (FileNotFoundException e) {
-                // ignore and return empty bundle if app metadata does not exist
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+
         return appMetadata != null ? appMetadata : new PersistableBundle();
     }
 

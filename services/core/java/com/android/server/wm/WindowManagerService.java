@@ -89,6 +89,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
@@ -193,6 +194,7 @@ import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputSettings;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -441,16 +443,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean ENABLE_FIXED_ROTATION_TRANSFORM =
             SystemProperties.getBoolean("persist.wm.fixed_rotation_transform", true);
 
-    /**
-     * Whether the device supports the WindowManager Extensions.
-     * OEMs can enable this by having their device config to inherit window_extensions.mk, such as:
-     * <pre>
-     * $(call inherit-product, $(SRC_TARGET_DIR)/product/window_extensions.mk)
-     * </pre>
-     */
-    static final boolean sWindowExtensionsEnabled =
-            SystemProperties.getBoolean("persist.wm.extensions.enabled", false);
-
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})
@@ -660,19 +652,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mDisableTransitionAnimation;
 
-    class RotationWatcher {
-        final IRotationWatcher mWatcher;
-        final IBinder.DeathRecipient mDeathRecipient;
-        final int mDisplayId;
-        RotationWatcher(IRotationWatcher watcher, IBinder.DeathRecipient deathRecipient,
-                int displayId) {
-            mWatcher = watcher;
-            mDeathRecipient = deathRecipient;
-            mDisplayId = displayId;
-        }
-    }
-
-    ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<>();
+    final RotationWatcherController mRotationWatcherController;
     final WallpaperVisibilityListeners mWallpaperVisibilityListeners =
             new WallpaperVisibilityListeners();
 
@@ -744,7 +724,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private final DisplayHashController mDisplayHashController;
 
     volatile float mMaximumObscuringOpacityForTouch =
-            InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+            InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
 
     @VisibleForTesting
     final WindowContextListenerController mWindowContextListenerController =
@@ -886,11 +866,11 @@ public class WindowManagerService extends IWindowManager.Stub
             ContentResolver resolver = mContext.getContentResolver();
             mMaximumObscuringOpacityForTouch = Settings.Global.getFloat(resolver,
                     Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
-                    InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+                    InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
             if (mMaximumObscuringOpacityForTouch < 0.0f
                     || mMaximumObscuringOpacityForTouch > 1.0f) {
                 mMaximumObscuringOpacityForTouch =
-                        InputManager.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
+                        InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
             }
         }
 
@@ -1265,6 +1245,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.PARTIAL_WAKE_LOCK, "SCREEN_FROZEN");
         mScreenFrozenLock.setReferenceCounted(false);
 
+        mRotationWatcherController = new RotationWatcherController(this);
         mDisplayNotificationController = new DisplayWindowListenerController(this);
         mTaskSystemBarsListenerController = new TaskSystemBarsListenerController();
 
@@ -2435,7 +2416,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     if (wallpaperMayMove) {
                         displayContent.mWallpaperController.adjustWallpaperWindows();
                     }
-                    focusMayChange = tryStartExitingAnimation(win, winAnimator, focusMayChange);
+                    tryStartExitingAnimation(win, winAnimator);
                 }
             }
 
@@ -2620,8 +2601,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private boolean tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator,
-            boolean focusMayChange) {
+    private void tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator) {
         // Try starting an animation; if there isn't one, we
         // can destroy the surface right away.
         int transit = WindowManagerPolicy.TRANSIT_EXIT;
@@ -2629,39 +2609,30 @@ public class WindowManagerService extends IWindowManager.Stub
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
 
-        if (win.isWinVisibleLw() && win.mDisplayContent.okToAnimate()) {
+        if (win.isVisible() && win.isDisplayed() && win.mDisplayContent.okToAnimate()) {
             String reason = null;
             if (winAnimator.applyAnimationLocked(transit, false)) {
                 // This is a WMCore-driven window animation.
                 reason = "applyAnimation";
-                focusMayChange = true;
-                win.mAnimatingExit = true;
-            } else if (
-                    // This is already animating via a WMCore-driven window animation
-                    win.isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)
-                    // Or already animating as part of a legacy app-transition
-                    || win.isAnimating(PARENTS | TRANSITION,
-                            ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
-                    // Or already animating as part of a shell-transition.
-                    || (win.inTransition()
-                            // Filter out non-app windows since transitions don't animate those
-                            // (but may still "wait" on them for readiness)
-                            && (win.mActivityRecord != null || win.mIsWallpaper))) {
-                // TODO(b/247005789): set mAnimatingExit somewhere in shell-transitions setup.
-                reason = "animating";
-                win.mAnimatingExit = true;
-            } else if (win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
-                    && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
-                reason = "isWallpaperTarget";
-                // If the wallpaper is currently behind this app window, they should be updated
-                // in a transaction to avoid artifacts.
-                // For NotificationShade, sysui is in charge of running window animation and it
-                // updates the client view visibility only after both NotificationShade and the
-                // wallpaper are hidden. So the exit animation is not needed and can destroy its
-                // surface immediately.
-                win.mAnimatingExit = true;
+            } else if (win.isSelfAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION)) {
+                // This is already animating via a WMCore-driven window animation.
+                reason = "selfAnimating";
+            } else {
+                if (win.mTransitionController.isShellTransitionsEnabled()) {
+                    // Already animating as part of a shell-transition. Currently this only handles
+                    // activity window because other types should be WMCore-driven.
+                    if ((win.mActivityRecord != null && win.mActivityRecord.inTransition())) {
+                        win.mTransitionController.mAnimatingExitWindows.add(win);
+                        reason = "inTransition";
+                    }
+                } else if (win.isAnimating(PARENTS | TRANSITION,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+                    // Already animating as part of a legacy app-transition.
+                    reason = "inLegacyTransition";
+                }
             }
             if (reason != null) {
+                win.mAnimatingExit = true;
                 ProtoLog.d(WM_DEBUG_ANIM,
                         "Set animatingExit: reason=startExitingAnimation/%s win=%s", reason, win);
             }
@@ -2677,8 +2648,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.onWindowTransition(win, transit);
         }
-
-        return focusMayChange;
     }
 
     private int createSurfaceControl(SurfaceControl outSurfaceControl, int result,
@@ -4531,58 +4500,44 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent;
         synchronized (mGlobalLock) {
             displayContent = mRoot.getDisplayContent(displayId);
-        }
-        if (displayContent == null) {
-            throw new IllegalArgumentException("Trying to register rotation event "
-                    + "for invalid display: " + displayId);
-        }
-
-        final IBinder watcherBinder = watcher.asBinder();
-        IBinder.DeathRecipient dr = new IBinder.DeathRecipient() {
-            @Override
-            public void binderDied() {
-                synchronized (mGlobalLock) {
-                    for (int i=0; i<mRotationWatchers.size(); i++) {
-                        if (watcherBinder == mRotationWatchers.get(i).mWatcher.asBinder()) {
-                            RotationWatcher removed = mRotationWatchers.remove(i);
-                            IBinder binder = removed.mWatcher.asBinder();
-                            if (binder != null) {
-                                binder.unlinkToDeath(this, 0);
-                            }
-                            i--;
-                        }
-                    }
-                }
+            if (displayContent == null) {
+                throw new IllegalArgumentException("Trying to register rotation event "
+                        + "for invalid display: " + displayId);
             }
-        };
-
-        synchronized (mGlobalLock) {
-            try {
-                watcher.asBinder().linkToDeath(dr, 0);
-                mRotationWatchers.add(new RotationWatcher(watcher, dr, displayId));
-            } catch (RemoteException e) {
-                // Client died, no cleanup needed.
-            }
-
+            mRotationWatcherController.registerDisplayRotationWatcher(watcher, displayId);
             return displayContent.getRotation();
         }
     }
 
     @Override
     public void removeRotationWatcher(IRotationWatcher watcher) {
-        final IBinder watcherBinder = watcher.asBinder();
         synchronized (mGlobalLock) {
-            for (int i=0; i<mRotationWatchers.size(); i++) {
-                RotationWatcher rotationWatcher = mRotationWatchers.get(i);
-                if (watcherBinder == rotationWatcher.mWatcher.asBinder()) {
-                    RotationWatcher removed = mRotationWatchers.remove(i);
-                    IBinder binder = removed.mWatcher.asBinder();
-                    if (binder != null) {
-                        binder.unlinkToDeath(removed.mDeathRecipient, 0);
-                    }
-                    i--;
+            mRotationWatcherController.removeRotationWatcher(watcher);
+        }
+    }
+
+    @Surface.Rotation
+    @Override
+    public int registerProposedRotationListener(IBinder contextToken, IRotationWatcher listener) {
+        synchronized (mGlobalLock) {
+            final WindowContainer<?> wc =
+                    mRotationWatcherController.getAssociatedWindowContainer(contextToken);
+            if (wc == null) {
+                Slog.w(TAG, "Register rotation listener from non-existing token, uid="
+                        + Binder.getCallingUid());
+                return Surface.ROTATION_0;
+            }
+            mRotationWatcherController.registerProposedRotationListener(listener, contextToken);
+            final WindowOrientationListener orientationListener =
+                    wc.mDisplayContent.getDisplayRotation().getOrientationListener();
+            if (orientationListener != null) {
+                // It may be -1 if sensor is disabled.
+                final int rotation = orientationListener.getProposedRotation();
+                if (rotation >= Surface.ROTATION_0) {
+                    return rotation;
                 }
             }
+            return wc.getWindowConfiguration().getRotation();
         }
     }
 
@@ -6804,6 +6759,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.println(defaultDisplayContent.getLastOrientation());
             pw.print("  mWaitingForConfig=");
                     pw.println(defaultDisplayContent.mWaitingForConfig);
+            mRotationWatcherController.dump(pw);
 
             pw.print("  Animation settings: disabled="); pw.print(mAnimationsDisabled);
                     pw.print(" window="); pw.print(mWindowAnimationScaleSetting);
@@ -7401,7 +7357,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 ProtoLog.w(WM_ERROR, "unable to restore pointer icon");
             }
         } else {
-            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_DEFAULT);
+            mContext.getSystemService(InputManager.class)
+                    .setPointerIconType(PointerIcon.TYPE_DEFAULT);
         }
     }
 
@@ -8712,7 +8669,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
 
+        // focus-transfer can re-order windows and thus potentially causes visible changes:
+        final Transition transition = mAtmService.getTransitionController()
+                .requestTransitionIfNeeded(TRANSIT_TO_FRONT, task);
         mAtmService.setFocusedTask(task.mTaskId, touchedActivity);
+        if (transition != null) {
+            transition.setReady(task, true /* ready */);
+        }
     }
 
     /**

@@ -904,37 +904,46 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * starting (about to be visible) activity that is fullscreen (opaque).
      * @param starting The currently starting activity or null if there is none.
      */
-    @VisibleForTesting
-    boolean isTranslucent(ActivityRecord starting) {
+    boolean isTranslucent(@Nullable ActivityRecord starting) {
         if (!isAttached() || isForceHidden() || isForceTranslucent()) {
             return true;
         }
         final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,
-                PooledLambda.__(ActivityRecord.class), starting);
+                PooledLambda.__(ActivityRecord.class), starting, false /* including*/);
         final ActivityRecord opaque = getActivity(p);
         p.recycle();
         return opaque == null;
     }
 
-    private static boolean isOpaqueActivity(ActivityRecord r, ActivityRecord starting) {
-        if (r.finishing) {
-            // We don't factor in finishing activities when determining translucency since
-            // they will be gone soon.
-            return false;
+    /**
+     * Whether the TaskFragment should be treated as translucent for the current transition.
+     * This is different from {@link #isTranslucent(ActivityRecord)} as this function also checks
+     * finishing activities when the TaskFragment itself is becoming invisible.
+     */
+    boolean isTranslucentForTransition() {
+        if (!isAttached() || isForceHidden() || isForceTranslucent()) {
+            return true;
         }
+        // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
+        final boolean includingFinishing = !isVisibleRequested();
+        final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,
+                PooledLambda.__(ActivityRecord.class), null /* starting */, includingFinishing);
+        final ActivityRecord opaque = getActivity(p);
+        p.recycle();
+        return opaque == null;
+    }
 
+    private static boolean isOpaqueActivity(@NonNull ActivityRecord r,
+            @Nullable ActivityRecord starting, boolean includingFinishing) {
         if (!r.visibleIgnoringKeyguard && r != starting) {
             // Also ignore invisible activities that are not the currently starting
             // activity (about to be visible).
             return false;
         }
 
-        if (r.occludesParent()) {
-            // Root task isn't translucent if it has at least one fullscreen activity
-            // that is visible.
-            return true;
-        }
-        return false;
+        // TaskFragment isn't translucent if it has at least one fullscreen activity that is
+        // visible.
+        return r.occludesParent(includingFinishing);
     }
 
     ActivityRecord getTopNonFinishingActivity() {

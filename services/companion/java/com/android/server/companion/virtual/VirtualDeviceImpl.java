@@ -41,6 +41,7 @@ import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
+import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.ComponentName;
@@ -86,6 +87,8 @@ import com.android.server.companion.virtual.audio.VirtualAudioController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -131,6 +134,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @Nullable
     private LocaleList mLocaleList = null;
+    // This device's sensors, keyed by sensor handle.
+    @GuardedBy("mVirtualDeviceLock")
+    private SparseArray<VirtualSensor> mVirtualSensors = new SparseArray<>();
+    @GuardedBy("mVirtualDeviceLock")
+    private List<VirtualSensor> mVirtualSensorList = null;
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -240,9 +248,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController = inputController;
         }
         if (sensorController == null) {
-            mSensorController = new SensorController(mVirtualDeviceLock, mDeviceId);
+            mSensorController = new SensorController(
+                    mVirtualDeviceLock, mDeviceId, mParams.getVirtualSensorCallback());
         } else {
             mSensorController = sensorController;
+        }
+        final List<VirtualSensorConfig> virtualSensorConfigs = mParams.getVirtualSensorConfigs();
+        for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
+            createVirtualSensor(virtualSensorConfigs.get(i));
         }
         mCameraAccessController = cameraAccessController;
         mCameraAccessController.startObservingIfNeeded();
@@ -384,6 +397,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mVirtualAudioController = null;
             }
             mLocaleList = null;
+            mVirtualSensorList = null;
+            mVirtualSensors.clear();
         }
         mOnDeviceCloseListener.onClose(mDeviceId);
         mAppToken.unlinkToDeath(this, 0);
@@ -698,17 +713,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    @Override // Binder call
-    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void createVirtualSensor(
-            @NonNull IBinder deviceToken,
-            @NonNull VirtualSensorConfig config) {
-        super.createVirtualSensor_enforcePermission();
-        Objects.requireNonNull(config);
-        Objects.requireNonNull(deviceToken);
+    private void createVirtualSensor(@NonNull VirtualSensorConfig config) {
+        final IBinder sensorToken =
+                new Binder("android.hardware.sensor.VirtualSensor:" + config.getName());
         final long ident = Binder.clearCallingIdentity();
         try {
-            mSensorController.createSensor(deviceToken, config);
+            int handle = mSensorController.createSensor(sensorToken, config);
+            VirtualSensor sensor = new VirtualSensor(handle, config.getType(), config.getName(),
+                    this, sensorToken);
+            synchronized (mVirtualDeviceLock) {
+                mVirtualSensors.put(handle, sensor);
+            }
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -716,13 +731,24 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    public void unregisterSensor(@NonNull IBinder token) {
-        super.unregisterSensor_enforcePermission();
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mSensorController.unregisterSensor(token);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
+    @Nullable
+    public List<VirtualSensor> getVirtualSensorList() {
+        super.getVirtualSensorList_enforcePermission();
+        synchronized (mVirtualDeviceLock) {
+            if (mVirtualSensorList == null) {
+                mVirtualSensorList = new ArrayList<>();
+                for (int i = 0; i < mVirtualSensors.size(); ++i) {
+                    mVirtualSensorList.add(mVirtualSensors.valueAt(i));
+                }
+                mVirtualSensorList = Collections.unmodifiableList(mVirtualSensorList);
+            }
+            return mVirtualSensorList;
+        }
+    }
+
+    VirtualSensor getVirtualSensorByHandle(int handle) {
+        synchronized (mVirtualDeviceLock) {
+            return mVirtualSensors.get(handle);
         }
     }
 

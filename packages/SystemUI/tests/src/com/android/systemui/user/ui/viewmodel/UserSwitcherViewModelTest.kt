@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
@@ -41,6 +42,7 @@ import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserMode
 import com.android.systemui.user.domain.interactor.RefreshUsersScheduler
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
@@ -72,6 +74,7 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var activityManager: ActivityManager
     @Mock private lateinit var manager: UserManager
+    @Mock private lateinit var headlessSystemUserMode: HeadlessSystemUserMode
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var uiEventLogger: UiEventLogger
@@ -150,10 +153,12 @@ class UserSwitcherViewModelTest : SysuiTestCase() {
                                 KeyguardInteractor(
                                     repository = keyguardRepository,
                                     commandQueue = commandQueue,
-                                    featureFlags = featureFlags
+                                    featureFlags = featureFlags,
+                                    bouncerRepository = FakeKeyguardBouncerRepository(),
                                 ),
                             featureFlags = featureFlags,
                             manager = manager,
+                            headlessSystemUserMode = headlessSystemUserMode,
                             applicationScope = testScope.backgroundScope,
                             telephonyInteractor =
                                 TelephonyInteractor(

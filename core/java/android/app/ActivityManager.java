@@ -636,6 +636,105 @@ public class ActivityManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCapability {}
 
+    /**
+     * Used to log FGS API events from CAMERA API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_CAMERA = 1;
+
+    /**
+     * Used to log FGS API events from BLUETOOTH API, used
+     * with FGS type of CONNECTED_DEVICE
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_BLUETOOTH = 2;
+    /**
+     * Used to log FGS API events from Location API.
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_LOCATION = 3;
+    /**
+     * Used to log FGS API events from media playback API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK = 4;
+    /**
+     * Used to log FGS API events from Audio API
+     * @hide
+     */
+    public static final int FOREGROUND_SERVICE_API_TYPE_AUDIO = 5;
+    /**
+     * Used to log FGS API events from microphone API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_MICROPHONE = 6;
+    /**
+     * Used to log FGS API events from phone API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_PHONE_CALL = 7;
+    /**
+     * Used to log FGS API events from USB API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_USB = 8;
+    /**
+     * Used to log FGS API events from CDM API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_TYPE_CDM = 9;
+
+    /**
+     * Constants used to denote what API type
+     * is creating an API event for logging.
+     * @hide
+     */
+    @IntDef(flag = false, prefix = { "FOREGROUND_SERVICE_API_TYPE_" }, value = {
+            FOREGROUND_SERVICE_API_TYPE_CAMERA,
+            FOREGROUND_SERVICE_API_TYPE_BLUETOOTH,
+            FOREGROUND_SERVICE_API_TYPE_LOCATION,
+            FOREGROUND_SERVICE_API_TYPE_MEDIA_PLAYBACK,
+            FOREGROUND_SERVICE_API_TYPE_AUDIO,
+            FOREGROUND_SERVICE_API_TYPE_MICROPHONE,
+            FOREGROUND_SERVICE_API_TYPE_PHONE_CALL,
+            FOREGROUND_SERVICE_API_TYPE_USB,
+            FOREGROUND_SERVICE_API_TYPE_CDM,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForegroundServiceApiType {}
+
+    /**
+     * Used to log a start event for an FGS API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_EVENT_BEGIN = 1;
+    /**
+     * Used to log a stop event for an FGS API
+     * @hide
+     */
+    @SystemApi
+    public static final int FOREGROUND_SERVICE_API_EVENT_END = 2;
+    /**
+     * Constants used to denote API state
+     * during an API event for logging.
+     * @hide
+     */
+    @IntDef(flag = false, prefix = { "FOREGROUND_SERVICE_API_EVENT_" }, value = {
+            FOREGROUND_SERVICE_API_EVENT_BEGIN,
+            FOREGROUND_SERVICE_API_EVENT_END,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ForegroundServiceApiEvent {}
+
     /** @hide Process does not have any capability */
     @SystemApi
     public static final int PROCESS_CAPABILITY_NONE = 0;
@@ -3676,6 +3775,130 @@ public class ActivityManager {
     }
 
     /**
+     * Return a list of {@link ApplicationStartInfo} records containing the information about the
+     * most recent app startups.
+     *
+     * <p class="note"> Note: System stores this historical information in a ring buffer and only
+     * the most recent records will be returned. </p>
+     *
+     * @param maxNum      The maximum number of results to be returned; a value of 0
+     *                    means to ignore this parameter and return all matching records. If fewer
+     *                    records exist, all existing records will be returned.
+     *
+     * @return a list of {@link ApplicationStartInfo} records matching the criteria, sorted in
+     *         the order from most recent to least recent.
+     *
+     * @hide
+     */
+    @NonNull
+    public List<ApplicationStartInfo> getHistoricalProcessStartReasons(
+            @IntRange(from = 0) int maxNum) {
+        try {
+            ParceledListSlice<ApplicationStartInfo> startInfos = getService()
+                    .getHistoricalProcessStartReasons(null, maxNum, mContext.getUserId());
+            return startInfos == null ? Collections.emptyList() : startInfos.getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return a list of {@link ApplicationStartInfo} records containing the information about the
+     * most recent app startups.
+     *
+     * <p class="note"> Note: System stores this historical information in a ring buffer and only
+     * the most recent records will be returned. </p>
+     *
+     * @param packageName Package name for which app startups to receive.
+     * @param maxNum      The maximum number of results to be returned; a value of 0
+     *                    means to ignore this parameter and return all matching records. If fewer
+     *                    records exist, all existing records will be returned.
+     *
+     * @return a list of {@link ApplicationStartInfo} records matching the criteria, sorted in
+     *         the order from most recent to least recent.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.DUMP)
+    public List<ApplicationStartInfo> getExternalHistoricalProcessStartReasons(
+            @NonNull String packageName, @IntRange(from = 0) int maxNum) {
+        try {
+            ParceledListSlice<ApplicationStartInfo> startInfos = getService()
+                    .getHistoricalProcessStartReasons(packageName, maxNum, mContext.getUserId());
+            return startInfos == null ? Collections.emptyList() : startInfos.getList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Callback to receive {@link ApplicationStartInfo} object once recording of startup related
+     * metrics is complete.
+     * Use with {@link #setApplicationStartInfoCompleteListener}.
+     *
+     * @hide
+     */
+    public interface ApplicationStartInfoCompleteListener {
+        /** {@link ApplicationStartInfo} is complete, no more info will be added. */
+        void onApplicationStartInfoComplete(@NonNull ApplicationStartInfo applicationStartInfo);
+    }
+
+    /**
+     * Sets a callback to be notified when the {@link ApplicationStartInfo} records of this startup
+     * are complete.
+     *
+     * <p class="note"> Note: callback will not wait for {@link Activity#reportFullyDrawn} to occur.
+     * Timestamp for fully drawn may be added after callback occurs. Set callback after invoking
+     * {@link Activity#reportFullyDrawn} if timestamp for fully drawn is required.</p>
+     *
+     * <p class="note"> Note: if start records have already been retrieved, the callback will be
+     * invoked immediately on the specified executor with the previously resolved AppStartInfo.</p>
+     *
+     * <p class="note"> Note: callback is asynchronous and should be made from a background thread.
+     * </p>
+     *
+     * @param executor    The executor on which the listener should be called.
+     * @param listener    Callback to be called when collection of {@link ApplicationStartInfo} is
+     *                    complete. Will replace existing listener if one is already attached.
+     *
+     * @throws IllegalArgumentException if executor or listener are null.
+     *
+     * @hide
+     */
+    public void setApplicationStartInfoCompleteListener(@NonNull final Executor executor,
+            @NonNull final ApplicationStartInfoCompleteListener listener) {
+        Preconditions.checkNotNull(executor, "executor cannot be null");
+        Preconditions.checkNotNull(listener, "listener cannot be null");
+        IApplicationStartInfoCompleteListener callback =
+                new IApplicationStartInfoCompleteListener.Stub() {
+            @Override
+            public void onApplicationStartInfoComplete(ApplicationStartInfo applicationStartInfo) {
+                executor.execute(() ->
+                        listener.onApplicationStartInfoComplete(applicationStartInfo));
+            }
+        };
+        try {
+            getService().setApplicationStartInfoCompleteListener(callback, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes the callback set by {@link #setApplicationStartInfoCompleteListener} if there is one.
+     *
+     * @hide
+     */
+    public void removeApplicationStartInfoCompleteListener() {
+        try {
+            getService().removeApplicationStartInfoCompleteListener(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return a list of {@link ApplicationExitInfo} records containing the reasons for the most
      * recent app deaths.
      *
@@ -5374,6 +5597,35 @@ public class ActivityManager {
             return getService().isProcessFrozen(pid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Internal method for logging API starts. Used with
+     * FGS metrics logging. Is called by APIs that are
+     * used with FGS to log an API event (eg when
+     * the camera starts).
+     * @hide
+     *
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES)
+    public void noteForegroundResourceUse(@ForegroundServiceApiType int apiType,
+            @ForegroundServiceApiEvent int apiEvent, int uid, int pid) {
+        try {
+            switch (apiEvent) {
+                case FOREGROUND_SERVICE_API_EVENT_BEGIN:
+                    getService().logFgsApiBegin(apiType, uid, pid);
+                    break;
+                case FOREGROUND_SERVICE_API_EVENT_END:
+                    getService().logFgsApiEnd(apiType, uid, pid);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Argument of "
+                            + apiType + " not supported for foreground resource use logging");
+            }
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 

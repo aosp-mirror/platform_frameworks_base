@@ -182,27 +182,6 @@ public final class CreateCredentialRequest implements Parcelable {
         mAlwaysSendAppInfoToProvider = alwaysSendAppInfoToProvider;
     }
 
-    /**
-     * Constructs a {@link CreateCredentialRequest}.
-     *
-     * @param type the requested credential type
-     * @param credentialData the full credential creation request data
-     * @param candidateQueryData the partial request data that will be sent to the provider
-     *                           during the initial creation candidate query stage
-     * @param isSystemProviderRequired whether the request must only be fulfilled by a system
-     *                                provider
-     *
-     * @throws IllegalArgumentException If type is empty.
-     */
-    public CreateCredentialRequest(
-            @NonNull String type,
-            @NonNull Bundle credentialData,
-            @NonNull Bundle candidateQueryData,
-            boolean isSystemProviderRequired) {
-        this(type, credentialData, candidateQueryData, isSystemProviderRequired,
-                /*mAlwaysSendAppInfoToProvider=*/true);
-    }
-
     private CreateCredentialRequest(@NonNull Parcel in) {
         String type = in.readString8();
         Bundle credentialData = in.readBundle();

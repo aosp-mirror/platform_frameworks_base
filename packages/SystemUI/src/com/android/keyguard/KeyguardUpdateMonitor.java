@@ -102,6 +102,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.usb.UsbManager;
 import android.nfc.NfcAdapter;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -138,6 +139,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
 import com.android.settingslib.WirelessUtils;
 import com.android.settingslib.fuelgauge.BatteryStatus;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
@@ -149,7 +151,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
 import com.android.systemui.log.SessionTracker;
-import com.android.systemui.plugins.Weather;
+import com.android.systemui.plugins.WeatherData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -329,6 +331,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     // Battery status
     @VisibleForTesting
     BatteryStatus mBatteryStatus;
+    @VisibleForTesting
+    boolean mIncompatibleCharger;
 
     private StrongAuthTracker mStrongAuthTracker;
 
@@ -679,7 +683,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public void onTrustManagedChanged(boolean managed, int userId) {
         Assert.isMainThread();
         mUserTrustIsManaged.put(userId, managed);
-        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
+        boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userId);
+        mLogger.logTrustUsuallyManagedUpdated(userId, mUserTrustIsUsuallyManaged.get(userId),
+                trustUsuallyManaged, "onTrustManagedChanged");
+        mUserTrustIsUsuallyManaged.put(userId, trustUsuallyManaged);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1572,10 +1579,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         MSG_TIMEZONE_UPDATE, intent.getStringExtra(Intent.EXTRA_TIMEZONE));
                 mHandler.sendMessage(msg);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
-
+                // Clear incompatible charger state when device is unplugged.
+                if (!BatteryStatus.isPluggedIn(intent)) {
+                    mIncompatibleCharger = false;
+                }
                 final Message msg = mHandler.obtainMessage(
-                        MSG_BATTERY_UPDATE, new BatteryStatus(intent));
+                        MSG_BATTERY_UPDATE, new BatteryStatus(intent, mIncompatibleCharger));
                 mHandler.sendMessage(msg);
+            } else if (UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED.equals(action)) {
+                mIncompatibleCharger = Utils.containsIncompatibleChargers(context, TAG);
+                BatteryStatus batteryStatus = BatteryStatus.create(context, mIncompatibleCharger);
+                if (batteryStatus != null) {
+                    mHandler.sendMessage(
+                            mHandler.obtainMessage(MSG_BATTERY_UPDATE, batteryStatus));
+                }
             } else if (Intent.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 SimData args = SimData.fromIntent(intent);
                 // ACTION_SIM_STATE_CHANGED is rebroadcast after unlocking the device to
@@ -1928,11 +1945,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             FACE_AUTH_UPDATED_STARTED_WAKING_UP.setExtraInfo(pmWakeReason);
             updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
                     FACE_AUTH_UPDATED_STARTED_WAKING_UP);
-            requestActiveUnlock(
+
+            final ActiveUnlockConfig.ActiveUnlockRequestOrigin requestOrigin =
                     mActiveUnlockConfig.isWakeupConsideredUnlockIntent(pmWakeReason)
                             ? ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT
-                            : ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE,
-                    "wakingUp - " + PowerManager.wakeReasonToString(pmWakeReason));
+                            : ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE;
+            final String reason = "wakingUp - " + PowerManager.wakeReasonToString(pmWakeReason);
+            if (mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(pmWakeReason)) {
+                requestActiveUnlockDismissKeyguard(
+                        requestOrigin,
+                        reason
+                );
+            } else {
+                requestActiveUnlock(
+                        requestOrigin,
+                        reason
+                );
+            }
         } else {
             mLogger.logSkipUpdateFaceListeningOnWakeup(pmWakeReason);
         }
@@ -2251,6 +2280,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         filter.addAction(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
         filter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+        filter.addAction(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED);
         mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastReceiver, filter, mHandler);
         // Since ACTION_SERVICE_STATE is being moved to a non-sticky broadcast, trigger the
         // listener now with the service state from the default sub.
@@ -2323,8 +2353,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         updateSecondaryLockscreenRequirement(user);
         List<UserInfo> allUsers = mUserManager.getUsers();
         for (UserInfo userInfo : allUsers) {
+            boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userInfo.id);
+            mLogger.logTrustUsuallyManagedUpdated(userInfo.id,
+                    mUserTrustIsUsuallyManaged.get(userInfo.id),
+                    trustUsuallyManaged, "init from constructor");
             mUserTrustIsUsuallyManaged.put(userInfo.id,
-                    mTrustManager.isTrustUsuallyManaged(userInfo.id));
+                    trustUsuallyManaged);
         }
         updateAirplaneModeState();
 
@@ -2364,9 +2398,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private void updateFaceEnrolled(int userId) {
-        mIsFaceEnrolled = mFaceManager != null && !mFaceSensorProperties.isEmpty()
+        Boolean isFaceEnrolled = mFaceManager != null && !mFaceSensorProperties.isEmpty()
                 && mBiometricEnabledForUser.get(userId)
                 && mAuthController.isFaceAuthEnrolled(userId);
+        mIsFaceEnrolled = isFaceEnrolled;
+        mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
     }
 
     public boolean isFaceSupported() {
@@ -2591,6 +2627,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+
     /**
      * Attempts to trigger active unlock from trust agent.
      * Only dismisses the keyguard under certain conditions.
@@ -2633,6 +2670,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     ActiveUnlockConfig.ActiveUnlockRequestOrigin.UNLOCK_INTENT,
                     "alternateBouncer");
         }
+        updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
     private boolean shouldTriggerActiveUnlock() {
@@ -2717,7 +2755,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         || shouldListenForFingerprintAssistant
                         || (mKeyguardOccluded && mIsDreaming)
                         || (mKeyguardOccluded && userDoesNotHaveTrust
-                            && (mOccludingAppRequestingFp || isUdfps));
+                            && (mOccludingAppRequestingFp || isUdfps || mAlternateBouncerShowing));
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -2752,12 +2790,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
                 && shouldListenBouncerState && shouldListenUdfpsState
-                && shouldListenSideFpsState;
+                && shouldListenSideFpsState
+                && !isFingerprintLockedOut();
         logListenerModelData(
                 new KeyguardFingerprintListenModel(
                     System.currentTimeMillis(),
                     user,
                     shouldListen,
+                    mAlternateBouncerShowing,
                     biometricEnabledForUser,
                     mPrimaryBouncerIsOrWillBeShowing,
                     userCanSkipBouncer,
@@ -3022,9 +3062,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        mIsUnlockWithFingerprintPossible.put(userId, mFpm != null
+        boolean fpEnrolled = mFpm != null
                 && !mFingerprintSensorProperties.isEmpty()
-                && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId));
+                && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId);
+        mLogger.logFpEnrolledUpdated(userId,
+                mIsUnlockWithFingerprintPossible.getOrDefault(userId, false),
+                fpEnrolled);
+        mIsUnlockWithFingerprintPossible.put(userId, fpEnrolled);
         return mIsUnlockWithFingerprintPossible.get(userId);
     }
 
@@ -3140,7 +3184,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     void handleUserSwitching(int userId, IRemoteCallback reply) {
         Assert.isMainThread();
         clearBiometricRecognized();
-        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
+        boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userId);
+        mLogger.logTrustUsuallyManagedUpdated(userId, mUserTrustIsUsuallyManaged.get(userId),
+                trustUsuallyManaged, "userSwitching");
+        mUserTrustIsUsuallyManaged.put(userId, trustUsuallyManaged);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -3272,12 +3319,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     /**
      * @param data the weather data (temp, conditions, unit) for weather clock to use
      */
-    public void sendWeatherData(Weather data) {
+    public void sendWeatherData(WeatherData data) {
         mHandler.post(()-> {
             handleWeatherDataUpdate(data); });
     }
 
-    private void handleWeatherDataUpdate(Weather data) {
+    private void handleWeatherDataUpdate(WeatherData data) {
         Assert.isMainThread();
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
@@ -3527,8 +3574,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean wasPluggedIn = old.isPluggedIn();
         final boolean stateChangedWhilePluggedIn = wasPluggedIn && nowPluggedIn
                 && (old.status != current.status);
-        final boolean nowPresent = current.present;
-        final boolean wasPresent = old.present;
 
         // change in plug state is always interesting
         if (wasPluggedIn != nowPluggedIn || stateChangedWhilePluggedIn) {
@@ -3545,8 +3590,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return true;
         }
 
-        // Battery either showed up or disappeared
-        if (wasPresent != nowPresent) {
+        // change in battery is present or not
+        if (old.present != current.present) {
+            return true;
+        }
+
+        // change in the incompatible charger
+        if (!old.incompatibleCharger.equals(current.incompatibleCharger)) {
             return true;
         }
 
@@ -3785,7 +3835,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     // TODO: use these callbacks elsewhere in place of the existing notifyScreen*()
-    // (KeyguardViewMediator, KeyguardHostView)
+    // (KeyguardViewMediator, KeyguardSecurityContainer)
     /**
      * Dispatch wakeup events to:
      *  - update biometric listening states

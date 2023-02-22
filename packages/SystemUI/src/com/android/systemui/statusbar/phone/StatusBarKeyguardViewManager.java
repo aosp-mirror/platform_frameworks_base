@@ -790,7 +790,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onFinishedGoingToSleep() {
-        mPrimaryBouncerInteractor.onScreenTurnedOff();
+        mPrimaryBouncerInteractor.hide();
     }
 
     @Override

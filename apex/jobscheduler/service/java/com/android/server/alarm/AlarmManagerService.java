@@ -766,11 +766,11 @@ public class AlarmManagerService extends SystemService {
          * Default quota for pre-S apps. The same as allowing an alarm slot once
          * every ALLOW_WHILE_IDLE_LONG_DELAY, which was 9 minutes.
          */
-        private static final int DEFAULT_ALLOW_WHILE_IDLE_COMPAT_QUOTA = 1;
+        private static final int DEFAULT_ALLOW_WHILE_IDLE_COMPAT_QUOTA = 7;
         private static final int DEFAULT_ALLOW_WHILE_IDLE_QUOTA = 72;
 
         private static final long DEFAULT_ALLOW_WHILE_IDLE_WINDOW = 60 * 60 * 1000; // 1 hour.
-        private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 9 * 60 * 1000; // 9 mins.
+        private static final long DEFAULT_ALLOW_WHILE_IDLE_COMPAT_WINDOW = 60 * 60 * 1000;
 
         private static final long DEFAULT_PRIORITY_ALARM_DELAY = 9 * 60_000;
 
@@ -862,7 +862,8 @@ public class AlarmManagerService extends SystemService {
         public boolean KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED =
                 DEFAULT_KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED;
 
-        public int USE_TARE_POLICY = Settings.Global.DEFAULT_ENABLE_TARE;
+        public int USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_ALARM
+                ? EconomyManager.DEFAULT_ENABLE_TARE_MODE : EconomyManager.ENABLED_MODE_OFF;
 
         /**
          * The amount of temporary reserve quota to give apps on receiving the
@@ -1294,7 +1295,8 @@ public class AlarmManagerService extends SystemService {
                     KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED);
             pw.println();
 
-            pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY);
+            pw.print(Settings.Global.ENABLE_TARE,
+                    EconomyManager.enabledModeToString(USE_TARE_POLICY));
             pw.println();
 
             pw.print(KEY_TEMPORARY_QUOTA_BUMP, TEMPORARY_QUOTA_BUMP);

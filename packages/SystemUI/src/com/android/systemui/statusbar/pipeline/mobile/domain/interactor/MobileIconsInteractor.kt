@@ -30,7 +30,6 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionMod
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.util.CarrierConfigTracker
@@ -111,7 +110,6 @@ class MobileIconsInteractorImpl
 constructor(
     private val mobileConnectionsRepo: MobileConnectionsRepository,
     private val carrierConfigTracker: CarrierConfigTracker,
-    private val logger: ConnectivityPipelineLogger,
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
     connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
@@ -150,6 +148,12 @@ constructor(
 
                 val info1 = unfilteredSubs[0]
                 val info2 = unfilteredSubs[1]
+
+                // Filtering only applies to subscriptions in the same group
+                if (info1.groupUuid == null || info1.groupUuid != info2.groupUuid) {
+                    return@combine unfilteredSubs
+                }
+
                 // If both subscriptions are primary, show both
                 if (!info1.isOpportunistic && !info2.isOpportunistic) {
                     return@combine unfilteredSubs
@@ -186,7 +190,7 @@ constructor(
      * validated bit from the old active network (A) while data is changing to the new one (B).
      *
      * This condition only applies if
-     * 1. A and B are in the same subscription group (e.c. for CBRS data switching) and
+     * 1. A and B are in the same subscription group (e.g. for CBRS data switching) and
      * 2. A was validated before the switch
      *
      * The goal of this is to minimize the flickering in the UI of the cellular indicator

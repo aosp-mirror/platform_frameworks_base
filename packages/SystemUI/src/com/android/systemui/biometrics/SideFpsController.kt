@@ -19,6 +19,8 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.ActivityTaskManager
 import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -90,7 +92,7 @@ constructor(
     private val featureFlags: FeatureFlags,
     dumpManager: DumpManager
 ) : Dumpable {
-    val requests: HashSet<SideFpsUiRequestSource> = HashSet()
+    private val requests: HashSet<SideFpsUiRequestSource> = HashSet()
 
     @VisibleForTesting
     val sensorProps: FingerprintSensorPropertiesInternal =
@@ -98,13 +100,17 @@ constructor(
             ?: throw IllegalStateException("no side fingerprint sensor")
 
     @VisibleForTesting
-    val orientationListener =
-        BiometricDisplayListener(
+    val orientationReasonListener =
+        OrientationReasonListener(
             context,
             displayManager,
             handler,
-            BiometricDisplayListener.SensorType.SideFingerprint(sensorProps)
-        ) { onOrientationChanged() }
+            sensorProps,
+            { reason -> onOrientationChanged(reason) },
+            BiometricOverlayConstants.REASON_UNKNOWN
+        )
+
+    @VisibleForTesting val orientationListener = orientationReasonListener.orientationListener
 
     @VisibleForTesting
     val overviewProxyListener =
@@ -168,7 +174,7 @@ constructor(
                     @BiometricOverlayConstants.ShowReason reason: Int
                 ) =
                     if (reason.isReasonToAutoShow(activityTaskManager)) {
-                        show(SideFpsUiRequestSource.AUTO_SHOW)
+                        show(SideFpsUiRequestSource.AUTO_SHOW, reason)
                     } else {
                         hide(SideFpsUiRequestSource.AUTO_SHOW)
                     }
@@ -198,11 +204,14 @@ constructor(
     }
 
     /** Shows the side fps overlay if not already shown. */
-    fun show(request: SideFpsUiRequestSource) {
+    fun show(
+        request: SideFpsUiRequestSource,
+        @BiometricOverlayConstants.ShowReason reason: Int = BiometricOverlayConstants.REASON_UNKNOWN
+    ) {
         requests.add(request)
         mainExecutor.execute {
             if (overlayView == null) {
-                createOverlayForDisplay()
+                createOverlayForDisplay(reason)
             } else {
                 Log.v(TAG, "overlay already shown")
             }
@@ -226,13 +235,13 @@ constructor(
         }
     }
 
-    private fun onOrientationChanged() {
+    private fun onOrientationChanged(@BiometricOverlayConstants.ShowReason reason: Int) {
         if (overlayView != null) {
-            createOverlayForDisplay()
+            createOverlayForDisplay(reason)
         }
     }
 
-    private fun createOverlayForDisplay() {
+    private fun createOverlayForDisplay(@BiometricOverlayConstants.ShowReason reason: Int) {
         val view = layoutInflater.inflate(R.layout.sidefps_view, null, false)
         overlayView = view
         val display = context.display!!
@@ -263,7 +272,8 @@ constructor(
                 updateOverlayParams(display, it.bounds)
             }
         }
-        lottie.addOverlayDynamicColor(context)
+        orientationReasonListener.reason = reason
+        lottie.addOverlayDynamicColor(context, reason)
 
         /**
          * Intercepts TYPE_WINDOW_STATE_CHANGED accessibility event, preventing Talkback from
@@ -418,17 +428,36 @@ private fun Display.isNaturalOrientation(): Boolean =
 private fun WindowInsets.hasBigNavigationBar(): Boolean =
     getInsets(WindowInsets.Type.navigationBars()).bottom >= 70
 
-private fun LottieAnimationView.addOverlayDynamicColor(context: Context) {
+private fun LottieAnimationView.addOverlayDynamicColor(
+    context: Context,
+    @BiometricOverlayConstants.ShowReason reason: Int
+) {
     fun update() {
         val c = context.getColor(R.color.biometric_dialog_accent)
         val chevronFill = context.getColor(R.color.sfps_chevron_fill)
-        for (key in listOf(".blue600", ".blue400")) {
-            addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
-                PorterDuffColorFilter(c, PorterDuff.Mode.SRC_ATOP)
+        val isKeyguard = reason == REASON_AUTH_KEYGUARD
+        if (isKeyguard) {
+            for (key in listOf(".blue600", ".blue400")) {
+                addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
+                    PorterDuffColorFilter(c, PorterDuff.Mode.SRC_ATOP)
+                }
             }
-        }
-        addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
-            PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
+            addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
+                PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
+            }
+        } else if (!isDarkMode(context)) {
+            addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
+                PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
+            }
+        } else if (isDarkMode(context)) {
+            for (key in listOf(".blue600", ".blue400")) {
+                addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
+                    PorterDuffColorFilter(
+                        context.getColor(R.color.settingslib_color_blue400),
+                        PorterDuff.Mode.SRC_ATOP
+                    )
+                }
+            }
         }
     }
 
@@ -437,6 +466,29 @@ private fun LottieAnimationView.addOverlayDynamicColor(context: Context) {
     } else {
         addLottieOnCompositionLoadedListener { update() }
     }
+}
+
+private fun isDarkMode(context: Context): Boolean {
+    val darkMode = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+    return darkMode == Configuration.UI_MODE_NIGHT_YES
+}
+
+@VisibleForTesting
+class OrientationReasonListener(
+    context: Context,
+    displayManager: DisplayManager,
+    handler: Handler,
+    sensorProps: FingerprintSensorPropertiesInternal,
+    onOrientationChanged: (reason: Int) -> Unit,
+    @BiometricOverlayConstants.ShowReason var reason: Int
+) {
+    val orientationListener =
+        BiometricDisplayListener(
+            context,
+            displayManager,
+            handler,
+            BiometricDisplayListener.SensorType.SideFingerprint(sensorProps)
+        ) { onOrientationChanged(reason) }
 }
 
 /**

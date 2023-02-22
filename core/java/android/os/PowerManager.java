@@ -44,9 +44,12 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -2472,6 +2475,49 @@ public final class PowerManager {
     }
 
     /**
+     * Creates a new Low Power Standby ports lock.
+     *
+     * <p>A Low Power Standby ports lock requests that the given ports remain open during
+     * Low Power Standby.
+     * Call {@link LowPowerStandbyPortsLock#acquire} to acquire the lock.
+     * This request is only respected if the calling package is exempt
+     * (see {@link #isExemptFromLowPowerStandby()}), and until the returned
+     * {@code LowPowerStandbyPorts} object is destroyed or has
+     * {@link LowPowerStandbyPortsLock#release} called on it.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)
+    @NonNull
+    public LowPowerStandbyPortsLock newLowPowerStandbyPortsLock(
+            @NonNull List<LowPowerStandbyPortDescription> ports) {
+        LowPowerStandbyPortsLock standbyPorts = new LowPowerStandbyPortsLock(ports);
+        return standbyPorts;
+    }
+
+    /**
+     * Gets all ports that should remain open in standby.
+     * Only includes ports requested by exempt packages (see {@link #getLowPowerStandbyPolicy()}).
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    @NonNull
+    public List<LowPowerStandbyPortDescription> getActiveLowPowerStandbyPorts() {
+        try {
+            return LowPowerStandbyPortDescription.fromParcelable(
+                    mService.getActiveLowPowerStandbyPorts());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the given application package name is on the device's power allowlist.
      * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
@@ -2968,25 +3014,42 @@ public final class PowerManager {
             "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
 
     /**
-     * Intent that is broadcast when Low Power Standby is enabled or disabled.
+     * Intent that is broadcast when Low Power Standby policy is changed.
      * This broadcast is only sent to registered receivers.
      *
-     * @see #getLowPowerStandbyPolicy
-     * @see #setLowPowerStandbyPolicy
-     * @hide
+     * @see #isExemptFromLowPowerStandby()
+     * @see #isAllowedInLowPowerStandby(int)
+     * @see #isAllowedInLowPowerStandby(String)
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.MANAGE_LOW_POWER_STANDBY)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LOW_POWER_STANDBY_POLICY_CHANGED =
             "android.os.action.LOW_POWER_STANDBY_POLICY_CHANGED";
 
     /**
+     * Intent that is broadcast when Low Power Standby exempt ports change.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @see #getActiveLowPowerStandbyPorts
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_LOW_POWER_STANDBY)
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOW_POWER_STANDBY_PORTS_CHANGED =
+            "android.os.action.LOW_POWER_STANDBY_PORTS_CHANGED";
+
+    /**
      * Signals that wake-on-lan/wake-on-wlan is allowed in Low Power Standby.
+     *
+     * <p>If Low Power Standby is enabled ({@link #isLowPowerStandbyEnabled()}),
+     * wake-on-lan/wake-on-wlan may not be available while in standby.
+     * Use {@link #isAllowedInLowPowerStandby(String)} to determine whether the device allows this
+     * feature to be used during Low Power Standby with the currently active Low Power Standby
+     * policy.
      *
      * @see #isAllowedInLowPowerStandby(String)
      */
-    public static final String LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN =
+    public static final String FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY =
             "com.android.lowpowerstandby.WAKE_ON_LAN";
 
     /**
@@ -2995,6 +3058,7 @@ public final class PowerManager {
     @IntDef(prefix = { "LOW_POWER_STANDBY_ALLOWED_REASON_" }, flag = true, value = {
             LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION,
             LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST,
+            LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface LowPowerStandbyAllowedReason {
@@ -3014,6 +3078,15 @@ public final class PowerManager {
      */
     public static final int LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST = 1 << 1;
 
+    /**
+     * Exempts apps with ongoing calls.
+     *
+     * <p>This includes apps with foreground services of type "phoneCall".
+     *
+     * @see #isAllowedInLowPowerStandby(int)
+     */
+    public static final int LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL = 1 << 2;
+
     /** @hide */
     public static String lowPowerStandbyAllowedReasonsToString(
             @LowPowerStandbyAllowedReason int allowedReasons) {
@@ -3025,6 +3098,10 @@ public final class PowerManager {
         if ((allowedReasons & LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST) != 0) {
             allowedStrings.add("ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST");
             allowedReasons &= ~LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
+        }
+        if ((allowedReasons & LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL) != 0) {
+            allowedStrings.add("ALLOWED_REASON_ONGOING_CALL");
+            allowedReasons &= ~LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL;
         }
         if (allowedReasons != 0) {
             allowedStrings.add(String.valueOf(allowedReasons));
@@ -3054,10 +3131,25 @@ public final class PowerManager {
         @LowPowerStandbyAllowedReason
         private final int mAllowedReasons;
 
-        /** Features that are allowed to be used in Low Power Standby. */
+        /**
+         * Features that are allowed to be used in Low Power Standby.
+         *
+         * @see #FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY
+         */
         @NonNull
         private final Set<String> mAllowedFeatures;
 
+        /**
+         * Create a policy that defines the restrictions enforced by Low Power Standby.
+         *
+         * @param identifier Name of the policy, used for debugging & metrics.
+         * @param exemptPackages Packages that are exempt from Low Power Standby restrictions.
+         * @param allowedReasons Reasons that this policy allows apps to be automatically exempted
+         *                       from Low Power Standby restrictions for.
+         * @param allowedFeatures Features that are allowed to be used in Low Power Standby.
+         *                        Features are declared as strings, see
+         *                        {@link #FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY} as an example.
+         */
         public LowPowerStandbyPolicy(@NonNull String identifier,
                 @NonNull Set<String> exemptPackages,
                 @LowPowerStandbyAllowedReason int allowedReasons,
@@ -3146,6 +3238,326 @@ public final class PowerManager {
                     new ArraySet<>(parcelablePolicy.exemptPackages),
                     parcelablePolicy.allowedReasons,
                     new ArraySet<>(parcelablePolicy.allowedFeatures));
+        }
+    }
+
+    /**
+     * Describes ports that may be requested to remain open during Low Power Standby.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final class LowPowerStandbyPortDescription {
+        /** @hide */
+        @IntDef(prefix = { "PROTOCOL_" }, value = {
+                PROTOCOL_TCP,
+                PROTOCOL_UDP,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface Protocol {
+        }
+
+        /**
+         * Constant to indicate the {@link LowPowerStandbyPortDescription} refers to a TCP port.
+         */
+        public static final int PROTOCOL_TCP = 6;
+        /**
+         * Constant to indicate the {@link LowPowerStandbyPortDescription} refers to a UDP port.
+         */
+        public static final int PROTOCOL_UDP = 17;
+
+        /** @hide */
+        @IntDef(prefix = { "MATCH_PORT_" }, value = {
+                MATCH_PORT_LOCAL,
+                MATCH_PORT_REMOTE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface PortMatcher {
+        }
+        /**
+         * Constant to indicate the {@link LowPowerStandbyPortDescription}'s port number is to be
+         * matched against the socket's local port number (the destination port number of an
+         * incoming packet).
+         */
+        public static final int MATCH_PORT_LOCAL = 1;
+        /**
+         * Constant to indicate the {@link LowPowerStandbyPortDescription}'s port number is to be
+         * matched against the socket's remote port number (the source port number of an
+         * incoming packet).
+         */
+        public static final int MATCH_PORT_REMOTE = 2;
+
+        @Protocol
+        private final int mProtocol;
+        @PortMatcher
+        private final int mPortMatcher;
+        private final int mPortNumber;
+        @Nullable
+        private final InetAddress mLocalAddress;
+
+        /**
+         * Describes a port.
+         *
+         * @param protocol The protocol of the port to match, {@link #PROTOCOL_TCP} or
+         *                 {@link #PROTOCOL_UDP}.
+         * @param portMatcher Whether to match the source port number of an incoming packet
+         *                    ({@link #MATCH_PORT_REMOTE}), or the destination port
+         *                    ({@link #MATCH_PORT_LOCAL}).
+         * @param portNumber The port number to match.
+         *
+         * @see #newLowPowerStandbyPortsLock(List)
+         */
+        public LowPowerStandbyPortDescription(@Protocol int protocol, @PortMatcher int portMatcher,
+                int portNumber) {
+            this.mProtocol = protocol;
+            this.mPortMatcher = portMatcher;
+            this.mPortNumber = portNumber;
+            this.mLocalAddress = null;
+        }
+
+        /**
+         * Describes a port.
+         *
+         * @param protocol The protocol of the port to match, {@link #PROTOCOL_TCP} or
+         *                 {@link #PROTOCOL_UDP}.
+         * @param portMatcher Whether to match the source port number of an incoming packet
+         *                    ({@link #MATCH_PORT_REMOTE}), or the destination port
+         *                    ({@link #MATCH_PORT_LOCAL}).
+         * @param portNumber The port number to match.
+         * @param localAddress The local address to match.
+         *
+         * @see #newLowPowerStandbyPortsLock(List)
+         */
+        public LowPowerStandbyPortDescription(@Protocol int protocol, @PortMatcher int portMatcher,
+                int portNumber, @Nullable InetAddress localAddress) {
+            this.mProtocol = protocol;
+            this.mPortMatcher = portMatcher;
+            this.mPortNumber = portNumber;
+            this.mLocalAddress = localAddress;
+        }
+
+        private String protocolToString(int protocol) {
+            switch (protocol) {
+                case PROTOCOL_TCP: return "TCP";
+                case PROTOCOL_UDP: return "UDP";
+            }
+            return String.valueOf(protocol);
+        }
+
+        private String portMatcherToString(int portMatcher) {
+            switch (portMatcher) {
+                case MATCH_PORT_LOCAL: return "MATCH_PORT_LOCAL";
+                case MATCH_PORT_REMOTE: return "MATCH_PORT_REMOTE";
+            }
+            return String.valueOf(portMatcher);
+        }
+
+        /**
+         * Returns the described port's protocol,
+         * either {@link #PROTOCOL_TCP} or {@link #PROTOCOL_UDP}.
+         *
+         * @see #PROTOCOL_TCP
+         * @see #PROTOCOL_UDP
+         * @see #getPortNumber()
+         * @see #getPortMatcher()
+         */
+        @Protocol
+        public int getProtocol() {
+            return mProtocol;
+        }
+
+        /**
+         * Returns how the port number ({@link #getPortNumber()}) should be matched against
+         * incoming packets.
+         * Either {@link #PROTOCOL_TCP} or {@link #PROTOCOL_UDP}.
+         *
+         * @see #PROTOCOL_TCP
+         * @see #PROTOCOL_UDP
+         * @see #getPortNumber()
+         * @see #getProtocol()
+         */
+        @PortMatcher
+        public int getPortMatcher() {
+            return mPortMatcher;
+        }
+
+        /**
+         * Returns how the port number that incoming packets should be matched against.
+         *
+         * @see #getPortMatcher()
+         * @see #getProtocol()
+         */
+        public int getPortNumber() {
+            return mPortNumber;
+        }
+
+        /**
+         * Returns the bind address to match against, or {@code null} if matching against any
+         * bind address.
+         *
+         * @see #getPortMatcher()
+         * @see #getProtocol()
+         */
+        @Nullable
+        public InetAddress getLocalAddress() {
+            return mLocalAddress;
+        }
+
+        @Override
+        public String toString() {
+            return "PortDescription{"
+                    + "mProtocol=" + protocolToString(mProtocol)
+                    + ", mPortMatcher=" + portMatcherToString(mPortMatcher)
+                    + ", mPortNumber=" + mPortNumber
+                    + ", mLocalAddress=" + mLocalAddress
+                    + '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof LowPowerStandbyPortDescription)) return false;
+            LowPowerStandbyPortDescription that = (LowPowerStandbyPortDescription) o;
+            return mProtocol == that.mProtocol && mPortMatcher == that.mPortMatcher
+                    && mPortNumber == that.mPortNumber && Objects.equals(mLocalAddress,
+                    that.mLocalAddress);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mProtocol, mPortMatcher, mPortNumber, mLocalAddress);
+        }
+
+        /** @hide */
+        public static IPowerManager.LowPowerStandbyPortDescription toParcelable(
+                LowPowerStandbyPortDescription portDescription) {
+            if (portDescription == null) {
+                return null;
+            }
+
+            IPowerManager.LowPowerStandbyPortDescription parcelablePortDescription =
+                    new IPowerManager.LowPowerStandbyPortDescription();
+            parcelablePortDescription.protocol = portDescription.mProtocol;
+            parcelablePortDescription.portMatcher = portDescription.mPortMatcher;
+            parcelablePortDescription.portNumber = portDescription.mPortNumber;
+            if (portDescription.mLocalAddress != null) {
+                parcelablePortDescription.localAddress = portDescription.mLocalAddress.getAddress();
+            }
+            return parcelablePortDescription;
+        }
+
+        /** @hide */
+        public static List<IPowerManager.LowPowerStandbyPortDescription> toParcelable(
+                List<LowPowerStandbyPortDescription> portDescriptions) {
+            if (portDescriptions == null) {
+                return null;
+            }
+
+            ArrayList<IPowerManager.LowPowerStandbyPortDescription> result = new ArrayList<>();
+            for (LowPowerStandbyPortDescription port : portDescriptions) {
+                result.add(toParcelable(port));
+            }
+            return result;
+        }
+
+        /** @hide */
+        public static LowPowerStandbyPortDescription fromParcelable(
+                IPowerManager.LowPowerStandbyPortDescription parcelablePortDescription) {
+            if (parcelablePortDescription == null) {
+                return null;
+            }
+
+            InetAddress localAddress = null;
+            if (parcelablePortDescription.localAddress != null) {
+                try {
+                    localAddress = InetAddress.getByAddress(parcelablePortDescription.localAddress);
+                } catch (UnknownHostException e) {
+                    Log.w(TAG, "Address has invalid length", e);
+                }
+            }
+            return new LowPowerStandbyPortDescription(
+                    parcelablePortDescription.protocol,
+                    parcelablePortDescription.portMatcher,
+                    parcelablePortDescription.portNumber,
+                    localAddress);
+        }
+
+        /** @hide */
+        public static List<LowPowerStandbyPortDescription> fromParcelable(
+                List<IPowerManager.LowPowerStandbyPortDescription> portDescriptions) {
+            if (portDescriptions == null) {
+                return null;
+            }
+
+            ArrayList<LowPowerStandbyPortDescription> result = new ArrayList<>();
+            for (IPowerManager.LowPowerStandbyPortDescription port : portDescriptions) {
+                result.add(fromParcelable(port));
+            }
+            return result;
+        }
+    }
+
+    /**
+     * An object that can be used to request network ports to remain open during Low Power Standby.
+     *
+     * <p>Use {@link #newLowPowerStandbyPortsLock} to create a ports lock, and {@link #acquire()}
+     * to request the ports to remain open. The request is only respected if the app requesting the
+     * lock is exempt from Low Power Standby ({@link #isExemptFromLowPowerStandby()}).
+     *
+     * @hide
+     */
+    @SystemApi
+    @SuppressLint("NotCloseable")
+    public final class LowPowerStandbyPortsLock {
+        private final IBinder mToken;
+        private final List<LowPowerStandbyPortDescription> mPorts;
+        private boolean mHeld;
+
+        LowPowerStandbyPortsLock(List<LowPowerStandbyPortDescription> ports) {
+            mPorts = ports;
+            mToken = new Binder();
+        }
+
+        /** Request the ports to remain open during standby. */
+        @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)
+        public void acquire() {
+            synchronized (mToken) {
+                try {
+                    mService.acquireLowPowerStandbyPorts(mToken,
+                            LowPowerStandbyPortDescription.toParcelable(mPorts));
+                    mHeld = true;
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+
+        /**
+         * Release the request, allowing these ports to be blocked during standby.
+         *
+         * <p>Note: This lock is not reference counted, so calling this method will release the lock
+         * regardless of how many times {@link #acquire()} has been called before.
+         */
+        @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)
+        public void release() {
+            synchronized (mToken) {
+                try {
+                    mService.releaseLowPowerStandbyPorts(mToken);
+                    mHeld = false;
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+        }
+
+        @Override
+        protected void finalize() {
+            synchronized (mToken) {
+                if (mHeld) {
+                    Log.wtf(TAG, "LowPowerStandbyPorts finalized while still held");
+                    release();
+                }
+            }
         }
     }
 

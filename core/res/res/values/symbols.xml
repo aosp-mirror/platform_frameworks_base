@@ -1190,6 +1190,9 @@
   <java-symbol type="string" name="personal_apps_suspension_soon_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
   <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
+  <java-symbol type="string" name="work_profile_telephony_paused_title" />
+  <java-symbol type="string" name="work_profile_telephony_paused_text" />
+  <java-symbol type="string" name="work_profile_telephony_paused_turn_on_button" />
   <java-symbol type="string" name="notification_work_profile_content_description" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
@@ -1410,6 +1413,7 @@
 
   <java-symbol type="drawable" name="btn_borderless_rect" />
   <java-symbol type="drawable" name="ic_phone" />
+  <java-symbol type="drawable" name="ic_phone_disabled" />
   <java-symbol type="drawable" name="ic_bt_headphones_a2dp" />
   <java-symbol type="drawable" name="ic_bt_headset_hfp" />
   <java-symbol type="drawable" name="ic_bt_hearing_aid" />
@@ -2992,6 +2996,9 @@
   <java-symbol type="array" name="config_backGestureInsetScales" />
   <java-symbol type="color" name="system_bar_background_semi_transparent" />
   <java-symbol type="bool" name="config_showGesturalNavigationHints" />
+  <java-symbol type="bool" name="config_navBarDefaultTransparent" />
+  <java-symbol type="color" name="navigation_bar_default"/>
+  <java-symbol type="color" name="navigation_bar_compatible"/>
 
   <!-- EditText suggestion popup. -->
   <java-symbol type="id" name="suggestionWindowContainer" />
@@ -4410,6 +4417,8 @@
   <java-symbol type="integer" name="device_idle_flex_time_short_ms" />
   <java-symbol type="integer" name="device_idle_light_after_inactive_to_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_to_ms" />
+  <java-symbol type="integer" name="device_idle_light_idle_to_init_flex_ms" />
+  <java-symbol type="integer" name="device_idle_light_idle_to_max_flex_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_factor" />
   <java-symbol type="integer" name="device_idle_light_max_idle_to_ms" />
   <java-symbol type="integer" name="device_idle_light_idle_maintenance_min_budget_ms" />
@@ -4495,7 +4504,15 @@
   <java-symbol type="bool" name="config_magnification_area" />
 
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
-
+  <!-- FullScreenMagnification thumbnail -->
+  <java-symbol type="layout" name="thumbnail_background_view" />
+  <java-symbol type="drawable" name="accessibility_magnification_thumbnail_background_bg" />
+  <java-symbol type="drawable" name="accessibility_magnification_thumbnail_bg" />
+  <java-symbol type="color" name="accessibility_magnification_thumbnail_stroke_color" />
+  <java-symbol type="color" name="accessibility_magnification_thumbnail_background_color" />
+  <java-symbol type="color" name="accessibility_magnification_thumbnail_color" />
+  <java-symbol type="dimen" name="accessibility_magnification_thumbnail_padding" />
+  <java-symbol type="id" name="accessibility_magnification_thumbnail_view" />
   <!-- Package with global data query permissions for AppSearch -->
   <java-symbol type="string" name="config_globalAppSearchDataQuerierPackage" />
 
@@ -4943,4 +4960,53 @@
 
   <!-- Whether to show weather on the lockscreen by default. -->
   <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />
+
+  <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
+  <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
+
+  
+  <java-symbol name="materialColorOnSecondaryFixedVariant" type="attr"/>
+  <java-symbol name="materialColorOnTertiaryFixedVariant" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerLowest" type="attr"/>
+  <java-symbol name="materialColorOnPrimaryFixedVariant" type="attr"/>
+  <java-symbol name="materialColorOnSecondaryContainer" type="attr"/>
+  <java-symbol name="materialColorOnTertiaryContainer" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerLow" type="attr"/>
+  <java-symbol name="materialColorOnPrimaryContainer" type="attr"/>
+  <java-symbol name="materialColorSecondaryFixedDim" type="attr"/>
+  <java-symbol name="materialColorOnErrorContainer" type="attr"/>
+  <java-symbol name="materialColorOnSecondaryFixed" type="attr"/>
+  <java-symbol name="materialColorOnSurfaceInverse" type="attr"/>
+  <java-symbol name="materialColorTertiaryFixedDim" type="attr"/>
+  <java-symbol name="materialColorOnTertiaryFixed" type="attr"/>
+  <java-symbol name="materialColorPrimaryFixedDim" type="attr"/>
+  <java-symbol name="materialColorSecondaryContainer" type="attr"/>
+  <java-symbol name="materialColorErrorContainer" type="attr"/>
+  <java-symbol name="materialColorOnPrimaryFixed" type="attr"/>
+  <java-symbol name="materialColorPrimaryInverse" type="attr"/>
+  <java-symbol name="materialColorSecondaryFixed" type="attr"/>
+  <java-symbol name="materialColorSurfaceInverse" type="attr"/>
+  <java-symbol name="materialColorSurfaceVariant" type="attr"/>
+  <java-symbol name="materialColorTertiaryContainer" type="attr"/>
+  <java-symbol name="materialColorTertiaryFixed" type="attr"/>
+  <java-symbol name="materialColorPrimaryContainer" type="attr"/>
+  <java-symbol name="materialColorOnBackground" type="attr"/>
+  <java-symbol name="materialColorPrimaryFixed" type="attr"/>
+  <java-symbol name="materialColorOnSecondary" type="attr"/>
+  <java-symbol name="materialColorOnTertiary" type="attr"/>
+  <java-symbol name="materialColorSurfaceDim" type="attr"/>
+  <java-symbol name="materialColorSurfaceBright" type="attr"/>
+  <java-symbol name="materialColorSecondary" type="attr"/>
+  <java-symbol name="materialColorOnError" type="attr"/>
+  <java-symbol name="materialColorSurface" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerHigh" type="attr"/>
+  <java-symbol name="materialColorTertiary" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainerHighest" type="attr"/>
+  <java-symbol name="materialColorOnSurfaceVariant" type="attr"/>
+  <java-symbol name="materialColorOutline" type="attr"/>
+  <java-symbol name="materialColorOnPrimary" type="attr"/>
+  <java-symbol name="materialColorOnSurface" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainer" type="attr"/>
+  <java-symbol name="materialColorSurfaceContainer" type="attr"/>
+
 </resources>

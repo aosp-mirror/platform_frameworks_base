@@ -168,6 +168,9 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var activityContext: Context
     private lateinit var listingCallback: ControlsListingController.ControlsListingCallback
 
+    override val isShowing: Boolean
+        get() = !hidden
+
     init {
         dumpManager.registerDumpable(javaClass.name, this)
     }
@@ -727,21 +730,27 @@ class ControlsUiControllerImpl @Inject constructor (
         controlActionCoordinator.closeDialogs()
     }
 
-    override fun hide() {
-        hidden = true
+    override fun hide(parent: ViewGroup) {
+        // We need to check for the parent because it's possible that  we have started showing in a
+        // different activity. In that case, make sure to only clear things associated with the
+        // passed parent
+        if (parent == this.parent) {
+            Log.d(ControlsUiController.TAG, "hide()")
+            hidden = true
 
-        closeDialogs(true)
-        controlsController.get().unsubscribe()
-        taskViewController?.dismiss()
-        taskViewController = null
+            closeDialogs(true)
+            controlsController.get().unsubscribe()
+            taskViewController?.dismiss()
+            taskViewController = null
 
+            controlsById.clear()
+            controlViewsById.clear()
+
+            controlsListingController.get().removeCallback(listingCallback)
+
+            if (!retainCache) RenderInfo.clearCache()
+        }
         parent.removeAllViews()
-        controlsById.clear()
-        controlViewsById.clear()
-
-        controlsListingController.get().removeCallback(listingCallback)
-
-        if (!retainCache) RenderInfo.clearCache()
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {

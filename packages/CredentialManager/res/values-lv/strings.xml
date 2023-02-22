@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"Turpināt"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Citas opcijas"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Uzzināt vairāk"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Rādīt paroli"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Slēpt paroli"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Lielāka drošība ar piekļuves atslēgām"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Izmantojot piekļuves atslēgas, nav jāveido vai jāatceras sarežģītas paroles."</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Piekļuves atslēgas ir šifrētas digitālas atslēgas, ko varat izveidot, izmantojot pirksta nospiedumu, seju vai ekrāna bloķēšanas informāciju."</string>

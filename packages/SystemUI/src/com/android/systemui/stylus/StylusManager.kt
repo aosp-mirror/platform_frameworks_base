@@ -21,15 +21,21 @@ import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
+import android.hardware.input.InputSettings
 import android.os.Handler
 import android.util.ArrayMap
 import android.util.Log
 import android.view.InputDevice
+import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.logging.InstanceId
+import com.android.internal.logging.InstanceIdSequence
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.shared.hardware.hasInputDevice
+import com.android.systemui.shared.hardware.isInternalStylusSource
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -57,10 +63,17 @@ constructor(
     private val stylusCallbacks: CopyOnWriteArrayList<StylusCallback> = CopyOnWriteArrayList()
     private val stylusBatteryCallbacks: CopyOnWriteArrayList<StylusBatteryCallback> =
         CopyOnWriteArrayList()
+
     // This map should only be accessed on the handler
     private val inputDeviceAddressMap: MutableMap<Int, String?> = ArrayMap()
-    // This variable should only be accessed on the handler
+    private val inputDeviceBtSessionIdMap: MutableMap<Int, InstanceId> = ArrayMap()
+
+    // These variables should only be accessed on the handler
     private var hasStarted: Boolean = false
+    private var isInUsiSession: Boolean = false
+    private var usiSessionId: InstanceId? = null
+
+    @VisibleForTesting var instanceIdSequence = InstanceIdSequence(1 shl 13)
 
     /**
      * Starts listening to InputManager InputDevice events. Will also load the InputManager snapshot
@@ -70,6 +83,10 @@ constructor(
         handler.post {
             if (hasStarted) return@post
             hasStarted = true
+            isInUsiSession =
+                inputManager.hasInputDevice {
+                    it.isInternalStylusSource && isBatteryStateValid(it.batteryState)
+                }
             addExistingStylusToMap()
 
             inputManager.registerInputDeviceListener(this, handler)
@@ -110,7 +127,7 @@ constructor(
 
         if (btAddress != null) {
             onStylusUsed()
-            onStylusBluetoothConnected(btAddress)
+            onStylusBluetoothConnected(deviceId, btAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothConnected(deviceId, btAddress) }
         }
     }
@@ -126,12 +143,12 @@ constructor(
         inputDeviceAddressMap[deviceId] = currAddress
 
         if (prevAddress == null && currAddress != null) {
-            onStylusBluetoothConnected(currAddress)
+            onStylusBluetoothConnected(deviceId, currAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothConnected(deviceId, currAddress) }
         }
 
         if (prevAddress != null && currAddress == null) {
-            onStylusBluetoothDisconnected(prevAddress)
+            onStylusBluetoothDisconnected(deviceId, prevAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothDisconnected(deviceId, prevAddress) }
         }
     }
@@ -145,7 +162,7 @@ constructor(
         val btAddress: String? = inputDeviceAddressMap[deviceId]
         inputDeviceAddressMap.remove(deviceId)
         if (btAddress != null) {
-            onStylusBluetoothDisconnected(btAddress)
+            onStylusBluetoothDisconnected(deviceId, btAddress)
             executeStylusCallbacks { cb -> cb.onStylusBluetoothDisconnected(deviceId, btAddress) }
         }
         executeStylusCallbacks { cb -> cb.onStylusRemoved(deviceId) }
@@ -177,7 +194,18 @@ constructor(
         handler.post {
             if (!hasStarted) return@post
 
-            if (batteryState.isPresent) {
+            if (DEBUG) {
+                Log.d(
+                    TAG,
+                    "onBatteryStateChanged for $deviceId. " +
+                        "batteryState present: ${batteryState.isPresent}, " +
+                        "capacity: ${batteryState.capacity}"
+                )
+            }
+
+            val batteryStateValid = isBatteryStateValid(batteryState)
+            trackAndLogUsiSession(deviceId, batteryStateValid)
+            if (batteryStateValid) {
                 onStylusUsed()
             }
 
@@ -187,8 +215,8 @@ constructor(
         }
     }
 
-    private fun onStylusBluetoothConnected(btAddress: String) {
-        uiEventLogger.log(StylusUiEvent.BLUETOOTH_STYLUS_CONNECTED)
+    private fun onStylusBluetoothConnected(deviceId: Int, btAddress: String) {
+        trackAndLogBluetoothSession(deviceId, true)
         val device: BluetoothDevice = bluetoothAdapter?.getRemoteDevice(btAddress) ?: return
         try {
             bluetoothAdapter.addOnMetadataChangedListener(device, executor, this)
@@ -197,8 +225,8 @@ constructor(
         }
     }
 
-    private fun onStylusBluetoothDisconnected(btAddress: String) {
-        uiEventLogger.log(StylusUiEvent.BLUETOOTH_STYLUS_DISCONNECTED)
+    private fun onStylusBluetoothDisconnected(deviceId: Int, btAddress: String) {
+        trackAndLogBluetoothSession(deviceId, false)
         val device: BluetoothDevice = bluetoothAdapter?.getRemoteDevice(btAddress) ?: return
         try {
             bluetoothAdapter.removeOnMetadataChangedListener(device, this)
@@ -215,10 +243,71 @@ constructor(
      */
     private fun onStylusUsed() {
         if (!featureFlags.isEnabled(Flags.TRACK_STYLUS_EVER_USED)) return
-        if (inputManager.isStylusEverUsed(context)) return
+        if (InputSettings.isStylusEverUsed(context)) return
 
-        inputManager.setStylusEverUsed(context, true)
+        InputSettings.setStylusEverUsed(context, true)
         executeStylusCallbacks { cb -> cb.onStylusFirstUsed() }
+    }
+
+    /**
+     * Uses the input device battery state to track whether a current USI session is active. The
+     * InputDevice battery state updates USI battery on USI stylus input, and removes the last-known
+     * USI stylus battery presence after 1 hour of not detecting input. As SysUI and StylusManager
+     * is persistently running, relies on tracking sessions via an in-memory isInUsiSession boolean.
+     */
+    private fun trackAndLogUsiSession(deviceId: Int, batteryStateValid: Boolean) {
+        // TODO(b/268618918) handle cases where an invalid battery callback from a previous stylus
+        //  is sent after the actual valid callback
+        if (batteryStateValid && usiSessionId == null) {
+            if (DEBUG) {
+                Log.d(
+                    TAG,
+                    "USI battery newly present, entering new USI session. Device ID: $deviceId"
+                )
+            }
+            usiSessionId = instanceIdSequence.newInstanceId()
+            uiEventLogger.logWithInstanceId(
+                StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_FIRST_DETECTED,
+                0,
+                null,
+                usiSessionId
+            )
+        } else if (!batteryStateValid && usiSessionId != null) {
+            if (DEBUG) {
+                Log.d(TAG, "USI battery newly absent, exiting USI session Device ID: $deviceId")
+            }
+            uiEventLogger.logWithInstanceId(
+                StylusUiEvent.USI_STYLUS_BATTERY_PRESENCE_REMOVED,
+                0,
+                null,
+                usiSessionId
+            )
+            usiSessionId = null
+        }
+    }
+
+    private fun trackAndLogBluetoothSession(deviceId: Int, bluetoothConnected: Boolean) {
+        if (bluetoothConnected) {
+            inputDeviceBtSessionIdMap[deviceId] = instanceIdSequence.newInstanceId()
+            uiEventLogger.logWithInstanceId(
+                StylusUiEvent.BLUETOOTH_STYLUS_CONNECTED,
+                0,
+                null,
+                inputDeviceBtSessionIdMap[deviceId]
+            )
+        } else {
+            uiEventLogger.logWithInstanceId(
+                StylusUiEvent.BLUETOOTH_STYLUS_DISCONNECTED,
+                0,
+                null,
+                inputDeviceBtSessionIdMap[deviceId]
+            )
+            inputDeviceBtSessionIdMap.remove(deviceId)
+        }
+    }
+
+    private fun isBatteryStateValid(batteryState: BatteryState): Boolean {
+        return batteryState.isPresent && batteryState.capacity > 0.0f
     }
 
     private fun executeStylusCallbacks(run: (cb: StylusCallback) -> Unit) {
@@ -295,5 +384,6 @@ constructor(
 
     companion object {
         private val TAG = StylusManager::class.simpleName.orEmpty()
+        private val DEBUG = false
     }
 }

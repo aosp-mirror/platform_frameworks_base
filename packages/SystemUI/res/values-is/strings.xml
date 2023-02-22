@@ -258,6 +258,8 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Birtustig"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Umsnúningur lita"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Litaleiðrétting"</string>
+    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
+    <skip />
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Stjórna notendum"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Lokið"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Loka"</string>
@@ -613,14 +615,84 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Tilkynningar"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Flýtilyklar"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Skipta um lyklaskipan"</string>
+    <!-- no translation found for keyboard_shortcut_clear_text (4679927133259287577) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_title (1156178106617830429) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_hint (5982623262974326746) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_list_no_result (6819302191660875501) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_system (1151182120757052669) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_input (5440558509904296233) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_open_apps (1450959949739257562) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_search_category_current_app (2011953559133734491) -->
+    <skip />
+    <!-- no translation found for group_system_access_notification_shade (7116898151485382275) -->
+    <skip />
+    <!-- no translation found for group_system_full_screenshot (7389040853798023211) -->
+    <skip />
+    <!-- no translation found for group_system_access_system_app_shortcuts (4421497579210445641) -->
+    <skip />
+    <!-- no translation found for group_system_go_back (8838454003680364227) -->
+    <skip />
+    <!-- no translation found for group_system_access_home_screen (1857344316928441909) -->
+    <skip />
+    <!-- no translation found for group_system_overview_open_apps (6897128761003265350) -->
+    <skip />
+    <!-- no translation found for group_system_cycle_forward (9202444850838205990) -->
+    <skip />
+    <!-- no translation found for group_system_cycle_back (5163464503638229131) -->
+    <skip />
+    <!-- no translation found for group_system_access_all_apps_search (488070738028991753) -->
+    <skip />
+    <!-- no translation found for group_system_hide_reshow_taskbar (3809304065624351131) -->
+    <skip />
+    <!-- no translation found for group_system_access_system_settings (7961639365383008053) -->
+    <skip />
+    <!-- no translation found for group_system_access_google_assistant (1186152943161483864) -->
+    <skip />
+    <!-- no translation found for group_system_lock_screen (7391191300363416543) -->
+    <skip />
+    <!-- no translation found for group_system_quick_memo (2914234890158583919) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_system_multitasking (1065232949510862593) -->
+    <skip />
+    <!-- no translation found for system_multitasking_rhs (6593269428880305699) -->
+    <skip />
+    <!-- no translation found for system_multitasking_lhs (8839380725557952846) -->
+    <skip />
+    <!-- no translation found for system_multitasking_full_screen (1962084334200006297) -->
+    <skip />
+    <!-- no translation found for system_multitasking_replace (844285282472557186) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_input (6888282716546625610) -->
+    <skip />
+    <!-- no translation found for input_switch_input_language_next (3394291576873633793) -->
+    <skip />
+    <!-- no translation found for input_switch_input_language_previous (8823659252918609216) -->
+    <skip />
+    <!-- no translation found for input_access_emoji (8105642858900406351) -->
+    <skip />
+    <!-- no translation found for input_access_voice_typing (7291201476395326141) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Forrit"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Aðstoð"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Vafri"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_browser (7328131901589876868) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Tengiliðir"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Tölvupóstur"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_email (7480359963463803511) -->
+    <skip />
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS-skilaboð"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Tónlist"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Dagatal"</string>
+    <!-- no translation found for keyboard_shortcut_group_applications_calculator (6316043911946540137) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_group_applications_maps (7312554713993114342) -->
+    <skip />
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ónáðið ekki"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Flýtihnappar fyrir hljóðstyrk"</string>
     <string name="battery" msgid="769686279459897127">"Rafhlaða"</string>
@@ -783,6 +855,12 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"skjáupptaka"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Enginn titill"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Biðstaða"</string>
+    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
+    <skip />
+    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
+    <skip />
+    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
+    <skip />
     <string name="magnification_window_title" msgid="4863914360847258333">"Stækkunargluggi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Stækkunarstillingar glugga"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Auka aðdrátt"</string>
@@ -889,10 +967,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Eitthvað fór úrskeiðis. Reyndu aftur."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Hleður"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"spjaldtölva"</string>
-    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
-    <skip />
-    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
-    <skip />
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Sendir út efni frá þér"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Sendir út <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Óvirkt, athugaðu forrit"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Fannst ekki"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Stýring er ekki tiltæk"</string>
@@ -1059,11 +1135,16 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Að minnsta kosti eitt tæki er tiltækt"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Haltu flýtilyklinum inni"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Hætta við"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Snúa núna"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Opnaðu símann til að taka betri sjálfsmynd"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Snúa á framskjá til að ná betri sjálfsmynd?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Notaðu aftari myndavélina til að ná víðara sjónarhorni með meiri upplausn."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Slökkt verður á þessum skjá"</b></string>
+    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
+    <skip />
+    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
+    <skip />
+    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
+    <skip />
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Samanbrjótanlegt tæki opnað"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Samanbrjótanlegu tæki snúið við"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> hleðsla eftir á rafhlöðu"</string>

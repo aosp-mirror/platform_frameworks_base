@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
@@ -315,6 +315,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     }
                     transition = mTransitionController.createTransition(type);
                 }
+                if (!transition.isCollecting()) {
+                    Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
+                            + " means Shell took too long to respond to a request. WM State may be"
+                            + " incorrect now, please file a bug");
+                    applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
+                    return transition.getToken();
+                }
                 transition.start();
                 transition.mLogger.mStartWCT = wct;
                 applyTransaction(wct, -1 /*syncId*/, transition, caller);
@@ -532,9 +539,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // setWindowingMode call in force-hidden.
                 boolean forceHiddenForPip = false;
                 if (wc.asTask() != null && wc.inPinnedWindowingMode()
-                        && entry.getValue().getWindowingMode() == WINDOWING_MODE_UNDEFINED) {
-                    // We are in pip and going to undefined. Now search hierarchy ops to determine
-                    // whether we are removing pip or expanding pip.
+                        && entry.getValue().getWindowingMode() != WINDOWING_MODE_PINNED) {
+                    // We are going out of pip. Now search hierarchy ops to determine whether we
+                    // are removing pip or expanding pip.
                     for (int i = 0; i < hopSize; ++i) {
                         final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
                         if (hop.getType() != HIERARCHY_OP_TYPE_REORDER) continue;
@@ -670,7 +677,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         + " windowing mode during locked task mode.");
             }
 
-            if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED) {
+            if (windowingMode == WINDOWING_MODE_PINNED) {
                 // Do not directly put the container into PINNED mode as it may not support it or
                 // the app may not want to enter it. Instead, send a signal to request PIP
                 // mode to the app if they wish to support it below in #applyTaskChanges.
@@ -722,7 +729,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             tr.mDisplayContent.mPinnedTaskController.setEnterPipBounds(enterPipBounds);
         }
 
-        if (c.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_PINNED
+        if (c.getWindowingMode() == WINDOWING_MODE_PINNED
                 && !tr.inPinnedWindowingMode()) {
             final ActivityRecord activity = tr.getTopNonFinishingActivity();
             if (activity != null) {
@@ -1900,16 +1907,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
         ownerTask.addChild(taskFragment, position);
         taskFragment.setWindowingMode(creationParams.getWindowingMode());
-        if (creationParams.areInitialRelativeBoundsSet()) {
+        if (!creationParams.getInitialRelativeBounds().isEmpty()) {
             // Set relative bounds instead of using setBounds. This will avoid unnecessary update in
             // case the parent has resized since the last time parent info is sent to the organizer.
             taskFragment.setRelativeEmbeddedBounds(creationParams.getInitialRelativeBounds());
             // Recompute configuration as the bounds will be calculated based on relative bounds in
             // TaskFragment#resolveOverrideConfiguration.
             taskFragment.recomputeConfiguration();
-        } else {
-            // TODO(b/232476698): remove after remove creationParams.getInitialBounds().
-            taskFragment.setBounds(creationParams.getInitialBounds());
         }
         mLaunchTaskFragments.put(creationParams.getFragmentToken(), taskFragment);
 

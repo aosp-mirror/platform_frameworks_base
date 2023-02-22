@@ -32,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
+import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
@@ -57,7 +58,6 @@ import com.android.systemui.theme.ThemeOverlayController
 import com.android.systemui.toast.ToastUI
 import com.android.systemui.usb.StorageNotification
 import com.android.systemui.util.NotificationChannels
-import com.android.systemui.util.leak.GarbageMonitor
 import com.android.systemui.volume.VolumeUI
 import com.android.systemui.wmshell.WMShell
 import dagger.Binds
@@ -108,12 +108,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(FsiChromeViewBinder::class)
     abstract fun bindFsiChromeWindowBinder(sysui: FsiChromeViewBinder): CoreStartable
-
-    /** Inject into GarbageMonitor.Service.  */
-    @Binds
-    @IntoMap
-    @ClassKey(GarbageMonitor::class)
-    abstract fun bindGarbageMonitorService(sysui: GarbageMonitor.Service): CoreStartable
 
     /** Inject into GlobalActionsComponent.  */
     @Binds
@@ -300,6 +294,11 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(StylusUsiPowerStartable::class)
     abstract fun bindStylusUsiPowerStartable(sysui: StylusUsiPowerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(PhysicalKeyboardCoreStartable::class)
+    abstract fun bindKeyboardCoreStartable(listener: PhysicalKeyboardCoreStartable): CoreStartable
 
     /** Inject into MuteQuickAffordanceCoreStartable*/
     @Binds

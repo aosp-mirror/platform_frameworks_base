@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.util.RotationUtils.deltaRotation;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
@@ -575,13 +574,10 @@ public class DisplayRotation {
                 "Display id=%d rotation changed to %d from %d, lastOrientation=%d",
                         displayId, rotation, oldRotation, lastOrientation);
 
-        if (deltaRotation(oldRotation, rotation) != Surface.ROTATION_180) {
-            mDisplayContent.mWaitingForConfig = true;
-        }
-
         mRotation = rotation;
 
         mDisplayContent.setLayoutNeeded();
+        mDisplayContent.mWaitingForConfig = true;
 
         if (mDisplayContent.mTransitionController.isShellTransitionsEnabled()) {
             final boolean wasCollecting = mDisplayContent.mTransitionController.isCollecting();
@@ -1494,6 +1490,15 @@ public class DisplayRotation {
         }
     }
 
+    void dispatchProposedRotation(@Surface.Rotation int rotation) {
+        if (mService.mRotationWatcherController.hasProposedRotationListeners()) {
+            synchronized (mLock) {
+                mService.mRotationWatcherController.dispatchProposedRotation(
+                        mDisplayContent, rotation);
+            }
+        }
+    }
+
     private static String allowAllRotationsToString(int allowAll) {
         switch (allowAll) {
             case -1:
@@ -1799,6 +1804,7 @@ public class DisplayRotation {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "onProposedRotationChanged, rotation=%d", rotation);
             // Send interaction power boost to improve redraw performance.
             mService.mPowerManagerInternal.setPowerBoost(Boost.INTERACTION, 0);
+            dispatchProposedRotation(rotation);
             if (isRotationChoiceAllowed(rotation)) {
                 final boolean isValid = isValidRotationChoice(rotation);
                 sendProposedRotationChangeToStatusBarInternal(rotation, isValid);

@@ -875,7 +875,7 @@ public class DeviceIdleControllerTest {
     @Test
     public void testLightStepIdleStateLocked_InvalidStates() {
         mDeviceIdleController.becomeActiveLocked("testing", 0);
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         // stepLightIdleStateLocked doesn't handle the ACTIVE case, so the state
         // should stay as ACTIVE.
         verifyLightStateConditions(LIGHT_STATE_ACTIVE);
@@ -888,7 +888,7 @@ public class DeviceIdleControllerTest {
     @Test
     public void testLightStepIdleStateLocked_Overriden() {
         enterLightState(LIGHT_STATE_OVERRIDE);
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
     }
 
@@ -906,18 +906,18 @@ public class DeviceIdleControllerTest {
         verifyLightStateConditions(LIGHT_STATE_INACTIVE);
 
         // No active ops means INACTIVE should go straight to IDLE.
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
         // Should just alternate between IDLE and IDLE_MAINTENANCE now.
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
     }
 
@@ -934,18 +934,18 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.setJobsActive(true);
         mDeviceIdleController.setAlarmsActive(true);
         mDeviceIdleController.setActiveIdleOpsForTest(1);
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
         // Should just alternate between IDLE and IDLE_MAINTENANCE now.
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
     }
 
@@ -963,24 +963,24 @@ public class DeviceIdleControllerTest {
         verifyLightStateConditions(LIGHT_STATE_INACTIVE);
 
         // No active ops means INACTIVE should go straight to IDLE.
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
         // Should cycle between IDLE, WAITING_FOR_NETWORK, and IDLE_MAINTENANCE now.
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
     }
 
@@ -997,83 +997,24 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.setJobsActive(true);
         mDeviceIdleController.setAlarmsActive(true);
         mDeviceIdleController.setActiveIdleOpsForTest(1);
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
         // Should cycle between IDLE, WAITING_FOR_NETWORK, and IDLE_MAINTENANCE now.
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
-        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
-    }
-
-    @Test
-    public void testLightStepIdleStateSkippedAlarms() {
-        setNetworkConnected(true);
-        mDeviceIdleController.setJobsActive(false);
-        mDeviceIdleController.setAlarmsActive(false);
-        mDeviceIdleController.setActiveIdleOpsForTest(0);
-
-        final ArgumentCaptor<AlarmManager.OnAlarmListener> alarmListenerCaptor = ArgumentCaptor
-                .forClass(AlarmManager.OnAlarmListener.class);
-        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
-                eq("DeviceIdleController.light"), alarmListenerCaptor.capture(), any());
-        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
-                eq("DeviceIdleController.light"), alarmListenerCaptor.capture(), any());
-
-        // Set state to INACTIVE.
-        mDeviceIdleController.becomeActiveLocked("testing", 0);
-        setChargingOn(false);
-        setScreenOn(false);
-        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
-
-        final AlarmManager.OnAlarmListener progressionListener =
-                alarmListenerCaptor.getAllValues().get(0);
-        final AlarmManager.OnAlarmListener maintenanceListener =
-                alarmListenerCaptor.getAllValues().get(1);
-
-        // Set things to make it look like the INACTIVE -> IDLE alarm didn't fire and the
-        // MAINTENANCE alarm just fired.
-        mInjector.nowElapsed = mDeviceIdleController.getNextLightMaintenanceAlarmTimeForTesting();
-        // If the non-wakeup alarm doesn't fire in a timely manner, we would see both fire at the
-        // same time.
-        progressionListener.onAlarm();
-        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
-        maintenanceListener.onAlarm();
-        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
-
-        assertTrue(mInjector.nowElapsed < mDeviceIdleController.getNextLightAlarmTimeForTesting());
-
-        // MAINTENANCE->IDLE alarm goes off at correct time.
-        mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
-        progressionListener.onAlarm();
-        verifyLightStateConditions(LIGHT_STATE_IDLE);
-
-        // Go back to MAINTENANCE
-        mInjector.nowElapsed = mDeviceIdleController.getNextLightMaintenanceAlarmTimeForTesting();
-        maintenanceListener.onAlarm();
-        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
-
-        assertTrue(mInjector.nowElapsed < mDeviceIdleController.getNextLightAlarmTimeForTesting());
-        assertTrue(mInjector.nowElapsed
-                < mDeviceIdleController.getNextLightMaintenanceAlarmTimeForTesting());
-
-        // MAINTENANCE->IDLE alarm is delayed until IDLE->MAINTENANCE alarm goes off.
-        mInjector.nowElapsed = mDeviceIdleController.getNextLightMaintenanceAlarmTimeForTesting();
-        progressionListener.onAlarm();
-        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
-        maintenanceListener.onAlarm();
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
     }
 
@@ -1097,8 +1038,6 @@ public class DeviceIdleControllerTest {
                 .forClass(AlarmManager.OnAlarmListener.class);
         doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
                 eq("DeviceIdleController.light"), alarmListenerCaptor.capture(), any());
-        doNothing().when(mAlarmManager).setWindow(anyInt(), anyLong(), anyLong(),
-                eq("DeviceIdleController.light"), alarmListenerCaptor.capture(), any());
 
         // Set state to INACTIVE.
         mDeviceIdleController.becomeActiveLocked("testing", 0);
@@ -1109,23 +1048,16 @@ public class DeviceIdleControllerTest {
         final long idleAfterInactiveExpiryTime =
                 mInjector.nowElapsed + mConstants.LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT;
         alarmManagerInOrder.verify(mAlarmManager).setWindow(
-                eq(AlarmManager.ELAPSED_REALTIME),
+                eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
                 eq(idleAfterInactiveExpiryTime),
                 anyLong(), anyString(), any(), any(Handler.class));
-        // Maintenance alarm
-        alarmManagerInOrder.verify(mAlarmManager).setWindow(
-                eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
-                eq(idleAfterInactiveExpiryTime + idlingTimeMs),
-                anyLong(), anyString(), any(), any(Handler.class));
 
-        final AlarmManager.OnAlarmListener progressionListener =
+        final AlarmManager.OnAlarmListener alarmListener =
                 alarmListenerCaptor.getAllValues().get(0);
-        final AlarmManager.OnAlarmListener maintenanceListener =
-                alarmListenerCaptor.getAllValues().get(1);
 
         // INACTIVE -> IDLE alarm
         mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
-        progressionListener.onAlarm();
+        alarmListener.onAlarm();
         verifyLightStateConditions(LIGHT_STATE_IDLE);
         alarmManagerInOrder.verify(mAlarmManager).setWindow(
                 eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
@@ -1134,26 +1066,20 @@ public class DeviceIdleControllerTest {
 
         for (int i = 0; i < 2; ++i) {
             // IDLE->MAINTENANCE alarm
-            mInjector.nowElapsed =
-                    mDeviceIdleController.getNextLightMaintenanceAlarmTimeForTesting();
-            maintenanceListener.onAlarm();
+            mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
+            alarmListener.onAlarm();
             verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
             long maintenanceExpiryTime = mInjector.nowElapsed + maintenanceTimeMs;
             idlingTimeMs *= mConstants.LIGHT_IDLE_FACTOR;
             // Set MAINTENANCE->IDLE
             alarmManagerInOrder.verify(mAlarmManager).setWindow(
-                    eq(AlarmManager.ELAPSED_REALTIME),
-                    eq(maintenanceExpiryTime),
-                    anyLong(), anyString(), any(), any(Handler.class));
-            // Set IDLE->MAINTENANCE
-            alarmManagerInOrder.verify(mAlarmManager).setWindow(
                     eq(AlarmManager.ELAPSED_REALTIME_WAKEUP),
-                    eq(maintenanceExpiryTime + idlingTimeMs),
+                    eq(maintenanceExpiryTime),
                     anyLong(), anyString(), any(), any(Handler.class));
 
             // MAINTENANCE->IDLE alarm
             mInjector.nowElapsed = mDeviceIdleController.getNextLightAlarmTimeForTesting();
-            progressionListener.onAlarm();
+            alarmListener.onAlarm();
             verifyLightStateConditions(LIGHT_STATE_IDLE);
             // Set IDLE->MAINTENANCE again
             alarmManagerInOrder.verify(mAlarmManager).setWindow(
@@ -1180,37 +1106,45 @@ public class DeviceIdleControllerTest {
         verifyLightStateConditions(LIGHT_STATE_INACTIVE);
 
         // No active ops means INACTIVE should go straight to IDLE.
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
-        inOrder.verify(mDeviceIdleController).scheduleLightMaintenanceAlarmLocked(
-                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT));
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT),
+                longThat(l -> l == mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX),
+                eq(true));
 
         // Should just alternate between IDLE and IDLE_MAINTENANCE now.
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
                 longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET),
-                longThat(l -> l == mConstants.FLEX_TIME_SHORT));
+                longThat(l -> l == mConstants.FLEX_TIME_SHORT),
+                eq(true));
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
-        inOrder.verify(mDeviceIdleController).scheduleLightMaintenanceAlarmLocked(
-                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT));
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT),
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX),
+                eq(true));
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
         inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
                 longThat(l -> l >= mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET),
-                longThat(l -> l == mConstants.FLEX_TIME_SHORT));
+                longThat(l -> l == mConstants.FLEX_TIME_SHORT),
+                eq(true));
 
         // Test that motion doesn't reset the idle timeout.
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
 
-        mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
         verifyLightStateConditions(LIGHT_STATE_IDLE);
-        inOrder.verify(mDeviceIdleController).scheduleLightMaintenanceAlarmLocked(
-                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT));
+        inOrder.verify(mDeviceIdleController).scheduleLightAlarmLocked(
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT),
+                longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX),
+                eq(true));
     }
 
     ///////////////// EXIT conditions ///////////////////
@@ -2230,7 +2164,7 @@ public class DeviceIdleControllerTest {
                 while (mDeviceIdleController.getLightState() != lightState) {
                     // Stepping through each state ensures that the proper features are turned
                     // on/off.
-                    mDeviceIdleController.stepLightIdleStateLocked("testing", true);
+                    mDeviceIdleController.stepLightIdleStateLocked("testing");
 
                     count++;
                     if (count > 10) {

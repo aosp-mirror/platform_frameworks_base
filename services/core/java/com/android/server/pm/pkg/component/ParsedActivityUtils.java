@@ -114,7 +114,7 @@ public class ParsedActivityUtils {
                 return input.error(result);
             }
 
-            if (receiver && pkg.isCantSaveState()) {
+            if (receiver && pkg.isSaveStateDisallowed()) {
                 // A heavy-weight application can not have receivers in its main process
                 if (Objects.equals(activity.getProcessName(), packageName)) {
                     return input.error("Heavy-weight applications can not have receivers "
@@ -129,7 +129,7 @@ public class ParsedActivityUtils {
             activity.setTheme(sa.getResourceId(R.styleable.AndroidManifestActivity_theme, 0))
                     .setUiOptions(sa.getInt(R.styleable.AndroidManifestActivity_uiOptions, pkg.getUiOptions()));
 
-            activity.setFlags(activity.getFlags() | (flag(ActivityInfo.FLAG_ALLOW_TASK_REPARENTING, R.styleable.AndroidManifestActivity_allowTaskReparenting, pkg.isAllowTaskReparenting(), sa)
+            activity.setFlags(activity.getFlags() | (flag(ActivityInfo.FLAG_ALLOW_TASK_REPARENTING, R.styleable.AndroidManifestActivity_allowTaskReparenting, pkg.isTaskReparentingAllowed(), sa)
                                 | flag(ActivityInfo.FLAG_ALWAYS_RETAIN_TASK_STATE, R.styleable.AndroidManifestActivity_alwaysRetainTaskState, sa)
                                 | flag(ActivityInfo.FLAG_CLEAR_TASK_ON_LAUNCH, R.styleable.AndroidManifestActivity_clearTaskOnLaunch, sa)
                                 | flag(ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS, R.styleable.AndroidManifestActivity_excludeFromRecents, sa)

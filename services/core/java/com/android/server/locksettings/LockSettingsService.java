@@ -82,6 +82,7 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -103,7 +104,6 @@ import android.security.Authorization;
 import android.security.KeyStore;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.keystore.UserNotAuthenticatedException;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.RecoveryCertPath;
@@ -117,6 +117,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -200,7 +201,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
     private static final String BIOMETRIC_PERMISSION = MANAGE_BIOMETRIC;
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
@@ -788,31 +789,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    /**
-     * Check if profile got unlocked but the keystore is still locked. This happens on full disk
-     * encryption devices since the profile may not yet be running when we consider unlocking it
-     * during the normal flow. In this case unlock the keystore for the profile.
-     */
-    private void ensureProfileKeystoreUnlocked(int userId) {
-        final KeyStore ks = KeyStore.getInstance();
-        if (ks.state(userId) == KeyStore.State.LOCKED
-                && isCredentialSharableWithParent(userId)
-                && hasUnifiedChallenge(userId)) {
-            Slog.i(TAG, "Profile got unlocked, will unlock its keystore");
-            // If boot took too long and the password in vold got expired, parent keystore will
-            // be still locked, we ignore this case since the user will be prompted to unlock
-            // the device after boot.
-            unlockChildProfile(userId, true /* ignoreUserNotAuthenticated */);
-        }
-    }
-
     private void onUnlockUser(final int userId) {
         // Perform tasks which require locks in LSS on a handler, as we are callbacks from
         // ActivityManager.unlockUser()
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                ensureProfileKeystoreUnlocked(userId);
                 // Hide notification first, as tie managed profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
@@ -1083,18 +1065,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(PERMISSION, "LockSettingsHave");
     }
 
-    private static final String[] UNPROTECTED_SETTINGS = {
-        // These three LOCK_PATTERN_* settings have traditionally been readable via the public API
-        // android.provider.Settings.{System,Secure}.getString() without any permission.
-        Settings.Secure.LOCK_PATTERN_ENABLED,
-        Settings.Secure.LOCK_PATTERN_VISIBLE,
-        Settings.Secure.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED,
-    };
-
     private final void checkDatabaseReadPermission(String requestedKey, int userId) {
-        if (ArrayUtils.contains(UNPROTECTED_SETTINGS, requestedKey)) {
-            return;
-        }
         if (!hasPermission(PERMISSION)) {
             throw new SecurityException("uid=" + getCallingUid() + " needs permission "
                     + PERMISSION + " to read " + requestedKey + " for user " + userId);
@@ -1208,9 +1179,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean getBoolean(String key, boolean defaultValue, int userId) {
         checkDatabaseReadPermission(key, userId);
-        if (Settings.Secure.LOCK_PATTERN_ENABLED.equals(key)) {
-            return getCredentialTypeInternal(userId) == CREDENTIAL_TYPE_PATTERN;
-        }
         return mStorage.getBoolean(key, defaultValue, userId);
     }
 
@@ -1335,7 +1303,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         return credential;
     }
 
-    private void unlockChildProfile(int profileHandle, boolean ignoreUserNotAuthenticated) {
+    private void unlockChildProfile(int profileHandle) {
         try {
             doVerifyCredential(getDecryptedPasswordForTiedProfile(profileHandle),
                     profileHandle, null /* progressCallback */, 0 /* flags */);
@@ -1345,8 +1313,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 | BadPaddingException | CertificateException | IOException e) {
             if (e instanceof FileNotFoundException) {
                 Slog.i(TAG, "Child profile key not found");
-            } else if (ignoreUserNotAuthenticated && e instanceof UserNotAuthenticatedException) {
-                Slog.i(TAG, "Parent keystore seems locked, ignoring");
             } else {
                 Slog.e(TAG, "Failed to decrypt child profile key", e);
             }
@@ -1410,7 +1376,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (hasUnifiedChallenge(profile.id)) {
                 if (mUserManager.isUserRunning(profile.id)) {
                     // Unlock profile with unified lock
-                    unlockChildProfile(profile.id, false /* ignoreUserNotAuthenticated */);
+                    unlockChildProfile(profile.id);
                 } else {
                     try {
                         // Profile not ready for unlock yet, but decrypt the unified challenge now
@@ -2177,17 +2143,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // credential has matched
                 mBiometricDeferredQueue.addPendingLockoutResetForUser(userId,
                         authResult.syntheticPassword.deriveGkPassword());
-
-                // perform verifyChallenge with synthetic password which generates the real GK auth
-                // token and response for the current user
-                response = mSpManager.verifyChallenge(getGateKeeperService(),
-                        authResult.syntheticPassword, 0L /* challenge */, userId);
-                if (response.getResponseCode() != VerifyCredentialResponse.RESPONSE_OK) {
-                    // This shouldn't really happen: the unwrapping of SP succeeds, but SP doesn't
-                    // match the recorded GK password handle.
-                    Slog.wtf(TAG, "verifyChallenge with SP failed.");
-                    return VerifyCredentialResponse.ERROR;
-                }
             }
         }
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
@@ -2794,7 +2749,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      *
      * Also maintains the invariants described in {@link SyntheticPasswordManager} by
      * setting/clearing the protection (by the SP) on the user's auth-bound Keystore keys when the
-     * LSKF is added/removed, respectively.  If the new LSKF is nonempty, then the Gatekeeper auth
+     * LSKF is added/removed, respectively.  If an LSKF is being added, then the Gatekeeper auth
      * token is also refreshed.
      */
     @GuardedBy("mSpManager")
@@ -2810,9 +2765,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // not needed by synchronizeUnifiedWorkChallengeForProfiles()
             profilePasswords = null;
 
-            if (mSpManager.hasSidForUser(userId)) {
-                mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
-            } else {
+            if (!mSpManager.hasSidForUser(userId)) {
                 mSpManager.newSidForUser(getGateKeeperService(), sp, userId);
                 mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
                 setKeystorePassword(sp.deriveKeyStorePassword(), userId);

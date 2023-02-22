@@ -53,6 +53,7 @@ import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_TASK_LAUNCHING_BEHIND;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
 
@@ -813,6 +814,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         boolean hasParticipatedDisplay = false;
+        boolean reportTaskStackChanged = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
@@ -855,6 +857,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && ar.isVisible()) {
                     // Transient launch was committed, so report enteringAnimation
                     ar.mEnteringAnimation = true;
+                    reportTaskStackChanged = true;
+
                     // Since transient launches don't automatically take focus, make sure we
                     // synchronize focus since we committed to the launch.
                     if (ar.isTopRunningActivity()) {
@@ -875,8 +879,32 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             "  Commit wallpaper becoming invisible: %s", wt);
                     wt.commitVisibility(false /* visible */);
                 }
+                continue;
+            }
+            final Task tr = participant.asTask();
+            if (tr != null && tr.isVisibleRequested() && tr.inPinnedWindowingMode()) {
+                final ActivityRecord top = tr.getTopNonFinishingActivity();
+                if (top != null && !top.inPinnedWindowingMode()) {
+                    mController.mStateValidators.add(() -> {
+                        if (!tr.isAttached() || !tr.isVisibleRequested()
+                                || !tr.inPinnedWindowingMode()) return;
+                        final ActivityRecord currTop = tr.getTopNonFinishingActivity();
+                        if (currTop.inPinnedWindowingMode()) return;
+                        Slog.e(TAG, "Enter-PIP was started but not completed, this is a Shell/SysUI"
+                                + " bug. This state breaks gesture-nav, so attempting clean-up.");
+                        // We don't know the destination bounds, so we can't actually finish the
+                        // operation. So, to prevent the half-pipped task from covering everything,
+                        // abort the action (which moves the task to back).
+                        tr.abortPipEnter(currTop);
+                    });
+                }
             }
         }
+
+        if (reportTaskStackChanged) {
+            mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
+        }
+
         // dispatch legacy callback in a different loop. This is because multiple legacy handlers
         // (fixed-rotation/displaycontent) make global changes, so we want to ensure that we've
         // processed all the participants first (in particular, we want to trigger pip-enter first)
@@ -1447,22 +1475,25 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     private static boolean isTranslucent(@NonNull WindowContainer wc) {
         final TaskFragment taskFragment = wc.asTaskFragment();
-        if (taskFragment != null) {
-            if (taskFragment.isTranslucent(null /* starting */)) {
-                return true;
-            }
-            final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-            if (adjacentTaskFragment != null) {
-                // Treat the TaskFragment as translucent if its adjacent TF is, otherwise everything
-                // behind two adjacent TaskFragments are occluded.
-                return adjacentTaskFragment.isTranslucent(null /* starting */);
-            }
+        if (taskFragment == null) {
+            return !wc.fillsParent();
         }
-        // TODO(b/172695805): hierarchical check. This is non-trivial because for containers
-        //                    it is effected by child visibility but needs to work even
-        //                    before visibility is committed. This means refactoring some
-        //                    checks to use requested visibility.
-        return !wc.fillsParent();
+
+        // Check containers differently as they are affected by child visibility.
+
+        if (taskFragment.isTranslucentForTransition()) {
+            // TaskFragment doesn't contain occluded ActivityRecord.
+            return true;
+        }
+        final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
+        if (adjacentTaskFragment != null) {
+            // When the TaskFragment has an adjacent TaskFragment, sibling behind them should be
+            // hidden unless any of them are translucent.
+            return adjacentTaskFragment.isTranslucentForTransition();
+        } else {
+            // Non-filling without adjacent is considered as translucent.
+            return !wc.fillsParent();
+        }
     }
 
     /**
@@ -1878,6 +1909,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             out.addChange(change);
         }
 
+        TransitionInfo.AnimationOptions animOptions = null;
+        if (topApp.asActivityRecord() != null) {
+            final ActivityRecord topActivity = topApp.asActivityRecord();
+            animOptions = addCustomActivityTransition(topActivity, true/* open */, null);
+            animOptions = addCustomActivityTransition(topActivity, false/* open */, animOptions);
+        }
         final WindowManager.LayoutParams animLp =
                 getLayoutParamsForAnimationsStyle(type, sortedTargets);
         if (animLp != null && animLp.type != TYPE_APPLICATION_STARTING
@@ -1885,14 +1922,33 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Don't send animation options if no windowAnimations have been set or if the we are
             // running an app starting animation, in which case we don't want the app to be able to
             // change its animation directly.
-            TransitionInfo.AnimationOptions animOptions =
-                    TransitionInfo.AnimationOptions.makeAnimOptionsFromLayoutParameters(animLp);
+            if (animOptions != null) {
+                animOptions.addOptionsFromLayoutParameters(animLp);
+            } else {
+                animOptions = TransitionInfo.AnimationOptions
+                        .makeAnimOptionsFromLayoutParameters(animLp);
+            }
+        }
+        if (animOptions != null) {
             out.setAnimationOptions(animOptions);
         }
-
         return out;
     }
 
+    static TransitionInfo.AnimationOptions addCustomActivityTransition(ActivityRecord topActivity,
+            boolean open, TransitionInfo.AnimationOptions animOptions) {
+        final ActivityRecord.CustomAppTransition customAnim =
+                topActivity.getCustomAnimation(open);
+        if (customAnim != null) {
+            if (animOptions == null) {
+                animOptions = TransitionInfo.AnimationOptions
+                        .makeCommonAnimOptions(topActivity.packageName);
+            }
+            animOptions.addCustomActivityTransition(open, customAnim.mEnterAnim,
+                    customAnim.mExitAnim, customAnim.mBackgroundColor);
+        }
+        return animOptions;
+    }
     /**
      * Finds the top-most common ancestor of app targets.
      *
@@ -2019,7 +2075,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayContent dc = wc.asDisplayContent();
             if (dc == null || !mChanges.get(dc).hasChanged()) continue;
             dc.sendNewConfiguration();
-            setReady(dc, true);
+            // Set to ready if no other change controls the ready state. But if there is, such as
+            // if an activity is pausing, it will call setReady(ar, false) and wait for the next
+            // resumed activity. Then do not set to ready because the transition only contains
+            // partial participants. Otherwise the transition may only handle HIDE and miss OPEN.
+            if (!mReadyTracker.mUsed) {
+                setReady(dc, true);
+            }
         }
     }
 
@@ -2168,6 +2230,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     if (topActivity.mAtmService.mBackNavigationController
                             .isMonitorTransitionTarget(topActivity)) {
                         flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+                    }
+                    if (topActivity != null && topActivity.mLaunchTaskBehind) {
+                        Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
+                        flags |= FLAG_TASK_LAUNCHING_BEHIND;
                     }
                 } else {
                     if (task.mAtmService.mBackNavigationController

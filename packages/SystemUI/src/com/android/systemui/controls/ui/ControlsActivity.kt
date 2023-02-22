@@ -134,7 +134,8 @@ class ControlsActivity @Inject constructor(
         super.onStop()
         mExitToDream = false
 
-        uiController.hide()
+        // parent is set in onStart, so the field is initialized when we get here
+        uiController.hide(parent)
         controlsSettingsDialogManager.closeDialog()
     }
 

@@ -1371,14 +1371,14 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_READ_MEDIA_VISUAL_USER_SELECTED;
 
     /**
-     * Prevent an app from being placed into app standby buckets.
+     * Prevent an app from being suspended.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final int OP_SYSTEM_EXEMPT_FROM_APP_STANDBY =
-            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_APP_STANDBY;
+    public static final int OP_SYSTEM_EXEMPT_FROM_SUSPENSION =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_SUSPENSION;
 
     /**
      * Prevent an app from dismissible notifications. Starting from Android U, notifications with
@@ -1421,16 +1421,14 @@ public class AppOpsManager {
             AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS;
 
     /**
-     * Exempt from start foreground service from background with while in user permission
-     * restriction.
+     * Prevent an app from being placed into hibernation.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final int OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =
-            AppProtoEnums
-                    .APP_OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION;
+    public static final int OP_SYSTEM_EXEMPT_FROM_HIBERNATION =
+            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_HIBERNATION;
 
     /**
      * Allows an application to start an activity while running in the background.
@@ -1462,17 +1460,9 @@ public class AppOpsManager {
      */
     public static final int OP_USE_FULL_SCREEN_INTENT = AppProtoEnums.APP_OP_USE_FULL_SCREEN_INTENT;
 
-    /**
-     * Prevent an app from being placed into hibernation.
-     *
-     * @hide
-     */
-    public static final int OP_SYSTEM_EXEMPT_FROM_HIBERNATION =
-            AppProtoEnums.APP_OP_SYSTEM_EXEMPT_FROM_HIBERNATION;
-
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 135;
+    public static final int _NUM_OP = 134;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1981,14 +1971,14 @@ public class AppOpsManager {
     public static final String OPSTR_RUN_USER_INITIATED_JOBS = "android:run_user_initiated_jobs";
 
     /**
-     * Prevent an app from being placed into app standby buckets.
+     * Prevent an app from being suspended.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final String OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY =
-            "android:system_exempt_from_app_standby";
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION =
+            "android:system_exempt_from_suspension";
 
     /**
      * Allow an application to create non-dismissible notifications. Starting from Android U,
@@ -2024,16 +2014,15 @@ public class AppOpsManager {
             "android:system_exempt_from_power_restrictions";
 
     /**
-     * Exempt from start foreground service from background with while in user permission
-     * restriction.
+     * Prevent an app from being placed into hibernation.
      *
      * Only to be used by the system.
      *
      * @hide
      */
-    public static final String
-            OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION =
-            "android:system_exempt_from_fgs_bg_start_while_in_use_permission_restriction";
+    @SystemApi
+    public static final String OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION =
+            "android:system_exempt_from_hibernation";
 
     /**
      * Allows an application to start an activity while running in the background.
@@ -2065,15 +2054,6 @@ public class AppOpsManager {
      * @hide
      */
     public static final String OPSTR_USE_FULL_SCREEN_INTENT = "android:use_full_screen_intent";
-
-    /**
-     *  Prevent an app from being placed into hibernation.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final String OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION =
-            "android:system_exempt_from_hibernation";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -2562,12 +2542,14 @@ public class AppOpsManager {
                     OPSTR_READ_MEDIA_VISUAL_USER_SELECTED, "READ_MEDIA_VISUAL_USER_SELECTED")
                     .setPermission(Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
                     .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
-        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_APP_STANDBY,
-                OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY,
-                "SYSTEM_EXEMPT_FROM_APP_STANDBY").build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_SUSPENSION,
+                OPSTR_SYSTEM_EXEMPT_FROM_SUSPENSION,
+                "SYSTEM_EXEMPT_FROM_SUSPENSION")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
                 OPSTR_SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS,
-                "SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS").build(),
+                "SYSTEM_EXEMPT_FROM_DISMISSIBLE_NOTIFICATIONS")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(OP_READ_WRITE_HEALTH_DATA, OPSTR_READ_WRITE_HEALTH_DATA,
                 "READ_WRITE_HEALTH_DATA").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_FOREGROUND_SERVICE_SPECIAL_USE,
@@ -2575,15 +2557,16 @@ public class AppOpsManager {
                 .setPermission(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE).build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
                 OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
-                "SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS").build(),
-        new AppOpInfo.Builder(
-                OP_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
-                OPSTR_SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION,
-                "SYSTEM_EXEMPT_FROM_FGS_BG_START_WHILE_IN_USE_PERMISSION_RESTRICTION")
-                .build(),
+                "SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS")
+                .setDisableReset(true).build(),
+        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_HIBERNATION,
+                OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
+                "SYSTEM_EXEMPT_FROM_HIBERNATION")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
                 OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
-                "SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION").build(),
+                "SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION")
+                .setDisableReset(true).build(),
         new AppOpInfo.Builder(
                 OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
                 OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
@@ -2597,10 +2580,7 @@ public class AppOpsManager {
                 .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
                 "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
-                .build(),
-        new AppOpInfo.Builder(OP_SYSTEM_EXEMPT_FROM_HIBERNATION,
-                OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
-                "SYSTEM_EXEMPT_FROM_HIBERNATION").build()
+                .build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -4584,10 +4564,9 @@ public class AppOpsManager {
      * Flag for querying app op history: assemble attribution chains, and attach the last visible
      * node in the chain to the start as a proxy info. This only applies to discrete accesses.
      *
-     * TODO 191512294: Add to @SystemApi
-     *
      * @hide
      */
+    @SystemApi
     public static final int HISTORY_FLAG_GET_ATTRIBUTION_CHAINS = 1 << 2;
 
     /**

@@ -861,8 +861,20 @@ public class ContextWrapper extends Context {
     }
 
     @Override
+    public boolean bindService(@NonNull Intent service, @NonNull ServiceConnection conn,
+            @NonNull BindServiceFlags flags) {
+        return mBase.bindService(service, conn, flags);
+    }
+
+    @Override
     public boolean bindService(Intent service, int flags, Executor executor,
             ServiceConnection conn) {
+        return mBase.bindService(service, flags, executor, conn);
+    }
+
+    @Override
+    public boolean bindService(@NonNull Intent service, @NonNull BindServiceFlags flags,
+            @NonNull Executor executor, @NonNull ServiceConnection conn) {
         return mBase.bindService(service, flags, executor, conn);
     }
 
@@ -881,8 +893,22 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+            @NonNull BindServiceFlags flags, UserHandle user) {
+        return mBase.bindServiceAsUser(service, conn, flags, user);
+    }
+
+    /** @hide */
+    @Override
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
+        return mBase.bindServiceAsUser(service, conn, flags, handler, user);
+    }
+
+    /** @hide */
+    @Override
+    public boolean bindServiceAsUser(Intent service, ServiceConnection conn,
+            @NonNull BindServiceFlags flags, Handler handler, UserHandle user) {
         return mBase.bindServiceAsUser(service, conn, flags, handler, user);
     }
 
@@ -1183,6 +1209,14 @@ public class ContextWrapper extends Context {
      * @hide
      */
     @Override
+    public int getAssociatedDisplayId() {
+        return mBase.getAssociatedDisplayId();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
     public void updateDisplay(int displayId) {
         mBase.updateDisplay(displayId);
     }
@@ -1198,11 +1232,6 @@ public class ContextWrapper extends Context {
     @Override
     public int getDeviceId() {
         return mBase.getDeviceId();
-    }
-
-    @Override
-    public boolean isDeviceContext() {
-        return mBase.isDeviceContext();
     }
 
     @Override
@@ -1275,7 +1304,7 @@ public class ContextWrapper extends Context {
      */
     @Override
     public @Nullable IServiceConnection getServiceDispatcher(ServiceConnection conn,
-            Handler handler, int flags) {
+            Handler handler, long flags) {
         return mBase.getServiceDispatcher(conn, handler, flags);
     }
 

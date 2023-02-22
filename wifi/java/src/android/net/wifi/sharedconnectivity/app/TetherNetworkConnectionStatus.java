@@ -105,6 +105,7 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
     public @interface ConnectionStatus {}
 
     @ConnectionStatus private final int mStatus;
+    private final TetherNetwork mTetherNetwork;
     private final Bundle mExtras;
 
     /**
@@ -112,6 +113,7 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
      */
     public static final class Builder {
         @ConnectionStatus private int mStatus;
+        private TetherNetwork mTetherNetwork;
         private Bundle mExtras;
 
         public Builder() {}
@@ -124,6 +126,17 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
         @NonNull
         public Builder setStatus(@ConnectionStatus int status) {
             mStatus = status;
+            return this;
+        }
+
+        /**
+         * Sets the {@link TetherNetwork} object of the connection.
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setTetherNetwork(@NonNull TetherNetwork tetherNetwork) {
+            mTetherNetwork = tetherNetwork;
             return this;
         }
 
@@ -145,12 +158,14 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
          */
         @NonNull
         public TetherNetworkConnectionStatus build() {
-            return new TetherNetworkConnectionStatus(mStatus, mExtras);
+            return new TetherNetworkConnectionStatus(mStatus, mTetherNetwork, mExtras);
         }
     }
 
-    private TetherNetworkConnectionStatus(@ConnectionStatus int status, Bundle extras) {
+    private TetherNetworkConnectionStatus(@ConnectionStatus int status, TetherNetwork tetherNetwork,
+            Bundle extras) {
         mStatus = status;
+        mTetherNetwork = tetherNetwork;
         mExtras = extras;
     }
 
@@ -162,6 +177,16 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
     @ConnectionStatus
     public int getStatus() {
         return mStatus;
+    }
+
+    /**
+     * Gets the {@link TetherNetwork} object of the connection.
+     *
+     * @return Returns a TetherNetwork object.
+     */
+    @NonNull
+    public TetherNetwork getTetherNetwork() {
+        return mTetherNetwork;
     }
 
     /**
@@ -178,12 +203,13 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
     public boolean equals(Object obj) {
         if (!(obj instanceof TetherNetworkConnectionStatus)) return false;
         TetherNetworkConnectionStatus other = (TetherNetworkConnectionStatus) obj;
-        return mStatus == other.getStatus();
+        return mStatus == other.getStatus()
+                && Objects.equals(mTetherNetwork, other.getTetherNetwork());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus);
+        return Objects.hash(mStatus, mTetherNetwork);
     }
 
     @Override
@@ -194,27 +220,39 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mStatus);
+        mTetherNetwork.writeToParcel(dest, flags);
         dest.writeBundle(mExtras);
+    }
+
+    /**
+     * Creates a {@link TetherNetworkConnectionStatus} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static TetherNetworkConnectionStatus readFromParcel(@NonNull Parcel in) {
+        return new TetherNetworkConnectionStatus(in.readInt(),
+                TetherNetwork.readFromParcel(in), in.readBundle());
     }
 
     @NonNull
     public static final Creator<TetherNetworkConnectionStatus> CREATOR = new Creator<>() {
-                @Override
-                public TetherNetworkConnectionStatus createFromParcel(Parcel in) {
-                    return new TetherNetworkConnectionStatus(in.readInt(),
-                            in.readBundle(getClass().getClassLoader()));
-                }
+        @Override
+        public TetherNetworkConnectionStatus createFromParcel(Parcel in) {
+            return readFromParcel(in);
+        }
 
-                @Override
-                public TetherNetworkConnectionStatus[] newArray(int size) {
-                    return new TetherNetworkConnectionStatus[size];
-                }
-            };
+        @Override
+        public TetherNetworkConnectionStatus[] newArray(int size) {
+            return new TetherNetworkConnectionStatus[size];
+        }
+    };
 
     @Override
     public String toString() {
         return new StringBuilder("TetherNetworkConnectionStatus[")
                 .append("status=").append(mStatus)
+                .append("tether network=").append(mTetherNetwork.toString())
                 .append("extras=").append(mExtras.toString())
                 .append("]").toString();
     }

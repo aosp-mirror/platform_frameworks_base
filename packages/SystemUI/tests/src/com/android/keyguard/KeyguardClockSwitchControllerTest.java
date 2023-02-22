@@ -241,7 +241,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
         mController.init();
         verify(mClockRegistry).registerClockChangeListener(listenerArgumentCaptor.capture());
 
-        listenerArgumentCaptor.getValue().onClockChanged();
+        listenerArgumentCaptor.getValue().onCurrentClockChanged();
         verify(mView, times(2)).setClock(mClockController, StatusBarState.SHADE);
         verify(mClockEventController, times(2)).setClock(mClockController);
     }

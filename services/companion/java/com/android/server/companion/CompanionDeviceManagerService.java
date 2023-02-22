@@ -726,6 +726,11 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public void enableSecureTransport(boolean enabled) {
+            mTransportManager.enableSecureTransport(enabled);
+        }
+
+        @Override
         public void notifyDeviceAppeared(int associationId) {
             if (DEBUG) Log.i(TAG, "notifyDevice_Appeared() id=" + associationId);
 

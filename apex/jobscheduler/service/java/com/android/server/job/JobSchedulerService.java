@@ -31,6 +31,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.BackgroundStartPrivileges;
 import android.app.IUidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
@@ -477,7 +478,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_EJ_GUARANTEE_MS:
-                        case Constants.KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS:
                         case Constants.KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS:
                         case Constants.KEY_RUNTIME_MIN_USER_INITIATED_GUARANTEE_MS:
@@ -574,8 +574,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 "runtime_free_quota_max_limit_ms";
         private static final String KEY_RUNTIME_MIN_GUARANTEE_MS = "runtime_min_guarantee_ms";
         private static final String KEY_RUNTIME_MIN_EJ_GUARANTEE_MS = "runtime_min_ej_guarantee_ms";
-        private static final String KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
-                "runtime_min_high_priority_guarantee_ms";
         private static final String KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
                 "runtime_min_data_transfer_guarantee_ms";
         private static final String KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS =
@@ -618,8 +616,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_MIN_GUARANTEE_MS = 10 * MINUTE_IN_MILLIS;
         @VisibleForTesting
         public static final long DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS = 3 * MINUTE_IN_MILLIS;
-        @VisibleForTesting
-        static final long DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = 5 * MINUTE_IN_MILLIS;
         public static final long DEFAULT_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
                 DEFAULT_RUNTIME_MIN_GUARANTEE_MS;
         public static final long DEFAULT_RUNTIME_DATA_TRANSFER_LIMIT_MS =
@@ -635,7 +631,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public static final long DEFAULT_RUNTIME_USER_INITIATED_DATA_TRANSFER_LIMIT_MS =
                 Math.min(Long.MAX_VALUE, DEFAULT_RUNTIME_USER_INITIATED_LIMIT_MS);
         static final boolean DEFAULT_PERSIST_IN_SPLIT_FILES = true;
-        private static final boolean DEFAULT_USE_TARE_POLICY = false;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -744,12 +739,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public long RUNTIME_MIN_EJ_GUARANTEE_MS = DEFAULT_RUNTIME_MIN_EJ_GUARANTEE_MS;
 
         /**
-         * The minimum amount of time we try to guarantee high priority jobs will run for.
-         */
-        public long RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS =
-                DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
-
-        /**
          * The minimum amount of time we try to guarantee normal data transfer jobs will run for.
          */
         public long RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS =
@@ -801,7 +790,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         /**
          * If true, use TARE policy for job limiting. If false, use quotas.
          */
-        public boolean USE_TARE_POLICY = DEFAULT_USE_TARE_POLICY;
+        public boolean USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER
+                && EconomyManager.DEFAULT_ENABLE_TARE_MODE == EconomyManager.ENABLED_MODE_ON;
 
         private void updateBatchingConstantsLocked() {
             MIN_READY_NON_ACTIVE_JOBS_COUNT = DeviceConfig.getInt(
@@ -894,7 +884,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS,
                     KEY_RUNTIME_MIN_GUARANTEE_MS, KEY_RUNTIME_MIN_EJ_GUARANTEE_MS,
-                    KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
                     KEY_RUNTIME_MIN_USER_INITIATED_DATA_TRANSFER_GUARANTEE_BUFFER_FACTOR,
                     KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
                     KEY_RUNTIME_DATA_TRANSFER_LIMIT_MS,
@@ -907,11 +896,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             RUNTIME_MIN_GUARANTEE_MS = Math.max(10 * MINUTE_IN_MILLIS,
                     properties.getLong(
                             KEY_RUNTIME_MIN_GUARANTEE_MS, DEFAULT_RUNTIME_MIN_GUARANTEE_MS));
-            // Make sure min runtime for high priority jobs is at least 4 minutes.
-            RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS = Math.max(4 * MINUTE_IN_MILLIS,
-                    properties.getLong(
-                            KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
-                            DEFAULT_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS));
             // Make sure min runtime for expedited jobs is at least one minute.
             RUNTIME_MIN_EJ_GUARANTEE_MS = Math.max(MINUTE_IN_MILLIS,
                     properties.getLong(
@@ -1007,8 +991,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             pw.print(KEY_RUNTIME_MIN_GUARANTEE_MS, RUNTIME_MIN_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_MIN_EJ_GUARANTEE_MS, RUNTIME_MIN_EJ_GUARANTEE_MS).println();
-            pw.print(KEY_RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
-                    RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS).println();
             pw.print(KEY_RUNTIME_FREE_QUOTA_MAX_LIMIT_MS, RUNTIME_FREE_QUOTA_MAX_LIMIT_MS)
                     .println();
             pw.print(KEY_RUNTIME_MIN_DATA_TRANSFER_GUARANTEE_MS,
@@ -1494,7 +1476,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     /* timingDelayConstraintSatisfied */ false,
                     /* isDeviceIdle */ false,
                     /* hasConnectivityConstraintSatisfied */ false,
-                    /* hasContentTriggerConstraintSatisfied */ false);
+                    /* hasContentTriggerConstraintSatisfied */ false,
+                    0);
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1912,7 +1895,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
                     cancelled.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                     cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
-                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+                    cancelled.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
+                    0);
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -3332,8 +3316,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
                         ? mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS
                         : Math.min(mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS, 5 * MINUTE_IN_MILLIS);
-            } else if (job.getEffectivePriority() >= JobInfo.PRIORITY_HIGH) {
-                return mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
             } else {
                 return mConstants.RUNTIME_MIN_GUARANTEE_MS;
             }
@@ -3743,7 +3725,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         // Enforce that only the app itself (or shared uid participant) can schedule a
         // job that runs one of the app's services, as well as verifying that the
         // named service properly requires the BIND_JOB_SERVICE permission
-        private void enforceValidJobRequest(int uid, JobInfo job) {
+        private void enforceValidJobRequest(int uid, int pid, JobInfo job) {
             final PackageManager pm = getContext()
                     .createContextAsUser(UserHandle.getUserHandleForUid(uid), 0)
                     .getPackageManager();
@@ -3766,6 +3748,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             } catch (NameNotFoundException e) {
                 throw new IllegalArgumentException(
                         "Tried to schedule job for non-existent component: " + service);
+            }
+            if (job.isPersisted() && !canPersistJobs(pid, uid)) {
+                throw new IllegalArgumentException("Requested job cannot be persisted without"
+                        + " holding android.permission.RECEIVE_BOOT_COMPLETED permission");
             }
         }
 
@@ -3841,6 +3827,25 @@ public class JobSchedulerService extends com.android.server.SystemService
                         return callingResult;
                     }
                 }
+
+                final int uid = sourceUid != -1 ? sourceUid : callingUid;
+                final int procState = mActivityManagerInternal.getUidProcessState(uid);
+                if (DEBUG) {
+                    Slog.d(TAG, "Uid " + uid + " proc state="
+                            + ActivityManager.procStateToString(procState));
+                }
+                if (procState != ActivityManager.PROCESS_STATE_TOP) {
+                    final BackgroundStartPrivileges bsp =
+                            mActivityManagerInternal.getBackgroundStartPrivileges(uid);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Uid " + uid + ": " + bsp);
+                    }
+                    if (!bsp.allowsBackgroundActivityStarts()) {
+                        Slog.e(TAG,
+                                "Uid " + uid + " not in a state to schedule user-initiated jobs");
+                        return JobScheduler.RESULT_FAILURE;
+                    }
+                }
             }
             if (jobWorkItem != null) {
                 jobWorkItem.enforceValidity(rejectNegativeNetworkEstimates);
@@ -3895,13 +3900,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             final int uid = Binder.getCallingUid();
             final int userId = UserHandle.getUserId(uid);
 
-            enforceValidJobRequest(uid, job);
-            if (job.isPersisted()) {
-                if (!canPersistJobs(pid, uid)) {
-                    throw new IllegalArgumentException("Error: requested job be persisted without"
-                            + " holding RECEIVE_BOOT_COMPLETED permission.");
-                }
-            }
+            enforceValidJobRequest(uid, pid, job);
 
             final int result = validateJob(job, uid, -1, null, null);
             if (result != JobScheduler.RESULT_SUCCESS) {
@@ -3928,9 +3927,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 Slog.d(TAG, "Enqueueing job: " + job.toString() + " work: " + work);
             }
             final int uid = Binder.getCallingUid();
+            final int pid = Binder.getCallingPid();
             final int userId = UserHandle.getUserId(uid);
 
-            enforceValidJobRequest(uid, job);
+            enforceValidJobRequest(uid, pid, job);
             if (work == null) {
                 throw new NullPointerException("work is null");
             }
@@ -4306,15 +4306,18 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure: immediately timeout currently executing jobs
-    int executeTimeoutCommand(PrintWriter pw, String pkgName, int userId,
-            @Nullable String namespace, boolean hasJobId, int jobId) {
+    int executeStopCommand(PrintWriter pw, String pkgName, int userId,
+            @Nullable String namespace, boolean hasJobId, int jobId,
+            int stopReason, int internalStopReason) {
         if (DEBUG) {
-            Slog.v(TAG, "executeTimeoutCommand(): " + pkgName + "/" + userId + " " + jobId);
+            Slog.v(TAG, "executeStopJobCommand(): " + pkgName + "/" + userId + " " + jobId
+                    + ": " + stopReason + "("
+                    + JobParameters.getInternalReasonCodeDescription(internalStopReason) + ")");
         }
 
         synchronized (mLock) {
-            final boolean foundSome = mConcurrencyManager.executeTimeoutCommandLocked(pw,
-                    pkgName, userId, namespace, hasJobId, jobId);
+            final boolean foundSome = mConcurrencyManager.executeStopCommandLocked(pw,
+                    pkgName, userId, namespace, hasJobId, jobId, stopReason, internalStopReason);
             if (!foundSome) {
                 pw.println("No matching executing jobs found.");
             }

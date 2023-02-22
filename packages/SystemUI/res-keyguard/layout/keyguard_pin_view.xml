@@ -54,7 +54,7 @@
             androidprv:layout_constraintEnd_toEndOf="parent"
             androidprv:layout_constraintStart_toStartOf="parent"
             androidprv:layout_constraintBottom_toTopOf="@id/key1"
-            androidprv:layout_constraintVertical_bias="1.0">
+            androidprv:layout_constraintVertical_bias="0.5">
 
             <com.android.keyguard.PasswordTextView
                 android:id="@+id/pinEntry"

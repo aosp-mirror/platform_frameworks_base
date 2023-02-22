@@ -151,6 +151,8 @@ import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.provider.DeviceConfigInitializer;
+import android.provider.DeviceConfigServiceManager;
 import android.provider.Downloads;
 import android.provider.FontsContract;
 import android.provider.Settings;
@@ -2249,12 +2251,18 @@ public final class ActivityThread extends ClientTransactionHandler
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case BIND_SERVICE:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceBind");
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceBind: "
+                                + String.valueOf(msg.obj));
+                    }
                     handleBindService((BindServiceData)msg.obj);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case UNBIND_SERVICE:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceUnbind");
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceUnbind: "
+                                + String.valueOf(msg.obj));
+                    }
                     handleUnbindService((BindServiceData)msg.obj);
                     schedulePurgeIdler();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -2268,13 +2276,19 @@ public final class ActivityThread extends ClientTransactionHandler
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case STOP_SERVICE:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop");
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceStop: "
+                                + String.valueOf(msg.obj));
+                    }
                     handleStopService((IBinder)msg.obj);
                     schedulePurgeIdler();
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
                 case TIMEOUT_SERVICE:
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceTimeout");
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceTimeout: "
+                                + String.valueOf(msg.obj));
+                    }
                     handleTimeoutService((IBinder) msg.obj, msg.arg1);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
                     break;
@@ -2286,7 +2300,12 @@ public final class ActivityThread extends ClientTransactionHandler
                     cci.context.performFinalCleanup(cci.who, cci.what);
                     break;
                 case GC_WHEN_IDLE:
-                    scheduleGcIdler();
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "gcWhenIdle");
+                    try {
+                        scheduleGcIdler();
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    }
                     break;
                 case DUMP_SERVICE:
                     handleDumpService((DumpComponentInfo)msg.obj);
@@ -2363,7 +2382,15 @@ public final class ActivityThread extends ClientTransactionHandler
                     handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
                     break;
                 case INSTALL_PROVIDER:
-                    handleInstallProvider((ProviderInfo) msg.obj);
+                    if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "providerInstall: "
+                                + String.valueOf(msg.obj));
+                    }
+                    try {
+                        handleInstallProvider((ProviderInfo) msg.obj);
+                    } finally {
+                        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    }
                     break;
                 case ON_NEW_ACTIVITY_OPTIONS:
                     Pair<IBinder, ActivityOptions> pair = (Pair<IBinder, ActivityOptions>) msg.obj;
@@ -8139,8 +8166,11 @@ public final class ActivityThread extends ClientTransactionHandler
         MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
-            BinderCallsStats.startForBluetooth(context); });
+            BinderCallsStats.startForBluetooth(context);
+        });
         NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
+
+        DeviceConfigInitializer.setDeviceConfigServiceManager(new DeviceConfigServiceManager());
     }
 
     private void purgePendingResources() {

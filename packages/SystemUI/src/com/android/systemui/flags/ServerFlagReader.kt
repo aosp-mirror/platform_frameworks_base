@@ -57,16 +57,16 @@ class ServerFlagReaderImpl @Inject constructor(
         override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
             if (isTestHarness) {
                 Log.w(TAG, "Ignore server flag changes in Test Harness mode.")
+                return
             }
             if (properties.namespace != namespace) {
                 return
             }
 
-
             for ((listener, flags) in listeners) {
                 propLoop@ for (propName in properties.keyset) {
                     for (flag in flags) {
-                        if (propName == getServerOverrideName(flag.id) || propName == flag.name) {
+                        if (propName == flag.name) {
                             listener.onChange(flag)
                             break@propLoop
                         }
@@ -102,10 +102,6 @@ class ServerFlagReaderImpl @Inject constructor(
             )
         }
         listeners.add(Pair(listener, flags))
-    }
-
-    private fun getServerOverrideName(flagId: Int): String {
-        return "flag_override_$flagId"
     }
 }
 

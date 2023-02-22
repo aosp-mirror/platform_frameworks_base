@@ -647,7 +647,7 @@
     <string-array name="avatar_image_descriptions"/>
 
     <!-- NOTE: if you change this, you must also add the corresponding scale key and lookup table to
-     frameworks/base/core/java/android/content/res/FontScaleLookupTableFactory.java -->
+     frameworks/base/core/java/android/content/res/FontScaleConverterFactory.java -->
     <string-array name="entryvalues_font_size" translatable="false">
         <item>0.85</item>
         <item>1.0</item>

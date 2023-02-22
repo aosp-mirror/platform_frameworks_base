@@ -279,7 +279,8 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testTranslucentActivitiesWhenUnfolding() {
         mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
         setUpDisplaySizeWithApp(2800, 1400);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(
+                true /* ignoreOrientationRequest */);
         mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 1.0f /*letterboxVerticalPositionMultiplier*/);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
@@ -290,18 +291,23 @@ public class SizeCompatTests extends WindowTestsBase {
                 .build();
         doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
+        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
 
         mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(mActivity);
 
         // Halffold
-        setFoldablePosture(translucentActivity, true /* isHalfFolded */, false /* isTabletop */);
+        setFoldablePosture(translucentActivity, true /* isHalfFolded */,
+                false /* isTabletop */);
         verify(mActivity).recomputeConfiguration();
+        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
         clearInvocations(mActivity);
 
         // Unfold
-        setFoldablePosture(translucentActivity, false /* isHalfFolded */, false /* isTabletop */);
+        setFoldablePosture(translucentActivity, false /* isHalfFolded */,
+                false /* isTabletop */);
         verify(mActivity).recomputeConfiguration();
+        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
     }
 
     @Test
@@ -516,7 +522,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         spyOn(mActivity.mLetterboxUiController);
         doReturn(true).when(mActivity.mLetterboxUiController)
-                .isSurfaceReadyAndVisible(any());
+                .isSurfaceVisible(any());
 
         assertTrue(mActivity.mLetterboxUiController.shouldShowLetterboxUi(
                 mActivity.findMainWindow()));
@@ -1445,6 +1451,65 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(1400, activity.getBounds().height());
         assertEquals(1400 / ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE_VALUE,
                 activity.getBounds().width(), 0.5);
+    }
+
+    @Test
+    public void testGetLetterboxInnerBounds_noScalingApplied() {
+        // Set up a display in portrait and ignoring orientation request.
+        final int dw = 1400;
+        final int dh = 2800;
+        setUpDisplaySizeWithApp(dw, dh);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        // Rotate display to landscape.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+
+        // Portrait fixed app without max aspect.
+        prepareUnresizable(mActivity, 0, SCREEN_ORIENTATION_LANDSCAPE);
+
+        // Need a window to call adjustBoundsForTaskbar with.
+        addWindowToActivity(mActivity);
+
+        // App should launch in fullscreen.
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertFalse(mActivity.inSizeCompatMode());
+
+        // Activity inherits max bounds from TaskDisplayArea.
+        assertMaxBoundsInheritDisplayAreaBounds();
+
+        // Rotate display to portrait.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_0);
+
+        final Rect rotatedDisplayBounds = new Rect(mActivity.mDisplayContent.getBounds());
+        final Rect rotatedActivityBounds = new Rect(mActivity.getBounds());
+        assertTrue(rotatedDisplayBounds.width() < rotatedDisplayBounds.height());
+
+        // App should be in size compat.
+        assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
+        assertScaled();
+        assertThat(mActivity.inSizeCompatMode()).isTrue();
+        assertActivityMaxBoundsSandboxed();
+
+
+	final int scale = dh / dw;
+
+        // App bounds should be dh / scale x dw / scale
+        assertEquals(dw, rotatedDisplayBounds.width());
+        assertEquals(dh, rotatedDisplayBounds.height());
+
+        assertEquals(dh / scale, rotatedActivityBounds.width());
+        assertEquals(dw / scale, rotatedActivityBounds.height());
+
+        // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+
+        assertEquals(dh / scale, letterboxDetails.getLetterboxInnerBounds().width());
+        assertEquals(dw / scale, letterboxDetails.getLetterboxInnerBounds().height());
+
+        assertEquals(dw, letterboxDetails.getLetterboxFullBounds().width());
+        assertEquals(dh, letterboxDetails.getLetterboxFullBounds().height());
     }
 
     @Test

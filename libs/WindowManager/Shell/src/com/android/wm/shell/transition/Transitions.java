@@ -20,6 +20,7 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -46,6 +47,7 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.ITransitionPlayer;
@@ -504,7 +506,9 @@ public class Transitions implements RemoteCallable<Transitions> {
             mObservers.get(i).onTransitionReady(transitionToken, info, t, finishT);
         }
 
-        if (!info.getRootLeash().isValid()) {
+        // Allow to notify keyguard un-occluding state to KeyguardService, which can happen while
+        // screen-off, so there might no visibility change involved.
+        if (!info.getRootLeash().isValid() && info.getType() != TRANSIT_KEYGUARD_UNOCCLUDE) {
             // Invalid root-leash implies that the transition is empty/no-op, so just do
             // housekeeping and return.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
@@ -624,13 +628,14 @@ public class Transitions implements RemoteCallable<Transitions> {
      * Gives every handler (in order) a chance to handle request until one consumes the transition.
      * @return the WindowContainerTransaction given by the handler which consumed the transition.
      */
-    public WindowContainerTransaction dispatchRequest(@NonNull IBinder transition,
-            @NonNull TransitionRequestInfo request, @Nullable TransitionHandler skip) {
+    public Pair<TransitionHandler, WindowContainerTransaction> dispatchRequest(
+            @NonNull IBinder transition, @NonNull TransitionRequestInfo request,
+            @Nullable TransitionHandler skip) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             if (mHandlers.get(i) == skip) continue;
             WindowContainerTransaction wct = mHandlers.get(i).handleRequest(transition, request);
             if (wct != null) {
-                return wct;
+                return new Pair<>(mHandlers.get(i), wct);
             }
         }
         return null;
@@ -695,24 +700,31 @@ public class Transitions implements RemoteCallable<Transitions> {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                 "Transition animation finished (abort=%b), notifying core %s", abort, transition);
         if (active.mStartT != null) {
-            // Applied by now, so close immediately. Do not set to null yet, though, since nullness
-            // is used later to disambiguate malformed transitions.
-            active.mStartT.close();
+            // Applied by now, so clear immediately to remove any references. Do not set to null
+            // yet, though, since nullness is used later to disambiguate malformed transitions.
+            active.mStartT.clear();
         }
         // Merge all relevant transactions together
         SurfaceControl.Transaction fullFinish = active.mFinishT;
         for (int iA = activeIdx + 1; iA < mActiveTransitions.size(); ++iA) {
             final ActiveTransition toMerge = mActiveTransitions.get(iA);
             if (!toMerge.mMerged) break;
-            // aborted transitions have no start/finish transactions
-            if (mActiveTransitions.get(iA).mStartT == null) break;
-            if (fullFinish == null) {
-                fullFinish = new SurfaceControl.Transaction();
-            }
             // Include start. It will be a no-op if it was already applied. Otherwise, we need it
             // to maintain consistent state.
-            fullFinish.merge(mActiveTransitions.get(iA).mStartT);
-            fullFinish.merge(mActiveTransitions.get(iA).mFinishT);
+            if (toMerge.mStartT != null) {
+                if (fullFinish == null) {
+                    fullFinish = toMerge.mStartT;
+                } else {
+                    fullFinish.merge(toMerge.mStartT);
+                }
+            }
+            if (toMerge.mFinishT != null) {
+                if (fullFinish == null) {
+                    fullFinish = toMerge.mFinishT;
+                } else {
+                    fullFinish.merge(toMerge.mFinishT);
+                }
+            }
         }
         if (fullFinish != null) {
             fullFinish.apply();

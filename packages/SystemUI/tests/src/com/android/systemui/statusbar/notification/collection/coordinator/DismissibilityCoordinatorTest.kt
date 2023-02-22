@@ -19,10 +19,9 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.app.Notification
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -48,15 +47,14 @@ class DismissibilityCoordinatorTest : SysuiTestCase() {
     private lateinit var onBeforeRenderListListener: OnBeforeRenderListListener
     private val keyguardStateController: KeyguardStateController = mock()
     private val pipeline: NotifPipeline = mock()
-    private val flagResolver: SystemUiSystemPropertiesFlags.FlagResolver = mock()
+    private val flags: NotifPipelineFlags = mock()
     private val dumpManager: DumpManager = mock()
 
     @Before
     fun setUp() {
-        setTestFlagResolver(flagResolver)
-        whenever(flagResolver.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)).thenReturn(true)
+        whenever(flags.allowDismissOngoing()).thenReturn(true)
 
-        dismissibilityProvider = NotificationDismissibilityProviderImpl(dumpManager)
+        dismissibilityProvider = NotificationDismissibilityProviderImpl(flags, dumpManager)
         coordinator = DismissibilityCoordinator(keyguardStateController, dismissibilityProvider)
         coordinator.attach(pipeline)
         onBeforeRenderListListener = withArgCaptor {
@@ -314,7 +312,7 @@ class DismissibilityCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testFeatureToggleOffNonDismissibleEntry() {
-        whenever(flagResolver.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)).thenReturn(false)
+        whenever(flags.allowDismissOngoing()).thenReturn(false)
         val entry =
             NotificationEntryBuilder()
                 .setTag("entry")
@@ -331,7 +329,7 @@ class DismissibilityCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testFeatureToggleOffOngoingNotifWhenPhoneIsLocked() {
-        whenever(flagResolver.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)).thenReturn(false)
+        whenever(flags.allowDismissOngoing()).thenReturn(false)
         whenever(keyguardStateController.isUnlocked).thenReturn(false)
         val entry =
             NotificationEntryBuilder()
@@ -349,7 +347,7 @@ class DismissibilityCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testFeatureToggleOffOngoingNotifWhenPhoneIsUnLocked() {
-        whenever(flagResolver.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)).thenReturn(false)
+        whenever(flags.allowDismissOngoing()).thenReturn(false)
         whenever(keyguardStateController.isUnlocked).thenReturn(true)
         val entry =
             NotificationEntryBuilder()

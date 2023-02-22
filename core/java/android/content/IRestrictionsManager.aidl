@@ -26,6 +26,7 @@ import android.os.PersistableBundle;
  */
 interface IRestrictionsManager {
     Bundle getApplicationRestrictions(in String packageName);
+    List<Bundle> getApplicationRestrictionsPerAdminForUser(int userId, in String packageName);
     boolean hasRestrictionsProvider();
     void requestPermission(in String packageName, in String requestType, in String requestId,
             in PersistableBundle requestData);

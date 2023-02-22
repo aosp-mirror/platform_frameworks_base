@@ -972,6 +972,9 @@ class PackageManagerShellCommand extends ShellCommand {
                         showUid = true;
                         uid = Integer.parseInt(getNextArgRequired());
                         break;
+                    case "--match-libraries":
+                        getFlags |= PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES;
+                        break;
                     default:
                         pw.println("Error: Unknown option: " + opt);
                         return -1;
@@ -2002,8 +2005,8 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    public int runForceDexOpt() throws RemoteException {
-        mInterface.forceDexOpt(getNextArgRequired());
+    public int runForceDexOpt() throws RemoteException, LegacyDexoptDisabledException {
+        mPm.legacyForceDexOpt(getNextArgRequired());
         return 0;
     }
 
@@ -4080,6 +4083,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --factory-only: only show system packages excluding updates");
         pw.println("      --uid UID: filter to only show packages with the given UID");
         pw.println("      --user USER_ID: only list packages belonging to the given user");
+        pw.println("      --match-libraries: include packages that declare static shared and SDK libraries");
         pw.println("");
         pw.println("  list permission-groups");
         pw.println("    Prints all known permission groups.");

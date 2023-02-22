@@ -349,9 +349,7 @@ package android.app {
   }
 
   public class NotificationManager {
-    method public void allowAssistantAdjustment(String);
     method public void cleanUpCallersAfter(long);
-    method public void disallowAssistantAdjustment(String);
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
@@ -514,6 +512,10 @@ package android.app {
 
 package android.app.admin {
 
+  public final class DeviceAdminAuthority extends android.app.admin.Authority {
+    field @NonNull public static final android.app.admin.DeviceAdminAuthority DEVICE_ADMIN_AUTHORITY;
+  }
+
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void clearOrganizationId();
@@ -544,6 +546,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, int);
     method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void setOverrideKeepProfilesRunning(boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void setProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean triggerDevicePolicyEngineMigration(boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
@@ -594,27 +597,41 @@ package android.app.admin {
     field @Deprecated public static final int STATUS_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
   }
 
+  public final class DpcAuthority extends android.app.admin.Authority {
+    field @NonNull public static final android.app.admin.DpcAuthority DPC_AUTHORITY;
+  }
+
   public final class FlagUnion extends android.app.admin.ResolutionMechanism<java.lang.Integer> {
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FlagUnion> CREATOR;
+    field @NonNull public static final android.app.admin.FlagUnion FLAG_UNION;
   }
 
   public final class MostRecent<V> extends android.app.admin.ResolutionMechanism<V> {
     ctor public MostRecent();
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRecent> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRecent<?>> CREATOR;
+    field @NonNull public static final android.app.admin.MostRecent<?> MOST_RECENT;
   }
 
   public final class MostRestrictive<V> extends android.app.admin.ResolutionMechanism<V> {
     method public int describeContents();
+    method @NonNull public java.util.List<V> getMostToLeastRestrictiveValues();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.MostRestrictive<?>> CREATOR;
   }
 
   public final class PolicyState<V> implements android.os.Parcelable {
     method @NonNull public android.app.admin.ResolutionMechanism<V> getResolutionMechanism();
+  }
+
+  public abstract class PolicyUpdateReceiver extends android.content.BroadcastReceiver {
+    field public static final String EXTRA_POLICY_BUNDLE_KEY = "android.app.admin.extra.POLICY_BUNDLE_KEY";
+    field public static final String EXTRA_POLICY_KEY = "android.app.admin.extra.POLICY_KEY";
+    field public static final String EXTRA_POLICY_TARGET_USER_ID = "android.app.admin.extra.POLICY_TARGET_USER_ID";
+    field public static final String EXTRA_POLICY_UPDATE_RESULT_KEY = "android.app.admin.extra.POLICY_UPDATE_RESULT_KEY";
   }
 
   public abstract class ResolutionMechanism<V> implements android.os.Parcelable {
@@ -629,12 +646,25 @@ package android.app.admin {
     method public int describeContents();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.StringSetUnion> CREATOR;
+    field @NonNull public static final android.app.admin.StringSetUnion STRING_SET_UNION;
+  }
+
+  public final class TargetUser {
+    field public static final int GLOBAL_USER_ID = -3; // 0xfffffffd
+    field public static final int LOCAL_USER_ID = -1; // 0xffffffff
+    field public static final int PARENT_USER_ID = -2; // 0xfffffffe
+    field public static final int UNKNOWN_USER_ID = -3; // 0xfffffffd
   }
 
   public final class TopPriority<V> extends android.app.admin.ResolutionMechanism<V> {
     method public int describeContents();
+    method @NonNull public java.util.List<android.app.admin.Authority> getHighestToLowestPriorityAuthorities();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.TopPriority<?>> CREATOR;
+  }
+
+  public final class UnknownAuthority extends android.app.admin.Authority {
+    field @NonNull public static final android.app.admin.UnknownAuthority UNKNOWN_AUTHORITY;
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
@@ -955,7 +985,7 @@ package android.content.pm {
     method public boolean isInitialized();
     method public boolean isMain();
     method public boolean isManagedProfile();
-    method public boolean isPrimary();
+    method @Deprecated public boolean isPrimary();
     method public boolean isProfile();
     method public boolean isQuietModeEnabled();
     method public boolean isRestricted();
@@ -972,7 +1002,7 @@ package android.content.pm {
     field public static final int FLAG_INITIALIZED = 16; // 0x10
     field public static final int FLAG_MAIN = 16384; // 0x4000
     field @Deprecated public static final int FLAG_MANAGED_PROFILE = 32; // 0x20
-    field public static final int FLAG_PRIMARY = 1; // 0x1
+    field @Deprecated public static final int FLAG_PRIMARY = 1; // 0x1
     field public static final int FLAG_PROFILE = 4096; // 0x1000
     field public static final int FLAG_QUIET_MODE = 128; // 0x80
     field @Deprecated public static final int FLAG_RESTRICTED = 8; // 0x8
@@ -1401,7 +1431,7 @@ package android.hardware.display {
     method public boolean areUserDisabledHdrTypesAllowed();
     method @RequiresPermission(android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE) public void clearGlobalUserPreferredDisplayMode();
     method @Nullable public android.view.Display.Mode getGlobalUserPreferredDisplayMode();
-    method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionMode();
+    method @NonNull public android.hardware.display.HdrConversionMode getHdrConversionModeSetting();
     method @NonNull public int[] getSupportedHdrOutputTypes();
     method @NonNull public int[] getUserDisabledHdrTypes();
     method public boolean isMinimalPostProcessingRequested(int);
@@ -1414,25 +1444,13 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final String DISPLAY_CATEGORY_REAR = "android.hardware.display.category.REAR";
+    field public static final String HDR_OUTPUT_CONTROL_FLAG = "enable_hdr_output_control";
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
     field public static final int SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY = 3; // 0x3
     field public static final int SWITCHING_TYPE_WITHIN_GROUPS = 1; // 0x1
     field public static final int VIRTUAL_DISPLAY_FLAG_OWN_FOCUS = 16384; // 0x4000
     field public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 512; // 0x200
-  }
-
-  public final class HdrConversionMode implements android.os.Parcelable {
-    ctor public HdrConversionMode(int, int);
-    ctor public HdrConversionMode(int);
-    method public int describeContents();
-    method public int getConversionMode();
-    method public int getPreferredHdrOutputType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.display.HdrConversionMode> CREATOR;
-    field public static final int HDR_CONVERSION_FORCE = 3; // 0x3
-    field public static final int HDR_CONVERSION_PASSTHROUGH = 1; // 0x1
-    field public static final int HDR_CONVERSION_SYSTEM = 2; // 0x2
   }
 
 }
@@ -1481,8 +1499,11 @@ package android.hardware.input {
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void removeKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
     method public void removeUniqueIdAssociation(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.SET_KEYBOARD_LAYOUT) public void setCurrentKeyboardLayoutForInputDevice(@NonNull android.hardware.input.InputDeviceIdentifier, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setMaximumObscuringOpacityForTouch(@FloatRange(from=0, to=1) float);
     field public static final long BLOCK_UNTRUSTED_TOUCHES = 158002302L; // 0x96aec7eL
+  }
+
+  public class InputSettings {
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void setMaximumObscuringOpacityForTouch(@NonNull android.content.Context, @FloatRange(from=0, to=1) float);
   }
 
 }
@@ -1548,7 +1569,7 @@ package android.hardware.soundtrigger {
   }
 
   public static class SoundTrigger.RecognitionEvent {
-    ctor public SoundTrigger.RecognitionEvent(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+    ctor public SoundTrigger.RecognitionEvent(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], long);
   }
 
 }
@@ -1717,27 +1738,29 @@ package android.media {
 
   public class AudioManager {
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int abandonAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void forceComputeCsdOnAllDevices(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void forceUseFrameworkMel(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceComputeCsdOnAllDevices(boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void forceUseFrameworkMel(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioRecord getCallDownlinkExtractionAudioRecord(@NonNull android.media.AudioFormat);
     method @NonNull @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public android.media.AudioTrack getCallUplinkInjectionAudioTrack(@NonNull android.media.AudioFormat);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public float getCsd();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getCsd();
     method @Nullable public static android.media.AudioDeviceInfo getDeviceInfoFromType(int);
     method @IntRange(from=0) @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public long getFadeOutDurationOnFocusLossMillis(@NonNull android.media.AudioAttributes);
     method @Nullable public static android.media.AudioHalVersionInfo getHalVersion();
     method public static final int[] getPublicStreamTypes();
     method @NonNull public java.util.List<java.lang.Integer> getReportedSurroundFormats();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public float getRs2Value();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public float getRs2Value();
     method public int getStreamMinVolumeInt(int);
     method @NonNull public java.util.Map<java.lang.Integer,java.lang.Boolean> getSurroundFormats();
     method public boolean hasRegisteredDynamicPolicy();
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public boolean isCsdEnabled();
-    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS}) public boolean isFullVolumeDevice();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isCsdEnabled();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MODIFY_AUDIO_ROUTING, android.Manifest.permission.QUERY_AUDIO_STATE, android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED}) public boolean isFullVolumeDevice();
     method @RequiresPermission(android.Manifest.permission.CALL_AUDIO_INTERCEPTION) public boolean isPstnCallAudioInterceptable();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public boolean isVolumeControlUsingVolumeGroups();
     method @RequiresPermission("android.permission.QUERY_AUDIO_STATE") public int requestAudioFocusForTest(@NonNull android.media.AudioFocusRequest, @NonNull String, int, int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void setCsd(float);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setCsd(float);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setNotifAliasRingForTest(boolean);
     method public void setRampingRingerEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SYSTEM_SETTINGS) public void setRs2Value(float);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED) public void setRs2Value(float);
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public void setTestDeviceConnectionState(@NonNull android.media.AudioDeviceAttributes, boolean);
   }
 
@@ -1925,6 +1948,7 @@ package android.net {
 package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
+    method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
   }
 
@@ -2753,7 +2777,7 @@ package android.service.voice {
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
     method public void overrideAvailability(int);
     method public void resetAvailability();
-    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], @NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+    method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, long, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[], @NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
   public static final class AlwaysOnHotwordDetector.EventPayload.Builder {
@@ -2765,6 +2789,7 @@ package android.service.voice {
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureSession(int);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setData(@NonNull byte[]);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setDataFormat(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHalEventReceivedMillis(long);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHotwordDetectedResult(@NonNull android.service.voice.HotwordDetectedResult);
     method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
@@ -2773,8 +2798,30 @@ package android.service.voice {
     field public static final boolean ENABLE_PROXIMITY_RESULT = true;
   }
 
+  public final class HotwordDetectionServiceFailure extends android.service.voice.DetectorFailure {
+    ctor public HotwordDetectionServiceFailure(int, @NonNull String);
+  }
+
+  public final class SoundTriggerFailure extends android.service.voice.DetectorFailure {
+    ctor public SoundTriggerFailure(int, @NonNull String);
+  }
+
+  public final class UnknownFailure extends android.service.voice.DetectorFailure {
+    ctor public UnknownFailure(@NonNull String);
+  }
+
   public final class VisibleActivityInfo implements android.os.Parcelable {
     ctor public VisibleActivityInfo(int, @NonNull android.os.IBinder);
+  }
+
+  public final class VisualQueryDetectionServiceFailure extends android.service.voice.DetectorFailure {
+    ctor public VisualQueryDetectionServiceFailure(int, @NonNull String);
+  }
+
+  public class VoiceInteractionService extends android.app.Service {
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
+    method @NonNull public final java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
   }
 
   public static class VoiceInteractionSession.ActivityId {
@@ -3265,6 +3312,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
+    method public static boolean hasWindowExtensionsEnabled();
     method public default void holdLock(android.os.IBinder, int);
     method public default boolean isGlobalKey(int);
     method public default boolean isTaskSnapshotSupported();
@@ -3283,7 +3331,6 @@ package android.view {
     method public final void setWindowContextToken(@NonNull android.os.IBinder);
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int FLAG_SLIPPERY = 536870912; // 0x20000000
-    field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40
     field public CharSequence accessibilityTitle;
     field public int privateFlags;
   }
@@ -3688,7 +3735,7 @@ package android.window {
 
   public final class TaskFragmentCreationParams implements android.os.Parcelable {
     method @NonNull public android.os.IBinder getFragmentToken();
-    method @NonNull public android.graphics.Rect getInitialBounds();
+    method @NonNull public android.graphics.Rect getInitialRelativeBounds();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizer();
     method @NonNull public android.os.IBinder getOwnerToken();
     method public int getWindowingMode();
@@ -3698,7 +3745,7 @@ package android.window {
   public static final class TaskFragmentCreationParams.Builder {
     ctor public TaskFragmentCreationParams.Builder(@NonNull android.window.TaskFragmentOrganizerToken, @NonNull android.os.IBinder, @NonNull android.os.IBinder);
     method @NonNull public android.window.TaskFragmentCreationParams build();
-    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialBounds(@NonNull android.graphics.Rect);
+    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialRelativeBounds(@NonNull android.graphics.Rect);
     method @NonNull public android.window.TaskFragmentCreationParams.Builder setWindowingMode(int);
   }
 

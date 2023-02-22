@@ -1817,6 +1817,13 @@ public class UserManager {
     public static final int REMOVE_RESULT_ALREADY_BEING_REMOVED = 2;
 
     /**
+     * A response code indicating that the specified user is removable.
+     *
+     * @hide
+     */
+    public static final int REMOVE_RESULT_USER_IS_REMOVABLE = 3;
+
+    /**
      * A response code from {@link #removeUserWhenPossible(UserHandle, boolean)} indicating that
      * an unknown error occurred that prevented the user from being removed or set as ephemeral.
      *
@@ -1871,6 +1878,7 @@ public class UserManager {
             REMOVE_RESULT_REMOVED,
             REMOVE_RESULT_DEFERRED,
             REMOVE_RESULT_ALREADY_BEING_REMOVED,
+            REMOVE_RESULT_USER_IS_REMOVABLE,
             REMOVE_RESULT_ERROR_USER_RESTRICTION,
             REMOVE_RESULT_ERROR_USER_NOT_FOUND,
             REMOVE_RESULT_ERROR_SYSTEM_USER,
@@ -3052,6 +3060,19 @@ public class UserManager {
     }
 
     /**
+     * See {@link com.android.server.pm.UserManagerInternal#getDisplayAssignedToUser(int)}.
+     *
+     * @hide
+     */
+    public int getDisplayIdAssignedToUser() {
+        try {
+            return mService.getDisplayIdAssignedToUser();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the context user is running in an "unlocked" state.
      * <p>
      * On devices with direct boot, a user is unlocked only after they've
@@ -3612,7 +3633,7 @@ public class UserManager {
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
-     * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION}.
+     * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION.
      *
      * @param name     the user's name
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
@@ -3686,7 +3707,7 @@ public class UserManager {
      *
      * <p>Requires {@link android.Manifest.permission#MANAGE_USERS}.
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
-     * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION}.
+     * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION.
      *
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
      * @return the {@link UserInfo} object for the created user.
@@ -3718,25 +3739,23 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createGuest(Context context) {
+    public @Nullable UserInfo createGuest(Context context) {
         try {
             final UserInfo guest = mService.createUserWithThrow(null, USER_TYPE_FULL_GUEST, 0);
-            if (guest != null) {
-                Settings.Secure.putStringForUser(context.getContentResolver(),
-                        Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
+            Settings.Secure.putStringForUser(context.getContentResolver(),
+                    Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
 
-                if (UserManager.isGuestUserAllowEphemeralStateChange()) {
-                    // Mark guest as (changeably) ephemeral if REMOVE_GUEST_ON_EXIT is 1
-                    // This is done so that a user via a UI controller can choose to
-                    // make a guest as ephemeral or not.
-                    // Settings.Global.REMOVE_GUEST_ON_EXIT holds the choice on what the guest state
-                    // should be, with default being ephemeral.
-                    boolean resetGuestOnExit = Settings.Global.getInt(context.getContentResolver(),
-                                                 Settings.Global.REMOVE_GUEST_ON_EXIT, 1) == 1;
+            if (UserManager.isGuestUserAllowEphemeralStateChange()) {
+                // Mark guest as (changeably) ephemeral if REMOVE_GUEST_ON_EXIT is 1
+                // This is done so that a user via a UI controller can choose to
+                // make a guest as ephemeral or not.
+                // Settings.Global.REMOVE_GUEST_ON_EXIT holds the choice on what the guest state
+                // should be, with default being ephemeral.
+                boolean resetGuestOnExit = Settings.Global.getInt(context.getContentResolver(),
+                                             Settings.Global.REMOVE_GUEST_ON_EXIT, 1) == 1;
 
-                    if (resetGuestOnExit && !guest.isEphemeral()) {
-                        setUserEphemeral(guest.id, true);
-                    }
+                if (resetGuestOnExit && !guest.isEphemeral()) {
+                    setUserEphemeral(guest.id, true);
                 }
             }
             return guest;
@@ -3855,7 +3874,7 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createProfileForUser(String name, @NonNull String userType,
+    public @Nullable UserInfo createProfileForUser(String name, @NonNull String userType,
             @UserInfoFlag int flags, @UserIdInt int userId) {
         return createProfileForUser(name, userType, flags, userId, null);
     }
@@ -3900,7 +3919,7 @@ public class UserManager {
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createProfileForUserEvenWhenDisallowed(String name,
+    public @Nullable UserInfo createProfileForUserEvenWhenDisallowed(String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int userId,
             String[] disallowedPackages) {
         try {
@@ -3931,11 +3950,9 @@ public class UserManager {
         try {
             final int parentUserId = mUserId;
             final UserInfo profile = mService.createRestrictedProfileWithThrow(name, parentUserId);
-            if (profile != null) {
-                final UserHandle parentUserHandle = UserHandle.of(parentUserId);
-                AccountManager.get(mContext).addSharedAccountsFromParentUser(parentUserHandle,
-                        UserHandle.of(profile.id));
-            }
+            final UserHandle parentUserHandle = UserHandle.of(parentUserId);
+            AccountManager.get(mContext).addSharedAccountsFromParentUser(parentUserHandle,
+                    UserHandle.of(profile.id));
             return profile;
         } catch (ServiceSpecificException e) {
             return null;
@@ -4372,11 +4389,16 @@ public class UserManager {
     }
 
     /**
-     * Returns information for Primary user.
+     * Returns information for Primary user (which in practice is the same as the System user).
      *
      * @return the Primary user, null if not found.
+     * @deprecated For the system user, call {@link #getUserInfo} on {@link UserHandle#USER_SYSTEM},
+     *             or just use {@link UserHandle#SYSTEM} or {@link UserHandle#USER_SYSTEM}.
+     *             For the designated MainUser, use {@link #getMainUser()}.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @Nullable UserInfo getPrimaryUser() {
         try {
@@ -5578,7 +5600,17 @@ public class UserManager {
      * if there are no saved restrictions.
      *
      * @see #KEY_RESTRICTIONS_PENDING
+     *
+     * @deprecated Use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
+     * possible for there to be multiple managing agents on the device with the ability to set
+     * restrictions. This API will only to return the restrictions set by device policy controllers
+     * (DPCs)
+     *
+     * @see DevicePolicyManager
      */
+    @Deprecated
     @WorkerThread
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public Bundle getApplicationRestrictions(String packageName) {
@@ -5591,8 +5623,12 @@ public class UserManager {
     }
 
     /**
+     * @deprecated Use
+     * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
+     *
      * @hide
      */
+    @Deprecated
     @WorkerThread
     public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {

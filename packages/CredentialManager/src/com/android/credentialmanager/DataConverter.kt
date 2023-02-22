@@ -473,8 +473,14 @@ class CreateFlowUtils {
                         createOptionsPairs.add(Pair(it, enabledProvider))
                     }
                 }
-                if (enabledProvider.remoteEntry != null) {
-                    remoteEntry = enabledProvider.remoteEntry!!
+                val currRemoteEntry = enabledProvider.remoteEntry
+                if (currRemoteEntry != null) {
+                    if (remoteEntry != null) {
+                        // There can only be at most one remote entry
+                        Log.d(Constants.LOG_TAG, "Found more than one remote entry.")
+                        return null
+                    }
+                    remoteEntry = currRemoteEntry
                 }
             }
             val initialScreenState = toCreateScreenState(
@@ -500,6 +506,7 @@ class CreateFlowUtils {
                     lastSeenProviderWithNonEmptyCreateOptions,
                     /*remoteEntry=*/remoteEntry
                 ),
+                remoteEntry = remoteEntry,
             )
         }
 

@@ -6226,6 +6226,61 @@ public final class PowerManagerService extends SystemService
             }
         }
 
+        @Override // Binder call
+        @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)
+        public void acquireLowPowerStandbyPorts(IBinder token,
+                List<LowPowerStandbyPortDescription> ports) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS,
+                    "acquireLowPowerStandbyPorts");
+
+            final int callingUid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mLowPowerStandbyController.acquireStandbyPorts(token, callingUid,
+                        PowerManager.LowPowerStandbyPortDescription.fromParcelable(ports));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        @RequiresPermission(android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS)
+        public void releaseLowPowerStandbyPorts(IBinder token) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.SET_LOW_POWER_STANDBY_PORTS,
+                    "releaseLowPowerStandbyPorts");
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mLowPowerStandbyController.releaseStandbyPorts(token);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        @RequiresPermission(anyOf = {
+                android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                android.Manifest.permission.DEVICE_POWER
+        })
+        public List<LowPowerStandbyPortDescription> getActiveLowPowerStandbyPorts() {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+                        "getActiveLowPowerStandbyPorts");
+            }
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return PowerManager.LowPowerStandbyPortDescription.toParcelable(
+                        mLowPowerStandbyController.getActiveStandbyPorts());
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
         /**
          * Gets the reason for the last time the phone had to reboot.
          *

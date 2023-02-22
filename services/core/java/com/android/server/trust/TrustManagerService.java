@@ -1760,8 +1760,12 @@ public class TrustManagerService extends SystemService {
         @Override
         public boolean isTrustUsuallyManaged(int userId) {
             super.isTrustUsuallyManaged_enforcePermission();
-
-            return isTrustUsuallyManagedInternal(userId);
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return isTrustUsuallyManagedInternal(userId);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
 
         @Override

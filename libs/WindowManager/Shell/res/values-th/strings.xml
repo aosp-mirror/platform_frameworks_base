@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ด้านบน 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ด้านบน 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"เต็มหน้าจอด้านล่าง"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"แยกไปทางซ้าย"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"แยกไปทางขวา"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"แยกไปด้านบน"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"แยกไปด้านล่าง"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"การใช้โหมดมือเดียว"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"หากต้องการออก ให้เลื่อนขึ้นจากด้านล่างของหน้าจอหรือแตะที่ใดก็ได้เหนือแอป"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"เริ่มโหมดมือเดียว"</string>
@@ -102,9 +98,19 @@
     <string name="close_button_text" msgid="2913281996024033299">"ปิด"</string>
     <string name="back_button_text" msgid="1469718707134137085">"กลับ"</string>
     <string name="handle_text" msgid="1766582106752184456">"แฮนเดิล"</string>
+    <!-- no translation found for app_icon_text (2823268023931811747) -->
+    <skip />
     <string name="fullscreen_text" msgid="1162316685217676079">"เต็มหน้าจอ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"โหมดเดสก์ท็อป"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"แยกหน้าจอ"</string>
     <string name="more_button_text" msgid="3655388105592893530">"เพิ่มเติม"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ล่องลอย"</string>
+    <!-- no translation found for select_text (5139083974039906583) -->
+    <skip />
+    <!-- no translation found for screenshot_text (1477704010087786671) -->
+    <skip />
+    <!-- no translation found for close_text (4986518933445178928) -->
+    <skip />
+    <!-- no translation found for collapse_menu_text (7515008122450342029) -->
+    <skip />
 </resources>

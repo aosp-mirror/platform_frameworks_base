@@ -367,6 +367,14 @@ public final class Choreographer {
     }
 
     /**
+     * Check if the sourced looper and the current looper are same.
+     * @hide
+     */
+    boolean isTheLooperSame(Looper looper) {
+        return mLooper == looper;
+    }
+
+    /**
      * The amount of time, in milliseconds, between each frame of the animation.
      * <p>
      * This is a requested time that the animation will attempt to honor, but the actual delay
@@ -1165,7 +1173,8 @@ public final class Choreographer {
          *
          * @param data The payload which includes frame information. Divide nanosecond values by
          *             {@code 1000000} to convert it to the {@link SystemClock#uptimeMillis()}
-         *             time base.
+         *             time base. {@code data} is not valid outside of {@code onVsync} and should
+         *             not be accessed outside the callback.
          * @see FrameCallback#doFrame
          **/
         void onVsync(@NonNull FrameData data);

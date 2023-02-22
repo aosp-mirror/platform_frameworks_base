@@ -1401,95 +1401,99 @@ public final class LoadedApk {
         if (mApplication != null) {
             return mApplication;
         }
-        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
 
-        synchronized (sApplications) {
-            final Application cached = sApplications.get(mPackageName);
-            if (cached != null) {
-                // Looks like this is always happening for the system server, because
-                // the LoadedApk created in systemMain() -> attach() isn't cached properly?
-                if (!"android".equals(mPackageName)) {
-                    Slog.wtfStack(TAG, "App instance already created for package=" + mPackageName
-                            + " instance=" + cached);
-                }
-                if (!allowDuplicateInstances) {
-                    mApplication = cached;
-                    return cached;
-                }
-                // Some apps intentionally call makeApplication() to create a new Application
-                // instance... Sigh...
-            }
-        }
 
-        Application app = null;
-
-        final String myProcessName = Process.myProcessName();
-        String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
-                myProcessName);
-        if (forceDefaultAppClass || (appClass == null)) {
-            appClass = "android.app.Application";
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "makeApplication");
         }
 
         try {
-            final java.lang.ClassLoader cl = getClassLoader();
-            if (!mPackageName.equals("android")) {
-                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
-                        "initializeJavaContextClassLoader");
-                initializeJavaContextClassLoader();
-                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-            }
-
-            // Rewrite the R 'constants' for all library apks.
-            SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
-                    false, false);
-            for (int i = 0, n = packageIdentifiers.size(); i < n; i++) {
-                final int id = packageIdentifiers.keyAt(i);
-                if (id == 0x01 || id == 0x7f) {
-                    continue;
-                }
-
-                rewriteRValues(cl, packageIdentifiers.valueAt(i), id);
-            }
-
-            ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
-            // The network security config needs to be aware of multiple
-            // applications in the same process to handle discrepancies
-            NetworkSecurityConfigProvider.handleNewApplication(appContext);
-            app = mActivityThread.mInstrumentation.newApplication(
-                    cl, appClass, appContext);
-            appContext.setOuterContext(app);
-        } catch (Exception e) {
-            if (!mActivityThread.mInstrumentation.onException(app, e)) {
-                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                throw new RuntimeException(
-                    "Unable to instantiate application " + appClass
-                    + " package " + mPackageName + ": " + e.toString(), e);
-            }
-        }
-        mActivityThread.mAllApplications.add(app);
-        mApplication = app;
-        if (!allowDuplicateInstances) {
             synchronized (sApplications) {
-                sApplications.put(mPackageName, app);
-            }
-        }
-
-        if (instrumentation != null) {
-            try {
-                instrumentation.callApplicationOnCreate(app);
-            } catch (Exception e) {
-                if (!instrumentation.onException(app, e)) {
-                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-                    throw new RuntimeException(
-                        "Unable to create application " + app.getClass().getName()
-                        + ": " + e.toString(), e);
+                final Application cached = sApplications.get(mPackageName);
+                if (cached != null) {
+                    // Looks like this is always happening for the system server, because
+                    // the LoadedApk created in systemMain() -> attach() isn't cached properly?
+                    if (!"android".equals(mPackageName)) {
+                        Slog.wtfStack(TAG, "App instance already created for package="
+                                + mPackageName + " instance=" + cached);
+                    }
+                    if (!allowDuplicateInstances) {
+                        mApplication = cached;
+                        return cached;
+                    }
+                    // Some apps intentionally call makeApplication() to create a new Application
+                    // instance... Sigh...
                 }
             }
+
+            Application app = null;
+
+            final String myProcessName = Process.myProcessName();
+            String appClass = mApplicationInfo.getCustomApplicationClassNameForProcess(
+                    myProcessName);
+            if (forceDefaultAppClass || (appClass == null)) {
+                appClass = "android.app.Application";
+            }
+
+            try {
+                final java.lang.ClassLoader cl = getClassLoader();
+                if (!mPackageName.equals("android")) {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                            "initializeJavaContextClassLoader");
+                    initializeJavaContextClassLoader();
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                }
+
+                // Rewrite the R 'constants' for all library apks.
+                SparseArray<String> packageIdentifiers = getAssets().getAssignedPackageIdentifiers(
+                        false, false);
+                for (int i = 0, n = packageIdentifiers.size(); i < n; i++) {
+                    final int id = packageIdentifiers.keyAt(i);
+                    if (id == 0x01 || id == 0x7f) {
+                        continue;
+                    }
+
+                    rewriteRValues(cl, packageIdentifiers.valueAt(i), id);
+                }
+
+                ContextImpl appContext = ContextImpl.createAppContext(mActivityThread, this);
+                // The network security config needs to be aware of multiple
+                // applications in the same process to handle discrepancies
+                NetworkSecurityConfigProvider.handleNewApplication(appContext);
+                app = mActivityThread.mInstrumentation.newApplication(
+                        cl, appClass, appContext);
+                appContext.setOuterContext(app);
+            } catch (Exception e) {
+                if (!mActivityThread.mInstrumentation.onException(app, e)) {
+                    throw new RuntimeException(
+                        "Unable to instantiate application " + appClass
+                        + " package " + mPackageName + ": " + e.toString(), e);
+                }
+            }
+            mActivityThread.mAllApplications.add(app);
+            mApplication = app;
+            if (!allowDuplicateInstances) {
+                synchronized (sApplications) {
+                    sApplications.put(mPackageName, app);
+                }
+            }
+
+            if (instrumentation != null) {
+                try {
+                    instrumentation.callApplicationOnCreate(app);
+                } catch (Exception e) {
+                    if (!instrumentation.onException(app, e)) {
+                        throw new RuntimeException(
+                            "Unable to create application " + app.getClass().getName()
+                            + ": " + e.toString(), e);
+                    }
+                }
+            }
+
+            return app;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
         }
-
-        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-
-        return app;
     }
 
     @UnsupportedAppUsage
@@ -1898,17 +1902,17 @@ public final class LoadedApk {
 
     @UnsupportedAppUsage
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
-            Context context, Handler handler, int flags) {
+            Context context, Handler handler, long flags) {
         return getServiceDispatcherCommon(c, context, handler, null, flags);
     }
 
     public final IServiceConnection getServiceDispatcher(ServiceConnection c,
-            Context context, Executor executor, int flags) {
+            Context context, Executor executor, long flags) {
         return getServiceDispatcherCommon(c, context, null, executor, flags);
     }
 
     private IServiceConnection getServiceDispatcherCommon(ServiceConnection c,
-            Context context, Handler handler, Executor executor, int flags) {
+            Context context, Handler handler, Executor executor, long flags) {
         synchronized (mServices) {
             LoadedApk.ServiceDispatcher sd = null;
             ArrayMap<ServiceConnection, LoadedApk.ServiceDispatcher> map = mServices.get(context);
@@ -2008,7 +2012,7 @@ public final class LoadedApk {
         private final Handler mActivityThread;
         private final Executor mActivityExecutor;
         private final ServiceConnectionLeaked mLocation;
-        private final int mFlags;
+        private final long mFlags;
 
         private RuntimeException mUnbindLocation;
 
@@ -2041,7 +2045,7 @@ public final class LoadedApk {
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ServiceDispatcher(ServiceConnection conn,
-                Context context, Handler activityThread, int flags) {
+                Context context, Handler activityThread, long flags) {
             mIServiceConnection = new InnerConnection(this);
             mConnection = conn;
             mContext = context;
@@ -2053,7 +2057,7 @@ public final class LoadedApk {
         }
 
         ServiceDispatcher(ServiceConnection conn,
-                Context context, Executor activityExecutor, int flags) {
+                Context context, Executor activityExecutor, long flags) {
             mIServiceConnection = new InnerConnection(this);
             mConnection = conn;
             mContext = context;
@@ -2109,7 +2113,7 @@ public final class LoadedApk {
             return mIServiceConnection;
         }
 
-        int getFlags() {
+        long getFlags() {
             return mFlags;
         }
 

@@ -266,8 +266,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENABLE_RESTRICTED_BUCKET,
                     Settings.Global.ENABLE_TARE,
-                    Settings.Global.ENABLE_TARE_ALARM_MANAGER,
-                    Settings.Global.ENABLE_TARE_JOB_SCHEDULER,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
@@ -666,7 +664,8 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.LOCK_SCREEN_STATE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
-                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED);
+                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
+                    Settings.Global.Wearable.SCREENSHOT_ENABLED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(

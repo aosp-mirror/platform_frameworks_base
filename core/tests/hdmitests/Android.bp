@@ -29,9 +29,11 @@ android_test {
         "androidx.test.rules",
         "frameworks-base-testutils",
         "guava-android-testlib",
+        "platform-test-annotations",
         "truth-prebuilt",
     ],
     libs: ["android.test.runner"],
     platform_apis: true,
     certificate: "platform",
+    test_suites: ["device-tests"],
 }

@@ -246,8 +246,17 @@ public class ServiceInfo extends ComponentInfo
 
     /**
      * Constant corresponding to {@code mediaProjection} in
-     * the {@link android.R.attr#foregroundServiceType} attribute.
-     * Managing a media projection session, e.g for screen recording or taking screenshots.
+     * the {@link android.R.attr#foregroundServiceType foregroundServiceType} attribute.
+     *
+     * <p>
+     * To capture through {@link android.media.projection.MediaProjection}, an app must start a
+     * foreground service with the type corresponding to this constant. This type should only be
+     * used for {@link android.media.projection.MediaProjection}. Capturing screen contents via
+     * {@link android.media.projection.MediaProjection#createVirtualDisplay(String, int, int, int,
+     * int, android.view.Surface, android.hardware.display.VirtualDisplay.Callback,
+     * android.os.Handler) createVirtualDisplay} conveniently allows recording, presenting screen
+     * contents into a meeting, taking screenshots, or several other scenarios.
+     * </p>
      *
      * <p>Starting foreground service with this type from apps targeting API level
      * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and later, will require permission
@@ -359,8 +368,8 @@ public class ServiceInfo extends ComponentInfo
      *   <li>App has a UID &lt; {@link android.os.Process#FIRST_APPLICATION_UID}</li>
      *   <li>App is on Doze allowlist</li>
      *   <li>Device is running in <a href="https://android.googlesource.com/platform/frameworks/base/+/master/packages/SystemUI/docs/demo_mode.md">Demo Mode</a></li>
-     *   <li><a href="https://source.android.com/devices/tech/admin/provision">Device owner app</a><li>
-     *   <li><a href="https://source.android.com/devices/tech/admin/managed-profiles">Profile owner apps</a><li>
+     *   <li><a href="https://source.android.com/devices/tech/admin/provision">Device owner app</a></li>
+     *   <li><a href="https://source.android.com/devices/tech/admin/managed-profiles">Profile owner apps</a></li>
      *   <li>Persistent apps</li>
      *   <li><a href="https://source.android.com/docs/core/connect/carrier">Carrier privileged apps</a></li>
      *   <li>Apps that have the {@code android.app.role.RoleManager#ROLE_EMERGENCY} role</li>

@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"Продовжити"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Інші опції"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Докладніше"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Показати пароль"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Сховати пароль"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Ключі доступу покращують безпеку"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Маючи ключі доступу, не потрібно створювати чи запам’ятовувати складні паролі"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Ключі доступу – це зашифровані цифрові ключі, які ви створюєте за допомогою відбитка пальця, фейс-контролю чи засобу розблокування екрана"</string>

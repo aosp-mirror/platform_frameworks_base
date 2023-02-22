@@ -22,6 +22,7 @@ import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.DEVICE_POLICY_SERVICE;
 import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_SYSTEM;
+import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_AUTOBIND;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -60,6 +61,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseSetArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
@@ -390,14 +392,18 @@ abstract public class ManagedServices {
             }
         }
 
+        final SparseSetArray<ComponentName> snoozingComponents;
         synchronized (mSnoozing) {
-            pw.println("    Snoozed " + getCaption() + "s ("
-                    + mSnoozing.size() + "):");
-            for (int i = 0; i < mSnoozing.size(); i++) {
-                pw.println("      User: " + mSnoozing.keyAt(i));
-                for (ComponentName name : mSnoozing.valuesAt(i)) {
-                    pw.println("        " + name.flattenToShortString());
-                }
+            snoozingComponents = new SparseSetArray<>(mSnoozing);
+        }
+        pw.println("    Snoozed " + getCaption() + "s ("
+                + snoozingComponents.size() + "):");
+        for (int i = 0; i < snoozingComponents.size(); i++) {
+            pw.println("      User: " + snoozingComponents.keyAt(i));
+            for (ComponentName name : snoozingComponents.valuesAt(i)) {
+                final ServiceInfo info = getServiceInfo(name, snoozingComponents.keyAt(i));
+                pw.println("        " + name.flattenToShortString() + (isAutobindAllowed(info) ? ""
+                        : " (META_DATA_DEFAULT_AUTOBIND=false)"));
             }
         }
     }
@@ -1432,28 +1438,30 @@ abstract public class ManagedServices {
             final int userId = componentsToBind.keyAt(i);
             final Set<ComponentName> add = componentsToBind.get(userId);
             for (ComponentName component : add) {
-                try {
-                    ServiceInfo info = mPm.getServiceInfo(component,
-                            PackageManager.GET_META_DATA
-                                    | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                            userId);
-                    if (info == null) {
-                        Slog.w(TAG, "Not binding " + getCaption() + " service " + component
-                                + ": service not found");
-                        continue;
-                    }
-                    if (!mConfig.bindPermission.equals(info.permission)) {
-                        Slog.w(TAG, "Not binding " + getCaption() + " service " + component
-                                + ": it does not require the permission " + mConfig.bindPermission);
-                        continue;
-                    }
-                    Slog.v(TAG,
-                            "enabling " + getCaption() + " for " + userId + ": " + component);
-                    registerService(info, userId);
-                } catch (RemoteException e) {
-                    e.rethrowFromSystemServer();
+                ServiceInfo info = getServiceInfo(component, userId);
+                if (info == null) {
+                    Slog.w(TAG, "Not binding " + getCaption() + " service " + component
+                            + ": service not found");
+                    continue;
                 }
+                if (!mConfig.bindPermission.equals(info.permission)) {
+                    Slog.w(TAG, "Not binding " + getCaption() + " service " + component
+                            + ": it does not require the permission " + mConfig.bindPermission);
+                    continue;
+                }
+                // Do not (auto)bind if service has meta-data to explicitly disallow it
+                if (!isAutobindAllowed(info) && !isBoundOrRebinding(component, userId)) {
+                    synchronized (mSnoozing) {
+                        Slog.d(TAG, "Not binding " + getCaption() + " service " + component
+                                + ": has META_DATA_DEFAULT_AUTOBIND = false");
+                        mSnoozing.add(userId, component);
+                    }
+                    continue;
+                }
+
+                Slog.v(TAG,
+                        "enabling " + getCaption() + " for " + userId + ": " + component);
+                registerService(info, userId);
             }
         }
     }
@@ -1620,6 +1628,12 @@ abstract public class ManagedServices {
         return mServicesBound.contains(servicesBindingTag);
     }
 
+    protected boolean isBoundOrRebinding(final ComponentName cn, final int userId) {
+        synchronized (mMutex) {
+            return isBound(cn, userId) || mServicesRebinding.contains(Pair.create(cn, userId));
+        }
+    }
+
     /**
      * Remove a service for the given user by ComponentName
      */
@@ -1716,6 +1730,27 @@ abstract public class ManagedServices {
         synchronized (mMutex) {
             mServicesBound.remove(Pair.create(component, userId));
         }
+    }
+
+    private ServiceInfo getServiceInfo(ComponentName component, int userId) {
+        try {
+            return mPm.getServiceInfo(component,
+                    PackageManager.GET_META_DATA
+                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                    userId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return null;
+    }
+
+    private boolean isAutobindAllowed(ServiceInfo serviceInfo) {
+        if (serviceInfo != null && serviceInfo.metaData != null && serviceInfo.metaData.containsKey(
+                META_DATA_DEFAULT_AUTOBIND)) {
+            return serviceInfo.metaData.getBoolean(META_DATA_DEFAULT_AUTOBIND, true);
+        }
+        return true;
     }
 
     public class ManagedServiceInfo implements IBinder.DeathRecipient {

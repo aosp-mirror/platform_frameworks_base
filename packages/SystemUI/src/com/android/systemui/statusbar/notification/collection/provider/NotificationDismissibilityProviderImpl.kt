@@ -17,11 +17,10 @@
 package com.android.systemui.statusbar.notification.collection.provider
 
 import androidx.annotation.VisibleForTesting
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags.ALLOW_DISMISS_ONGOING
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.withIncreasedIndent
@@ -29,7 +28,9 @@ import java.io.PrintWriter
 import javax.inject.Inject
 
 @SysUISingleton
-class NotificationDismissibilityProviderImpl @Inject constructor(dumpManager: DumpManager) :
+class NotificationDismissibilityProviderImpl
+@Inject
+constructor(private val notifPipelineFlags: NotifPipelineFlags, dumpManager: DumpManager) :
     NotificationDismissibilityProvider, Dumpable {
 
     init {
@@ -42,8 +43,7 @@ class NotificationDismissibilityProviderImpl @Inject constructor(dumpManager: Du
         private set
 
     override fun isDismissable(entry: NotificationEntry): Boolean {
-        // TODO(b/268380968): inject FlagResolver
-        return if (SystemUiSystemPropertiesFlags.getResolver().isEnabled(ALLOW_DISMISS_ONGOING)) {
+        return if (notifPipelineFlags.allowDismissOngoing()) {
             entry.key !in nonDismissableEntryKeys
         } else {
             entry.legacyIsDismissableRecursive()

@@ -265,6 +265,7 @@
     <uses-permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS" />
     <uses-permission android:name="android.permission.MANAGE_APP_PREDICTIONS" />
     <uses-permission android:name="android.permission.MANAGE_LOW_POWER_STANDBY" />
+    <uses-permission android:name="android.permission.SET_LOW_POWER_STANDBY_PORTS" />
     <uses-permission android:name="android.permission.MANAGE_SEARCH_UI" />
     <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
     <uses-permission android:name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
@@ -275,6 +276,7 @@
     <uses-permission android:name="android.permission.SET_TIME_ZONE" />
     <uses-permission android:name="android.permission.DISABLE_HIDDEN_API_CHECKS" />
     <uses-permission android:name="android.permission.MANAGE_ROLE_HOLDERS" />
+    <uses-permission android:name="android.permission.MANAGE_DEFAULT_APPLICATIONS" />
     <uses-permission android:name="android.permission.BYPASS_ROLE_QUALIFICATION" />
     <uses-permission android:name="android.permission.OBSERVE_ROLE_HOLDERS" />
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
@@ -655,7 +657,7 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_ROUTING" />
 
     <!-- Permission required for CTS test - SoundDoseHelperTest -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SYSTEM_SETTINGS" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED" />
 
     <!-- Permission required for CTS test - CtsAmbientContextDetectionServiceDeviceTest -->
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_CONTEXT_EVENT" />
@@ -816,6 +818,9 @@
 
     <!-- Permission required for CTS test - ActivityCaptureCallbackTests -->
     <uses-permission android:name="android.permission.DETECT_SCREEN_CAPTURE" />
+
+    <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
+    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

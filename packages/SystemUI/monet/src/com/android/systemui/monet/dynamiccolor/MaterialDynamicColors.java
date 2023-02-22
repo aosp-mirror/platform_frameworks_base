@@ -16,6 +16,8 @@
 
 package com.android.systemui.monet.dynamiccolor;
 
+import android.os.SystemProperties;
+
 import com.android.systemui.monet.dislike.DislikeAnalyzer;
 import com.android.systemui.monet.dynamiccolor.DynamicColor;
 import com.android.systemui.monet.dynamiccolor.ToneDeltaConstraint;
@@ -28,7 +30,8 @@ import com.android.systemui.monet.scheme.Variant;
 /** Named colors, otherwise known as tokens, or roles, in the Material Design system. */
 public final class MaterialDynamicColors {
     private static final double CONTAINER_ACCENT_TONE_DELTA = 15.0;
-
+    private static final boolean IS_FIDELITY_ON_ALL_VARIANTS = SystemProperties.getBoolean(
+            "persist.fidelity_on_theme_variants", false);
 
     private MaterialDynamicColors() {
     }
@@ -252,49 +255,49 @@ public final class MaterialDynamicColors {
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor primaryFixedDarker =
+    public static final DynamicColor primaryFixedDim =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onPrimaryFixed =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 10.0,
-                    (s) -> primaryFixedDarker);
+                    (s) -> primaryFixedDim);
 
     public static final DynamicColor onPrimaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.primaryPalette, (s) -> 30.0,
-                    (s) -> primaryFixedDarker);
+                    (s) -> primaryFixedDim);
 
     public static final DynamicColor secondaryFixed =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor secondaryFixedDarker =
+    public static final DynamicColor secondaryFixedDim =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onSecondaryFixed =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 10.0,
-                    (s) -> secondaryFixedDarker);
+                    (s) -> secondaryFixedDim);
 
     public static final DynamicColor onSecondaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.secondaryPalette, (s) -> 30.0,
-                    (s) -> secondaryFixedDarker);
+                    (s) -> secondaryFixedDim);
 
     public static final DynamicColor tertiaryFixed =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 90.0,
                     (s) -> highestSurface(s));
 
-    public static final DynamicColor tertiaryFixedDarker =
+    public static final DynamicColor tertiaryFixedDim =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 80.0,
                     (s) -> highestSurface(s));
 
     public static final DynamicColor onTertiaryFixed =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 10.0,
-                    (s) -> tertiaryFixedDarker);
+                    (s) -> tertiaryFixedDim);
 
     public static final DynamicColor onTertiaryFixedVariant =
             DynamicColor.fromPalette((s) -> s.tertiaryPalette, (s) -> 30.0,
-                    (s) -> tertiaryFixedDarker);
+                    (s) -> tertiaryFixedDim);
 
     /**
      * These colors were present in Android framework before Android U, and used by MDC controls.
@@ -392,6 +395,9 @@ public final class MaterialDynamicColors {
     }
 
     private static boolean isFidelity(DynamicScheme scheme) {
+        if (IS_FIDELITY_ON_ALL_VARIANTS) {
+            return scheme.variant != Variant.NEUTRAL && scheme.variant != Variant.MONOCHROME;
+        }
         return scheme.variant == Variant.FIDELITY || scheme.variant == Variant.CONTENT;
     }
 

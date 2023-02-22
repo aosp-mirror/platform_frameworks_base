@@ -19,6 +19,7 @@ package android.app.admin;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 
 /**
@@ -31,11 +32,18 @@ import android.os.Parcel;
 public final class DpcAuthority extends Authority {
 
     /**
+     * Object representing a DPC authority.
+     *
      * @hide
      */
+    @NonNull
+    @TestApi
     public static final DpcAuthority DPC_AUTHORITY = new DpcAuthority();
 
-    private DpcAuthority() {}
+    /**
+     * Creates an authority that represents a DPC admin.
+     */
+    public DpcAuthority() {}
 
     @Override
     public String toString() {
@@ -44,12 +52,13 @@ public final class DpcAuthority extends Authority {
 
     @Override
     public boolean equals(@Nullable Object o) {
-        return super.equals(o);
+        if (this == o) return true;
+        return o != null && getClass() == o.getClass();
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return 0;
     }
 
     @Override
@@ -65,7 +74,7 @@ public final class DpcAuthority extends Authority {
             new Creator<DpcAuthority>() {
                 @Override
                 public DpcAuthority createFromParcel(Parcel source) {
-                    return new DpcAuthority();
+                    return DPC_AUTHORITY;
                 }
 
                 @Override

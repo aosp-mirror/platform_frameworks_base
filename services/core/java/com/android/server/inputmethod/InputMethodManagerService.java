@@ -236,6 +236,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_FINISH_HANDWRITING = 1110;
     private static final int MSG_REMOVE_HANDWRITING_WINDOW = 1120;
 
+    private static final int MSG_PREPARE_HANDWRITING_DELEGATION = 1130;
+
     private static final int MSG_SET_INTERACTIVE = 3030;
 
     private static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
@@ -2689,6 +2691,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @AnyThread
+    void schedulePrepareStylusHandwritingDelegation(
+            @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
+        mHandler.obtainMessage(
+                MSG_PREPARE_HANDWRITING_DELEGATION,
+                new Pair<>(delegatePackageName, delegatorPackageName)).sendToTarget();
+    }
+
+    @AnyThread
     void scheduleRemoveStylusHandwritingWindow() {
         mHandler.obtainMessage(MSG_REMOVE_HANDWRITING_WINDOW).sendToTarget();
     }
@@ -3304,6 +3314,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     "InputMethodManagerService#startStylusHandwriting");
             int uid = Binder.getCallingUid();
             synchronized (ImfLock.class) {
+                mHwController.clearPendingHandwritingDelegation();
                 if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting",
                         null /* statsToken */)) {
                     return;
@@ -3331,6 +3342,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 "There is no ongoing stylus gesture to start stylus handwriting.");
                         return;
                     }
+                    if (mHwController.hasOngoingStylusHandwritingSession()) {
+                        // prevent duplicate calls to startStylusHandwriting().
+                        Slog.e(TAG,
+                                "Stylus handwriting session is already ongoing."
+                                        + " Ignoring startStylusHandwriting().");
+                        return;
+                    }
                     if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
                     final IInputMethodInvoker curMethod = getCurMethodLocked();
                     if (curMethod != null) {
@@ -3343,6 +3361,68 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
+    }
+
+    @Override
+    public void prepareStylusHandwritingDelegation(
+            @NonNull IInputMethodClient client,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        if (!verifyClientAndPackageMatch(client, delegatorPackageName)) {
+            Slog.w(TAG, "prepareStylusHandwritingDelegation() fail");
+            throw new IllegalArgumentException("Delegator doesn't match Uid");
+        }
+        schedulePrepareStylusHandwritingDelegation(delegatePackageName, delegatorPackageName);
+    }
+
+    @Override
+    public boolean acceptStylusHandwritingDelegation(
+            @NonNull IInputMethodClient client,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        if (!verifyDelegator(client, delegatePackageName, delegatorPackageName)) {
+            return false;
+        }
+
+        startStylusHandwriting(client);
+        return true;
+    }
+
+    private boolean verifyClientAndPackageMatch(
+            @NonNull IInputMethodClient client, @NonNull String packageName) {
+        ClientState cs;
+        synchronized (ImfLock.class) {
+            cs = mClients.get(client.asBinder());
+        }
+        if (cs == null) {
+            throw new IllegalArgumentException("unknown client " + client.asBinder());
+        }
+        return InputMethodUtils.checkIfPackageBelongsToUid(
+                mPackageManagerInternal, cs.mUid, packageName);
+    }
+
+    private boolean verifyDelegator(
+            @NonNull IInputMethodClient client,
+            @NonNull String delegatePackageName,
+            @NonNull String delegatorPackageName) {
+        if (!verifyClientAndPackageMatch(client, delegatePackageName)) {
+            Slog.w(TAG, "Delegate package does not belong to the same user. Ignoring"
+                    + " startStylusHandwriting");
+            return false;
+        }
+        synchronized (ImfLock.class) {
+            if (!delegatorPackageName.equals(mHwController.getDelegatorPackageName())) {
+                Slog.w(TAG,
+                        "Delegator package does not match. Ignoring startStylusHandwriting");
+                return false;
+            }
+            if (!delegatePackageName.equals(mHwController.getDelegatePackageName())) {
+                Slog.w(TAG,
+                        "Delegate package does not match. Ignoring startStylusHandwriting");
+                return false;
+            }
+        }
+        return true;
     }
 
     @BinderThread
@@ -4549,19 +4629,23 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private void applyImeVisibility(IBinder token, IBinder windowToken, boolean setVisible,
             @Nullable ImeTracker.Token statsToken) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
-                ImeTracker.forLogging().onFailed(statsToken,
-                        ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
-                return;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
+            synchronized (ImfLock.class) {
+                if (!calledWithValidTokenLocked(token)) {
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
+                    return;
+                }
+                final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(
+                        windowToken);
+                mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
+                        setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
+                                : ImeVisibilityStateComputer.STATE_HIDE_IME);
             }
-            final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(windowToken);
-            mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
-                    setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
-                            : ImeVisibilityStateComputer.STATE_HIDE_IME);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @BinderThread
@@ -4632,39 +4716,45 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private void hideMySoftInput(@NonNull IBinder token, int flags,
             @SoftInputShowHideReason int reason) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
-                return;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
+            synchronized (ImfLock.class) {
+                if (!calledWithValidTokenLocked(token)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    hideCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
+                            null /* resultReceiver */, reason);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                hideCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
-                        null /* resultReceiver */, reason);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @BinderThread
     private void showMySoftInput(@NonNull IBinder token, int flags) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
-                return;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
+            synchronized (ImfLock.class) {
+                if (!calledWithValidTokenLocked(token)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    showCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
+                            null /* resultReceiver */,
+                            SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                showCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
-                        null /* resultReceiver */,
-                        SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @VisibleForTesting
@@ -4842,6 +4932,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             }
+            case MSG_PREPARE_HANDWRITING_DELEGATION:
+                synchronized (ImfLock.class) {
+                    String delegate = (String) ((Pair) msg.obj).first;
+                    String delegator = (String) ((Pair) msg.obj).second;
+                    mHwController.prepareStylusHandwritingDelegation(delegate, delegator);
+                }
+                return true;
             case MSG_START_HANDWRITING:
                 synchronized (ImfLock.class) {
                     IInputMethodInvoker curMethod = getCurMethodLocked();

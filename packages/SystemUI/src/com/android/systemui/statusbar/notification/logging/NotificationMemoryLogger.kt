@@ -20,6 +20,7 @@ package com.android.systemui.statusbar.notification.logging
 import android.app.StatsManager
 import android.util.Log
 import android.util.StatsEvent
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -143,67 +144,70 @@ constructor(
         runBlocking(mainDispatcher) {
             traceSection("NML#getNotifications") { notificationPipeline.allNotifs }
         }
-
-    /** Aggregates memory usage data by package and style, returning sums. */
-    private fun aggregateMemoryUsageData(
-        notificationMemoryUse: List<NotificationMemoryUsage>
-    ): Map<Pair<String, Int>, NotificationMemoryUseAtomBuilder> {
-        return notificationMemoryUse
-            .groupingBy { Pair(it.packageName, it.objectUsage.style) }
-            .aggregate {
-                _,
-                accumulator: NotificationMemoryUseAtomBuilder?,
-                element: NotificationMemoryUsage,
-                first ->
-                val use =
-                    if (first) {
-                        NotificationMemoryUseAtomBuilder(element.uid, element.objectUsage.style)
-                    } else {
-                        accumulator!!
-                    }
-
-                use.count++
-                // If the views of the notification weren't inflated, the list of memory usage
-                // parameters will be empty.
-                if (element.viewUsage.isNotEmpty()) {
-                    use.countWithInflatedViews++
-                }
-
-                use.smallIconObject += element.objectUsage.smallIcon
-                if (element.objectUsage.smallIcon > 0) {
-                    use.smallIconBitmapCount++
-                }
-
-                use.largeIconObject += element.objectUsage.largeIcon
-                if (element.objectUsage.largeIcon > 0) {
-                    use.largeIconBitmapCount++
-                }
-
-                use.bigPictureObject += element.objectUsage.bigPicture
-                if (element.objectUsage.bigPicture > 0) {
-                    use.bigPictureBitmapCount++
-                }
-
-                use.extras += element.objectUsage.extras
-                use.extenders += element.objectUsage.extender
-
-                // Use totals count which are more accurate when aggregated
-                // in this manner.
-                element.viewUsage
-                    .firstOrNull { vu -> vu.viewType == ViewType.TOTAL }
-                    ?.let {
-                        use.smallIconViews += it.smallIcon
-                        use.largeIconViews += it.largeIcon
-                        use.systemIconViews += it.systemIcons
-                        use.styleViews += it.style
-                        use.customViews += it.style
-                        use.softwareBitmaps += it.softwareBitmapsPenalty
-                    }
-
-                return@aggregate use
-            }
-    }
-
-    /** Rounds the passed value to the nearest KB - e.g. 700B rounds to 1KB. */
-    private fun toKb(value: Int): Int = (value.toFloat() / 1024f).roundToInt()
 }
+
+/** Aggregates memory usage data by package and style, returning sums. */
+@VisibleForTesting
+internal fun aggregateMemoryUsageData(
+    notificationMemoryUse: List<NotificationMemoryUsage>
+): Map<Pair<String, Int>, NotificationMemoryLogger.NotificationMemoryUseAtomBuilder> {
+    return notificationMemoryUse
+        .groupingBy { Pair(it.packageName, it.objectUsage.style) }
+        .aggregate {
+            _,
+            accumulator: NotificationMemoryLogger.NotificationMemoryUseAtomBuilder?,
+            element: NotificationMemoryUsage,
+            first ->
+            val use =
+                if (first) {
+                    NotificationMemoryLogger.NotificationMemoryUseAtomBuilder(
+                        element.uid,
+                        element.objectUsage.style
+                    )
+                } else {
+                    accumulator!!
+                }
+
+            use.count++
+            // If the views of the notification weren't inflated, the list of memory usage
+            // parameters will be empty.
+            if (element.viewUsage.isNotEmpty()) {
+                use.countWithInflatedViews++
+            }
+
+            use.smallIconObject += element.objectUsage.smallIcon
+            if (element.objectUsage.smallIcon > 0) {
+                use.smallIconBitmapCount++
+            }
+
+            use.largeIconObject += element.objectUsage.largeIcon
+            if (element.objectUsage.largeIcon > 0) {
+                use.largeIconBitmapCount++
+            }
+
+            use.bigPictureObject += element.objectUsage.bigPicture
+            if (element.objectUsage.bigPicture > 0) {
+                use.bigPictureBitmapCount++
+            }
+
+            use.extras += element.objectUsage.extras
+            use.extenders += element.objectUsage.extender
+
+            // Use totals count which are more accurate when aggregated
+            // in this manner.
+            element.viewUsage
+                .firstOrNull { vu -> vu.viewType == ViewType.TOTAL }
+                ?.let {
+                    use.smallIconViews += it.smallIcon
+                    use.largeIconViews += it.largeIcon
+                    use.systemIconViews += it.systemIcons
+                    use.styleViews += it.style
+                    use.customViews += it.customViews
+                    use.softwareBitmaps += it.softwareBitmapsPenalty
+                }
+
+            return@aggregate use
+        }
+}
+/** Rounds the passed value to the nearest KB - e.g. 700B rounds to 1KB. */
+private fun toKb(value: Int): Int = (value.toFloat() / 1024f).roundToInt()

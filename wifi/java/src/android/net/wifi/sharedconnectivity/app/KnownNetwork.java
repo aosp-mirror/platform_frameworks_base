@@ -228,15 +228,25 @@ public final class KnownNetwork implements Parcelable {
         dest.writeInt(mNetworkSource);
         dest.writeString(mSsid);
         dest.writeIntArray(mSecurityTypes);
-        dest.writeTypedObject(mDeviceInfo, 0);
+        mDeviceInfo.writeToParcel(dest, flags);
+    }
+
+    /**
+     * Creates a {@link KnownNetwork} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static KnownNetwork readFromParcel(@NonNull Parcel in) {
+        return new KnownNetwork(in.readInt(), in.readString(), in.createIntArray(),
+                DeviceInfo.readFromParcel(in));
     }
 
     @NonNull
     public static final Creator<KnownNetwork> CREATOR = new Creator<>() {
         @Override
         public KnownNetwork createFromParcel(Parcel in) {
-            return new KnownNetwork(in.readInt(), in.readString(), in.createIntArray(),
-                    in.readTypedObject(DeviceInfo.CREATOR));
+            return readFromParcel(in);
         }
 
         @Override

@@ -16,10 +16,18 @@
 
 package com.android.server.pm;
 
+import android.content.pm.PackageManager;
+
 final class ReconcileFailure extends PackageManagerException {
-    ReconcileFailure(String message) {
-        super("Reconcile failed: " + message);
+    public static ReconcileFailure ofInternalError(String message, int internalErrorCode) {
+        return new ReconcileFailure(message, internalErrorCode);
     }
+
+    private ReconcileFailure(String message, int internalErrorCode) {
+        super(PackageManager.INSTALL_FAILED_INTERNAL_ERROR, "Reconcile failed: " + message,
+                internalErrorCode);
+    }
+
     ReconcileFailure(int reason, String message) {
         super(reason, "Reconcile failed: " + message);
     }

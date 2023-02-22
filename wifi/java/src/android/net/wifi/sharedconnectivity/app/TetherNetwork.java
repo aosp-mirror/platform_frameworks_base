@@ -328,7 +328,7 @@ public final class TetherNetwork implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mDeviceId);
-        dest.writeTypedObject(mDeviceInfo, 0);
+        mDeviceInfo.writeToParcel(dest, flags);
         dest.writeInt(mNetworkType);
         dest.writeString(mNetworkName);
         dest.writeString(mHotspotSsid);
@@ -336,14 +336,23 @@ public final class TetherNetwork implements Parcelable {
         dest.writeIntArray(mHotspotSecurityTypes);
     }
 
+    /**
+     * Creates a {@link TetherNetwork} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static TetherNetwork readFromParcel(@NonNull Parcel in) {
+        return new TetherNetwork(in.readLong(), DeviceInfo.readFromParcel(in),
+                in.readInt(), in.readString(), in.readString(), in.readString(),
+                in.createIntArray());
+    }
+
     @NonNull
     public static final Creator<TetherNetwork> CREATOR = new Creator<>() {
         @Override
         public TetherNetwork createFromParcel(Parcel in) {
-            return new TetherNetwork(in.readLong(), in.readTypedObject(
-                    android.net.wifi.sharedconnectivity.app.DeviceInfo.CREATOR),
-                    in.readInt(), in.readString(), in.readString(), in.readString(),
-                    in.createIntArray());
+            return readFromParcel(in);
         }
 
         @Override

@@ -1365,6 +1365,20 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
     }
 
+    public void setAllowCrossUidActivitySwitchFromBelow(IBinder token, boolean allowed) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r != null) {
+                    r.setAllowCrossUidActivitySwitchFromBelow(allowed);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     @Override
     public void reportActivityFullyDrawn(IBinder token, boolean restoredFromBundle) {
         final long origId = Binder.clearCallingIdentity();
@@ -1379,6 +1393,31 @@ class ActivityClientController extends IActivityClientController.Stub {
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    @Override
+    public void overrideActivityTransition(IBinder token, boolean open, int enterAnim, int exitAnim,
+            int backgroundColor) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            if (r != null) {
+                r.overrideCustomTransition(open, enterAnim, exitAnim, backgroundColor);
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
+    }
+
+    @Override
+    public void clearOverrideActivityTransition(IBinder token, boolean open) {
+        final long origId = Binder.clearCallingIdentity();
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            if (r != null) {
+                r.clearCustomTransition(open);
+            }
+        }
+        Binder.restoreCallingIdentity(origId);
     }
 
     @Override

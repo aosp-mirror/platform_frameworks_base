@@ -36,6 +36,7 @@ import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -135,6 +136,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int MSG_UPDATE_RBC = 9;
     private static final int MSG_BRIGHTNESS_RAMP_DONE = 10;
     private static final int MSG_STATSD_HBM_BRIGHTNESS = 11;
+    private static final int MSG_SWITCH_USER = 12;
+    private static final int MSG_BOOT_COMPLETED = 13;
 
     private static final int BRIGHTNESS_CHANGE_STATSD_REPORT_INTERVAL_MS = 500;
 
@@ -423,6 +426,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private SparseArray<DisplayPowerControllerInterface> mDisplayBrightnessFollowers =
             new SparseArray();
 
+    private boolean mBootCompleted;
+
     /**
      * Creates the display power controller.
      */
@@ -430,7 +435,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             DisplayPowerCallbacks callbacks, Handler handler,
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay,
             BrightnessTracker brightnessTracker, BrightnessSetting brightnessSetting,
-            Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata) {
+            Runnable onBrightnessChangeRunnable, HighBrightnessModeMetadata hbmMetadata,
+            boolean bootCompleted) {
 
         mInjector = injector != null ? injector : new Injector();
         mClock = mInjector.getClock();
@@ -493,7 +499,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mDisplayBrightnessController =
                 new DisplayBrightnessController(context, null,
                         mDisplayId, mLogicalDisplay.getDisplayInfoLocked().brightnessDefault,
-                        brightnessSetting, () -> postBrightnessChangeRunnable());
+                        brightnessSetting, () -> postBrightnessChangeRunnable(),
+                        new HandlerExecutor(mHandler));
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
 
@@ -552,6 +559,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
         mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
 
+        mBootCompleted = bootCompleted;
     }
 
     private void applyReduceBrightColorsSplineAdjustment() {
@@ -605,6 +613,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
     @Override
     public void onSwitchUser(@UserIdInt int newUserId) {
+        Message msg = mHandler.obtainMessage(MSG_SWITCH_USER, newUserId);
+        mHandler.sendMessage(msg);
+    }
+
+    private void handleOnSwitchUser(@UserIdInt int newUserId) {
         handleSettingsChange(true /* userSwitch */);
         handleBrightnessModeChange();
         if (mBrightnessTracker != null) {
@@ -1017,17 +1030,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
             loadScreenOffBrightnessSensor();
             int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
-            // TODO (b/265793751): Don't instantiate ScreenOffBrightnessSensorController if this is
-            // a complementary display
             if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
-                mScreenOffBrightnessSensorController = new ScreenOffBrightnessSensorController(
-                        mSensorManager,
-                        mScreenOffBrightnessSensor,
-                        mHandler,
-                        SystemClock::uptimeMillis,
-                        sensorValueToLux,
-                        mInteractiveModeBrightnessMapper
-                );
+                mScreenOffBrightnessSensorController =
+                        mInjector.getScreenOffBrightnessSensorController(
+                                mSensorManager,
+                                mScreenOffBrightnessSensor,
+                                mHandler,
+                                SystemClock::uptimeMillis,
+                                sensorValueToLux,
+                                mInteractiveModeBrightnessMapper);
             }
         } else {
             mUseSoftwareAutoBrightnessConfig = false;
@@ -1176,13 +1187,14 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
         if (mScreenOffBrightnessSensorController != null) {
             mScreenOffBrightnessSensorController.setLightSensorEnabled(mUseAutoBrightness
-                    && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
-                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig())));
+                    && mIsEnabled && (state == Display.STATE_OFF || (state == Display.STATE_DOZE
+                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()))
+                    && mLeadDisplayId == Layout.NO_LEAD_DISPLAY);
         }
 
         // Initialize things the first time the power state is changed.
         if (mustInitialize) {
-            initialize(state);
+            initialize(readyToUpdateDisplayState() ? state : Display.STATE_UNKNOWN);
         }
 
         // Animate the screen state change unless already animating.
@@ -1708,6 +1720,12 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
+    @Override
+    public void onBootCompleted() {
+        Message msg = mHandler.obtainMessage(MSG_BOOT_COMPLETED);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
+    }
+
     private boolean saveBrightnessInfo(float brightness) {
         return saveBrightnessInfo(brightness, brightness);
     }
@@ -1849,7 +1867,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 }
             }
 
-            if (!reportOnly && mPowerState.getScreenState() != state) {
+            if (!reportOnly && mPowerState.getScreenState() != state
+                    && readyToUpdateDisplayState()) {
                 Trace.traceCounter(Trace.TRACE_TAG_POWER, "ScreenState", state);
                 // TODO(b/153319140) remove when we can get this from the above trace invocation
                 SystemProperties.set("debug.tracing.screen_state", String.valueOf(state));
@@ -2110,8 +2129,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mPendingAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         if (userSwitch) {
             // Don't treat user switches as user initiated change.
-            mDisplayBrightnessController.setCurrentScreenBrightness(mDisplayBrightnessController
-                    .getPendingScreenBrightness());
+            mDisplayBrightnessController
+                    .setAndNotifyCurrentScreenBrightness(mDisplayBrightnessController
+                            .getPendingScreenBrightness());
             updateAutoBrightnessAdjustment();
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.resetShortTermModel();
@@ -2125,11 +2145,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
-        mHandler.post(() -> {
+        mHandler.postAtTime(() -> {
             mUseAutoBrightness = screenBrightnessModeSetting
                     == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
             updatePowerState();
-        });
+        }, mClock.uptimeMillis());
     }
 
     private float getAutoBrightnessAdjustmentSetting() {
@@ -2506,6 +2526,17 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
+    /**
+     * Indicates whether the display state is ready to update. If this is the default display, we
+     * want to update it right away so that we can draw the boot animation on it. If it is not
+     * the default display, drawing the boot animation on it would look incorrect, so we need
+     * to wait until boot is completed.
+     * @return True if the display state is ready to update
+     */
+    private boolean readyToUpdateDisplayState() {
+        return mDisplayId == Display.DEFAULT_DISPLAY || mBootCompleted;
+    }
+
     private final class DisplayControllerHandler extends Handler {
         DisplayControllerHandler(Looper looper) {
             super(looper, null, true /*async*/);
@@ -2572,6 +2603,15 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
                 case MSG_STATSD_HBM_BRIGHTNESS:
                     logHbmBrightnessStats(Float.intBitsToFloat(msg.arg1), msg.arg2);
+                    break;
+
+                case MSG_SWITCH_USER:
+                    handleOnSwitchUser(msg.arg1);
+                    break;
+
+                case MSG_BOOT_COMPLETED:
+                    mBootCompleted = true;
+                    updatePowerState();
                     break;
             }
         }
@@ -2730,6 +2770,23 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     darkeningThresholdsPercentages, brighteningThresholdLevels,
                     darkeningThresholdLevels, minDarkeningThreshold, minBrighteningThreshold,
                     potentialOldBrightnessRange);
+        }
+
+        ScreenOffBrightnessSensorController getScreenOffBrightnessSensorController(
+                SensorManager sensorManager,
+                Sensor lightSensor,
+                Handler handler,
+                ScreenOffBrightnessSensorController.Clock clock,
+                int[] sensorValueToLux,
+                BrightnessMappingStrategy brightnessMapper) {
+            return new ScreenOffBrightnessSensorController(
+                    sensorManager,
+                    lightSensor,
+                    handler,
+                    clock,
+                    sensorValueToLux,
+                    brightnessMapper
+            );
         }
     }
 

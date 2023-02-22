@@ -148,9 +148,8 @@ public class GlobalSettingsValidators {
                 Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.BLUETOOTH_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.CLOCKWORK_HOME_READY, ANY_STRING_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE_ALARM_MANAGER, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE_JOB_SCHEDULER, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.ENABLE_TARE,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Global.TARE_ALARM_MANAGER_CONSTANTS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.TARE_JOB_SCHEDULER_CONSTANTS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.PRIVATE_DNS_MODE, ANY_STRING_VALIDATOR);
@@ -403,5 +402,13 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_ABORTED),
                           }));
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
+	VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
+                       new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_NOT_NEEDED),
+                            String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_PENDING),
+                            String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_DONE)
+                        }));
     }
 }

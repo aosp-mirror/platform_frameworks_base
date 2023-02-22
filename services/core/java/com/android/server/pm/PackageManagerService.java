@@ -131,6 +131,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -1958,8 +1959,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mUserNeedsBadging, () -> mResolveInfo, () -> mInstantAppInstallerActivity,
                 injector.getBackgroundHandler());
         mDexOptHelper = new DexOptHelper(this);
-        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mBroadcastHelper,
-                mProtectedPackages);
+        mSuspendPackageHelper = new SuspendPackageHelper(this, mInjector, mUserManager,
+                mBroadcastHelper, mProtectedPackages);
         mDistractingPackageHelper = new DistractingPackageHelper(this, mInjector, mBroadcastHelper,
                 mSuspendPackageHelper);
         mStorageEventHelper = new StorageEventHelper(this, mDeletePackageHelper,
@@ -5148,8 +5149,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
-        public String getAppMetadataPath(String packageName, int userId) {
-            mContext.enforceCallingOrSelfPermission(GET_APP_METADATA, "getAppMetadataPath");
+        public ParcelFileDescriptor getAppMetadataFd(String packageName, int userId) {
+            mContext.enforceCallingOrSelfPermission(GET_APP_METADATA, "getAppMetadataFd");
             final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
             final PackageStateInternal ps = snapshot.getPackageStateForInstalledAndFiltered(
@@ -5158,7 +5159,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new ParcelableException(
                         new PackageManager.NameNotFoundException(packageName));
             }
-            return new File(ps.getPathString(), APP_METADATA_FILE_NAME).getAbsolutePath();
+            try {
+                File file = new File(ps.getPath(), APP_METADATA_FILE_NAME);
+                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
         }
 
         @Override
@@ -6141,7 +6147,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             enforceCanSetPackagesSuspendedAsUser(snapshot, callingPackage, callingUid, userId,
                     "setPackagesSuspendedAsUser");
             return mSuspendPackageHelper.setPackagesSuspended(snapshot, packageNames, suspended,
-                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid);
+                    appExtras, launcherExtras, dialogInfo, callingPackage, userId, callingUid,
+                    false /* forQuietMode */);
         }
 
         @Override
@@ -6504,6 +6511,19 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public String[] setPackagesSuspendedByAdmin(
+                @UserIdInt int userId, @NonNull String[] packageNames, boolean suspended) {
+            return mSuspendPackageHelper.setPackagesSuspendedByAdmin(
+                    snapshotComputer(), userId, packageNames, suspended);
+        }
+
+        @Override
+        public void setPackagesSuspendedForQuietMode(int userId, boolean suspended) {
+            mSuspendPackageHelper.setPackagesSuspendedForQuietMode(
+                    snapshotComputer(), userId, suspended);
+        }
+
+        @Override
         public void setDeviceAndProfileOwnerPackages(
                 int deviceOwnerUserId, String deviceOwnerPackage,
                 SparseArray<String> profileOwnerPackages) {
@@ -6674,6 +6694,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             }
+        }
+
+        /** @deprecated For legacy shell command only. */
+        @Override
+        @Deprecated
+        public void legacyForceDexOpt(String packageName) throws LegacyDexoptDisabledException {
+            mDexOptHelper.forceDexOpt(snapshotComputer(), packageName);
         }
 
         /** @deprecated For legacy shell command only. */

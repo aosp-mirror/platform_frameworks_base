@@ -16,6 +16,9 @@
 
 package com.android.server.credentials;
 
+import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_FAILURE;
+import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_SUCCESS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -94,9 +97,14 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable CreateCredentialResponse response) {
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
+        setChosenMetric(componentName);
         if (response != null) {
+            mChosenProviderMetric.setChosenProviderStatus(
+                    METRICS_PROVIDER_STATUS_FINAL_SUCCESS);
             respondToClientWithResponseAndFinish(response);
         } else {
+            mChosenProviderMetric.setChosenProviderStatus(
+                    METRICS_PROVIDER_STATUS_FINAL_FAILURE);
             respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
                     "Invalid response");
         }
@@ -127,6 +135,10 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithResponseAndFinish(CreateCredentialResponse response) {
         Log.i(TAG, "respondToClientWithResponseAndFinish");
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
             logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ true);
@@ -145,6 +157,10 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
         Log.i(TAG, "respondToClientWithErrorAndFinish");
+        if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
+            Log.i(TAG, "Request has already been completed. This is strange.");
+            return;
+        }
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
             logApiCalled(RequestType.CREATE_CREDENTIALS, /* isSuccessful */ true);

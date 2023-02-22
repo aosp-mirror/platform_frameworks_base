@@ -167,8 +167,9 @@ public class LocaleStore {
          */
         @UnsupportedAppUsage
         public String getFullNameInUiLanguage() {
+            Locale locale = mLocale.stripExtensions();
             // We don't cache the UI name because the default locale keeps changing
-            return LocaleHelper.getDisplayName(mLocale, true /* sentence case */);
+            return LocaleHelper.getDisplayName(locale, true /* sentence case */);
         }
 
         private String getLangScriptKey() {

@@ -16,9 +16,13 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManager.FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY;
+import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_TEMP_POWER_SAVE_ALLOWLIST;
 import static android.os.PowerManager.LOW_POWER_STANDBY_ALLOWED_REASON_VOICE_INTERACTION;
-import static android.os.PowerManager.LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN;
+import static android.os.PowerManager.LowPowerStandbyPortDescription.MATCH_PORT_LOCAL;
+import static android.os.PowerManager.LowPowerStandbyPortDescription.PROTOCOL_TCP;
+import static android.os.PowerManager.LowPowerStandbyPortDescription.PROTOCOL_UDP;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,15 +45,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.app.IActivityManager;
+import android.app.IForegroundServiceObserver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.IPowerManager;
 import android.os.PowerManager;
 import android.os.PowerManager.LowPowerStandbyPolicy;
+import android.os.PowerManager.LowPowerStandbyPortDescription;
 import android.os.PowerManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -98,6 +108,10 @@ public class LowPowerStandbyControllerTest {
     private static final int USER_ID_2 = 10;
     private static final LowPowerStandbyPolicy EMPTY_POLICY = new LowPowerStandbyPolicy(
             "Test policy", Collections.emptySet(), 0, Collections.emptySet());
+    private static final LowPowerStandbyPortDescription PORT_DESC_1 =
+            new LowPowerStandbyPortDescription(PROTOCOL_UDP, MATCH_PORT_LOCAL, 5353);
+    private static final LowPowerStandbyPortDescription PORT_DESC_2 =
+            new LowPowerStandbyPortDescription(PROTOCOL_TCP, MATCH_PORT_LOCAL, 8008);
 
     private LowPowerStandbyController mController;
     private BroadcastInterceptingContext mContextSpy;
@@ -108,6 +122,8 @@ public class LowPowerStandbyControllerTest {
 
     @Mock
     private DeviceConfigWrapper mDeviceConfigWrapperMock;
+    @Mock
+    private IActivityManager mIActivityManagerMock;
     @Mock
     private AlarmManager mAlarmManagerMock;
     @Mock
@@ -122,6 +138,8 @@ public class LowPowerStandbyControllerTest {
     private NetworkPolicyManagerInternal mNetworkPolicyManagerInternalMock;
     @Mock
     private PowerAllowlistInternal mPowerAllowlistInternalMock;
+    @Mock
+    private ActivityManagerInternal mActivityManagerInternalMock;
 
     @Before
     public void setUp() throws Exception {
@@ -136,10 +154,12 @@ public class LowPowerStandbyControllerTest {
         addLocalServiceMock(PowerManagerInternal.class, mPowerManagerInternalMock);
         addLocalServiceMock(NetworkPolicyManagerInternal.class, mNetworkPolicyManagerInternalMock);
         addLocalServiceMock(PowerAllowlistInternal.class, mPowerAllowlistInternalMock);
+        addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
 
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
 
         when(mDeviceConfigWrapperMock.enableCustomPolicy()).thenReturn(true);
+        when(mDeviceConfigWrapperMock.enableStandbyPorts()).thenReturn(true);
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
         when(mResourcesSpy.getBoolean(
@@ -161,13 +181,18 @@ public class LowPowerStandbyControllerTest {
                 UserHandle.of(USER_ID_1), UserHandle.of(USER_ID_2)));
         when(mPackageManagerMock.getPackageUid(eq(TEST_PKG1), any())).thenReturn(TEST_PKG1_APP_ID);
         when(mPackageManagerMock.getPackageUid(eq(TEST_PKG2), any())).thenReturn(TEST_PKG2_APP_ID);
+        when(mPackageManagerMock.getPackageUidAsUser(eq(TEST_PKG1), eq(USER_ID_1)))
+                .thenReturn(TEST_PKG1_APP_ID);
+        when(mPackageManagerMock.getPackageUidAsUser(eq(TEST_PKG2), eq(USER_ID_1)))
+                .thenReturn(TEST_PKG2_APP_ID);
 
         mClock = new OffsettableClock.Stopped();
         mTestLooper = new TestLooper(mClock::now);
 
         mTestPolicyFile = new File(mContextSpy.getCacheDir(), "lps_policy.xml");
         mController = new LowPowerStandbyController(mContextSpy, mTestLooper.getLooper(),
-                () -> mClock.now(), mDeviceConfigWrapperMock, mTestPolicyFile);
+                () -> mClock.now(), mDeviceConfigWrapperMock, () -> mIActivityManagerMock,
+                mTestPolicyFile);
     }
 
     @After
@@ -176,6 +201,8 @@ public class LowPowerStandbyControllerTest {
         LocalServices.removeServiceForTest(LowPowerStandbyControllerInternal.class);
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.removeServiceForTest(PowerAllowlistInternal.class);
+        LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+
         mTestPolicyFile.delete();
     }
 
@@ -544,17 +571,17 @@ public class LowPowerStandbyControllerTest {
         mController.setEnabled(false);
         mTestLooper.dispatchAll();
 
-        assertTrue(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        assertTrue(mController.isAllowed(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
     }
 
     @Test
     public void testSetAllowedFeatures_isAllowedWhenEnabled() throws Exception {
         mController.systemReady();
         mController.setEnabled(true);
-        mController.setPolicy(policyWithAllowedFeatures(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        mController.setPolicy(policyWithAllowedFeatures(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
         mTestLooper.dispatchAll();
 
-        assertTrue(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        assertTrue(mController.isAllowed(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
     }
 
     @Test
@@ -563,7 +590,7 @@ public class LowPowerStandbyControllerTest {
         mController.setEnabled(true);
         mTestLooper.dispatchAll();
 
-        assertFalse(mController.isAllowed(LOW_POWER_STANDBY_FEATURE_WAKE_ON_LAN));
+        assertFalse(mController.isAllowed(FEATURE_WAKE_ON_LAN_IN_LOW_POWER_STANDBY));
     }
 
     @Test
@@ -701,6 +728,118 @@ public class LowPowerStandbyControllerTest {
         mController.setPolicy(EMPTY_POLICY);
         mTestLooper.dispatchAll();
         verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[0]);
+    }
+
+    @Test
+    public void testAllowReason_ongoingPhoneCallService() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithAllowedReasons(
+                LOW_POWER_STANDBY_ALLOWED_REASON_ONGOING_CALL));
+        mTestLooper.dispatchAll();
+
+        ArgumentCaptor<IForegroundServiceObserver> fgsObserverCapt =
+                ArgumentCaptor.forClass(IForegroundServiceObserver.class);
+        verify(mIActivityManagerMock).registerForegroundServiceObserver(fgsObserverCapt.capture());
+        IForegroundServiceObserver fgsObserver = fgsObserverCapt.getValue();
+
+        when(mActivityManagerInternalMock.hasRunningForegroundService(eq(TEST_PKG1_APP_ID),
+                eq(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL))).thenReturn(true);
+        fgsObserver.onForegroundStateChanged(null, TEST_PKG1, USER_ID_1, true);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{TEST_PKG1_APP_ID});
+
+        when(mActivityManagerInternalMock.hasRunningForegroundService(eq(TEST_PKG2_APP_ID),
+                eq(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL))).thenReturn(true);
+        fgsObserver.onForegroundStateChanged(null, TEST_PKG2, USER_ID_1, true);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(
+                new int[]{TEST_PKG1_APP_ID, TEST_PKG2_APP_ID});
+
+        when(mActivityManagerInternalMock.hasRunningForegroundService(eq(TEST_PKG1_APP_ID),
+                eq(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL))).thenReturn(false);
+        fgsObserver.onForegroundStateChanged(null, TEST_PKG1, USER_ID_1, false);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[]{TEST_PKG2_APP_ID});
+
+        mController.setPolicy(EMPTY_POLICY);
+        mTestLooper.dispatchAll();
+        verify(mPowerManagerInternalMock).setLowPowerStandbyAllowlist(new int[0]);
+    }
+
+    @Test
+    public void testStandbyPorts_broadcastChangedIfPackageIsExempt() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+
+        Binder token = new Binder();
+        BroadcastInterceptingContext.FutureIntent futureIntent = mContextSpy.nextBroadcastIntent(
+                PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
+        mController.acquireStandbyPorts(token, TEST_PKG1_APP_ID, List.of(PORT_DESC_1));
+        mTestLooper.dispatchAll();
+        assertThat(futureIntent.get(1, TimeUnit.SECONDS)).isNotNull();
+
+        futureIntent = mContextSpy.nextBroadcastIntent(
+                PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
+        mController.releaseStandbyPorts(token);
+        mTestLooper.dispatchAll();
+        assertThat(futureIntent.get(1, TimeUnit.SECONDS)).isNotNull();
+    }
+
+    @Test
+    public void testStandbyPorts_noBroadcastChangedIfPackageIsNotExempt() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+
+        BroadcastInterceptingContext.FutureIntent futureIntent = mContextSpy.nextBroadcastIntent(
+                PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
+        mController.acquireStandbyPorts(new Binder(), TEST_PKG2_APP_ID, List.of(PORT_DESC_1));
+        mTestLooper.dispatchAll();
+        futureIntent.assertNotReceived();
+    }
+
+    @Test
+    public void testActiveStandbyPorts_emptyIfDisabled() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(false);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+
+        mController.acquireStandbyPorts(new Binder(), TEST_PKG1_APP_ID, List.of(PORT_DESC_1));
+        assertThat(mController.getActiveStandbyPorts()).isEmpty();
+    }
+
+    @Test
+    public void testActiveStandbyPorts_emptyIfPackageNotExempt() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG2));
+
+        mController.acquireStandbyPorts(new Binder(), TEST_PKG1_APP_ID, List.of(PORT_DESC_1));
+        assertThat(mController.getActiveStandbyPorts()).isEmpty();
+    }
+
+    @Test
+    public void testActiveStandbyPorts_activeIfPackageExempt() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+
+        mController.acquireStandbyPorts(new Binder(), TEST_PKG1_APP_ID, List.of(PORT_DESC_1));
+        mController.acquireStandbyPorts(new Binder(), TEST_PKG2_APP_ID, List.of(PORT_DESC_2));
+        assertThat(mController.getActiveStandbyPorts()).containsExactly(PORT_DESC_1);
+    }
+
+    @Test
+    public void testActiveStandbyPorts_removedAfterRelease() throws Exception {
+        mController.systemReady();
+        mController.setEnabled(true);
+        mController.setPolicy(policyWithExemptPackages(TEST_PKG1));
+        Binder token = new Binder();
+        mController.acquireStandbyPorts(token, TEST_PKG1_APP_ID, List.of(PORT_DESC_1));
+        mController.releaseStandbyPorts(token);
+        assertThat(mController.getActiveStandbyPorts()).isEmpty();
     }
 
     private void setInteractive() throws Exception {

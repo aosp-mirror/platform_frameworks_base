@@ -24,7 +24,8 @@
 */
 
 /**
- * Modify this to match your packages/apps/Settings/res/arrays.xml#entryvalues_font_size
+ * Modify this to match your
+ * frameworks/base/packages/SettingsLib/res/values/arrays.xml#entryvalues_font_size
  * array so that all possible scales are generated.
  */
 const scales = [1.15, 1.30, 1.5, 1.8, 2];

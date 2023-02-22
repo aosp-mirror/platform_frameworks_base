@@ -683,9 +683,10 @@ public final class ViewRootImpl implements ViewParent,
 
     private BLASTBufferQueue mBlastBufferQueue;
 
-    private boolean mUpdateSdrHdrRatioInfo = false;
-    private float mDesiredSdrHdrRatio = 1f;
-    private float mRenderSdrHdrRatio = 1f;
+    private boolean mUpdateHdrSdrRatioInfo = false;
+    private float mDesiredHdrSdrRatio = 1f;
+    private float mRenderHdrSdrRatio = 1f;
+    private Consumer<Display> mHdrSdrRatioChangedListener = null;
 
     /**
      * Child container layer of {@code mSurface} with the same bounds as its parent, and cropped to
@@ -1134,6 +1135,10 @@ public final class ViewRootImpl implements ViewParent,
         updateLastConfigurationFromResources(getConfiguration());
         // Make sure to report the completion of draw for relaunch with preserved window.
         reportNextDraw("rebuilt");
+        // Make sure to resume this root view when relaunching its host activity which was stopped.
+        if (mStopped && getHostVisibility() != View.GONE) {
+            setWindowStopped(false);
+        }
     }
 
     private Configuration getConfiguration() {
@@ -1947,6 +1952,9 @@ public final class ViewRootImpl implements ViewParent,
     private void updateInternalDisplay(int displayId, Resources resources) {
         final Display preferredDisplay =
                 ResourcesManager.getInstance().getAdjustedDisplay(displayId, resources);
+        if (mHdrSdrRatioChangedListener != null && mDisplay != null) {
+            mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
+        }
         if (preferredDisplay == null) {
             // Fallback to use default display.
             Slog.w(TAG, "Cannot get desired display with Id: " + displayId);
@@ -1954,6 +1962,9 @@ public final class ViewRootImpl implements ViewParent,
                     .getAdjustedDisplay(DEFAULT_DISPLAY, resources);
         } else {
             mDisplay = preferredDisplay;
+        }
+        if (mHdrSdrRatioChangedListener != null && mDisplay != null) {
+            mDisplay.registerHdrSdrRatioChangedListener(mExecutor, mHdrSdrRatioChangedListener);
         }
         mContext.updateDisplay(mDisplay.getDisplayId());
     }
@@ -3741,7 +3752,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mAttachInfo.mContentCaptureEvents != null) {
-            notifyContentCatpureEvents();
+            notifyContentCaptureEvents();
         }
 
         mIsInTraversal = false;
@@ -3782,7 +3793,7 @@ public final class ViewRootImpl implements ViewParent,
         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
-    private void notifyContentCatpureEvents() {
+    private void notifyContentCaptureEvents() {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "notifyContentCaptureEvents");
         try {
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
@@ -4838,11 +4849,11 @@ public final class ViewRootImpl implements ViewParent,
 
                 useAsyncReport = true;
 
-                if (mUpdateSdrHdrRatioInfo) {
-                    mUpdateSdrHdrRatioInfo = false;
+                if (mUpdateHdrSdrRatioInfo) {
+                    mUpdateHdrSdrRatioInfo = false;
                     applyTransactionOnDraw(mTransaction.setExtendedRangeBrightness(
-                            getSurfaceControl(), mRenderSdrHdrRatio, mDesiredSdrHdrRatio));
-                    mAttachInfo.mThreadedRenderer.setTargetSdrHdrRatio(mRenderSdrHdrRatio);
+                            getSurfaceControl(), mRenderHdrSdrRatio, mDesiredHdrSdrRatio));
+                    mAttachInfo.mThreadedRenderer.setTargetHdrSdrRatio(mRenderHdrSdrRatio);
                 }
 
                 if (forceDraw) {
@@ -5372,6 +5383,10 @@ public final class ViewRootImpl implements ViewParent,
         if (mAttachInfo.mThreadedRenderer == null) {
             return;
         }
+        if ((colorMode == ActivityInfo.COLOR_MODE_HDR || colorMode == ActivityInfo.COLOR_MODE_HDR10)
+                && !mDisplay.isHdrSdrRatioAvailable()) {
+            colorMode = ActivityInfo.COLOR_MODE_WIDE_COLOR_GAMUT;
+        }
         // TODO: Centralize this sanitization? Why do we let setting bad modes?
         // Alternatively, can we just let HWUI figure it out? Do we need to care here?
         if (colorMode != ActivityInfo.COLOR_MODE_A8
@@ -5379,17 +5394,28 @@ public final class ViewRootImpl implements ViewParent,
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
         float desiredRatio = mAttachInfo.mThreadedRenderer.setColorMode(colorMode);
-        if (desiredRatio != mDesiredSdrHdrRatio) {
-            mDesiredSdrHdrRatio = desiredRatio;
-            mUpdateSdrHdrRatioInfo = true;
+        if (desiredRatio != mDesiredHdrSdrRatio) {
+            mDesiredHdrSdrRatio = desiredRatio;
+            mRenderHdrSdrRatio = mDisplay.getHdrSdrRatio();
+            mUpdateHdrSdrRatioInfo = true;
+
+            if (mDesiredHdrSdrRatio < 1.01f) {
+                mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
+                mHdrSdrRatioChangedListener = null;
+            } else {
+                mHdrSdrRatioChangedListener = display -> {
+                    setTargetHdrSdrRatio(display.getHdrSdrRatio());
+                };
+                mDisplay.registerHdrSdrRatioChangedListener(mExecutor, mHdrSdrRatioChangedListener);
+            }
         }
     }
 
     /** happylint */
-    public void setTargetSdrHdrRatio(float ratio) {
-        if (mRenderSdrHdrRatio != ratio) {
-            mRenderSdrHdrRatio = ratio;
-            mUpdateSdrHdrRatioInfo = true;
+    public void setTargetHdrSdrRatio(float ratio) {
+        if (mRenderHdrSdrRatio != ratio) {
+            mRenderHdrSdrRatio = ratio;
+            mUpdateHdrSdrRatioInfo = true;
             invalidate();
         }
     }
@@ -5965,6 +5991,9 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     final ViewRootHandler mHandler = new ViewRootHandler();
+    private final Executor mExecutor = (Runnable r) -> {
+        mHandler.post(r);
+    };
 
     /**
      * Something in the current window tells us we need to change the touch mode.  For
@@ -8950,6 +8979,10 @@ public final class ViewRootImpl implements ViewParent,
     private void destroyHardwareRenderer() {
         ThreadedRenderer hardwareRenderer = mAttachInfo.mThreadedRenderer;
 
+        if (mHdrSdrRatioChangedListener != null) {
+            mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
+        }
+
         if (hardwareRenderer != null) {
             if (mHardwareRendererObserver != null) {
                 hardwareRenderer.removeObserver(mHardwareRendererObserver);
@@ -10718,7 +10751,8 @@ public final class ViewRootImpl implements ViewParent,
         public int ensureDirectConnection() {
             if (mDirectConnectionId == AccessibilityNodeInfo.UNDEFINED_CONNECTION_ID) {
                 mDirectConnectionId = AccessibilityInteractionClient.addDirectConnection(
-                        new AccessibilityInteractionConnection(ViewRootImpl.this));
+                        new AccessibilityInteractionConnection(ViewRootImpl.this),
+                        mAccessibilityManager);
                 // Notify listeners in the app process.
                 mAccessibilityManager.notifyAccessibilityStateChanged();
             }

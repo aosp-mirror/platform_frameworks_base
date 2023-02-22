@@ -99,6 +99,7 @@ public class GlobalSettings {
         Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MS,
         Settings.Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_SET_BY_USER,
         Settings.Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED,
+        Settings.Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
         Settings.Global.HDR_CONVERSION_MODE,
         Settings.Global.HDR_FORCE_CONVERSION_TYPE,
     };

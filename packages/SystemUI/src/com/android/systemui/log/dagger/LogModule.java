@@ -265,16 +265,6 @@ public class LogModule {
         return factory.create("MediaCarouselCtlrLog", 20);
     }
 
-    /**
-     * Provides a {@link LogBuffer} for use in the status bar connectivity pipeline
-     */
-    @Provides
-    @SysUISingleton
-    @StatusBarConnectivityLog
-    public static LogBuffer provideStatusBarConnectivityBuffer(LogBufferFactory factory) {
-        return factory.create("SbConnectivity", 64);
-    }
-
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -357,6 +347,17 @@ public class LogModule {
     @ScreenDecorationsLog
     public static LogBuffer provideScreenDecorationsLog(LogBufferFactory factory) {
         return factory.create("ScreenDecorationsLog", 200);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by
+     *  {@link com.android.keyguard.faceauth.KeyguardFaceAuthManagerImpl}.
+     */
+    @Provides
+    @SysUISingleton
+    @FaceAuthLog
+    public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
+        return factory.create("KeyguardFaceAuthManagerLog", 300);
     }
 
     /**

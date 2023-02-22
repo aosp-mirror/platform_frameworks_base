@@ -19,8 +19,8 @@ package com.android.server.devicepolicy;
 import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
 import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_TARGET_USER_ID;
-import static android.app.admin.PolicyUpdatesReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
+import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
@@ -30,9 +30,10 @@ import android.annotation.Nullable;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
 import android.app.admin.PolicyKey;
-import android.app.admin.PolicyUpdatesReceiver;
+import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
+import android.app.admin.UserRestrictionPolicyKey;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -614,6 +615,47 @@ final class DevicePolicyEngine {
         }
     }
 
+    /**
+     * Returns all user restriction policies set by the given admin.
+     *
+     * <p>Pass in {@link UserHandle#USER_ALL} for {@code userId} to get global restrictions set by
+     * the admin
+     */
+    @NonNull
+    Set<UserRestrictionPolicyKey> getUserRestrictionPolicyKeysForAdmin(
+            @NonNull EnforcingAdmin admin,
+            int userId) {
+        Objects.requireNonNull(admin);
+        synchronized (mLock) {
+            if (userId == UserHandle.USER_ALL) {
+                return getUserRestrictionPolicyKeysForAdminLocked(mGlobalPolicies, admin);
+            }
+            if (!mLocalPolicies.contains(userId)) {
+                return Set.of();
+            }
+            return getUserRestrictionPolicyKeysForAdminLocked(mLocalPolicies.get(userId), admin);
+        }
+    }
+
+    private Set<UserRestrictionPolicyKey> getUserRestrictionPolicyKeysForAdminLocked(
+            Map<PolicyKey, PolicyState<?>> policies,
+            EnforcingAdmin admin) {
+        Set<UserRestrictionPolicyKey> keys = new HashSet<>();
+        for (PolicyKey key : policies.keySet()) {
+            if (!policies.get(key).getPolicyDefinition().isUserRestrictionPolicy()) {
+                continue;
+            }
+            // User restriction policies are always boolean
+            PolicyValue<Boolean> value = (PolicyValue<Boolean>) policies.get(key)
+                    .getPoliciesSetByAdmins().get(admin);
+            if (value == null || !value.getValue()) {
+                continue;
+            }
+            keys.add((UserRestrictionPolicyKey) key);
+        }
+        return keys;
+    }
+
     private <V> boolean hasLocalPolicyLocked(PolicyDefinition<V> policyDefinition, int userId) {
         if (policyDefinition.isGlobalOnlyPolicy()) {
             return false;
@@ -709,7 +751,7 @@ final class DevicePolicyEngine {
 
     private <V> void sendPolicyResultToAdmin(
             EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int result, int userId) {
-        Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
+        Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_SET_RESULT);
         intent.setPackage(admin.getPackageName());
 
         List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(
@@ -759,7 +801,7 @@ final class DevicePolicyEngine {
     private <V> void maybeSendOnPolicyChanged(
             EnforcingAdmin admin, PolicyDefinition<V> policyDefinition, int reason,
             int userId) {
-        Intent intent = new Intent(PolicyUpdatesReceiver.ACTION_DEVICE_POLICY_CHANGED);
+        Intent intent = new Intent(PolicyUpdateReceiver.ACTION_DEVICE_POLICY_CHANGED);
         intent.setPackage(admin.getPackageName());
 
         List<ResolveInfo> receivers = mContext.getPackageManager().queryBroadcastReceiversAsUser(

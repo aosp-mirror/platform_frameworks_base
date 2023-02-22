@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-import static android.safetylabel.SafetyLabelConstants.PERMISSION_RATIONALE_ENABLED;
 import static android.safetylabel.SafetyLabelConstants.SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
@@ -392,8 +391,7 @@ public final class BroadcastHelper {
     /** Returns whether the Safety Label Change notification, a privacy feature, is enabled. */
     public static boolean isPrivacySafetyLabelChangeNotificationsEnabled() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, false) && DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_PRIVACY, PERMISSION_RATIONALE_ENABLED, false);
+                SAFETY_LABEL_CHANGE_NOTIFICATIONS_ENABLED, false);
     }
 
     @NonNull

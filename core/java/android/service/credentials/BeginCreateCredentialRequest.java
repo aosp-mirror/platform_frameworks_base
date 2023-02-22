@@ -100,7 +100,13 @@ public class BeginCreateCredentialRequest implements Parcelable {
         dest.writeBundle(mData);
     }
 
-    /** Returns the info pertaining to the calling app. */
+    /**
+     * Returns the info pertaining to the calling app.
+     *
+     * This value can be null when this instance is set on a {@link BeginGetCredentialRequest} or
+     * a {@link BeginCreateCredentialRequest} if the caller of the API does not wish to propagate
+     * this information to a credential provider.
+     */
     @Nullable
     public CallingAppInfo getCallingAppInfo() {
         return mCallingAppInfo;

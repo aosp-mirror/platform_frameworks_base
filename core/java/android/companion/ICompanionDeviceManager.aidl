@@ -88,4 +88,6 @@ interface ICompanionDeviceManager {
     void enableSystemDataSync(int associationId, int flags);
 
     void disableSystemDataSync(int associationId, int flags);
+
+    void enableSecureTransport(boolean enabled);
 }

@@ -333,7 +333,8 @@ public final class SplashScreenView extends FrameLayout {
 
                 SurfaceControlViewHost viewHost = new SurfaceControlViewHost(viewContext,
                         viewContext.getDisplay(),
-                        surfaceView.getHostToken());
+                        surfaceView.getHostToken(),
+                        "SplashScreenView");
                 ImageView imageView = new ImageView(viewContext);
                 imageView.setBackground(mIconDrawable);
                 viewHost.setView(imageView, mIconSize, mIconSize);

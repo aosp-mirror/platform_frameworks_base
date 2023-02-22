@@ -1,5 +1,6 @@
 #undef LOG_TAG
 #define LOG_TAG "Bitmap"
+// #define LOG_NDEBUG 0
 #include "Bitmap.h"
 
 #include <hwui/Bitmap.h>
@@ -9,6 +10,7 @@
 #include "Gainmap.h"
 #include "GraphicsJNI.h"
 #include "HardwareBufferHelpers.h"
+#include "ScopedParcel.h"
 #include "SkBitmap.h"
 #include "SkBlendMode.h"
 #include "SkCanvas.h"
@@ -26,12 +28,7 @@
 
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer, parcel or render thread
 #include <android-base/unique_fd.h>
-#include <android/binder_parcel.h>
-#include <android/binder_parcel_jni.h>
-#include <android/binder_parcel_platform.h>
-#include <cutils/ashmem.h>
 #include <renderthread/RenderProxy.h>
-#include <sys/mman.h>
 #endif
 
 #include <inttypes.h>
@@ -372,14 +369,32 @@ static bool bitmapCopyTo(SkBitmap* dst, SkColorType dstCT, const SkBitmap& src,
     return srcPM.readPixels(dstPM);
 }
 
-static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
-                           jint dstConfigHandle, jboolean isMutable) {
+static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle, jint dstConfigHandle,
+                           jboolean isMutable) {
+    LocalScopedBitmap bitmapHolder(srcHandle);
+    if (!bitmapHolder.valid()) {
+        return NULL;
+    }
+    const Bitmap& original = bitmapHolder->bitmap();
+    const bool hasGainmap = original.hasGainmap();
     SkBitmap src;
-    reinterpret_cast<BitmapWrapper*>(srcHandle)->getSkBitmap(&src);
+    bitmapHolder->getSkBitmap(&src);
+
     if (dstConfigHandle == GraphicsJNI::hardwareLegacyBitmapConfig()) {
         sk_sp<Bitmap> bitmap(Bitmap::allocateHardwareBitmap(src));
         if (!bitmap.get()) {
             return NULL;
+        }
+        if (hasGainmap) {
+            auto gainmap = sp<uirenderer::Gainmap>::make();
+            gainmap->info = original.gainmap()->info;
+            const SkBitmap skSrcBitmap = original.gainmap()->bitmap->getSkBitmap();
+            sk_sp<Bitmap> skBitmap(Bitmap::allocateHardwareBitmap(skSrcBitmap));
+            if (!skBitmap.get()) {
+                return NULL;
+            }
+            gainmap->bitmap = std::move(skBitmap);
+            bitmap->setGainmap(std::move(gainmap));
         }
         return createBitmap(env, bitmap.release(), getPremulBitmapCreateFlags(isMutable));
     }
@@ -392,6 +407,18 @@ static jobject Bitmap_copy(JNIEnv* env, jobject, jlong srcHandle,
         return NULL;
     }
     auto bitmap = allocator.getStorageObjAndReset();
+    if (hasGainmap) {
+        auto gainmap = sp<uirenderer::Gainmap>::make();
+        gainmap->info = original.gainmap()->info;
+        const SkBitmap skSrcBitmap = original.gainmap()->bitmap->getSkBitmap();
+        SkBitmap skDestBitmap;
+        HeapAllocator destAllocator;
+        if (!bitmapCopyTo(&skDestBitmap, dstCT, skSrcBitmap, &destAllocator)) {
+            return NULL;
+        }
+        gainmap->bitmap = sk_sp<Bitmap>(destAllocator.getStorageObjAndReset());
+        bitmap->setGainmap(std::move(gainmap));
+    }
     return createBitmap(env, bitmap, getPremulBitmapCreateFlags(isMutable));
 }
 
@@ -585,91 +612,7 @@ static void Bitmap_setHasMipMap(JNIEnv* env, jobject, jlong bitmapHandle,
 ///////////////////////////////////////////////////////////////////////////////
 
 // TODO: Move somewhere else
-#ifdef __ANDROID__ // Layoutlib does not support parcel
-
-class ScopedParcel {
-public:
-    explicit ScopedParcel(JNIEnv* env, jobject parcel) {
-        mParcel = AParcel_fromJavaParcel(env, parcel);
-    }
-
-    ~ScopedParcel() { AParcel_delete(mParcel); }
-
-    int32_t readInt32() {
-        int32_t temp = 0;
-        // TODO: This behavior-matches what android::Parcel does
-        // but this should probably be better
-        if (AParcel_readInt32(mParcel, &temp) != STATUS_OK) {
-            temp = 0;
-        }
-        return temp;
-    }
-
-    uint32_t readUint32() {
-        uint32_t temp = 0;
-        // TODO: This behavior-matches what android::Parcel does
-        // but this should probably be better
-        if (AParcel_readUint32(mParcel, &temp) != STATUS_OK) {
-            temp = 0;
-        }
-        return temp;
-    }
-
-    void writeInt32(int32_t value) { AParcel_writeInt32(mParcel, value); }
-
-    void writeUint32(uint32_t value) { AParcel_writeUint32(mParcel, value); }
-
-    bool allowFds() const { return AParcel_getAllowFds(mParcel); }
-
-    std::optional<sk_sp<SkData>> readData() {
-        struct Data {
-            void* ptr = nullptr;
-            size_t size = 0;
-        } data;
-        auto error = AParcel_readByteArray(mParcel, &data,
-                                           [](void* arrayData, int32_t length,
-                                              int8_t** outBuffer) -> bool {
-                                               Data* data = reinterpret_cast<Data*>(arrayData);
-                                               if (length > 0) {
-                                                   data->ptr = sk_malloc_canfail(length);
-                                                   if (!data->ptr) {
-                                                       return false;
-                                                   }
-                                                   *outBuffer =
-                                                           reinterpret_cast<int8_t*>(data->ptr);
-                                                   data->size = length;
-                                               }
-                                               return true;
-                                           });
-        if (error != STATUS_OK || data.size <= 0) {
-            sk_free(data.ptr);
-            return std::nullopt;
-        } else {
-            return SkData::MakeFromMalloc(data.ptr, data.size);
-        }
-    }
-
-    void writeData(const std::optional<sk_sp<SkData>>& optData) {
-        if (optData) {
-            const auto& data = *optData;
-            AParcel_writeByteArray(mParcel, reinterpret_cast<const int8_t*>(data->data()),
-                                   data->size());
-        } else {
-            AParcel_writeByteArray(mParcel, nullptr, -1);
-        }
-    }
-
-    AParcel* get() { return mParcel; }
-
-private:
-    AParcel* mParcel;
-};
-
-enum class BlobType : int32_t {
-    IN_PLACE,
-    ASHMEM,
-};
-
+#ifdef __ANDROID__  // Layoutlib does not support parcel
 #define ON_ERROR_RETURN(X) \
     if ((error = (X)) != STATUS_OK) return error
 
@@ -1269,6 +1212,13 @@ static jobject Bitmap_extractGainmap(JNIEnv* env, jobject, jlong bitmapHandle) {
     return Gainmap_extractFromBitmap(env, bitmapHolder->bitmap());
 }
 
+static void Bitmap_setGainmap(JNIEnv*, jobject, jlong bitmapHandle, jlong gainmapPtr) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return;
+    uirenderer::Gainmap* gainmap = reinterpret_cast<uirenderer::Gainmap*>(gainmapPtr);
+    bitmapHolder->bitmap().setGainmap(sp<uirenderer::Gainmap>::fromExisting(gainmap));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gBitmapMethods[] = {
@@ -1320,6 +1270,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         {"nativeIsSRGBLinear", "(J)Z", (void*)Bitmap_isSRGBLinear},
         {"nativeSetImmutable", "(J)V", (void*)Bitmap_setImmutable},
         {"nativeExtractGainmap", "(J)Landroid/graphics/Gainmap;", (void*)Bitmap_extractGainmap},
+        {"nativeSetGainmap", "(JJ)V", (void*)Bitmap_setGainmap},
 
         // ------------ @CriticalNative ----------------
         {"nativeIsImmutable", "(J)Z", (void*)Bitmap_isImmutable},

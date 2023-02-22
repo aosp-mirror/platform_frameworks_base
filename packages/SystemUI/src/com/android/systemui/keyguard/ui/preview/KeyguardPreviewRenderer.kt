@@ -97,6 +97,7 @@ constructor(
                     context,
                     displayManager.getDisplay(bundle.getInt(KEY_DISPLAY_ID)),
                     hostToken,
+                    "KeyguardPreviewRenderer"
                 )
             disposables.add(DisposableHandle { host.release() })
         }
@@ -170,7 +171,12 @@ constructor(
     }
 
     private fun setUpClock(parentView: ViewGroup) {
-        val clockChangeListener = ClockRegistry.ClockChangeListener { onClockChanged(parentView) }
+        val clockChangeListener =
+            object : ClockRegistry.ClockChangeListener {
+                override fun onCurrentClockChanged() {
+                    onClockChanged(parentView)
+                }
+            }
         clockRegistry.registerClockChangeListener(clockChangeListener)
         disposables.add(
             DisposableHandle { clockRegistry.unregisterClockChangeListener(clockChangeListener) }

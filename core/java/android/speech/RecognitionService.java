@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -92,6 +93,10 @@ public abstract class RecognitionService extends Service {
 
     private static final int MSG_TRIGGER_MODEL_DOWNLOAD = 6;
 
+    private static final int MSG_SET_MODEL_DOWNLOAD_LISTENER = 7;
+
+    private static final int MSG_CLEAR_MODEL_DOWNLOAD_LISTENER = 8;
+
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -110,13 +115,26 @@ public abstract class RecognitionService extends Service {
                     dispatchClearCallback((IRecognitionListener) msg.obj);
                     break;
                 case MSG_CHECK_RECOGNITION_SUPPORT:
-                    Pair<Intent, IRecognitionSupportCallback> intentAndListener =
-                            (Pair<Intent, IRecognitionSupportCallback>) msg.obj;
+                    CheckRecognitionSupportArgs checkArgs = (CheckRecognitionSupportArgs) msg.obj;
                     dispatchCheckRecognitionSupport(
-                            intentAndListener.first, intentAndListener.second);
+                            checkArgs.mIntent, checkArgs.callback, checkArgs.mAttributionSource);
                     break;
                 case MSG_TRIGGER_MODEL_DOWNLOAD:
-                    dispatchTriggerModelDownload((Intent) msg.obj);
+                    Pair<Intent, AttributionSource> params =
+                            (Pair<Intent, AttributionSource>) msg.obj;
+                    dispatchTriggerModelDownload(params.first, params.second);
+                    break;
+                case MSG_SET_MODEL_DOWNLOAD_LISTENER:
+                    ModelDownloadListenerArgs dListenerArgs = (ModelDownloadListenerArgs) msg.obj;
+                    dispatchSetModelDownloadListener(
+                            dListenerArgs.mIntent,
+                            dListenerArgs.mListener,
+                            dListenerArgs.mAttributionSource);
+                    break;
+                case MSG_CLEAR_MODEL_DOWNLOAD_LISTENER:
+                    Pair<Intent, AttributionSource> clearDlPair =
+                            (Pair<Intent, AttributionSource>) msg.obj;
+                    dispatchClearModelDownloadListener(clearDlPair.first, clearDlPair.second);
                     break;
             }
         }
@@ -142,6 +160,10 @@ public abstract class RecognitionService extends Service {
                 if (preflightPermissionCheckPassed) {
                     currentCallback = new Callback(listener, attributionSource);
                     sessionState = new SessionState(currentCallback);
+                    mSessions.put(listener.asBinder(), sessionState);
+                    if (DBG) {
+                        Log.d(TAG, "Added a new session to the map, pending permission checks");
+                    }
                     RecognitionService.this.onStartListening(intent, currentCallback);
                 }
 
@@ -151,16 +173,12 @@ public abstract class RecognitionService extends Service {
                     if (preflightPermissionCheckPassed) {
                         // If start listening was attempted, cancel the callback.
                         RecognitionService.this.onCancel(currentCallback);
+                        mSessions.remove(listener.asBinder());
                         finishDataDelivery(sessionState);
                         sessionState.reset();
                     }
                     Log.i(TAG, "#startListening received from a caller "
                             + "without permission " + Manifest.permission.RECORD_AUDIO + ".");
-                } else {
-                    if (DBG) {
-                        Log.d(TAG, "Added a new session to the map.");
-                    }
-                    mSessions.put(listener.asBinder(), sessionState);
                 }
             } else {
                 listener.onError(SpeechRecognizer.ERROR_CLIENT);
@@ -211,12 +229,69 @@ public abstract class RecognitionService extends Service {
     }
 
     private void dispatchCheckRecognitionSupport(
-            Intent intent, IRecognitionSupportCallback callback) {
-        RecognitionService.this.onCheckRecognitionSupport(intent, new SupportCallback(callback));
+            Intent intent, IRecognitionSupportCallback callback,
+            AttributionSource attributionSource) {
+        RecognitionService.this.onCheckRecognitionSupport(
+                intent,
+                attributionSource,
+                new SupportCallback(callback));
     }
 
-    private void dispatchTriggerModelDownload(Intent intent) {
-        RecognitionService.this.onTriggerModelDownload(intent);
+    private void dispatchTriggerModelDownload(
+            Intent intent,
+            AttributionSource attributionSource) {
+        RecognitionService.this.onTriggerModelDownload(intent, attributionSource);
+    }
+
+    private void dispatchSetModelDownloadListener(
+            Intent intent,
+            IModelDownloadListener listener,
+            AttributionSource attributionSource) {
+        RecognitionService.this.setModelDownloadListener(
+                intent,
+                attributionSource,
+                new ModelDownloadListener() {
+                    @Override
+                    public void onProgress(int completedPercent) {
+                        try {
+                            listener.onProgress(completedPercent);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        try {
+                            listener.onSuccess();
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
+
+                    @Override
+                    public void onScheduled() {
+                        try {
+                            listener.onScheduled();
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
+
+                    @Override
+                    public void onError(int error) {
+                        try {
+                            listener.onError(error);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
+                });
+    }
+
+    private void dispatchClearModelDownloadListener(
+            Intent intent, AttributionSource attributionSource) {
+        RecognitionService.this.clearModelDownloadListener(intent, attributionSource);
     }
 
     private static class StartListeningArgs {
@@ -230,6 +305,35 @@ public abstract class RecognitionService extends Service {
             this.mIntent = intent;
             this.mListener = listener;
             this.mAttributionSource = attributionSource;
+        }
+    }
+
+    private static class CheckRecognitionSupportArgs {
+        public final Intent mIntent;
+        public final IRecognitionSupportCallback callback;
+        public final AttributionSource mAttributionSource;
+
+        private CheckRecognitionSupportArgs(
+                Intent intent,
+                IRecognitionSupportCallback callback,
+                AttributionSource attributionSource) {
+            this.mIntent = intent;
+            this.callback = callback;
+            this.mAttributionSource = attributionSource;
+        }
+    }
+
+    private static class ModelDownloadListenerArgs {
+        final Intent mIntent;
+        final IModelDownloadListener mListener;
+        final AttributionSource mAttributionSource;
+
+        private ModelDownloadListenerArgs(Intent intent,
+                IModelDownloadListener listener,
+                AttributionSource attributionSource) {
+            mIntent = intent;
+            this.mListener = listener;
+            mAttributionSource = attributionSource;
         }
     }
 
@@ -298,11 +402,78 @@ public abstract class RecognitionService extends Service {
     }
 
     /**
+     * Queries the service on whether it would support a {@link #onStartListening(Intent, Callback)}
+     * for the same {@code recognizerIntent}.
+     *
+     * <p>The service will notify the caller about the level of support or error via
+     * {@link SupportCallback}.
+     *
+     * <p>If the service does not offer the support check it will notify the caller with
+     * {@link SpeechRecognizer#ERROR_CANNOT_CHECK_SUPPORT}.
+     *
+     * <p>Provides the calling AttributionSource to the service implementation so that permissions
+     * and bandwidth could be correctly blamed.</p>
+     */
+    public void onCheckRecognitionSupport(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource,
+            @NonNull SupportCallback supportCallback) {
+        onCheckRecognitionSupport(recognizerIntent, supportCallback);
+    }
+
+    /**
      * Requests the download of the recognizer support for {@code recognizerIntent}.
      */
     public void onTriggerModelDownload(@NonNull Intent recognizerIntent) {
         if (DBG) {
             Log.i(TAG, String.format("#downloadModel [%s]", recognizerIntent));
+        }
+    }
+
+    /**
+     * Requests the download of the recognizer support for {@code recognizerIntent}.
+     *
+     * <p>Provides the calling AttributionSource to the service implementation so that permissions
+     * and bandwidth could be correctly blamed.</p>
+     */
+    public void onTriggerModelDownload(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource) {
+        onTriggerModelDownload(recognizerIntent);
+    }
+
+    /**
+     * Sets a {@link ModelDownloadListener} to receive progress updates after
+     * {@link #onTriggerModelDownload} calls.
+     *
+     * @param recognizerIntent the request to monitor model download progress for.
+     * @param modelDownloadListener the listener to keep updated.
+     */
+    public void setModelDownloadListener(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource,
+            @NonNull ModelDownloadListener modelDownloadListener) {
+        if (DBG) {
+            Log.i(TAG, TextUtils.formatSimple(
+                    "#setModelDownloadListener [%s] [%s]",
+                    recognizerIntent,
+                    modelDownloadListener));
+        }
+        modelDownloadListener.onError(SpeechRecognizer.ERROR_CANNOT_LISTEN_TO_DOWNLOAD_EVENTS);
+    }
+
+    /**
+     * Clears the {@link ModelDownloadListener} set to receive progress updates for the given
+     * {@code recognizerIntent}, if any.
+     *
+     * @param recognizerIntent the request to monitor model download progress for.
+     */
+    public void clearModelDownloadListener(
+            @NonNull Intent recognizerIntent,
+            @NonNull AttributionSource attributionSource) {
+        if (DBG) {
+            Log.i(TAG, TextUtils.formatSimple(
+                    "#clearModelDownloadListener [%s]", recognizerIntent));
         }
     }
 
@@ -480,6 +651,39 @@ public abstract class RecognitionService extends Service {
         }
 
         /**
+         * The service should call this method when the language detection (and switching)
+         * results are available. This method can be called on any number of occasions
+         * at any time between {@link #beginningOfSpeech()} and {@link #endOfSpeech()},
+         * depending on the speech recognition service implementation.
+         *
+         * @param results the returned language detection (and switching) results.
+         *        <p> To retrieve the most confidently detected language IETF tag
+         *        (as defined by BCP 47, e.g., "en-US", "de-DE"),
+         *        use {@link Bundle#getString(String)}
+         *        with {@link SpeechRecognizer#DETECTED_LANGUAGE} as the parameter.
+         *        <p> To retrieve the language detection confidence level represented by a value
+         *        prefixed by {@code LANGUAGE_DETECTION_CONFIDENCE_LEVEL_} defined in
+         *        {@link SpeechRecognizer}, use {@link Bundle#getInt(String)} with
+         *        {@link SpeechRecognizer#LANGUAGE_DETECTION_CONFIDENCE_LEVEL} as the parameter.
+         *        <p> To retrieve the alternative locales for the same language
+         *        retrieved by the key {@link SpeechRecognizer#DETECTED_LANGUAGE},
+         *        use {@link Bundle#getStringArrayList(String)}
+         *        with {@link SpeechRecognizer#TOP_LOCALE_ALTERNATIVES} as the parameter.
+         *        <p> To retrieve the language switching results represented by a value
+         *        prefixed by {@code LANGUAGE_SWITCH_RESULT_}
+         *        and defined in {@link SpeechRecognizer}, use {@link Bundle#getInt(String)}
+         *        with {@link SpeechRecognizer#LANGUAGE_SWITCH_RESULT} as the parameter.
+         */
+        @SuppressLint("CallbackMethodName") // For consistency with existing methods.
+        public void languageDetection(@NonNull Bundle results) {
+            try {
+                mListener.onLanguageDetection(results);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Return the Linux uid assigned to the process that sent you the current transaction that
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */
@@ -524,7 +728,8 @@ public abstract class RecognitionService extends Service {
     public static class SupportCallback {
         private final IRecognitionSupportCallback mCallback;
 
-        private SupportCallback(IRecognitionSupportCallback callback) {
+        private SupportCallback(
+                IRecognitionSupportCallback callback) {
             this.mCallback = callback;
         }
 
@@ -596,22 +801,55 @@ public abstract class RecognitionService extends Service {
 
         @Override
         public void checkRecognitionSupport(
-                Intent recognizerIntent, IRecognitionSupportCallback callback) {
+                Intent recognizerIntent,
+                @NonNull AttributionSource attributionSource,
+                IRecognitionSupportCallback callback) {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(
                         Message.obtain(service.mHandler, MSG_CHECK_RECOGNITION_SUPPORT,
-                                Pair.create(recognizerIntent, callback)));
+                                new CheckRecognitionSupportArgs(
+                                        recognizerIntent, callback, attributionSource)));
             }
         }
 
         @Override
-        public void triggerModelDownload(Intent recognizerIntent) {
+        public void triggerModelDownload(
+                Intent recognizerIntent, @NonNull AttributionSource attributionSource) {
             final RecognitionService service = mServiceRef.get();
             if (service != null) {
                 service.mHandler.sendMessage(
                         Message.obtain(
-                                service.mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+                                service.mHandler, MSG_TRIGGER_MODEL_DOWNLOAD,
+                                Pair.create(recognizerIntent, attributionSource)));
+            }
+        }
+
+        @Override
+        public void setModelDownloadListener(
+                Intent recognizerIntent,
+                AttributionSource attributionSource,
+                IModelDownloadListener listener) throws RemoteException {
+            final RecognitionService service = mServiceRef.get();
+            if (service != null) {
+                service.mHandler.sendMessage(
+                        Message.obtain(service.mHandler, MSG_SET_MODEL_DOWNLOAD_LISTENER,
+                                new ModelDownloadListenerArgs(
+                                        recognizerIntent,
+                                        listener,
+                                        attributionSource)));
+            }
+        }
+
+        @Override
+        public void clearModelDownloadListener(
+                Intent recognizerIntent,
+                AttributionSource attributionSource) throws RemoteException {
+            final RecognitionService service = mServiceRef.get();
+            if (service != null) {
+                service.mHandler.sendMessage(
+                        Message.obtain(service.mHandler, MSG_CLEAR_MODEL_DOWNLOAD_LISTENER,
+                                Pair.create(recognizerIntent, attributionSource)));
             }
         }
 

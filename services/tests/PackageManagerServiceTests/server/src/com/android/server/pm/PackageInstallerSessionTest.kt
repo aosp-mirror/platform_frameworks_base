@@ -15,7 +15,6 @@
  */
 package com.android.server.pm
 
-import android.Manifest
 import android.content.Context
 import android.content.pm.PackageInstaller
 import android.content.pm.PackageInstaller.SessionParams
@@ -122,12 +121,10 @@ class PackageInstallerSessionTest {
         writeRestoreAssert(sessions).single().params.run {
             assertThat(legacyGrantedRuntimePermissions).asList()
                 .containsExactly("grantPermission", "denyToGrantPermission")
-            assertThat(finalPermissionStates)
+            assertThat(permissionStates)
                 .containsExactlyEntriesIn(mapOf(
                     "grantPermission" to PERMISSION_STATE_GRANTED,
                     "denyToGrantPermission" to PERMISSION_STATE_GRANTED,
-                    // Fullscreen Intent is auto-granted if the caller has no opinion
-                    Manifest.permission.USE_FULL_SCREEN_INTENT to PERMISSION_STATE_GRANTED,
                     "denyPermission" to PERMISSION_STATE_DENIED,
                     "grantToDenyPermission" to PERMISSION_STATE_DENIED,
                 ))
@@ -282,7 +279,7 @@ class PackageInstallerSessionTest {
         assertThat(expected.referrerUri).isEqualTo(actual.referrerUri)
         assertThat(expected.abiOverride).isEqualTo(actual.abiOverride)
         assertThat(expected.volumeUuid).isEqualTo(actual.volumeUuid)
-        assertThat(expected.finalPermissionStates).isEqualTo(actual.finalPermissionStates)
+        assertThat(expected.permissionStates).isEqualTo(actual.permissionStates)
         assertThat(expected.installerPackageName).isEqualTo(actual.installerPackageName)
         assertThat(expected.isMultiPackage).isEqualTo(actual.isMultiPackage)
         assertThat(expected.isStaged).isEqualTo(actual.isStaged)

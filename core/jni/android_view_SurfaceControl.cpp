@@ -427,7 +427,7 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return 0;
     } else if (err != NO_ERROR) {
-        jniThrowException(env, OutOfResourcesException, NULL);
+        jniThrowException(env, OutOfResourcesException, statusToString(err).c_str());
         return 0;
     }
 
@@ -637,6 +637,13 @@ static void nativeSetExtendedRangeBrightness(JNIEnv* env, jclass clazz, jlong tr
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     transaction->setExtendedRangeBrightness(ctrl, currentBufferRatio, desiredRatio);
+}
+
+static void nativeSetCachingHint(JNIEnv* env, jclass clazz, jlong transactionObj,
+                                 jlong nativeObject, jint cachingHint) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    transaction->setCachingHint(ctrl, static_cast<gui::CachingHint>(cachingHint));
 }
 
 static void nativeSetBlurRegions(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2204,6 +2211,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetDataSpace },
     {"nativeSetExtendedRangeBrightness", "(JJFF)V",
             (void*)nativeSetExtendedRangeBrightness },
+            {"nativeSetCachingHint", "(JJI)V",
+            (void*)nativeSetCachingHint },
     {"nativeAddWindowInfosReportedListener", "(JLjava/lang/Runnable;)V",
             (void*)nativeAddWindowInfosReportedListener },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",

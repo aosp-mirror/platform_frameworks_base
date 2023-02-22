@@ -57,10 +57,8 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎‎‏‎‏‎‏‎‏‏‎‏‎‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‏‎‎‏‎‎Sign-in options‎‏‎‎‏‎"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‏‎‏‎‎‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎‎For ‎‏‎‎‏‏‎<xliff:g id="USERNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‏‏‎‎‎‎‏‏‎‎‏‎‎‎Locked password managers‎‏‎‎‏‎"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‎‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‏‎‏‎‎‎‏‏‎‎‏‎‎‎‏‎Tap to unlock‎‏‎‎‏‎"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‎‎‏‏‎‏‏‎‎‎‎‏‏‎‏‎‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‎‏‎‏‎No sign-in info‎‏‎‎‏‎"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‏‎‎‎‏‎‏‎‏‎‎‎‏‎‎‏‏‏‎‎‏‏‏‎‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎Manage sign-ins‎‏‎‎‏‎"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‎‎‎‏‎‏‏‎‏‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‎‎‎‎From another device‎‏‎‎‏‎"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‎‎‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‏‏‏‎‏‎Use a different device‎‏‎‎‏‎"</string>

@@ -19,10 +19,12 @@ package android.app;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityTaskManager;
+import android.app.ApplicationStartInfo;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ContentProviderHolder;
 import android.app.GrantedUriPermission;
+import android.app.IApplicationStartInfoCompleteListener;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
@@ -93,7 +95,7 @@ interface IActivityManager {
     // below block of transactions.
 
     // Since these transactions are also called from native code, these must be kept in sync with
-    // the ones in frameworks/native/libs/binder/include/binder/IActivityManager.h
+    // the ones in frameworks/native/libs/binder/include_activitymanager/binder/ActivityManager.h
     // =============== Beginning of transactions used on native side as well ======================
     ParcelFileDescriptor openContentUri(in String uriString);
     void registerUidObserver(in IUidObserver observer, int which, int cutpoint,
@@ -170,10 +172,10 @@ interface IActivityManager {
     // Currently keeping old bindService because it is on the greylist
     @UnsupportedAppUsage
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
-            in String resolvedType, in IServiceConnection connection, int flags,
+            in String resolvedType, in IServiceConnection connection, long flags,
             in String callingPackage, int userId);
     int bindServiceInstance(in IApplicationThread caller, in IBinder token, in Intent service,
-            in String resolvedType, in IServiceConnection connection, int flags,
+            in String resolvedType, in IServiceConnection connection, long flags,
             in String instanceName, in String callingPackage, int userId);
     void updateServiceGroup(in IServiceConnection connection, int group, int importance);
     @UnsupportedAppUsage
@@ -345,7 +347,7 @@ interface IActivityManager {
     String getProviderMimeType(in Uri uri, int userId);
 
     oneway void getProviderMimeTypeAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
-
+    oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,
             boolean runGc, in String path, in ParcelFileDescriptor fd,
@@ -485,8 +487,18 @@ interface IActivityManager {
 
     // Start of L transactions
     String getTagForIntentSender(in IIntentSender sender, in String prefix);
+
+    /**
+      * Starts a user in the background (i.e., while another user is running in the foreground).
+      *
+      * Notice that a background user is "invisible" and cannot launch activities. Starting on
+      * Android U, all users started with this method are invisible, even profiles (prior to Android
+      * U, profiles started with this method would be visible if its parent was the current user) -
+      * if you want to start a profile visible, you should call {@code startProfile()} instead.
+      */
     @UnsupportedAppUsage
     boolean startUserInBackground(int userid);
+
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isInLockTaskMode();
     @UnsupportedAppUsage
@@ -634,6 +646,45 @@ interface IActivityManager {
     void appNotResponding(String reason);
 
     /**
+     * Return a list of {@link ApplicationStartInfo} records.
+     *
+     * <p class="note"> Note: System stores historical information in a ring buffer, older
+     * records would be overwritten by newer records. </p>
+     *
+     * @param packageName Optional, an empty value means match all packages belonging to the
+     *                    caller's UID. If this package belongs to another UID, you must hold
+     *                    {@link android.Manifest.permission#DUMP} in order to retrieve it.
+     * @param maxNum      Optional, the maximum number of results should be returned; A value of 0
+     *                    means to ignore this parameter and return all matching records
+     * @param userId      The userId in the multi-user environment.
+     *
+     * @return a list of {@link ApplicationStartInfo} records with the matching criteria, sorted in
+     *         the order from most recent to least recent.
+     */
+    ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(String packageName,
+            int maxNum, int userId);
+
+
+    /**
+     * Sets a callback for {@link ApplicationStartInfo} upon completion of collecting startup data.
+     *
+     * <p class="note"> Note: completion of startup is no guaranteed and as such this callback may not occur.</p>
+     *
+     * @param listener    A listener to for the callback upon completion of startup data collection.
+     * @param userId      The userId in the multi-user environment.
+     */
+    void setApplicationStartInfoCompleteListener(IApplicationStartInfoCompleteListener listener,
+            int userId);
+
+
+    /**
+     * Removes callback for {@link ApplicationStartInfo} upon completion of collecting startup data.
+     *
+     * @param userId      The userId in the multi-user environment.
+     */
+    void removeApplicationStartInfoCompleteListener(int userId);
+
+    /**
      * Return a list of {@link ApplicationExitInfo} records.
      *
      * <p class="note"> Note: System stores these historical information in a ring buffer, older
@@ -772,6 +823,7 @@ interface IActivityManager {
 
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
+    void waitForBroadcastBarrier();
 
     /** Delays delivering broadcasts to the specified package. */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.DUMP)")
@@ -822,4 +874,13 @@ interface IActivityManager {
 
     /** Returns if the service is a short-service is still "alive" and past the timeout. */
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
+
+    /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
+    oneway void logFgsApiBegin(int apiType, int appUid, int appPid);
+
+    /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
+    oneway void logFgsApiEnd(int apiType, int appUid, int appPid);
+
+    /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
+    oneway void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
 }

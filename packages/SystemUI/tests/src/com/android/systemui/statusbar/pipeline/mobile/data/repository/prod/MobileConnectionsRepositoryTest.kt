@@ -42,10 +42,10 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionMod
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
+import com.android.systemui.statusbar.pipeline.mobile.shared.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
-import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
-import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
@@ -86,7 +86,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
-    @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var summaryLogger: TableLogBuffer
     @Mock private lateinit var logBufferFactory: TableLogBufferFactory
 
@@ -896,21 +896,31 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         // Subscription 1
         private const val SUB_1_ID = 1
+        private val GROUP_1 = ParcelUuid(UUID.randomUUID())
         private val SUB_1 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_1_ID)
-                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+                whenever(it.groupUuid).thenReturn(GROUP_1)
             }
-        private val MODEL_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
+        private val MODEL_1 =
+            SubscriptionModel(
+                subscriptionId = SUB_1_ID,
+                groupUuid = GROUP_1,
+            )
 
         // Subscription 2
         private const val SUB_2_ID = 2
+        private val GROUP_2 = ParcelUuid(UUID.randomUUID())
         private val SUB_2 =
             mock<SubscriptionInfo>().also {
                 whenever(it.subscriptionId).thenReturn(SUB_2_ID)
-                whenever(it.groupUuid).thenReturn(ParcelUuid(UUID.randomUUID()))
+                whenever(it.groupUuid).thenReturn(GROUP_2)
             }
-        private val MODEL_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
+        private val MODEL_2 =
+            SubscriptionModel(
+                subscriptionId = SUB_2_ID,
+                groupUuid = GROUP_2,
+            )
 
         // Subs 3 and 4 are considered to be in the same group ------------------------------------
         private val GROUP_ID_3_4 = ParcelUuid(UUID.randomUUID())

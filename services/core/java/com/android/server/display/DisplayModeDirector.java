@@ -1352,6 +1352,8 @@ public class DisplayModeDirector {
                     return "PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE";
                 case PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE:
                     return "PRIORITY_AUTH_OPTIMIZER_RENDER_FRAME_RATE";
+                case PRIORITY_LAYOUT_LIMITED_FRAME_RATE:
+                    return "PRIORITY_LAYOUT_LIMITED_FRAME_RATE";
                 default:
                     return Integer.toString(priority);
             }
@@ -3236,10 +3238,7 @@ public class DisplayModeDirector {
 
         @Override
         public boolean supportsFrameRateOverride() {
-            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(true)
-                            && !SurfaceFlingerProperties.frame_rate_override_for_native_rates()
-                                    .orElse(false)
-                            && SurfaceFlingerProperties.frame_rate_override_global().orElse(true);
+            return SurfaceFlingerProperties.enable_frame_rate_override().orElse(true);
         }
 
         private DisplayManager getDisplayManager() {

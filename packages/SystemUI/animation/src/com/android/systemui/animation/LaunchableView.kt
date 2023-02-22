@@ -35,8 +35,7 @@ interface LaunchableView {
      *
      * Note that calls to [View.setTransitionVisibility] shouldn't be blocked.
      *
-     * @param block whether we should block/postpone all calls to `setVisibility` and
-     * `setTransitionVisibility`.
+     * @param block whether we should block/postpone all calls to `setVisibility`.
      */
     fun setShouldBlockVisibilityChanges(block: Boolean)
 }

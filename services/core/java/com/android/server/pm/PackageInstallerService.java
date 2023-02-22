@@ -172,7 +172,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private static final int ADB_DEV_MODE = PackageManager.INSTALL_FROM_ADB
             | PackageManager.INSTALL_ALLOW_TEST;
 
-    private static final Set<String> ALLOWED_PERMISSION_STATE_NAMES = Set.of(
+    /**
+     * Set of app op permissions that the installer of a session is allowed to change through
+     * {@link PackageInstaller.SessionParams#setPermissionState(String, int)}.
+     */
+    public static final Set<String> INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS = Set.of(
             Manifest.permission.USE_FULL_SCREEN_INTENT
     );
 
@@ -765,6 +769,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        if ((params.installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0
+                && !PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)
+                && !Build.IS_DEBUGGABLE) {
+            // If the bypass flag is set, but not running as system root or shell then remove
+            // the flag
+            params.installFlags &= ~PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
+        }
+
         if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0
                 && !PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)
                 && (snapshot.getFlagsForUid(callingUid) & ApplicationInfo.FLAG_SYSTEM)
@@ -804,12 +816,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         + " PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS flag");
             }
 
-            var permissionStates = params.getFinalPermissionStates();
+            var permissionStates = params.getPermissionStates();
             if (!permissionStates.isEmpty()) {
                 if (!hasInstallGrantRuntimePermissions) {
                     for (int index = 0; index < permissionStates.size(); index++) {
                         var permissionName = permissionStates.keyAt(index);
-                        if (!ALLOWED_PERMISSION_STATE_NAMES.contains(permissionName)) {
+                        if (!INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS.contains(permissionName)) {
                             throw new SecurityException("You need the "
                                     + Manifest.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS
                                     + " permission to grant runtime permissions for a session");
@@ -912,6 +924,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         if (requestedInstallerPackageUid == INVALID_UID) {
             // Requested installer package is invalid, reset it
             requestedInstallerPackageName = null;
+        }
+
+        final var dpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
+        if (dpmi != null && dpmi.isUserOrganizationManaged(userId)) {
+            params.installFlags |= PackageManager.INSTALL_FROM_MANAGED_USER_OR_PROFILE;
         }
 
         if (isApex || mContext.checkCallingOrSelfPermission(

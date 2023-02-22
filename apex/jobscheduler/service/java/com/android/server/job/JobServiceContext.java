@@ -24,7 +24,9 @@ import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManagerInternal;
 import android.app.Notification;
+import android.app.compat.CompatChanges;
 import android.app.job.IJobCallback;
 import android.app.job.IJobService;
 import android.app.job.JobInfo;
@@ -32,6 +34,9 @@ import android.app.job.JobParameters;
 import android.app.job.JobProtoEnums;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
+import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +62,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -87,11 +93,22 @@ public final class JobServiceContext implements ServiceConnection {
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
     private static final boolean DEBUG_STANDBY = JobSchedulerService.DEBUG_STANDBY;
 
+    /**
+     * Whether to trigger an ANR when apps are slow to respond on pre-UDC APIs and functionality.
+     */
+    @ChangeId
+    @Disabled
+    // TODO(258236856): Enable after test is fixed
+    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    private static final long ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES = 258236856L;
+
     private static final String TAG = "JobServiceContext";
     /** Amount of time the JobScheduler waits for the initial service launch+bind. */
     private static final long OP_BIND_TIMEOUT_MILLIS = 18 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     /** Amount of time the JobScheduler will wait for a response from an app for a message. */
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+    /** Amount of time the JobScheduler will wait for a job to provide a required notification. */
+    private static final long NOTIFICATION_TIMEOUT_MILLIS = 10_000L * Build.HW_TIMEOUT_MULTIPLIER;
 
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
@@ -119,6 +136,7 @@ public final class JobServiceContext implements ServiceConnection {
     /** Used for service binding, etc. */
     private final Context mContext;
     private final Object mLock;
+    private final ActivityManagerInternal mActivityManagerInternal;
     private final IBatteryStats mBatteryStats;
     private final EconomyManagerInternal mEconomyManagerInternal;
     private final JobPackageTracker mJobPackageTracker;
@@ -174,6 +192,8 @@ public final class JobServiceContext implements ServiceConnection {
     private long mMinExecutionGuaranteeMillis;
     /** The absolute maximum amount of time the job can run */
     private long mMaxExecutionTimeMillis;
+    /** Whether this job is required to provide a notification and we're still waiting for it. */
+    private boolean mAwaitingNotification;
 
     private long mEstimatedDownloadBytes;
     private long mEstimatedUploadBytes;
@@ -270,6 +290,7 @@ public final class JobServiceContext implements ServiceConnection {
         mContext = service.getContext();
         mLock = service.getLock();
         mService = service;
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mBatteryStats = batteryStats;
         mEconomyManagerInternal = LocalServices.getService(EconomyManagerInternal.class);
         mJobPackageTracker = tracker;
@@ -331,6 +352,7 @@ public final class JobServiceContext implements ServiceConnection {
             mEstimatedDownloadBytes = job.getEstimatedNetworkDownloadBytes();
             mEstimatedUploadBytes = job.getEstimatedNetworkUploadBytes();
             mTransferredDownloadBytes = mTransferredUploadBytes = 0;
+            mAwaitingNotification = job.isUserVisibleJob();
 
             final long whenDeferred = job.getWhenStandbyDeferred();
             if (whenDeferred > 0) {
@@ -439,7 +461,8 @@ public final class JobServiceContext implements ServiceConnection {
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
                     job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
-                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
+                    mExecutionStartTimeElapsed - job.enqueueTime);
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
@@ -591,17 +614,16 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     @GuardedBy("mLock")
-    boolean timeoutIfExecutingLocked(String pkgName, int userId, @Nullable String namespace,
-            boolean matchJobId, int jobId, String reason) {
+    boolean stopIfExecutingLocked(String pkgName, int userId, @Nullable String namespace,
+            boolean matchJobId, int jobId, int stopReason, int internalStopReason) {
         final JobStatus executing = getRunningJobLocked();
         if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
                 && Objects.equals(namespace, executing.getNamespace())
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
-                mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
-                        JobParameters.INTERNAL_STOP_REASON_TIMEOUT, reason);
-                sendStopMessageLocked("force timeout from shell");
+                mParams.setStopReason(stopReason, internalStopReason, "stop from shell");
+                sendStopMessageLocked("stop from shell");
                 return true;
             }
         }
@@ -755,6 +777,12 @@ public final class JobServiceContext implements ServiceConnection {
                 mNotificationCoordinator.enqueueNotification(this, callingPkgName,
                         callingPid, callingUid, notificationId,
                         notification, jobEndNotificationPolicy);
+                if (mAwaitingNotification) {
+                    mAwaitingNotification = false;
+                    if (mVerb == VERB_EXECUTING) {
+                        scheduleOpTimeOutLocked();
+                    }
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1121,23 +1149,31 @@ public final class JobServiceContext implements ServiceConnection {
     private void handleOpTimeoutLocked() {
         switch (mVerb) {
             case VERB_BINDING:
-                Slog.w(TAG, "Time-out while trying to bind " + getRunningJobNameLocked()
-                        + ", dropping.");
-                closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while binding");
+                onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                        /* debugReason */ "timed out while binding",
+                        /* anrMessage */ "Timed out while trying to bind",
+                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
+                            mRunningJob.getUid()));
                 break;
             case VERB_STARTING:
                 // Client unresponsive - wedged or failed to respond in time. We don't really
                 // know what happened so let's log it and notify the JobScheduler
                 // FINISHED/NO-RETRY.
-                Slog.w(TAG, "No response from client for onStartJob "
-                        + getRunningJobNameLocked());
-                closeAndCleanupJobLocked(false /* needsReschedule */, "timed out while starting");
+                onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                        /* debugReason */ "timed out while starting",
+                        /* anrMessage */ "No response to onStartJob",
+                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
+                            mRunningJob.getUid()));
                 break;
             case VERB_STOPPING:
                 // At least we got somewhere, so fail but ask the JobScheduler to reschedule.
-                Slog.w(TAG, "No response from client for onStopJob "
-                        + getRunningJobNameLocked());
-                closeAndCleanupJobLocked(true /* needsReschedule */, "timed out while stopping");
+                // Don't update the stop reasons since we were already stopping the job for some
+                // other reason.
+                onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ false,
+                        /* debugReason */ "timed out while stopping",
+                        /* anrMessage */ "No response to onStopJob",
+                        CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
+                            mRunningJob.getUid()));
                 break;
             case VERB_EXECUTING:
                 if (mPendingStopReason != JobParameters.STOP_REASON_UNDEFINED) {
@@ -1159,6 +1195,8 @@ public final class JobServiceContext implements ServiceConnection {
                 }
                 final long latestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
+                final long earliestStopTimeElapsed =
+                        mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 if (nowElapsed >= latestStopTimeElapsed) {
                     // Not an error - client ran out of time.
@@ -1167,7 +1205,7 @@ public final class JobServiceContext implements ServiceConnection {
                     mParams.setStopReason(JobParameters.STOP_REASON_TIMEOUT,
                             JobParameters.INTERNAL_STOP_REASON_TIMEOUT, "client timed out");
                     sendStopMessageLocked("timeout while executing");
-                } else {
+                } else if (nowElapsed >= earliestStopTimeElapsed) {
                     // We've given the app the minimum execution time. See if we should stop it or
                     // let it continue running
                     final String reason = mJobConcurrencyManager.shouldStopRunningJobLocked(this);
@@ -1185,6 +1223,14 @@ public final class JobServiceContext implements ServiceConnection {
                                 + " continue to run past min execution time");
                         scheduleOpTimeOutLocked();
                     }
+                } else if (mAwaitingNotification) {
+                    onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ true,
+                            /* debugReason */ "timed out while stopping",
+                            /* anrMessage */ "required notification not provided",
+                            /* triggerAnr */ true);
+                } else {
+                    Slog.e(TAG, "Unexpected op timeout while EXECUTING");
+                    scheduleOpTimeOutLocked();
                 }
                 break;
             default:
@@ -1216,6 +1262,24 @@ public final class JobServiceContext implements ServiceConnection {
             // The job's host app apparently crashed during the job, so we should reschedule.
             closeAndCleanupJobLocked(true /* reschedule */, "host crashed when trying to stop");
         }
+    }
+
+    @GuardedBy("mLock")
+    private void onSlowAppResponseLocked(boolean reschedule, boolean updateStopReasons,
+            @NonNull String debugReason, @NonNull String anrMessage, boolean triggerAnr) {
+        Slog.w(TAG, anrMessage + " for " + getRunningJobNameLocked());
+        if (updateStopReasons) {
+            mParams.setStopReason(
+                    JobParameters.STOP_REASON_UNDEFINED,
+                    JobParameters.INTERNAL_STOP_REASON_ANR,
+                    debugReason);
+        }
+        if (triggerAnr) {
+            mActivityManagerInternal.appNotResponding(
+                    mRunningJob.serviceProcessName, mRunningJob.getUid(),
+                    TimeoutRecord.forJobService(anrMessage));
+        }
+        closeAndCleanupJobLocked(reschedule, debugReason);
     }
 
     /**
@@ -1293,7 +1357,8 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
                 completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
-                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
+                0);
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
@@ -1360,20 +1425,24 @@ public final class JobServiceContext implements ServiceConnection {
     private void scheduleOpTimeOutLocked() {
         removeOpTimeOutLocked();
 
-        // TODO(260848384): enforce setNotification timeout for user-initiated jobs
         final long timeoutMillis;
         switch (mVerb) {
             case VERB_EXECUTING:
+                long minTimeout;
                 final long earliestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMinExecutionGuaranteeMillis;
                 final long latestStopTimeElapsed =
                         mExecutionStartTimeElapsed + mMaxExecutionTimeMillis;
                 final long nowElapsed = sElapsedRealtimeClock.millis();
                 if (nowElapsed < earliestStopTimeElapsed) {
-                    timeoutMillis = earliestStopTimeElapsed - nowElapsed;
+                    minTimeout = earliestStopTimeElapsed - nowElapsed;
                 } else {
-                    timeoutMillis = latestStopTimeElapsed - nowElapsed;
+                    minTimeout = latestStopTimeElapsed - nowElapsed;
                 }
+                if (mAwaitingNotification) {
+                    minTimeout = Math.min(minTimeout, NOTIFICATION_TIMEOUT_MILLIS);
+                }
+                timeoutMillis = minTimeout;
                 break;
 
             case VERB_BINDING:

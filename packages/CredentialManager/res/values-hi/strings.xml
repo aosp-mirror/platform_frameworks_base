@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"जारी रखें"</string>
     <string name="string_more_options" msgid="7990658711962795124">"ज़्यादा विकल्प"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ज़्यादा जानें"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड दिखाएं"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड छिपाएं"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकी के साथ सुरक्षित रहें"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"पासकी होने पर, आपको जटिल पासवर्ड बनाने या याद रखने की ज़रूरत नहीं पड़ती"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी, एन्क्रिप्ट (सुरक्षित) की गई डिजिटल की होती हैं. इन्हें फ़िंगरप्रिंट, चेहरे या स्क्रीन लॉक का इस्तेमाल करके बनाया जाता है"</string>

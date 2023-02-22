@@ -1942,12 +1942,11 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = mDisplayContent;
         final DisplayRotation dr = dc.getDisplayRotation();
         spyOn(dr);
-        // Rotate 180 degree so the display doesn't have configuration change. This condition is
-        // used for the later verification of stop-freezing (without setting mWaitingForConfig).
         doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
         doAnswer(invocation -> {
             continued[0] = true;
+            mDisplayContent.mWaitingForConfig = false;
             mAtm.addWindowLayoutReasons(ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
             return true;
         }).when(dc).updateDisplayOverrideConfigurationLocked();

@@ -712,6 +712,15 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_NO_DISMISS = 0x00002000;
 
+    /**
+     * Bit to be bitwise-ORed into the {@link #flags} field that should be
+     * set by the system if the app that sent this notification does not have the permission to send
+     * full screen intents.
+     *
+     * This flag is for internal use only; applications cannot set this flag directly.
+     * @hide
+     */
+    public static final int FLAG_FSI_REQUESTED_BUT_DENIED = 0x00004000;
 
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
@@ -4624,16 +4633,15 @@ public class Notification implements Parcelable
         /**
          * Set whether this is an "ongoing" notification.
          *
-
-         * Ongoing notifications cannot be dismissed by the user, so your application or service
-         * must take care of canceling them.
+         * Ongoing notifications cannot be dismissed by the user on locked devices, or by
+         * notification listeners, and some notifications  (device management, media) cannot be
+         * dismissed on unlocked devices, so your application or service must take
+         * care of canceling them.
          *
-
          * They are typically used to indicate a background task that the user is actively engaged
          * with (e.g., playing music) or is pending in some way and therefore occupying the device
          * (e.g., a file download, sync operation, active network connection).
          *
-
          * @see Notification#FLAG_ONGOING_EVENT
          */
         @NonNull
@@ -5241,17 +5249,17 @@ public class Notification implements Parcelable
             boolean hasSecondLine = showProgress;
             if (p.hasTitle()) {
                 contentView.setViewVisibility(p.mTitleViewId, View.VISIBLE);
-                contentView.setTextViewText(p.mTitleViewId, processTextSpans(p.title));
+                contentView.setTextViewText(p.mTitleViewId, processTextSpans(p.mTitle));
                 setTextViewColorPrimary(contentView, p.mTitleViewId, p);
             } else if (p.mTitleViewId != R.id.title) {
                 // This alternate title view ID is not cleared by resetStandardTemplate
                 contentView.setViewVisibility(p.mTitleViewId, View.GONE);
                 contentView.setTextViewText(p.mTitleViewId, null);
             }
-            if (p.text != null && p.text.length() != 0
+            if (p.mText != null && p.mText.length() != 0
                     && (!showProgress || p.mAllowTextWithProgress)) {
                 contentView.setViewVisibility(p.mTextViewId, View.VISIBLE);
-                contentView.setTextViewText(p.mTextViewId, processTextSpans(p.text));
+                contentView.setTextViewText(p.mTextViewId, processTextSpans(p.mText));
                 setTextViewColorSecondary(contentView, p.mTextViewId, p);
                 hasSecondLine = true;
             } else if (p.mTextViewId != R.id.text) {
@@ -5525,20 +5533,20 @@ public class Notification implements Parcelable
             if (p.mHideSubText) {
                 return false;
             }
-            CharSequence summaryText = p.summaryText;
-            if (summaryText == null && mStyle != null && mStyle.mSummaryTextSet
+            CharSequence headerText = p.mSubText;
+            if (headerText == null && mStyle != null && mStyle.mSummaryTextSet
                     && mStyle.hasSummaryInHeader()) {
-                summaryText = mStyle.mSummaryText;
+                headerText = mStyle.mSummaryText;
             }
-            if (summaryText == null
+            if (headerText == null
                     && mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.N
                     && mN.extras.getCharSequence(EXTRA_INFO_TEXT) != null) {
-                summaryText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
+                headerText = mN.extras.getCharSequence(EXTRA_INFO_TEXT);
             }
-            if (!TextUtils.isEmpty(summaryText)) {
+            if (!TextUtils.isEmpty(headerText)) {
                 // TODO: Remove the span entirely to only have the string with propper formating.
                 contentView.setTextViewText(R.id.header_text, processTextSpans(
-                        processLegacyText(summaryText)));
+                        processLegacyText(headerText)));
                 setTextViewColorSecondary(contentView, R.id.header_text, p);
                 contentView.setViewVisibility(R.id.header_text, View.VISIBLE);
                 if (hasTextToLeft) {
@@ -5558,9 +5566,9 @@ public class Notification implements Parcelable
             if (p.mHideSubText) {
                 return false;
             }
-            if (!TextUtils.isEmpty(p.headerTextSecondary)) {
+            if (!TextUtils.isEmpty(p.mHeaderTextSecondary)) {
                 contentView.setTextViewText(R.id.header_text_secondary, processTextSpans(
-                        processLegacyText(p.headerTextSecondary)));
+                        processLegacyText(p.mHeaderTextSecondary)));
                 setTextViewColorSecondary(contentView, R.id.header_text_secondary, p);
                 contentView.setViewVisibility(R.id.header_text_secondary, View.VISIBLE);
                 if (hasTextToLeft) {
@@ -5750,7 +5758,10 @@ public class Notification implements Parcelable
             List<Notification.Action> nonContextualActions = getNonContextualActions();
 
             int numActions = Math.min(nonContextualActions.size(), MAX_ACTION_BUTTONS);
-            boolean emphazisedMode = mN.fullScreenIntent != null || p.mCallStyleActions;
+            boolean emphazisedMode = mN.fullScreenIntent != null
+                    || p.mCallStyleActions
+                    || ((mN.flags & FLAG_FSI_REQUESTED_BUT_DENIED) != 0);
+
             if (p.mCallStyleActions) {
                 // Clear view padding to allow buttons to start on the left edge.
                 // This must be done before 'setEmphasizedMode' which sets top/bottom margins.
@@ -6164,7 +6175,7 @@ public class Notification implements Parcelable
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
                     .highlightExpander(false)
                     .fillTextsFrom(this);
-            if (!useRegularSubtext || TextUtils.isEmpty(p.summaryText)) {
+            if (!useRegularSubtext || TextUtils.isEmpty(p.mSubText)) {
                 p.summaryText(createSummaryText());
             }
             RemoteViews header = makeNotificationHeader(p);
@@ -6981,8 +6992,10 @@ public class Notification implements Parcelable
     /**
      * Returns whether an app can colorize due to the android.permission.USE_COLORIZED_NOTIFICATIONS
      * permission. The permission is checked when a notification is enqueued.
+     *
+     * @hide
      */
-    private boolean hasColorizedPermission() {
+    public boolean hasColorizedPermission() {
         return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
     }
 
@@ -7179,7 +7192,7 @@ public class Notification implements Parcelable
             checkBuilder();
 
             if (mBigContentTitle != null) {
-                p.title = mBigContentTitle;
+                p.mTitle = mBigContentTitle;
             }
 
             return mBuilder.applyStandardTemplateWithActions(layoutId, p, result);
@@ -7829,6 +7842,14 @@ public class Notification implements Parcelable
      * notification and its avatars. For conversations involving multiple people, the app should
      * also make sure that it marks the conversation as a group with
      * {@link #setGroupConversation(boolean)}.
+     *
+     * <p>
+     * From Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, messaging style
+     * notifications that are associated with a valid conversation shortcut
+     * (via {@link Notification.Builder#setShortcutId(String)}) are displayed in a dedicated
+     * conversation section in the shade above non-conversation alerting and silence notifications.
+     * To be a valid conversation shortcut, the shortcut must be a
+     * {@link ShortcutInfo#setLongLived()} dynamic or cached sharing shortcut.
      *
      * <p>
      * This class is a "rebuilder": It attaches to a Builder object and modifies its behavior.
@@ -12434,10 +12455,10 @@ public class Notification implements Parcelable
         boolean mAllowTextWithProgress;
         int mTitleViewId;
         int mTextViewId;
-        CharSequence title;
-        CharSequence text;
-        CharSequence headerTextSecondary;
-        CharSequence summaryText;
+        @Nullable CharSequence mTitle;
+        @Nullable CharSequence mText;
+        @Nullable CharSequence mHeaderTextSecondary;
+        @Nullable CharSequence mSubText;
         int maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
         boolean allowColorization  = true;
         boolean mHighlightExpander = false;
@@ -12459,10 +12480,10 @@ public class Notification implements Parcelable
             mAllowTextWithProgress = false;
             mTitleViewId = R.id.title;
             mTextViewId = R.id.text;
-            title = null;
-            text = null;
-            summaryText = null;
-            headerTextSecondary = null;
+            mTitle = null;
+            mText = null;
+            mSubText = null;
+            mHeaderTextSecondary = null;
             maxRemoteInputHistory = Style.MAX_REMOTE_INPUT_HISTORY_LINES;
             allowColorization = true;
             mHighlightExpander = false;
@@ -12470,7 +12491,7 @@ public class Notification implements Parcelable
         }
 
         final boolean hasTitle() {
-            return !TextUtils.isEmpty(title) && !mHideTitle;
+            return !TextUtils.isEmpty(mTitle) && !mHideTitle;
         }
 
         final StandardTemplateParams viewType(int viewType) {
@@ -12543,23 +12564,23 @@ public class Notification implements Parcelable
             return this;
         }
 
-        final StandardTemplateParams title(CharSequence title) {
-            this.title = title;
+        final StandardTemplateParams title(@Nullable CharSequence title) {
+            this.mTitle = title;
             return this;
         }
 
-        final StandardTemplateParams text(CharSequence text) {
-            this.text = text;
+        final StandardTemplateParams text(@Nullable CharSequence text) {
+            this.mText = text;
             return this;
         }
 
-        final StandardTemplateParams summaryText(CharSequence text) {
-            this.summaryText = text;
+        final StandardTemplateParams summaryText(@Nullable CharSequence text) {
+            this.mSubText = text;
             return this;
         }
 
-        final StandardTemplateParams headerTextSecondary(CharSequence text) {
-            this.headerTextSecondary = text;
+        final StandardTemplateParams headerTextSecondary(@Nullable CharSequence text) {
+            this.mHeaderTextSecondary = text;
             return this;
         }
 
@@ -12586,9 +12607,9 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams fillTextsFrom(Builder b) {
             Bundle extras = b.mN.extras;
-            this.title = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
-            this.text = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
-            this.summaryText = extras.getCharSequence(EXTRA_SUB_TEXT);
+            this.mTitle = b.processLegacyText(extras.getCharSequence(EXTRA_TITLE));
+            this.mText = b.processLegacyText(extras.getCharSequence(EXTRA_TEXT));
+            this.mSubText = extras.getCharSequence(EXTRA_SUB_TEXT);
             return this;
         }
 

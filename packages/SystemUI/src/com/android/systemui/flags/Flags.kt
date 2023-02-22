@@ -59,7 +59,7 @@ object Flags {
         )
 
     // TODO(b/254512517): Tracking Bug
-    val FSI_REQUIRES_KEYGUARD = unreleasedFlag(110, "fsi_requires_keyguard", teamfood = true)
+    val FSI_REQUIRES_KEYGUARD = releasedFlag(110, "fsi_requires_keyguard")
 
     // TODO(b/259130119): Tracking Bug
     val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
@@ -100,7 +100,7 @@ object Flags {
     // TODO(b/260335638): Tracking Bug
     @JvmField
     val NOTIFICATION_INLINE_REPLY_ANIMATION =
-        unreleasedFlag(174148361, "notification_inline_reply_animation", teamfood = true)
+        releasedFlag(174148361, "notification_inline_reply_animation")
 
     val FILTER_UNSEEN_NOTIFS_ON_KEYGUARD =
         releasedFlag(254647461, "filter_unseen_notifs_on_keyguard", teamfood = true)
@@ -187,7 +187,7 @@ object Flags {
 
     // TODO(b/262780002): Tracking Bug
     @JvmField
-    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = false)
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = true)
 
     /** A different path for unocclusion transitions back to keyguard */
     // TODO(b/262859270): Tracking Bug
@@ -217,6 +217,7 @@ object Flags {
         unreleasedFlag(
             228,
             "lock_screen_long_press_enabled",
+            teamfood = true,
         )
 
     // 300 - power menu
@@ -259,6 +260,11 @@ object Flags {
 
     // TODO(b/244064524): Tracking Bug
     @JvmField val QS_SECONDARY_DATA_SUB_INFO = releasedFlag(508, "qs_secondary_data_sub_info")
+
+    /** Enables Font Scaling Quick Settings tile */
+    // TODO(b/269341316): Tracking Bug
+    @JvmField
+    val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
 
     // 600- status bar
 
@@ -514,9 +520,7 @@ object Flags {
     @JvmField val SCREENSHOT_APP_CLIPS = releasedFlag(1304, "screenshot_app_clips")
 
     // TODO(b/268484562): Tracking bug
-    @JvmField
-    val SCREENSHOT_METADATA_REFACTOR =
-        unreleasedFlag(1305, "screenshot_metadata_refactor", teamfood = true)
+    @JvmField val SCREENSHOT_METADATA_REFACTOR = releasedFlag(1305, "screenshot_metadata_refactor")
 
     // 1400 - columbus
     // TODO(b/254512756): Tracking Bug
@@ -546,7 +550,8 @@ object Flags {
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/267162944): Tracking bug
-    @JvmField val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model")
+    @JvmField
+    val CLIPBOARD_MINIMIZED_LAYOUT = unreleasedFlag(1702, "clipboard_data_model", teamfood = true)
 
     // 1800 - shade container
     @JvmField
@@ -568,6 +573,12 @@ object Flags {
     val CONTROLS_MANAGEMENT_NEW_FLOWS =
         releasedFlag(2002, "controls_management_new_flows", teamfood = true)
 
+    // Enables removing app from Home control panel as a part of a new flow
+    // TODO(b/269132640): Tracking Bug
+    @JvmField
+    val APP_PANELS_REMOVE_APPS_ALLOWED =
+        unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = false)
+
     // 2100 - Falsing Manager
     @JvmField val FALSING_FOR_LONG_TAPS = releasedFlag(2100, "falsing_for_long_taps")
 
@@ -577,8 +588,7 @@ object Flags {
     @JvmField val UDFPS_ELLIPSE_DETECTION = releasedFlag(2201, "udfps_ellipse_detection")
 
     // 2300 - stylus
-    @JvmField
-    val TRACK_STYLUS_EVER_USED = unreleasedFlag(2300, "track_stylus_ever_used", teamfood = true)
+    @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag(2300, "track_stylus_ever_used")
     @JvmField
     val ENABLE_STYLUS_CHARGING_UI =
         unreleasedFlag(2301, "enable_stylus_charging_ui", teamfood = true)
@@ -605,7 +615,7 @@ object Flags {
     // TODO(b/20911786): Tracking Bug
     @JvmField
     val OUTPUT_SWITCHER_SHOW_API_ENABLED =
-        unreleasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
+        releasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
@@ -619,7 +629,8 @@ object Flags {
 
     // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
-    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT =
+            unreleasedFlag(2600, "shortcut_list_search_layout", teamfood = true)
 
     // TODO(b/259428678): Tracking Bug
     @JvmField

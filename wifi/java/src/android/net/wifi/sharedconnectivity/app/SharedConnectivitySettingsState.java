@@ -128,12 +128,22 @@ public final class SharedConnectivitySettingsState implements Parcelable {
         dest.writeBundle(mExtras);
     }
 
+    /**
+     * Creates a {@link SharedConnectivitySettingsState} object from a parcel.
+     *
+     * @hide
+     */
+    @NonNull
+    public static SharedConnectivitySettingsState readFromParcel(@NonNull Parcel in) {
+        return new SharedConnectivitySettingsState(in.readBoolean(),
+                in.readBundle());
+    }
+
     @NonNull
     public static final Creator<SharedConnectivitySettingsState> CREATOR = new Creator<>() {
                 @Override
                 public SharedConnectivitySettingsState createFromParcel(Parcel in) {
-                    return new SharedConnectivitySettingsState(in.readBoolean(),
-                            in.readBundle(getClass().getClassLoader()));
+                    return readFromParcel(in);
                 }
 
                 @Override
