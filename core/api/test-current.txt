@@ -3733,7 +3733,7 @@ package android.window {
 
   public final class TaskFragmentCreationParams implements android.os.Parcelable {
     method @NonNull public android.os.IBinder getFragmentToken();
-    method @NonNull public android.graphics.Rect getInitialBounds();
+    method @NonNull public android.graphics.Rect getInitialRelativeBounds();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizer();
     method @NonNull public android.os.IBinder getOwnerToken();
     method public int getWindowingMode();
@@ -3743,7 +3743,7 @@ package android.window {
   public static final class TaskFragmentCreationParams.Builder {
     ctor public TaskFragmentCreationParams.Builder(@NonNull android.window.TaskFragmentOrganizerToken, @NonNull android.os.IBinder, @NonNull android.os.IBinder);
     method @NonNull public android.window.TaskFragmentCreationParams build();
-    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialBounds(@NonNull android.graphics.Rect);
+    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialRelativeBounds(@NonNull android.graphics.Rect);
     method @NonNull public android.window.TaskFragmentCreationParams.Builder setWindowingMode(int);
   }
 
