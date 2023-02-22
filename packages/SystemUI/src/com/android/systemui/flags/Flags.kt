@@ -629,7 +629,8 @@ object Flags {
 
     // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
-    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT =
+            unreleasedFlag(2600, "shortcut_list_search_layout", teamfood = true)
 
     // TODO(b/259428678): Tracking Bug
     @JvmField
