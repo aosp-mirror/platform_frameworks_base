@@ -113,6 +113,8 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Tests for Size Compatibility mode.
@@ -165,6 +167,156 @@ public class SizeCompatTests extends WindowTestsBase {
     private void setUpDisplaySizeWithApp(int dw, int dh) {
         final TestDisplayContent.Builder builder = new TestDisplayContent.Builder(mAtm, dw, dh);
         setUpApp(builder.build());
+    }
+
+    @Test
+    public void testHorizontalReachabilityEnabledForTranslucentActivities() {
+        setUpDisplaySizeWithApp(2500, 1000);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        final LetterboxConfiguration config = mWm.mLetterboxConfiguration;
+        config.setTranslucentLetterboxingOverrideEnabled(true);
+        config.setLetterboxHorizontalPositionMultiplier(0.5f);
+        config.setIsHorizontalReachabilityEnabled(true);
+
+        // Opaque activity
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        addWindowToActivity(mActivity);
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        spyOn(translucentActivity.mLetterboxUiController);
+        doReturn(true).when(translucentActivity.mLetterboxUiController)
+                .shouldShowLetterboxUi(any());
+
+        addWindowToActivity(translucentActivity);
+        translucentActivity.mRootWindowContainer.performSurfacePlacement();
+
+        final Function<ActivityRecord, Rect> innerBoundsOf =
+                (ActivityRecord a) -> {
+                    final Rect bounds = new Rect();
+                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    return bounds;
+                };
+        final Runnable checkLetterboxPositions = () -> assertEquals(innerBoundsOf.apply(mActivity),
+                innerBoundsOf.apply(translucentActivity));
+        final Runnable checkIsLeft = () -> assertThat(
+                innerBoundsOf.apply(translucentActivity).left).isEqualTo(0);
+        final Runnable checkIsRight = () -> assertThat(
+                innerBoundsOf.apply(translucentActivity).right).isEqualTo(2500);
+        final Runnable checkIsCentered = () -> assertThat(
+                innerBoundsOf.apply(translucentActivity).left > 0
+                        && innerBoundsOf.apply(translucentActivity).right < 2500).isTrue();
+
+        final Consumer<Integer> doubleClick =
+                (Integer x) -> {
+                    mActivity.mLetterboxUiController.handleHorizontalDoubleTap(x);
+                    mActivity.mRootWindowContainer.performSurfacePlacement();
+                };
+
+        // Initial state
+        checkIsCentered.run();
+
+        // Double-click left
+        doubleClick.accept(/* x */ 10);
+        checkLetterboxPositions.run();
+        checkIsLeft.run();
+
+        // Double-click right
+        doubleClick.accept(/* x */ 1990);
+        checkLetterboxPositions.run();
+        checkIsCentered.run();
+
+        // Double-click right
+        doubleClick.accept(/* x */ 1990);
+        checkLetterboxPositions.run();
+        checkIsRight.run();
+
+        // Double-click left
+        doubleClick.accept(/* x */ 10);
+        checkLetterboxPositions.run();
+        checkIsCentered.run();
+    }
+
+    @Test
+    public void testVerticalReachabilityEnabledForTranslucentActivities() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        final LetterboxConfiguration config = mWm.mLetterboxConfiguration;
+        config.setTranslucentLetterboxingOverrideEnabled(true);
+        config.setLetterboxVerticalPositionMultiplier(0.5f);
+        config.setIsVerticalReachabilityEnabled(true);
+
+        // Opaque activity
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+        addWindowToActivity(mActivity);
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+
+        spyOn(translucentActivity.mLetterboxUiController);
+        doReturn(true).when(translucentActivity.mLetterboxUiController)
+                .shouldShowLetterboxUi(any());
+
+        addWindowToActivity(translucentActivity);
+        translucentActivity.mRootWindowContainer.performSurfacePlacement();
+
+        final Function<ActivityRecord, Rect> innerBoundsOf =
+                (ActivityRecord a) -> {
+                    final Rect bounds = new Rect();
+                    a.mLetterboxUiController.getLetterboxInnerBounds(bounds);
+                    return bounds;
+                };
+        final Runnable checkLetterboxPositions = () -> assertEquals(innerBoundsOf.apply(mActivity),
+                innerBoundsOf.apply(translucentActivity));
+        final Runnable checkIsTop = () -> assertThat(
+                innerBoundsOf.apply(translucentActivity).top).isEqualTo(0);
+        final Runnable checkIsBottom = () -> assertThat(
+                innerBoundsOf.apply(translucentActivity).bottom).isEqualTo(2500);
+        final Runnable checkIsCentered = () -> assertThat(
+                innerBoundsOf.apply(translucentActivity).top > 0
+                        && innerBoundsOf.apply(translucentActivity).bottom < 2500).isTrue();
+
+        final Consumer<Integer> doubleClick =
+                (Integer y) -> {
+                    mActivity.mLetterboxUiController.handleVerticalDoubleTap(y);
+                    mActivity.mRootWindowContainer.performSurfacePlacement();
+                };
+
+        // Initial state
+        checkIsCentered.run();
+
+        // Double-click top
+        doubleClick.accept(/* y */ 10);
+        checkLetterboxPositions.run();
+        checkIsTop.run();
+
+        // Double-click bottom
+        doubleClick.accept(/* y */ 1990);
+        checkLetterboxPositions.run();
+        checkIsCentered.run();
+
+        // Double-click bottom
+        doubleClick.accept(/* y */ 1990);
+        checkLetterboxPositions.run();
+        checkIsBottom.run();
+
+        // Double-click top
+        doubleClick.accept(/* y */ 10);
+        checkLetterboxPositions.run();
+        checkIsCentered.run();
     }
 
     @Test
