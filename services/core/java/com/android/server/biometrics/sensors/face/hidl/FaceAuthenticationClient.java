@@ -72,12 +72,12 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull LockoutTracker lockoutTracker,
             @NonNull UsageStats usageStats, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled, @Authenticators.Types int sensorStrength) {
+            @Authenticators.Types int sensorStrength) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */,
                 lockoutTracker, allowBackgroundAuthentication, false /* shouldVibrate */,
-                isKeyguardBypassEnabled, sensorStrength);
+                 sensorStrength);
         setRequestId(requestId);
         mUsageStats = usageStats;
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
