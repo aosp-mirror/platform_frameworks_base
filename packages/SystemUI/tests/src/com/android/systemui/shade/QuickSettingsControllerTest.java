@@ -119,7 +119,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
-    @Mock private LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
+    @Mock private ShadeHeaderController mShadeHeaderController;
     @Mock private StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock private KeyguardStateController mKeyguardStateController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
@@ -204,7 +204,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
-                mLargeScreenShadeHeaderController,
+                mShadeHeaderController,
                 mStatusBarTouchableRegionManager,
                 mKeyguardStateController,
                 mKeyguardBypassController,
@@ -259,11 +259,11 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(SHADE);
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(true);
         mQsController.updateResources();
-        verify(mLargeScreenShadeHeaderController).setLargeScreenActive(true);
+        verify(mShadeHeaderController).setLargeScreenActive(true);
 
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(false);
         mQsController.updateResources();
-        verify(mLargeScreenShadeHeaderController).setLargeScreenActive(false);
+        verify(mShadeHeaderController).setLargeScreenActive(false);
     }
 
     @Test

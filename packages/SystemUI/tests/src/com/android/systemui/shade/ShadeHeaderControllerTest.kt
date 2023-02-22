@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.shade
 
+import android.animation.Animator
+import android.app.StatusBarManager
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.XmlResourceParser
@@ -39,16 +40,13 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.qs.ChipVisibilityListener
 import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
+import com.android.systemui.shade.ShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
+import com.android.systemui.shade.ShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
+import com.android.systemui.shade.ShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
@@ -68,136 +66,106 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyFloat
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.anyBoolean
-import org.mockito.Mockito.anyFloat
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.clearInvocations
-import org.mockito.Mockito.inOrder
-import org.mockito.Mockito.never
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.same
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private val EMPTY_CHANGES = ConstraintsChanges()
 
-/**
- * Tests for [LargeScreenShadeHeaderController] when [Flags.COMBINED_QS_HEADERS] is `true`.
- *
- * Once that flag is removed, this class will be combined with
- * [LargeScreenShadeHeaderControllerTest].
- */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
+class ShadeHeaderControllerTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var statusIcons: StatusIconContainer
-    @Mock
-    private lateinit var statusBarIconController: StatusBarIconController
-    @Mock
-    private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
-    @Mock
-    private lateinit var iconManager: StatusBarIconController.TintedIconManager
-    @Mock
-    private lateinit var qsCarrierGroupController: QSCarrierGroupController
-    @Mock
-    private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
-    @Mock
-    private lateinit var clock: Clock
-    @Mock
-    private lateinit var date: VariableDateView
-    @Mock
-    private lateinit var carrierGroup: QSCarrierGroup
-    @Mock
-    private lateinit var batteryMeterView: BatteryMeterView
-    @Mock
-    private lateinit var batteryMeterViewController: BatteryMeterViewController
-    @Mock
-    private lateinit var privacyIconsController: HeaderPrivacyIconsController
-    @Mock
-    private lateinit var insetsProvider: StatusBarContentInsetsProvider
-    @Mock
-    private lateinit var variableDateViewControllerFactory: VariableDateViewController.Factory
-    @Mock
-    private lateinit var variableDateViewController: VariableDateViewController
-    @Mock
-    private lateinit var dumpManager: DumpManager
+    @Mock(answer = Answers.RETURNS_MOCKS) private lateinit var view: MotionLayout
+    @Mock private lateinit var statusIcons: StatusIconContainer
+    @Mock private lateinit var statusBarIconController: StatusBarIconController
+    @Mock private lateinit var iconManagerFactory: StatusBarIconController.TintedIconManager.Factory
+    @Mock private lateinit var iconManager: StatusBarIconController.TintedIconManager
+    @Mock private lateinit var qsCarrierGroupController: QSCarrierGroupController
+    @Mock private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
+    @Mock private lateinit var clock: Clock
+    @Mock private lateinit var date: VariableDateView
+    @Mock private lateinit var carrierGroup: QSCarrierGroup
+    @Mock private lateinit var batteryMeterView: BatteryMeterView
+    @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
+    @Mock private lateinit var privacyIconsController: HeaderPrivacyIconsController
+    @Mock private lateinit var insetsProvider: StatusBarContentInsetsProvider
+    @Mock private lateinit var variableDateViewControllerFactory: VariableDateViewController.Factory
+    @Mock private lateinit var variableDateViewController: VariableDateViewController
+    @Mock private lateinit var dumpManager: DumpManager
     @Mock
     private lateinit var combinedShadeHeadersConstraintManager:
         CombinedShadeHeadersConstraintManager
 
-    @Mock
-    private lateinit var mockedContext: Context
+    @Mock private lateinit var mockedContext: Context
     private lateinit var viewContext: Context
-    @Mock(answer = Answers.RETURNS_MOCKS)
-    private lateinit var view: MotionLayout
 
-    @Mock
-    private lateinit var qqsConstraints: ConstraintSet
-    @Mock
-    private lateinit var qsConstraints: ConstraintSet
-    @Mock
-    private lateinit var largeScreenConstraints: ConstraintSet
+    @Mock private lateinit var qqsConstraints: ConstraintSet
+    @Mock private lateinit var qsConstraints: ConstraintSet
+    @Mock private lateinit var largeScreenConstraints: ConstraintSet
+
     @Mock private lateinit var demoModeController: DemoModeController
     @Mock private lateinit var qsBatteryModeController: QsBatteryModeController
 
-    @JvmField @Rule
-    val mockitoRule = MockitoJUnit.rule()
+    @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
+    var viewAlpha = 1f
 
-    private lateinit var controller: LargeScreenShadeHeaderController
+    private lateinit var shadeHeaderController: ShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
     private val configurationController = FakeConfigurationController()
-    private lateinit var demoModeControllerCapture: ArgumentCaptor<DemoMode>
+    @Captor private lateinit var demoModeControllerCapture: ArgumentCaptor<DemoMode>
 
     @Before
-    fun setUp() {
-        demoModeControllerCapture = argumentCaptor<DemoMode>()
+    fun setup() {
         whenever<Clock>(view.findViewById(R.id.clock)).thenReturn(clock)
         whenever(clock.context).thenReturn(mockedContext)
 
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
-        whenever(variableDateViewControllerFactory.create(any()))
-            .thenReturn(variableDateViewController)
 
         whenever<QSCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
+
         whenever<BatteryMeterView>(view.findViewById(R.id.batteryRemainingIcon))
             .thenReturn(batteryMeterView)
 
         whenever<StatusIconContainer>(view.findViewById(R.id.statusIcons)).thenReturn(statusIcons)
-        whenever(statusIcons.context).thenReturn(context)
 
+        viewContext = Mockito.spy(context)
+        whenever(view.context).thenReturn(viewContext)
+        whenever(view.resources).thenReturn(context.resources)
+        whenever(statusIcons.context).thenReturn(context)
         whenever(qsCarrierGroupControllerBuilder.setQSCarrierGroup(any()))
             .thenReturn(qsCarrierGroupControllerBuilder)
         whenever(qsCarrierGroupControllerBuilder.build()).thenReturn(qsCarrierGroupController)
-
-        viewContext = spy(context)
-        whenever(view.context).thenReturn(viewContext)
-        whenever(view.resources).thenReturn(context.resources)
-        whenever(view.setVisibility(ArgumentMatchers.anyInt())).then {
+        whenever(view.setVisibility(anyInt())).then {
             viewVisibility = it.arguments[0] as Int
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
-        whenever(view.alpha).thenReturn(1f)
 
+        whenever(view.setAlpha(anyFloat())).then {
+            viewAlpha = it.arguments[0] as Float
+            null
+        }
+        whenever(view.alpha).thenAnswer { _ -> viewAlpha }
+
+        whenever(variableDateViewControllerFactory.create(any()))
+            .thenReturn(variableDateViewController)
         whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
-
-        whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(true)
 
         setUpDefaultInsets()
         setUpMotionLayout(view)
 
-        controller = LargeScreenShadeHeaderController(
+        shadeHeaderController =
+            ShadeHeaderController(
                 view,
                 statusBarIconController,
                 iconManagerFactory,
@@ -207,16 +175,171 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
                 variableDateViewControllerFactory,
                 batteryMeterViewController,
                 dumpManager,
-                featureFlags,
                 qsCarrierGroupControllerBuilder,
                 combinedShadeHeadersConstraintManager,
                 demoModeController,
                 qsBatteryModeController,
-        )
+            )
         whenever(view.isAttachedToWindow).thenReturn(true)
-        controller.init()
-        carrierIconSlots = listOf(
-            context.getString(com.android.internal.R.string.status_bar_mobile))
+        shadeHeaderController.init()
+        carrierIconSlots =
+            listOf(context.getString(com.android.internal.R.string.status_bar_mobile))
+    }
+
+    @Test
+    fun updateListeners_registersWhenVisible() {
+        makeShadeVisible()
+        verify(qsCarrierGroupController).setListening(true)
+        verify(statusBarIconController).addIconGroup(any())
+    }
+
+    @Test
+    fun statusIconsAddedWhenAttached() {
+        verify(statusBarIconController).addIconGroup(any())
+    }
+
+    @Test
+    fun statusIconsRemovedWhenDettached() {
+        shadeHeaderController.simulateViewDetached()
+        verify(statusBarIconController).removeIconGroup(any())
+    }
+
+    @Test
+    fun shadeExpandedFraction_updatesAlpha() {
+        makeShadeVisible()
+        shadeHeaderController.shadeExpandedFraction = 0.5f
+        verify(view).setAlpha(ShadeInterpolation.getContentAlpha(0.5f))
+    }
+
+    @Test
+    fun singleCarrier_enablesCarrierIconsInStatusIcons() {
+        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(true)
+
+        makeShadeVisible()
+
+        verify(statusIcons).removeIgnoredSlots(carrierIconSlots)
+    }
+
+    @Test
+    fun dualCarrier_disablesCarrierIconsInStatusIcons() {
+        whenever(qsCarrierGroupController.isSingleCarrier).thenReturn(false)
+
+        makeShadeVisible()
+
+        verify(statusIcons).addIgnoredSlots(carrierIconSlots)
+    }
+
+    @Test
+    fun disableQS_notDisabled_visible() {
+        makeShadeVisible()
+        shadeHeaderController.disable(0, 0, false)
+
+        assertThat(viewVisibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun disableQS_disabled_gone() {
+        makeShadeVisible()
+        shadeHeaderController.disable(0, StatusBarManager.DISABLE2_QUICK_SETTINGS, false)
+
+        assertThat(viewVisibility).isEqualTo(View.GONE)
+    }
+
+    private fun makeShadeVisible() {
+        shadeHeaderController.largeScreenActive = true
+        shadeHeaderController.qsVisible = true
+    }
+
+    @Test
+    fun updateConfig_changesFontStyle() {
+        configurationController.notifyDensityOrFontScaleChanged()
+
+        verify(clock).setTextAppearance(R.style.TextAppearance_QS_Status)
+        verify(date).setTextAppearance(R.style.TextAppearance_QS_Status)
+        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
+    }
+
+    @Test
+    fun animateOutOnStartCustomizing() {
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+
+        shadeHeaderController.startCustomizingAnimation(show = true, duration)
+
+        verify(animator).setDuration(duration)
+        verify(animator).alpha(0f)
+        verify(animator).setInterpolator(Interpolators.ALPHA_OUT)
+        verify(animator).start()
+    }
+
+    @Test
+    fun animateInOnEndCustomizing() {
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+
+        shadeHeaderController.startCustomizingAnimation(show = false, duration)
+
+        verify(animator).setDuration(duration)
+        verify(animator).alpha(1f)
+        verify(animator).setInterpolator(Interpolators.ALPHA_IN)
+        verify(animator).start()
+    }
+
+    @Test
+    fun customizerAnimatorChangesViewVisibility() {
+        makeShadeVisible()
+
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        val duration = 1000L
+        whenever(view.animate()).thenReturn(animator)
+        val listenerCaptor = argumentCaptor<Animator.AnimatorListener>()
+
+        shadeHeaderController.startCustomizingAnimation(show = true, duration)
+        verify(animator).setListener(capture(listenerCaptor))
+        // Start and end the animation
+        listenerCaptor.value.onAnimationStart(mock())
+        listenerCaptor.value.onAnimationEnd(mock())
+        assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
+
+        reset(animator)
+        shadeHeaderController.startCustomizingAnimation(show = false, duration)
+        verify(animator).setListener(capture(listenerCaptor))
+        // Start and end the animation
+        listenerCaptor.value.onAnimationStart(mock())
+        listenerCaptor.value.onAnimationEnd(mock())
+        assertThat(viewVisibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun animatorListenersClearedAtEnd() {
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        whenever(view.animate()).thenReturn(animator)
+
+        shadeHeaderController.startCustomizingAnimation(show = true, 0L)
+        val listenerCaptor = argumentCaptor<Animator.AnimatorListener>()
+        verify(animator).setListener(capture(listenerCaptor))
+
+        listenerCaptor.value.onAnimationEnd(mock())
+        verify(animator).setListener(null)
+    }
+
+    @Test
+    fun demoMode_attachDemoMode() {
+        val cb = argumentCaptor<DemoMode>()
+        verify(demoModeController).addCallback(capture(cb))
+        cb.value.onDemoModeStarted()
+        verify(clock).onDemoModeStarted()
+    }
+
+    @Test
+    fun demoMode_detachDemoMode() {
+        shadeHeaderController.simulateViewDetached()
+        val cb = argumentCaptor<DemoMode>()
+        verify(demoModeController).removeCallback(capture(cb))
+        cb.value.onDemoModeFinished()
+        verify(clock).onDemoModeFinished()
     }
 
     @Test
@@ -226,23 +349,21 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(batteryMeterViewController).init()
         verify(batteryMeterViewController).ignoreTunerUpdates()
 
-        val inOrder = inOrder(qsCarrierGroupControllerBuilder)
+        val inOrder = Mockito.inOrder(qsCarrierGroupControllerBuilder)
         inOrder.verify(qsCarrierGroupControllerBuilder).setQSCarrierGroup(carrierGroup)
         inOrder.verify(qsCarrierGroupControllerBuilder).build()
     }
 
     @Test
     fun `battery mode controller called when qsExpandedFraction changes`() {
-        whenever(qsBatteryModeController.getBatteryMode(same(null), eq(0f)))
-                .thenReturn(BatteryMeterView.MODE_ON)
-        whenever(qsBatteryModeController.getBatteryMode(same(null), eq(1f)))
-                .thenReturn(BatteryMeterView.MODE_ESTIMATE)
-        controller.qsVisible = true
+        whenever(qsBatteryModeController.getBatteryMode(Mockito.same(null), eq(0f)))
+            .thenReturn(BatteryMeterView.MODE_ON)
+        whenever(qsBatteryModeController.getBatteryMode(Mockito.same(null), eq(1f)))
+            .thenReturn(BatteryMeterView.MODE_ESTIMATE)
+        shadeHeaderController.qsVisible = true
 
         val times = 10
-        repeat(times) {
-            controller.qsExpandedFraction = it / (times - 1).toFloat()
-        }
+        repeat(times) { shadeHeaderController.qsExpandedFraction = it / (times - 1).toFloat() }
 
         verify(batteryMeterView).setPercentShowMode(BatteryMeterView.MODE_ON)
         verify(batteryMeterView).setPercentShowMode(BatteryMeterView.MODE_ESTIMATE)
@@ -277,89 +398,89 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     @Test
     fun testShadeExpanded_true() {
         // When shade is expanded, view should be visible regardless of largeScreenActive
-        controller.largeScreenActive = false
-        controller.qsVisible = true
+        shadeHeaderController.largeScreenActive = false
+        shadeHeaderController.qsVisible = true
         assertThat(viewVisibility).isEqualTo(View.VISIBLE)
 
-        controller.largeScreenActive = true
+        shadeHeaderController.largeScreenActive = true
         assertThat(viewVisibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
     fun testShadeExpanded_false() {
         // When shade is not expanded, view should be invisible regardless of largeScreenActive
-        controller.largeScreenActive = false
-        controller.qsVisible = false
+        shadeHeaderController.largeScreenActive = false
+        shadeHeaderController.qsVisible = false
         assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
 
-        controller.largeScreenActive = true
+        shadeHeaderController.largeScreenActive = true
         assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
     }
 
     @Test
     fun testLargeScreenActive_false() {
-        controller.largeScreenActive = true // Make sure there's a change
-        clearInvocations(view)
+        shadeHeaderController.largeScreenActive = true // Make sure there's a change
+        Mockito.clearInvocations(view)
 
-        controller.largeScreenActive = false
+        shadeHeaderController.largeScreenActive = false
 
-        verify(view).setTransition(HEADER_TRANSITION_ID)
+        verify(view).setTransition(ShadeHeaderController.HEADER_TRANSITION_ID)
     }
 
     @Test
     fun testShadeExpandedFraction() {
         // View needs to be visible for this to actually take effect
-        controller.qsVisible = true
+        shadeHeaderController.qsVisible = true
 
-        clearInvocations(view)
-        controller.shadeExpandedFraction = 0.3f
+        Mockito.clearInvocations(view)
+        shadeHeaderController.shadeExpandedFraction = 0.3f
         verify(view).alpha = ShadeInterpolation.getContentAlpha(0.3f)
 
-        clearInvocations(view)
-        controller.shadeExpandedFraction = 1f
+        Mockito.clearInvocations(view)
+        shadeHeaderController.shadeExpandedFraction = 1f
         verify(view).alpha = ShadeInterpolation.getContentAlpha(1f)
 
-        clearInvocations(view)
-        controller.shadeExpandedFraction = 0f
+        Mockito.clearInvocations(view)
+        shadeHeaderController.shadeExpandedFraction = 0f
         verify(view).alpha = ShadeInterpolation.getContentAlpha(0f)
     }
 
     @Test
     fun testQsExpandedFraction_headerTransition() {
-        controller.qsVisible = true
-        controller.largeScreenActive = false
+        shadeHeaderController.qsVisible = true
+        shadeHeaderController.largeScreenActive = false
 
-        clearInvocations(view)
-        controller.qsExpandedFraction = 0.3f
+        Mockito.clearInvocations(view)
+        shadeHeaderController.qsExpandedFraction = 0.3f
         verify(view).progress = 0.3f
     }
 
     @Test
     fun testQsExpandedFraction_largeScreen() {
-        controller.qsVisible = true
-        controller.largeScreenActive = true
+        shadeHeaderController.qsVisible = true
+        shadeHeaderController.largeScreenActive = true
 
-        clearInvocations(view)
-        controller.qsExpandedFraction = 0.3f
-        verify(view, never()).progress = anyFloat()
+        Mockito.clearInvocations(view)
+        shadeHeaderController.qsExpandedFraction = 0.3f
+        verify(view, Mockito.never()).progress = anyFloat()
     }
 
     @Test
     fun testScrollY_headerTransition() {
-        controller.largeScreenActive = false
+        shadeHeaderController.largeScreenActive = false
 
-        clearInvocations(view)
-        controller.qsScrollY = 20
+        Mockito.clearInvocations(view)
+        shadeHeaderController.qsScrollY = 20
         verify(view).scrollY = 20
     }
 
     @Test
     fun testScrollY_largeScreen() {
-        controller.largeScreenActive = true
+        shadeHeaderController.largeScreenActive = true
 
-        clearInvocations(view)
-        controller.qsScrollY = 20
-        verify(view, never()).scrollY = anyInt()
+        Mockito.clearInvocations(view)
+        shadeHeaderController.qsScrollY = 20
+        verify(view, Mockito.never()).scrollY = anyInt()
     }
 
     @Test
@@ -381,9 +502,9 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(chipVisibleChanges.qsConstraintsChanges)!!.invoke(qsConstraints)
         verify(chipVisibleChanges.largeScreenConstraintsChanges)!!.invoke(largeScreenConstraints)
 
-        verify(chipNotVisibleChanges.qqsConstraintsChanges, never())!!.invoke(any())
-        verify(chipNotVisibleChanges.qsConstraintsChanges, never())!!.invoke(any())
-        verify(chipNotVisibleChanges.largeScreenConstraintsChanges, never())!!.invoke(any())
+        verify(chipNotVisibleChanges.qqsConstraintsChanges, Mockito.never())!!.invoke(any())
+        verify(chipNotVisibleChanges.qsConstraintsChanges, Mockito.never())!!.invoke(any())
+        verify(chipNotVisibleChanges.largeScreenConstraintsChanges, Mockito.never())!!.invoke(any())
     }
 
     @Test
@@ -401,10 +522,11 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         captor.value.onChipVisibilityRefreshed(false)
 
-        verify(chipVisibleChanges.qqsConstraintsChanges, never())!!.invoke(qqsConstraints)
-        verify(chipVisibleChanges.qsConstraintsChanges, never())!!.invoke(qsConstraints)
-        verify(chipVisibleChanges.largeScreenConstraintsChanges, never())!!
-            .invoke(largeScreenConstraints)
+        verify(chipVisibleChanges.qqsConstraintsChanges, Mockito.never())!!.invoke(qqsConstraints)
+        verify(chipVisibleChanges.qsConstraintsChanges, Mockito.never())!!.invoke(qsConstraints)
+        verify(chipVisibleChanges.largeScreenConstraintsChanges, Mockito.never())!!.invoke(
+            largeScreenConstraints
+        )
 
         verify(chipNotVisibleChanges.qqsConstraintsChanges)!!.invoke(any())
         verify(chipNotVisibleChanges.qsConstraintsChanges)!!.invoke(any())
@@ -425,9 +547,15 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         mockInsetsProvider(insetLeft to insetRight, false)
 
-        whenever(combinedShadeHeadersConstraintManager
-            .edgesGuidelinesConstraints(anyInt(), anyInt(), anyInt(), anyInt())
-        ).thenReturn(mockConstraintsChanges)
+        whenever(
+                combinedShadeHeadersConstraintManager.edgesGuidelinesConstraints(
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt()
+                )
+            )
+            .thenReturn(mockConstraintsChanges)
 
         captor.value.onApplyWindowInsets(view, createWindowInsets())
 
@@ -453,9 +581,15 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         mockInsetsProvider(insetLeft to insetRight, false)
 
-        whenever(combinedShadeHeadersConstraintManager
-            .edgesGuidelinesConstraints(anyInt(), anyInt(), anyInt(), anyInt())
-        ).thenReturn(mockConstraintsChanges)
+        whenever(
+                combinedShadeHeadersConstraintManager.edgesGuidelinesConstraints(
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt()
+                )
+            )
+            .thenReturn(mockConstraintsChanges)
 
         captor.value.onApplyWindowInsets(view, createWindowInsets())
 
@@ -479,8 +613,8 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         captor.value.onApplyWindowInsets(view, createWindowInsets(null))
 
         verify(combinedShadeHeadersConstraintManager).emptyCutoutConstraints()
-        verify(combinedShadeHeadersConstraintManager, never())
-            .centerCutoutConstraints(anyBoolean(), anyInt())
+        verify(combinedShadeHeadersConstraintManager, Mockito.never())
+            .centerCutoutConstraints(Mockito.anyBoolean(), anyInt())
 
         verify(mockConstraintsChanges.qqsConstraintsChanges)!!.invoke(any())
         verify(mockConstraintsChanges.qsConstraintsChanges)!!.invoke(any())
@@ -499,8 +633,8 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         captor.value.onApplyWindowInsets(view, createWindowInsets())
 
         verify(combinedShadeHeadersConstraintManager).emptyCutoutConstraints()
-        verify(combinedShadeHeadersConstraintManager, never())
-            .centerCutoutConstraints(anyBoolean(), anyInt())
+        verify(combinedShadeHeadersConstraintManager, Mockito.never())
+            .centerCutoutConstraints(Mockito.anyBoolean(), anyInt())
 
         verify(mockConstraintsChanges.qqsConstraintsChanges)!!.invoke(any())
         verify(mockConstraintsChanges.qsConstraintsChanges)!!.invoke(any())
@@ -521,8 +655,8 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         captor.value.onApplyWindowInsets(view, createWindowInsets())
 
         verify(combinedShadeHeadersConstraintManager).emptyCutoutConstraints()
-        verify(combinedShadeHeadersConstraintManager, never())
-            .centerCutoutConstraints(anyBoolean(), anyInt())
+        verify(combinedShadeHeadersConstraintManager, Mockito.never())
+            .centerCutoutConstraints(Mockito.anyBoolean(), anyInt())
 
         verify(mockConstraintsChanges.qqsConstraintsChanges)!!.invoke(any())
         verify(mockConstraintsChanges.qsConstraintsChanges)!!.invoke(any())
@@ -543,8 +677,8 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         captor.value.onApplyWindowInsets(view, createWindowInsets(Rect(1, 2, 3, 4)))
 
         verify(combinedShadeHeadersConstraintManager).emptyCutoutConstraints()
-        verify(combinedShadeHeadersConstraintManager, never())
-            .centerCutoutConstraints(anyBoolean(), anyInt())
+        verify(combinedShadeHeadersConstraintManager, Mockito.never())
+            .centerCutoutConstraints(Mockito.anyBoolean(), anyInt())
 
         verify(mockConstraintsChanges.qqsConstraintsChanges)!!.invoke(any())
         verify(mockConstraintsChanges.qsConstraintsChanges)!!.invoke(any())
@@ -569,13 +703,17 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         mockInsetsProvider(0 to 0, false)
 
-        whenever(combinedShadeHeadersConstraintManager
-            .centerCutoutConstraints(anyBoolean(), anyInt())
-        ).thenReturn(mockConstraintsChanges)
+        whenever(
+                combinedShadeHeadersConstraintManager.centerCutoutConstraints(
+                    Mockito.anyBoolean(),
+                    anyInt()
+                )
+            )
+            .thenReturn(mockConstraintsChanges)
 
         captor.value.onApplyWindowInsets(view, createWindowInsets(Rect(0, 0, cutoutWidth, 1)))
 
-        verify(combinedShadeHeadersConstraintManager, never()).emptyCutoutConstraints()
+        verify(combinedShadeHeadersConstraintManager, Mockito.never()).emptyCutoutConstraints()
         val offset = (width - paddingLeft - paddingRight - cutoutWidth) / 2
         verify(combinedShadeHeadersConstraintManager).centerCutoutConstraints(false, offset)
 
@@ -602,13 +740,17 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         mockInsetsProvider(0 to 0, false)
 
-        whenever(combinedShadeHeadersConstraintManager
-            .centerCutoutConstraints(anyBoolean(), anyInt())
-        ).thenReturn(mockConstraintsChanges)
+        whenever(
+                combinedShadeHeadersConstraintManager.centerCutoutConstraints(
+                    Mockito.anyBoolean(),
+                    anyInt()
+                )
+            )
+            .thenReturn(mockConstraintsChanges)
 
         captor.value.onApplyWindowInsets(view, createWindowInsets(Rect(0, 0, cutoutWidth, 1)))
 
-        verify(combinedShadeHeadersConstraintManager, never()).emptyCutoutConstraints()
+        verify(combinedShadeHeadersConstraintManager, Mockito.never()).emptyCutoutConstraints()
         val offset = (width - paddingLeft - paddingRight - cutoutWidth) / 2
         verify(combinedShadeHeadersConstraintManager).centerCutoutConstraints(true, offset)
 
@@ -619,52 +761,8 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
     @Test
     fun alarmIconNotIgnored() {
-        verify(statusIcons, never()).addIgnoredSlot(
-                context.getString(com.android.internal.R.string.status_bar_alarm_clock)
-        )
-    }
-
-    @Test
-    fun demoMode_attachDemoMode() {
-        verify(demoModeController).addCallback(capture(demoModeControllerCapture))
-        demoModeControllerCapture.value.onDemoModeStarted()
-        verify(clock).onDemoModeStarted()
-    }
-
-    @Test
-    fun demoMode_detachDemoMode() {
-        controller.simulateViewDetached()
-        verify(demoModeController).removeCallback(capture(demoModeControllerCapture))
-        demoModeControllerCapture.value.onDemoModeFinished()
-        verify(clock).onDemoModeFinished()
-    }
-
-    @Test
-    fun animateOutOnStartCustomizing() {
-        val animator = Mockito.mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
-        val duration = 1000L
-        whenever(view.animate()).thenReturn(animator)
-
-        controller.startCustomizingAnimation(show = true, duration)
-
-        verify(animator).setDuration(duration)
-        verify(animator).alpha(0f)
-        verify(animator).setInterpolator(Interpolators.ALPHA_OUT)
-        verify(animator).start()
-    }
-
-    @Test
-    fun animateInOnEndCustomizing() {
-        val animator = Mockito.mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
-        val duration = 1000L
-        whenever(view.animate()).thenReturn(animator)
-
-        controller.startCustomizingAnimation(show = false, duration)
-
-        verify(animator).setDuration(duration)
-        verify(animator).alpha(1f)
-        verify(animator).setInterpolator(Interpolators.ALPHA_IN)
-        verify(animator).start()
+        verify(statusIcons, Mockito.never())
+            .addIgnoredSlot(context.getString(com.android.internal.R.string.status_bar_alarm_clock))
     }
 
     @Test
@@ -674,11 +772,11 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
     @Test
     fun privacyChipParentVisibleAlways() {
-        controller.largeScreenActive = true
-        controller.largeScreenActive = false
-        controller.largeScreenActive = true
+        shadeHeaderController.largeScreenActive = true
+        shadeHeaderController.largeScreenActive = false
+        shadeHeaderController.largeScreenActive = true
 
-        verify(privacyIconsController, never()).onParentInvisible()
+        verify(privacyIconsController, Mockito.never()).onParentInvisible()
     }
 
     @Test
@@ -700,9 +798,9 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     fun onDensityOrFontScaleChanged_reloadConstraints() {
         // After density or font scale change, constraints need to be reloaded to reflect new
         // dimensions.
-        reset(qqsConstraints)
-        reset(qsConstraints)
-        reset(largeScreenConstraints)
+        Mockito.reset(qqsConstraints)
+        Mockito.reset(qsConstraints)
+        Mockito.reset(largeScreenConstraints)
 
         configurationController.notifyDensityOrFontScaleChanged()
 
@@ -729,11 +827,11 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     }
 
     private fun View.executeLayoutChange(
-            left: Int,
-            top: Int,
-            right: Int,
-            bottom: Int,
-            listener: View.OnLayoutChangeListener
+        left: Int,
+        top: Int,
+        right: Int,
+        bottom: Int,
+        listener: View.OnLayoutChangeListener
     ) {
         val oldLeft = this.left
         val oldTop = this.top
@@ -746,21 +844,19 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         whenever(this.height).thenReturn(bottom - top)
         whenever(this.width).thenReturn(right - left)
         listener.onLayoutChange(
-                this,
-                oldLeft,
-                oldTop,
-                oldRight,
-                oldBottom,
-                left,
-                top,
-                right,
-                bottom
+            this,
+            oldLeft,
+            oldTop,
+            oldRight,
+            oldBottom,
+            left,
+            top,
+            right,
+            bottom
         )
     }
 
-    private fun createWindowInsets(
-        topCutout: Rect? = Rect()
-    ): WindowInsets {
+    private fun createWindowInsets(topCutout: Rect? = Rect()): WindowInsets {
         val windowInsets: WindowInsets = mock()
         val displayCutout: DisplayCutout = mock()
         whenever(windowInsets.displayCutout)
@@ -795,17 +891,30 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     }
 
     private fun setUpDefaultInsets() {
-        whenever(combinedShadeHeadersConstraintManager
-            .edgesGuidelinesConstraints(anyInt(), anyInt(), anyInt(), anyInt())
-        ).thenReturn(EMPTY_CHANGES)
+        whenever(
+                combinedShadeHeadersConstraintManager.edgesGuidelinesConstraints(
+                    anyInt(),
+                    anyInt(),
+                    anyInt(),
+                    anyInt()
+                )
+            )
+            .thenReturn(EMPTY_CHANGES)
         whenever(combinedShadeHeadersConstraintManager.emptyCutoutConstraints())
             .thenReturn(EMPTY_CHANGES)
-        whenever(combinedShadeHeadersConstraintManager
-            .centerCutoutConstraints(anyBoolean(), anyInt())
-        ).thenReturn(EMPTY_CHANGES)
-        whenever(combinedShadeHeadersConstraintManager
-            .privacyChipVisibilityConstraints(anyBoolean())
-        ).thenReturn(EMPTY_CHANGES)
+        whenever(
+                combinedShadeHeadersConstraintManager.centerCutoutConstraints(
+                    Mockito.anyBoolean(),
+                    anyInt()
+                )
+            )
+            .thenReturn(EMPTY_CHANGES)
+        whenever(
+                combinedShadeHeadersConstraintManager.privacyChipVisibilityConstraints(
+                    Mockito.anyBoolean()
+                )
+            )
+            .thenReturn(EMPTY_CHANGES)
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
             .thenReturn(Pair(0, 0).toAndroidPair())
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(false)
@@ -814,11 +923,11 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
     private fun setupCurrentInsets(cutout: DisplayCutout?) {
         val mockedDisplay =
-                mock<Display>().also { display -> whenever(display.cutout).thenReturn(cutout) }
+            mock<Display>().also { display -> whenever(display.cutout).thenReturn(cutout) }
         whenever(viewContext.display).thenReturn(mockedDisplay)
     }
 
-    private fun<T, U> Pair<T, U>.toAndroidPair(): android.util.Pair<T, U> {
+    private fun <T, U> Pair<T, U>.toAndroidPair(): android.util.Pair<T, U> {
         return android.util.Pair(first, second)
     }
 }
