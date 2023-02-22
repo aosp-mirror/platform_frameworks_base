@@ -4928,4 +4928,7 @@
 
   <!-- Whether to show weather on the lockscreen by default. -->
   <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />
+
+  <java-symbol type="bool" name="config_batteryStatsResetOnUnplugHighBatteryLevel" />
+  <java-symbol type="bool" name="config_batteryStatsResetOnUnplugAfterSignificantCharge" />
 </resources>
