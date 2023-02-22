@@ -312,7 +312,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
         }
         mView.removeChildNotification(childView);
         if (!isTransfer) {
-            mListContainer.notifyGroupChildRemoved(childView, mView);
+            mListContainer.notifyGroupChildRemoved(childView, mView.getChildrenContainer());
         }
     }
 
