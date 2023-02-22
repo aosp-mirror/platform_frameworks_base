@@ -18,7 +18,6 @@ package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
-import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
@@ -107,7 +106,7 @@ public class RemoteTransitionCompat {
         private RecentsAnimationListener mListener = null;
         private RecentsAnimationControllerCompat mWrapped = null;
         private IRemoteTransitionFinishedCallback mFinishCB = null;
-        private ArrayList<WindowContainerToken> mPausingTasks = null;
+        private ArrayList<TaskState> mPausingTasks = null;
         private WindowContainerToken mPipTask = null;
         private WindowContainerToken mRecentsTask = null;
         private int mRecentsTaskId = 0;
@@ -140,47 +139,52 @@ public class RemoteTransitionCompat {
             mTransition = transition;
             mKeyguardLocked = (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0;
 
-            final RemoteAnimationTarget[] apps =
-                    RemoteAnimationTargetCompat.wrapApps(info, t, mLeashMap);
-            final RemoteAnimationTarget[] wallpapers =
-                    RemoteAnimationTargetCompat.wrapNonApps(
-                            info, true /* wallpapers */, t, mLeashMap);
-
-            // This transition is for opening recents, so recents is on-top. We want to draw
-            // the current going-away tasks on top of recents, though, so move them to front.
-            // Note that we divide up the "layer space" into 3 regions each the size of
-            // the change count. This way we can easily move changes into above/below/between
+            final ArrayList<RemoteAnimationTarget> apps = new ArrayList<>();
+            final ArrayList<RemoteAnimationTarget> wallpapers = new ArrayList<>();
+            RemoteAnimationTargetCompat.LeafTaskFilter leafTaskFilter =
+                    new RemoteAnimationTargetCompat.LeafTaskFilter();
+            // About layering: we divide up the "layer space" into 3 regions (each the size of
+            // the change count). This lets us categorize things into above/below/between
             // while maintaining their relative ordering.
-            for (int i = apps.length - 1; i >= 0; --i) {
-                final ActivityManager.RunningTaskInfo taskInfo = apps[i].taskInfo;
-                if (apps[i].mode == MODE_CLOSING) {
-                    t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
-                    if (taskInfo == null) {
-                        continue;
+            for (int i = 0; i < info.getChanges().size(); ++i) {
+                final TransitionInfo.Change change = info.getChanges().get(i);
+                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+                if (RemoteAnimationTargetCompat.isWallpaper(change)) {
+                    final RemoteAnimationTarget target = newTarget(change,
+                            // wallpapers go into the "below" layer space
+                            info.getChanges().size() - i, info, t, mLeashMap);
+                    wallpapers.add(target);
+                    // Make all the wallpapers opaque since we want them visible from the start
+                    t.setAlpha(target.leash, 1);
+                } else if (leafTaskFilter.test(change)) {
+                    // start by putting everything into the "below" layer space.
+                    final RemoteAnimationTarget target = newTarget(change,
+                            info.getChanges().size() - i, info, t, mLeashMap);
+                    apps.add(target);
+                    if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
+                        // raise closing (pausing) task to "above" layer so it isn't covered
+                        t.setLayer(target.leash, info.getChanges().size() * 3 - i);
+                        mPausingTasks.add(new TaskState(change, target.leash));
+                        if (taskInfo.pictureInPictureParams != null
+                                && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
+                            mPipTask = taskInfo.token;
+                        }
+                    } else if (taskInfo != null
+                            && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
+                        // There's a 3p launcher, so make sure recents goes above that.
+                        t.setLayer(target.leash, info.getChanges().size() * 3 - i);
+                        mRecentsTask = taskInfo.token;
+                        mRecentsTaskId = taskInfo.taskId;
+                    } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
+                        mRecentsTask = taskInfo.token;
+                        mRecentsTaskId = taskInfo.taskId;
                     }
-                    // Add to front since we are iterating backwards.
-                    mPausingTasks.add(0, taskInfo.token);
-                    if (taskInfo.pictureInPictureParams != null
-                            && taskInfo.pictureInPictureParams.isAutoEnterEnabled()) {
-                        mPipTask = taskInfo.token;
-                    }
-                } else if (taskInfo != null
-                        && taskInfo.topActivityType == ACTIVITY_TYPE_RECENTS) {
-                    // This task is for recents, keep it on top.
-                    t.setLayer(apps[i].leash, info.getChanges().size() * 3 - i);
-                    mRecentsTask = taskInfo.token;
-                    mRecentsTaskId = taskInfo.taskId;
-                } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
-                    mRecentsTask = taskInfo.token;
-                    mRecentsTaskId = taskInfo.taskId;
                 }
             }
-            // Also make all the wallpapers opaque since we want the visible from the start
-            for (int i = wallpapers.length - 1; i >= 0; --i) {
-                t.setAlpha(wallpapers[i].leash, 1);
-            }
             t.apply();
-            mListener.onAnimationStart(this, apps, wallpapers, new Rect(0, 0, 0, 0), new Rect());
+            mListener.onAnimationStart(this, apps.toArray(new RemoteAnimationTarget[apps.size()]),
+                    wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
+                    new Rect(0, 0, 0, 0), new Rect());
         }
 
         @SuppressLint("NewApi")
@@ -234,7 +238,7 @@ public class RemoteTransitionCompat {
             int pauseMatches = 0;
             if (!foundHomeOpening) {
                 for (int i = 0; i < openingTasks.size(); ++i) {
-                    if (mPausingTasks.contains(openingTasks.valueAt(i).getContainer())) {
+                    if (TaskState.indexOf(mPausingTasks, openingTasks.valueAt(i)) >= 0) {
                         ++pauseMatches;
                     }
                 }
@@ -338,8 +342,8 @@ public class RemoteTransitionCompat {
                 // re-showing it's task).
                 for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
                     // reverse order so that index 0 ends up on top
-                    wct.reorder(mPausingTasks.get(i), true /* onTop */);
-                    t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                    wct.reorder(mPausingTasks.get(i).mToken, true /* onTop */);
+                    t.show(mPausingTasks.get(i).mTaskSurface);
                 }
                 if (!mKeyguardLocked && mRecentsTask != null) {
                     wct.restoreTransientOrder(mRecentsTask);
@@ -350,15 +354,14 @@ public class RemoteTransitionCompat {
                 // This is basically going home, but we have to restore recents order and also
                 // treat the home "pausing" task properly.
                 for (int i = mPausingTasks.size() - 1; i >= 0; --i) {
-                    final TransitionInfo.Change change = mInfo.getChange(mPausingTasks.get(i));
-                    final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                    if (taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
+                    final TaskState state = mPausingTasks.get(i);
+                    if (state.mTaskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                         // Treat as opening (see above)
-                        wct.reorder(mPausingTasks.get(i), true /* onTop */);
-                        t.show(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                        wct.reorder(state.mToken, true /* onTop */);
+                        t.show(state.mTaskSurface);
                     } else {
                         // Treat as hiding (see below)
-                        t.hide(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                        t.hide(state.mTaskSurface);
                     }
                 }
                 if (!mKeyguardLocked && mRecentsTask != null) {
@@ -369,13 +372,13 @@ public class RemoteTransitionCompat {
                     if (!sendUserLeaveHint) {
                         // This means recents is not *actually* finishing, so of course we gotta
                         // do special stuff in WMCore to accommodate.
-                        wct.setDoNotPip(mPausingTasks.get(i));
+                        wct.setDoNotPip(mPausingTasks.get(i).mToken);
                     }
                     // Since we will reparent out of the leashes, pre-emptively hide the child
                     // surface to match the leash. Otherwise, there will be a flicker before the
                     // visibility gets committed in Core when using split-screen (in splitscreen,
                     // the leaf-tasks are not "independent" so aren't hidden by normal setup).
-                    t.hide(mInfo.getChange(mPausingTasks.get(i)).getLeash());
+                    t.hide(mPausingTasks.get(i).mTaskSurface);
                 }
                 if (mPipTask != null && mPipTransaction != null && sendUserLeaveHint) {
                     t.show(mInfo.getChange(mPipTask).getLeash());
@@ -442,6 +445,38 @@ public class RemoteTransitionCompat {
          * @see IRecentsAnimationController#animateNavigationBarToApp(long)
          */
         @Override public void animateNavigationBarToApp(long duration) {
+        }
+    }
+
+    /** Utility class to track the state of a task as-seen by recents. */
+    private static class TaskState {
+        WindowContainerToken mToken;
+        ActivityManager.RunningTaskInfo mTaskInfo;
+
+        /** The surface/leash of the task provided by Core. */
+        SurfaceControl mTaskSurface;
+
+        /** The (local) animation-leash created for this task. */
+        SurfaceControl mLeash;
+
+        TaskState(TransitionInfo.Change change, SurfaceControl leash) {
+            mToken = change.getContainer();
+            mTaskInfo = change.getTaskInfo();
+            mTaskSurface = change.getLeash();
+            mLeash = leash;
+        }
+
+        static int indexOf(ArrayList<TaskState> list, TransitionInfo.Change change) {
+            for (int i = list.size() - 1; i >= 0; --i) {
+                if (list.get(i).mToken.equals(change.getContainer())) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public String toString() {
+            return "" + mToken + " : " + mLeash;
         }
     }
 }
