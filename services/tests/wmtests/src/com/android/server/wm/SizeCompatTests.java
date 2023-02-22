@@ -279,7 +279,8 @@ public class SizeCompatTests extends WindowTestsBase {
     public void testTranslucentActivitiesWhenUnfolding() {
         mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
         setUpDisplaySizeWithApp(2800, 1400);
-        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(
+                true /* ignoreOrientationRequest */);
         mActivity.mWmService.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
                 1.0f /*letterboxVerticalPositionMultiplier*/);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
@@ -290,18 +291,23 @@ public class SizeCompatTests extends WindowTestsBase {
                 .build();
         doReturn(false).when(translucentActivity).fillsParent();
         mTask.addChild(translucentActivity);
+        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
 
         mTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         spyOn(mActivity);
 
         // Halffold
-        setFoldablePosture(translucentActivity, true /* isHalfFolded */, false /* isTabletop */);
+        setFoldablePosture(translucentActivity, true /* isHalfFolded */,
+                false /* isTabletop */);
         verify(mActivity).recomputeConfiguration();
+        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
         clearInvocations(mActivity);
 
         // Unfold
-        setFoldablePosture(translucentActivity, false /* isHalfFolded */, false /* isTabletop */);
+        setFoldablePosture(translucentActivity, false /* isHalfFolded */,
+                false /* isTabletop */);
         verify(mActivity).recomputeConfiguration();
+        assertEquals(translucentActivity.getBounds(), mActivity.getBounds());
     }
 
     @Test
