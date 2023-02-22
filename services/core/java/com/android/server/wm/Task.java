@@ -3456,6 +3456,11 @@ class Task extends TaskFragment {
                 && top.getOrganizedTask() == this && top.isState(RESUMED);
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = isTopActivityResumed && top.inSizeCompatMode();
+        if (info.topActivityInSizeCompat
+                && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
+            // We hide the restart button in case of transparent activities.
+            info.topActivityInSizeCompat = top.fillsParent();
+        }
         // Whether the direct top activity is eligible for letterbox education.
         info.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();
