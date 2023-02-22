@@ -147,10 +147,8 @@ public final class CallControl {
      *                        <li>{@link DisconnectCause#REJECTED}</li>
      *                        <li>{@link DisconnectCause#MISSED}</li>
      *                        </ul>
-     *
      * @param executor        The {@link Executor} on which the {@link OutcomeReceiver} callback
      *                        will be called on.
-     *
      * @param callback        That will be completed on the Telecom side that details success or
      *                        failure of the requested operation.
      *
@@ -245,6 +243,36 @@ public final class CallControl {
             try {
                 mServerInterface.requestCallEndpointChange(callEndpoint,
                         new CallControlResultReceiver("endpointChange", executor, callback));
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
+     * Raises an event to the {@link android.telecom.InCallService} implementations tracking this
+     * call via {@link android.telecom.Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * These events and the associated extra keys for the {@code Bundle} parameter are defined
+     * in Android X. This API is used to relay additional information about a call other than
+     * what is specified in the {@link android.telecom.CallAttributes} to
+     * {@link android.telecom.InCallService}s. This might include, for example, a change to the list
+     * of participants in a meeting, or the name of the speakers who have their hand raised. Where
+     * appropriate, the {@link InCallService}s tracking this call may choose to render this
+     * additional information about the call. An automotive calling UX, for example may have enough
+     * screen real estate to indicate the number of participants in a meeting, but to prevent
+     * distractions could suppress the list of participants.
+     *
+     * @param event  that is defined in AndroidX (ex. The number of participants changed)
+     * @param extras the updated value in relation to the event (ex. 4 participants)
+     */
+    public void sendEvent(@NonNull String event, @NonNull Bundle extras) {
+        Objects.requireNonNull(event);
+        Objects.requireNonNull(extras);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.sendEvent(mCallId, event, extras);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
