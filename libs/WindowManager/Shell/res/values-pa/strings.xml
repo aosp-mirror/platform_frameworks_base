@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"ਉੱਪਰ 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"ਉੱਪਰ 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"ਹੇਠਾਂ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"ਖੱਬੇ ਪਾਸੇ ਵੰਡੋ"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"ਸੱਜੇ ਪਾਸੇ ਵੰਡੋ"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"ਸਿਖਰ \'ਤੇ ਵੰਡੋ"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"ਹੇਠਾਂ ਵੰਡੋ"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"ਇੱਕ ਹੱਥ ਮੋਡ ਵਰਤਣਾ"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"ਬਾਹਰ ਜਾਣ ਲਈ, ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਜਾਂ ਐਪ \'ਤੇ ਕਿਤੇ ਵੀ ਟੈਪ ਕਰੋ"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"ਇੱਕ ਹੱਥ ਮੋਡ ਸ਼ੁਰੂ ਕਰੋ"</string>
@@ -102,9 +98,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"ਬੰਦ ਕਰੋ"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ਪਿੱਛੇ"</string>
     <string name="handle_text" msgid="1766582106752184456">"ਹੈਂਡਲ"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"ਐਪ ਪ੍ਰਤੀਕ"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ਪੂਰੀ-ਸਕ੍ਰੀਨ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ਡੈਸਕਟਾਪ ਮੋਡ"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ"</string>
     <string name="more_button_text" msgid="3655388105592893530">"ਹੋਰ"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ਫ਼ਲੋਟ"</string>
+    <string name="select_text" msgid="5139083974039906583">"ਚੁਣੋ"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="close_text" msgid="4986518933445178928">"ਬੰਦ ਕਰੋ"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"ਮੀਨੂ ਬੰਦ ਕਰੋ"</string>
 </resources>
