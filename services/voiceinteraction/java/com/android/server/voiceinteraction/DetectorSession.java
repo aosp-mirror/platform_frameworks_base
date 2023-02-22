@@ -510,6 +510,8 @@ abstract class DetectorSession {
                                         try {
                                             enforcePermissionsForDataDelivery();
                                         } catch (SecurityException e) {
+                                            Slog.w(TAG, "Ignoring #onDetected due to a "
+                                                    + "SecurityException", e);
                                             HotwordMetricsLogger.writeDetectorEvent(
                                                     getDetectorType(),
                                                     EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
@@ -525,6 +527,8 @@ abstract class DetectorSession {
                                             newResult = mHotwordAudioStreamCopier
                                                     .startCopyingAudioStreams(triggerResult);
                                         } catch (IOException e) {
+                                            Slog.w(TAG, "Ignoring #onDetected due to a "
+                                                    + "IOException", e);
                                             // TODO: Write event
                                             callback.onError(new HotwordDetectionServiceFailure(
                                                     CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
