@@ -27,6 +27,7 @@ import static android.view.KeyEvent.KEYCODE_META_LEFT;
 import static android.view.KeyEvent.KEYCODE_N;
 import static android.view.KeyEvent.KEYCODE_P;
 import static android.view.KeyEvent.KEYCODE_S;
+import static android.view.KeyEvent.KEYCODE_SHIFT_LEFT;
 import static android.view.KeyEvent.KEYCODE_SLASH;
 import static android.view.KeyEvent.KEYCODE_SPACE;
 import static android.view.KeyEvent.KEYCODE_TAB;
@@ -35,10 +36,15 @@ import static android.view.KeyEvent.KEYCODE_Z;
 
 import android.content.Intent;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
+
+import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+@Presubmit
+@SmallTest
 public class ModifierShortcutTests extends ShortcutKeyTestBase {
     private static final SparseArray<String> META_SHORTCUTS =  new SparseArray<>();
     static {
@@ -82,7 +88,16 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
     @Test
     public void testCtrlSpace() {
         sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout();
+        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
+    }
+
+    /**
+     * CTRL + SHIFT + SPACE to switch keyboard layout backwards.
+     */
+    @Test
+    public void testCtrlShiftSpace() {
+        sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
+        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
     }
 
     /**
@@ -91,7 +106,16 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
     @Test
     public void testMetaSpace() {
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout();
+        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
+    }
+
+    /**
+     * META + SHIFT + SPACE to switch keyboard layout backwards.
+     */
+    @Test
+    public void testMetaShiftSpace() {
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
+        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
     }
 
     /**

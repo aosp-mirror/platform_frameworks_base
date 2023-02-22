@@ -4549,19 +4549,23 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private void applyImeVisibility(IBinder token, IBinder windowToken, boolean setVisible,
             @Nullable ImeTracker.Token statsToken) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
-                ImeTracker.forLogging().onFailed(statsToken,
-                        ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
-                return;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.applyImeVisibility");
+            synchronized (ImfLock.class) {
+                if (!calledWithValidTokenLocked(token)) {
+                    ImeTracker.forLogging().onFailed(statsToken,
+                            ImeTracker.PHASE_SERVER_APPLY_IME_VISIBILITY);
+                    return;
+                }
+                final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(
+                        windowToken);
+                mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
+                        setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
+                                : ImeVisibilityStateComputer.STATE_HIDE_IME);
             }
-            final IBinder requestToken = mVisibilityStateComputer.getWindowTokenFrom(windowToken);
-            mVisibilityApplier.applyImeVisibility(requestToken, statsToken,
-                    setVisible ? ImeVisibilityStateComputer.STATE_SHOW_IME
-                            : ImeVisibilityStateComputer.STATE_HIDE_IME);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @BinderThread
@@ -4632,39 +4636,45 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private void hideMySoftInput(@NonNull IBinder token, int flags,
             @SoftInputShowHideReason int reason) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
-                return;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.hideMySoftInput");
+            synchronized (ImfLock.class) {
+                if (!calledWithValidTokenLocked(token)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    hideCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
+                            null /* resultReceiver */, reason);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                hideCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
-                        null /* resultReceiver */, reason);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @BinderThread
     private void showMySoftInput(@NonNull IBinder token, int flags) {
-        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
-        synchronized (ImfLock.class) {
-            if (!calledWithValidTokenLocked(token)) {
-                return;
+        try {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.showMySoftInput");
+            synchronized (ImfLock.class) {
+                if (!calledWithValidTokenLocked(token)) {
+                    return;
+                }
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    showCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
+                            null /* resultReceiver */,
+                            SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                showCurrentInputLocked(mLastImeTargetWindow, null /* statsToken */, flags,
-                        null /* resultReceiver */,
-                        SoftInputShowHideReason.SHOW_SOFT_INPUT_FROM_IME);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
-        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
     @VisibleForTesting
