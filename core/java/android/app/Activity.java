@@ -6621,7 +6621,9 @@ public class Activity extends ContextThemeWrapper
      * the incoming activity.  Use 0 for no animation.
      * @param exitAnim A resource ID of the animation resource to use for
      * the outgoing activity.  Use 0 for no animation.
+     * @deprecated Use {@link #overrideActivityTransition(int, int, int)}} instead.
      */
+    @Deprecated
     public void overridePendingTransition(int enterAnim, int exitAnim) {
         overridePendingTransition(enterAnim, exitAnim, 0);
     }
@@ -6644,7 +6646,9 @@ public class Activity extends ContextThemeWrapper
      * the outgoing activity.  Use 0 for no animation.
      * @param backgroundColor The background color to use for the background during the animation if
      * the animation requires a background. Set to 0 to not override the default color.
+     * @deprecated Use {@link #overrideActivityTransition(int, int, int, int)}} instead.
      */
+    @Deprecated
     public void overridePendingTransition(int enterAnim, int exitAnim, int backgroundColor) {
         ActivityClient.getInstance().overridePendingTransition(mToken, getPackageName(), enterAnim,
                 exitAnim, backgroundColor);
