@@ -315,6 +315,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     }
                     transition = mTransitionController.createTransition(type);
                 }
+                if (!transition.isCollecting()) {
+                    Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
+                            + " means Shell took too long to respond to a request. WM State may be"
+                            + " incorrect now, please file a bug");
+                    applyTransaction(wct, -1 /*syncId*/, null /*transition*/, caller);
+                    return transition.getToken();
+                }
                 transition.start();
                 transition.mLogger.mStartWCT = wct;
                 applyTransaction(wct, -1 /*syncId*/, transition, caller);
