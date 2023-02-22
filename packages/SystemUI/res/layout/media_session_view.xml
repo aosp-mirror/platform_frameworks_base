@@ -35,7 +35,6 @@
         android:layout_height="@dimen/qs_media_session_height_expanded"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:translationZ="0dp"
         android:scaleType="centerCrop"
@@ -43,6 +42,24 @@
         android:clipToOutline="true"
         android:background="@drawable/qs_media_outline_album_bg"
         />
+
+    <com.android.systemui.surfaceeffects.ripple.MultiRippleView
+        android:id="@+id/touch_ripple_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
+        app:layout_constraintStart_toStartOf="@id/album_art"
+        app:layout_constraintEnd_toEndOf="@id/album_art"
+        app:layout_constraintTop_toTopOf="@id/album_art"
+        app:layout_constraintBottom_toBottomOf="@id/album_art" />
+
+    <com.android.systemui.surfaceeffects.turbulencenoise.TurbulenceNoiseView
+        android:id="@+id/turbulence_noise_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
+        app:layout_constraintStart_toStartOf="@id/album_art"
+        app:layout_constraintEnd_toEndOf="@id/album_art"
+        app:layout_constraintTop_toTopOf="@id/album_art"
+        app:layout_constraintBottom_toBottomOf="@id/album_art" />
 
     <!-- Guideline for output switcher -->
     <androidx.constraintlayout.widget.Guideline
@@ -169,7 +186,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:barrierDirection="end"
         app:constraint_referenced_ids="actionPrev,media_scrubbing_elapsed_time,media_progress_bar,actionNext,media_scrubbing_total_time,action0,action1,action2,action3,action4"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintRight_toRightOf="@id/actionPlayPause"
         />
 
     <!-- This barrier is used in expanded view to constrain the bottom row of actions -->

@@ -16,12 +16,15 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
+import static com.android.systemui.statusbar.notification.logging.NotificationPanelLogger.NotificationPanelEvent.NOTIFICATION_DRAG;
+
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.logging.nano.Notifications;
 
 import com.google.protobuf.nano.MessageNano;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -35,6 +38,16 @@ public class NotificationPanelLoggerImpl implements NotificationPanelLogger {
                 visibleNotifications);
         SysUiStatsLog.write(SysUiStatsLog.NOTIFICATION_PANEL_REPORTED,
                 /* int event_id */ NotificationPanelEvent.fromLockscreen(isLockscreen).getId(),
+                /* int num_notifications*/ proto.notifications.length,
+                /* byte[] notifications*/ MessageNano.toByteArray(proto));
+    }
+
+    @Override
+    public void logNotificationDrag(NotificationEntry draggedNotification) {
+        final Notifications.NotificationList proto = NotificationPanelLogger.toNotificationProto(
+                Collections.singletonList(draggedNotification));
+        SysUiStatsLog.write(SysUiStatsLog.NOTIFICATION_PANEL_REPORTED,
+                /* int event_id */ NOTIFICATION_DRAG.getId(),
                 /* int num_notifications*/ proto.notifications.length,
                 /* byte[] notifications*/ MessageNano.toByteArray(proto));
     }

@@ -26,10 +26,12 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpHandler;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.carrier.QSCarrierGroupController;
@@ -130,6 +132,9 @@ public interface CentralSurfacesDependenciesModule {
             NotifCollection notifCollection,
             @Main DelayableExecutor mainExecutor,
             MediaDataManager mediaDataManager,
+            StatusBarStateController statusBarStateController,
+            SysuiColorExtractor colorExtractor,
+            KeyguardStateController keyguardStateController,
             DumpManager dumpManager) {
         return new NotificationMediaManager(
                 context,
@@ -142,6 +147,9 @@ public interface CentralSurfacesDependenciesModule {
                 notifCollection,
                 mainExecutor,
                 mediaDataManager,
+                statusBarStateController,
+                colorExtractor,
+                keyguardStateController,
                 dumpManager);
     }
 
@@ -174,8 +182,10 @@ public interface CentralSurfacesDependenciesModule {
     static CommandQueue provideCommandQueue(
             Context context,
             ProtoTracer protoTracer,
-            CommandRegistry registry) {
-        return new CommandQueue(context, protoTracer, registry);
+            CommandRegistry registry,
+            DumpHandler dumpHandler
+    ) {
+        return new CommandQueue(context, protoTracer, registry, dumpHandler);
     }
 
     /**
@@ -290,7 +300,7 @@ public interface CentralSurfacesDependenciesModule {
 
             @Override
             public boolean isShowingAlternateAuthOnUnlock() {
-                return statusBarKeyguardViewManager.get().shouldShowAltAuth();
+                return statusBarKeyguardViewManager.get().canShowAlternateBouncer();
             }
         };
         return new DialogLaunchAnimator(callback, interactionJankMonitor);

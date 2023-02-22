@@ -238,15 +238,15 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleResumeActivityItem() {
-        ResumeActivityItem emptyItem = ResumeActivityItem.obtain(false);
-        ResumeActivityItem item = ResumeActivityItem.obtain(3, true);
+        ResumeActivityItem emptyItem = ResumeActivityItem.obtain(false, false);
+        ResumeActivityItem item = ResumeActivityItem.obtain(3, true, false);
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));
 
         item.recycle();
         assertEquals(item, emptyItem);
 
-        ResumeActivityItem item2 = ResumeActivityItem.obtain(2, true);
+        ResumeActivityItem item2 = ResumeActivityItem.obtain(2, true, false);
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }

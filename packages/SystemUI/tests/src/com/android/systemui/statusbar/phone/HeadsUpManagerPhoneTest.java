@@ -31,6 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -67,6 +68,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
     @Mock private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
+    @Mock private ShadeExpansionStateManager mShadeExpansionStateManager;
     @Mock private UiEventLogger mUiEventLogger;
     private boolean mLivesPastNormalTime;
 
@@ -81,7 +83,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 ConfigurationController configurationController,
                 Handler handler,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
-                UiEventLogger uiEventLogger
+                UiEventLogger uiEventLogger,
+                ShadeExpansionStateManager shadeExpansionStateManager
         ) {
             super(
                     context,
@@ -93,7 +96,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     configurationController,
                     handler,
                     accessibilityManagerWrapper,
-                    uiEventLogger
+                    uiEventLogger,
+                    shadeExpansionStateManager
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
@@ -125,7 +129,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mConfigurationController,
                 mTestHandler,
                 mAccessibilityManagerWrapper,
-                mUiEventLogger
+                mUiEventLogger,
+                mShadeExpansionStateManager
         );
     }
 

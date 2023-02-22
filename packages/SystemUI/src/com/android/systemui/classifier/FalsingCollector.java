@@ -44,9 +44,6 @@ public interface FalsingCollector {
     void onQsDown();
 
     /** */
-    void setQsExpanded(boolean expanded);
-
-    /** */
     boolean shouldEnforceBouncer();
 
     /** */
@@ -135,5 +132,8 @@ public interface FalsingCollector {
 
     /** */
     void updateFalseConfidence(FalsingClassifier.Result result);
+
+    /** Indicates an a11y action was made. */
+    void onA11yAction();
 }
 

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"음성사서함"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"연결에 문제가 있거나 MMI 코드가 잘못되었습니다."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"기능이 지원되지 않습니다."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"발신 허용 번호에서만 수행할 수 있는 작업입니다."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"로밍 중에는 착신 전환 설정을 변경할 수 없습니다."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"서비스를 사용하도록 설정했습니다."</string>
@@ -252,7 +253,7 @@
     <string name="bugreport_message" msgid="5212529146119624326">"현재 기기 상태에 대한 정보를 수집하여 이메일 메시지로 전송합니다. 버그 신고를 시작하여 전송할 준비가 되려면 약간 시간이 걸립니다."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"대화형 보고서"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"대부분의 경우 이 옵션을 사용합니다. 신고 진행 상황을 추적하고 문제에 대한 세부정보를 입력하고 스크린샷을 찍을 수 있습니다. 신고하기에 시간이 너무 오래 걸리고 사용 빈도가 낮은 일부 섹션을 생략할 수 있습니다."</string>
-    <string name="bugreport_option_full_title" msgid="7681035745950045690">"전체 보고서"</string>
+    <string name="bugreport_option_full_title" msgid="7681035745950045690">"전체 신고"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"기기가 응답하지 않거나 너무 느리거나 모든 보고서 섹션이 필요한 경우 이 옵션을 사용하여 시스템 방해를 최소화합니다. 세부정보를 추가하거나 스크린샷을 추가로 찍을 수 없습니다."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{버그 신고 스크린샷을 #초 후에 찍습니다.}other{버그 신고 스크린샷을 #초 후에 찍습니다.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"버그 신고용 스크린샷 촬영 완료"</string>
@@ -598,7 +599,7 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"지문을 인식할 수 없습니다."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
@@ -1252,7 +1253,7 @@
     <string name="android_upgrading_complete" msgid="409800058018374746">"부팅 완료"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"전원 버튼을 눌렀습니다. 이러면 보통 화면이 꺼집니다.\n\n지문 설정 중에 가볍게 탭하세요."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"설정을 완료하려면 화면을 끄세요"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"사용 중지"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"화면 끄기"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"지문 인증을 계속할까요?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"전원 버튼을 눌렀습니다. 이러면 보통 화면이 꺼집니다.\n\n지문을 인식하려면 화면을 가볍게 탭하세요."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"화면 끄기"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"일회성 액세스 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"기기 로그에 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그에 민감한 정보가 포함될 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도, 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 기기 내 일부 로그 또는 정보에 액세스할 수도 있습니다.\n\ng.co/android/devicelogs에서 자세히 알아보세요."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"다시 표시 안함"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>

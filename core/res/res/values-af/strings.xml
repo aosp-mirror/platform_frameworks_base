@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Stemboodskap"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Verbindingsprobleem of ongeldige MMI-kode."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Kenmerk word nie gesteun nie."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Bewerking is beperk tot belbeperking-nommers."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Kan oproep-aanstuurinstellings nie van jou foon af verander tewyl jy swerf nie."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Diens is geaktiveer."</string>

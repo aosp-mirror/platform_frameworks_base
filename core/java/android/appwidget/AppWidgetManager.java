@@ -42,12 +42,15 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.os.BackgroundThread;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Updates AppWidget state; gets information about installed AppWidget providers and other
@@ -62,6 +65,7 @@ import java.util.List;
 @SystemService(Context.APPWIDGET_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_APP_WIDGETS)
 public class AppWidgetManager {
+
 
     /**
      * Activity action to launch from your {@link AppWidgetHost} activity when you want to
@@ -332,6 +336,17 @@ public class AppWidgetManager {
     public static final String ACTION_APPWIDGET_UPDATE = "android.appwidget.action.APPWIDGET_UPDATE";
 
     /**
+     * A combination broadcast of APPWIDGET_ENABLED and APPWIDGET_UPDATE.
+     * Sent during boot time and when the host is binding the widget for the very first time
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_APPWIDGET_ENABLE_AND_UPDATE = "android.appwidget.action"
+            + ".APPWIDGET_ENABLE_AND_UPDATE";
+
+    /**
      * Sent when the custom extras for an AppWidget change.
      *
      * <p class="note">This is a protected intent that can only be sent
@@ -456,6 +471,8 @@ public class AppWidgetManager {
     public static final String ACTION_APPWIDGET_HOST_RESTORED
             = "android.appwidget.action.APPWIDGET_HOST_RESTORED";
 
+    private static final String TAG = "AppWidgetManager";
+
     /**
      * An intent extra that contains multiple appWidgetIds.  These are id values as
      * they were provided to the application during a recent restore from backup.  It is
@@ -511,6 +528,26 @@ public class AppWidgetManager {
         mPackageName = context.getOpPackageName();
         mService = service;
         mDisplayMetrics = context.getResources().getDisplayMetrics();
+        if (mService == null) {
+            return;
+        }
+        BackgroundThread.getExecutor().execute(() -> {
+            try {
+                mService.notifyProviderInheritance(getInstalledProvidersForPackage(mPackageName,
+                        null)
+                        .stream().filter(Objects::nonNull)
+                        .map(info -> info.provider).filter(p -> {
+                            try {
+                                Class clazz = Class.forName(p.getClassName());
+                                return AppWidgetProvider.class.isAssignableFrom(clazz);
+                            } catch (Exception e) {
+                                return false;
+                            }
+                        }).toArray(ComponentName[]::new));
+            } catch (Exception e) {
+                Log.e(TAG, "Nofity service of inheritance info", e);
+            }
+        });
     }
 
     /**

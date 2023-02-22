@@ -885,4 +885,31 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         assertThat(themeOverlays.getValue().get(OVERLAY_CATEGORY_SYSTEM_PALETTE))
                 .isEqualTo(new OverlayIdentifier("ff00ff00"));
     }
+
+    // Regression test for b/234603929, where a reboot would generate a wallpaper colors changed
+    // event for the already-set colors that would then set the theme incorrectly on screen sleep.
+    @Test
+    public void onWallpaperColorsSetToSame_keepsTheme() {
+        // Set initial colors and verify.
+        WallpaperColors startingColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+        WallpaperColors sameColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+        mColorsListener.getValue().onColorsChanged(startingColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+        clearInvocations(mThemeOverlayApplier);
+
+        // Set to the same colors.
+        mColorsListener.getValue().onColorsChanged(sameColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
+        verify(mThemeOverlayApplier, never())
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+
+        // Verify that no change resulted.
+        mWakefulnessLifecycleObserver.getValue().onFinishedGoingToSleep();
+        verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
+                any());
+    }
 }

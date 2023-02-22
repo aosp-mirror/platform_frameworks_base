@@ -329,6 +329,22 @@ public class AppWidgetHost {
     }
 
     /**
+     * Set the visibiity of all widgets associated with this host to hidden
+     *
+     * @hide
+     */
+    public void setAppWidgetHidden() {
+        if (sService == null) {
+            return;
+        }
+        try {
+            sService.setAppWidgetHidden(mContextOpPackageName, mHostId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("System server dead?", e);
+        }
+    }
+
+    /**
      * Set the host's interaction handler.
      *
      * @hide
@@ -418,14 +434,7 @@ public class AppWidgetHost {
         AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);
         view.setInteractionHandler(mInteractionHandler);
         view.setAppWidget(appWidgetId, appWidget);
-        addListener(appWidgetId, view);
-        RemoteViews views;
-        try {
-            views = sService.getAppWidgetViews(mContextOpPackageName, appWidgetId);
-        } catch (RemoteException e) {
-            throw new RuntimeException("system server dead?", e);
-        }
-        view.updateAppWidget(views);
+        setListener(appWidgetId, view);
 
         return view;
     }
@@ -513,13 +522,19 @@ public class AppWidgetHost {
      * The AppWidgetHost retains a pointer to the newly-created listener.
      * @param appWidgetId The ID of the app widget for which to add the listener
      * @param listener The listener interface that deals with actions towards the widget view
-     *
      * @hide
      */
-    public void addListener(int appWidgetId, @NonNull AppWidgetHostListener listener) {
+    public void setListener(int appWidgetId, @NonNull AppWidgetHostListener listener) {
         synchronized (mListeners) {
             mListeners.put(appWidgetId, listener);
         }
+        RemoteViews views = null;
+        try {
+            views = sService.getAppWidgetViews(mContextOpPackageName, appWidgetId);
+        } catch (RemoteException e) {
+            throw new RuntimeException("system server dead?", e);
+        }
+        listener.updateAppWidget(views);
     }
 
     /**

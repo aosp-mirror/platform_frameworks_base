@@ -184,7 +184,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"कुछ डिफ़ॉल्‍ट सेट हैं"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"कोई डिफ़ॉल्‍ट सेट नहीं है"</string>
     <string name="tts_settings" msgid="8130616705989351312">"लेख से बोली सेटिंग"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलना"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"लिखाई को बोली में बदलने की सुविधा"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"बोली दर"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"बोलने की गति तय करें"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> में बैटरी पूरी चार्ज हो जाएगी"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को रोका गया है"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्जिंग को ऑप्टिमाइज़ किया गया"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हो रही है"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"तेज़ चार्ज हो रही है"</string>
@@ -610,7 +611,7 @@
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"मिटाएं"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"सेव करें"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"मेहमान मोड से बाहर निकलें"</string>
-    <string name="guest_reset_button" msgid="2515069346223503479">"मेहमान मोड के सेशन को रीसेट करें?"</string>
+    <string name="guest_reset_button" msgid="2515069346223503479">"मेहमान मोड के सेशन को रीसेट करें"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"मेहमान मोड से बाहर निकलें"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"बाहर निकलने पर, सारी गतिविधि मिट जाएगी"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"बाहर निकलने पर, गतिविधि को मिटाया या सेव किया जा सकता है"</string>

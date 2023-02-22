@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -34,9 +35,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -70,7 +70,7 @@ class AppAdapterTest : SysuiTestCase() {
     fun testOnServicesUpdated_nullLoadLabel() {
         val captor = ArgumentCaptor
             .forClass(ControlsListingController.ControlsListingCallback::class.java)
-        val controlsServiceInfo = mock(ControlsServiceInfo::class.java)
+        val controlsServiceInfo = mock<ControlsServiceInfo>()
         val serviceInfo = listOf(controlsServiceInfo)
         `when`(controlsServiceInfo.loadLabel()).thenReturn(null)
         verify(controlsListingController).observe(any(Lifecycle::class.java), captor.capture())
@@ -80,5 +80,33 @@ class AppAdapterTest : SysuiTestCase() {
         uiExecutor.runAllReady()
 
         assertThat(adapter.itemCount).isEqualTo(serviceInfo.size)
+    }
+
+    @Test
+    fun testOnServicesUpdatedDoesntHavePanels() {
+        val captor = ArgumentCaptor
+                .forClass(ControlsListingController.ControlsListingCallback::class.java)
+        val serviceInfo = listOf(
+                ControlsServiceInfo("no panel", null),
+                ControlsServiceInfo("panel", mock())
+        )
+        verify(controlsListingController).observe(any(Lifecycle::class.java), captor.capture())
+
+        captor.value.onServicesUpdated(serviceInfo)
+        backgroundExecutor.runAllReady()
+        uiExecutor.runAllReady()
+
+        assertThat(adapter.itemCount).isEqualTo(1)
+    }
+
+    fun ControlsServiceInfo(
+        label: CharSequence,
+        panelComponentName: ComponentName? = null
+    ): ControlsServiceInfo {
+        return mock {
+            `when`(this.loadLabel()).thenReturn(label)
+            `when`(this.panelActivity).thenReturn(panelComponentName)
+            `when`(this.loadIcon()).thenReturn(mock())
+        }
     }
 }

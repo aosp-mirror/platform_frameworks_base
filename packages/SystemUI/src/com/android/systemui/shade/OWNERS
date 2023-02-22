@@ -1,3 +1,6 @@
+justinweir@google.com
+syeonlee@google.com
+
 per-file *Notification* = set noparent
 per-file *Notification* = file:../statusbar/notification/OWNERS
 

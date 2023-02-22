@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Govorna pošta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problem sa povezivanjem ili nevažeći MMI kôd."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcija nije podržana."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacija je ograničena samo na brojeve fiksnog biranja."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nije moguće promijeniti postavke prosljeđivanja poziva s vašeg telefona dok ste u romingu."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Usluga je omogućena."</string>
@@ -235,7 +236,7 @@
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Telefon će se isključiti."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Želite li ugasiti telefon?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Ponovo pokreni uređaj u sigurnom načinu rada"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Želite li pokrenuti uređaj u sigurnom načinu rada? To će onemogućiti sve aplikacije trećih strana koje ste instalirali. One će biti obnovljene kada ponovo pokrenete uređaj."</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"Želite li ponovo pokrenuti uređaj u sigurnom načinu rada? To će onemogućiti sve aplikacije trećih strana koje ste instalirali. Obnovit će se kada još jednom ponovo pokrenete uređaj."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"Nedavni zadaci"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"Nema nedavno pokrenutih aplikacija."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Opcije tableta"</string>
@@ -1015,7 +1016,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"Fabrički test nije uspio"</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"Akcija FACTORY_TEST podržana je samo za pakete instalirane u facsikli /system/app."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"Nije pronađen paket koji omogućava akciju FACTORY_TEST."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"Ponovno pokretanje"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"Ponovo pokreni"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"Stranica na \"<xliff:g id="TITLE">%s</xliff:g>\" kaže:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"Potvrdite navigaciju"</string>
@@ -1375,7 +1376,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"Serijska konzola omogućena"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Performanse su smanjene. Da onemogućite, provjerite program za učitavanje operativnog sistema."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Eksperimentalni MTE je omogućen"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"Moguće da će to uticati na performanse i stabilnost. Ponovo pokrenite da onemogućite. Ako je omogućeno pomoću arm64.memtag.bootctl, unaprijed ga postavite na \"Ništa\"."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"To može uticati na performanse i stabilnost. Ponovo pokrenite da onemogućite. Ako je omogućeno pomoću arm64.memtag.bootctl, prvo postavite na \"Ništa\"."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Tečnost ili nečistoće u USB priključku"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB priključak je automatski onemogućen. Dodirnite da saznate više."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB priključak je sada sigurno koristiti"</string>
@@ -1529,7 +1530,7 @@
     <string name="sync_undo_deletes" msgid="5786033331266418896">"Poništiti brisanje"</string>
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ne radi ništa za sada"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Odaberite račun"</string>
-    <string name="add_account_label" msgid="4067610644298737417">"Dodaj račun"</string>
+    <string name="add_account_label" msgid="4067610644298737417">"Dodajte račun"</string>
     <string name="add_account_button_label" msgid="322390749416414097">"Dodajte račun"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Povećaj"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Smanji"</string>

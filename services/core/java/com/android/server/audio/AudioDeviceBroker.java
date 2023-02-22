@@ -1365,7 +1365,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     break;
                 case MSG_II_SET_HEARING_AID_VOLUME:
                     synchronized (mDeviceStateLock) {
-                        mBtHelper.setHearingAidVolume(msg.arg1, msg.arg2);
+                        mBtHelper.setHearingAidVolume(msg.arg1, msg.arg2,
+                                mDeviceInventory.isHearingAidConnected());
                     }
                     break;
                 case MSG_II_SET_LE_AUDIO_OUT_VOLUME: {

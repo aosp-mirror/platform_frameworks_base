@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g>‏ – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – הזמן הנותר לטעינה מלאה: <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה הושהתה"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה עברה אופטימיזציה"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – הטעינה עברה אופטימיזציה"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"לא ידוע"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"בטעינה"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"הסוללה נטענת מהר"</string>
@@ -522,7 +523,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"לא רשום"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"לא זמין"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"‏כתובת ה-MAC אקראית"</string>
-    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{אין מכשירים מחוברים}=1{מכשיר אחד מחובר}two{# מכשירים מחוברים}many{# מכשירים מחוברים}other{# מכשירים מחוברים}}"</string>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{אין מכשירים מחוברים}=1{מכשיר אחד מחובר}one{# מכשירים מחוברים}two{# מכשירים מחוברים}other{# מכשירים מחוברים}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"יותר זמן."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"פחות זמן."</string>
     <string name="cancel" msgid="5665114069455378395">"ביטול"</string>

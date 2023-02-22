@@ -19,11 +19,13 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
-import com.android.internal.widget.CachingIconView
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -39,7 +41,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
     private lateinit var appIconFromPackageName: Drawable
     @Mock private lateinit var packageManager: PackageManager
     @Mock private lateinit var applicationInfo: ApplicationInfo
-    @Mock private lateinit var logger: MediaTttLogger
+    @Mock private lateinit var logger: MediaTttLogger<TemporaryViewInfo>
 
     @Before
     fun setUp() {
@@ -69,8 +71,9 @@ class MediaTttUtilsTest : SysuiTestCase() {
             MediaTttUtils.getIconInfoFromPackageName(context, appPackageName = null, logger)
 
         assertThat(iconInfo.isAppIcon).isFalse()
-        assertThat(iconInfo.contentDescription)
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
     }
 
     @Test
@@ -78,8 +81,9 @@ class MediaTttUtilsTest : SysuiTestCase() {
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, "fakePackageName", logger)
 
         assertThat(iconInfo.isAppIcon).isFalse()
-        assertThat(iconInfo.contentDescription)
+        assertThat(iconInfo.contentDescription.loadContentDescription(context))
             .isEqualTo(context.getString(R.string.media_output_dialog_unknown_launch_app_name))
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Resource(R.drawable.ic_cast))
     }
 
     @Test
@@ -87,50 +91,48 @@ class MediaTttUtilsTest : SysuiTestCase() {
         val iconInfo = MediaTttUtils.getIconInfoFromPackageName(context, PACKAGE_NAME, logger)
 
         assertThat(iconInfo.isAppIcon).isTrue()
-        assertThat(iconInfo.drawable).isEqualTo(appIconFromPackageName)
-        assertThat(iconInfo.contentDescription).isEqualTo(APP_NAME)
+        assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))
+        assertThat(iconInfo.contentDescription.loadContentDescription(context)).isEqualTo(APP_NAME)
     }
 
     @Test
-    fun setIcon_viewHasIconAndContentDescription() {
-        val view = CachingIconView(context)
-        val icon = context.getDrawable(R.drawable.ic_celebration)!!
-        val contentDescription = "Happy birthday!"
+    fun iconInfo_toTintedIcon_loaded() {
+        val contentDescription = ContentDescription.Loaded("test")
+        val drawable = context.getDrawable(R.drawable.ic_cake)!!
+        val tintAttr = android.R.attr.textColorTertiary
 
-        MediaTttUtils.setIcon(view, icon, contentDescription)
+        val iconInfo =
+            IconInfo(
+                contentDescription,
+                MediaTttIcon.Loaded(drawable),
+                tintAttr,
+                isAppIcon = false,
+            )
 
-        assertThat(view.drawable).isEqualTo(icon)
-        assertThat(view.contentDescription).isEqualTo(contentDescription)
+        val tinted = iconInfo.toTintedIcon()
+
+        assertThat(tinted.icon).isEqualTo(Icon.Loaded(drawable, contentDescription))
+        assertThat(tinted.tintAttr).isEqualTo(tintAttr)
     }
 
     @Test
-    fun setIcon_iconSizeNull_viewSizeDoesNotChange() {
-        val view = CachingIconView(context)
-        val size = 456
-        view.layoutParams = FrameLayout.LayoutParams(size, size)
+    fun iconInfo_toTintedIcon_resource() {
+        val contentDescription = ContentDescription.Loaded("test")
+        val drawableRes = R.drawable.ic_cake
+        val tintAttr = android.R.attr.textColorTertiary
 
-        MediaTttUtils.setIcon(view, context.getDrawable(R.drawable.ic_cake)!!, "desc")
+        val iconInfo =
+            IconInfo(
+                contentDescription,
+                MediaTttIcon.Resource(drawableRes),
+                tintAttr,
+                isAppIcon = false
+            )
 
-        assertThat(view.layoutParams.width).isEqualTo(size)
-        assertThat(view.layoutParams.height).isEqualTo(size)
-    }
+        val tinted = iconInfo.toTintedIcon()
 
-    @Test
-    fun setIcon_iconSizeProvided_viewSizeUpdates() {
-        val view = CachingIconView(context)
-        val size = 456
-        view.layoutParams = FrameLayout.LayoutParams(size, size)
-
-        val newSize = 40
-        MediaTttUtils.setIcon(
-            view,
-            context.getDrawable(R.drawable.ic_cake)!!,
-            "desc",
-            iconSize = newSize
-        )
-
-        assertThat(view.layoutParams.width).isEqualTo(newSize)
-        assertThat(view.layoutParams.height).isEqualTo(newSize)
+        assertThat(tinted.icon).isEqualTo(Icon.Resource(drawableRes, contentDescription))
+        assertThat(tinted.tintAttr).isEqualTo(tintAttr)
     }
 }
 

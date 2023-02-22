@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ಅನ್‌ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ವಿಭಜಿಸಿದ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ಈ ಆ್ಯಪ್ ಅನ್ನು 1 ವಿಂಡೋದಲ್ಲಿ ಮಾತ್ರ ತೆರೆಯಬಹುದು."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವಿಕೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"ಸ್ಪ್ಲಿಟ್-ಪರದೆ ಡಿವೈಡರ್"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"ಹಿಗ್ಗಿಸಿ"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="close_button_text" msgid="2913281996024033299">"ಮುಚ್ಚಿರಿ"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"ಹಿಂದಕ್ಕೆ"</string>
+    <string name="handle_text" msgid="1766582106752184456">"ಹ್ಯಾಂಡಲ್"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"ಫುಲ್‌ಸ್ಕ್ರೀನ್"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ಡೆಸ್ಕ್‌ಟಾಪ್ ಮೋಡ್"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"ಇನ್ನಷ್ಟು"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"ಫ್ಲೋಟ್"</string>
 </resources>

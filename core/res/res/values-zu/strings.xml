@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Ivoyisimeyili"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Inkinga yoxhumano noma ikhadi ye-MMI engalungile."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Isakhi asisekelwa."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Umsebenzi uvinjelwe ekudayeleni izinombolo ezingaguquki kuphela."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Ayikwazi ukushintsha izilungiselelo zokudluliselwa kwekholi kusuka efonini yakho ngenkathi uzula."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Isevisi ivaliwe."</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Vumela ukufinyelela kwesikhathi esisodwa"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ungavumeli"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Amalogu edivayisi arekhoda okwenzekayo kudivayisi yakho. Ama-app angasebenzisa lawa malogu ukuze athole futhi alungise izinkinga.\n\nAmanye amalogu angase aqukathe ulwazi olubucayi, ngakho vumela ama-app owathembayo kuphela ukuthi afinyelele wonke amalogu edivayisi. \n\nUma ungayivumeli le app ukuthi ifinyelele wonke amalogu wedivayisi, isengakwazi ukufinyelela amalogu wayo. Umkhiqizi wedivayisi yakho usengakwazi ukufinyelela amanye amalogu noma ulwazi kudivayisi yakho."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Amalogu edivayisi arekhoda okwenzekayo kudivayisi yakho. Ama-app angasebenzisa lawa malogu ukuze athole futhi alungise izinkinga.\n\nAmanye amalogu angase aqukathe ulwazi olubucayi, ngakho vumela ama-app owathembayo kuphela ukuthi afinyelele wonke amalogu edivayisi. \n\nUma ungayivumeli le app ukuthi ifinyelele wonke amalogu wedivayisi, isengakwazi ukufinyelela amalogu wayo. Umkhiqizi wedivayisi yakho usengakwazi ukufinyelela amanye amalogu noma ulwazi kudivayisi yakho.\n\nFunda kabanzi ku-g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ungabonisi futhi"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"I-<xliff:g id="APP_0">%1$s</xliff:g> ifuna ukubonisa izingcezu ze-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Hlela"</string>

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Ovozli pochta"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Tarmoqda xato yoki MMI kod noto‘g‘ri."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Ishlamaydigan funksiya."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Bu amal faqat ruxsat etilgan raqamlar uchun mavjud."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Rouming vaqtida telefondagi chaqiruvni boshqa raqamga uzatish sozlamalarini o‘zgartirib bo‘lmadi."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Xizmat yoqildi."</string>
@@ -1595,7 +1596,7 @@
     <string name="issued_by" msgid="7872459822431585684">"Tegishli:"</string>
     <string name="validity_period" msgid="1717724283033175968">"Yaroqliligi:"</string>
     <string name="issued_on" msgid="5855489688152497307">"Chiqarilgan sanasi:"</string>
-    <string name="expires_on" msgid="1623640879705103121">"Amal qilish muddati:"</string>
+    <string name="expires_on" msgid="1623640879705103121">"Muddati:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Serial raqam:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Barmoq izlari:"</string>
     <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 barmoq izi:"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Bir matalik foydalanishga ruxsat berish"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Rad etish"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Qurilma jurnaliga qurilma bilan yuz bergan hodisalar qaydlari yoziladi. Ilovalar bu jurnal qaydlari yordamida muammolarni topishi va bartaraf qilishi mumkin.\n\nAyrim jurnal qaydlarida maxfiy axborotlar yozilishi mumkin, shu sababli qurilmadagi barcha jurnal qaydlariga ruxsatni faqat ishonchli ilovalarga bering. \n\nBu ilovaga qurilmadagi barcha jurnal qaydlariga ruxsat berilmasa ham, u oʻzining jurnalini ocha oladi. Qurilma ishlab chiqaruvchisi ham ayrim jurnallar yoki qurilma haqidagi axborotlarni ocha oladi.\n\nBatafsil: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Boshqa chiqmasin"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ilovasi <xliff:g id="APP_2">%2$s</xliff:g> ilovasidan fragmentlar ko‘rsatish uchun ruxsat so‘ramoqda"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Tahrirlash"</string>

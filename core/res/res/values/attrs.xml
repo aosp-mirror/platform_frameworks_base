@@ -9560,6 +9560,12 @@
         <attr name="maxCollapsedHeightSmall" format="dimension" />
         <!-- Whether the Drawer should be positioned at the top rather than at the bottom. -->
         <attr name="showAtTop" format="boolean" />
+        <!-- By default `ResolverDrawerLayout`’s children views with `layout_ignoreOffset` property
+             set to true have a fixed position in the layout that won’t be affected by the drawer’s
+             movements. This property alternates that behavior. It specifies a child view’s id that
+             will push all ignoreOffset siblings below it when the drawer is moved i.e. setting the
+             top limit the ignoreOffset elements. -->
+        <attr name="ignoreOffsetTopLimit" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="MessagingLinearLayout">

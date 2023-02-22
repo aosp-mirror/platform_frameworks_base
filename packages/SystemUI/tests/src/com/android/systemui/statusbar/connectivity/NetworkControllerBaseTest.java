@@ -70,7 +70,10 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.log.LogBuffer;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -115,6 +118,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected TelephonyManager mMockTm;
     protected TelephonyListenerManager mTelephonyListenerManager;
     protected BroadcastDispatcher mMockBd;
+    protected UserTracker mUserTracker;
     protected Config mConfig;
     protected CallbackHandler mCallbackHandler;
     protected SubscriptionDefaults mMockSubDefaults;
@@ -125,6 +129,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected CarrierConfigTracker mCarrierConfigTracker;
     protected FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     protected Handler mMainHandler;
+    // Use a real mobile mappings object since lots of tests rely on it
+    protected FakeMobileMappingsProxy mMobileMappingsProxy = new FakeMobileMappingsProxy();
     protected WifiStatusTrackerFactory mWifiStatusTrackerFactory;
     protected MobileSignalControllerFactory mMobileFactory;
 
@@ -169,6 +175,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         mMockSm = mock(SubscriptionManager.class);
         mMockCm = mock(ConnectivityManager.class);
         mMockBd = mock(BroadcastDispatcher.class);
+        mUserTracker = mock(UserTracker.class);
         mMockNsm = mock(NetworkScoreManager.class);
         mMockSubDefaults = mock(SubscriptionDefaults.class);
         mCarrierConfigTracker = mock(CarrierConfigTracker.class);
@@ -219,10 +226,13 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mWifiStatusTrackerFactory = new WifiStatusTrackerFactory(
                 mContext, mMockWm, mMockNsm, mMockCm, mMainHandler);
+        // Most of these tests rely on the actual MobileMappings behavior
+        mMobileMappingsProxy.setUseRealImpl(true);
         mMobileFactory = new MobileSignalControllerFactory(
                 mContext,
                 mCallbackHandler,
-                mCarrierConfigTracker
+                mCarrierConfigTracker,
+                mMobileMappingsProxy
         );
 
         mNetworkController = new NetworkControllerImpl(mContext,
@@ -236,10 +246,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 mFakeExecutor,
                 mCallbackHandler,
                 mock(AccessPointControllerImpl.class),
+                mock(StatusBarPipelineFlags.class),
                 mock(DataUsageController.class),
                 mMockSubDefaults,
                 mMockProvisionController,
                 mMockBd,
+                mUserTracker,
                 mDemoModeController,
                 mCarrierConfigTracker,
                 mWifiStatusTrackerFactory,

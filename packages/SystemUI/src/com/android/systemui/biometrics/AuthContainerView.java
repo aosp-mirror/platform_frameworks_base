@@ -120,20 +120,20 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting final BiometricCallback mBiometricCallback;
 
     @Nullable private AuthBiometricView mBiometricView;
-    @Nullable private AuthCredentialView mCredentialView;
+    @VisibleForTesting @Nullable AuthCredentialView mCredentialView;
     private final AuthPanelController mPanelController;
     private final FrameLayout mFrameLayout;
     private final ImageView mBackgroundView;
     private final ScrollView mBiometricScrollView;
     private final View mPanelView;
     private final float mTranslationY;
-    @ContainerState private int mContainerState = STATE_UNKNOWN;
+    @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
     private final Set<Integer> mFailedModalities = new HashSet<Integer>();
+    private OnBackInvokedDispatcher mOnBackInvokedDispatcher;
     private final OnBackInvokedCallback mBackCallback = this::onBackInvoked;
 
     private final @Background DelayableExecutor mBackgroundExecutor;
-    private int mOrientation;
-    private boolean mSkipFirstLostFocus = false;
+    private boolean mIsOrientationChanged = false;
 
     // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
     @Nullable @AuthDialogCallback.DismissedReason private Integer mPendingCallbackReason;
@@ -444,6 +444,7 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onOrientationChanged() {
         maybeUpdatePositionForUdfps(true /* invalidate */);
+        mIsOrientationChanged = true;
     }
 
     @Override
@@ -452,8 +453,8 @@ public class AuthContainerView extends LinearLayout
         if (!hasWindowFocus) {
             //it's a workaround to avoid closing BP incorrectly
             //BP gets a onWindowFocusChanged(false) and then gets a onWindowFocusChanged(true)
-            if (mSkipFirstLostFocus) {
-                mSkipFirstLostFocus = false;
+            if (mIsOrientationChanged) {
+                mIsOrientationChanged = false;
                 return;
             }
             Log.v(TAG, "Lost window focus, dismissing the dialog");
@@ -464,9 +465,6 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-
-        //save the first orientation
-        mOrientation = getResources().getConfiguration().orientation;
 
         mWakefulnessLifecycle.addObserver(this);
 
@@ -485,51 +483,24 @@ public class AuthContainerView extends LinearLayout
             mContainerState = STATE_SHOWING;
         } else {
             mContainerState = STATE_ANIMATING_IN;
-            // The background panel and content are different views since we need to be able to
-            // animate them separately in other places.
-            mPanelView.setY(mTranslationY);
-            mBiometricScrollView.setY(mTranslationY);
-
+            setY(mTranslationY);
             setAlpha(0f);
             final long animateDuration = mConfig.mSkipAnimation ? 0 : ANIMATION_DURATION_SHOW_MS;
             postOnAnimation(() -> {
-                mPanelView.animate()
-                        .translationY(0)
-                        .setDuration(animateDuration)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .setListener(getJankListener(mPanelView, SHOW, animateDuration))
-                        .withLayer()
-                        .withEndAction(this::onDialogAnimatedIn)
-                        .start();
-                mBiometricScrollView.animate()
-                        .translationY(0)
-                        .setDuration(animateDuration)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .setListener(getJankListener(mBiometricScrollView, SHOW, animateDuration))
-                        .withLayer()
-                        .start();
-                if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
-                    mCredentialView.setY(mTranslationY);
-                    mCredentialView.animate()
-                            .translationY(0)
-                            .setDuration(animateDuration)
-                            .setInterpolator(mLinearOutSlowIn)
-                            .setListener(getJankListener(mCredentialView, SHOW, animateDuration))
-                            .withLayer()
-                            .start();
-                }
                 animate()
                         .alpha(1f)
+                        .translationY(0)
                         .setDuration(animateDuration)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .setListener(getJankListener(this, SHOW, animateDuration))
+                        .withEndAction(this::onDialogAnimatedIn)
                         .start();
             });
         }
-        OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
-        if (dispatcher != null) {
-            dispatcher.registerOnBackInvokedCallback(
+        mOnBackInvokedDispatcher = findOnBackInvokedDispatcher();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                     OnBackInvokedDispatcher.PRIORITY_DEFAULT, mBackCallback);
         }
     }
@@ -630,11 +601,11 @@ public class AuthContainerView extends LinearLayout
 
     @Override
     public void onDetachedFromWindow() {
-        OnBackInvokedDispatcher dispatcher = findOnBackInvokedDispatcher();
-        if (dispatcher != null) {
-            findOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mBackCallback);
-        }
         super.onDetachedFromWindow();
+        if (mOnBackInvokedDispatcher != null) {
+            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mBackCallback);
+            mOnBackInvokedDispatcher = null;
+        }
         mWakefulnessLifecycle.removeObserver(this);
     }
 
@@ -650,11 +621,24 @@ public class AuthContainerView extends LinearLayout
         }
 
         if (savedState != null) {
-            mSkipFirstLostFocus = savedState.getBoolean(
+            mIsOrientationChanged = savedState.getBoolean(
                     AuthDialog.KEY_BIOMETRIC_ORIENTATION_CHANGED);
         }
 
         wm.addView(this, getLayoutParams(mWindowToken, mConfig.mPromptInfo.getTitle()));
+    }
+
+    private void forceExecuteAnimatedIn() {
+        if (mContainerState == STATE_ANIMATING_IN) {
+            //clear all animators
+            if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
+                mCredentialView.animate().cancel();
+            }
+            mPanelView.animate().cancel();
+            mBiometricView.animate().cancel();
+            animate().cancel();
+            onDialogAnimatedIn();
+        }
     }
 
     @Override
@@ -662,6 +646,7 @@ public class AuthContainerView extends LinearLayout
         if (animate) {
             animateAway(false /* sendReason */, 0 /* reason */);
         } else {
+            forceExecuteAnimatedIn();
             removeWindowIfAttached();
         }
     }
@@ -730,9 +715,7 @@ public class AuthContainerView extends LinearLayout
                 mBiometricView != null && mCredentialView == null);
         outState.putBoolean(AuthDialog.KEY_CREDENTIAL_SHOWING, mCredentialView != null);
 
-        if (mOrientation != getResources().getConfiguration().orientation) {
-            outState.putBoolean(AuthDialog.KEY_BIOMETRIC_ORIENTATION_CHANGED, true);
-        }
+        outState.putBoolean(AuthDialog.KEY_BIOMETRIC_ORIENTATION_CHANGED, mIsOrientationChanged);
 
         if (mBiometricView != null) {
             mBiometricView.onSaveState(outState);
@@ -775,6 +758,12 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_ANIMATING_OUT;
 
+        // Request hiding soft-keyboard before animating away credential UI, in case IME insets
+        // animation get delayed by dismissing animation.
+        if (isAttachedToWindow() && getRootWindowInsets().isVisible(WindowInsets.Type.ime())) {
+            getWindowInsetsController().hide(WindowInsets.Type.ime());
+        }
+
         if (sendReason) {
             mPendingCallbackReason = reason;
         } else {
@@ -788,32 +777,9 @@ public class AuthContainerView extends LinearLayout
 
         final long animateDuration = mConfig.mSkipAnimation ? 0 : ANIMATION_DURATION_AWAY_MS;
         postOnAnimation(() -> {
-            mPanelView.animate()
-                    .translationY(mTranslationY)
-                    .setDuration(animateDuration)
-                    .setInterpolator(mLinearOutSlowIn)
-                    .setListener(getJankListener(mPanelView, DISMISS, animateDuration))
-                    .withLayer()
-                    .withEndAction(endActionRunnable)
-                    .start();
-            mBiometricScrollView.animate()
-                    .translationY(mTranslationY)
-                    .setDuration(animateDuration)
-                    .setInterpolator(mLinearOutSlowIn)
-                    .setListener(getJankListener(mBiometricScrollView, DISMISS, animateDuration))
-                    .withLayer()
-                    .start();
-            if (mCredentialView != null && mCredentialView.isAttachedToWindow()) {
-                mCredentialView.animate()
-                        .translationY(mTranslationY)
-                        .setDuration(animateDuration)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .setListener(getJankListener(mCredentialView, DISMISS, animateDuration))
-                        .withLayer()
-                        .start();
-            }
             animate()
                     .alpha(0f)
+                    .translationY(mTranslationY)
                     .setDuration(animateDuration)
                     .setInterpolator(mLinearOutSlowIn)
                     .setListener(getJankListener(this, DISMISS, animateDuration))
@@ -828,6 +794,7 @@ public class AuthContainerView extends LinearLayout
                         mWindowManager.updateViewLayout(this, lp);
                     })
                     .withLayer()
+                    .withEndAction(endActionRunnable)
                     .start();
         });
     }
@@ -849,7 +816,7 @@ public class AuthContainerView extends LinearLayout
         }
         mContainerState = STATE_GONE;
         if (isAttachedToWindow()) {
-            mWindowManager.removeView(this);
+            mWindowManager.removeViewImmediate(this);
         }
     }
 
@@ -875,6 +842,7 @@ public class AuthContainerView extends LinearLayout
     static WindowManager.LayoutParams getLayoutParams(IBinder windowToken, CharSequence title) {
         final int windowFlags = WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                 | WindowManager.LayoutParams.FLAG_SECURE
+                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_DIM_BEHIND;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.MetricsLogger;
@@ -42,6 +43,9 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.data.source.UserRecord;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -82,6 +86,13 @@ public class UserDetailView extends PseudoGridView {
         private final UiEventLogger mUiEventLogger;
         private final FalsingManager mFalsingManager;
         private @Nullable UserSwitchDialogController.DialogShower mDialogShower;
+
+        @NonNull
+        @Override
+        protected List<UserRecord> getUsers() {
+            return super.getUsers().stream().filter(
+                    userRecord -> !userRecord.isManageUsers).collect(Collectors.toList());
+        }
 
         @Inject
         public Adapter(Context context, UserSwitcherController controller,
@@ -134,7 +145,7 @@ public class UserDetailView extends PseudoGridView {
                 v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
-            v.setDisabledByAdmin(mController.isDisabledByAdmin(item));
+            v.setDisabledByAdmin(item.isDisabledByAdmin());
             v.setEnabled(item.isSwitchToEnabled);
             UserSwitcherController.setSelectableAlpha(v);
 
@@ -173,16 +184,16 @@ public class UserDetailView extends PseudoGridView {
             Trace.beginSection("UserDetailView.Adapter#onClick");
             UserRecord userRecord =
                     (UserRecord) view.getTag();
-            if (mController.isDisabledByAdmin(userRecord)) {
+            if (userRecord.isDisabledByAdmin()) {
                 final Intent intent = RestrictedLockUtils.getShowAdminSupportDetailsIntent(
-                        mContext, mController.getEnforcedAdmin(userRecord));
+                        mContext, userRecord.enforcedAdmin);
                 mController.startActivity(intent);
             } else if (userRecord.isSwitchToEnabled) {
                 MetricsLogger.action(mContext, MetricsEvent.QS_SWITCH_USER);
                 mUiEventLogger.log(QSUserSwitcherEvent.QS_USER_SWITCH);
                 if (!userRecord.isAddUser
                         && !userRecord.isRestricted
-                        && !mController.isDisabledByAdmin(userRecord)) {
+                        && !userRecord.isDisabledByAdmin()) {
                     if (mCurrentUserView != null) {
                         mCurrentUserView.setActivated(false);
                     }
@@ -191,6 +202,15 @@ public class UserDetailView extends PseudoGridView {
                 onUserListItemClicked(userRecord, mDialogShower);
             }
             Trace.endSection();
+        }
+
+        @Override
+        public void onUserListItemClicked(@NonNull UserRecord record,
+                @Nullable UserSwitchDialogController.DialogShower dialogShower) {
+            if (dialogShower != null) {
+                mDialogShower.dismiss();
+            }
+            super.onUserListItemClicked(record, dialogShower);
         }
 
         public void linkToViewGroup(ViewGroup viewGroup) {

@@ -21,11 +21,12 @@
             android:paddingEnd="0dp">
     <item>
         <shape android:shape="rectangle">
-          <solid android:color="?androidprv:attr/colorSurface" />
+          <solid android:color="?androidprv:attr/colorSurfaceHighlight" />
             <corners android:radius="32dp" />
         </shape>
     </item>
     <item
+        android:id="@+id/user_switcher_key_down"
         android:drawable="@drawable/ic_ksh_key_down"
         android:gravity="end|center_vertical"
         android:width="32dp"

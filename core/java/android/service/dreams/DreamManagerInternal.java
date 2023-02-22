@@ -16,7 +16,6 @@
 
 package android.service.dreams;
 
-import android.content.ComponentName;
 
 /**
  * Dream manager local system service interface.
@@ -29,16 +28,18 @@ public abstract class DreamManagerInternal {
      *
      * @param doze If true, starts the doze dream component if one has been configured,
      * otherwise starts the user-specified dream.
+     * @param reason The reason to start dreaming, which is logged to help debugging.
      */
-    public abstract void startDream(boolean doze);
+    public abstract void startDream(boolean doze, String reason);
 
     /**
      * Called by the power manager to stop a dream.
      *
      * @param immediate If true, ends the dream summarily, otherwise gives it some time
      * to perform a proper exit transition.
+     * @param reason The reason to stop dreaming, which is logged to help debugging.
      */
-    public abstract void stopDream(boolean immediate);
+    public abstract void stopDream(boolean immediate, String reason);
 
     /**
      * Called by the power manager to determine whether a dream is running.
@@ -52,17 +53,44 @@ public abstract class DreamManagerInternal {
     public abstract void requestDream();
 
     /**
-     * Called by the ActivityTaskManagerService to verify that the startDreamActivity
-     * request comes from the current active dream component.
+     * Whether dreaming can start given user settings and the current dock/charge state.
      *
-     * This function and its call path should not acquire the DreamManagerService lock
-     * to avoid deadlock with the ActivityTaskManager lock.
-     *
-     * TODO: Make this interaction push-based - the DreamManager should inform the
-     * ActivityTaskManager whenever the active dream component changes.
-     *
-     * @param doze If true returns the current active doze component. Otherwise, returns the
-     *             active dream component.
+     * @param isScreenOn True if the screen is currently on.
      */
-    public abstract ComponentName getActiveDreamComponent(boolean doze);
+    public abstract boolean canStartDreaming(boolean isScreenOn);
+
+    /**
+     * Return whether dreams can continue when undocking by default. Even if the default is true,
+     * it can be overridden temporarily, in which case {@link DreamManagerStateListener} will be
+     * informed of any changes.
+     */
+    public abstract boolean keepDreamingWhenUndockedDefault();
+
+    /**
+     * Register a {@link DreamManagerStateListener}, which will be called when there are changes to
+     * dream state.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerDreamManagerStateListener(DreamManagerStateListener listener);
+
+    /**
+     * Unregister a {@link DreamManagerStateListener}, which will be called when there are changes
+     * to dream state.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterDreamManagerStateListener(DreamManagerStateListener listener);
+
+    /**
+     * Called when there are changes to dream state.
+     */
+    public interface DreamManagerStateListener {
+        /**
+         * Called when keep dreaming when undocked has changed.
+         *
+         * @param keepDreaming True if the current dream should continue when undocking.
+         */
+        void onKeepDreamingWhenUndockedChanged(boolean keepDreaming);
+    }
 }

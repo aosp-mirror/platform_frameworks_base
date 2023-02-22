@@ -17,106 +17,52 @@
 package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.window.TransitionFilter.CONTAINER_ORDER_TOP;
 
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.ACTIVITY_TYPE_RECENTS;
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.MODE_CLOSING;
+import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.newTarget;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
-import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.IRecentsAnimationController;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.RemoteTransition;
 import android.window.TaskSnapshot;
-import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.DataClass;
 import com.android.systemui.shared.recents.model.ThumbnailData;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 
 /**
- * Wrapper to expose RemoteTransition (shell transitions) to Launcher.
- *
- * @see IRemoteTransition
- * @see TransitionFilter
+ * Helper class to build {@link RemoteTransition} objects
  */
-@DataClass
-public class RemoteTransitionCompat implements Parcelable {
+public class RemoteTransitionCompat {
     private static final String TAG = "RemoteTransitionCompat";
 
-    @NonNull final RemoteTransition mTransition;
-    @Nullable TransitionFilter mFilter = null;
-
-    RemoteTransitionCompat(RemoteTransition transition) {
-        mTransition = transition;
-    }
-
-    public RemoteTransitionCompat(@NonNull RemoteTransitionRunner runner,
-            @NonNull Executor executor, @Nullable IApplicationThread appThread) {
-        IRemoteTransition remote = new IRemoteTransition.Stub() {
-            @Override
-            public void startAnimation(IBinder transition, TransitionInfo info,
-                    SurfaceControl.Transaction t,
-                    IRemoteTransitionFinishedCallback finishedCallback) {
-                final Runnable finishAdapter = () ->  {
-                    try {
-                        finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to call transition finished callback", e);
-                    }
-                };
-                executor.execute(() -> runner.startAnimation(transition, info, t, finishAdapter));
-            }
-
-            @Override
-            public void mergeAnimation(IBinder transition, TransitionInfo info,
-                    SurfaceControl.Transaction t, IBinder mergeTarget,
-                    IRemoteTransitionFinishedCallback finishedCallback) {
-                final Runnable finishAdapter = () ->  {
-                    try {
-                        finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Failed to call transition finished callback", e);
-                    }
-                };
-                executor.execute(() -> runner.mergeAnimation(transition, info, t, mergeTarget,
-                        finishAdapter));
-            }
-        };
-        mTransition = new RemoteTransition(remote, appThread);
-    }
-
     /** Constructor specifically for recents animation */
-    public RemoteTransitionCompat(RecentsAnimationListener recents,
+    public static RemoteTransition newRemoteTransition(RecentsAnimationListener recents,
             RecentsAnimationControllerCompat controller, IApplicationThread appThread) {
         IRemoteTransition remote = new IRemoteTransition.Stub() {
             final RecentsControllerWrap mRecentsSession = new RecentsControllerWrap();
@@ -127,9 +73,9 @@ public class RemoteTransitionCompat implements Parcelable {
                     SurfaceControl.Transaction t,
                     IRemoteTransitionFinishedCallback finishedCallback) {
                 final ArrayMap<SurfaceControl, SurfaceControl> leashMap = new ArrayMap<>();
-                final RemoteAnimationTargetCompat[] apps =
+                final RemoteAnimationTarget[] apps =
                         RemoteAnimationTargetCompat.wrapApps(info, t, leashMap);
-                final RemoteAnimationTargetCompat[] wallpapers =
+                final RemoteAnimationTarget[] wallpapers =
                         RemoteAnimationTargetCompat.wrapNonApps(
                                 info, true /* wallpapers */, t, leashMap);
                 // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
@@ -180,36 +126,21 @@ public class RemoteTransitionCompat implements Parcelable {
             public void mergeAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IBinder mergeTarget,
                     IRemoteTransitionFinishedCallback finishedCallback) {
-                if (!mergeTarget.equals(mToken)) return;
-                if (!mRecentsSession.merge(info, t, recents)) return;
-                try {
-                    finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error merging transition.", e);
+                if (mergeTarget.equals(mToken) && mRecentsSession.merge(info, t, recents)) {
+                    try {
+                        finishedCallback.onTransitionFinished(null /* wct */, null /* sct */);
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Error merging transition.", e);
+                    }
+                    // commit taskAppeared after merge transition finished.
+                    mRecentsSession.commitTasksAppearedIfNeeded(recents);
+                } else {
+                    t.close();
+                    info.releaseAllSurfaces();
                 }
-                // commit taskAppeared after merge transition finished.
-                mRecentsSession.commitTasksAppearedIfNeeded(recents);
             }
         };
-        mTransition = new RemoteTransition(remote, appThread);
-    }
-
-    /** Adds a filter check that restricts this remote transition to home open transitions. */
-    public void addHomeOpenCheck(ComponentName homeActivity) {
-        if (mFilter == null) {
-            mFilter = new TransitionFilter();
-        }
-        // No need to handle the transition that also dismisses keyguard.
-        mFilter.mNotFlags = TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
-        mFilter.mRequirements =
-                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement(),
-                        new TransitionFilter.Requirement()};
-        mFilter.mRequirements[0].mActivityType = ACTIVITY_TYPE_HOME;
-        mFilter.mRequirements[0].mTopActivity = homeActivity;
-        mFilter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
-        mFilter.mRequirements[0].mOrder = CONTAINER_ORDER_TOP;
-        mFilter.mRequirements[1].mActivityType = ACTIVITY_TYPE_STANDARD;
-        mFilter.mRequirements[1].mModes = new int[]{TRANSIT_CLOSE, TRANSIT_TO_BACK};
+        return new RemoteTransition(remote, appThread);
     }
 
     /**
@@ -230,7 +161,7 @@ public class RemoteTransitionCompat implements Parcelable {
         private PictureInPictureSurfaceTransaction mPipTransaction = null;
         private IBinder mTransition = null;
         private boolean mKeyguardLocked = false;
-        private RemoteAnimationTargetCompat[] mAppearedTargets;
+        private RemoteAnimationTarget[] mAppearedTargets;
         private boolean mWillFinishToHome = false;
 
         void setup(RecentsAnimationControllerCompat wrapped, TransitionInfo info,
@@ -320,25 +251,26 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
                 // In this case, we are "returning" to an already running app, so just consume
                 // the merge and do nothing.
+                info.releaseAllSurfaces();
+                t.close();
                 return true;
             }
             final int layer = mInfo.getChanges().size() * 3;
             mOpeningLeashes = new ArrayList<>();
             mOpeningHome = cancelRecents;
-            final RemoteAnimationTargetCompat[] targets =
-                    new RemoteAnimationTargetCompat[openingTasks.size()];
+            final RemoteAnimationTarget[] targets =
+                    new RemoteAnimationTarget[openingTasks.size()];
             for (int i = 0; i < openingTasks.size(); ++i) {
                 final TransitionInfo.Change change = openingTasks.valueAt(i);
                 mOpeningLeashes.add(change.getLeash());
                 // We are receiving new opening tasks, so convert to onTasksAppeared.
-                final RemoteAnimationTargetCompat target = new RemoteAnimationTargetCompat(
-                        change, layer, info, t);
-                mLeashMap.put(mOpeningLeashes.get(i), target.leash);
-                t.reparent(target.leash, mInfo.getRootLeash());
-                t.setLayer(target.leash, layer);
-                targets[i] = target;
+                targets[i] = newTarget(change, layer, info, t, mLeashMap);
+                t.reparent(targets[i].leash, mInfo.getRootLeash());
+                t.setLayer(targets[i].leash, layer);
             }
             t.apply();
+            // not using the incoming anim-only surfaces
+            info.releaseAnimSurfaces();
             mAppearedTargets = targets;
             return true;
         }
@@ -455,9 +387,7 @@ public class RemoteTransitionCompat implements Parcelable {
             }
             // Only release the non-local created surface references. The animator is responsible
             // for releasing the leashes created by local.
-            for (int i = 0; i < mInfo.getChanges().size(); ++i) {
-                mInfo.getChanges().get(i).getLeash().release();
-            }
+            mInfo.releaseAllSurfaces();
             // Reset all members.
             mWrapped = null;
             mFinishCB = null;
@@ -506,161 +436,4 @@ public class RemoteTransitionCompat implements Parcelable {
         @Override public void animateNavigationBarToApp(long duration) {
         }
     }
-
-
-
-    // Code below generated by codegen v1.0.23.
-    //
-    // DO NOT MODIFY!
-    // CHECKSTYLE:OFF Generated code
-    //
-    // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/system/RemoteTransitionCompat.java
-    //
-    // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
-    //   Settings > Editor > Code Style > Formatter Control
-    //@formatter:off
-
-
-    @DataClass.Generated.Member
-    /* package-private */ RemoteTransitionCompat(
-            @NonNull RemoteTransition transition,
-            @Nullable TransitionFilter filter) {
-        this.mTransition = transition;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTransition);
-        this.mFilter = filter;
-
-        // onConstructed(); // You can define this method to get a callback
-    }
-
-    @DataClass.Generated.Member
-    public @NonNull RemoteTransition getTransition() {
-        return mTransition;
-    }
-
-    @DataClass.Generated.Member
-    public @Nullable TransitionFilter getFilter() {
-        return mFilter;
-    }
-
-    @Override
-    @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
-        // You can override field parcelling by defining methods like:
-        // void parcelFieldName(Parcel dest, int flags) { ... }
-
-        byte flg = 0;
-        if (mFilter != null) flg |= 0x2;
-        dest.writeByte(flg);
-        dest.writeTypedObject(mTransition, flags);
-        if (mFilter != null) dest.writeTypedObject(mFilter, flags);
-    }
-
-    @Override
-    @DataClass.Generated.Member
-    public int describeContents() { return 0; }
-
-    /** @hide */
-    @SuppressWarnings({"unchecked", "RedundantCast"})
-    @DataClass.Generated.Member
-    protected RemoteTransitionCompat(@NonNull android.os.Parcel in) {
-        // You can override field unparcelling by defining methods like:
-        // static FieldType unparcelFieldName(Parcel in) { ... }
-
-        byte flg = in.readByte();
-        RemoteTransition transition = (RemoteTransition) in.readTypedObject(RemoteTransition.CREATOR);
-        TransitionFilter filter = (flg & 0x2) == 0 ? null : (TransitionFilter) in.readTypedObject(TransitionFilter.CREATOR);
-
-        this.mTransition = transition;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTransition);
-        this.mFilter = filter;
-
-        // onConstructed(); // You can define this method to get a callback
-    }
-
-    @DataClass.Generated.Member
-    public static final @NonNull Parcelable.Creator<RemoteTransitionCompat> CREATOR
-            = new Parcelable.Creator<RemoteTransitionCompat>() {
-        @Override
-        public RemoteTransitionCompat[] newArray(int size) {
-            return new RemoteTransitionCompat[size];
-        }
-
-        @Override
-        public RemoteTransitionCompat createFromParcel(@NonNull android.os.Parcel in) {
-            return new RemoteTransitionCompat(in);
-        }
-    };
-
-    /**
-     * A builder for {@link RemoteTransitionCompat}
-     */
-    @SuppressWarnings("WeakerAccess")
-    @DataClass.Generated.Member
-    public static class Builder {
-
-        private @NonNull RemoteTransition mTransition;
-        private @Nullable TransitionFilter mFilter;
-
-        private long mBuilderFieldsSet = 0L;
-
-        public Builder(
-                @NonNull RemoteTransition transition) {
-            mTransition = transition;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mTransition);
-        }
-
-        @DataClass.Generated.Member
-        public @NonNull Builder setTransition(@NonNull RemoteTransition value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x1;
-            mTransition = value;
-            return this;
-        }
-
-        @DataClass.Generated.Member
-        public @NonNull Builder setFilter(@NonNull TransitionFilter value) {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x2;
-            mFilter = value;
-            return this;
-        }
-
-        /** Builds the instance. This builder should not be touched after calling this! */
-        public @NonNull RemoteTransitionCompat build() {
-            checkNotUsed();
-            mBuilderFieldsSet |= 0x4; // Mark builder used
-
-            if ((mBuilderFieldsSet & 0x2) == 0) {
-                mFilter = null;
-            }
-            RemoteTransitionCompat o = new RemoteTransitionCompat(
-                    mTransition,
-                    mFilter);
-            return o;
-        }
-
-        private void checkNotUsed() {
-            if ((mBuilderFieldsSet & 0x4) != 0) {
-                throw new IllegalStateException(
-                        "This Builder should not be reused. Use a new Builder instance instead");
-            }
-        }
-    }
-
-    @DataClass.Generated(
-            time = 1629321609807L,
-            codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/packages/SystemUI/shared/src/com/android/systemui/shared/system/RemoteTransitionCompat.java",
-            inputSignatures = "private static final  java.lang.String TAG\nfinal @android.annotation.NonNull android.window.RemoteTransition mTransition\n @android.annotation.Nullable android.window.TransitionFilter mFilter\npublic  void addHomeOpenCheck(android.content.ComponentName)\nclass RemoteTransitionCompat extends java.lang.Object implements [android.os.Parcelable]\nprivate  com.android.systemui.shared.system.RecentsAnimationControllerCompat mWrapped\nprivate  android.window.IRemoteTransitionFinishedCallback mFinishCB\nprivate  android.window.WindowContainerToken mPausingTask\nprivate  android.window.WindowContainerToken mPipTask\nprivate  android.window.TransitionInfo mInfo\nprivate  android.view.SurfaceControl mOpeningLeash\nprivate  android.util.ArrayMap<android.view.SurfaceControl,android.view.SurfaceControl> mLeashMap\nprivate  android.window.PictureInPictureSurfaceTransaction mPipTransaction\nprivate  android.os.IBinder mTransition\n  void setup(com.android.systemui.shared.system.RecentsAnimationControllerCompat,android.window.TransitionInfo,android.window.IRemoteTransitionFinishedCallback,android.window.WindowContainerToken,android.window.WindowContainerToken,android.util.ArrayMap<android.view.SurfaceControl,android.view.SurfaceControl>,android.os.IBinder)\n @android.annotation.SuppressLint boolean merge(android.window.TransitionInfo,android.view.SurfaceControl.Transaction,com.android.systemui.shared.system.RecentsAnimationListener)\npublic @java.lang.Override com.android.systemui.shared.recents.model.ThumbnailData screenshotTask(int)\npublic @java.lang.Override void setInputConsumerEnabled(boolean)\npublic @java.lang.Override void setAnimationTargetsBehindSystemBars(boolean)\npublic @java.lang.Override void hideCurrentInputMethod()\npublic @java.lang.Override void setFinishTaskTransaction(int,android.window.PictureInPictureSurfaceTransaction,android.view.SurfaceControl)\npublic @java.lang.Override @android.annotation.SuppressLint void finish(boolean,boolean)\npublic @java.lang.Override void setDeferCancelUntilNextTransition(boolean,boolean)\npublic @java.lang.Override void cleanupScreenshot()\npublic @java.lang.Override void setWillFinishToHome(boolean)\npublic @java.lang.Override boolean removeTask(int)\npublic @java.lang.Override void detachNavigationBarFromApp(boolean)\npublic @java.lang.Override void animateNavigationBarToApp(long)\nclass RecentsControllerWrap extends com.android.systemui.shared.system.RecentsAnimationControllerCompat implements []\n@com.android.internal.util.DataClass")
-    @Deprecated
-    private void __metadata() {}
-
-
-    //@formatter:on
-    // End of generated code
-
 }

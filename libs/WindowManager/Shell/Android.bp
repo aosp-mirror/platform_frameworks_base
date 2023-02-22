@@ -44,6 +44,10 @@ filegroup {
     srcs: [
         "src/com/android/wm/shell/util/**/*.java",
         "src/com/android/wm/shell/common/split/SplitScreenConstants.java",
+        "src/com/android/wm/shell/sysui/ShellSharedConstants.java",
+        "src/com/android/wm/shell/common/TransactionPool.java",
+        "src/com/android/wm/shell/animation/Interpolators.java",
+        "src/com/android/wm/shell/startingsurface/SplashScreenExitAnimationUtils.java",
     ],
     path: "src",
 }
@@ -100,6 +104,21 @@ genrule {
     out: ["wm_shell_protolog.json"],
 }
 
+genrule {
+    name: "protolog.json.gz",
+    srcs: [":generate-wm_shell_protolog.json"],
+    out: ["wmshell.protolog.json.gz"],
+    cmd: "$(location minigzip) -c < $(in) > $(out)",
+    tools: ["minigzip"],
+}
+
+prebuilt_etc {
+    name: "wmshell.protolog.json.gz",
+    system_ext_specific: true,
+    src: ":protolog.json.gz",
+    filename_from_src: true,
+}
+
 // End ProtoLog
 
 java_library {
@@ -122,9 +141,6 @@ android_library {
     ],
     resource_dirs: [
         "res",
-    ],
-    java_resources: [
-        ":generate-wm_shell_protolog.json",
     ],
     static_libs: [
         "androidx.appcompat_appcompat",

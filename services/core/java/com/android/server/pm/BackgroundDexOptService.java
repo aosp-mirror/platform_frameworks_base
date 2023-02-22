@@ -385,7 +385,7 @@ public final class BackgroundDexOptService {
                                 job.jobFinished(params, !completed);
                             } else {
                                 // Periodic job
-                                job.jobFinished(params, true);
+                                job.jobFinished(params, false /* reschedule */);
                             }
                             markDexOptCompleted();
                         }

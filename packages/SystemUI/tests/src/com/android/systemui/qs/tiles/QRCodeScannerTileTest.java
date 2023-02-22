@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 
 import static org.mockito.Mockito.when;
 
@@ -108,17 +109,20 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
     @Test
     public void testQRCodeTileUnavailable() {
-        when(mController.isEnabledForQuickSettings()).thenReturn(false);
+        when(mController.isAbleToOpenCameraApp()).thenReturn(false);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
         assertEquals(state.state, Tile.STATE_UNAVAILABLE);
+        assertEquals(state.secondaryLabel.toString(),
+                     mContext.getString(R.string.qr_code_scanner_updating_secondary_label));
     }
 
     @Test
     public void testQRCodeTileAvailable() {
-        when(mController.isEnabledForQuickSettings()).thenReturn(true);
+        when(mController.isAbleToOpenCameraApp()).thenReturn(true);
         QSTile.State state = new QSTile.State();
         mTile.handleUpdateState(state, null);
-        assertEquals(state.state, Tile.STATE_ACTIVE);
+        assertEquals(state.state, Tile.STATE_INACTIVE);
+        assertNull(state.secondaryLabel);
     }
 }

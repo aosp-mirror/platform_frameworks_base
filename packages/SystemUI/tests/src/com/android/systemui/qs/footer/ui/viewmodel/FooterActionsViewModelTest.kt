@@ -29,6 +29,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.FakeFgsManagerController
 import com.android.systemui.qs.QSSecurityFooterUtils
 import com.android.systemui.qs.footer.FooterActionsTestUtils
@@ -44,10 +45,11 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,15 +60,20 @@ import org.mockito.Mockito.`when` as whenever
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
 class FooterActionsViewModelTest : SysuiTestCase() {
+    private val testScope = TestScope()
     private lateinit var utils: FooterActionsTestUtils
 
     @Before
     fun setUp() {
-        utils = FooterActionsTestUtils(context, TestableLooper.get(this))
+        utils = FooterActionsTestUtils(context, TestableLooper.get(this), testScope.testScheduler)
+    }
+
+    private fun runTest(block: suspend TestScope.() -> Unit) {
+        testScope.runTest(testBody = block)
     }
 
     @Test
-    fun settingsButton() = runBlockingTest {
+    fun settingsButton() = runTest {
         val underTest = utils.footerActionsViewModel(showPowerButton = false)
         val settings = underTest.settings
 
@@ -77,12 +84,12 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
                 )
             )
-        assertThat(settings.background).isEqualTo(R.drawable.qs_footer_action_circle)
+        assertThat(settings.backgroundColor).isEqualTo(R.attr.offStateColor)
         assertThat(settings.iconTint).isNull()
     }
 
     @Test
-    fun powerButton() = runBlockingTest {
+    fun powerButton() = runTest {
         // Without power button.
         val underTestWithoutPower = utils.footerActionsViewModel(showPowerButton = false)
         assertThat(underTestWithoutPower.power).isNull()
@@ -98,7 +105,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                     ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
                 )
             )
-        assertThat(power.background).isEqualTo(R.drawable.qs_footer_action_circle_color)
+        assertThat(power.backgroundColor).isEqualTo(com.android.internal.R.attr.colorAccent)
         assertThat(power.iconTint)
             .isEqualTo(
                 Utils.getColorAttrDefaultColor(
@@ -109,7 +116,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun userSwitcher() = runBlockingTest {
+    fun userSwitcher() = runTest {
         val picture: Drawable = mock()
         val userInfoController = FakeUserInfoController(FakeInfo(picture = picture))
         val settings = FakeSettings()
@@ -142,16 +149,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
             )
 
         // Collect the user switcher into currentUserSwitcher.
-        var currentUserSwitcher: FooterActionsButtonViewModel? = null
-        val job = launch { underTest.userSwitcher.collect { currentUserSwitcher = it } }
-        fun currentUserSwitcher(): FooterActionsButtonViewModel? {
-            // Make sure we finish collecting the current user switcher. This is necessary because
-            // combined flows launch multiple coroutines in the current scope so we need to make
-            // sure we process all coroutines triggered by our flow collection before we make
-            // assertions on the current buttons.
-            advanceUntilIdle()
-            return currentUserSwitcher
-        }
+        val currentUserSwitcher = collectLastValue(underTest.userSwitcher)
 
         // The user switcher is disabled.
         assertThat(currentUserSwitcher()).isNull()
@@ -172,7 +170,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         assertThat(userSwitcher).isNotNull()
         assertThat(userSwitcher!!.icon)
             .isEqualTo(Icon.Loaded(picture, ContentDescription.Loaded("Signed in as foo")))
-        assertThat(userSwitcher.background).isEqualTo(R.drawable.qs_footer_action_circle)
+        assertThat(userSwitcher.backgroundColor).isEqualTo(R.attr.offStateColor)
 
         // Change the current user name.
         userSwitcherControllerWrapper.currentUserName = "bar"
@@ -192,26 +190,14 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         // UserManager change.
         assertThat(iconTint()).isNull()
 
-        // Trigger a user info change: there should now be a tint.
-        userInfoController.updateInfo { userAccount = "doe" }
-        assertThat(iconTint())
-            .isEqualTo(
-                Utils.getColorAttrDefaultColor(
-                    context,
-                    android.R.attr.colorForeground,
-                )
-            )
-
         // Make sure we don't tint the icon if it is a user image (and not the default image), even
         // in guest mode.
         userInfoController.updateInfo { this.picture = mock<UserIconDrawable>() }
         assertThat(iconTint()).isNull()
-
-        job.cancel()
     }
 
     @Test
-    fun security() = runBlockingTest {
+    fun security() = runTest {
         val securityController = FakeSecurityController()
         val qsSecurityFooterUtils = mock<QSSecurityFooterUtils>()
 
@@ -235,12 +221,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
             )
 
         // Collect the security model into currentSecurity.
-        var currentSecurity: FooterActionsSecurityButtonViewModel? = null
-        val job = launch { underTest.security.collect { currentSecurity = it } }
-        fun currentSecurity(): FooterActionsSecurityButtonViewModel? {
-            advanceUntilIdle()
-            return currentSecurity
-        }
+        val currentSecurity = collectLastValue(underTest.security)
 
         // By default, we always return a null SecurityButtonConfig.
         assertThat(currentSecurity()).isNull()
@@ -271,12 +252,10 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         security = currentSecurity()
         assertThat(security).isNotNull()
         assertThat(security!!.onClick).isNull()
-
-        job.cancel()
     }
 
     @Test
-    fun foregroundServices() = runBlockingTest {
+    fun foregroundServices() = runTest {
         val securityController = FakeSecurityController()
         val fgsManagerController =
             FakeFgsManagerController(
@@ -298,19 +277,17 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                 footerActionsInteractor =
                     utils.footerActionsInteractor(
                         qsSecurityFooterUtils = qsSecurityFooterUtils,
-                        securityRepository = utils.securityRepository(securityController),
+                        securityRepository =
+                            utils.securityRepository(
+                                securityController,
+                            ),
                         foregroundServicesRepository =
                             utils.foregroundServicesRepository(fgsManagerController),
                     ),
             )
 
         // Collect the security model into currentSecurity.
-        var currentForegroundServices: FooterActionsForegroundServicesButtonViewModel? = null
-        val job = launch { underTest.foregroundServices.collect { currentForegroundServices = it } }
-        fun currentForegroundServices(): FooterActionsForegroundServicesButtonViewModel? {
-            advanceUntilIdle()
-            return currentForegroundServices
-        }
+        val currentForegroundServices = collectLastValue(underTest.foregroundServices)
 
         // We don't show the foreground services button if the number of running packages is not
         // > 1.
@@ -352,12 +329,10 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         }
         securityController.updateState {}
         assertThat(currentForegroundServices()?.displayText).isFalse()
-
-        job.cancel()
     }
 
     @Test
-    fun observeDeviceMonitoringDialogRequests() = runBlockingTest {
+    fun observeDeviceMonitoringDialogRequests() = runTest {
         val qsSecurityFooterUtils = mock<QSSecurityFooterUtils>()
         val broadcastDispatcher = mock<BroadcastDispatcher>()
 
@@ -409,5 +384,87 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
         underTest.onVisibilityChangeRequested(visible = true)
         assertThat(underTest.isVisible.value).isTrue()
+    }
+
+    @Test
+    fun alpha_inSplitShade_followsExpansion() {
+        val underTest = utils.footerActionsViewModel()
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.25f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0.25f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0.5f)
+
+        underTest.onQuickSettingsExpansionChanged(0.75f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(0.75f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = true)
+        assertThat(underTest.alpha.value).isEqualTo(1f)
+    }
+
+    @Test
+    fun backgroundAlpha_inSplitShade_followsExpansion_with_0_99_delay() {
+        val underTest = utils.footerActionsViewModel()
+        val floatTolerance = 0.01f
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.9f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.991f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isWithin(floatTolerance).of(0.1f)
+
+        underTest.onQuickSettingsExpansionChanged(0.995f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isWithin(floatTolerance).of(0.5f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = true)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+    }
+
+    @Test
+    fun alpha_inSingleShade_followsExpansion_with_0_9_delay() {
+        val underTest = utils.footerActionsViewModel()
+        val floatTolerance = 0.01f
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.9f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(0f)
+
+        underTest.onQuickSettingsExpansionChanged(0.91f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isWithin(floatTolerance).of(0.1f)
+
+        underTest.onQuickSettingsExpansionChanged(0.95f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isWithin(floatTolerance).of(0.5f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = false)
+        assertThat(underTest.alpha.value).isEqualTo(1f)
+    }
+
+    @Test
+    fun backgroundAlpha_inSingleShade_always1() {
+        val underTest = utils.footerActionsViewModel()
+
+        underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = false)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+
+        underTest.onQuickSettingsExpansionChanged(0.5f, isInSplitShade = false)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
+
+        underTest.onQuickSettingsExpansionChanged(1f, isInSplitShade = false)
+        assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
     }
 }

@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Correio de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de ligação ou código MMI inválido."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funcionalidade não suportada."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"A operação está restringida a números fixos autorizados."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Não é possível alterar as definições do encaminhamento de chamadas no telemóvel quando está em roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"O serviço foi ativado."</string>
@@ -164,7 +165,7 @@
     <string name="httpErrorAuth" msgid="469553140922938968">"Não foi possível autenticar."</string>
     <string name="httpErrorProxyAuth" msgid="7229662162030113406">"A autenticação através do servidor proxy falhou."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"Não foi possível ligar ao servidor."</string>
-    <string name="httpErrorIO" msgid="3860318696166314490">"Não foi possível comunicar com o servidor. Tente novamente mais tarde."</string>
+    <string name="httpErrorIO" msgid="3860318696166314490">"Não foi possível comunicar com o servidor. Tente mais tarde."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Esgotou o tempo limite da ligação ao servidor."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"A página contém demasiados redireccionamentos do servidor."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"O protocolo não é suportado."</string>
@@ -172,7 +173,7 @@
     <string name="httpErrorBadUrl" msgid="754447723314832538">"Não foi possível abrir a página porque o URL é inválido."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"Não foi possível aceder ao ficheiro."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"Não foi possível localizar o ficheiro solicitado."</string>
-    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"Existem demasiados pedidos em processamento. Tente novamente mais tarde."</string>
+    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"Existem demasiados pedidos em processamento. Tente mais tarde."</string>
     <string name="notification_title" msgid="5783748077084481121">"Erro de início de sessão de <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"Sincronização"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"Não é possível sincronizar"</string>
@@ -671,7 +672,7 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"Não pode guardar novos dados de rostos. Elimine um antigo."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Operação de rosto cancelada."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Desbloqueio facial cancelado pelo utilizador"</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"Demasiadas tentativas. Tente novamente mais tarde."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"Demasiadas tentativas. Tente mais tarde."</string>
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Demasiadas tentativas. O Desbloqueio facial foi desativado."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Demasiadas tentativas. Em alternativa, introduza o bloqueio de ecrã."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Não é possível validar o rosto. Tente novamente."</string>
@@ -1836,7 +1837,7 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Crie um PIN para modificar as restrições"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Os PINs não correspondem. Tente novamente."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"O PIN é demasiado pequeno. Deve ter, no mínimo, 4 dígitos."</string>
-    <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente novamente mais tarde"</string>
+    <string name="restr_pin_try_later" msgid="5897719962541636727">"Tente mais tarde"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualização de ecrã inteiro"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Para sair, deslize rapidamente para baixo a partir da parte superior."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>

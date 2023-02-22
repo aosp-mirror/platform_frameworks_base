@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static androidx.window.extensions.embedding.SplitRule.FINISH_ALWAYS;
 import static androidx.window.extensions.embedding.SplitRule.FINISH_NEVER;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -45,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+// Suppress GuardedBy warning on unit tests
+@SuppressWarnings("GuardedBy")
 public class EmbeddingTestUtils {
     static final Rect TASK_BOUNDS = new Rect(0, 0, 600, 1200);
     static final int TASK_ID = 10;
@@ -160,15 +163,22 @@ public class EmbeddingTestUtils {
     /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
     static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
             @NonNull Activity activity) {
+        return createMockTaskFragmentInfo(container, activity, true /* isVisible */);
+    }
+
+    /** Creates a mock TaskFragmentInfo for the given TaskFragment. */
+    static TaskFragmentInfo createMockTaskFragmentInfo(@NonNull TaskFragmentContainer container,
+            @NonNull Activity activity, boolean isVisible) {
         return new TaskFragmentInfo(container.getTaskFragmentToken(),
                 mock(WindowContainerToken.class),
                 new Configuration(),
                 1,
-                true /* isVisible */,
+                isVisible,
                 Collections.singletonList(activity.getActivityToken()),
                 new Point(),
                 false /* isTaskClearedForReuse */,
                 false /* isTaskFragmentClearedForPip */,
+                false /* isClearedForReorderActivityToFront */,
                 new Point());
     }
 
@@ -188,6 +198,15 @@ public class EmbeddingTestUtils {
         doReturn(DEFAULT_DISPLAY).when(activity).getDisplayId();
 
         return new TaskContainer(TASK_ID, activity);
+    }
+
+    static TaskContainer createTestTaskContainer(@NonNull SplitController controller) {
+        final TaskContainer taskContainer = createTestTaskContainer();
+        final int taskId = taskContainer.getTaskId();
+        // Should not call to create TaskContainer with the same task id twice.
+        assertFalse(controller.mTaskContainers.contains(taskId));
+        controller.mTaskContainers.put(taskId, taskContainer);
+        return taskContainer;
     }
 
     static WindowLayoutInfo createWindowLayoutInfo() {

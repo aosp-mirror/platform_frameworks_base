@@ -43,7 +43,7 @@
     <string name="ok" msgid="7871959885003339302">"OK"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Pamahalaan ang app"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Wala nang espasyo"</string>
-    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Hindi ma-install ang <xliff:g id="APP_NAME">%1$s</xliff:g>. Magbakante ng ilang espasyo at subukang muli."</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Hindi ma-install ang <xliff:g id="APP_NAME">%1$s</xliff:g>. Magbakante ng ilang espasyo at subukan ulit."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Hindi nakita ang app"</string>
     <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Hindi nakita ang app sa listahan ng mga naka-install na app."</string>
     <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Hindi pinapayagan"</string>

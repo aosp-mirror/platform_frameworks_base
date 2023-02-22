@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 
 import static android.net.TetheringManager.TETHERING_WIFI;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.TetheringManager;
@@ -33,10 +32,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.internal.util.ConcurrentUtils;
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.settings.UserTracker;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -58,11 +59,13 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     private final WifiManager mWifiManager;
     private final Handler mMainHandler;
     private final Context mContext;
+    private final UserTracker mUserTracker;
 
     private int mHotspotState;
     private volatile int mNumConnectedDevices;
     // Assume tethering is available until told otherwise
     private volatile boolean mIsTetheringSupported = true;
+    private final boolean mIsTetheringSupportedConfig;
     private volatile boolean mHasTetherableWifiRegexs = true;
     private boolean mWaitingForTerminalState;
 
@@ -93,31 +96,39 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
     @Inject
     public HotspotControllerImpl(
             Context context,
+            UserTracker userTracker,
             @Main Handler mainHandler,
             @Background Handler backgroundHandler,
             DumpManager dumpManager) {
         mContext = context;
+        mUserTracker = userTracker;
         mTetheringManager = context.getSystemService(TetheringManager.class);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mMainHandler = mainHandler;
-        mTetheringManager.registerTetheringEventCallback(
-                new HandlerExecutor(backgroundHandler), mTetheringCallback);
+        mIsTetheringSupportedConfig = context.getResources()
+                .getBoolean(R.bool.config_show_wifi_tethering);
+        if (mIsTetheringSupportedConfig) {
+            mTetheringManager.registerTetheringEventCallback(
+                    new HandlerExecutor(backgroundHandler), mTetheringCallback);
+        }
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /**
      * Whether hotspot is currently supported.
      *
-     * This will return {@code true} immediately on creation of the controller, but may be updated
-     * later. Callbacks from this controllers will notify if the state changes.
+     * This may return {@code true} immediately on creation of the controller, but may be updated
+     * later as capabilities are collected from System Server.
+     *
+     * Callbacks from this controllers will notify if the state changes.
      *
      * @return {@code true} if hotspot is supported (or we haven't been told it's not)
      * @see #addCallback
      */
     @Override
     public boolean isHotspotSupported() {
-        return mIsTetheringSupported && mHasTetherableWifiRegexs
-                && UserManager.get(mContext).isUserAdmin(ActivityManager.getCurrentUser());
+        return mIsTetheringSupportedConfig && mIsTetheringSupported && mHasTetherableWifiRegexs
+                && UserManager.get(mContext).isUserAdmin(mUserTracker.getUserId());
     }
 
     public void dump(PrintWriter pw, String[] args) {

@@ -21,8 +21,6 @@
     android:id="@+id/keyguard_bouncer_user_switcher"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     android:orientation="vertical"
     android:gravity="center"
     android:importantForAccessibility="yes"> <!-- Needed because TYPE_WINDOW_STATE_CHANGED is sent

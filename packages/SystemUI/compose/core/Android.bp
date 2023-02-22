@@ -22,7 +22,7 @@ package {
 }
 
 android_library {
-    name: "SystemUIComposeCore",
+    name: "PlatformComposeCore",
     manifest: "AndroidManifest.xml",
 
     srcs: [
@@ -30,8 +30,11 @@ android_library {
     ],
 
     static_libs: [
+        "SystemUIAnimationLib",
+
         "androidx.compose.runtime_runtime",
         "androidx.compose.material3_material3",
+        "androidx.savedstate_savedstate",
     ],
 
     kotlincflags: ["-Xjvm-default=all"],

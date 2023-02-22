@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
+import com.android.systemui.statusbar.NotificationInsetsController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -51,7 +52,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionStateManager;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.tuner.TunerService;
 
@@ -92,6 +92,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private KeyguardBouncerViewModel mKeyguardBouncerViewModel;
     @Mock private KeyguardBouncerComponent.Factory mKeyguardBouncerComponentFactory;
+    @Mock private NotificationInsetsController mNotificationInsetsController;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -118,7 +119,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationShadeDepthController,
                 mView,
                 mNotificationPanelViewController,
-                new PanelExpansionStateManager(),
+                new ShadeExpansionStateManager(),
                 mNotificationStackScrollLayoutController,
                 mStatusBarKeyguardViewManager,
                 mStatusBarWindowStateController,
@@ -126,6 +127,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mCentralSurfaces,
                 mNotificationShadeWindowController,
                 mKeyguardUnlockAnimationController,
+                mNotificationInsetsController,
                 mAmbientState,
                 mPulsingGestureListener,
                 mFeatureFlags,
@@ -153,7 +155,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateBouncer()).thenReturn(true);
         when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
 
         // THEN we should intercept touch
@@ -166,7 +168,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         // WHEN not showing alt auth, not dozing, drag down helper doesn't want to intercept
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(false);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateBouncer()).thenReturn(false);
         when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
 
         // THEN we shouldn't intercept touch
@@ -179,7 +181,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
 
         // WHEN showing alt auth, not dozing, drag down helper doesn't want to intercept
         when(mStatusBarStateController.isDozing()).thenReturn(false);
-        when(mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()).thenReturn(true);
+        when(mStatusBarKeyguardViewManager.isShowingAlternateBouncer()).thenReturn(true);
         when(mDragDownHelper.onInterceptTouchEvent(any())).thenReturn(false);
 
         // THEN we should handle the touch

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection;
 
 import static com.android.systemui.statusbar.notification.collection.ListDumper.dumpTree;
+import static com.android.systemui.statusbar.notification.collection.ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -33,10 +34,12 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -45,6 +48,7 @@ import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.ArrayMap;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -125,10 +129,15 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private Map<String, Integer> mNextIdMap = new ArrayMap<>();
     private int mNextRank = 0;
 
+    private Log.TerribleFailureHandler mOldWtfHandler = null;
+    private Log.TerribleFailure mLastWtf = null;
+    private int mWtfCount = 0;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         allowTestableLooperAsMainThread();
+        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(true);
 
         mListBuilder = new ShadeListBuilder(
                 mDumpManager,
@@ -1748,14 +1757,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the filter is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1767,18 +1779,24 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the filter is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        try {
+            runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        } finally {
+            expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        }
 
         // THEN an exception IS thrown.
     }
 
     @Test
-    public void testNonConsecutiveOutOfOrderInvalidationDontThrowAfterTooManyRuns() {
+    public void testNonConsecutiveOutOfOrderInvalidationsDontThrowAfterTooManyRuns() {
         // GIVEN a PreGroupNotifFilter that gets invalidated during the grouping stage,
         NotifFilter filter = new PackageFilter(PACKAGE_1);
         CountingInvalidator invalidator = new CountingInvalidator(filter);
@@ -1786,17 +1804,22 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPreGroupFilter(filter);
         mListBuilder.addOnBeforeTransformGroupsListener(listener);
 
-        // WHEN we try to run the pipeline and the filter is invalidated at least
-        // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
-        addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
-        dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
-        dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        interceptWtfs();
 
-        // THEN an exception is NOT thrown.
+        // WHEN we try to run the pipeline and the filter is invalidated
+        // MAX_CONSECUTIVE_REENTRANT_REBUILDS times, the pipeline runs for a non-reentrant reason,
+        // and then the filter is invalidated MAX_CONSECUTIVE_REENTRANT_REBUILDS times again,
+        addNotif(0, PACKAGE_2);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        dispatchBuild();
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        // Note: dispatchBuild itself triggers a non-reentrant pipeline run.
+        dispatchBuild();
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+
+        // THEN an exception is NOT thrown, but WTFs ARE logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS * 2);
     }
 
     @Test
@@ -1808,14 +1831,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the promoter is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_1);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1827,12 +1854,18 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addPromoter(promoter);
         mListBuilder.addOnBeforeSortListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the promoter is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_1);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        try {
+            runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        } finally {
+            expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        }
 
         // THEN an exception IS thrown.
     }
@@ -1846,14 +1879,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.setComparators(singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the comparator is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1865,12 +1901,14 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.setComparators(singletonList(comparator));
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the comparator is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
         // THEN an exception IS thrown.
     }
@@ -1884,14 +1922,17 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the PreRenderFilter is invalidated exactly
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
 
-        // THEN an exception is NOT thrown.
+        // THEN an exception is NOT thrown directly, but a WTF IS logged.
+        expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -1903,33 +1944,143 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         mListBuilder.addFinalizeFilter(filter);
         mListBuilder.addOnBeforeRenderListListener(listener);
 
+        interceptWtfs();
+
         // WHEN we try to run the pipeline and the PreRenderFilter is invalidated more than
         // MAX_CONSECUTIVE_REENTRANT_REBUILDS times,
         addNotif(0, PACKAGE_2);
-        invalidator.setInvalidationCount(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
+        invalidator.setInvalidationCount(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 1);
         dispatchBuild();
-        runWhileScheduledUpTo(ShadeListBuilder.MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        try {
+            runWhileScheduledUpTo(MAX_CONSECUTIVE_REENTRANT_REBUILDS + 2);
+        } finally {
+            expectWtfs(MAX_CONSECUTIVE_REENTRANT_REBUILDS);
+        }
 
         // THEN an exception IS thrown.
     }
 
+    private void interceptWtfs() {
+        assertNull(mOldWtfHandler);
+
+        mLastWtf = null;
+        mWtfCount = 0;
+
+        mOldWtfHandler = Log.setWtfHandler((tag, e, system) -> {
+            Log.e("ShadeListBuilderTest", "Observed WTF: " + e);
+            mLastWtf = e;
+            mWtfCount++;
+        });
+    }
+
+    private void expectNoWtfs() {
+        assertNull(expectWtfs(0));
+    }
+
+    private Log.TerribleFailure expectWtf() {
+        return expectWtfs(1);
+    }
+
+    private Log.TerribleFailure expectWtfs(int expectedWtfCount) {
+        assertNotNull(mOldWtfHandler);
+
+        Log.setWtfHandler(mOldWtfHandler);
+        mOldWtfHandler = null;
+
+        Log.TerribleFailure wtf = mLastWtf;
+        int wtfCount = mWtfCount;
+
+        mLastWtf = null;
+        mWtfCount = 0;
+
+        assertEquals(expectedWtfCount, wtfCount);
+        return wtf;
+    }
+
+    @Test
+    public void testActiveOrdering_withLegacyStability() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(false);
+        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG", true); // X
+        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG", true); // Z and X
+        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG", true); // Z and X + gap
+    }
+
+    @Test
+    public void testStableOrdering_withLegacyStability() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(false);
+        mStabilityManager.setAllowEntryReordering(false);
+        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFXBG", "XABCDEFG", false); // X
+        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG", false); // no change
+        assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG", false); // Z and X
+        assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG", false); // Z and X + gap
+    }
+
     @Test
     public void testStableOrdering() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
         mStabilityManager.setAllowEntryReordering(false);
-        assertOrder("ABCDEFG", "ACDEFXBG", "XABCDEFG"); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG"); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "XZABCDEFG"); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "XZABCDEFG"); // Z and X + gap
-        verify(mStabilityManager, times(4)).onEntryReorderSuppressed();
+        // No input or output
+        assertOrder("", "", "", true);
+        // Remove everything
+        assertOrder("ABCDEFG", "", "", true);
+        // Literally no changes
+        assertOrder("ABCDEFG", "ABCDEFG", "ABCDEFG", true);
+
+        // No stable order
+        assertOrder("", "ABCDEFG", "ABCDEFG", true);
+
+        // F moved after A, and...
+        assertOrder("ABCDEFG", "AFBCDEG", "ABCDEFG", false);   // No other changes
+        assertOrder("ABCDEFG", "AXFBCDEG", "AXBCDEFG", false); // Insert X before F
+        assertOrder("ABCDEFG", "AFXBCDEG", "AXBCDEFG", false); // Insert X after F
+        assertOrder("ABCDEFG", "AFBCDEXG", "ABCDEFXG", false); // Insert X where F was
+
+        // B moved after F, and...
+        assertOrder("ABCDEFG", "ACDEFBG", "ABCDEFG", false);   // No other changes
+        assertOrder("ABCDEFG", "ACDEFXBG", "ABCDEFXG", false); // Insert X before B
+        assertOrder("ABCDEFG", "ACDEFBXG", "ABCDEFXG", false); // Insert X after B
+        assertOrder("ABCDEFG", "AXCDEFBG", "AXBCDEFG", false); // Insert X where B was
+
+        // Swap F and B, and...
+        assertOrder("ABCDEFG", "AFCDEBG", "ABCDEFG", false);   // No other changes
+        assertOrder("ABCDEFG", "AXFCDEBG", "AXBCDEFG", false); // Insert X before F
+        assertOrder("ABCDEFG", "AFXCDEBG", "AXBCDEFG", false); // Insert X after F
+        assertOrder("ABCDEFG", "AFCXDEBG", "AXBCDEFG", false); // Insert X between CD (or: ABCXDEFG)
+        assertOrder("ABCDEFG", "AFCDXEBG", "ABCDXEFG", false); // Insert X between DE (or: ABCDEFXG)
+        assertOrder("ABCDEFG", "AFCDEXBG", "ABCDEFXG", false); // Insert X before B
+        assertOrder("ABCDEFG", "AFCDEBXG", "ABCDEFXG", false); // Insert X after B
+
+        // Remove a bunch of entries at once
+        assertOrder("ABCDEFGHIJKL", "ACEGHI", "ACEGHI", true);
+
+        // Remove a bunch of entries and scramble
+        assertOrder("ABCDEFGHIJKL", "GCEHAI", "ACEGHI", false);
+
+        // Add a bunch of entries at once
+        assertOrder("ABCDEFG", "AVBWCXDYZEFG", "AVBWCXDYZEFG", true);
+
+        // Add a bunch of entries and reverse originals
+        // NOTE: Some of these don't have obviously correct answers
+        assertOrder("ABCDEFG", "GFEBCDAVWXYZ", "ABCDEFGVWXYZ", false); // appended
+        assertOrder("ABCDEFG", "VWXYZGFEBCDA", "VWXYZABCDEFG", false); // prepended
+        assertOrder("ABCDEFG", "GFEBVWXYZCDA", "ABCDEFGVWXYZ", false); // closer to back: append
+        assertOrder("ABCDEFG", "GFEVWXYZBCDA", "VWXYZABCDEFG", false); // closer to front: prepend
+        assertOrder("ABCDEFG", "GFEVWBXYZCDA", "VWABCDEFGXYZ", false); // split new entries
+
+        // Swap 2 pairs ("*BC*NO*"->"*NO*CB*"), remove EG, add UVWXYZ throughout
+        assertOrder("ABCDEFGHIJKLMNOP", "AUNOVDFHWXIJKLMYCBZP", "AUVBCDFHWXIJKLMNOYZP", false);
     }
 
     @Test
     public void testActiveOrdering() {
-        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG"); // X
-        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG"); // no change
-        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG"); // Z and X
-        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG"); // Z and X + gap
-        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
+        assertOrder("ABCDEFG", "ACDEFXBG", "ACDEFXBG", true); // X
+        assertOrder("ABCDEFG", "ACDEFBG", "ACDEFBG", true); // no change
+        assertOrder("ABCDEFG", "ACDEFBXZG", "ACDEFBXZG", true); // Z and X
+        assertOrder("ABCDEFG", "AXCDEZFBG", "AXCDEZFBG", true); // Z and X + gap
     }
 
     @Test
@@ -1981,6 +2132,52 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void stableOrderingDisregardedWithSectionChange() {
+        when(mNotifPipelineFlags.isSemiStableSortEnabled()).thenReturn(true);
+        // GIVEN the first sectioner's packages can be changed from run-to-run
+        List<String> mutableSectionerPackages = new ArrayList<>();
+        mutableSectionerPackages.add(PACKAGE_1);
+        mListBuilder.setSectioners(asList(
+                new PackageSectioner(mutableSectionerPackages, null),
+                new PackageSectioner(List.of(PACKAGE_1, PACKAGE_2, PACKAGE_3), null)));
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(4);
+        addNotif(1, PACKAGE_1).setRank(5);
+        addNotif(2, PACKAGE_2).setRank(1);
+        addNotif(3, PACKAGE_2).setRank(2);
+        addNotif(4, PACKAGE_3).setRank(3);
+        dispatchBuild();
+
+        // VERIFY the order and that entry reordering has not been suppressed
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3),
+                notif(4)
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+
+        // WHEN the first section now claims PACKAGE_3 notifications
+        mutableSectionerPackages.add(PACKAGE_3);
+        dispatchBuild();
+
+        // VERIFY the re-sectioned notification is inserted at #1 of the first section, which
+        // is the correct position based on its rank, rather than #3 in the new section simply
+        // because it was #3 in its previous section.
+        verifyBuiltList(
+                notif(4),
+                notif(0),
+                notif(1),
+                notif(2),
+                notif(3)
+        );
+        verify(mStabilityManager, never()).onEntryReorderSuppressed();
+    }
+
+    @Test
     public void testStableChildOrdering() {
         // WHEN the list is originally built with reordering disabled
         mStabilityManager.setAllowEntryReordering(false);
@@ -2028,6 +2225,85 @@ public class ShadeListBuilderTest extends SysuiTestCase {
                         child(3),
                         child(2)
                 )
+        );
+    }
+
+    @Test
+    public void groupRevertingToSummaryDoesNotRetainStablePositionWithLegacyIndexLogic() {
+        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(false);
+
+        // GIVEN a notification group is on screen
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(2);
+        addNotif(1, PACKAGE_1).setRank(3);
+        addGroupSummary(2, PACKAGE_1, "group").setRank(4);
+        addGroupChild(3, PACKAGE_1, "group").setRank(5);
+        addGroupChild(4, PACKAGE_1, "group").setRank(6);
+        dispatchBuild();
+
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                group(
+                        summary(2),
+                        child(3),
+                        child(4)
+                )
+        );
+
+        // WHEN the notification summary rank increases and children removed
+        setNewRank(notif(2).entry, 1);
+        mEntrySet.remove(4);
+        mEntrySet.remove(3);
+        dispatchBuild();
+
+        // VERIFY the summary (incorrectly) moves to the top of the section where it is ranked,
+        // despite visual stability being active
+        verifyBuiltList(
+                notif(2),
+                notif(0),
+                notif(1)
+        );
+    }
+
+    @Test
+    public void groupRevertingToSummaryRetainsStablePosition() {
+        when(mNotifPipelineFlags.isStabilityIndexFixEnabled()).thenReturn(true);
+
+        // GIVEN a notification group is on screen
+        mStabilityManager.setAllowEntryReordering(false);
+
+        // WHEN the list is originally built with reordering disabled (and section changes allowed)
+        addNotif(0, PACKAGE_1).setRank(2);
+        addNotif(1, PACKAGE_1).setRank(3);
+        addGroupSummary(2, PACKAGE_1, "group").setRank(4);
+        addGroupChild(3, PACKAGE_1, "group").setRank(5);
+        addGroupChild(4, PACKAGE_1, "group").setRank(6);
+        dispatchBuild();
+
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                group(
+                        summary(2),
+                        child(3),
+                        child(4)
+                )
+        );
+
+        // WHEN the notification summary rank increases and children removed
+        setNewRank(notif(2).entry, 1);
+        mEntrySet.remove(4);
+        mEntrySet.remove(3);
+        dispatchBuild();
+
+        // VERIFY the summary stays in the same location on rebuild
+        verifyBuiltList(
+                notif(0),
+                notif(1),
+                notif(2)
         );
     }
 
@@ -2174,25 +2450,34 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         return addGroupChildWithTag(index, packageId, groupId, null);
     }
 
-    private void assertOrder(String visible, String active, String expected) {
+    private void assertOrder(String visible, String active, String expected,
+            boolean isOrderedCorrectly) {
         StringBuilder differenceSb = new StringBuilder();
+        NotifSection section = new NotifSection(mock(NotifSectioner.class), 0);
         for (char c : active.toCharArray()) {
             if (visible.indexOf(c) < 0) differenceSb.append(c);
         }
         String difference = differenceSb.toString();
 
+        int globalIndex = 0;
         for (int i = 0; i < visible.length(); i++) {
-            addNotif(i, String.valueOf(visible.charAt(i)))
-                    .setRank(active.indexOf(visible.charAt(i)))
+            final char c = visible.charAt(i);
+            // Skip notifications which aren't active anymore
+            if (!active.contains(String.valueOf(c))) continue;
+            addNotif(globalIndex++, String.valueOf(c))
+                    .setRank(active.indexOf(c))
+                    .setSection(section)
                     .setStableIndex(i);
-
         }
 
-        for (int i = 0; i < difference.length(); i++) {
-            addNotif(i + visible.length(), String.valueOf(difference.charAt(i)))
-                    .setRank(active.indexOf(difference.charAt(i)))
+        for (char c : difference.toCharArray()) {
+            addNotif(globalIndex++, String.valueOf(c))
+                    .setRank(active.indexOf(c))
+                    .setSection(section)
                     .setStableIndex(-1);
         }
+
+        clearInvocations(mStabilityManager);
 
         dispatchBuild();
         StringBuilder resultSb = new StringBuilder();
@@ -2203,6 +2488,9 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         assertEquals("visible [" + visible + "] active [" + active + "]",
                 expected, resultSb.toString());
         mEntrySet.clear();
+
+        verify(mStabilityManager, isOrderedCorrectly ? never() : times(1))
+                .onEntryReorderSuppressed();
     }
 
     private int nextId(String packageName) {

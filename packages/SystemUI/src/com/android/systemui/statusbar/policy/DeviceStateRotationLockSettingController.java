@@ -118,7 +118,10 @@ public final class DeviceStateRotationLockSettingController
 
     private void updateDeviceState(int state) {
         Log.v(TAG, "updateDeviceState [state=" + state + "]");
-        Trace.beginSection("updateDeviceState [state=" + state + "]");
+        if (Trace.isEnabled()) {
+            Trace.traceBegin(
+                    Trace.TRACE_TAG_APP, "updateDeviceState [state=" + state + "]");
+        }
         try {
             if (mDeviceState == state) {
                 return;

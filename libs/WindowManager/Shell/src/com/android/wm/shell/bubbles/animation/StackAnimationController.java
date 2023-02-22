@@ -417,6 +417,17 @@ public class StackAnimationController extends
     }
 
     /**
+     * Snaps the stack back to the previous resting position.
+     */
+    public void snapStackBack() {
+        if (mLayout == null) {
+            return;
+        }
+        PointF p = getStackPositionAlongNearestHorizontalEdge();
+        springStackAfterFling(p.x, p.y);
+    }
+
+    /**
      * Where the stack would be if it were snapped to the nearest horizontal edge (left or right).
      */
     public PointF getStackPositionAlongNearestHorizontalEdge() {

@@ -16,19 +16,19 @@
 
 package com.android.systemui.mediaprojection.appselector.data
 
-import android.app.ActivityManager
 import android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.recents.RecentTasks
 import com.android.wm.shell.util.GroupedRecentTaskInfo
 import java.util.Optional
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executor
 
 interface RecentTaskListProvider {
     /** Loads recent tasks, the returned task list is from the most-recent to least-recent order */
@@ -40,7 +40,8 @@ class ShellRecentTaskListProvider
 constructor(
     @Background private val coroutineDispatcher: CoroutineDispatcher,
     @Background private val backgroundExecutor: Executor,
-    private val recentTasks: Optional<RecentTasks>
+    private val recentTasks: Optional<RecentTasks>,
+    private val userTracker: UserTracker
 ) : RecentTaskListProvider {
 
     private val recents by lazy { recentTasks.getOrNull() }
@@ -67,10 +68,8 @@ constructor(
             getRecentTasks(
                 Integer.MAX_VALUE,
                 RECENT_IGNORE_UNAVAILABLE,
-                ActivityManager.getCurrentUser(),
+                userTracker.userId,
                 backgroundExecutor
-            ) { tasks ->
-                continuation.resume(tasks)
-            }
+            ) { tasks -> continuation.resume(tasks) }
         }
 }

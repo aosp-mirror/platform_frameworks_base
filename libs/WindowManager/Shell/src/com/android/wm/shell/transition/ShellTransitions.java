@@ -27,14 +27,6 @@ import com.android.wm.shell.common.annotations.ExternalThread;
  */
 @ExternalThread
 public interface ShellTransitions {
-
-    /**
-     * Returns a binder that can be passed to an external process to manipulate remote transitions.
-     */
-    default IShellTransitions createExternalInterface() {
-        return null;
-    }
-
     /**
      * Registers a remote transition.
      */

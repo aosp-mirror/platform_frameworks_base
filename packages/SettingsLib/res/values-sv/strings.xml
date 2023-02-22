@@ -95,7 +95,7 @@
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Kopplar ifrån…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Ansluter…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Ansluten<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Parkoppling…"</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Parkopplar…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Ansluten (ingen mobil)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Ansluten (inga medier)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"Ansluten (ingen meddelandeåtkomst)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> kvar tills fulladdat"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> kvar tills fulladdat"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - Laddningen har pausats"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Laddningen har optimerats"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Laddningen har optimerats"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Okänd"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Laddar"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Laddas snabbt"</string>

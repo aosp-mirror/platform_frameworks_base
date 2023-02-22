@@ -55,6 +55,7 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -67,8 +68,8 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
-import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -122,8 +123,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     private BubblesManager mBubblesManager;
     @Mock
     private ShadeControllerImpl mShadeController;
-    @Mock
-    private NotifPipeline mNotifPipeline;
     @Mock
     private NotificationVisibilityProvider mVisibilityProvider;
     @Mock
@@ -197,7 +196,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         getContext(),
                         mHandler,
                         mUiBgExecutor,
-                        mNotifPipeline,
                         mVisibilityProvider,
                         headsUpManager,
                         mActivityStarter,
@@ -222,7 +220,9 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(NotificationPresenter.class),
                         mock(NotificationPanelViewController.class),
                         mActivityLaunchAnimator,
-                        notificationAnimationProvider
+                        notificationAnimationProvider,
+                        mock(LaunchFullScreenIntentProvider.class),
+                        mock(FeatureFlags.class)
                 );
 
         // set up dismissKeyguardThenExecute to synchronously invoke the OnDismissAction arg
@@ -265,7 +265,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         while (!runnables.isEmpty()) runnables.remove(0).run();
 
         // Then
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mActivityLaunchAnimator).startPendingIntentWithAnimation(any(),
                 eq(false) /* animate */, any(), any());
@@ -298,7 +298,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
         // This is called regardless, and simply short circuits when there is nothing to do.
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mAssistManager).hideAssist();
 
@@ -331,7 +331,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(eq(mBubbleNotificationRow.getEntry()));
 
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mAssistManager).hideAssist();
 
@@ -359,7 +359,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         // Then
         verify(mBubblesManager).expandStackAndSelectBubble(mBubbleNotificationRow.getEntry());
 
-        verify(mShadeController, atLeastOnce()).collapsePanel();
+        verify(mShadeController, atLeastOnce()).collapseShade();
 
         verify(mAssistManager).hideAssist();
 
@@ -384,11 +384,9 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
         NotificationEntry entry = mock(NotificationEntry.class);
         when(entry.getImportance()).thenReturn(NotificationManager.IMPORTANCE_HIGH);
         when(entry.getSbn()).thenReturn(sbn);
-        when(mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(eq(entry)))
-                .thenReturn(true);
 
         // WHEN
-        mNotificationActivityStarter.handleFullScreenIntent(entry);
+        mNotificationActivityStarter.launchFullScreenIntent(entry);
 
         // THEN display should try wake up for the full screen intent
         verify(mCentralSurfaces).wakeUpForFullScreenIntent();

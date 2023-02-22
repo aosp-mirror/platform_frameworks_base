@@ -651,7 +651,7 @@ public final class CachedAppOptimizer {
     /**
      * Retrieves the free swap percentage.
      */
-    static private native double getFreeSwapPercent();
+    static native double getFreeSwapPercent();
 
     /**
      * Reads the flag value from DeviceConfig to determine whether app compaction

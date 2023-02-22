@@ -62,11 +62,19 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
     }
 
     @Override
-    public void setSignalIcon(String slot, WifiIconState state) {
+    public void setWifiIcon(String slot, WifiIconState state) {
+    }
+
+    @Override
+    public void setNewWifiIcon() {
     }
 
     @Override
     public void setMobileIcons(String slot, List<MobileIconState> states) {
+    }
+
+    @Override
+    public void setNewMobileIconSubIds(List<Integer> subIds) {
     }
 
     @Override
@@ -87,6 +95,10 @@ public class FakeStatusBarIconController extends BaseLeakChecker<IconManager>
 
     @Override
     public void removeAllIconsForSlot(String slot) {
+    }
+
+    @Override
+    public void removeAllIconsForExternalSlot(String slot) {
     }
 
     @Override

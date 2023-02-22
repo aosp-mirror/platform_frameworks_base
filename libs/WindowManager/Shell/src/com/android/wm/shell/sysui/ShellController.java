@@ -23,23 +23,28 @@ import static android.content.pm.ActivityInfo.CONFIG_LOCALE;
 import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.CONFIG_UI_MODE;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_INIT;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SYSUI_EVENTS;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.os.Bundle;
+import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 
 /**
  * Handles event callbacks from SysUI that can be used within the Shell.
@@ -59,6 +64,11 @@ public class ShellController {
     private final CopyOnWriteArrayList<UserChangeListener> mUserChangeListeners =
             new CopyOnWriteArrayList<>();
 
+    private ArrayMap<String, Supplier<ExternalInterfaceBinder>> mExternalInterfaceSuppliers =
+            new ArrayMap<>();
+    // References to the existing interfaces, to be invalidated when they are recreated
+    private ArrayMap<String, ExternalInterfaceBinder> mExternalInterfaces = new ArrayMap<>();
+
     private Configuration mLastConfiguration;
 
 
@@ -67,6 +77,11 @@ public class ShellController {
         mShellInit = shellInit;
         mShellCommandHandler = shellCommandHandler;
         mMainExecutor = mainExecutor;
+        shellInit.addInitCallback(this::onInit, this);
+    }
+
+    private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
     }
 
     /**
@@ -122,6 +137,48 @@ public class ShellController {
      */
     public void removeUserChangeListener(UserChangeListener listener) {
         mUserChangeListeners.remove(listener);
+    }
+
+    /**
+     * Adds an interface that can be called from a remote process. This method takes a supplier
+     * because each binder reference is valid for a single process, and in multi-user mode, SysUI
+     * will request new binder instances for each instance of Launcher that it provides binders
+     * to.
+     *
+     * @param extra the key for the interface, {@see ShellSharedConstants}
+     * @param binderSupplier the supplier of the binder to pass to the external process
+     * @param callerInstance the instance of the caller, purely for logging
+     */
+    public void addExternalInterface(String extra, Supplier<ExternalInterfaceBinder> binderSupplier,
+            Object callerInstance) {
+        ProtoLog.v(WM_SHELL_INIT, "Adding external interface from %s with key %s",
+                callerInstance.getClass().getSimpleName(), extra);
+        if (mExternalInterfaceSuppliers.containsKey(extra)) {
+            throw new IllegalArgumentException("Supplier with same key already exists: "
+                    + extra);
+        }
+        mExternalInterfaceSuppliers.put(extra, binderSupplier);
+    }
+
+    /**
+     * Updates the given bundle with the set of external interfaces, invalidating the old set of
+     * binders.
+     */
+    @VisibleForTesting
+    public void createExternalInterfaces(Bundle output) {
+        // Invalidate the old binders
+        for (int i = 0; i < mExternalInterfaces.size(); i++) {
+            mExternalInterfaces.valueAt(i).invalidate();
+        }
+        mExternalInterfaces.clear();
+
+        // Create new binders for each key
+        for (int i = 0; i < mExternalInterfaceSuppliers.size(); i++) {
+            final String key = mExternalInterfaceSuppliers.keyAt(i);
+            final ExternalInterfaceBinder b = mExternalInterfaceSuppliers.valueAt(i).get();
+            mExternalInterfaces.put(key, b);
+            output.putBinder(key, b.asBinder());
+        }
     }
 
     @VisibleForTesting
@@ -204,6 +261,14 @@ public class ShellController {
         pw.println(innerPrefix + "mLastConfiguration=" + mLastConfiguration);
         pw.println(innerPrefix + "mKeyguardChangeListeners=" + mKeyguardChangeListeners.size());
         pw.println(innerPrefix + "mUserChangeListeners=" + mUserChangeListeners.size());
+
+        if (!mExternalInterfaces.isEmpty()) {
+            pw.println(innerPrefix + "mExternalInterfaces={");
+            for (String key : mExternalInterfaces.keySet()) {
+                pw.println(innerPrefix + "\t" + key + ": " + mExternalInterfaces.get(key));
+            }
+            pw.println(innerPrefix + "}");
+        }
     }
 
     /**
@@ -211,35 +276,12 @@ public class ShellController {
      */
     @ExternalThread
     private class ShellInterfaceImpl implements ShellInterface {
-
         @Override
         public void onInit() {
             try {
                 mMainExecutor.executeBlocking(() -> mShellInit.init());
             } catch (InterruptedException e) {
                 throw new RuntimeException("Failed to initialize the Shell in 2s", e);
-            }
-        }
-
-        @Override
-        public void dump(PrintWriter pw) {
-            try {
-                mMainExecutor.executeBlocking(() -> mShellCommandHandler.dump(pw));
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to dump the Shell in 2s", e);
-            }
-        }
-
-        @Override
-        public boolean handleCommand(String[] args, PrintWriter pw) {
-            try {
-                boolean[] result = new boolean[1];
-                mMainExecutor.executeBlocking(() -> {
-                    result[0] = mShellCommandHandler.handleCommand(args, pw);
-                });
-                return result[0];
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Failed to handle Shell command in 2s", e);
             }
         }
 
@@ -273,6 +315,39 @@ public class ShellController {
         public void onUserProfilesChanged(@NonNull List<UserInfo> profiles) {
             mMainExecutor.execute(() ->
                     ShellController.this.onUserProfilesChanged(profiles));
+        }
+
+        @Override
+        public boolean handleCommand(String[] args, PrintWriter pw) {
+            try {
+                boolean[] result = new boolean[1];
+                mMainExecutor.executeBlocking(() -> {
+                    result[0] = mShellCommandHandler.handleCommand(args, pw);
+                });
+                return result[0];
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to handle Shell command in 2s", e);
+            }
+        }
+
+        @Override
+        public void createExternalInterfaces(Bundle bundle) {
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    ShellController.this.createExternalInterfaces(bundle);
+                });
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to get Shell command in 2s", e);
+            }
+        }
+
+        @Override
+        public void dump(PrintWriter pw) {
+            try {
+                mMainExecutor.executeBlocking(() -> mShellCommandHandler.dump(pw));
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to dump the Shell in 2s", e);
+            }
         }
     }
 }

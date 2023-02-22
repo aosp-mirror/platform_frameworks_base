@@ -19,7 +19,7 @@ package com.android.systemui.dreams.complication.dagger;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import android.view.LayoutInflater;
-import android.widget.ImageView;
+import android.view.View;
 
 import com.android.systemui.R;
 import com.android.systemui.dreams.complication.DreamHomeControlsComplication;
@@ -74,8 +74,8 @@ public interface DreamHomeControlsComplicationComponent {
         @Provides
         @DreamHomeControlsComplicationScope
         @Named(DREAM_HOME_CONTROLS_CHIP_VIEW)
-        static ImageView provideHomeControlsChipView(LayoutInflater layoutInflater) {
-            return (ImageView) layoutInflater.inflate(R.layout.dream_overlay_home_controls_chip,
+        static View provideHomeControlsChipView(LayoutInflater layoutInflater) {
+            return layoutInflater.inflate(R.layout.dream_overlay_home_controls_chip,
                     null, false);
         }
     }

@@ -259,7 +259,7 @@
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"正在配對裝置…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"無法配對裝置。可能是QR 圖碼錯誤，或是裝置未連上相同的網路。"</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 位址和通訊埠"</string>
-    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"掃描 QR 圖碼"</string>
+    <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"掃描 QR code"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"掃描 QR 圖碼即可透過 Wi-Fi 配對裝置"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"請連上 Wi-Fi 網路"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, 偵錯, 開發"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充飽"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - 已暫停充電"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電效能已最佳化"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電效能將最佳化"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"快速充電中"</string>

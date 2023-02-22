@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"语音信箱"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"出现连接问题或 MMI 码无效。"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"不支持此功能。"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"只能对固定拨号号码执行此类操作。"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"漫游时无法通过您的手机来更改来电转接设置。"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"已启用服务。"</string>
@@ -1562,7 +1563,7 @@
     <string name="content_description_sliding_handle" msgid="982510275422590757">"滑动手柄。触摸并按住。"</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"滑动解锁。"</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"导航首页"</string>
-    <string name="action_bar_up_description" msgid="6611579697195026932">"向上导航"</string>
+    <string name="action_bar_up_description" msgid="6611579697195026932">"返回"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"更多选项"</string>
     <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s：%2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s - %2$s：%3$s"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"允许访问一次"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"不允许"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问设备上的部分日志或信息。"</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"设备日志会记录设备上发生的活动。应用可以使用这些日志查找和修复问题。\n\n部分日志可能包含敏感信息，因此请仅允许您信任的应用访问所有设备日志。\n\n如果您不授予此应用访问所有设备日志的权限，它仍然可以访问自己的日志。您的设备制造商可能仍然能够访问设备上的部分日志或信息。\n\n如需了解详情，请访问 g.co/android/devicelogs。"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"不再显示"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"“<xliff:g id="APP_0">%1$s</xliff:g>”想要显示“<xliff:g id="APP_2">%2$s</xliff:g>”图块"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"编辑"</string>

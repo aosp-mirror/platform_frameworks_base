@@ -41,6 +41,7 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -137,6 +138,11 @@ public class PackageManagerServiceUtils {
 
     public final static Predicate<PackageStateInternal> REMOVE_IF_NULL_PKG =
             pkgSetting -> pkgSetting.getPkg() == null;
+
+    // This is a horrible hack to workaround b/240373119, specifically for fixing the T branch.
+    // A proper fix should be implemented in master instead.
+    public static final ThreadLocal<Boolean> DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS =
+            ThreadLocal.withInitial(() -> false);
 
     /**
      * Components of apps targeting Android T and above will stop receiving intents from
@@ -1089,6 +1095,8 @@ public class PackageManagerServiceUtils {
             PlatformCompat compat, ComponentResolverApi resolver,
             List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
+        if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
+
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
@@ -1122,13 +1130,18 @@ public class PackageManagerServiceUtils {
                 throw new IllegalArgumentException("Unsupported component type");
             }
 
-            if (comp.getIntents().isEmpty()) {
+            if (comp == null || comp.getIntents().isEmpty()) {
                 continue;
             }
 
-            final boolean match = comp.getIntents().stream().anyMatch(
-                    f -> IntentResolver.intentMatchesFilter(f.getIntentFilter(), intent,
-                            resolvedType));
+            boolean match = false;
+            for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
+                IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
+                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                    match = true;
+                    break;
+                }
+            }
             if (!match) {
                 Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
                 Slog.w(TAG, "Access blocked: " + comp.getComponentName());

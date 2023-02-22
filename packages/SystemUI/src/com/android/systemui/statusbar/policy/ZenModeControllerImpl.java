@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -28,6 +27,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Global;
@@ -46,7 +46,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.qs.SettingObserver;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.GlobalSettings;
 
@@ -58,14 +58,15 @@ import javax.inject.Inject;
 
 /** Platform implementation of the zen mode controller. **/
 @SysUISingleton
-public class ZenModeControllerImpl extends CurrentUserTracker
-        implements ZenModeController, Dumpable {
+public class ZenModeControllerImpl implements ZenModeController, Dumpable {
     private static final String TAG = "ZenModeController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final Object mCallbacksLock = new Object();
     private final Context mContext;
+    private final UserTracker mUserTracker;
+    private final BroadcastDispatcher mBroadcastDispatcher;
     private final SettingObserver mModeSetting;
     private final SettingObserver mConfigSetting;
     private final NotificationManager mNoMan;
@@ -80,23 +81,45 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     private long mZenUpdateTime;
     private NotificationManager.Policy mConsolidatedNotificationPolicy;
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, Context userContext) {
+                    mUserId = newUser;
+                    if (mRegistered) {
+                        mBroadcastDispatcher.unregisterReceiver(mReceiver);
+                    }
+                    final IntentFilter filter = new IntentFilter(
+                            AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
+                    filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
+                    mBroadcastDispatcher.registerReceiver(mReceiver, filter, null,
+                            UserHandle.of(mUserId));
+                    mRegistered = true;
+                    mSetupObserver.register();
+                }
+            };
+
     @Inject
     public ZenModeControllerImpl(
             Context context,
             @Main Handler handler,
             BroadcastDispatcher broadcastDispatcher,
             DumpManager dumpManager,
-            GlobalSettings globalSettings) {
-        super(broadcastDispatcher);
+            GlobalSettings globalSettings,
+            UserTracker userTracker) {
         mContext = context;
-        mModeSetting = new SettingObserver(globalSettings, handler, Global.ZEN_MODE) {
+        mBroadcastDispatcher = broadcastDispatcher;
+        mUserTracker = userTracker;
+        mModeSetting = new SettingObserver(globalSettings, handler, Global.ZEN_MODE,
+                userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 updateZenMode(value);
                 fireZenChanged(value);
             }
         };
-        mConfigSetting = new SettingObserver(globalSettings, handler, Global.ZEN_MODE_CONFIG_ETAG) {
+        mConfigSetting = new SettingObserver(globalSettings, handler, Global.ZEN_MODE_CONFIG_ETAG,
+                userTracker.getUserId()) {
             @Override
             protected void handleValueChanged(int value, boolean observedChange) {
                 updateZenModeConfig();
@@ -112,7 +135,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
         mSetupObserver = new SetupObserver(handler);
         mSetupObserver.register();
         mUserManager = context.getSystemService(UserManager.class);
-        startTracking();
+        mUserTracker.addCallback(mUserChangedCallback, new HandlerExecutor(handler));
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
@@ -120,7 +143,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     @Override
     public boolean isVolumeRestricted() {
         return mUserManager.hasUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME,
-                new UserHandle(mUserId));
+                UserHandle.of(mUserId));
     }
 
     @Override
@@ -183,19 +206,6 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     }
 
     @Override
-    public void onUserSwitched(int userId) {
-        mUserId = userId;
-        if (mRegistered) {
-            mContext.unregisterReceiver(mReceiver);
-        }
-        final IntentFilter filter = new IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED);
-        filter.addAction(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
-        mContext.registerReceiverAsUser(mReceiver, new UserHandle(mUserId), filter, null, null);
-        mRegistered = true;
-        mSetupObserver.register();
-    }
-
-    @Override
     public ComponentName getEffectsSuppressor() {
         return NotificationManager.from(mContext).getEffectsSuppressor();
     }
@@ -208,7 +218,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
 
     @Override
     public int getCurrentUser() {
-        return ActivityManager.getCurrentUser();
+        return mUserTracker.getUserId();
     }
 
     private void fireNextAlarmChanged() {

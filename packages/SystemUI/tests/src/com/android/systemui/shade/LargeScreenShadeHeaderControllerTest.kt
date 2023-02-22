@@ -1,5 +1,6 @@
 package com.android.systemui.shade
 
+import android.animation.ValueAnimator
 import android.app.StatusBarManager
 import android.content.Context
 import android.testing.AndroidTestingRunner
@@ -13,6 +14,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.demomode.DemoMode
+import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -22,9 +25,13 @@ import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -32,6 +39,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Answers
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.mock
@@ -52,7 +60,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var qsCarrierGroupController: QSCarrierGroupController
     @Mock private lateinit var qsCarrierGroupControllerBuilder: QSCarrierGroupController.Builder
     @Mock private lateinit var featureFlags: FeatureFlags
-    @Mock private lateinit var clock: TextView
+    @Mock private lateinit var clock: Clock
     @Mock private lateinit var date: TextView
     @Mock private lateinit var carrierGroup: QSCarrierGroup
     @Mock private lateinit var batteryMeterView: BatteryMeterView
@@ -66,9 +74,11 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         CombinedShadeHeadersConstraintManager
 
     @Mock private lateinit var mockedContext: Context
+    @Mock private lateinit var demoModeController: DemoModeController
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
+    var viewAlpha = 1f
 
     private lateinit var mLargeScreenShadeHeaderController: LargeScreenShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
@@ -76,7 +86,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        whenever<TextView>(view.findViewById(R.id.clock)).thenReturn(clock)
+        whenever<Clock>(view.findViewById(R.id.clock)).thenReturn(clock)
         whenever(clock.context).thenReturn(mockedContext)
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
@@ -95,6 +105,13 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
+
+        whenever(view.setAlpha(anyFloat())).then {
+            viewAlpha = it.arguments[0] as Float
+            null
+        }
+        whenever(view.alpha).thenAnswer { _ -> viewAlpha }
+
         whenever(variableDateViewControllerFactory.create(any()))
             .thenReturn(variableDateViewController)
         whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
@@ -111,8 +128,9 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
                 dumpManager,
                 featureFlags,
                 qsCarrierGroupControllerBuilder,
-                combinedShadeHeadersConstraintManager
-        )
+                combinedShadeHeadersConstraintManager,
+                demoModeController
+                )
         whenever(view.isAttachedToWindow).thenReturn(true)
         mLargeScreenShadeHeaderController.init()
         carrierIconSlots = listOf(
@@ -145,6 +163,16 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         makeShadeVisible()
         mLargeScreenShadeHeaderController.shadeExpandedFraction = 0.5f
         verify(view).setAlpha(ShadeInterpolation.getContentAlpha(0.5f))
+    }
+
+    @Test
+    fun alphaChangesUpdateVisibility() {
+        makeShadeVisible()
+        mLargeScreenShadeHeaderController.shadeExpandedFraction = 0f
+        assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
+
+        mLargeScreenShadeHeaderController.shadeExpandedFraction = 1f
+        assertThat(viewVisibility).isEqualTo(View.VISIBLE)
     }
 
     @Test
@@ -229,5 +257,55 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         verify(animator).alpha(1f)
         verify(animator).setInterpolator(Interpolators.ALPHA_IN)
         verify(animator).start()
+    }
+
+    @Test
+    fun testShadeExpanded_true_alpha_zero_invisible() {
+        view.alpha = 0f
+        mLargeScreenShadeHeaderController.largeScreenActive = true
+        mLargeScreenShadeHeaderController.qsVisible = true
+
+        assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
+    }
+
+    @Test
+    fun animatorCallsUpdateVisibilityOnUpdate() {
+        val animator = mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
+        whenever(view.animate()).thenReturn(animator)
+
+        mLargeScreenShadeHeaderController.startCustomizingAnimation(show = false, 0L)
+
+        val updateCaptor = argumentCaptor<ValueAnimator.AnimatorUpdateListener>()
+        verify(animator).setUpdateListener(capture(updateCaptor))
+
+        mLargeScreenShadeHeaderController.largeScreenActive = true
+        mLargeScreenShadeHeaderController.qsVisible = true
+
+        view.alpha = 1f
+        updateCaptor.value.onAnimationUpdate(mock())
+
+        assertThat(viewVisibility).isEqualTo(View.VISIBLE)
+
+        view.alpha = 0f
+        updateCaptor.value.onAnimationUpdate(mock())
+
+        assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
+    }
+
+    @Test
+    fun demoMode_attachDemoMode() {
+        val cb = argumentCaptor<DemoMode>()
+        verify(demoModeController).addCallback(capture(cb))
+        cb.value.onDemoModeStarted()
+        verify(clock).onDemoModeStarted()
+    }
+
+    @Test
+    fun demoMode_detachDemoMode() {
+        mLargeScreenShadeHeaderController.simulateViewDetached()
+        val cb = argumentCaptor<DemoMode>()
+        verify(demoModeController).removeCallback(capture(cb))
+        cb.value.onDemoModeFinished()
+        verify(clock).onDemoModeFinished()
     }
 }

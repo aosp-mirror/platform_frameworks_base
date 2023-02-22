@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Hlasová schránka"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problém s pripojením alebo neplatný kód MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcia nie je podporovaná."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operácia je obmedzená len na povolené čísla."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nastavenia presmerovania hovorov nie je možné zmeniť z telefónu počas roamingu."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Služba bola povolená."</string>
@@ -992,7 +993,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Výber používateľa"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stav"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparát"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládacie prvky médií"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládanie médií"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Zmena usporiadania miniaplikácií sa začala."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Zmena usporiadania miniaplikácií sa skončila."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Miniaplikácia <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> bola odstránená."</string>
@@ -1953,13 +1954,13 @@
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Nastavenia telefónu nie sú k dispozícii"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste namiesto toho použiť telefón."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte k tomuto obsahu prístup. Skúste použiť telefón."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste namiesto toho použiť telefón."</string>
+    <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Táto aplikácia požaduje dodatočné zabezpečenie. Skúste použiť telefón."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť zariadenie Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť tablet."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste namiesto toho použiť telefón."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> momentálne nemáte prístup k tomuto obsahu. Skúste použiť telefón."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Táto aplikácia bola zostavená pre staršiu verziu Androidu a nemusí správne fungovať. Skúste skontrolovať dostupnosť aktualizácií alebo kontaktovať vývojára."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Skontrolovať dostupnosť aktualizácie"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Máte nové správy."</string>
@@ -2294,6 +2295,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skontrolovať aktívne aplikácie"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere telefónu"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"V zariadení <xliff:g id="DEVICE">%1$s</xliff:g> nemáte prístup ku kamere tabletu"</string>
-    <string name="vdm_secure_window" msgid="161700398158812314">"K tomuto obsahu nie je počas streamovania prístup. Skúste namiesto toho použiť telefón."</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"K tomuto obsahu nie je počas streamovania prístup. Skúste použiť telefón."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predvolené systémom"</string>
 </resources>

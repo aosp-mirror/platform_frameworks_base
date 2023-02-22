@@ -668,8 +668,8 @@ public class AttentionManagerService extends SystemService {
             mIProximityUpdateCallback = new IProximityUpdateCallback.Stub() {
                 @Override
                 public void onProximityUpdate(double distance) {
+                    mCallbackInternal.onProximityUpdate(distance);
                     synchronized (mLock) {
-                        mCallbackInternal.onProximityUpdate(distance);
                         freeIfInactiveLocked();
                     }
                 }

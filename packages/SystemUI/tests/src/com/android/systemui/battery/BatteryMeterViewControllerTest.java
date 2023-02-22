@@ -34,7 +34,9 @@ import android.provider.Settings;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
@@ -50,15 +52,16 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
     private BatteryMeterView mBatteryMeterView;
 
     @Mock
+    private UserTracker mUserTracker;
+    @Mock
     private ConfigurationController mConfigurationController;
     @Mock
     private TunerService mTunerService;
     @Mock
-    private BroadcastDispatcher mBroadcastDispatcher;
-    @Mock
     private Handler mHandler;
     @Mock
     private ContentResolver mContentResolver;
+    private FakeFeatureFlags mFeatureFlags;
     @Mock
     private BatteryController mBatteryController;
 
@@ -71,19 +74,13 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
         when(mBatteryMeterView.getContext()).thenReturn(mContext);
         when(mBatteryMeterView.getResources()).thenReturn(mContext.getResources());
 
-        mController = new BatteryMeterViewController(
-                mBatteryMeterView,
-                mConfigurationController,
-                mTunerService,
-                mBroadcastDispatcher,
-                mHandler,
-                mContentResolver,
-                mBatteryController
-        );
+        mFeatureFlags = new FakeFeatureFlags();
+        mFeatureFlags.set(Flags.BATTERY_SHIELD_ICON, false);
     }
 
     @Test
     public void onViewAttached_callbacksRegistered() {
+        initController();
         mController.onViewAttached();
 
         verify(mConfigurationController).addCallback(any());
@@ -101,6 +98,7 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
     @Test
     public void onViewDetached_callbacksUnregistered() {
+        initController();
         // Set everything up first.
         mController.onViewAttached();
 
@@ -114,6 +112,7 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
     @Test
     public void ignoreTunerUpdates_afterOnViewAttached_callbackUnregistered() {
+        initController();
         // Start out receiving tuner updates
         mController.onViewAttached();
 
@@ -124,10 +123,43 @@ public class BatteryMeterViewControllerTest extends SysuiTestCase {
 
     @Test
     public void ignoreTunerUpdates_beforeOnViewAttached_callbackNeverRegistered() {
+        initController();
+
         mController.ignoreTunerUpdates();
 
         mController.onViewAttached();
 
         verify(mTunerService, never()).addTunable(any(), any());
+    }
+
+    @Test
+    public void shieldFlagDisabled_viewNotified() {
+        mFeatureFlags.set(Flags.BATTERY_SHIELD_ICON, false);
+
+        initController();
+
+        verify(mBatteryMeterView).setDisplayShieldEnabled(false);
+    }
+
+    @Test
+    public void shieldFlagEnabled_viewNotified() {
+        mFeatureFlags.set(Flags.BATTERY_SHIELD_ICON, true);
+
+        initController();
+
+        verify(mBatteryMeterView).setDisplayShieldEnabled(true);
+    }
+
+    private void initController() {
+        mController = new BatteryMeterViewController(
+                mBatteryMeterView,
+                mUserTracker,
+                mConfigurationController,
+                mTunerService,
+                mHandler,
+                mContentResolver,
+                mFeatureFlags,
+                mBatteryController
+        );
     }
 }

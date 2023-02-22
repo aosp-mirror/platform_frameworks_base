@@ -553,6 +553,14 @@
     <!-- If this is true, then keep dreaming when undocking. -->
     <bool name="config_keepDreamingWhenUndocking">false</bool>
 
+    <!-- The timeout (in ms) to wait before attempting to reconnect to the dream overlay service if
+         it becomes disconnected -->
+    <integer name="config_dreamOverlayReconnectTimeoutMs">1000</integer> <!-- 1 second -->
+    <!-- The maximum number of times to attempt reconnecting to the dream overlay service -->
+    <integer name="config_dreamOverlayMaxReconnectAttempts">3</integer>
+    <!-- The duration after which the dream overlay connection should be considered stable -->
+    <integer name="config_minDreamOverlayDurationMs">10000</integer> <!-- 10 seconds -->
+
     <!-- Auto-rotation behavior -->
 
     <!-- If true, enables auto-rotation features using the accelerometer.
@@ -650,6 +658,20 @@
         -->
     </integer-array>
 
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as half-folded by
+     the display fold controller. Default is empty. -->
+    <integer-array name="config_halfFoldedDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
+
+    <!-- Indicates whether the window manager reacts to half-fold device states by overriding
+     rotation. -->
+    <bool name="config_windowManagerHalfFoldAutoRotateOverride">false</bool>
+
     <!-- When a device enters any of these states, it should be woken up. States are defined in
          device_state_configuration.xml. -->
     <integer-array name="config_deviceStatesOnWhichToWakeUp">
@@ -679,7 +701,7 @@
 
     <!-- Indicates the time needed to time out the fold animation if the device stops in half folded
          mode. -->
-    <integer name="config_unfoldTransitionHalfFoldedTimeout">600</integer>
+    <integer name="config_unfoldTransitionHalfFoldedTimeout">1000</integer>
 
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
@@ -1892,6 +1914,10 @@
     -->
     <string name="config_defaultCaptivePortalLoginPackageName" translatable="false">com.android.captiveportallogin</string>
 
+    <!-- The package name of the dock manager app. Must be granted the
+         POST_NOTIFICATIONS permission. -->
+    <string name="config_defaultDockManagerPackageName" translatable="false"></string>
+
     <!-- Whether to enable geocoder overlay which allows geocoder to be replaced
          by an app at run-time. When disabled, only the
          config_geocoderProviderPackageName package will be searched for
@@ -2455,15 +2481,24 @@
     <integer name="config_dreamsBatteryLevelDrainCutoff">5</integer>
     <!-- Limit of how long the device can remain unlocked due to attention checking.  -->
     <integer name="config_attentionMaximumExtension">900000</integer> <!-- 15 minutes.  -->
-    <!-- Is the system user the only user allowed to dream. -->
-    <bool name="config_dreamsOnlyEnabledForSystemUser">false</bool>
+    <!-- Whether there is to be a chosen Dock User who is the only user allowed to dream. -->
+    <bool name="config_dreamsOnlyEnabledForDockUser">false</bool>
+    <!-- Whether dreams are disabled when ambient mode is suppressed. -->
+    <bool name="config_dreamsDisabledByAmbientModeSuppressionConfig">false</bool>
+
+    <!-- The duration in milliseconds of the dream opening animation.  -->
+    <integer name="config_dreamOpenAnimationDuration">250</integer>
+    <!-- The duration in milliseconds of the dream closing animation.  -->
+    <integer name="config_dreamCloseAnimationDuration">300</integer>
 
     <!-- Whether to dismiss the active dream when an activity is started. Doesn't apply to
          assistant activities (ACTIVITY_TYPE_ASSISTANT) -->
     <bool name="config_dismissDreamOnActivityStart">false</bool>
 
-    <!-- The prefix of dream component names that are loggable. If empty, logs "other" for all. -->
-    <string name="config_loggable_dream_prefix" translatable="false"></string>
+    <!-- The prefixes of dream component names that are loggable.
+         Matched against ComponentName#flattenToString() for dream components.
+         If empty, logs "other" for all. -->
+    <string-array name="config_loggable_dream_prefixes"></string-array>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -2511,6 +2546,10 @@
          devices where the display has been tuned to be power efficient in DOZE and/or DOZE_SUSPEND
          states. -->
     <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
+
+    <!-- Control whether the pickup gesture is enabled by default. This value will be used
+     during initialization when the setting is still null. -->
+    <bool name="config_dozePickupGestureEnabled">true</bool>
 
     <!-- Control whether the always on display mode is enabled by default. This value will be used
          during initialization when the setting is still null. -->
@@ -2685,9 +2724,9 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
-    <!-- Whether to automatically switch a non-primary user back to the primary user after a
-         timeout when the device is docked.  -->
-    <bool name="config_enableTimeoutToUserZeroWhenDocked">false</bool>
+    <!-- Whether to automatically switch to the designated Dock User (the user chosen for
+         displaying dreams, etc.) after a timeout when the device is docked.  -->
+    <bool name="config_enableTimeoutToDockUserWhenDocked">false</bool>
 
     <!-- Whether to only install system packages on a user if they're allowlisted for that user
          type. These are flags and can be freely combined.
@@ -3553,9 +3592,9 @@
          config_sidefpsSkipWaitForPowerVendorAcquireMessage -->
     <integer name="config_sidefpsSkipWaitForPowerAcquireMessage">6</integer>
 
-    <!-- This vendor acquired message that will cause the sidefpsKgPowerPress window to be skipped.
-         config_sidefpsSkipWaitForPowerOnFingerUp must be true and
-         config_sidefpsSkipWaitForPowerAcquireMessage must be BIOMETRIC_ACQUIRED_VENDOR == 6. -->
+    <!-- This vendor acquired message will cause the sidefpsKgPowerPress window to be skipped
+         when config_sidefpsSkipWaitForPowerAcquireMessage == 6 (VENDOR) and the vendor acquire
+         message equals this constant -->
     <integer name="config_sidefpsSkipWaitForPowerVendorAcquireMessage">2</integer>
 
     <!-- This config is used to force VoiceInteractionService to start on certain low ram devices.
@@ -4754,11 +4793,11 @@
     <integer name="config_defaultPeakRefreshRate">0</integer>
 
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
-         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         vendors to tune the curves to have exact same brightness for different refresh rate. So
          flicker could be observed at switch time. The issue is worse at the gamma lower end.
          In addition, human eyes are more sensitive to the flicker at darker environment.
          To prevent flicker, we only support higher refresh rates if the display brightness is above
-         a threshold. And the darker environment could have higher threshold.
+         a threshold.
          For example, no higher refresh rate if
              display brightness <= disp0 && ambient brightness <= amb0
              || display brightness <= disp1 && ambient brightness <= amb1 -->
@@ -4780,13 +4819,12 @@
     <integer name="config_defaultRefreshRateInZone">0</integer>
 
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
-         vendor to tune the curves to have exact same brightness for different refresh rate. So
+         vendors to tune the curves to have exact same brightness for different refresh rate. So
          flicker could be observed at switch time. The issue can be observed on the screen with
          even full white content at the high brightness. To prevent flickering, we support fixed
          refresh rates if the display and ambient brightness are equal to or above the provided
          thresholds. You can define multiple threshold levels as higher brightness environments
-         may have lower display brightness requirements for the flickering is visible. And the
-         high brightness environment could have higher threshold.
+         may have lower display brightness requirements for the flickering is visible.
          For example, fixed refresh rate if
              display brightness >= disp0 && ambient brightness >= amb0
              || display brightness >= disp1 && ambient brightness >= amb1 -->
@@ -4937,6 +4975,10 @@
 
     <!-- If face auth sends the user directly to home/last open app, or stays on keyguard -->
     <bool name="config_faceAuthDismissesKeyguard">true</bool>
+
+    <!-- Default value for whether a SFPS device is required to be interactive for fingerprint auth
+    to unlock the device.  -->
+    <bool name="config_requireScreenOnToAuthEnabled">false</bool>
 
     <!-- The component name for the default profile supervisor, which can be set as a profile owner
     even after user setup is complete. The defined component should be used for supervision purposes
@@ -5166,6 +5208,23 @@
          the format [System DeviceState]:[WM Jetpack Posture], for example: "0:1". -->
     <string-array name="config_device_state_postures" translatable="false" />
 
+    <!-- Which Surface rotations are considered as tabletop posture (horizontal hinge) when the
+         device is half-folded. Other half-folded postures will be assumed to be book (vertical
+         hinge) mode. Units: degrees; valid values: 0, 90, 180, 270. -->
+    <integer-array name="config_deviceTabletopRotations" />
+
+    <!-- This flag indicates that a display with fold-state FLAT should always be considered as
+         having a separating hinge. -->
+    <bool name="config_isDisplayHingeAlwaysSeparating">false</bool>
+
+    <!-- Whether enabling rotation compat policy for immersive apps that prevents auto rotation
+         into non-optimal screen orientation while in fullscreen. This is needed because immersive
+         apps, such as games, are often not optimized for all orientations and can have a poor UX
+         when rotated. Additionally, some games rely on sensors for the gameplay so users can
+         trigger such rotations accidentally when auto rotation is on.
+         Applicable only if ignoreOrientationRequest is enabled. -->
+    <bool name="config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled">false</bool>
+
     <!-- Aspect ratio of letterboxing for fixed orientation. Values <= 1.0 will be ignored.
          Note: Activity min/max aspect ratio restrictions will still be respected.
          Therefore this override can control the maximum screen area that can be occupied by
@@ -5210,17 +5269,29 @@
             but isn't supported on the device or both dark scrim alpha and blur radius aren't
             provided.
      -->
-    <color name="config_letterboxBackgroundColor">@android:color/system_neutral2_900</color>
+    <color name="config_letterboxBackgroundColor">@color/letterbox_background</color>
 
     <!-- Horizontal position of a center of the letterboxed app window.
         0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
-        or > 1, it is ignored and central position is used (0.5). -->
+        or > 1 it is ignored and for non-book mode central position is used (0.5); for book mode
+         left is used (0.0). -->
     <item name="config_letterboxHorizontalPositionMultiplier" format="float" type="dimen">0.5</item>
 
     <!-- Vertical position of a center of the letterboxed app window.
         0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
-        or > 1, it is ignored and central position is used (0.5). -->
+        or > 1 it is ignored and for non-tabletop mode central position is used (0.5); for
+         tabletop mode top (0.0) is used. -->
     <item name="config_letterboxVerticalPositionMultiplier" format="float" type="dimen">0.0</item>
+
+    <!-- Horizontal position of a center of the letterboxed app window when in book mode.
+    0 corresponds to the left side of the screen and 1 to the right side. If given value < 0
+    or > 1, it is ignored and left position is used (0.0). -->
+    <item name="config_letterboxBookModePositionMultiplier" format="float" type="dimen">0.0</item>
+
+    <!-- Vertical position of a center of the letterboxed app window when in tabletop mode.
+        0 corresponds to the upper side of the screen and 1 to the lower side. If given value < 0
+        or > 1, it is ignored and top position is used (0.0). -->
+    <item name="config_letterboxTabletopModePositionMultiplier" format="float" type="dimen">0.0</item>
 
     <!-- Whether horizontal reachability repositioning is allowed for letterboxed fullscreen apps.
     -->
@@ -5249,6 +5320,31 @@
         If given value is outside of this range, the option 1 (center) is assummed. -->
     <integer name="config_letterboxDefaultPositionForVerticalReachability">1</integer>
 
+    <!-- Default horizontal position of the letterboxed app window when reachability is
+    enabled and an app is fullscreen in landscape device orientation and in book mode. When
+    reachability is enabled, the position can change between left, center and right. This config
+    defines the default one:
+        - Option 0 - Left.
+        - Option 1 - Center.
+        - Option 2 - Right.
+    If given value is outside of this range, the option 0 (left) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForBookModeReachability">0</integer>
+
+    <!-- Default vertical position of the letterboxed app window when reachability is
+        enabled and an app is fullscreen in portrait device orientation and in tabletop mode. When
+        reachability is enabled, the position can change between top, center and bottom. This config
+        defines the default one:
+            - Option 0 - Top.
+            - Option 1 - Center.
+            - Option 2 - Bottom.
+        If given value is outside of this range, the option 0 (top) is assummed. -->
+    <integer name="config_letterboxDefaultPositionForTabletopModeReachability">0</integer>
+
+    <!-- Whether should ignore app requested orientation in response to an app
+         calling Activity#setRequestedOrientation. See
+         LetterboxUiController#shouldIgnoreRequestedOrientation for details. -->
+    <bool name="config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled">false</bool>
+
     <!-- Whether displaying letterbox education is enabled for letterboxed fullscreen apps. -->
     <bool name="config_letterboxIsEducationEnabled">false</bool>
 
@@ -5260,6 +5356,21 @@
 
     <!-- Whether using split screen aspect ratio as a default aspect ratio for unresizable apps. -->
     <bool name="config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled">false</bool>
+
+    <!-- Whether the specific behaviour for translucent activities letterboxing is enabled.
+         TODO(b/255532890) Enable when ignoreOrientationRequest is set -->
+    <bool name="config_letterboxIsEnabledForTranslucentActivities">false</bool>
+
+    <!-- Whether sending compat fake focus for split screen resumed activities is enabled.
+         Needed because some game engines wait to get focus before drawing the content of
+         the app which isn't guaranteed by default in multi-window modes. -->
+    <bool name="config_isCompatFakeFocusEnabled">false</bool>
+
+    <!-- Whether camera compat treatment is enabled for issues caused by orientation mismatch
+        between camera buffers and an app window. This includes force rotation of fixed
+        orientation activities connected to the camera in fullscreen and showing a tooltip in
+        split screen. -->
+    <bool name="config_isWindowManagerCameraCompatTreatmentEnabled">false</bool>
 
     <!-- Whether a camera compat controller is enabled to allow the user to apply or revert
          treatment for stretched issues in camera viewfinder. -->
@@ -5934,4 +6045,8 @@
          TODO(b/236022708) Move rear display state to device state config file
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
+
+    <!-- Whether the lock screen is allowed to run its own live wallpaper,
+         different from the home screen wallpaper. -->
+    <bool name="config_independentLockscreenLiveWallpaper">false</bool>
 </resources>

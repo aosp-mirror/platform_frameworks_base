@@ -357,13 +357,24 @@ public final class SystemServiceManager implements Dumpable {
      * Starts the given user.
      */
     public void onUserStarting(@NonNull TimingsTraceAndSlog t, @UserIdInt int userId) {
-        EventLog.writeEvent(EventLogTags.SSM_USER_STARTING, userId);
-
         final TargetUser targetUser = newTargetUser(userId);
         synchronized (mTargetUsers) {
+            // On Automotive / Headless System User Mode, the system user will be started twice:
+            // - Once by some external or local service that switches the system user to
+            //   the background.
+            // - Once by the ActivityManagerService, when the system is marked ready.
+            // These two events are not synchronized and the order of execution is
+            // non-deterministic. To avoid starting the system user twice, verify whether
+            // the system user has already been started by checking the mTargetUsers.
+            // TODO(b/242195409): this workaround shouldn't be necessary once we move
+            // the headless-user start logic to UserManager-land.
+            if (userId == UserHandle.USER_SYSTEM && mTargetUsers.contains(userId)) {
+                Slog.e(TAG, "Skipping starting system user twice");
+                return;
+            }
             mTargetUsers.put(userId, targetUser);
         }
-
+        EventLog.writeEvent(EventLogTags.SSM_USER_STARTING, userId);
         onUser(t, USER_STARTING, /* prevUser= */ null, targetUser);
     }
 

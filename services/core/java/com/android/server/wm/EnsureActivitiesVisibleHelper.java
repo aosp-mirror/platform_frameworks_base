@@ -28,7 +28,7 @@ import java.util.ArrayList;
 /** Helper class to ensure activities are in the right visible state for a container. */
 class EnsureActivitiesVisibleHelper {
     private final TaskFragment mTaskFragment;
-    private ActivityRecord mTop;
+    private ActivityRecord mTopRunningActivity;
     private ActivityRecord mStarting;
     private boolean mAboveTop;
     private boolean mContainerShouldBeVisible;
@@ -54,10 +54,10 @@ class EnsureActivitiesVisibleHelper {
     void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
         mStarting = starting;
-        mTop = mTaskFragment.topRunningActivity();
+        mTopRunningActivity = mTaskFragment.topRunningActivity();
         // If the top activity is not fullscreen, then we need to make sure any activities under it
         // are now visible.
-        mAboveTop = mTop != null;
+        mAboveTop = mTopRunningActivity != null;
         mContainerShouldBeVisible = mTaskFragment.shouldBeVisible(mStarting);
         mBehindFullyOccludedContainer = !mContainerShouldBeVisible;
         mConfigChanges = configChanges;
@@ -85,18 +85,19 @@ class EnsureActivitiesVisibleHelper {
         reset(starting, configChanges, preserveWindows, notifyClients);
 
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTop
+            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTopRunningActivity
                     + " configChanges=0x" + Integer.toHexString(configChanges));
         }
-        if (mTop != null && mTaskFragment.asTask() != null) {
+        if (mTopRunningActivity != null && mTaskFragment.asTask() != null) {
             // TODO(14709632): Check if this needed to be implemented in TaskFragment.
-            mTaskFragment.asTask().checkTranslucentActivityWaiting(mTop);
+            mTaskFragment.asTask().checkTranslucentActivityWaiting(mTopRunningActivity);
         }
 
         // We should not resume activities that being launched behind because these
         // activities are actually behind other fullscreen activities, but still required
         // to be visible (such as performing Recents animation).
-        final boolean resumeTopActivity = mTop != null && !mTop.mLaunchTaskBehind
+        final boolean resumeTopActivity = mTopRunningActivity != null
+                && !mTopRunningActivity.mLaunchTaskBehind
                 && mTaskFragment.canBeResumed(starting)
                 && (starting == null || !starting.isDescendantOf(mTaskFragment));
 
@@ -113,7 +114,7 @@ class EnsureActivitiesVisibleHelper {
                 mBehindFullyOccludedContainer |=
                         (childTaskFragment.getBounds().equals(mTaskFragment.getBounds())
                                 && !childTaskFragment.isTranslucent(starting));
-                if (mAboveTop && mTop.getTaskFragment() == childTaskFragment) {
+                if (mAboveTop && mTopRunningActivity.getTaskFragment() == childTaskFragment) {
                     mAboveTop = false;
                 }
 
@@ -147,8 +148,11 @@ class EnsureActivitiesVisibleHelper {
 
     private void setActivityVisibilityState(ActivityRecord r, ActivityRecord starting,
             final boolean resumeTopActivity) {
-        final boolean isTop = r == mTop;
+        final boolean isTop = r == mTopRunningActivity;
         if (mAboveTop && !isTop) {
+            // Ensure activities above the top-running activity to be invisible because the
+            // activity should be finishing or cannot show to current user.
+            r.makeInvisible();
             return;
         }
         mAboveTop = false;
@@ -191,7 +195,7 @@ class EnsureActivitiesVisibleHelper {
             if (!r.attachedToProcess()) {
                 makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges, isTop,
                         resumeTopActivity && isTop, r);
-            } else if (r.mVisibleRequested) {
+            } else if (r.isVisibleRequested()) {
                 // If this activity is already visible, then there is nothing to do here.
                 if (DEBUG_VISIBILITY) {
                     Slog.v(TAG_VISIBILITY, "Skipping: already visible at " + r);
@@ -244,7 +248,7 @@ class EnsureActivitiesVisibleHelper {
         // invisible. If the app is already visible, it must have died while it was visible. In this
         // case, we'll show the dead window but will not restart the app. Otherwise we could end up
         // thrashing.
-        if (!isTop && r.mVisibleRequested && !r.isState(INITIALIZING)) {
+        if (!isTop && r.isVisibleRequested() && !r.isState(INITIALIZING)) {
             return;
         }
 
@@ -256,7 +260,7 @@ class EnsureActivitiesVisibleHelper {
         if (r != starting) {
             r.startFreezingScreenLocked(configChanges);
         }
-        if (!r.mVisibleRequested || r.mLaunchTaskBehind) {
+        if (!r.isVisibleRequested() || r.mLaunchTaskBehind) {
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Starting and making visible: " + r);
             }

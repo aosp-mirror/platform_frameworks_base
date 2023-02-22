@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе зарадка"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе хуткая зарадка"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Ідзе павольная зарадка"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Зарадка прыпынена дзеля ашчады акумулятара"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • У мэтах зберажэння акумулятара зарадка аптымізавана"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Націсніце кнопку \"Меню\", каб разблакіраваць."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Сетка заблакіравана"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Няма SIM-карты"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Пасля перазапуску прылады патрабуецца ўзор"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Пасля перазапуску прылады патрабуецца PIN-код"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Пасля перазапуску прылады патрабуецца пароль"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Для забеспячэння дадатковай бяспекі патрабуецца ўзор"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Для забеспячэння дадатковай бяспекі патрабуецца PIN-код"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Для забеспячэння дадатковай бяспекі патрабуецца пароль"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"У мэтах дадатковай бяспекі скарыстайце ўзор разблакіроўкі"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"У мэтах дадатковай бяспекі скарыстайце PIN-код"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"У мэтах дадатковай бяспекі скарыстайце пароль"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Прылада заблакіравана адміністратарам"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Прылада была заблакіравана ўручную"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Не распазнана"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Стандартны"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Бурбалкі"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Са стрэлкамі"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Каб працягнуць, разблакіруйце прыладу"</string>
 </resources>

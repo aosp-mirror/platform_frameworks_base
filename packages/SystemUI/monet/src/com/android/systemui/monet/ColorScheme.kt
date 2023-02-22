@@ -205,6 +205,13 @@ enum class Style(internal val coreSpec: CoreSpec) {
             n1 = TonalSpec(HueSource(), ChromaMultiple(0.0833)),
             n2 = TonalSpec(HueSource(), ChromaMultiple(0.1666))
     )),
+    MONOCHROMATIC(CoreSpec(
+            a1 = TonalSpec(HueSource(), ChromaConstant(.0)),
+            a2 = TonalSpec(HueSource(), ChromaConstant(.0)),
+            a3 = TonalSpec(HueSource(), ChromaConstant(.0)),
+            n1 = TonalSpec(HueSource(), ChromaConstant(.0)),
+            n2 = TonalSpec(HueSource(), ChromaConstant(.0))
+    )),
 }
 
 class ColorScheme(
@@ -219,7 +226,7 @@ class ColorScheme(
     val neutral1: List<Int>
     val neutral2: List<Int>
 
-    constructor(@ColorInt seed: Int, darkTheme: Boolean):
+    constructor(@ColorInt seed: Int, darkTheme: Boolean) :
             this(seed, darkTheme, Style.TONAL_SPOT)
 
     @JvmOverloads
@@ -227,7 +234,7 @@ class ColorScheme(
         wallpaperColors: WallpaperColors,
         darkTheme: Boolean,
         style: Style = Style.TONAL_SPOT
-    ):
+    ) :
             this(getSeedColor(wallpaperColors, style != Style.CONTENT), darkTheme, style)
 
     val allAccentColors: List<Int>

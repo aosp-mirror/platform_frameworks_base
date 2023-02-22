@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Poczta głosowa"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problem z połączeniem lub błędny kod MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funkcja nie jest obsługiwana."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operacja jest ograniczona wyłącznie do numerów ustalonych."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Podczas roamingu nie można zmienić ustawień przekazywania połączeń z telefonu."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Usługa została włączona."</string>

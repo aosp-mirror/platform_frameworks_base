@@ -1,0 +1,100 @@
+<!--
+  ~ Copyright (C) 2021 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!-- Wrap in a frame layout so that we can update the margins on the inner layout. (Since this view
+     is the root view of a window, we cannot change the root view's margins.) -->
+<!-- Alphas start as 0 because the view will be animated in. -->
+<com.android.systemui.temporarydisplay.chipbar.ChipbarRootView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:id="@+id/chipbar_root_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/chipbar_inner"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/media_ttt_chip_outer_padding"
+        android:background="@drawable/media_ttt_chip_background"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="@dimen/notification_side_paddings"
+        android:layout_marginEnd="@dimen/notification_side_paddings"
+        android:clipToPadding="false"
+        android:gravity="center_vertical"
+        android:alpha="0.0"
+        >
+
+        <com.android.internal.widget.CachingIconView
+            android:id="@+id/start_icon"
+            android:layout_width="@dimen/media_ttt_app_icon_size"
+            android:layout_height="@dimen/media_ttt_app_icon_size"
+            android:layout_marginEnd="12dp"
+            android:alpha="0.0"
+            />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/media_ttt_text_size"
+            android:textColor="?android:attr/textColorPrimary"
+            android:alpha="0.0"
+            />
+
+        <!-- At most one of [loading, failure_icon, undo] will be visible at a time. -->
+        <ProgressBar
+            android:id="@+id/loading"
+            android:indeterminate="true"
+            android:layout_width="@dimen/media_ttt_status_icon_size"
+            android:layout_height="@dimen/media_ttt_status_icon_size"
+            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:indeterminateTint="?androidprv:attr/colorAccentPrimaryVariant"
+            style="?android:attr/progressBarStyleSmall"
+            android:alpha="0.0"
+            />
+
+        <ImageView
+            android:id="@+id/error"
+            android:layout_width="@dimen/media_ttt_status_icon_size"
+            android:layout_height="@dimen/media_ttt_status_icon_size"
+            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:src="@drawable/ic_warning"
+            android:tint="@color/GM2_red_500"
+            android:alpha="0.0"
+            />
+
+        <!-- TODO(b/245610654): Re-name all the media-specific dimens to chipbar dimens instead. -->
+        <TextView
+            android:id="@+id/end_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?androidprv:attr/textColorOnAccent"
+            android:layout_marginStart="@dimen/media_ttt_last_item_start_margin"
+            android:textSize="@dimen/media_ttt_text_size"
+            android:paddingStart="@dimen/media_ttt_chip_outer_padding"
+            android:paddingEnd="@dimen/media_ttt_chip_outer_padding"
+            android:paddingTop="@dimen/media_ttt_undo_button_vertical_padding"
+            android:paddingBottom="@dimen/media_ttt_undo_button_vertical_padding"
+            android:layout_marginTop="@dimen/media_ttt_undo_button_vertical_negative_margin"
+            android:layout_marginBottom="@dimen/media_ttt_undo_button_vertical_negative_margin"
+            android:background="@drawable/media_ttt_undo_background"
+            android:alpha="0.0"
+            />
+
+    </LinearLayout>
+</com.android.systemui.temporarydisplay.chipbar.ChipbarRootView>

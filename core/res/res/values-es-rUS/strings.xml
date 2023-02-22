@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Buzón de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de conexión o código incorrecto de MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Función no compatible."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"La operación está limitada a números de marcación fija."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No se puede cambiar la configuración de desvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Se ha activado el servicio."</string>
@@ -447,7 +448,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acceder a la ubicación en segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esta aplicación puede acceder a la ubicación en cualquier momento, aunque no la estés usando."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"cambiar tu configuración de audio"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y el altavoz de salida."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y la bocina de salida."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"grabar audio"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Esta app puede grabar audio con el micrófono mientras está en uso."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"grabar audio en segundo plano"</string>
@@ -1166,8 +1167,8 @@
     <string name="no" msgid="5122037903299899715">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Atención"</string>
     <string name="loading" msgid="3138021523725055037">"Cargando…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"Sí"</string>
-    <string name="capital_off" msgid="7443704171014626777">"No"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVADO"</string>
+    <string name="capital_off" msgid="7443704171014626777">"Desactivado"</string>
     <string name="checked" msgid="9179896827054513119">"activado"</string>
     <string name="not_checked" msgid="7972320087569023342">"desactivado"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionado"</string>
@@ -1970,8 +1971,8 @@
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"Presiona para ver archivos"</string>
     <string name="pin_target" msgid="8036028973110156895">"Fijar"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"Fijar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="unpin_target" msgid="3963318576590204447">"No fijar"</string>
-    <string name="unpin_specific_target" msgid="3859828252160908146">"No fijar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
+    <string name="unpin_target" msgid="3963318576590204447">"Dejar de fijar"</string>
+    <string name="unpin_specific_target" msgid="3859828252160908146">"Dejar de fijar <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="app_info" msgid="6113278084877079851">"Información de apps"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"Iniciando demostración…"</string>

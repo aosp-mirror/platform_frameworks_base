@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock er slått av"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har sendt et bilde"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Lagrer skjermdumpen …"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Lagrer skjermdumpen i jobbprofilen …"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"Skjermdumpen er lagret"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"Kunne ikke lagre skjermdump"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Enheten må være låst opp før skjermdumpen kan lagres"</string>
@@ -84,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"Del skjermdumpen"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"Utvidet skjermdump"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Avvis skjermdumpen"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Avvis melding fra jobbprofilen"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Forhåndsvisning av skjermdump"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Øvre grense <xliff:g id="PERCENT">%1$d</xliff:g> prosent"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"Nedre grense <xliff:g id="PERCENT">%1$d</xliff:g> prosent"</string>
@@ -94,6 +96,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Vedvarende varsel for et skjermopptak"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vil du starte et opptak?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"Under opptak kan Android-systemet registrere all sensitiv informasjon som er synlig på skjermen eller spilles av på enheten. Dette inkluderer passord, betalingsinformasjon, bilder, meldinger og lyd."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Ta opp hele skjermen"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Ta opp én app"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Når du tar opp noe, har Android tilgang til alt som vises på skjermen eller spilles av på enheten. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Når du tar opp en app, har Android tilgang til alt som vises eller spilles av i appen. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"Start opptaket"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Spill inn lyd"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Enhetslyd"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Lyd fra enheten, f.eks. musikk, samtaler og ringelyder"</string>
@@ -120,7 +127,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Talehjelp"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR-kodeskanner"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"Lås opp"</string>
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"Ulåst"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Enheten er låst"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Skanning av ansikt"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"Send"</string>
@@ -163,6 +170,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"Ansiktet gjenkjennes ikke"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"Bruk fingeravtrykk"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Ansiktslås er utilgjengelig"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth er tilkoblet."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batteriprosenten er ukjent."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Koblet til <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
@@ -173,8 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Flymodus."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN på."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"Batterinivået er <xliff:g id="PERCENTAGE">%1$s</xliff:g> prosent – omtrent <xliff:g id="TIME">%2$s</xliff:g> gjenstår basert på bruken din"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"Batterinivået er <xliff:g id="PERCENTAGE">%1$d</xliff:g> prosent, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"Batteriet lades – <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> prosent."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"Batterinivået er <xliff:g id="PERCENTAGE">%d</xliff:g> prosent. Lading er satt på pause for å beskytte batteriet."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"Batterinivået er <xliff:g id="PERCENTAGE">%1$d</xliff:g> prosent, <xliff:g id="TIME">%2$s</xliff:g>. Lading er satt på pause for å beskytte batteriet."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"Se alle varslene"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter er aktivert."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Vibreringsmodus."</string>
@@ -233,17 +243,17 @@
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internett"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tilgjengelige nettverk"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Nettverk er utilgjengelige"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Ingen tilgjengelige Wi-Fi-nettverk"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"Ingen tilgjengelige Wifi-nettverk"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"Slår på …"</string>
     <string name="quick_settings_cast_title" msgid="2279220930629235211">"Skjermcasting"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Enhet uten navn"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ingen enheter er tilgjengelige"</string>
-    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wi-Fi er ikke tilkoblet"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Wifi er ikke tilkoblet"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Lysstyrke"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Fargeinvertering"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Fargekorrigering"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Brukerinnstillinger"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrer brukere"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Ferdig"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Lukk"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Tilkoblet"</string>
@@ -361,6 +371,18 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Tjenesten som leverer denne funksjonen, får tilgang til all informasjon som er synlig på skjermen din, eller som spilles av fra enheten når du tar opp eller caster. Dette inkluderer informasjon som passord, betalingsopplysninger, bilder, meldinger og lyd du spiller av."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vil du starte opptak eller casting?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vil du starte opptak eller casting med <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Vil du gi <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tillatelse til å dele eller ta opp?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Hele skjermen"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Én app"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Når du deler, tar opp eller caster noe, har <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tilgang til alt som vises på skjermen eller spilles av på enheten. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Når du deler, tar opp eller caster en app, har <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tilgang til alt som vises eller spilles av i den aktuelle appen. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Fortsett"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Del eller ta opp en app"</string>
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vil du tillate at denne appen deler eller tar opp?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Når du deler, tar opp eller caster noe, har denne appen tilgang til alt som vises på skjermen eller spilles av på enheten. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Når du deler, tar opp eller caster en app, har denne appen tilgang til alt som vises eller spilles av i den aktuelle appen. Derfor bør du være forsiktig med passord, betalingsopplysninger, meldinger og annen sensitiv informasjon."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokkert av IT-administratoren"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Skjermdumper er deaktivert av enhetsinnstillingene"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Fjern alt"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Administrer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Logg"</string>
@@ -372,6 +394,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Varsler er satt på pause av «Ikke forstyrr»"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Start nå"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ingen varsler"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"Ingen nye varsler"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Lås opp for å se eldre varsler"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Denne enheten administreres av forelderen din"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"Organisasjonen din eier denne enheten og kan overvåke nettverkstrafikken"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> eier denne enheten og kan overvåke nettverkstrafikken"</string>
@@ -476,7 +500,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Lås opp for å bruke"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Det oppsto et problem med henting av kortene. Prøv på nytt senere"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Innstillinger for låseskjermen"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"Skann QR-koden"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR-kodeskanner"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Oppdaterer"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Work-profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Flymodus"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Du hører ikke neste innstilte alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -704,17 +729,22 @@
     <string name="mobile_data" msgid="4564407557775397216">"Mobildata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g> <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
-    <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi er av"</string>
+    <string name="wifi_is_off" msgid="5389597396308001471">"Wifi er av"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth er av"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Ikke forstyrr er av"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"Ikke forstyrr er på"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Ikke forstyrr ble slått på av en automatisk regel (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Ikke forstyrr ble slått på av en app (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Ikke forstyrr ble slått på av en automatisk regel eller en app."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Apper kjører i bakgrunnen"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Trykk for detaljer om batteri- og databruk"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Vil du slå av mobildata?"</string>
-    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett er bare tilgjengelig via Wi-Fi."</string>
+    <string name="mobile_data_disable_message" msgid="8604966027899770415">"Du får ikke tilgang til data eller internett via <xliff:g id="CARRIER">%s</xliff:g>. Internett er bare tilgjengelig via Wifi."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"operatøren din"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"Vil du bytte tilbake til <xliff:g id="CARRIER">%s</xliff:g>?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"Det byttes ikke mobildataoperatør automatisk basert på tilgjengelighet"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"Nei takk"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"Ja, bytt"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"Fordi en app skjuler tillatelsesforespørselen, kan ikke Innstillinger bekrefte svaret ditt."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"Vil du tillate at <xliff:g id="APP_0">%1$s</xliff:g> viser <xliff:g id="APP_2">%2$s</xliff:g>-utsnitt?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"– Den kan lese informasjon fra <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -823,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Flytt deg nærmere <xliff:g id="DEVICENAME">%1$s</xliff:g> for å spille av her"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Spilles av på <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Noe gikk galt. Prøv på nytt."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv. Sjekk appen"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ikke funnet"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrollen er utilgjengelig"</string>
@@ -844,6 +876,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Stopp castingen"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Tilgjengelige enheter for lydutgang."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"Volum"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Høyttalere og skjermer"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Slik fungerer kringkasting"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Kringkasting"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Folk i nærheten med kompatible Bluetooth-enheter kan lytte til mediene du kringkaster"</string>
@@ -905,6 +939,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobildata"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Tilkoblet"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Koblet til midlertidig"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"Dårlig forbindelse"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"Mobildata kobler ikke til automatisk"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"Ingen tilkobling"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"Ingen andre nettverk er tilgjengelige"</string>
@@ -914,10 +950,10 @@
     <string name="unlock_to_view_networks" msgid="5072880496312015676">"Lås opp for å se nettverk"</string>
     <string name="wifi_empty_list_wifi_on" msgid="3864376632067585377">"Søker etter nettverk …"</string>
     <string name="wifi_failed_connect_message" msgid="4161863112079000071">"Kunne ikke koble til nettverket"</string>
-    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi kobles ikke til automatisk inntil videre"</string>
+    <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wifi kobles ikke til automatisk inntil videre"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wi-Fi-nettverk når som helst – også når Wi-Fi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter Wifi-nettverk når som helst – også når Wifi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Slå av flymodus"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vil legge til denne brikken i Hurtiginnstillinger"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Legg til brikke"</string>
@@ -955,13 +991,29 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Kamera og mikrofon er av"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# varsel}other{# varsler}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"Notatskriving"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"Kringkaster"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"Vil du stoppe kringkastingen av <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"Hvis du kringkaster <xliff:g id="SWITCHAPP">%1$s</xliff:g> eller endrer utgangen, stopper den nåværende kringkastingen din"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"Kringkast <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"Endre utgang"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"Ukjent"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE d. MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Åpne <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• appen er konfigurert"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• minst ett kort er lagt til i Wallet"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• en kameraapp er installert"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• appen er konfigurert"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• minst én enhet er tilgjengelig"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på og hold inne snarveien"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Vend nå"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Brett ut telefonen for å ta bedre selfier"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"Vil du bytte til frontskjermen for bedre selfier?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Bruk det bakovervendte kameraet for å ta bredere bilder med høyere oppløsning."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Denne skjermen slås av"</b></string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"En sammenleggbar enhet blir brettet ut"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"En sammenleggbar enhet blir snudd"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"Det er lite batteri i pekepennen"</string>
 </resources>

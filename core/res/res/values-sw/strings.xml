@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Ujumbe wa sauti"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Tatizo la muunganisho au msimbo batili MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Kipengele hakitumiki."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Ni matumizi yanayohusisha nambari za simu zilizobainishwa pekee yatakayowezekana."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Haiwezi kubadilisha mipangilio ya kusambaza simu kutoka kwenye simu yako ukiwa unatumia mitandao mingine."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Huduma iliwezeshwa"</string>
@@ -2051,8 +2052,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Ruhusu ufikiaji wa mara moja"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Usiruhusu"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Kumbukumbu za kifaa zinarekodi kinachofanyika kwenye kifaa chako. Programu zinaweza kutumia kumbukumbu hizi ili kutambua na kurekebisha hitilafu.\n\nBaadhi ya kumbukumbu huenda zikawa na taarifa nyeti, hivyo ruhusu tu programu unazoziamini kufikia kumbukumbu zote za kifaa. \n\nIwapo hutaruhusu programu hii ifikie kumbukumbu zote za kifaa, bado inaweza kufikia kumbukumbu zake yenyewe. Huenda mtengenezaji wa kifaa chako bado akaweza kufikia baadhi ya kumbukumbu au taarifa zilizopo kwenye kifaa chako."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Kumbukumbu za kifaa hurekodi kinachofanyika kwenye kifaa chako. Programu zinaweza kutumia kumbukumbu hizi ili kutambua na kurekebisha hitilafu.\n\nBaadhi ya kumbukumbu huenda zikawa na taarifa nyeti, hivyo ruhusu tu programu unazoziamini kufikia kumbukumbu zote za kifaa. \n\nIwapo hutaruhusu programu hii ifikie kumbukumbu zote za kifaa, bado inaweza kufikia kumbukumbu zake yenyewe. Huenda mtengenezaji wa kifaa chako bado akaweza kufikia baadhi ya kumbukumbu au taarifa zilizopo kwenye kifaa chako.\n\nPata maelezo zaidi kwenye g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Usionyeshe tena"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> inataka kuonyesha vipengee <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Badilisha"</string>

@@ -16,15 +16,12 @@
 
 package com.android.systemui;
 
-import android.content.Context;
-
 /**
  * Placeholder for any vendor-specific services.
  */
-public class VendorServices extends CoreStartable {
+public class VendorServices implements CoreStartable {
 
-    public VendorServices(Context context) {
-        super(context);
+    public VendorServices() {
     }
 
     @Override

@@ -72,6 +72,7 @@
     <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock બંધ કરેલું છે"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"છબી મોકલી"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
+    <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"ઑફિસની પ્રોફાઇલમાં સ્ક્રીનશૉટ સાચવી રહ્યાં છીએ…"</string>
     <string name="screenshot_saved_title" msgid="8893267638659083153">"સ્ક્રીનશૉટ સાચવ્યો"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"સ્ક્રીનશૉટ સાચવી શક્યાં નથી"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"સ્ક્રીનશૉટ સાચવવામાં આવે તે પહેલાં ડિવાઇસને અનલૉક કરવું જરૂરી છે"</string>
@@ -84,6 +85,7 @@
     <string name="screenshot_share_description" msgid="2861628935812656612">"સ્ક્રીનશૉટ શેર કરો"</string>
     <string name="screenshot_scroll_label" msgid="2930198809899329367">"વધુ કૅપ્ચર કરો"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"સ્ક્રીનશૉટ છોડી દો"</string>
+    <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"ઑફિસની પ્રોફાઇલનો મેસેજ છોડી દો"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"સ્ક્રીનશૉટનો પ્રીવ્યૂ"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"ઉપરની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
     <string name="screenshot_bottom_boundary_pct" msgid="3880821519814946478">"નીચેની સીમા <xliff:g id="PERCENT">%1$d</xliff:g> ટકા"</string>
@@ -94,6 +96,11 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"રેકોર્ડિંગ શરૂ કરીએ?"</string>
     <string name="screenrecord_description" msgid="1123231719680353736">"રેકોર્ડ કરતી વખતે, Android System તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી કોઈપણ સંવેદનશીલ માહિતીને કૅપ્ચર કરી શકે છે. આમાં પાસવર્ડ, ચુકવણીની માહિતી, ફોટા, મેસેજ અને ઑડિયોનો સમાવેશ થાય છે."</string>
+    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"પૂર્ણ સ્ક્રીન રેકોર્ડ કરો"</string>
+    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"કોઈ એક ઍપ રેકોર્ડ કરો"</string>
+    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"જ્યારે તમે રેકોર્ડ કરી રહ્યાં હો, ત્યારે તમારી સ્ક્રીન પર દેખાતી હોય કે તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી કોઈપણ વસ્તુનો ઍક્સેસ Android ધરાવે છે. તેથી પાસવર્ડ, ચુકવણીની વિગતો, મેસેજ અથવા અન્ય સંવેદનશીલ માહિતીની બાબતે સાવચેત રહેશો."</string>
+    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"જ્યારે તમે કોઈ ઍપ રેકોર્ડ કરી રહ્યાં હો, ત્યારે તે ઍપ પર બતાવવામાં કે ચલાવવામાં આવતી હોય તેવી કોઈપણ વસ્તુનો ઍક્સેસ Android ધરાવે છે. તેથી પાસવર્ડ, ચુકવણીની વિગતો, મેસેજ અથવા અન્ય સંવેદનશીલ માહિતીની બાબતે સાવચેત રહેશો."</string>
+    <string name="screenrecord_start_recording" msgid="348286842544768740">"રેકોર્ડિંગ શરૂ કરો"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ઑડિયો રેકોર્ડ કરો"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ડિવાઇસનો ઑડિયો"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"મ્યુઝિક, કૉલ અને રિંગટોન જેવા તમારા ડિવાઇસના સાઉન્ડ"</string>
@@ -120,7 +127,7 @@
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"વૉઇસ સહાય"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Wallet"</string>
     <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"QR કોડ સ્કૅનર"</string>
-    <string name="accessibility_unlock_button" msgid="122785427241471085">"અનલૉક કરો"</string>
+    <string name="accessibility_unlock_button" msgid="3613812140816244310">"અનલૉક કર્યું છે"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"ડિવાઇસ લૉક કરેલું છે"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"ચહેરો સ્કૅન કરવો"</string>
     <string name="accessibility_send_smart_reply" msgid="8885032190442015141">"મોકલો"</string>
@@ -163,6 +170,7 @@
     <skip />
     <string name="keyguard_face_failed" msgid="9044619102286917151">"ચહેરો ઓળખાતો નથી"</string>
     <string name="keyguard_suggest_fingerprint" msgid="8742015961962702960">"તો ફિંગરપ્રિન્ટ વાપરો"</string>
+    <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ફેસ અનલૉક સુવિધા ઉપલબ્ધ નથી"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"બ્લૂટૂથ કનેક્ટ થયું."</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"બૅટરીની ટકાવારી અજાણ છે."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> થી કનેક્ટ થયાં."</string>
@@ -173,8 +181,10 @@
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"એરપ્લેન મોડ."</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN ચાલુ છે."</string>
     <string name="accessibility_battery_level" msgid="5143715405241138822">"બૅટરી <xliff:g id="NUMBER">%d</xliff:g> ટકા."</string>
-    <string name="accessibility_battery_level_with_estimate" msgid="4843119982547599452">"તમારા વપરાશના આધારે બૅટરી <xliff:g id="PERCENTAGE">%1$s</xliff:g> ટકા, જે લગભગ <xliff:g id="TIME">%2$s</xliff:g> સુધી ચાલે તેટલી બચી છે"</string>
+    <string name="accessibility_battery_level_with_estimate" msgid="6548654589315074529">"બૅટરી <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="accessibility_battery_level_charging" msgid="8892191177774027364">"બૅટરી ચાર્જ થઈ રહી છે, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="accessibility_battery_level_charging_paused" msgid="3560711496775146763">"બૅટરી <xliff:g id="PERCENTAGE">%d</xliff:g>, બૅટરીની સુરક્ષા માટે ચાર્જિંગ થોભાવ્યું છે."</string>
+    <string name="accessibility_battery_level_charging_paused_with_estimate" msgid="2223541217743647858">"બૅટરી <xliff:g id="PERCENTAGE">%1$d</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>, બૅટરીની સુરક્ષા માટે ચાર્જિંગ થોભાવ્યું છે."</string>
     <string name="accessibility_overflow_action" msgid="8555835828182509104">"બધી સૂચના જુઓ"</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"ટેલિટાઇપરાઇટર સક્ષમ કર્યું."</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"રિંગર વાઇબ્રેટ."</string>
@@ -243,7 +253,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"તેજ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"વિપરીત રંગમાં બદલવું"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"રંગ સુધારણા"</string>
-    <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"વપરાશકર્તા સેટિંગ"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"વપરાશકર્તાઓને મેનેજ કરો"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"થઈ ગયું"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"બંધ કરો"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"કનેક્ટ થયેલું"</string>
@@ -361,6 +371,18 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"રેકોર્ડ અથવા કાસ્ટ કરતી વખતે, આ સુવિધા આપતી સેવાને તમારી સ્ક્રીન પર દેખાતી હોય અથવા તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી બધી માહિતીનો ઍક્સેસ હશે. આમાં પાસવર્ડ, ચુકવણીની વિગતો, ફોટા, મેસેજ અને તમે ચલાવો છો તે ઑડિયો જેવી માહિતીનો સમાવેશ થાય છે."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"શું રેકોર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> વડે રેકોર્ડ અથવા કાસ્ટ કરવાનું શરૂ કરીએ?"</string>
+    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"શુ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ને શેર અથવા રેકોર્ડ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"પૂર્ણ સ્ક્રીન"</string>
+    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"કોઈ એક ઍપ"</string>
+    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"જ્યારે તમે શેર, રેકોર્ડ અથવા કાસ્ટ કરી રહ્યાં હો, ત્યારે તમારી સ્ક્રીન પર દેખાતી હોય કે તમારા ડિવાઇસ પર ચલાવવામાં આવતી હોય તેવી કોઈપણ વસ્તુનો ઍક્સેસ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ધરાવે છે. તેથી પાસવર્ડ, ચુકવણીની વિગતો, મેસેજ અથવા અન્ય સંવેદનશીલ માહિતીની બાબતે સાવચેત રહેશો."</string>
+    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"જ્યારે તમે કોઈ ઍપ શેર, રેકોર્ડ અથવા કાસ્ટ કરી રહ્યાં હો, ત્યારે તે ઍપ પર બતાવવામાં કે ચલાવવામાં આવતી હોય તેવી કોઈપણ વસ્તુનો ઍક્સેસ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ધરાવે છે. તેથી પાસવર્ડ, ચુકવણીની વિગતો, મેસેજ અથવા અન્ય સંવેદનશીલ માહિતીની બાબતે સાવચેત રહેશો."</string>
+    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ચાલુ રાખો"</string>
+    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"કોઈ ઍપ શેર કરો અથવા રેકોર્ડ કરો"</string>
+    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"આ ઍપને શેર કે રેકોર્ડ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"જ્યારે તમે શેર, રેકોર્ડ અથવા કાસ્ટ કરી રહ્યાં હો, ત્યારે આ ઍપ પાસે તમારી સ્ક્રીન પર જોઈ શકાતી કે તમારા ડિવાઇસ પર ચલાવવામાં આવતી બધી વસ્તુઓનો ઍક્સેસ હોય છે. તેથી પાસવર્ડ, ચુકવણીની વિગતો, મેસેજ અથવા અન્ય સંવેદનશીલ માહિતીની બાબતે સાવચેત રહેશો."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"જ્યારે તમે કોઈ ઍપને શેર, રેકોર્ડ અથવા કાસ્ટ કરી રહ્યાં હો, ત્યારે તેના પર બતાવવામાં કે ચલાવવામાં આવતી બધી વસ્તુઓનો ઍક્સેસ આ ઍપ પાસે હોય છે. તેથી પાસવર્ડ, ચુકવણીની વિગતો, મેસેજ અથવા અન્ય સંવેદનશીલ માહિતીની બાબતે સાવચેત રહેશો."</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"તમારા IT ઍડમિન દ્વારા બ્લૉક કરાયેલી"</string>
+    <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ડિવાઇસ પૉલિસી અનુસાર સ્ક્રીન કૅપ્ચર કરવાની સુવિધા બંધ કરવામાં આવી છે"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"બધુ સાફ કરો"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"મેનેજ કરો"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ઇતિહાસ"</string>
@@ -372,6 +394,8 @@
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"હવે શરૂ કરો"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"કોઈ નોટિફિકેશન નથી"</string>
+    <string name="no_unseen_notif_text" msgid="395512586119868682">"કોઈ નવું નોટિફિકેશન નથી"</string>
+    <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"જૂના નોટિફિકેશન જોવા માટે અનલૉક કરો"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"આ ડિવાઇસ તમારા માતાપિતા દ્વારા મેનેજ કરવામાં આવે છે"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"તમારી સંસ્થા આ ડિવાઇસની માલિકી ધરાવે છે અને નેટવર્ક ટ્રાફિકનું નિરીક્ષણ કરી શકે છે"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"આ ડિવાઇસ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>ની માલિકીનું છે અને નેટવર્ક ટ્રાફિકનું નિરીક્ષણ કરી શકે છે"</string>
@@ -476,7 +500,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"ઉપયોગ કરવા માટે અનલૉક કરો"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"તમારા કાર્ડની માહિતી મેળવવામાં સમસ્યા આવી હતી, કૃપા કરીને થોડા સમય પછી ફરી પ્રયાસ કરો"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"લૉક સ્ક્રીનના સેટિંગ"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"QR કોડ સ્કૅન કરો"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR કોડ સ્કૅનર"</string>
+    <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"અપડેટ કરી રહ્યાં છીએ"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"ઑફિસની પ્રોફાઇલ"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"એરપ્લેન મોડ"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"તમે <xliff:g id="WHEN">%1$s</xliff:g> એ તમારો આગલો એલાર્મ સાંભળશો નહીં"</string>
@@ -707,6 +732,7 @@
     <string name="wifi_is_off" msgid="5389597396308001471">"વાઇ-ફાઇ બંધ છે"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"બ્લૂટૂથ બંધ છે"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"ખલેલ પાડશો નહીં બંધ છે"</string>
+    <string name="dnd_is_on" msgid="7009368176361546279">"ખલેલ પાડશો નહીં ચાલુ છે"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"ખલેલ પાડશો નહીં એક ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ખલેલ પાડશો નહીં એક સ્વચાલિત નિયમ અથવા ઍપ્લિકેશન દ્વારા ચાલુ કરાયું હતું."</string>
@@ -715,6 +741,10 @@
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"મોબાઇલ ડેટા બંધ કરીએ?"</string>
     <string name="mobile_data_disable_message" msgid="8604966027899770415">"તમને <xliff:g id="CARRIER">%s</xliff:g> મારફતે ડેટા અથવા ઇન્ટરનેટનો ઍક્સેસ મળશે નહીં. ઇન્ટરનેટ માત્ર વાઇ-ફાઇ દ્વારા ઉપલબ્ધ થશે."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6496033312431658238">"તમારા કૅરિઅર"</string>
+    <string name="auto_data_switch_disable_title" msgid="5146527155665190652">"<xliff:g id="CARRIER">%s</xliff:g> પર પાછા સ્વિચ કરીએ?"</string>
+    <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"મોબાઇલ ડેટાને ઉપલબ્ધતાના આધારે ઑટોમૅટિક રીતે સ્વિચ કરવામાં આવશે નહીં"</string>
+    <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"ના, આભાર"</string>
+    <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"હા, સ્વિચ કરો"</string>
     <string name="touch_filtered_warning" msgid="8119511393338714836">"કોઈ ઍપ પરવાનગી વિનંતીને અસ્પષ્ટ કરતી હોવાને કારણે, સેટિંગ તમારા પ્રતિસાદને ચકાસી શકતું નથી."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_0">%1$s</xliff:g>ને <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવાની મંજૂરી આપીએ?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- મારાથી <xliff:g id="APP">%1$s</xliff:g>ની માહિતી વાંચી શકાતી નથી"</string>
@@ -823,6 +853,8 @@
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"આમાં ચલાવવા માટે ડિવાઇસને <xliff:g id="DEVICENAME">%1$s</xliff:g>ની નજીક ખસેડો"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> પર ચલાવવામાં આવી રહ્યું છે"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"કંઈક ખોટું થયું. ફરી પ્રયાસ કરો."</string>
+    <!-- no translation found for media_transfer_loading (5544017127027152422) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"મળ્યું નથી"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"નિયંત્રણ ઉપલબ્ધ નથી"</string>
@@ -844,6 +876,8 @@
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"કાસ્ટ કરવાનું રોકો"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ઑડિયો આઉટપુટ માટે ઉપલબ્ધ ડિવાઇસ."</string>
     <string name="media_output_dialog_accessibility_seekbar" msgid="5332843993805568978">"વૉલ્યૂમ"</string>
+    <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
+    <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"સ્પીકર અને ડિસ્પ્લે"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"બ્રોડકાસ્ટ પ્રક્રિયાની કામ કરવાની રીત"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"બ્રોડકાસ્ટ કરો"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"સુસંગત બ્લૂટૂથ ડિવાઇસ ધરાવતા નજીકના લોકો તમે જે મીડિયા બ્રોડકાસ્ટ કરી રહ્યાં છો તે સાંભળી શકે છે"</string>
@@ -905,6 +939,8 @@
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"મોબાઇલ ડેટા"</string>
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"કનેક્ટ કરેલું"</string>
+    <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"હંગામી રીતે કનેક્ટ કર્યું"</string>
+    <string name="mobile_data_poor_connection" msgid="819617772268371434">"નબળું કનેક્શન"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"મોબાઇલ ડેટા ઑટોમૅટિક રીતે કનેક્ટ થશે નહીં"</string>
     <string name="mobile_data_no_connection" msgid="1713872434869947377">"કોઈ કનેક્શન નથી"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"બીજાં કોઈ નેટવર્ક ઉપલબ્ધ નથી"</string>
@@ -955,13 +991,29 @@
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"કૅમેરા અને માઇક બંધ છે"</string>
     <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# નોટિફિકેશન}one{# નોટિફિકેશન}other{# નોટિફિકેશન}}"</string>
     <string name="dream_overlay_weather_complication_desc" msgid="824503662089783824">"<xliff:g id="WEATHER_CONDITION">%1$s</xliff:g>, <xliff:g id="TEMPERATURE">%2$s</xliff:g>"</string>
+    <string name="note_task_button_label" msgid="8718616095800343136">"નોંધ લેવી"</string>
     <string name="broadcasting_description_is_broadcasting" msgid="765627502786404290">"બ્રૉડકાસ્ટ કરી રહ્યાં છે"</string>
     <string name="bt_le_audio_broadcast_dialog_title" msgid="3605428497924077811">"<xliff:g id="APP_NAME">%1$s</xliff:g> બ્રોડકાસ્ટ કરવાનું રોકીએ?"</string>
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="7889684551194225793">"જો તમે <xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો અથવા આઉટપુટ બદલો, તો તમારું હાલનું બ્રોડકાસ્ટ બંધ થઈ જશે"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="6098768269397105733">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> બ્રોડકાસ્ટ કરો"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="7885102097302562674">"આઉટપુટ બદલો"</string>
     <string name="bt_le_audio_broadcast_dialog_unknown_name" msgid="3791472237793443044">"અજાણ"</string>
-    <string name="dream_date_complication_date_format" msgid="8191225366513860104">"EEE, d MMM"</string>
     <string name="dream_time_complication_12_hr_time_format" msgid="4691197486690291529">"h:mm"</string>
     <string name="dream_time_complication_24_hr_time_format" msgid="6248280719733640813">"kk:mm"</string>
+    <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> ખોલો"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_1" msgid="8439655049139819278">"• ઍપનું સેટઅપ કરેલું છે"</string>
+    <string name="keyguard_affordance_enablement_dialog_wallet_instruction_2" msgid="4321089250629477835">"• ઓછામાં ઓછું એક કાર્ડ વૉલેટમાં ઉમેરેલું છે"</string>
+    <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• કૅમેરા ઍપ ઇન્સ્ટૉલ કરી છે"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ઍપનું સેટઅપ કરેલું છે"</string>
+    <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ઓછામાં ઓછું એક ડિવાઇસ ઉપલબ્ધ છે"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"શૉર્ટકટને ટચ વડે પળભર દબાવી રાખો"</string>
+    <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"રદ કરો"</string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"હમણાં જ ફ્લિપ કરો"</string>
+    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"બહેતર સેલ્ફી લેવા માટે ફોન ખોલો"</string>
+    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"બહેતર સેલ્ફી લેવા ફ્રન્ટ ડિસ્પ્લે પર ફ્લિપ કરીએ?"</string>
+    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"વધુ ઉચ્ચ રિઝોલ્યુશનવાળો વિશાળ ફોટો લેવા માટે પાછલા કૅમેરાનો ઉપયોગ કરો."</string>
+    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ આ સ્ક્રીન બંધ થઈ જશે"</b></string>
+    <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ અનફોલ્ડ કરવામાં આવી રહ્યું છે"</string>
+    <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"ફોલ્ડ કરી શકાય એવું ડિવાઇસ ફ્લિપ કરવામાં આવી રહ્યું છે"</string>
+    <string name="stylus_battery_low" msgid="7134370101603167096">"સ્ટાઇલસની બૅટરીમાં ચાર્જ ઓછો છે"</string>
 </resources>

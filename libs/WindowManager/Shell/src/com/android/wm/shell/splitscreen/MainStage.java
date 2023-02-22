@@ -16,9 +16,6 @@
 
 package com.android.wm.shell.splitscreen;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
-import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
-
 import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
@@ -34,8 +31,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  * @see StageCoordinator
  */
 class MainStage extends StageTaskListener {
-    private static final String TAG = MainStage.class.getSimpleName();
-
     private boolean mIsActive = false;
 
     MainStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
@@ -52,15 +47,8 @@ class MainStage extends StageTaskListener {
     void activate(WindowContainerTransaction wct, boolean includingTopTask) {
         if (mIsActive) return;
 
-        final WindowContainerToken rootToken = mRootTaskInfo.token;
         if (includingTopTask) {
-            wct.reparentTasks(
-                    null /* currentParent */,
-                    rootToken,
-                    CONTROLLED_WINDOWING_MODES,
-                    CONTROLLED_ACTIVITY_TYPES,
-                    true /* onTop */,
-                    true /* reparentTopOnly */);
+            reparentTopTask(wct);
         }
 
         mIsActive = true;

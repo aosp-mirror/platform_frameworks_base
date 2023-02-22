@@ -117,13 +117,13 @@ public class SafeActivityOptions {
 
     /**
      * To ensure that two activities, one using this object, and the other using the
-     * SafeActivityOptions returned from this function, are launched into the same display through
-     * ActivityStartController#startActivities, all display-related information, i.e.
-     * displayAreaToken, launchDisplayId and callerDisplayId, are cloned.
+     * SafeActivityOptions returned from this function, are launched into the same display/root task
+     * through ActivityStartController#startActivities, all display-related information, i.e.
+     * displayAreaToken, launchDisplayId, callerDisplayId and the launch root task are cloned.
      */
-    @Nullable SafeActivityOptions selectiveCloneDisplayOptions() {
-        final ActivityOptions options = cloneLaunchingDisplayOptions(mOriginalOptions);
-        final ActivityOptions callerOptions = cloneLaunchingDisplayOptions(mCallerOptions);
+    @Nullable SafeActivityOptions selectiveCloneLaunchOptions() {
+        final ActivityOptions options = cloneLaunchingOptions(mOriginalOptions);
+        final ActivityOptions callerOptions = cloneLaunchingOptions(mCallerOptions);
         if (options == null && callerOptions == null) {
             return null;
         }
@@ -136,11 +136,12 @@ public class SafeActivityOptions {
         return safeOptions;
     }
 
-    private ActivityOptions cloneLaunchingDisplayOptions(ActivityOptions options) {
+    private ActivityOptions cloneLaunchingOptions(ActivityOptions options) {
         return options == null ? null : ActivityOptions.makeBasic()
                 .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
                 .setLaunchDisplayId(options.getLaunchDisplayId())
-                .setCallerDisplayId((options.getCallerDisplayId()));
+                .setCallerDisplayId(options.getCallerDisplayId())
+                .setLaunchRootTask(options.getLaunchRootTask());
     }
 
     /**
@@ -263,7 +264,7 @@ public class SafeActivityOptions {
             ActivityOptions options, int callingPid, int callingUid) {
         // If a launch task id is specified, then ensure that the caller is the recents
         // component or has the START_TASKS_FROM_RECENTS permission
-        if (options.getLaunchTaskId() != INVALID_TASK_ID
+        if ((options.getLaunchTaskId() != INVALID_TASK_ID || options.getDisableStartingWindow())
                 && !supervisor.mRecentTasks.isCallerRecents(callingUid)) {
             final int startInTaskPerm = ActivityTaskManagerService.checkPermission(
                     START_TASKS_FROM_RECENTS, callingPid, callingUid);

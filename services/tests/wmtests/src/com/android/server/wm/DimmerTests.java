@@ -24,7 +24,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -139,34 +138,12 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimAboveNoChildCreatesSurface() {
-        final float alpha = 0.8f;
-        mDimmer.dimAbove(mTransaction, alpha);
-
-        SurfaceControl dimLayer = getDimLayer();
-
-        assertNotNull("Dimmer should have created a surface", dimLayer);
-
-        verify(mTransaction).setAlpha(dimLayer, alpha);
-        verify(mTransaction).setLayer(dimLayer, Integer.MAX_VALUE);
-    }
-
-    @Test
-    public void testDimAboveNoChildRedundantlyUpdatesAlphaOnExistingSurface() {
-        float alpha = 0.8f;
-        mDimmer.dimAbove(mTransaction, alpha);
-        final SurfaceControl firstSurface = getDimLayer();
-
-        alpha = 0.9f;
-        mDimmer.dimAbove(mTransaction, alpha);
-
-        assertEquals(firstSurface, getDimLayer());
-        verify(mTransaction).setAlpha(firstSurface, 0.9f);
-    }
-
-    @Test
     public void testUpdateDimsAppliesCrop() {
-        mDimmer.dimAbove(mTransaction, 0.8f);
+        TestWindowContainer child = new TestWindowContainer(mWm);
+        mHost.addChild(child, 0);
+
+        final float alpha = 0.8f;
+        mDimmer.dimAbove(mTransaction, child, alpha);
 
         int width = 100;
         int height = 300;
@@ -175,17 +152,6 @@ public class DimmerTests extends WindowTestsBase {
 
         verify(mTransaction).setWindowCrop(getDimLayer(), width, height);
         verify(mTransaction).show(getDimLayer());
-    }
-
-    @Test
-    public void testDimAboveNoChildNotReset() {
-        mDimmer.dimAbove(mTransaction, 0.8f);
-        SurfaceControl dimLayer = getDimLayer();
-        mDimmer.resetDimStates();
-
-        mDimmer.updateDims(mTransaction, new Rect());
-        verify(mTransaction).show(getDimLayer());
-        verify(mTransaction, never()).remove(dimLayer);
     }
 
     @Test

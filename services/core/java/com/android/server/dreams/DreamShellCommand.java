@@ -18,10 +18,8 @@ package com.android.server.dreams;
 
 import android.annotation.NonNull;
 import android.os.Binder;
-import android.os.PowerManager;
 import android.os.Process;
 import android.os.ShellCommand;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -34,11 +32,9 @@ public class DreamShellCommand extends ShellCommand {
     private static final boolean DEBUG = true;
     private static final String TAG = "DreamShellCommand";
     private final @NonNull DreamManagerService mService;
-    private final @NonNull PowerManager mPowerManager;
 
-    DreamShellCommand(@NonNull DreamManagerService service, @NonNull PowerManager powerManager) {
+    DreamShellCommand(@NonNull DreamManagerService service) {
         mService = service;
-        mPowerManager = powerManager;
     }
 
     @Override
@@ -67,8 +63,6 @@ public class DreamShellCommand extends ShellCommand {
     }
 
     private int startDreaming() {
-        mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                PowerManager.WAKE_REASON_PLUGGED_IN, "shell:cmd:android.service.dreams:DREAM");
         mService.requestStartDreamFromShell();
         return 0;
     }

@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Í hleðslu"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hröð hleðsla"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hæg hleðsla"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Gert var hlé á hleðslu til að vernda rafhlöðuna"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Hleðsla fínstillt til að vernda rafhlöðuna"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Ýttu á valmyndarhnappinn til að taka úr lás."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Net læst"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Ekkert SIM-kort"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Mynsturs er krafist þegar tækið er endurræst"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"PIN-númers er krafist þegar tækið er endurræst"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Aðgangsorðs er krafist þegar tækið er endurræst"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Mynsturs er krafist af öryggisástæðum"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"PIN-númers er krafist af öryggisástæðum"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Aðgangsorðs er krafist af öryggisástæðum"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Fyrir aukið öryggi skaltu nota mynstur í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Fyrir aukið öryggi skaltu nota PIN-númer í staðinn"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Fyrir aukið öryggi skaltu nota aðgangsorð í staðinn"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Kerfisstjóri læsti tæki"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Tækinu var læst handvirkt"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Þekktist ekki"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Sjálfgefið"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Blaðra"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Með vísum"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Taktu tækið úr lás til að halda áfram"</string>
 </resources>

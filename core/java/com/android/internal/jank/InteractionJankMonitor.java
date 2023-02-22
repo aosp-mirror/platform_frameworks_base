@@ -27,6 +27,9 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_ICON;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_RECENTS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_LAUNCH_FROM_WIDGET;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_SWIPE_TO_RECENTS;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION;
@@ -45,6 +48,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_ENTER_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__ONE_HANDED_EXIT_TRANSITION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__PIP_TRANSITION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__RECENTS_SCROLLING;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SCREEN_OFF_SHOW_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SETTINGS_PAGE_SCROLL;
@@ -223,6 +227,10 @@ public class InteractionJankMonitor {
     public static final int CUJ_SHADE_CLEAR_ALL = 62;
     public static final int CUJ_LAUNCHER_UNLOCK_ENTRANCE_ANIMATION = 63;
     public static final int CUJ_LOCKSCREEN_OCCLUSION = 64;
+    public static final int CUJ_RECENTS_SCROLLING = 65;
+    public static final int CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS = 66;
+    public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE = 67;
+    public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME = 68;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -296,6 +304,10 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__SHADE_CLEAR_ALL,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_OCCLUSION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__RECENTS_SCROLLING,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_APP_SWIPE_TO_RECENTS,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
     };
 
     private static volatile InteractionJankMonitor sInstance;
@@ -380,7 +392,11 @@ public class InteractionJankMonitor {
             CUJ_TASKBAR_COLLAPSE,
             CUJ_SHADE_CLEAR_ALL,
             CUJ_LAUNCHER_UNLOCK_ENTRANCE_ANIMATION,
-            CUJ_LOCKSCREEN_OCCLUSION
+            CUJ_LOCKSCREEN_OCCLUSION,
+            CUJ_RECENTS_SCROLLING,
+            CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS,
+            CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE,
+            CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -893,6 +909,14 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_UNLOCK_ENTRANCE_ANIMATION";
             case CUJ_LOCKSCREEN_OCCLUSION:
                 return "LOCKSCREEN_OCCLUSION";
+            case CUJ_RECENTS_SCROLLING:
+                return "RECENTS_SCROLLING";
+            case CUJ_LAUNCHER_APP_SWIPE_TO_RECENTS:
+                return "LAUNCHER_APP_SWIPE_TO_RECENTS";
+            case CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE:
+                return "LAUNCHER_CLOSE_ALL_APPS_SWIPE";
+            case CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME:
+                return "LAUNCHER_CLOSE_ALL_APPS_TO_HOME";
         }
         return "UNKNOWN";
     }

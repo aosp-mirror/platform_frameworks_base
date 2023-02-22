@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"דואר קולי"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"‏בעיה בחיבור או קוד MMI לא חוקי."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"התכונה לא נתמכת."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"הפעולה מוגבלת למספרי חיוג קבועים בלבד."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"לא ניתן לשנות את הגדרות העברת השיחות מהטלפון במצב נדידה."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"השירות הופעל."</string>
@@ -51,10 +52,9 @@
     <string name="needPuk2" msgid="7032612093451537186">"‏יש להקליד PUK2 כדי לבטל את חסימת כרטיס ה-SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"‏לא הצלחת. יש להפעיל נעילת SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
+      <item quantity="one">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM‏ יינעל.</item>
       <item quantity="two">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM‏ יינעל.</item>
-      <item quantity="many">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM יינעל‏.</item>
       <item quantity="other">‏נותרו לך <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות לפני שכרטיס ה-SIM‏ יינעל.</item>
-      <item quantity="one">‏נותר לך ניסיון אחד (<xliff:g id="NUMBER_0">%d</xliff:g>) לפני שכרטיס ה-SIM‏ יינעל.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
@@ -182,7 +182,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"מקום האחסון של השעון מלא. אפשר למחוק כמה קבצים כדי לפנות מקום."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"‏האחסון של מכשיר ה-Android TV מלא. יש למחוק חלק מהקבצים כדי לפנות מקום."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"מקום האחסון של הטלפון מלא. אפשר למחוק חלק מהקבצים כדי לפנות מקום."</string>
-    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{רשות אישורים הותקנה}two{רשויות אישורים הותקנו}many{רשויות אישורים הותקנו}other{רשויות אישורים הותקנו}}"</string>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{רשות אישורים הותקנה}one{רשויות אישורים הותקנו}two{רשויות אישורים הותקנו}other{רשויות אישורים הותקנו}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"על ידי צד שלישי לא ידוע"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"על ידי המנהל של פרופיל העבודה שלך"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"על ידי <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -256,7 +256,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"כדאי להשתמש באפשרות הזו ברוב המקרים. היא מאפשרת לך לעקוב אחר התקדמות הדוח, להזין פרטים נוספים על הבעיה ולצלם את המסך. היא עשויה להשמיט כמה קטעים שנמצאים פחות בשימוש ושיצירת הדיווח עליהם נמשכת זמן רב."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"דוח מלא"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"כדאי להשתמש באפשרות הזו כדי שההפרעה למערכת תהיה מזערית כשהמכשיר אינו מגיב או איטי מדי, או כשצריך את כל קטעי הדוח. לא ניתן להזין פרטים נוספים או ליצור צילומי מסך נוספים."</string>
-    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{צילום המסך לדוח על הבאג ייווצר בעוד שנייה אחת.}two{צילום המסך לדוח על הבאג ייווצר בעוד # שניות.}many{צילום המסך לדוח על הבאג ייווצר בעוד # שניות.}other{צילום המסך לדוח על הבאג ייווצר בעוד # שניות.}}"</string>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{צילום המסך לדוח על הבאג ייווצר בעוד שנייה אחת.}one{צילום המסך לדוח על הבאג ייווצר בעוד # שניות.}two{צילום המסך לדוח על הבאג ייווצר בעוד # שניות.}other{צילום המסך לדוח על הבאג ייווצר בעוד # שניות.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"בוצע צילום מסך של דוח על באג"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"הניסיון לצילום המסך של דוח על באג נכשל"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"מצב שקט"</string>
@@ -1090,7 +1090,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"השירות <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> רוצה להפעיל את התכונה \'גילוי באמצעות מגע\'. כשהתכונה \'גילוי באמצעות מגע\' מופעלת, אפשר לשמוע או לראות תיאורים של הפריטים שעליהם האצבע מונחת או לקיים אינטראקציה עם הטלפון באמצעות תנועות אצבע."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"לפני חודש"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"לפני חודש אחד"</string>
-    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{ביום האחרון}two{ביומיים האחרונים}many{ב-# הימים האחרונים}other{ב-# הימים האחרונים}}"</string>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{ביום האחרון}one{ב-# הימים האחרונים}two{ביומיים האחרונים}other{ב-# הימים האחרונים}}"</string>
     <string name="last_month" msgid="1528906781083518683">"בחודש שעבר"</string>
     <string name="older" msgid="1645159827884647400">"ישן יותר"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"בתאריך <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1117,14 +1117,14 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"בעוד <xliff:g id="COUNT">%d</xliff:g> שע‘"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"בעוד <xliff:g id="COUNT">%d</xliff:g> י‘"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"בעוד <xliff:g id="COUNT">%d</xliff:g> שנים"</string>
-    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{לפני דקה}two{לפני # דקות}many{לפני # דקות}other{לפני # דקות}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{לפני שעה}two{לפני שעתיים}many{לפני # שעות}other{לפני # שעות}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{לפני יום}two{לפני יומיים}many{לפני # ימים}other{לפני # ימים}}"</string>
-    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{לפני שנה}two{לפני שנתיים}many{לפני # שנים}other{לפני # שנים}}"</string>
-    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{דקה}two{# דקות}many{# דקות}other{# דקות}}"</string>
-    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{שעה}two{שעתיים}many{# שעות}other{# שעות}}"</string>
-    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{יום}two{יומיים}many{# ימים}other{# ימים}}"</string>
-    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{שנה}two{שנתיים}many{# שנים}other{# שנים}}"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{לפני דקה}one{לפני # דקות}two{לפני # דקות}other{לפני # דקות}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{לפני שעה}one{לפני # שעות}two{לפני שעתיים}other{לפני # שעות}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{לפני יום}one{לפני # ימים}two{לפני יומיים}other{לפני # ימים}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{לפני שנה}one{לפני # שנים}two{לפני שנתיים}other{לפני # שנים}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{דקה}one{# דקות}two{# דקות}other{# דקות}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{שעה}one{# שעות}two{שעתיים}other{# שעות}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{יום}one{# ימים}two{יומיים}other{# ימים}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{שנה}one{# שנים}two{שנתיים}other{# שנים}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"בעיה בסרטון"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"לא ניתן להעביר את הסרטון הזה בסטרימינג למכשיר."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"לא ניתן להפעיל את הסרטון הזה."</string>
@@ -1253,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"מתבצעת הפעלה של אפליקציות."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"תהליך האתחול בשלבי סיום."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות במהלך ההגדרה של טביעת האצבע שלך."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"כדי לסיים את ההגדרה צריך לכבות את המסך"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"לסיום ההגדרה, יש לכבות את המסך"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"השבתה"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"להמשיך לאמת את טביעת האצבע שלך?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"לחצת על לחצן ההפעלה – בדרך כלל הפעולה הזו מכבה את המסך.\n\nעליך לנסות להקיש בעדינות כדי לאמת את טביעת האצבע שלך."</string>
@@ -1487,7 +1487,7 @@
     <string name="accessibility_binding_label" msgid="1974602776545801715">"נגישות"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"טפט"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"שינוי טפט"</string>
-    <string name="notification_listener_binding_label" msgid="2702165274471499713">"מאזין להתראות"</string>
+    <string name="notification_listener_binding_label" msgid="2702165274471499713">"האזנה להתראות"</string>
     <string name="vr_listener_binding_label" msgid="8013112996671206429">"‏VR ליסנר"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"ספק תנאי"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"שירות של דירוג התראות"</string>
@@ -1511,7 +1511,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"דילוג"</string>
     <string name="no_matches" msgid="6472699895759164599">"אין התאמות"</string>
     <string name="find_on_page" msgid="5400537367077438198">"חיפוש בדף"</string>
-    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{התאמה אחת}two{# מתוך {total}}many{# מתוך {total}}other{# מתוך {total}}}"</string>
+    <string name="matches_found" msgid="2296462299979507689">"{count,plural, =1{התאמה אחת}one{# מתוך {total}}two{# מתוך {total}}other{# מתוך {total}}}"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"סיום"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"בתהליך מחיקה של אחסון משותף…"</string>
     <string name="share" msgid="4157615043345227321">"שיתוף"</string>
@@ -1864,14 +1864,14 @@
     <string name="data_saver_description" msgid="4995164271550590517">"‏כדי לסייע בהפחתת השימוש בנתונים, חוסך הנתונים (Data Saver) מונע מאפליקציות מסוימות לשלוח או לקבל נתונים ברקע. אפליקציות שבהן נעשה שימוש כרגע יכולות לגשת לנתונים, אבל בתדירות נמוכה יותר. המשמעות היא, למשל, שתמונות יוצגו רק לאחר שמקישים עליהן."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"להפעיל את חוסך הנתונים?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"הפעלה"</string>
-    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{למשך דקה אחת (עד {formattedTime})}two{למשך # דקות (עד{formattedTime})}many{למשך # דקות (עד{formattedTime})}other{למשך # דקות (עד{formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{למשך דקה (עד {formattedTime})}two{למשך # דק‘ (עד {formattedTime})}many{למשך # דק‘ (עד {formattedTime})}other{למשך # דק‘ (עד {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{למשך שעה אחת (עד {formattedTime})}two{למשך שעתיים (עד {formattedTime})}many{למשך # שעות (עד {formattedTime})}other{למשך # שעות (עד {formattedTime})}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{למשך שעה (עד {formattedTime})}two{למשך שעתיים (עד {formattedTime})}many{למשך # שע‘ (עד {formattedTime})}other{למשך # שע‘ (עד {formattedTime})}}"</string>
-    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{למשך דקה אחת}two{למשך # דקות}many{למשך # דקות}other{למשך # דקות}}"</string>
-    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{למשך דקה}two{למשך # דק‘}many{למשך # דק‘}other{למשך # דק‘}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{למשך שעה אחת}two{למשך שעתיים}many{למשך # שעות}other{למשך # שעות}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{למשך שעה אחת}two{למשך שעתיים}many{למשך # שע‘}other{למשך # שע‘}}"</string>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{למשך דקה אחת (עד {formattedTime})}one{למשך # דקות (עד{formattedTime})}two{למשך # דקות (עד{formattedTime})}other{למשך # דקות (עד{formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{למשך דקה (עד {formattedTime})}one{למשך # דק‘ (עד {formattedTime})}two{למשך # דק‘ (עד {formattedTime})}other{למשך # דק‘ (עד {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{למשך שעה אחת (עד {formattedTime})}one{למשך # שעות (עד {formattedTime})}two{למשך שעתיים (עד {formattedTime})}other{למשך # שעות (עד {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{למשך שעה (עד {formattedTime})}one{למשך # שע‘ (עד {formattedTime})}two{למשך שעתיים (עד {formattedTime})}other{למשך # שע‘ (עד {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{למשך דקה אחת}one{למשך # דקות}two{למשך # דקות}other{למשך # דקות}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{למשך דקה}one{למשך # דק‘}two{למשך # דק‘}other{למשך # דק‘}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{למשך שעה אחת}one{למשך # שעות}two{למשך שעתיים}other{למשך # שעות}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{למשך שעה אחת}one{למשך # שע‘}two{למשך שעתיים}other{למשך # שע‘}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"עד <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ההתראה הבאה)"</string>
@@ -2002,7 +2002,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"שמירה לצורך מילוי אוטומטי"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"לא ניתן למלא את התוכן באופן אוטומטי"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"אין הצעות של מילוי אוטומטי"</string>
-    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{הצעה אחת של מילוי אוטומטי}two{# הצעות של מילוי אוטומטי}many{# הצעות של מילוי אוטומטי}other{# הצעות של מילוי אוטומטי}}"</string>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{הצעה אחת של מילוי אוטומטי}one{# הצעות של מילוי אוטומטי}two{# הצעות של מילוי אוטומטי}other{# הצעות של מילוי אוטומטי}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"לשמור בשירות "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"האם לשמור את <xliff:g id="TYPE">%1$s</xliff:g> ב-"<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"האם לשמור את <xliff:g id="TYPE_0">%1$s</xliff:g> ואת <xliff:g id="TYPE_1">%2$s</xliff:g> ב-"<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2053,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"הרשאת גישה חד-פעמית"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"אין אישור"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"ביומני המכשיר מתועדת הפעילות במכשיר. האפליקציות יכולות להשתמש ביומנים האלה כדי למצוא בעיות ולפתור אותן.\n\nהמידע בחלק מהיומנים יכול להיות רגיש, לכן יש לתת הרשאת גישה לכל יומני המכשיר רק לאפליקציות מהימנות. \n\nגם אם האפליקציה הזו לא תקבל הרשאת גישה לכל יומני המכשיר, היא תוכל לגשת ליומנים שלה. יכול להיות שליצרן המכשיר עדיין תהיה גישה לחלק מהיומנים או למידע במכשיר שלך."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"‏ביומני המכשיר מתועדת הפעילות במכשיר. האפליקציות יכולות להשתמש ביומנים האלה כדי למצוא בעיות ולפתור אותן.\n\nהמידע בחלק מהיומנים יכול להיות רגיש, לכן יש לתת הרשאת גישה לכל היומנים של המכשיר רק לאפליקציות שסומכים עליהן. \n\nגם אם האפליקציה הזו לא תקבל הרשאת גישה לכל יומני המכשיר, היא תוכל לגשת ליומנים שלה. יכול להיות שליצרן המכשיר עדיין תהיה גישה לחלק מהיומנים או למידע במכשיר שלך.\n\nמידע נוסף זמין בכתובת g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"אין להציג שוב"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> רוצה להציג חלקים מ-<xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"עריכה"</string>
@@ -2114,7 +2113,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"מצגת <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"‏Bluetooth יישאר מופעל במהלך מצב טיסה"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"בטעינה"</string>
-    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} ועוד קובץ אחד}two{{file_name} ועוד # קבצים}many{{file_name} ועוד # קבצים}other{{file_name} ועוד # קבצים}}"</string>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} ועוד קובץ אחד}one{{file_name} ועוד # קבצים}two{{file_name} ועוד # קבצים}other{{file_name} ועוד # קבצים}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"אין אנשים שניתן לשתף איתם"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"רשימת האפליקציות"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏לאפליקציה זו לא ניתנה הרשאת הקלטה, אבל אפשר להקליט אודיו באמצעות התקן ה-USB הזה."</string>

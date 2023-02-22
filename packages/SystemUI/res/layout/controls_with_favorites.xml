@@ -18,7 +18,7 @@
 
   <LinearLayout
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       android:orientation="horizontal"
       android:layout_marginTop="@dimen/controls_top_margin"
       android:layout_marginBottom="@dimen/controls_header_bottom_margin">
@@ -71,5 +71,27 @@
         android:background="?android:attr/selectableItemBackgroundBorderless" />
   </LinearLayout>
 
-  <include layout="@layout/global_actions_controls_list_view" />
+  <ScrollView
+        android:id="@+id/controls_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:clipChildren="true"
+        android:scrollbars="none">
+    <include layout="@layout/global_actions_controls_list_view" />
+
+  </ScrollView>
+
+  <FrameLayout
+      android:id="@+id/controls_panel"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      android:layout_marginLeft="@dimen/global_actions_side_margin"
+      android:layout_marginRight="@dimen/global_actions_side_margin"
+      android:background="@drawable/controls_panel_background"
+      android:padding="@dimen/global_actions_side_margin"
+      android:visibility="gone"
+      />
 </merge>

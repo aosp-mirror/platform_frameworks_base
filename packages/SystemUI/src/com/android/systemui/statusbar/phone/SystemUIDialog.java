@@ -189,7 +189,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // for foldables that often go from large <=> small screen when folding/unfolding.
         ViewRootImpl.addConfigCallback(this);
         mDialogManager.setShowing(this, true);
-        mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true);
+        mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, true)
+                .commitUpdate(mContext.getDisplayId());
     }
 
     @Override
@@ -202,7 +203,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
 
         ViewRootImpl.removeConfigCallback(this);
         mDialogManager.setShowing(this, false);
-        mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, false);
+        mSysUiState.setFlag(QuickStepContract.SYSUI_STATE_DIALOG_SHOWING, false)
+                .commitUpdate(mContext.getDisplayId());
     }
 
     public void setShowForAllUsers(boolean show) {

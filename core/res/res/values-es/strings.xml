@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Buzón de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Se ha producido un problema de conexión o el código MMI no es válido."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Función no disponible."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"La operación solo es válida para números de marcación fija."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No se puede cambiar la configuración de desvío de llamadas desde tu teléfono mientras estás en roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"El servicio se ha habilitado."</string>
@@ -91,7 +92,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desvío de llamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de devolución de llamada de emergencia"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Estado de los datos móviles"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Estado de datos móviles"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"Mensajes SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Mensajes de voz"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Llamada por Wi-Fi"</string>
@@ -1956,9 +1957,9 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Esta aplicación solicita seguridad adicional. Prueba en tu dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Esta aplicación solicita seguridad adicional. Prueba en tu tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Esta aplicación solicita seguridad adicional. Prueba en tu teléfono."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"No se puede acceder desde tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu dispositivo Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu tablet."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No se puede acceder a este contenido en tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"No se puede acceder desde tu <xliff:g id="DEVICE">%1$s</xliff:g>. Prueba en tu teléfono."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta aplicación se ha diseñado para una versión anterior de Android y es posible que no funcione correctamente. Busca actualizaciones o ponte en contacto con el desarrollador."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Buscar actualizaciones"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tienes mensajes nuevos"</string>
@@ -2052,8 +2053,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir el acceso una vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, aún podrá acceder a sus propios registros. El fabricante de tu dispositivo aún puede acceder a algunos registros o información de tu dispositivo."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Los registros del dispositivo documentan lo que sucede en tu dispositivo. Las aplicaciones pueden usar estos registros para encontrar y solucionar problemas.\n\nComo algunos registros pueden contener información sensible, es mejor que solo permitas que accedan a ellos las aplicaciones en las que confíes. \n\nAunque no permitas que esta aplicación acceda a todos los registros del dispositivo, podrá seguir accediendo a sus propios registros. El fabricante de tu dispositivo aún puede acceder a algunos registros o información de tu dispositivo.\n\nObtén más información en g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>

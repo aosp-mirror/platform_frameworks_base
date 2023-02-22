@@ -41,7 +41,8 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.Clock;
+import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.ClockFaceController;
 import com.android.systemui.statusbar.StatusBarState;
 
 import org.junit.Before;
@@ -61,7 +62,13 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     ViewGroup mMockKeyguardSliceView;
 
     @Mock
-    Clock mClock;
+    ClockController mClock;
+
+    @Mock
+    ClockFaceController mSmallClock;
+
+    @Mock
+    ClockFaceController mLargeClock;
 
     private FrameLayout mSmallClockFrame;
     private FrameLayout mLargeClockFrame;
@@ -75,8 +82,11 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
         when(mMockKeyguardSliceView.findViewById(R.id.keyguard_status_area))
                 .thenReturn(mMockKeyguardSliceView);
 
-        when(mClock.getSmallClock()).thenReturn(new TextView(getContext()));
-        when(mClock.getLargeClock()).thenReturn(new TextView(getContext()));
+        when(mClock.getSmallClock()).thenReturn(mSmallClock);
+        when(mClock.getLargeClock()).thenReturn(mLargeClock);
+
+        when(mSmallClock.getView()).thenReturn(new TextView(getContext()));
+        when(mLargeClock.getView()).thenReturn(new TextView(getContext()));
 
         LayoutInflater layoutInflater = LayoutInflater.from(getContext());
         layoutInflater.setPrivateFactory(new LayoutInflater.Factory2() {
@@ -124,41 +134,49 @@ public class KeyguardClockSwitchTest extends SysuiTestCase {
     public void onPluginConnected_showClock() {
         mKeyguardClockSwitch.setClock(mClock, StatusBarState.KEYGUARD);
 
-        assertEquals(mClock.getSmallClock().getParent(), mSmallClockFrame);
-        assertEquals(mClock.getLargeClock().getParent(), mLargeClockFrame);
+        assertEquals(mClock.getSmallClock().getView().getParent(), mSmallClockFrame);
+        assertEquals(mClock.getLargeClock().getView().getParent(), mLargeClockFrame);
     }
 
     @Test
     public void onPluginConnected_showSecondPluginClock() {
         // GIVEN a plugin has already connected
-        Clock otherClock = mock(Clock.class);
-        when(otherClock.getSmallClock()).thenReturn(new TextView(getContext()));
-        when(otherClock.getLargeClock()).thenReturn(new TextView(getContext()));
+        ClockController otherClock = mock(ClockController.class);
+        ClockFaceController smallClock = mock(ClockFaceController.class);
+        ClockFaceController largeClock = mock(ClockFaceController.class);
+        when(otherClock.getSmallClock()).thenReturn(smallClock);
+        when(otherClock.getLargeClock()).thenReturn(largeClock);
+        when(smallClock.getView()).thenReturn(new TextView(getContext()));
+        when(largeClock.getView()).thenReturn(new TextView(getContext()));
         mKeyguardClockSwitch.setClock(mClock, StatusBarState.KEYGUARD);
         mKeyguardClockSwitch.setClock(otherClock, StatusBarState.KEYGUARD);
 
         // THEN only the view from the second plugin should be a child of KeyguardClockSwitch.
-        assertThat(otherClock.getSmallClock().getParent()).isEqualTo(mSmallClockFrame);
-        assertThat(otherClock.getLargeClock().getParent()).isEqualTo(mLargeClockFrame);
-        assertThat(mClock.getSmallClock().getParent()).isNull();
-        assertThat(mClock.getLargeClock().getParent()).isNull();
+        assertThat(otherClock.getSmallClock().getView().getParent()).isEqualTo(mSmallClockFrame);
+        assertThat(otherClock.getLargeClock().getView().getParent()).isEqualTo(mLargeClockFrame);
+        assertThat(mClock.getSmallClock().getView().getParent()).isNull();
+        assertThat(mClock.getLargeClock().getView().getParent()).isNull();
     }
 
     @Test
     public void onPluginDisconnected_secondOfTwoDisconnected() {
         // GIVEN two plugins are connected
-        Clock otherClock = mock(Clock.class);
-        when(otherClock.getSmallClock()).thenReturn(new TextView(getContext()));
-        when(otherClock.getLargeClock()).thenReturn(new TextView(getContext()));
+        ClockController otherClock = mock(ClockController.class);
+        ClockFaceController smallClock = mock(ClockFaceController.class);
+        ClockFaceController largeClock = mock(ClockFaceController.class);
+        when(otherClock.getSmallClock()).thenReturn(smallClock);
+        when(otherClock.getLargeClock()).thenReturn(largeClock);
+        when(smallClock.getView()).thenReturn(new TextView(getContext()));
+        when(largeClock.getView()).thenReturn(new TextView(getContext()));
         mKeyguardClockSwitch.setClock(otherClock, StatusBarState.KEYGUARD);
         mKeyguardClockSwitch.setClock(mClock, StatusBarState.KEYGUARD);
         // WHEN the second plugin is disconnected
         mKeyguardClockSwitch.setClock(null, StatusBarState.KEYGUARD);
         // THEN nothing should be shown
-        assertThat(otherClock.getSmallClock().getParent()).isNull();
-        assertThat(otherClock.getLargeClock().getParent()).isNull();
-        assertThat(mClock.getSmallClock().getParent()).isNull();
-        assertThat(mClock.getLargeClock().getParent()).isNull();
+        assertThat(otherClock.getSmallClock().getView().getParent()).isNull();
+        assertThat(otherClock.getLargeClock().getView().getParent()).isNull();
+        assertThat(mClock.getSmallClock().getView().getParent()).isNull();
+        assertThat(mClock.getLargeClock().getView().getParent()).isNull();
     }
 
     @Test

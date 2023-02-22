@@ -16,18 +16,35 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
+
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.provider.DeviceConfig;
+import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Function;
 
 /** Reads letterbox configs from resources and controls their overrides at runtime. */
 final class LetterboxConfiguration {
+
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxConfiguration" : TAG_ATM;
+
+    @VisibleForTesting
+    static final String DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS =
+            "enable_compat_fake_focus";
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -98,7 +115,17 @@ final class LetterboxConfiguration {
     /** Letterboxed app window is aligned to the right side. */
     static final int LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM = 2;
 
+    @VisibleForTesting
+    static final String PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN = "com.android.COMPAT_FAKE_FOCUS_OPT_IN";
+    @VisibleForTesting
+    static final String PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT =
+            "com.android.COMPAT_FAKE_FOCUS_OPT_OUT";
+
     final Context mContext;
+
+    // Responsible for the persistence of letterbox[Horizontal|Vertical]PositionMultiplier
+    @NonNull
+    private final LetterboxConfigurationPersister mLetterboxConfigurationPersister;
 
     // Aspect ratio of letterbox for fixed orientation, values <=
     // MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO will be ignored.
@@ -136,6 +163,14 @@ final class LetterboxConfiguration {
     // side of the screen and 1.0 to the bottom side.
     private float mLetterboxVerticalPositionMultiplier;
 
+    // Horizontal position of a center of the letterboxed app window when the device is half-folded.
+    // 0 corresponds to the left side of the screen and 1.0 to the right side.
+    private float mLetterboxBookModePositionMultiplier;
+
+    // Vertical position of a center of the letterboxed app window when the device is half-folded.
+    // 0 corresponds to the top side of the screen and 1.0 to the bottom side.
+    private float mLetterboxTabletopModePositionMultiplier;
+
     // Default horizontal position the letterboxed app window when horizontal reachability is
     // enabled and an app is fullscreen in landscape device orientation.
     // It is used as a starting point for mLetterboxPositionForHorizontalReachability.
@@ -156,35 +191,72 @@ final class LetterboxConfiguration {
     // portrait device orientation.
     private boolean mIsVerticalReachabilityEnabled;
 
-
-    // Horizontal position of a center of the letterboxed app window which is global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
-    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
-    // LetterboxUiController#getHorizontalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsPosition.
-    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
-    // Overview after changing position in another app.
-    @LetterboxHorizontalReachabilityPosition
-    private volatile int mLetterboxPositionForHorizontalReachability;
-
-    // Vertical position of a center of the letterboxed app window which is global to prevent
-    // "jumps" when switching between letterboxed apps. It's updated to reposition the app window
-    // in response to a double tap gesture (see LetterboxUiController#handleDoubleTap). Used in
-    // LetterboxUiController#getVerticalPositionMultiplier which is called from
-    // ActivityRecord#updateResolvedBoundsPosition.
-    // TODO(b/199426138): Global reachability setting causes a jump when resuming an app from
-    // Overview after changing position in another app.
-    @LetterboxVerticalReachabilityPosition
-    private volatile int mLetterboxPositionForVerticalReachability;
-
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
 
     // Whether using split screen aspect ratio as a default aspect ratio for unresizable apps.
     private boolean mIsSplitScreenAspectRatioForUnresizableAppsEnabled;
 
-    LetterboxConfiguration(Context systemUiContext) {
+    // Whether letterboxing strategy is enabled for translucent activities. If {@value false}
+    // all the feature is disabled
+    private boolean mTranslucentLetterboxingEnabled;
+
+    // Allows to enable letterboxing strategy for translucent activities ignoring flags.
+    private boolean mTranslucentLetterboxingOverrideEnabled;
+
+    // Whether sending compat fake focus is enabled for unfocused apps in splitscreen. Some game
+    // engines wait to get focus before drawing the content of the app so this needs to be used
+    // otherwise the apps get blacked out when they are resumed and do not have focus yet.
+    private boolean mIsCompatFakeFocusEnabled;
+
+    // Whether camera compatibility treatment is enabled.
+    // See DisplayRotationCompatPolicy for context.
+    private final boolean mIsCameraCompatTreatmentEnabled;
+
+    // Whether activity "refresh" in camera compatibility treatment is enabled.
+    // See RefreshCallbackItem for context.
+    private boolean mIsCameraCompatTreatmentRefreshEnabled = true;
+
+    // Whether activity "refresh" in camera compatibility treatment should happen using the
+    // "stopped -> resumed" cycle rather than "paused -> resumed" cycle. Using "stop -> resumed"
+    // cycle by default due to higher success rate confirmed with app compatibility testing.
+    // See RefreshCallbackItem for context.
+    private boolean mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+
+    // Whether should ignore app requested orientation in response to an app
+    // calling Activity#setRequestedOrientation. See
+    // LetterboxUiController#shouldIgnoreRequestedOrientation for details.
+    private final boolean mIsPolicyForIgnoringRequestedOrientationEnabled;
+
+    // Whether enabling rotation compat policy for immersive apps that prevents auto rotation
+    // into non-optimal screen orientation while in fullscreen. This is needed because immersive
+    // apps, such as games, are often not optimized for all orientations and can have a poor UX
+    // when rotated. Additionally, some games rely on sensors for the gameplay so users can trigger
+    // such rotations accidentally when auto rotation is on.
+    private final boolean mIsDisplayRotationImmersiveAppCompatPolicyEnabled;
+
+    // Flags dynamically updated with {@link android.provider.DeviceConfig}.
+    @NonNull private final LetterboxConfigurationDeviceConfig mDeviceConfig;
+
+    LetterboxConfiguration(@NonNull final Context systemUiContext) {
+        this(systemUiContext,
+                new LetterboxConfigurationPersister(systemUiContext,
+                        () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                                systemUiContext, /* forBookMode */ false),
+                        () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                                systemUiContext, /* forTabletopMode */ false),
+                        () -> readLetterboxHorizontalReachabilityPositionFromConfig(
+                                systemUiContext, /* forBookMode */ true),
+                        () -> readLetterboxVerticalReachabilityPositionFromConfig(
+                                systemUiContext, /* forTabletopMode */ true)));
+    }
+
+    @VisibleForTesting
+    LetterboxConfiguration(@NonNull final Context systemUiContext,
+            @NonNull final LetterboxConfigurationPersister letterboxConfigurationPersister) {
         mContext = systemUiContext;
+        mDeviceConfig = new LetterboxConfigurationDeviceConfig(systemUiContext.getMainExecutor());
+
         mFixedOrientationLetterboxAspectRatio = mContext.getResources().getFloat(
                 R.dimen.config_fixedOrientationLetterboxAspectRatio);
         mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
@@ -198,22 +270,41 @@ final class LetterboxConfiguration {
                 R.dimen.config_letterboxHorizontalPositionMultiplier);
         mLetterboxVerticalPositionMultiplier = mContext.getResources().getFloat(
                 R.dimen.config_letterboxVerticalPositionMultiplier);
+        mLetterboxBookModePositionMultiplier = mContext.getResources().getFloat(
+                R.dimen.config_letterboxBookModePositionMultiplier);
+        mLetterboxTabletopModePositionMultiplier = mContext.getResources().getFloat(
+                R.dimen.config_letterboxTabletopModePositionMultiplier);
         mIsHorizontalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
         mDefaultPositionForHorizontalReachability =
-                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext, false);
         mDefaultPositionForVerticalReachability =
-                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
-        mLetterboxPositionForHorizontalReachability = mDefaultPositionForHorizontalReachability;
-        mLetterboxPositionForVerticalReachability = mDefaultPositionForVerticalReachability;
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext, false);
         mIsEducationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsEducationEnabled);
         setDefaultMinAspectRatioForUnresizableApps(mContext.getResources().getFloat(
                 R.dimen.config_letterboxDefaultMinAspectRatioForUnresizableApps));
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+        mTranslucentLetterboxingEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEnabledForTranslucentActivities);
+        mIsCameraCompatTreatmentEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
+        mIsCompatFakeFocusEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isCompatFakeFocusEnabled);
+        mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
+
+        mIsDisplayRotationImmersiveAppCompatPolicyEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled);
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mIsDisplayRotationImmersiveAppCompatPolicyEnabled,
+                /* key */ KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
+
+        mLetterboxConfigurationPersister = letterboxConfigurationPersister;
+        mLetterboxConfigurationPersister.start();
     }
 
     /**
@@ -456,11 +547,30 @@ final class LetterboxConfiguration {
      * or via an ADB command. 0 corresponds to the left side of the screen and 1 to the
      * right side.
      */
-    float getLetterboxHorizontalPositionMultiplier() {
-        return (mLetterboxHorizontalPositionMultiplier < 0.0f
-                || mLetterboxHorizontalPositionMultiplier > 1.0f)
-                        // Default to central position if invalid value is provided.
-                        ? 0.5f : mLetterboxHorizontalPositionMultiplier;
+    float getLetterboxHorizontalPositionMultiplier(boolean isInBookMode) {
+        if (isInBookMode) {
+            if (mLetterboxBookModePositionMultiplier < 0.0f
+                    || mLetterboxBookModePositionMultiplier > 1.0f) {
+                Slog.w(TAG,
+                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=true): "
+                        + mLetterboxBookModePositionMultiplier);
+                // Default to left position if invalid value is provided.
+                return 0.0f;
+            } else {
+                return mLetterboxBookModePositionMultiplier;
+            }
+        } else {
+            if (mLetterboxHorizontalPositionMultiplier < 0.0f
+                    || mLetterboxHorizontalPositionMultiplier > 1.0f) {
+                Slog.w(TAG,
+                        "mLetterboxBookModePositionMultiplier out of bounds (isInBookMode=false):"
+                        + mLetterboxBookModePositionMultiplier);
+                // Default to central position if invalid value is provided.
+                return 0.5f;
+            } else {
+                return mLetterboxHorizontalPositionMultiplier;
+            }
+        }
     }
 
     /*
@@ -469,11 +579,18 @@ final class LetterboxConfiguration {
      * or via an ADB command. 0 corresponds to the top side of the screen and 1 to the
      * bottom side.
      */
-    float getLetterboxVerticalPositionMultiplier() {
-        return (mLetterboxVerticalPositionMultiplier < 0.0f
-                || mLetterboxVerticalPositionMultiplier > 1.0f)
-                        // Default to central position if invalid value is provided.
-                        ? 0.5f : mLetterboxVerticalPositionMultiplier;
+    float getLetterboxVerticalPositionMultiplier(boolean isInTabletopMode) {
+        if (isInTabletopMode) {
+            return (mLetterboxTabletopModePositionMultiplier < 0.0f
+                    || mLetterboxTabletopModePositionMultiplier > 1.0f)
+                    // Default to top position if invalid value is provided.
+                    ? 0.0f : mLetterboxTabletopModePositionMultiplier;
+        } else {
+            return (mLetterboxVerticalPositionMultiplier < 0.0f
+                    || mLetterboxVerticalPositionMultiplier > 1.0f)
+                    // Default to central position if invalid value is provided.
+                    ? 0.5f : mLetterboxVerticalPositionMultiplier;
+        }
     }
 
     /**
@@ -614,7 +731,8 @@ final class LetterboxConfiguration {
      */
     void resetDefaultPositionForHorizontalReachability() {
         mDefaultPositionForHorizontalReachability =
-                readLetterboxHorizontalReachabilityPositionFromConfig(mContext);
+                readLetterboxHorizontalReachabilityPositionFromConfig(mContext,
+                        false /* forBookMode */);
     }
 
     /**
@@ -623,27 +741,34 @@ final class LetterboxConfiguration {
      */
     void resetDefaultPositionForVerticalReachability() {
         mDefaultPositionForVerticalReachability =
-                readLetterboxVerticalReachabilityPositionFromConfig(mContext);
+                readLetterboxVerticalReachabilityPositionFromConfig(mContext,
+                        false /* forTabletopMode */);
     }
 
     @LetterboxHorizontalReachabilityPosition
-    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context) {
+    private static int readLetterboxHorizontalReachabilityPositionFromConfig(Context context,
+            boolean forBookMode) {
         int position = context.getResources().getInteger(
-                R.integer.config_letterboxDefaultPositionForHorizontalReachability);
+                forBookMode
+                    ? R.integer.config_letterboxDefaultPositionForBookModeReachability
+                    : R.integer.config_letterboxDefaultPositionForHorizontalReachability);
         return position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT
-                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
-                    || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
+                || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER
+                || position == LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT
                     ? position : LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER;
     }
 
     @LetterboxVerticalReachabilityPosition
-    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context) {
+    private static int readLetterboxVerticalReachabilityPositionFromConfig(Context context,
+            boolean forTabletopMode) {
         int position = context.getResources().getInteger(
-                R.integer.config_letterboxDefaultPositionForVerticalReachability);
+                forTabletopMode
+                    ? R.integer.config_letterboxDefaultPositionForTabletopModeReachability
+                    : R.integer.config_letterboxDefaultPositionForVerticalReachability);
         return position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP
                 || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER
                 || position == LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM
-                ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
+                    ? position : LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
     }
 
     /*
@@ -652,8 +777,11 @@ final class LetterboxConfiguration {
      *
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
-    float getHorizontalMultiplierForReachability() {
-        switch (mLetterboxPositionForHorizontalReachability) {
+    float getHorizontalMultiplierForReachability(boolean isDeviceInBookMode) {
+        final int letterboxPositionForHorizontalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                        isDeviceInBookMode);
+        switch (letterboxPositionForHorizontalReachability) {
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_LEFT:
                 return 0.0f;
             case LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_CENTER:
@@ -662,18 +790,22 @@ final class LetterboxConfiguration {
                 return 1.0f;
             default:
                 throw new AssertionError(
-                    "Unexpected letterbox position type: "
-                            + mLetterboxPositionForHorizontalReachability);
+                        "Unexpected letterbox position type: "
+                                + letterboxPositionForHorizontalReachability);
         }
     }
+
     /*
      * Gets vertical position of a center of the letterboxed app window when reachability
      * is enabled specified. 0 corresponds to the top side of the screen and 1 to the bottom side.
      *
      * <p>The position multiplier is changed after each double tap in the letterbox area.
      */
-    float getVerticalMultiplierForReachability() {
-        switch (mLetterboxPositionForVerticalReachability) {
+    float getVerticalMultiplierForReachability(boolean isDeviceInTabletopMode) {
+        final int letterboxPositionForVerticalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
+                        isDeviceInTabletopMode);
+        switch (letterboxPositionForVerticalReachability) {
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP:
                 return 0.0f;
             case LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER:
@@ -683,7 +815,7 @@ final class LetterboxConfiguration {
             default:
                 throw new AssertionError(
                         "Unexpected letterbox position type: "
-                                + mLetterboxPositionForVerticalReachability);
+                                + letterboxPositionForVerticalReachability);
         }
     }
 
@@ -692,8 +824,9 @@ final class LetterboxConfiguration {
      * enabled.
      */
     @LetterboxHorizontalReachabilityPosition
-    int getLetterboxPositionForHorizontalReachability() {
-        return mLetterboxPositionForHorizontalReachability;
+    int getLetterboxPositionForHorizontalReachability(boolean isInFullScreenBookMode) {
+        return mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                isInFullScreenBookMode);
     }
 
     /*
@@ -701,8 +834,9 @@ final class LetterboxConfiguration {
      * enabled.
      */
     @LetterboxVerticalReachabilityPosition
-    int getLetterboxPositionForVerticalReachability() {
-        return mLetterboxPositionForVerticalReachability;
+    int getLetterboxPositionForVerticalReachability(boolean isInFullScreenTabletopMode) {
+        return mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
+                isInFullScreenTabletopMode);
     }
 
     /** Returns a string representing the given {@link LetterboxHorizontalReachabilityPosition}. */
@@ -741,38 +875,41 @@ final class LetterboxConfiguration {
      * Changes letterbox position for horizontal reachability to the next available one on the
      * right side.
      */
-    void movePositionForHorizontalReachabilityToNextRightStop() {
-        mLetterboxPositionForHorizontalReachability = Math.min(
-                mLetterboxPositionForHorizontalReachability + 1,
-                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT);
+    void movePositionForHorizontalReachabilityToNextRightStop(boolean isDeviceInBookMode) {
+        updatePositionForHorizontalReachability(isDeviceInBookMode, prev -> Math.min(
+                prev + (isDeviceInBookMode ? 2 : 1), // Move 2 stops in book mode to avoid center.
+                LETTERBOX_HORIZONTAL_REACHABILITY_POSITION_RIGHT));
     }
 
     /**
      * Changes letterbox position for horizontal reachability to the next available one on the left
      * side.
      */
-    void movePositionForHorizontalReachabilityToNextLeftStop() {
-        mLetterboxPositionForHorizontalReachability =
-                Math.max(mLetterboxPositionForHorizontalReachability - 1, 0);
+    void movePositionForHorizontalReachabilityToNextLeftStop(boolean isDeviceInBookMode) {
+        updatePositionForHorizontalReachability(isDeviceInBookMode, prev -> Math.max(
+                prev - (isDeviceInBookMode ? 2 : 1), 0)); // Move 2 stops in book mode to avoid
+                                                          // center.
     }
 
     /**
      * Changes letterbox position for vertical reachability to the next available one on the bottom
      * side.
      */
-    void movePositionForVerticalReachabilityToNextBottomStop() {
-        mLetterboxPositionForVerticalReachability = Math.min(
-                mLetterboxPositionForVerticalReachability + 1,
-                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM);
+    void movePositionForVerticalReachabilityToNextBottomStop(boolean isDeviceInTabletopMode) {
+        updatePositionForVerticalReachability(isDeviceInTabletopMode, prev -> Math.min(
+                prev + (isDeviceInTabletopMode ? 2 : 1), // Move 2 stops in tabletop mode to avoid
+                                                         // center.
+                LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM));
     }
 
     /**
      * Changes letterbox position for vertical reachability to the next available one on the top
      * side.
      */
-    void movePositionForVerticalReachabilityToNextTopStop() {
-        mLetterboxPositionForVerticalReachability =
-                Math.max(mLetterboxPositionForVerticalReachability - 1, 0);
+    void movePositionForVerticalReachabilityToNextTopStop(boolean isDeviceInTabletopMode) {
+        updatePositionForVerticalReachability(isDeviceInTabletopMode, prev -> Math.max(
+                prev - (isDeviceInTabletopMode ? 2 : 1), 0)); // Move 2 stops in tabletop mode to
+                                                              // avoid center.
     }
 
     /**
@@ -820,6 +957,187 @@ final class LetterboxConfiguration {
     void resetIsSplitScreenAspectRatioForUnresizableAppsEnabled() {
         mIsSplitScreenAspectRatioForUnresizableAppsEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsSplitScreenAspectRatioForUnresizableAppsEnabled);
+    }
+
+    boolean isTranslucentLetterboxingEnabled() {
+        return mTranslucentLetterboxingOverrideEnabled || (mTranslucentLetterboxingEnabled
+                && isTranslucentLetterboxingAllowed());
+    }
+
+    void setTranslucentLetterboxingEnabled(boolean translucentLetterboxingEnabled) {
+        mTranslucentLetterboxingEnabled = translucentLetterboxingEnabled;
+    }
+
+    void setTranslucentLetterboxingOverrideEnabled(
+            boolean translucentLetterboxingOverrideEnabled) {
+        mTranslucentLetterboxingOverrideEnabled = translucentLetterboxingOverrideEnabled;
+        setTranslucentLetterboxingEnabled(translucentLetterboxingOverrideEnabled);
+    }
+
+    /**
+     * Resets whether we use the constraints override strategy for letterboxing when dealing
+     * with translucent activities {@link R.bool.config_letterboxIsEnabledForTranslucentActivities}.
+     */
+    void resetTranslucentLetterboxingEnabled() {
+        final boolean newValue = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsEnabledForTranslucentActivities);
+        setTranslucentLetterboxingEnabled(newValue);
+        setTranslucentLetterboxingOverrideEnabled(false);
+    }
+
+    /** Calculates a new letterboxPositionForHorizontalReachability value and updates the store */
+    private void updatePositionForHorizontalReachability(boolean isDeviceInBookMode,
+            Function<Integer, Integer> newHorizonalPositionFun) {
+        final int letterboxPositionForHorizontalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForHorizontalReachability(
+                        isDeviceInBookMode);
+        final int nextHorizontalPosition = newHorizonalPositionFun.apply(
+                letterboxPositionForHorizontalReachability);
+        mLetterboxConfigurationPersister.setLetterboxPositionForHorizontalReachability(
+                isDeviceInBookMode, nextHorizontalPosition);
+    }
+
+    /** Calculates a new letterboxPositionForVerticalReachability value and updates the store */
+    private void updatePositionForVerticalReachability(boolean isDeviceInTabletopMode,
+            Function<Integer, Integer> newVerticalPositionFun) {
+        final int letterboxPositionForVerticalReachability =
+                mLetterboxConfigurationPersister.getLetterboxPositionForVerticalReachability(
+                        isDeviceInTabletopMode);
+        final int nextVerticalPosition = newVerticalPositionFun.apply(
+                letterboxPositionForVerticalReachability);
+        mLetterboxConfigurationPersister.setLetterboxPositionForVerticalReachability(
+                isDeviceInTabletopMode, nextVerticalPosition);
+    }
+
+    // TODO(b/262378106): Cache a runtime flag and implement
+    // DeviceConfig.OnPropertiesChangedListener
+    static boolean isTranslucentLetterboxingAllowed() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                "enable_translucent_activity_letterbox", false);
+    }
+
+    @VisibleForTesting
+    boolean getPackageManagerProperty(PackageManager pm, String property) {
+        boolean enabled = false;
+        try {
+            final PackageManager.Property p = pm.getProperty(property, mContext.getPackageName());
+            enabled = p.getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // Property not found
+        }
+        return enabled;
+    }
+
+    @VisibleForTesting
+    boolean isCompatFakeFocusEnabled(ActivityInfo info) {
+        if (!isCompatFakeFocusEnabledOnDevice()) {
+            return false;
+        }
+        // See if the developer has chosen to opt in / out of treatment
+        PackageManager pm = mContext.getPackageManager();
+        if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT)) {
+            return false;
+        } else if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN)) {
+            return true;
+        }
+        if (info.isChangeEnabled(ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS)) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
+    boolean isCompatFakeFocusEnabledOnDevice() {
+        return mIsCompatFakeFocusEnabled
+                && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                        DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, true);
+    }
+
+    /**
+     * Overrides whether fake sending focus is enabled for unfocused apps in splitscreen
+     */
+    @VisibleForTesting
+    void setIsCompatFakeFocusEnabled(boolean enabled) {
+        mIsCompatFakeFocusEnabled = enabled;
+    }
+
+    /**
+     * Whether should ignore app requested orientation in response to an app calling
+     * {@link android.app.Activity#setRequestedOrientation}. See {@link
+     * LetterboxUiController#shouldIgnoreRequestedOrientation} for details.
+     */
+    boolean isPolicyForIgnoringRequestedOrientationEnabled() {
+        return mIsPolicyForIgnoringRequestedOrientationEnabled;
+    }
+
+    /** Whether camera compatibility treatment is enabled. */
+    boolean isCameraCompatTreatmentEnabled(boolean checkDeviceConfig) {
+        return mIsCameraCompatTreatmentEnabled
+                && (!checkDeviceConfig || isCameraCompatTreatmentAllowed());
+    }
+
+    // TODO(b/262977416): Cache a runtime flag and implement
+    // DeviceConfig.OnPropertiesChangedListener
+    private static boolean isCameraCompatTreatmentAllowed() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                "enable_compat_camera_treatment", true);
+    }
+
+    /** Whether camera compatibility refresh is enabled. */
+    boolean isCameraCompatRefreshEnabled() {
+        return mIsCameraCompatTreatmentRefreshEnabled;
+    }
+
+    /** Overrides whether camera compatibility treatment is enabled. */
+    void setCameraCompatRefreshEnabled(boolean enabled) {
+        mIsCameraCompatTreatmentRefreshEnabled = enabled;
+    }
+
+    /**
+     * Resets whether camera compatibility treatment is enabled to {@code true}.
+     */
+    void resetCameraCompatRefreshEnabled() {
+        mIsCameraCompatTreatmentRefreshEnabled = true;
+    }
+
+    /**
+     * Whether activity "refresh" in camera compatibility treatment should happen using the
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle.
+     */
+    boolean isCameraCompatRefreshCycleThroughStopEnabled() {
+        return mIsCameraCompatRefreshCycleThroughStopEnabled;
+    }
+
+    /**
+     * Overrides whether activity "refresh" in camera compatibility treatment should happen using
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle.
+     */
+    void setCameraCompatRefreshCycleThroughStopEnabled(boolean enabled) {
+        mIsCameraCompatRefreshCycleThroughStopEnabled = enabled;
+    }
+
+    /**
+     * Resets  whether activity "refresh" in camera compatibility treatment should happen using
+     * "stopped -> resumed" cycle rather than "paused -> resumed" cycle to {@code true}.
+     */
+    void resetCameraCompatRefreshCycleThroughStopEnabled() {
+        mIsCameraCompatRefreshCycleThroughStopEnabled = true;
+    }
+
+    /**
+     * Checks whether rotation compat policy for immersive apps that prevents auto rotation
+     * into non-optimal screen orientation while in fullscreen is enabled.
+     *
+     * <p>This is needed because immersive apps, such as games, are often not optimized for all
+     * orientations and can have a poor UX when rotated. Additionally, some games rely on sensors
+     * for the gameplay so users can trigger such rotations accidentally when auto rotation is on.
+     *
+     * @param checkDeviceConfig whether should check both static config and a dynamic property
+     *        from {@link DeviceConfig} or only static value.
+     */
+    boolean isDisplayRotationImmersiveAppCompatPolicyEnabled(final boolean checkDeviceConfig) {
+        return mIsDisplayRotationImmersiveAppCompatPolicyEnabled && (!checkDeviceConfig
+                || mDeviceConfig.getFlag(KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY));
     }
 
 }

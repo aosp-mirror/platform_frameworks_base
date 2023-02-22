@@ -16,19 +16,23 @@
 
 package com.android.systemui.media.taptotransfer.common
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.temporarydisplay.TemporaryViewInfo
 import com.android.systemui.temporarydisplay.TemporaryViewLogger
 
 /**
  * A logger for media tap-to-transfer events.
  *
  * @param deviceTypeTag the type of device triggering the logs -- "Sender" or "Receiver".
+ *
+ * TODO(b/245610654): We should de-couple the sender and receiver loggers, since they're vastly
+ * different experiences.
  */
-class MediaTttLogger(
+class MediaTttLogger<T : TemporaryViewInfo>(
     deviceTypeTag: String,
     buffer: LogBuffer
-) : TemporaryViewLogger(buffer, BASE_TAG + deviceTypeTag) {
+) : TemporaryViewLogger<T>(buffer, BASE_TAG + deviceTypeTag) {
     /** Logs a change in the chip state for the given [mediaRouteId]. */
     fun logStateChange(stateName: String, mediaRouteId: String, packageName: String?) {
         buffer.log(
@@ -40,6 +44,42 @@ class MediaTttLogger(
                 str3 = packageName
             },
             { "State changed to $str1 for ID=$str2 package=$str3" }
+        )
+    }
+
+    /**
+     * Logs an error in trying to update to [displayState].
+     *
+     * [displayState] is either a [android.app.StatusBarManager.MediaTransferSenderState] or
+     * a [android.app.StatusBarManager.MediaTransferReceiverState].
+     */
+    fun logStateChangeError(displayState: Int) {
+        buffer.log(
+            tag,
+            LogLevel.ERROR,
+            { int1 = displayState },
+            { "Cannot display state=$int1; aborting" }
+        )
+    }
+
+    /**
+     * Logs an invalid sender state transition error in trying to update to [desiredState].
+     *
+     * @param currentState the previous state of the chip.
+     * @param desiredState the new state of the chip.
+     */
+    fun logInvalidStateTransitionError(
+        currentState: String,
+        desiredState: String
+    ) {
+        buffer.log(
+                tag,
+                LogLevel.ERROR,
+                {
+                    str1 = currentState
+                    str2 = desiredState
+                },
+                { "Cannot display state=$str2 after state=$str1; invalid transition" }
         )
     }
 

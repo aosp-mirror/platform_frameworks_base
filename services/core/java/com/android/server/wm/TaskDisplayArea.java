@@ -27,7 +27,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -42,6 +41,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.UserHandle;
@@ -634,33 +634,20 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     @Override
-    int getOrientation(int candidate) {
-        mLastOrientationSource = null;
-        if (getIgnoreOrientationRequest()) {
-            return SCREEN_ORIENTATION_UNSET;
-        }
-        if (!canSpecifyOrientation()) {
+    @ScreenOrientation
+    int getOrientation(@ScreenOrientation int candidate) {
+        final int orientation = super.getOrientation(candidate);
+        if (!canSpecifyOrientation(orientation)) {
+            mLastOrientationSource = null;
             // We only respect orientation of the focused TDA, which can be a child of this TDA.
-            return reduceOnAllTaskDisplayAreas((taskDisplayArea, orientation) -> {
-                if (taskDisplayArea == this || orientation != SCREEN_ORIENTATION_UNSET) {
-                    return orientation;
+            return reduceOnAllTaskDisplayAreas((taskDisplayArea, taskOrientation) -> {
+                if (taskDisplayArea == this || taskOrientation != SCREEN_ORIENTATION_UNSET) {
+                    return taskOrientation;
                 }
                 return taskDisplayArea.getOrientation(candidate);
             }, SCREEN_ORIENTATION_UNSET);
         }
 
-        // Apps and their containers are not allowed to specify an orientation of non floating
-        // visible tasks created by organizer and that has an adjacent task.
-        final Task nonFloatingTopTask =
-                getTask(t -> !t.getWindowConfiguration().tasksAreFloating());
-        if (nonFloatingTopTask != null) {
-            final Task task = nonFloatingTopTask.getCreatedByOrganizerTask();
-            if (task != null && task.getAdjacentTaskFragment() != null && task.isVisible()) {
-                return SCREEN_ORIENTATION_UNSPECIFIED;
-            }
-        }
-
-        final int orientation = super.getOrientation(candidate);
         if (orientation != SCREEN_ORIENTATION_UNSET
                 && orientation != SCREEN_ORIENTATION_BEHIND) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -911,15 +898,16 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             }
         } else if (candidateTask != null) {
             final int position = onTop ? POSITION_TOP : POSITION_BOTTOM;
-            final Task launchRootTask = getLaunchRootTask(resolvedWindowingMode, activityType,
+            final Task launchParentTask = getLaunchRootTask(resolvedWindowingMode, activityType,
                     options, sourceTask, launchFlags, candidateTask);
-            if (launchRootTask != null) {
+            if (launchParentTask != null) {
                 if (candidateTask.getParent() == null) {
-                    launchRootTask.addChild(candidateTask, position);
-                } else if (candidateTask.getParent() != launchRootTask) {
-                    candidateTask.reparent(launchRootTask, position);
+                    launchParentTask.addChild(candidateTask, position);
+                } else if (candidateTask.getParent() != launchParentTask) {
+                    candidateTask.reparent(launchParentTask, position);
                 }
-            } else if (candidateTask.getDisplayArea() != this) {
+            } else if (candidateTask.getDisplayArea() != this
+                    || candidateTask.getRootTask().mReparentLeafTaskIfRelaunch) {
                 if (candidateTask.getParent() == null) {
                     addChild(candidateTask, position);
                 } else {
@@ -929,6 +917,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             // Update windowing mode if necessary, e.g. launch into a different windowing mode.
             if (windowingMode != WINDOWING_MODE_UNDEFINED && candidateTask.isRootTask()
                     && candidateTask.getWindowingMode() != windowingMode) {
+                candidateTask.mTransitionController.collect(candidateTask);
                 candidateTask.setWindowingMode(windowingMode);
             }
             return candidateTask.getRootTask();
@@ -1880,12 +1869,11 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     /** Whether this task display area can request orientation. */
-    boolean canSpecifyOrientation() {
-        // Only allow to specify orientation if this TDA is not set to ignore orientation request,
-        // and it is the last focused one on this logical display that can request orientation
-        // request.
-        return !getIgnoreOrientationRequest()
-                && mDisplayContent.getOrientationRequestingTaskDisplayArea() == this;
+    boolean canSpecifyOrientation(@ScreenOrientation int orientation) {
+        // Only allow to specify orientation if this TDA is the last focused one on this logical
+        // display that can request orientation request.
+        return mDisplayContent.getOrientationRequestingTaskDisplayArea() == this
+                && !getIgnoreOrientationRequest(orientation);
     }
 
     void clearPreferredTopFocusableRootTask() {

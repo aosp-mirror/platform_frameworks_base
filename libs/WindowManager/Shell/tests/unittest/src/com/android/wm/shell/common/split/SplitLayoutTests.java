@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.common.split;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -91,12 +92,21 @@ public class SplitLayoutTests extends ShellTestCase {
         // Verify updateConfiguration returns true if the root bounds changed.
         config.windowConfiguration.setBounds(new Rect(0, 0, 2160, 1080));
         assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the orientation changed.
+        config.orientation = ORIENTATION_LANDSCAPE;
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
+
+        // Verify updateConfiguration returns true if the density changed.
+        config.densityDpi = 123;
+        assertThat(mSplitLayout.updateConfiguration(config)).isTrue();
     }
 
     @Test
     public void testUpdateDivideBounds() {
         mSplitLayout.updateDivideBounds(anyInt());
-        verify(mSplitLayoutHandler).onLayoutSizeChanging(any(SplitLayout.class));
+        verify(mSplitLayoutHandler).onLayoutSizeChanging(any(SplitLayout.class), anyInt(),
+                anyInt());
     }
 
     @Test
@@ -131,7 +141,7 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START);
 
-        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(false), anyInt());
     }
@@ -143,7 +153,7 @@ public class SplitLayoutTests extends ShellTestCase {
         DividerSnapAlgorithm.SnapTarget snapTarget = getSnapTarget(0 /* position */,
                 DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END);
 
-        mSplitLayout.snapToTarget(0 /* currentPosition */, snapTarget);
+        mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), snapTarget);
         waitDividerFlingFinished();
         verify(mSplitLayoutHandler).onSnappedToDismiss(eq(true), anyInt());
     }

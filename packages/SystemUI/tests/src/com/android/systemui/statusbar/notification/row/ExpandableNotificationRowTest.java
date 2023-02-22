@@ -38,6 +38,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
@@ -57,6 +58,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
+import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
@@ -232,7 +234,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testUserLockedResetEvenWhenNoChildren() {
         mGroupRow.setUserLocked(true);
-        mGroupRow.removeAllChildren();
         mGroupRow.setUserLocked(false);
         assertFalse("The childrencontainer should not be userlocked but is, the state "
                 + "seems out of sync.", mGroupRow.getChildrenContainer().isUserLocked());
@@ -240,12 +241,11 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testReinflatedOnDensityChange() {
-        mGroupRow.setUserLocked(true);
-        mGroupRow.removeAllChildren();
-        mGroupRow.setUserLocked(false);
         NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
-        mGroupRow.setChildrenContainer(mockContainer);
-        mGroupRow.onDensityOrFontScaleChanged();
+        mNotifRow.setChildrenContainer(mockContainer);
+
+        mNotifRow.onDensityOrFontScaleChanged();
+
         verify(mockContainer).reInflateViews(any(), any());
     }
 
@@ -459,5 +459,104 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.performDismiss(false);
         verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
                 .registerFutureDismissal(any(), anyInt());
+    }
+
+    @Test
+    public void testAddChildNotification() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(0);
+        ExpandableNotificationRow child = mNotificationTestHelper.createRow();
+
+        group.addChildNotification(child);
+
+        Assert.assertEquals(child, group.getChildNotificationAt(0));
+        Assert.assertEquals(group, child.getNotificationParent());
+        Assert.assertTrue(child.isChildInGroup());
+    }
+
+    @Test
+    public void testAddChildNotification_childSkipped() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(0);
+        ExpandableNotificationRow child = mNotificationTestHelper.createRow();
+        child.setKeepInParentForDismissAnimation(true);
+
+        group.addChildNotification(child);
+
+        Assert.assertTrue(group.getAttachedChildren().isEmpty());
+        Assert.assertNotEquals(group, child.getNotificationParent());
+        verify(mNotificationTestHelper.getMockLogger()).logSkipAttachingKeepInParentChild(
+                /*child=*/ child.getEntry(),
+                /*newParent=*/ group.getEntry()
+        );
+    }
+
+    @Test
+    public void testRemoveChildNotification() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(1);
+        ExpandableNotificationRow child = group.getAttachedChildren().get(0);
+        child.setKeepInParentForDismissAnimation(true);
+
+        group.removeChildNotification(child);
+
+        Assert.assertNull(child.getParent());
+        Assert.assertNull(child.getNotificationParent());
+        Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verifyNoMoreInteractions(mNotificationTestHelper.getMockLogger());
+    }
+
+    @Test
+    public void testRemoveChildrenWithKeepInParent_removesChildWithKeepInParent() throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(1);
+        ExpandableNotificationRow child = group.getAttachedChildren().get(0);
+        child.setKeepInParentForDismissAnimation(true);
+
+        group.removeChildrenWithKeepInParent();
+
+        Assert.assertNull(child.getParent());
+        Assert.assertNull(child.getNotificationParent());
+        Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verify(mNotificationTestHelper.getMockLogger()).logKeepInParentChildDetached(
+                /*child=*/ child.getEntry(),
+                /*oldParent=*/ group.getEntry()
+        );
+    }
+
+    @Test
+    public void testRemoveChildrenWithKeepInParent_skipsChildrenWithoutKeepInParent()
+            throws Exception {
+        ExpandableNotificationRow group = mNotificationTestHelper.createGroup(1);
+        ExpandableNotificationRow child = group.getAttachedChildren().get(0);
+
+        group.removeChildrenWithKeepInParent();
+
+        Assert.assertEquals(group, child.getNotificationParent());
+        Assert.assertFalse(child.keepInParentForDismissAnimation());
+        verify(mNotificationTestHelper.getMockLogger(), never()).logKeepInParentChildDetached(
+                /*child=*/ any(),
+                /*oldParent=*/ any()
+        );
+    }
+
+    @Test
+    public void applyRoundnessAndInv_should_be_immediately_applied_on_childrenContainer_legacy() {
+        mGroupRow.useRoundnessSourceTypes(false);
+        Assert.assertEquals(0f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(0f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+
+        mGroupRow.requestBottomRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(1f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+    }
+
+    @Test
+    public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_childrenContainer() {
+        mGroupRow.useRoundnessSourceTypes(true);
+        Assert.assertEquals(0f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(0f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
+
+        mGroupRow.requestBottomRoundness(1f, SourceType.from(""), false);
+
+        Assert.assertEquals(1f, mGroupRow.getBottomRoundness(), 0.001f);
+        Assert.assertEquals(1f, mGroupRow.getChildrenContainer().getBottomRoundness(), 0.001f);
     }
 }

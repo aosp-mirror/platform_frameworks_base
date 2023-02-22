@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rápidamente"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Se pausó la carga para proteger la batería"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Carga optimizada para proteger la batería"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Presiona Menú para desbloquear."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Bloqueada para la red"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"Sin tarjeta SIM"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Se requiere el patrón después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Se requiere el PIN después de reiniciar el dispositivo"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Se requiere la contraseña después de reiniciar el dispositivo"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Se requiere el patrón por razones de seguridad"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Se requiere el PIN por razones de seguridad"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Se requiere la contraseña por razones de seguridad"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para seguridad adicional, usa un patrón"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para seguridad adicional, usa un PIN"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para seguridad adicional, usa una contraseña"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado por el administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositivo se bloqueó de forma manual"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No se reconoció"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Predeterminado"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Burbuja"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Analógico"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Desbloquea tu dispositivo para continuar"</string>
 </resources>

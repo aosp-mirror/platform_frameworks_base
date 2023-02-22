@@ -51,15 +51,11 @@ class PairwiseFlowTest : SysuiTestCase() {
             )
     }
 
-    @Test
-    fun notEnough() = runBlocking {
-        assertThatFlow(flowOf(1).pairwise()).emitsNothing()
-    }
+    @Test fun notEnough() = runBlocking { assertThatFlow(flowOf(1).pairwise()).emitsNothing() }
 
     @Test
     fun withInit() = runBlocking {
-        assertThatFlow(flowOf(2).pairwise(initialValue = 1))
-            .emitsExactly(WithPrev(1, 2))
+        assertThatFlow(flowOf(2).pairwise(initialValue = 1)).emitsExactly(WithPrev(1, 2))
     }
 
     @Test
@@ -68,25 +64,78 @@ class PairwiseFlowTest : SysuiTestCase() {
     }
 
     @Test
-    fun withStateFlow() = runBlocking(Dispatchers.Main.immediate) {
-        val state = MutableStateFlow(1)
-        val stop = MutableSharedFlow<Unit>()
-
-        val stoppable = merge(state, stop)
-            .takeWhile { it is Int }
-            .filterIsInstance<Int>()
-
-        val job1 = launch {
-            assertThatFlow(stoppable.pairwise()).emitsExactly(WithPrev(1, 2))
-        }
-        state.value = 2
-        val job2 = launch { assertThatFlow(stoppable.pairwise()).emitsNothing() }
-
-        stop.emit(Unit)
-
-        assertThatJob(job1).isCompleted()
-        assertThatJob(job2).isCompleted()
+    fun withTransform() = runBlocking {
+        assertThatFlow(
+                flowOf("val1", "val2", "val3").pairwiseBy { prev: String, next: String ->
+                    "$prev|$next"
+                }
+            )
+            .emitsExactly("val1|val2", "val2|val3")
     }
+
+    @Test
+    fun withGetInit() = runBlocking {
+        var initRun = false
+        assertThatFlow(
+                flowOf("val1", "val2").pairwiseBy(
+                    getInitialValue = {
+                        initRun = true
+                        "initial"
+                    }
+                ) { prev: String, next: String -> "$prev|$next" }
+            )
+            .emitsExactly("initial|val1", "val1|val2")
+        assertThat(initRun).isTrue()
+    }
+
+    @Test
+    fun notEnoughWithGetInit() = runBlocking {
+        var initRun = false
+        assertThatFlow(
+                emptyFlow<String>().pairwiseBy(
+                    getInitialValue = {
+                        initRun = true
+                        "initial"
+                    }
+                ) { prev: String, next: String -> "$prev|$next" }
+            )
+            .emitsNothing()
+        // Even though the flow will not emit anything, the initial value function should still get
+        // run.
+        assertThat(initRun).isTrue()
+    }
+
+    @Test
+    fun getInitNotRunWhenFlowNotCollected() = runBlocking {
+        var initRun = false
+        flowOf("val1", "val2").pairwiseBy(
+            getInitialValue = {
+                initRun = true
+                "initial"
+            }
+        ) { prev: String, next: String -> "$prev|$next" }
+
+        // Since the flow isn't collected, ensure [initialValueFun] isn't run.
+        assertThat(initRun).isFalse()
+    }
+
+    @Test
+    fun withStateFlow() =
+        runBlocking(Dispatchers.Main.immediate) {
+            val state = MutableStateFlow(1)
+            val stop = MutableSharedFlow<Unit>()
+
+            val stoppable = merge(state, stop).takeWhile { it is Int }.filterIsInstance<Int>()
+
+            val job1 = launch { assertThatFlow(stoppable.pairwise()).emitsExactly(WithPrev(1, 2)) }
+            state.value = 2
+            val job2 = launch { assertThatFlow(stoppable.pairwise()).emitsNothing() }
+
+            stop.emit(Unit)
+
+            assertThatJob(job1).isCompleted()
+            assertThatJob(job2).isCompleted()
+        }
 }
 
 @SmallTest
@@ -94,18 +143,17 @@ class PairwiseFlowTest : SysuiTestCase() {
 class SetChangesFlowTest : SysuiTestCase() {
     @Test
     fun simple() = runBlocking {
-        assertThatFlow(
-            flowOf(setOf(1, 2, 3), setOf(2, 3, 4)).setChanges()
-        ).emitsExactly(
-            SetChanges(
-                added = setOf(1, 2, 3),
-                removed = emptySet(),
-            ),
-            SetChanges(
-                added = setOf(4),
-                removed = setOf(1),
-            ),
-        )
+        assertThatFlow(flowOf(setOf(1, 2, 3), setOf(2, 3, 4)).setChanges())
+            .emitsExactly(
+                SetChanges(
+                    added = setOf(1, 2, 3),
+                    removed = emptySet(),
+                ),
+                SetChanges(
+                    added = setOf(4),
+                    removed = setOf(1),
+                ),
+            )
     }
 
     @Test
@@ -147,14 +195,19 @@ class SetChangesFlowTest : SysuiTestCase() {
 class SampleFlowTest : SysuiTestCase() {
     @Test
     fun simple() = runBlocking {
-        assertThatFlow(flow { yield(); emit(1) }.sample(flowOf(2)) { a, b -> a to b })
+        assertThatFlow(
+                flow {
+                        yield()
+                        emit(1)
+                    }
+                    .sample(flowOf(2)) { a, b -> a to b }
+            )
             .emitsExactly(1 to 2)
     }
 
     @Test
     fun otherFlowNoValueYet() = runBlocking {
-        assertThatFlow(flowOf(1).sample(emptyFlow<Unit>()))
-            .emitsNothing()
+        assertThatFlow(flowOf(1).sample(emptyFlow<Unit>())).emitsNothing()
     }
 
     @Test
@@ -178,13 +231,14 @@ class SampleFlowTest : SysuiTestCase() {
     }
 }
 
-private fun <T> assertThatFlow(flow: Flow<T>) = object {
-    suspend fun emitsExactly(vararg emissions: T) =
-        assertThat(flow.toList()).containsExactly(*emissions).inOrder()
-    suspend fun emitsNothing() =
-        assertThat(flow.toList()).isEmpty()
-}
+private fun <T> assertThatFlow(flow: Flow<T>) =
+    object {
+        suspend fun emitsExactly(vararg emissions: T) =
+            assertThat(flow.toList()).containsExactly(*emissions).inOrder()
+        suspend fun emitsNothing() = assertThat(flow.toList()).isEmpty()
+    }
 
-private fun assertThatJob(job: Job) = object {
-    fun isCompleted() = assertThat(job.isCompleted).isTrue()
-}
+private fun assertThatJob(job: Job) =
+    object {
+        fun isCompleted() = assertThat(job.isCompleted).isTrue()
+    }

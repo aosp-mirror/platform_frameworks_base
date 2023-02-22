@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಚಾರ್ಜ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ವೇಗವಾಗಿ ಚಾರ್ಜ್‌ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಬ್ಯಾಟರಿಯನ್ನು ರಕ್ಷಿಸಲು ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಬ್ಯಾಟರಿಯನ್ನು ರಕ್ಷಿಸಲು ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ನೆಟ್‌ವರ್ಕ್ ಲಾಕ್ ಆಗಿದೆ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"ಸಿಮ್‌ ಕಾರ್ಡ್ ಇಲ್ಲ"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"ಸಾಧನ ಮರುಪ್ರಾರಂಭಗೊಂಡ ನಂತರ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"ಸಾಧನ ಮರುಪ್ರಾರಂಭಗೊಂಡ ನಂತರ ಪಿನ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"ಸಾಧನ ಮರುಪ್ರಾರಂಭಗೊಂಡ ನಂತರ ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗೆ ಪ್ಯಾಟರ್ನ್ ಅಗತ್ಯವಿದೆ"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗೆ ಪಿನ್ ಅಗತ್ಯವಿದೆ"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿದೆ"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ, ಬದಲಿಗೆ ಪ್ಯಾಟರ್ನ್ ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ, ಬದಲಿಗೆ ಪಿನ್ ಬಳಸಿ"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"ಹೆಚ್ಚುವರಿ ಭದ್ರತೆಗಾಗಿ, ಬದಲಿಗೆ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ನಿರ್ವಾಹಕರು ಸಾಧನವನ್ನು ಲಾಕ್ ಮಾಡಿದ್ದಾರೆ"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"ಸಾಧನವನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಲಾಕ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"ಡೀಫಾಲ್ಟ್"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"ಬಬಲ್"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"ಅನಲಾಗ್"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"ಮುಂದುವರಿಸಲು, ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
 </resources>

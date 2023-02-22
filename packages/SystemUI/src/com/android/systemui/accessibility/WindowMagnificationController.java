@@ -94,7 +94,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final Context mContext;
     private final Resources mResources;
     private final Handler mHandler;
-    private Rect mWindowBounds;
+    private final Rect mWindowBounds;
     private final int mDisplayId;
     @Surface.Rotation
     @VisibleForTesting
@@ -174,16 +174,16 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
     private final MagnificationGestureDetector mGestureDetector;
     private final int mBounceEffectDuration;
-    private Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
+    private final Choreographer.FrameCallback mMirrorViewGeometryVsyncCallback;
     private Locale mLocale;
     private NumberFormat mPercentFormat;
     private float mBounceEffectAnimationScale;
-    private SysUiState mSysUiState;
+    private final SysUiState mSysUiState;
     // Set it to true when the view is overlapped with the gesture insets at the bottom.
     private boolean mOverlapWithGestureInsets;
 
     @Nullable
-    private MirrorWindowControl mMirrorWindowControl;
+    private final MirrorWindowControl mMirrorWindowControl;
 
     WindowMagnificationController(@UiContext Context context, @NonNull Handler handler,
             @NonNull WindowMagnificationAnimationController animationController,
@@ -489,9 +489,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     /** Returns the rotation degree change of two {@link Surface.Rotation} */
     private int getDegreeFromRotation(@Surface.Rotation int newRotation,
             @Surface.Rotation int oldRotation) {
-        final int rotationDiff = oldRotation - newRotation;
-        final int degree = (rotationDiff + 4) % 4 * 90;
-        return degree;
+        return (oldRotation - newRotation + 4) % 4 * 90;
     }
 
     private void createMirrorWindow() {

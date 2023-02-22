@@ -45,7 +45,7 @@ class SimpleMirrorWindowControl extends MirrorWindowControl implements View.OnCl
     private boolean mShouldSetTouchStart;
 
     @Nullable private MoveWindowTask mMoveWindowTask;
-    private PointF mLastDrag = new PointF();
+    private final PointF mLastDrag = new PointF();
     private final Handler mHandler;
 
     SimpleMirrorWindowControl(Context context, Handler handler) {
@@ -92,8 +92,7 @@ class SimpleMirrorWindowControl extends MirrorWindowControl implements View.OnCl
     }
 
     private Point findOffset(View v, int moveFrameAmount) {
-        final Point offset = mTmpPoint;
-        offset.set(0, 0);
+        mTmpPoint.set(0, 0);
         if (v.getId() == R.id.left_control) {
             mTmpPoint.x = -moveFrameAmount;
         } else if (v.getId() == R.id.up_control) {
@@ -184,7 +183,7 @@ class SimpleMirrorWindowControl extends MirrorWindowControl implements View.OnCl
         private final int mYOffset;
         private final Handler mHandler;
         /** Time in milliseconds between successive task executions.*/
-        private long mPeriod;
+        private final long mPeriod;
         private boolean mCancel;
 
         MoveWindowTask(@NonNull MirrorWindowDelegate windowDelegate, Handler handler, int xOffset,

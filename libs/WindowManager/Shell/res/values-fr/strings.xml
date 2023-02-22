@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Il est possible que l\'application ne fonctionne pas en mode Écran partagé."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Application incompatible avec l\'écran partagé."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Cette appli ne peut être ouverte que dans 1 fenêtre."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Il est possible que l\'application ne fonctionne pas sur un écran secondaire."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"L\'application ne peut pas être lancée sur des écrans secondaires."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Séparateur d\'écran partagé"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Agrandir"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Réduire"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Fermer"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Retour"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Poignée"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Plein écran"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Mode ordinateur"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Écran partagé"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Plus"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Flottante"</string>
 </resources>

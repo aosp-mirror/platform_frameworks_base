@@ -136,9 +136,6 @@ public class VoiceInteractionManagerService extends SystemService {
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
 
-    // TODO(b/226201975): remove once RoleService supports pre-created users
-    private final ArrayList<UserHandle> mIgnoredPreCreatedUsers = new ArrayList<>();
-
     public VoiceInteractionManagerService(Context context) {
         super(context);
         mContext = context;
@@ -175,11 +172,11 @@ public class VoiceInteractionManagerService extends SystemService {
         mAmInternal.setVoiceInteractionManagerProvider(
                 new ActivityManagerInternal.VoiceInteractionManagerProvider() {
                     @Override
-                    public void notifyActivityEventChanged() {
+                    public void notifyActivityDestroyed(IBinder activityToken) {
                         if (DEBUG) {
-                            Slog.d(TAG, "call notifyActivityEventChanged");
+                            Slog.d(TAG, "notifyActivityDestroyed activityToken=" + activityToken);
                         }
-                        mServiceStub.notifyActivityEventChanged();
+                        mServiceStub.notifyActivityDestroyed(activityToken);
                     }
                 });
     }
@@ -308,24 +305,14 @@ public class VoiceInteractionManagerService extends SystemService {
             return hotwordDetectionConnection.mIdentity;
         }
 
+        // TODO(b/226201975): remove this method once RoleService supports pre-created users
         @Override
         public void onPreCreatedUserConversion(int userId) {
-            Slogf.d(TAG, "onPreCreatedUserConversion(%d)", userId);
-
-            for (int i = 0; i < mIgnoredPreCreatedUsers.size(); i++) {
-                UserHandle preCreatedUser = mIgnoredPreCreatedUsers.get(i);
-                if (preCreatedUser.getIdentifier() == userId) {
-                    Slogf.d(TAG, "Updating role on pre-created user %d", userId);
-                    mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
-                            preCreatedUser);
-                    mIgnoredPreCreatedUsers.remove(i);
-                    return;
-                }
-            }
-            Slogf.w(TAG, "onPreCreatedUserConversion(%d): not available on "
-                    + "mIgnoredPreCreatedUserIds (%s)", userId, mIgnoredPreCreatedUsers);
+            Slogf.d(TAG, "onPreCreatedUserConversion(%d): calling onRoleHoldersChanged() again",
+                    userId);
+            mServiceStub.mRoleObserver.onRoleHoldersChanged(RoleManager.ROLE_ASSISTANT,
+                                                UserHandle.of(userId));
         }
-
     }
 
     // implementation entry point and binder service
@@ -460,11 +447,12 @@ public class VoiceInteractionManagerService extends SystemService {
             return mImpl.supportsLocalVoiceInteraction();
         }
 
-        void notifyActivityEventChanged() {
+        void notifyActivityDestroyed(@NonNull IBinder activityToken) {
             synchronized (this) {
-                if (mImpl == null) return;
+                if (mImpl == null || activityToken == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mImpl.notifyActivityEventChangedLocked());
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.notifyActivityDestroyedLocked(activityToken));
             }
         }
 
@@ -807,8 +795,10 @@ public class VoiceInteractionManagerService extends SystemService {
             if (TextUtils.isEmpty(curInteractor)) {
                 return null;
             }
-            if (DEBUG) Slog.d(TAG, "getCurInteractor curInteractor=" + curInteractor
+            if (DEBUG) {
+                Slog.d(TAG, "getCurInteractor curInteractor=" + curInteractor
                     + " user=" + userHandle);
+            }
             return ComponentName.unflattenFromString(curInteractor);
         }
 
@@ -816,8 +806,9 @@ public class VoiceInteractionManagerService extends SystemService {
             Settings.Secure.putStringForUser(mContext.getContentResolver(),
                     Settings.Secure.VOICE_INTERACTION_SERVICE,
                     comp != null ? comp.flattenToShortString() : "", userHandle);
-            if (DEBUG) Slog.d(TAG, "setCurInteractor comp=" + comp
-                    + " user=" + userHandle);
+            if (DEBUG) {
+                Slog.d(TAG, "setCurInteractor comp=" + comp + " user=" + userHandle);
+            }
         }
 
         ComponentName findAvailRecognizer(String prefPackage, int userHandle) {
@@ -1233,6 +1224,16 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        public void notifyActivityEventChanged(@NonNull IBinder activityToken, int type) {
+            synchronized (this) {
+                if (mImpl == null || activityToken == null) {
+                    return;
+                }
+                Binder.withCleanCallingIdentity(
+                        () -> mImpl.notifyActivityEventChangedLocked(activityToken, type));
+            }
+        }
         //----------------- Hotword Detection/Validation APIs --------------------------------//
 
         @Override
@@ -1912,7 +1913,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mTemporarilyDisabled: " + mTemporarilyDisabled);
                 pw.println("  mCurUser: " + mCurUser);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
-                pw.println("  mIgnoredPreCreatedUsers: " + mIgnoredPreCreatedUsers);
                 dumpSupportedUsers(pw, "  ");
                 mDbHelper.dump(pw);
                 if (mImpl == null) {
@@ -2026,6 +2026,11 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 List<String> roleHolders = mRm.getRoleHoldersAsUser(roleName, user);
 
+                if (DEBUG) {
+                    Slogf.d(TAG, "onRoleHoldersChanged(%s, %s): roleHolders=%s", roleName, user,
+                            roleHolders);
+                }
+
                 // TODO(b/226201975): this method is beling called when a pre-created user is added,
                 // at which point it doesn't have any role holders. But it's not called again when
                 // the actual user is added (i.e., when the  pre-created user is converted), so we
@@ -2036,9 +2041,9 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (roleHolders.isEmpty()) {
                     UserInfo userInfo = mUserManagerInternal.getUserInfo(user.getIdentifier());
                     if (userInfo != null && userInfo.preCreated) {
-                        Slogf.d(TAG, "onRoleHoldersChanged(): ignoring pre-created user %s for now",
-                                userInfo.toFullString());
-                        mIgnoredPreCreatedUsers.add(user);
+                        Slogf.d(TAG, "onRoleHoldersChanged(): ignoring pre-created user %s for now,"
+                                + " this method will be called again when it's converted to a real"
+                                + " user", userInfo.toFullString());
                         return;
                     }
                 }

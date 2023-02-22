@@ -16,38 +16,6 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-
     package="com.android.systemui.compose.features">
-    <application
-        android:name="android.app.Application"
-        android:appComponentFactory="androidx.core.app.AppComponentFactory"
-        tools:replace="android:name,android:appComponentFactory">
-        <!-- Disable providers from SystemUI -->
-        <provider android:name="com.android.systemui.keyguard.KeyguardSliceProvider"
-            android:authorities="com.android.systemui.test.keyguard.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove" />
-        <provider android:name="com.google.android.systemui.keyguard.KeyguardSliceProviderGoogle"
-            android:authorities="com.android.systemui.test.keyguard.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove" />
-        <provider android:name="com.android.keyguard.clock.ClockOptionsProvider"
-            android:authorities="com.android.systemui.test.keyguard.clock.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove" />
-        <provider android:name="com.android.systemui.people.PeopleProvider"
-            android:authorities="com.android.systemui.test.people.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove" />
-        <provider android:name="androidx.core.content.FileProvider"
-            android:authorities="com.android.systemui.test.fileprovider.disabled"
-            android:enabled="false"
-            tools:replace="android:authorities"
-            tools:node="remove"/>
-    </application>
+
 </manifest>

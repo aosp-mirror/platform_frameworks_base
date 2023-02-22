@@ -18,6 +18,8 @@ package com.android.server.input;
 
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 
+import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -47,6 +49,7 @@ import android.hardware.SensorPrivacyManager.Sensors;
 import android.hardware.SensorPrivacyManagerInternal;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
+import android.hardware.input.IInputDeviceBatteryListener;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.IInputSensorEventListener;
@@ -318,6 +321,9 @@ public class InputManagerService extends IInputManager.Stub
     @GuardedBy("mInputMonitors")
     final Map<IBinder, GestureMonitorSpyWindow> mInputMonitors = new HashMap<>();
 
+    // Manages battery state for input devices.
+    private final BatteryController mBatteryController;
+
     // Maximum number of milliseconds to wait for input event injection.
     private static final int INJECTION_TIMEOUT_MILLIS = 30 * 1000;
 
@@ -425,6 +431,7 @@ public class InputManagerService extends IInputManager.Stub
         mContext = injector.getContext();
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
+        mBatteryController = new BatteryController(mContext, mNative);
 
         mUseDevInputEventForAudioJack =
                 mContext.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);
@@ -2673,6 +2680,25 @@ public class InputManagerService extends IInputManager.Stub
         mNative.cancelCurrentTouch();
     }
 
+    @EnforcePermission(Manifest.permission.MONITOR_INPUT)
+    @Override
+    public void pilferPointers(IBinder inputChannelToken) {
+        Objects.requireNonNull(inputChannelToken);
+        mNative.pilferPointers(inputChannelToken);
+    }
+
+    @Override
+    public void registerBatteryListener(int deviceId, IInputDeviceBatteryListener listener) {
+        Objects.requireNonNull(listener);
+        mBatteryController.registerBatteryListener(deviceId, listener, Binder.getCallingPid());
+    }
+
+    @Override
+    public void unregisterBatteryListener(int deviceId, IInputDeviceBatteryListener listener) {
+        Objects.requireNonNull(listener);
+        mBatteryController.unregisterBatteryListener(deviceId, listener, Binder.getCallingPid());
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -2686,7 +2712,8 @@ public class InputManagerService extends IInputManager.Stub
         pw.println("Input Manager Service (Java) State:");
         dumpAssociations(pw, "  " /*prefix*/);
         dumpSpyWindowGestureMonitors(pw, "  " /*prefix*/);
-        dumpDisplayInputPropertiesValues(pw, "  " /* prefix */);
+        dumpDisplayInputPropertiesValues(pw, "  " /*prefix*/);
+        mBatteryController.dump(pw, "  " /*prefix*/);
     }
 
     private void dumpAssociations(PrintWriter pw, String prefix) {
@@ -2797,6 +2824,7 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
         synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
+        mBatteryController.monitor();
         mNative.monitor();
     }
 

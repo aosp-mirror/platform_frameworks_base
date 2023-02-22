@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +29,9 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.UserHandle;
 
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.CrossProfileIntentsChecker;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.MyUserIdProvider;
+import com.android.internal.app.AbstractMultiProfilePagerAdapter.QuietModeManager;
 import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.List;
@@ -52,12 +57,27 @@ public class ResolverWrapperActivity extends ResolverActivity {
     }
 
     @Override
-    protected AbstractMultiProfilePagerAdapter createMultiProfilePagerAdapter(
-            Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed) {
-        AbstractMultiProfilePagerAdapter multiProfilePagerAdapter =
-                super.createMultiProfilePagerAdapter(initialIntents, rList, filterLastUsed);
-        multiProfilePagerAdapter.setInjector(sOverrides.multiPagerAdapterInjector);
-        return multiProfilePagerAdapter;
+    protected MyUserIdProvider createMyUserIdProvider() {
+        if (sOverrides.mMyUserIdProvider != null) {
+            return sOverrides.mMyUserIdProvider;
+        }
+        return super.createMyUserIdProvider();
+    }
+
+    @Override
+    protected CrossProfileIntentsChecker createCrossProfileIntentsChecker() {
+        if (sOverrides.mCrossProfileIntentsChecker != null) {
+            return sOverrides.mCrossProfileIntentsChecker;
+        }
+        return super.createCrossProfileIntentsChecker();
+    }
+
+    @Override
+    protected QuietModeManager createQuietModeManager() {
+        if (sOverrides.mQuietModeManager != null) {
+            return sOverrides.mQuietModeManager;
+        }
+        return super.createQuietModeManager();
     }
 
     ResolverWrapperAdapter getAdapter() {
@@ -137,9 +157,12 @@ public class ResolverWrapperActivity extends ResolverActivity {
         public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
         public UserHandle workProfileUserHandle;
+        public Integer myUserId;
         public boolean hasCrossProfileIntents;
         public boolean isQuietModeEnabled;
-        public AbstractMultiProfilePagerAdapter.Injector multiPagerAdapterInjector;
+        public QuietModeManager mQuietModeManager;
+        public MyUserIdProvider mMyUserIdProvider;
+        public CrossProfileIntentsChecker mCrossProfileIntentsChecker;
 
         public void reset() {
             onSafelyStartCallback = null;
@@ -148,15 +171,11 @@ public class ResolverWrapperActivity extends ResolverActivity {
             resolverListController = mock(ResolverListController.class);
             workResolverListController = mock(ResolverListController.class);
             workProfileUserHandle = null;
+            myUserId = null;
             hasCrossProfileIntents = true;
             isQuietModeEnabled = false;
-            multiPagerAdapterInjector = new AbstractMultiProfilePagerAdapter.Injector() {
-                @Override
-                public boolean hasCrossProfileIntents(List<Intent> intents, int sourceUserId,
-                        int targetUserId) {
-                    return hasCrossProfileIntents;
-                }
 
+            mQuietModeManager = new QuietModeManager() {
                 @Override
                 public boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
                     return isQuietModeEnabled;
@@ -167,7 +186,27 @@ public class ResolverWrapperActivity extends ResolverActivity {
                         UserHandle workProfileUserHandle) {
                     isQuietModeEnabled = enabled;
                 }
+
+                @Override
+                public void markWorkProfileEnabledBroadcastReceived() {
+                }
+
+                @Override
+                public boolean isWaitingToEnableWorkProfile() {
+                    return false;
+                }
             };
+
+            mMyUserIdProvider = new MyUserIdProvider() {
+                @Override
+                public int getMyUserId() {
+                    return myUserId != null ? myUserId : UserHandle.myUserId();
+                }
+            };
+
+            mCrossProfileIntentsChecker = mock(CrossProfileIntentsChecker.class);
+            when(mCrossProfileIntentsChecker.hasCrossProfileIntents(any(), anyInt(), anyInt()))
+                    .thenAnswer(invocation -> hasCrossProfileIntents);
         }
     }
 }

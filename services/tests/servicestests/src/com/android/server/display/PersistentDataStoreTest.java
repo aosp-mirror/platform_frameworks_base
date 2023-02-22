@@ -275,6 +275,109 @@ public class PersistentDataStoreTest {
         assertNull(mDataStore.getBrightnessConfiguration(userSerial));
     }
 
+    @Test
+    public void testStoreAndRestoreResolution() {
+        final String uniqueDisplayId = "test:123";
+        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return true;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return null;
+            }
+        };
+        int width = 35;
+        int height = 45;
+        mDataStore.loadIfNeeded();
+        mDataStore.setUserPreferredResolution(testDisplayDevice, width, height);
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mInjector.setWriteStream(baos);
+        mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
+        assertTrue(mInjector.wasWriteSuccessful());
+        TestInjector newInjector = new TestInjector();
+        PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        newInjector.setReadStream(bais);
+        newDataStore.loadIfNeeded();
+        assertNotNull(newDataStore.getUserPreferredResolution(testDisplayDevice));
+        assertEquals(35, newDataStore.getUserPreferredResolution(testDisplayDevice).x);
+        assertEquals(35, mDataStore.getUserPreferredResolution(testDisplayDevice).x);
+        assertEquals(45, newDataStore.getUserPreferredResolution(testDisplayDevice).y);
+        assertEquals(45, mDataStore.getUserPreferredResolution(testDisplayDevice).y);
+    }
+
+    @Test
+    public void testStoreAndRestoreRefreshRate() {
+        final String uniqueDisplayId = "test:123";
+        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return true;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return null;
+            }
+        };
+        float refreshRate = 85.3f;
+        mDataStore.loadIfNeeded();
+        mDataStore.setUserPreferredRefreshRate(testDisplayDevice, refreshRate);
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mInjector.setWriteStream(baos);
+        mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
+        assertTrue(mInjector.wasWriteSuccessful());
+        TestInjector newInjector = new TestInjector();
+        PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        newInjector.setReadStream(bais);
+        newDataStore.loadIfNeeded();
+        assertNotNull(newDataStore.getUserPreferredRefreshRate(testDisplayDevice));
+        assertEquals(85.3f, mDataStore.getUserPreferredRefreshRate(testDisplayDevice), 01.f);
+        assertEquals(85.3f, newDataStore.getUserPreferredRefreshRate(testDisplayDevice), 0.1f);
+    }
+
+    @Test
+    public void testBrightnessInitialisesWithInvalidFloat() {
+        final String uniqueDisplayId = "test:123";
+        DisplayDevice testDisplayDevice = new DisplayDevice(null, null, uniqueDisplayId, null) {
+            @Override
+            public boolean hasStableUniqueId() {
+                return true;
+            }
+
+            @Override
+            public DisplayDeviceInfo getDisplayDeviceInfoLocked() {
+                return null;
+            }
+        };
+
+        // Set any value which initialises Display state
+        float refreshRate = 85.3f;
+        mDataStore.loadIfNeeded();
+        mDataStore.setUserPreferredRefreshRate(testDisplayDevice, refreshRate);
+
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        mInjector.setWriteStream(baos);
+        mDataStore.saveIfNeeded();
+        mTestLooper.dispatchAll();
+        assertTrue(mInjector.wasWriteSuccessful());
+        TestInjector newInjector = new TestInjector();
+        PersistentDataStore newDataStore = new PersistentDataStore(newInjector);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        newInjector.setReadStream(bais);
+        newDataStore.loadIfNeeded();
+        assertTrue(Float.isNaN(mDataStore.getBrightness(testDisplayDevice)));
+    }
+
+
     public class TestInjector extends PersistentDataStore.Injector {
         private InputStream mReadStream;
         private OutputStream mWriteStream;

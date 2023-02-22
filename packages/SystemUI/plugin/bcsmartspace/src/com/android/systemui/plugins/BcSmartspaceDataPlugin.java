@@ -40,6 +40,11 @@ import java.util.List;
  */
 @ProvidesInterface(action = BcSmartspaceDataPlugin.ACTION, version = BcSmartspaceDataPlugin.VERSION)
 public interface BcSmartspaceDataPlugin extends Plugin {
+    String UI_SURFACE_LOCK_SCREEN_AOD = "lockscreen";
+    String UI_SURFACE_HOME_SCREEN = "home";
+    String UI_SURFACE_MEDIA = "media_data_manager";
+    String UI_SURFACE_DREAM = "dream";
+
     String ACTION = "com.android.systemui.action.PLUGIN_BC_SMARTSPACE_DATA";
     int VERSION = 1;
     String TAG = "BcSmartspaceDataPlugin";
@@ -98,6 +103,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * created.
          */
         void setIsDreaming(boolean isDreaming);
+
+        /**
+         * Set the UI surface for the cards. Should be called immediately after the view is created.
+         */
+        void setUiSurface(String uiSurface);
 
         /**
          * Range [0.0 - 1.0] when transitioning from Lockscreen to/from AOD

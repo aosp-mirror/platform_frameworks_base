@@ -94,7 +94,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"विच्छेदन गरियो"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"जडान हटाइँदै ..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"जडान हुँदै..."</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> सँग जडान गरियो"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> सँग कनेक्ट भएको छ"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"कनेक्ट गरिँदै छ..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"जडान गरियो (फोनबाहेेक) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"जडान गरियो (मिडियाबाहेक) <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -182,7 +182,7 @@
     <string name="unknown" msgid="3544487229740637809">"अज्ञात"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"प्रयोगकर्ता: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"केही पूर्वनिर्धारितहरू सेट गरिएका छन्"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"कुनै डिफल्ट सेट गरिएको छैन"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"कुनै डिफल्ट मान सेट गरिएको छैन"</string>
     <string name="tts_settings" msgid="8130616705989351312">"पाठ-वाचन सेटिङहरू"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"टेक्स्ट टु स्पिच आउटपुट"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"बोलीको गति"</string>
@@ -477,7 +477,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"पूरा चार्ज हुन <xliff:g id="TIME">%1$s</xliff:g> लाग्ने छ"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - पूरा चार्ज हुन <xliff:g id="TIME">%2$s</xliff:g> लाग्ने छ"</string>
-    <string name="power_charging_limited" msgid="6971664137170239141">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गर्ने प्रक्रिया रोकिएको छ"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - चार्ज गर्ने प्रक्रिया अप्टिमाइज गरिएको छ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"अज्ञात"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"चार्ज हुँदै छ"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"द्रुत गतिमा चार्ज गरिँदै छ"</string>

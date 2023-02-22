@@ -33,9 +33,9 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.ripple.RippleShader.RippleShape;
-import com.android.systemui.ripple.RippleView;
-import com.android.systemui.ripple.RippleViewKt;
+import com.android.systemui.surfaceeffects.ripple.RippleAnimationConfig;
+import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
+import com.android.systemui.surfaceeffects.ripple.RippleView;
 
 import java.text.NumberFormat;
 
@@ -150,7 +150,7 @@ final class WirelessChargingLayout extends FrameLayout {
             mRippleView.setColor(color, 28);
         } else {
             mRippleView.setDuration(CIRCLE_RIPPLE_ANIMATION_DURATION);
-            mRippleView.setColor(color, RippleViewKt.RIPPLE_DEFAULT_ALPHA);
+            mRippleView.setColor(color, RippleAnimationConfig.RIPPLE_DEFAULT_ALPHA);
         }
 
         OnAttachStateChangeListener listener = new OnAttachStateChangeListener() {

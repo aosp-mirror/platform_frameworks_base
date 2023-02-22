@@ -55,6 +55,37 @@ public abstract class ControlsProviderService extends Service {
             "android.service.controls.ControlsProviderService";
 
     /**
+     * Manifest metadata to show a custom embedded activity as part of device controls.
+     *
+     * The value of this metadata must be the {@link ComponentName} as a string of an activity in
+     * the same package that will be launched embedded in the device controls space.
+     *
+     * The activity must be exported, enabled and protected by
+     * {@link Manifest.permission.BIND_CONTROLS}.
+     *
+     * It is recommended that the activity is declared {@code android:resizeableActivity="true"}.
+     *
+     * @hide
+     */
+    public static final String META_DATA_PANEL_ACTIVITY =
+            "android.service.controls.META_DATA_PANEL_ACTIVITY";
+
+    /**
+     * Boolean extra containing the value of the setting allowing actions on a locked device.
+     *
+     * This corresponds to the setting that indicates whether the user has
+     * consented to allow actions on devices that declare {@link Control#isAuthRequired()} as
+     * {@code false} when the device is locked.
+     *
+     * This is passed with the intent when the panel specified by {@link #META_DATA_PANEL_ACTIVITY}
+     * is launched.
+     *
+     * @hide
+     */
+    public static final String EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
+            "android.service.controls.extra.LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS";
+
+    /**
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)

@@ -16,34 +16,83 @@
 
 package com.android.systemui.flags
 
+import android.provider.DeviceConfig
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.DeviceConfigProxy
-import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 interface ServerFlagReader {
     /** Returns true if there is a server-side setting stored. */
-    fun hasOverride(flagId: Int): Boolean
+    fun hasOverride(namespace: String, name: String): Boolean
 
     /** Returns any stored server-side setting or the default if not set. */
-    fun readServerOverride(flagId: Int, default: Boolean): Boolean
+    fun readServerOverride(namespace: String, name: String, default: Boolean): Boolean
+    /** Register a listener for changes to any of the passed in flags. */
+    fun listenForChanges(values: Collection<Flag<*>>, listener: ChangeListener)
+
+    interface ChangeListener {
+        fun onChange()
+    }
 }
 
 class ServerFlagReaderImpl @Inject constructor(
-    private val deviceConfig: DeviceConfigProxy
+    private val namespace: String,
+    private val deviceConfig: DeviceConfigProxy,
+    @Background private val executor: Executor
 ) : ServerFlagReader {
-    override fun hasOverride(flagId: Int): Boolean =
-        deviceConfig.getProperty(
-            SYSUI_NAMESPACE,
-            getServerOverrideName(flagId)
+
+    private val listeners =
+        mutableListOf<Pair<ServerFlagReader.ChangeListener, Collection<Flag<*>>>>()
+
+    private val onPropertiesChangedListener = object : DeviceConfig.OnPropertiesChangedListener {
+        override fun onPropertiesChanged(properties: DeviceConfig.Properties) {
+            if (properties.namespace != namespace) {
+                return
+            }
+
+            for ((listener, flags) in listeners) {
+                propLoop@ for (propName in properties.keyset) {
+                    for (flag in flags) {
+                        if (propName == getServerOverrideName(flag.id)) {
+                            listener.onChange()
+                            break@propLoop
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun hasOverride(namespace: String, name: String): Boolean =
+        !namespace.isBlank() && !name.isBlank() && deviceConfig.getProperty(
+            namespace,
+            name
         ) != null
 
-    override fun readServerOverride(flagId: Int, default: Boolean): Boolean {
-        return deviceConfig.getBoolean(
-            SYSUI_NAMESPACE,
-            getServerOverrideName(flagId),
+
+    override fun readServerOverride(namespace: String, name: String, default: Boolean): Boolean =
+        !namespace.isBlank() && !name.isBlank() && deviceConfig.getBoolean(
+            namespace,
+            name,
             default
         )
+
+    override fun listenForChanges(
+        flags: Collection<Flag<*>>,
+        listener: ServerFlagReader.ChangeListener
+    ) {
+        if (listeners.isEmpty()) {
+            deviceConfig.addOnPropertiesChangedListener(
+                namespace,
+                executor,
+                onPropertiesChangedListener
+            )
+        }
+        listeners.add(Pair(listener, flags))
     }
 
     private fun getServerOverrideName(flagId: Int): String {
@@ -51,30 +100,58 @@ class ServerFlagReaderImpl @Inject constructor(
     }
 }
 
-private val SYSUI_NAMESPACE = "systemui"
-
 @Module
 interface ServerFlagReaderModule {
-    @Binds
-    fun bindsReader(impl: ServerFlagReaderImpl): ServerFlagReader
+    companion object {
+        private val SYSUI_NAMESPACE = "systemui"
+
+        @JvmStatic
+        @Provides
+        @SysUISingleton
+        fun bindsReader(
+            deviceConfig: DeviceConfigProxy,
+            @Background executor: Executor
+        ): ServerFlagReader {
+            return ServerFlagReaderImpl(
+                SYSUI_NAMESPACE, deviceConfig, executor
+            )
+        }
+    }
 }
 
 class ServerFlagReaderFake : ServerFlagReader {
-    private val flagMap: MutableMap<Int, Boolean> = mutableMapOf()
+    private val flagMap: MutableMap<String, Boolean> = mutableMapOf()
+    private val listeners =
+        mutableListOf<Pair<ServerFlagReader.ChangeListener, Collection<Flag<*>>>>()
 
-    override fun hasOverride(flagId: Int): Boolean {
-        return flagMap.containsKey(flagId)
+    override fun hasOverride(namespace: String, name: String): Boolean {
+        return flagMap.containsKey(name)
     }
 
-    override fun readServerOverride(flagId: Int, default: Boolean): Boolean {
-        return flagMap.getOrDefault(flagId, default)
+    override fun readServerOverride(namespace: String, name: String, default: Boolean): Boolean {
+        return flagMap.getOrDefault(name, default)
     }
 
-    fun setFlagValue(flagId: Int, value: Boolean) {
-        flagMap.put(flagId, value)
+    fun setFlagValue(namespace: String, name: String, value: Boolean) {
+        flagMap.put(name, value)
+
+        for ((listener, flags) in listeners) {
+            flagLoop@ for (flag in flags) {
+                if (name == flag.name) {
+                    listener.onChange()
+                    break@flagLoop
+                }
+            }
+        }
     }
 
-    fun eraseFlag(flagId: Int) {
-        flagMap.remove(flagId)
+    fun eraseFlag(namespace: String, name: String) {
+        flagMap.remove(name)
+    }
+
+    override fun listenForChanges(
+        flags: Collection<Flag<*>>,
+        listener: ServerFlagReader.ChangeListener
+    ) {
     }
 }

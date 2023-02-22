@@ -30,7 +30,7 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Цэнэглэж байна"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Хурдан цэнэглэж байна"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Удаан цэнэглэж байна"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1709413803451065875">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батарейг хамгаалахын тулд цэнэглэхийг түр зогсоосон"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Батарейг хамгаалахын тулд цэнэглэх явцыг оновчилсон"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Түгжээг тайлах бол цэсийг дарна уу."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Сүлжээ түгжигдсэн"</string>
     <string name="keyguard_missing_sim_message_short" msgid="704159478161444907">"SIM карт алга"</string>
@@ -78,9 +78,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"Төхөөрөмжийг дахин эхлүүлсний дараа загвар оруулах шаардлагатай"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"Төхөөрөмжийг дахин эхлүүлсний дараа ПИН оруулах шаардлагатай"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"Төхөөрөмжийг дахин эхлүүлсний дараа нууц үг оруулах шаардлагатай"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"Аюулгүй байдлын үүднээс загвар оруулах шаардлагатай"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"Аюулгүй байдлын үүднээс ПИН оруулах шаардлагатай"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"Аюулгүй байдлын үүднээс нууц үг оруулах шаардлагатай"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Нэмэлт аюулгүй байдлын үүднээс оронд нь хээ ашиглана уу"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Нэмэлт аюулгүй байдлын үүднээс оронд нь ПИН ашиглана уу"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Нэмэлт аюулгүй байдлын үүднээс оронд нь нууц үг ашиглана уу"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Админ төхөөрөмжийг түгжсэн"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Төхөөрөмжийг гараар түгжсэн"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таньж чадсангүй"</string>
@@ -90,4 +90,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Өгөгдмөл"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Бөмбөлөг"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Aналог"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Үргэлжлүүлэхийн тулд төхөөрөмжийнхөө түгжээг тайлна уу"</string>
 </resources>

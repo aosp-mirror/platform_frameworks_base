@@ -33,6 +33,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Голосовая почта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Неполадки подключения или неверный код MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функция не поддерживается."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Операция возможна только для разрешенных номеров."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Вы не можете изменить настройки переадресации вызовов, поскольку находитесь в роуминге."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Служба включена."</string>
@@ -92,7 +93,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Режим экстренных обратных вызовов"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного Интернета"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Состояние мобильного интернета"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Голосовые сообщения"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Звонки по Wi-Fi"</string>
@@ -1953,13 +1954,13 @@
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Настройки телефона недоступны"</string>
     <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте Android TV."</string>
     <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте планшет."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Эта функция пока недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте телефон."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"На устройстве <xliff:g id="DEVICE">%1$s</xliff:g> эта функция пока недоступна. Используйте телефон."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Это приложение запрашивает дополнительные меры защиты. Используйте Android TV."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Это приложение запрашивает дополнительные меры защиты. Используйте планшет."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Это приложение запрашивает дополнительные меры защиты. Используйте телефон."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте Android TV."</string>
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте планшет."</string>
-    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Эта функция недоступна на устройстве <xliff:g id="DEVICE">%1$s</xliff:g>. Используйте телефон."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"На устройстве <xliff:g id="DEVICE">%1$s</xliff:g> эта функция недоступна. Используйте телефон."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Это приложение было создано для более ранней версии Android и может работать со сбоями. Проверьте наличие обновлений или свяжитесь с разработчиком."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Проверить обновления"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Новые сообщения"</string>
@@ -2053,8 +2054,7 @@
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Разрешить разовый доступ"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Запретить"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"В журналы записывается информация о том, что происходит на устройстве. Приложения могут использовать их, чтобы находить и устранять неполадки.\n\nТак как некоторые журналы могут содержать конфиденциальную информацию, доступ ко всем журналам следует предоставлять только тем приложениям, которым вы доверяете. \n\nЕсли вы не предоставите такой доступ этому приложению, оно по-прежнему сможет просматривать свои журналы. Не исключено, что некоторые журналы или сведения на вашем устройстве будут по-прежнему доступны его производителю."</string>
-    <!-- no translation found for log_access_confirmation_body (7379536536425265262) -->
-    <skip />
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"В журналы записывается информация о том, что происходит на устройстве. Приложения могут использовать их, чтобы находить и устранять неполадки.\n\nТак как некоторые журналы могут содержать конфиденциальную информацию, доступ ко всем журналам следует предоставлять только тем приложениям, которым вы доверяете. \n\nЕсли вы не предоставите такой доступ этому приложению, оно по-прежнему сможет просматривать свои журналы. Также некоторые журналы или сведения на вашем устройстве могут быть доступны его производителю.\n\nПодробнее: g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Больше не показывать"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Приложение \"<xliff:g id="APP_0">%1$s</xliff:g>\" запрашивает разрешение на показ фрагментов приложения \"<xliff:g id="APP_2">%2$s</xliff:g>\"."</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Изменить"</string>
@@ -2293,7 +2293,7 @@
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"\"<xliff:g id="APP">%1$s</xliff:g>\" работает в фоновом режиме. Нажмите, чтобы изменить настройки, связанные с расходом заряда батареи."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"Приложение \"<xliff:g id="APP">%1$s</xliff:g>\" может влиять на время работы батареи. Нажмите, чтобы увидеть активные приложения."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверить активные приложения"</string>
-    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере телефона."</string>
+    <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"У устройства <xliff:g id="DEVICE">%1$s</xliff:g> нет доступа к камере телефона."</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"У устройства \"<xliff:g id="DEVICE">%1$s</xliff:g>\" нет доступа к камере планшета."</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Этот контент недоступен во время трансляции. Используйте телефон."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Системные настройки по умолчанию"</string>

@@ -36,8 +36,7 @@ import javax.inject.Provider;
  * Manages power menu plugins and communicates power menu actions to the CentralSurfaces.
  */
 @SysUISingleton
-public class GlobalActionsComponent extends CoreStartable
-        implements Callbacks, GlobalActionsManager {
+public class GlobalActionsComponent implements CoreStartable, Callbacks, GlobalActionsManager {
 
     private final CommandQueue mCommandQueue;
     private final ExtensionController mExtensionController;
@@ -48,11 +47,10 @@ public class GlobalActionsComponent extends CoreStartable
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Inject
-    public GlobalActionsComponent(Context context, CommandQueue commandQueue,
+    public GlobalActionsComponent(CommandQueue commandQueue,
             ExtensionController extensionController,
             Provider<GlobalActions> globalActionsProvider,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
-        super(context);
         mCommandQueue = commandQueue;
         mExtensionController = extensionController;
         mGlobalActionsProvider = globalActionsProvider;

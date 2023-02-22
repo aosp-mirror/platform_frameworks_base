@@ -16,9 +16,14 @@
 
 package com.android.systemui.screenshot;
 
+import com.android.systemui.screenshot.IOnDoneCallback;
+
 /** Interface implemented by ScreenshotProxyService */
 interface IScreenshotProxy {
 
     /** Is the notification shade currently exanded? */
     boolean isNotificationShadeExpanded();
+
+    /** Attempts to dismiss the keyguard. */
+    void dismissKeyguard(IOnDoneCallback callback);
 }

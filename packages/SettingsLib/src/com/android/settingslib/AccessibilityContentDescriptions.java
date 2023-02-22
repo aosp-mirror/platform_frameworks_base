@@ -22,8 +22,11 @@ package com.android.settingslib;
 public class AccessibilityContentDescriptions {
 
     private AccessibilityContentDescriptions() {}
+
+    public static final int PHONE_SIGNAL_STRENGTH_NONE = R.string.accessibility_no_phone;
+
     public static final int[] PHONE_SIGNAL_STRENGTH = {
-        R.string.accessibility_no_phone,
+        PHONE_SIGNAL_STRENGTH_NONE,
         R.string.accessibility_phone_one_bar,
         R.string.accessibility_phone_two_bars,
         R.string.accessibility_phone_three_bars,

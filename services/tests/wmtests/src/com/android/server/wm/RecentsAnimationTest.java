@@ -111,14 +111,14 @@ public class RecentsAnimationTest extends WindowTestsBase {
         RecentsAnimationCallbacks recentsAnimation = startRecentsActivity(
                 mRecentsComponent, true /* getRecentsAnimation */);
         // The launch-behind state should make the recents activity visible.
-        assertTrue(recentActivity.mVisibleRequested);
+        assertTrue(recentActivity.isVisibleRequested());
         assertEquals(ActivityTaskManagerService.DEMOTE_TOP_REASON_ANIMATING_RECENTS,
                 mAtm.mDemoteTopAppReasons);
 
         // Simulate the animation is cancelled without changing the stack order.
         recentsAnimation.onAnimationFinished(REORDER_KEEP_IN_PLACE, false /* sendUserLeaveHint */);
         // The non-top recents activity should be invisible by the restored launch-behind state.
-        assertFalse(recentActivity.mVisibleRequested);
+        assertFalse(recentActivity.isVisibleRequested());
         assertEquals(0, mAtm.mDemoteTopAppReasons);
     }
 
@@ -163,7 +163,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
         // The activity is started in background so it should be invisible and will be stopped.
         assertThat(recentsActivity).isNotNull();
         assertThat(mSupervisor.mStoppingActivities).contains(recentsActivity);
-        assertFalse(recentsActivity.mVisibleRequested);
+        assertFalse(recentsActivity.isVisibleRequested());
 
         // Assume it is stopped to test next use case.
         recentsActivity.activityStopped(null /* newIcicle */, null /* newPersistentState */,
@@ -359,7 +359,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 true);
 
         // Ensure we find the task for the right user and it is made visible
-        assertTrue(otherUserHomeActivity.mVisibleRequested);
+        assertTrue(otherUserHomeActivity.isVisibleRequested());
     }
 
     private void startRecentsActivity() {

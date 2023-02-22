@@ -25,7 +25,6 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -41,9 +40,6 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        // TODO(b/197137564): Setting up a panel view and its controller feels unnecessary when
-        //   testing just [PhoneStatusBarView].
-        `when`(notificationPanelViewController.view).thenReturn(panelView)
 
         view = PhoneStatusBarView(mContext, null)
     }

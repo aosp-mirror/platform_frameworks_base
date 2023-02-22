@@ -35,6 +35,8 @@ import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
+import com.android.systemui.demomode.DemoMode
+import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -44,16 +46,17 @@ import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_CONSTRAINT
-import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.LARGE_SCREEN_HEADER_TRANSITION_ID
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QQS_HEADER_CONSTRAINT
 import com.android.systemui.shade.LargeScreenShadeHeaderController.Companion.QS_HEADER_CONSTRAINT
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.policy.Clock
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.VariableDateView
 import com.android.systemui.statusbar.policy.VariableDateViewController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
@@ -73,6 +76,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -104,7 +108,7 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     @Mock
     private lateinit var featureFlags: FeatureFlags
     @Mock
-    private lateinit var clock: TextView
+    private lateinit var clock: Clock
     @Mock
     private lateinit var date: VariableDateView
     @Mock
@@ -138,6 +142,7 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     private lateinit var qsConstraints: ConstraintSet
     @Mock
     private lateinit var largeScreenConstraints: ConstraintSet
+    @Mock private lateinit var demoModeController: DemoModeController
 
     @JvmField @Rule
     val mockitoRule = MockitoJUnit.rule()
@@ -146,10 +151,12 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     private lateinit var controller: LargeScreenShadeHeaderController
     private lateinit var carrierIconSlots: List<String>
     private val configurationController = FakeConfigurationController()
+    private lateinit var demoModeControllerCapture: ArgumentCaptor<DemoMode>
 
     @Before
     fun setUp() {
-        whenever<TextView>(view.findViewById(R.id.clock)).thenReturn(clock)
+        demoModeControllerCapture = argumentCaptor<DemoMode>()
+        whenever<Clock>(view.findViewById(R.id.clock)).thenReturn(clock)
         whenever(clock.context).thenReturn(mockedContext)
 
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
@@ -175,11 +182,11 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
+        whenever(view.alpha).thenReturn(1f)
 
         whenever(iconManagerFactory.create(any(), any())).thenReturn(iconManager)
 
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(true)
-        whenever(featureFlags.isEnabled(Flags.NEW_HEADER)).thenReturn(true)
 
         setUpDefaultInsets()
         setUpMotionLayout(view)
@@ -196,26 +203,13 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
             dumpManager,
             featureFlags,
             qsCarrierGroupControllerBuilder,
-            combinedShadeHeadersConstraintManager
+            combinedShadeHeadersConstraintManager,
+            demoModeController
         )
         whenever(view.isAttachedToWindow).thenReturn(true)
         controller.init()
         carrierIconSlots = listOf(
             context.getString(com.android.internal.R.string.status_bar_mobile))
-    }
-
-    @Test
-    fun testCorrectConstraints() {
-        val captor = ArgumentCaptor.forClass(XmlResourceParser::class.java)
-
-        verify(qqsConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.qqs_header)
-
-        verify(qsConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.qs_header_new)
-
-        verify(largeScreenConstraints).load(eq(context), capture(captor))
-        assertThat(captor.value.getResId()).isEqualTo(R.xml.large_screen_shade_header)
     }
 
     @Test
@@ -277,16 +271,6 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
 
         controller.largeScreenActive = true
         assertThat(viewVisibility).isEqualTo(View.INVISIBLE)
-    }
-
-    @Test
-    fun testLargeScreenActive_true() {
-        controller.largeScreenActive = false // Make sure there's a change
-        clearInvocations(view)
-
-        controller.largeScreenActive = true
-
-        verify(view).setTransition(LARGE_SCREEN_HEADER_TRANSITION_ID)
     }
 
     @Test
@@ -618,6 +602,21 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
     }
 
     @Test
+    fun demoMode_attachDemoMode() {
+        verify(demoModeController).addCallback(capture(demoModeControllerCapture))
+        demoModeControllerCapture.value.onDemoModeStarted()
+        verify(clock).onDemoModeStarted()
+    }
+
+    @Test
+    fun demoMode_detachDemoMode() {
+        controller.simulateViewDetached()
+        verify(demoModeController).removeCallback(capture(demoModeControllerCapture))
+        demoModeControllerCapture.value.onDemoModeFinished()
+        verify(clock).onDemoModeFinished()
+    }
+
+    @Test
     fun animateOutOnStartCustomizing() {
         val animator = Mockito.mock(ViewPropertyAnimator::class.java, Answers.RETURNS_SELF)
         val duration = 1000L
@@ -643,6 +642,84 @@ class LargeScreenShadeHeaderControllerCombinedTest : SysuiTestCase() {
         verify(animator).alpha(1f)
         verify(animator).setInterpolator(Interpolators.ALPHA_IN)
         verify(animator).start()
+    }
+
+    @Test
+    fun privacyChipParentVisibleFromStart() {
+        verify(privacyIconsController).onParentVisible()
+    }
+
+    @Test
+    fun privacyChipParentVisibleAlways() {
+        controller.largeScreenActive = true
+        controller.largeScreenActive = false
+        controller.largeScreenActive = true
+
+        verify(privacyIconsController, never()).onParentInvisible()
+    }
+
+    @Test
+    fun clockPivotYInCenter() {
+        val captor = ArgumentCaptor.forClass(View.OnLayoutChangeListener::class.java)
+        verify(clock).addOnLayoutChangeListener(capture(captor))
+        var height = 100
+        val width = 50
+
+        clock.executeLayoutChange(0, 0, width, height, captor.value)
+        verify(clock).pivotY = height.toFloat() / 2
+
+        height = 150
+        clock.executeLayoutChange(0, 0, width, height, captor.value)
+        verify(clock).pivotY = height.toFloat() / 2
+    }
+
+    @Test
+    fun onDensityOrFontScaleChanged_reloadConstraints() {
+        // After density or font scale change, constraints need to be reloaded to reflect new
+        // dimensions.
+        reset(qqsConstraints)
+        reset(qsConstraints)
+        reset(largeScreenConstraints)
+
+        configurationController.notifyDensityOrFontScaleChanged()
+
+        val captor = ArgumentCaptor.forClass(XmlResourceParser::class.java)
+        verify(qqsConstraints).load(eq(context), capture(captor))
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.qqs_header)
+        verify(qsConstraints).load(eq(context), capture(captor))
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.qs_header)
+        verify(largeScreenConstraints).load(eq(context), capture(captor))
+        assertThat(captor.value.getResId()).isEqualTo(R.xml.large_screen_shade_header)
+    }
+
+    private fun View.executeLayoutChange(
+            left: Int,
+            top: Int,
+            right: Int,
+            bottom: Int,
+            listener: View.OnLayoutChangeListener
+    ) {
+        val oldLeft = this.left
+        val oldTop = this.top
+        val oldRight = this.right
+        val oldBottom = this.bottom
+        whenever(this.left).thenReturn(left)
+        whenever(this.top).thenReturn(top)
+        whenever(this.right).thenReturn(right)
+        whenever(this.bottom).thenReturn(bottom)
+        whenever(this.height).thenReturn(bottom - top)
+        whenever(this.width).thenReturn(right - left)
+        listener.onLayoutChange(
+                this,
+                oldLeft,
+                oldTop,
+                oldRight,
+                oldBottom,
+                left,
+                top,
+                right,
+                bottom
+        )
     }
 
     private fun createWindowInsets(

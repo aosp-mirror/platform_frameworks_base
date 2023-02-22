@@ -30,7 +30,12 @@ interface Expandable {
      */
     fun activityLaunchController(cujType: Int? = null): ActivityLaunchAnimator.Controller?
 
-    // TODO(b/230830644): Introduce DialogLaunchAnimator and a function to expose it here.
+    /**
+     * Create a [DialogLaunchAnimator.Controller] that can be used to expand this [Expandable] into
+     * a Dialog, or return `null` if this [Expandable] should not be animated (e.g. if it is
+     * currently not attached or visible).
+     */
+    fun dialogLaunchController(cuj: DialogCuj? = null): DialogLaunchAnimator.Controller?
 
     companion object {
         /**
@@ -39,12 +44,19 @@ interface Expandable {
          * Note: The background of [view] should be a (rounded) rectangle so that it can be properly
          * animated.
          */
+        @JvmStatic
         fun fromView(view: View): Expandable {
             return object : Expandable {
                 override fun activityLaunchController(
                     cujType: Int?,
                 ): ActivityLaunchAnimator.Controller? {
                     return ActivityLaunchAnimator.Controller.fromView(view, cujType)
+                }
+
+                override fun dialogLaunchController(
+                    cuj: DialogCuj?
+                ): DialogLaunchAnimator.Controller? {
+                    return DialogLaunchAnimator.Controller.fromView(view, cuj)
                 }
             }
         }

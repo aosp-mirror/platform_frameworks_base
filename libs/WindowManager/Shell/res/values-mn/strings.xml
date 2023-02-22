@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ил гаргах"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"Апп хуваагдсан дэлгэц дээр ажиллахгүй байж болзошгүй."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"Энэ апп нь дэлгэц хуваах тохиргоог дэмждэггүй."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Энэ аппыг зөвхөн 1 цонхонд нээх боломжтой."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Апп хоёрдогч дэлгэцэд ажиллахгүй."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Аппыг хоёрдогч дэлгэцэд эхлүүлэх боломжгүй."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"\"Дэлгэц хуваах\" хуваагч"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Томруулах"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Багасгах"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Хаах"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Буцах"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Бариул"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Бүтэн дэлгэц"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Дэлгэцийн горим"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Дэлгэцийг хуваах"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Бусад"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Хөвөгч"</string>
 </resources>

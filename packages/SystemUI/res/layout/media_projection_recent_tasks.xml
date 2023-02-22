@@ -23,8 +23,9 @@
     >
 
     <FrameLayout
+        android:id="@+id/media_projection_recent_tasks_container"
         android:layout_width="match_parent"
-        android:layout_height="256dp">
+        android:layout_height="wrap_content">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/media_projection_recent_tasks_recycler"
