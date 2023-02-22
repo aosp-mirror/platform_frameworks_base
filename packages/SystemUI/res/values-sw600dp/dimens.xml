@@ -62,7 +62,6 @@
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
 
     <dimen name="qs_panel_padding_top">8dp</dimen>
-    <dimen name="qs_panel_padding_top_combined_headers">@dimen/qs_panel_padding_top</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">472dp</dimen>
