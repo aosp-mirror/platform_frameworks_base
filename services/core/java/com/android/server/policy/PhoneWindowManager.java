@@ -2978,15 +2978,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 break;
             case KeyEvent.KEYCODE_N:
                 if (down && event.isMetaPressed()) {
-                    IStatusBarService service = getStatusBarService();
-                    if (service != null) {
-                        try {
-                            service.expandNotificationsPanel();
-                        } catch (RemoteException e) {
-                            // do nothing.
-                        }
-                        return key_consumed;
-                    }
+                    toggleNotificationPanel();
+                    return key_consumed;
                 }
                 break;
             case KeyEvent.KEYCODE_S:

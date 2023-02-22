@@ -141,9 +141,9 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      */
     @Test
     public void testMetaN() throws RemoteException {
-        mPhoneWindowManager.overrideExpandNotificationsPanel();
+        mPhoneWindowManager.overrideTogglePanel();
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_N}, 0);
-        mPhoneWindowManager.assertExpandNotification();
+        mPhoneWindowManager.assertTogglePanel();
     }
 
     /**
