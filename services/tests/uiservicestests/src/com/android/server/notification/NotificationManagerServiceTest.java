@@ -177,7 +177,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.permission.PermissionCheckerManager;
 import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
@@ -10254,7 +10253,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
 
         verifyStickyHun(/* flag= */ SHOW_STICKY_HUN_FOR_DENIED_FSI,
-                /* permissionState= */ PermissionCheckerManager.PERMISSION_HARD_DENIED,
+                /* permissionState= */ PermissionManager.PERMISSION_HARD_DENIED,
                 /* isSticky= */ true);
     }
 
@@ -10263,7 +10262,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
 
         verifyStickyHun(/* flag= */ SHOW_STICKY_HUN_FOR_DENIED_FSI,
-                /* permissionState= */ PermissionCheckerManager.PERMISSION_SOFT_DENIED,
+                /* permissionState= */ PermissionManager.PERMISSION_SOFT_DENIED,
                 /* isSticky= */ true);
     }
 
@@ -10272,7 +10271,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
 
         verifyStickyHun(/* flag= */ SHOW_STICKY_HUN_FOR_DENIED_FSI,
-                /* permissionState= */ PermissionCheckerManager.PERMISSION_GRANTED,
+                /* permissionState= */ PermissionManager.PERMISSION_GRANTED,
                 /* isSticky= */ false);
     }
 
@@ -10281,7 +10280,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
 
         verifyStickyHun(/* flag= */ FSI_FORCE_DEMOTE,
-                /* permissionState= */ PermissionCheckerManager.PERMISSION_HARD_DENIED,
+                /* permissionState= */ PermissionManager.PERMISSION_HARD_DENIED,
                 /* isSticky= */ true);
     }
 
@@ -10290,7 +10289,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
 
         verifyStickyHun(/* flag= */ FSI_FORCE_DEMOTE,
-                /* permissionState= */ PermissionCheckerManager.PERMISSION_SOFT_DENIED,
+                /* permissionState= */ PermissionManager.PERMISSION_SOFT_DENIED,
                 /* isSticky= */ true);
     }
 
@@ -10299,7 +10298,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             throws Exception {
 
         verifyStickyHun(/* flag= */ FSI_FORCE_DEMOTE,
-                /* permissionState= */ PermissionCheckerManager.PERMISSION_GRANTED,
+                /* permissionState= */ PermissionManager.PERMISSION_GRANTED,
                 /* isSticky= */ true);
     }
 
