@@ -20,6 +20,8 @@ import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
+import static android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN;
+import static android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_STARTED_WAKING_UP;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
@@ -80,6 +82,7 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
@@ -2500,7 +2503,46 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .isEqualTo(BIOMETRIC_STATE_CANCELLING_RESTARTING);
     }
 
+    @Test
+    public void faceAuthenticateOptions_bouncerAuthenticateReason() {
+        // GIVEN the bouncer is fully visible
+        bouncerFullyVisible();
+
+        // WHEN authenticate is called
+        ArgumentCaptor<FaceAuthenticateOptions> captor =
+                ArgumentCaptor.forClass(FaceAuthenticateOptions.class);
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), captor.capture());
+
+        // THEN the authenticate reason is attributed to the bouncer
+        assertThat(captor.getValue().getAuthenticateReason())
+                .isEqualTo(AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN);
+    }
+
+    @Test
+    public void faceAuthenticateOptions_wakingUpAuthenticateReason_powerButtonWakeReason() {
+        // GIVEN keyguard is visible
+        keyguardIsVisible();
+
+        // WHEN device wakes up from the power button
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+
+        // THEN face auth is triggered
+        ArgumentCaptor<FaceAuthenticateOptions> captor =
+                ArgumentCaptor.forClass(FaceAuthenticateOptions.class);
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), captor.capture());
+
+        // THEN the authenticate reason is attributed to the waking
+        assertThat(captor.getValue().getAuthenticateReason())
+                .isEqualTo(AUTHENTICATE_REASON_STARTED_WAKING_UP);
+
+        // THEN the wake reason is attributed to the power button
+        assertThat(captor.getValue().getWakeReason())
+                .isEqualTo(PowerManager.WAKE_REASON_POWER_BUTTON);
+    }
+
     private void verifyFingerprintAuthenticateNeverCalled() {
+        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
                 anyInt(), anyInt());
     }
@@ -2519,11 +2561,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void verifyFaceAuthenticateNeverCalled() {
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), any());
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
     }
 
     private void verifyFaceAuthenticateCall() {
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt());
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), any());
     }
 
     private void verifyFaceDetectNeverCalled() {
@@ -2631,7 +2674,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 any(),
                 mAuthenticationCallbackCaptor.capture(),
                 any(),
-                anyInt());
+                any());
         mAuthenticationCallbackCaptor.getValue()
                 .onAuthenticationSucceeded(
                         new FaceManager.AuthenticationResult(null, null, mCurrentUserId, false));
