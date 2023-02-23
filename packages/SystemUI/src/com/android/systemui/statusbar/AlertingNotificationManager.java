@@ -298,9 +298,7 @@ public abstract class AlertingNotificationManager {
             mLogger.logUpdateEntry(mEntry, updatePostTime);
 
             final long now = mClock.currentTimeMillis();
-            mEarliestRemovaltime = isSticky()
-                    ? mEntry.mCreationElapsedRealTime + mStickyDisplayTime
-                    : now + mMinimumDisplayTime;
+            mEarliestRemovaltime = now + mMinimumDisplayTime;
 
             if (updatePostTime) {
                 mPostTime = Math.max(mPostTime, now);
