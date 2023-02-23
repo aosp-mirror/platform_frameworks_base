@@ -24,7 +24,7 @@ import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
 
 /** An [ImageView] that also implements [LaunchableView]. */
-class LaunchableImageView : ImageView, LaunchableView {
+open class LaunchableImageView : ImageView, LaunchableView {
     private val delegate =
         LaunchableViewDelegate(
             this,
