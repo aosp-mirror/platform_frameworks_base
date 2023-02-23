@@ -135,7 +135,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int mNumQuickTiles;
     private int mLastQQSTileHeight;
     private float mLastPosition;
-    private final QSTileHost mHost;
+    private final QSHost mHost;
     private final Executor mExecutor;
     private boolean mShowCollapsedOnKeyguard;
     private int mQQSTop;
@@ -146,7 +146,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     @Inject
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
             QSPanelController qsPanelController,
-            QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
+            QuickQSPanelController quickQSPanelController, QSHost qsTileHost,
             @Main Executor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
         mQs = qs;
@@ -485,7 +485,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         if (specs.isEmpty()) {
             // specs should not be empty in a valid secondary page, as we scrolled to it.
             // We may crash later on because there's a null animator.
-            specs = mQsPanelController.getHost().mTileSpecs;
+            specs = mHost.getSpecs();
             Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
             // return null;
         }

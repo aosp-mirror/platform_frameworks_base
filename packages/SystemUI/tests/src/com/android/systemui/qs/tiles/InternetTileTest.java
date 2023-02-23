@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
 import android.os.Handler;
 import android.service.quicksettings.Tile;
 import android.testing.AndroidTestingRunner;
@@ -35,7 +34,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
@@ -56,7 +55,7 @@ import org.mockito.MockitoAnnotations;
 public class InternetTileTest extends SysuiTestCase {
 
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     private NetworkController mNetworkController;
     @Mock
