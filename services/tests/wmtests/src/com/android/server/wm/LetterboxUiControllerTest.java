@@ -68,6 +68,7 @@ import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.RoundedCorner;
 import android.view.RoundedCorners;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -353,7 +354,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testGetCropBoundsIfNeeded_noCrop() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
-                InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+                WindowInsets.Type.navigationBars());
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
 
         // Do not apply crop if taskbar is collapsed
@@ -374,7 +375,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testGetCropBoundsIfNeeded_appliesCrop() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
-                InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+                WindowInsets.Type.navigationBars());
+        taskbar.setInsetsRoundedCornerFrame(true);
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
 
         // Apply crop if taskbar is expanded
@@ -396,7 +398,8 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     @Test
     public void testGetCropBoundsIfNeeded_appliesCropWithSizeCompatScaling() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
-                InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+                WindowInsets.Type.navigationBars());
+        taskbar.setInsetsRoundedCornerFrame(true);
         final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
         final float scaling = 2.0f;
 
@@ -440,7 +443,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
                     configurationRadius * 2 /*2 is to test selection of the min radius*/,
                     /*centerX=*/ 1, /*centerY=*/ 1)
         );
-        doReturn(roundedCorners).when(insets).getRoundedCorners();
+        insets.setRoundedCorners(roundedCorners);
         mLetterboxConfiguration.setLetterboxActivityCornersRadius(-1);
 
         assertEquals(expectedRadius, mController.getRoundedCornersRadius(mainWindow));
@@ -479,7 +482,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
     private WindowState mockForGetCropBoundsAndRoundedCorners(@Nullable InsetsSource taskbar) {
         final WindowState mainWindow = mock(WindowState.class);
-        final InsetsState insets = mock(InsetsState.class);
+        final InsetsState insets = new InsetsState();
         final Resources resources = mWm.mContext.getResources();
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams();
 
@@ -489,7 +492,7 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
 
         if (taskbar != null) {
             taskbar.setVisible(true);
-            doReturn(taskbar).when(insets).peekSource(taskbar.getType());
+            insets.addSource(taskbar);
         }
         doReturn(mLetterboxedPortraitTaskBounds).when(mActivity).getBounds();
         doReturn(true).when(mActivity).isVisible();

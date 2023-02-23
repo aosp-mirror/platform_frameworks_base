@@ -123,7 +123,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -3193,8 +3192,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
                 // TODO: Remove when we migrate to shell (b/202383002)
                 if (mWmService.mTaskTransitionSpec != null) {
-                    animationRunnerBuilder.hideInsetSourceViewOverflows(
-                            mWmService.mTaskTransitionSpec.animationBoundInsets);
+                    animationRunnerBuilder.hideInsetSourceViewOverflows();
                 }
             }
 
@@ -4115,11 +4113,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
 
-        private void hideInsetSourceViewOverflows(Set<Integer> sourceIds) {
-            final InsetsStateController controller = getDisplayContent().getInsetsStateController();
-            for (int id : sourceIds) {
-                final InsetsSourceProvider insetProvider = controller.peekSourceProvider(id);
-                if (insetProvider == null) {
+        private void hideInsetSourceViewOverflows() {
+            final SparseArray<WindowContainerInsetsSourceProvider> providers =
+                    getDisplayContent().getInsetsStateController().getSourceProviders();
+            for (int i = providers.size(); i >= 0; i--) {
+                final InsetsSourceProvider insetProvider = providers.valueAt(i);
+                if (!insetProvider.getSource().insetsRoundedCornerFrame()) {
                     return;
                 }
 
