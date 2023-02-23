@@ -60,6 +60,7 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         mContext = getInstrumentation().getTargetContext();
         mCdm = mContext.getSystemService(CompanionDeviceManager.class);
         mAssociationId = createAssociation();
+        mCdm.enableSecureTransport(false);
     }
 
     @Override
@@ -67,6 +68,7 @@ public class SystemDataTransportTest extends InstrumentationTestCase {
         super.tearDown();
 
         mCdm.disassociate(mAssociationId);
+        mCdm.enableSecureTransport(true);
     }
 
     public void testPingHandRolled() {
