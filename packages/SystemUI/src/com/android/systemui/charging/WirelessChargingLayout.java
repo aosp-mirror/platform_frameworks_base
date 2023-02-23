@@ -130,8 +130,7 @@ final class WirelessChargingLayout extends FrameLayout {
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator);
 
         // For tablet docking animation, we don't play the background scrim.
-        // TODO(b/270524780): use utility to check for tablet instead. 
-        if (!Utilities.isLargeScreen(context)) {
+        if (!Utilities.isTablet(context)) {
             ValueAnimator scrimFadeInAnimator = ObjectAnimator.ofArgb(this,
                     "backgroundColor", Color.TRANSPARENT, SCRIM_COLOR);
             scrimFadeInAnimator.setDuration(SCRIM_FADE_DURATION);
