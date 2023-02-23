@@ -2938,13 +2938,16 @@ interface ITelephony {
     * @param datagramId An id that uniquely identifies datagram requested to be sent.
     * @param datagramType Type of datagram.
     * @param datagram Datagram to send over satellite.
+    * @param needFullScreenPointingUI this is used to indicate pointingUI app to open in
+    *                                 full screen mode.
     * @param receiver Result receiver to get the datagramId if datagram is sent successfully else
     *                 error code of the request.
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void sendSatelliteDatagram(int subId, long datagramId, int datagramType,
-            in SatelliteDatagram datagram, in ResultReceiver receiver);
+             in SatelliteDatagram datagram, in boolean needFullScreenPointingUI,
+             in ResultReceiver receiver);
 
     /**
      * Request to get whether satellite communication is allowed for the current location.
