@@ -173,6 +173,7 @@ package android {
     field public static final String MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED = "android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED";
     field public static final String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
+    field public static final String MANAGE_CLIPBOARD_ACCESS_NOTIFICATION = "android.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION";
     field public static final String MANAGE_CLOUDSEARCH = "android.permission.MANAGE_CLOUDSEARCH";
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
@@ -3400,6 +3401,8 @@ package android.content {
   }
 
   public class ClipboardManager extends android.text.ClipboardManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION) public boolean areClipboardAccessNotificationsEnabled();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION) public void setClipboardAccessNotificationsEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.SET_CLIP_SOURCE) public void setPrimaryClipAsPackage(@NonNull android.content.ClipData, @NonNull String);
   }
 
