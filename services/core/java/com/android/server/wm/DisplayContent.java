@@ -4589,7 +4589,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
-        if (!ImeTargetVisibilityPolicy.isValidToComputeImeParent(mImeLayeringTarget,
+        if (!ImeTargetVisibilityPolicy.isReadyToComputeImeParent(mImeLayeringTarget,
                 mImeInputTarget)) {
             return null;
         }
