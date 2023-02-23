@@ -522,6 +522,7 @@ public final class ActiveServices {
         final ArrayList<ServiceRecord> mStartingBackground = new ArrayList<>();
 
         final ArrayMap<String, ActiveForegroundApp> mActiveForegroundApps = new ArrayMap<>();
+        final ArrayList<String> mPendingRemoveForegroundApps = new ArrayList<>();
 
         boolean mActiveForegroundAppsChanged;
 
@@ -1657,13 +1658,14 @@ public final class ActiveServices {
             if (smap != null) {
                 if (DEBUG_FOREGROUND_SERVICE) Slog.d(TAG, "Updating foreground apps for user "
                         + smap.mUserId);
+                smap.mPendingRemoveForegroundApps.clear();
                 for (int i = smap.mActiveForegroundApps.size()-1; i >= 0; i--) {
                     ActiveForegroundApp aa = smap.mActiveForegroundApps.valueAt(i);
                     if (aa.mEndTime != 0) {
                         boolean canRemove = foregroundAppShownEnoughLocked(aa, now);
                         if (canRemove) {
                             // This was up for longer than the timeout, so just remove immediately.
-                            smap.mActiveForegroundApps.removeAt(i);
+                            smap.mPendingRemoveForegroundApps.add(smap.mActiveForegroundApps.keyAt(i));
                             smap.mActiveForegroundAppsChanged = true;
                             continue;
                         }
@@ -1687,6 +1689,9 @@ public final class ActiveServices {
                             stopAllForegroundServicesLocked(aa.mUid, aa.mPackageName);
                         }
                     }
+                }
+                for(int i = smap.mPendingRemoveForegroundApps.size() - 1; i >= 0; i--) {
+                    smap.mActiveForegroundApps.remove(smap.mPendingRemoveForegroundApps.get(i));
                 }
                 smap.removeMessages(ServiceMap.MSG_UPDATE_FOREGROUND_APPS);
                 if (nextUpdateTime < Long.MAX_VALUE) {
