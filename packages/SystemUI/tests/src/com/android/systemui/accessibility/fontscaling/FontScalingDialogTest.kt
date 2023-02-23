@@ -19,7 +19,7 @@ import android.os.Handler
 import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
-import android.widget.ImageView
+import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -68,14 +68,14 @@ class FontScalingDialogTest : SysuiTestCase() {
     fun progressIsZero_clickIconEnd_seekBarProgressIncreaseOne_fontSizeScaled() {
         fontScalingDialog.show()
 
-        val iconEnd: ImageView = fontScalingDialog.findViewById(R.id.icon_end)!!
+        val iconEndFrame: ViewGroup = fontScalingDialog.findViewById(R.id.icon_end_frame)!!
         val seekBarWithIconButtonsView: SeekBarWithIconButtonsView =
             fontScalingDialog.findViewById(R.id.font_scaling_slider)!!
         val seekBar: SeekBar = fontScalingDialog.findViewById(R.id.seekbar)!!
 
         seekBarWithIconButtonsView.setProgress(0)
 
-        iconEnd.performClick()
+        iconEndFrame.performClick()
 
         val currentScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def = */ 1.0f)
         assertThat(seekBar.getProgress()).isEqualTo(1)
@@ -88,14 +88,14 @@ class FontScalingDialogTest : SysuiTestCase() {
     fun progressIsMax_clickIconStart_seekBarProgressDecreaseOne_fontSizeScaled() {
         fontScalingDialog.show()
 
-        val iconStart: ImageView = fontScalingDialog.findViewById(R.id.icon_start)!!
+        val iconStartFrame: ViewGroup = fontScalingDialog.findViewById(R.id.icon_start_frame)!!
         val seekBarWithIconButtonsView: SeekBarWithIconButtonsView =
             fontScalingDialog.findViewById(R.id.font_scaling_slider)!!
         val seekBar: SeekBar = fontScalingDialog.findViewById(R.id.seekbar)!!
 
         seekBarWithIconButtonsView.setProgress(fontSizeValueArray.size - 1)
 
-        iconStart.performClick()
+        iconStartFrame.performClick()
 
         val currentScale = systemSettings.getFloat(Settings.System.FONT_SCALE, /* def = */ 1.0f)
         assertThat(seekBar.getProgress()).isEqualTo(fontSizeValueArray.size - 2)
