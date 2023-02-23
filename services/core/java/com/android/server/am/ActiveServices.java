@@ -2059,6 +2059,9 @@ public final class ActiveServices {
                             foregroundServiceType == FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
                     final boolean isOldTypeShortFgsAndTimedOut = r.shouldTriggerShortFgsTimeout();
 
+                    // If true, we skip the BFSL check.
+                    boolean bypassBfslCheck = false;
+
                     if (r.isForeground && (isOldTypeShortFgs || isNewTypeShortFgs)) {
                         if (DEBUG_SHORT_SERVICE) {
                             Slog.i(TAG_SERVICE, String.format(
@@ -2089,9 +2092,6 @@ public final class ActiveServices {
                             if (isNewTypeShortFgs) {
                                 // Only in this case, we extend the SHORT_SERVICE time out.
                                 extendShortServiceTimeout = true;
-                                if (DEBUG_SHORT_SERVICE) {
-                                    Slog.i(TAG_SERVICE, "Extending SHORT_SERVICE time out: " + r);
-                                }
                             } else {
                                 // FGS type is changing from SHORT_SERVICE to another type when
                                 // an app is allowed to start FGS, so this will succeed.
@@ -2099,8 +2099,20 @@ public final class ActiveServices {
                                 // maybeUpdateShortFgsTrackingLocked().
                             }
                         } else {
-                            // We catch this case later, in the
-                            // "if (r.mAllowStartForeground == REASON_DENIED...)" block below.
+                            if (isNewTypeShortFgs) {
+                                // startForeground(SHORT_SERVICE) is called on an already running
+                                // SHORT_SERVICE FGS, when BFSL is not allowed.
+                                // In this case, the call should succeed
+                                // (== ForegroundServiceStartNotAllowedException shouldn't be
+                                // thrown), but the short service timeout shouldn't extend
+                                // (== extendShortServiceTimeout should be false).
+                                // We still do everything else -- e.g. we still need to update
+                                // the notification.
+                                bypassBfslCheck = true;
+                            } else {
+                                // We catch this case later, in the
+                                // "if (r.mAllowStartForeground == REASON_DENIED...)" block below.
+                            }
                         }
 
                     } else if (r.mStartForegroundCount == 0) {
@@ -2155,23 +2167,25 @@ public final class ActiveServices {
                                         + "location/camera/microphone access: service "
                                         + r.shortInstanceName);
                     }
-                    logFgsBackgroundStart(r);
-                    if (r.mAllowStartForeground == REASON_DENIED
-                            && isBgFgsRestrictionEnabledForService) {
-                        final String msg = "Service.startForeground() not allowed due to "
-                                + "mAllowStartForeground false: service "
-                                + r.shortInstanceName
-                                + (isOldTypeShortFgs ? " (Called on SHORT_SERVICE)" : "");
-                        Slog.w(TAG, msg);
-                        showFgsBgRestrictedNotificationLocked(r);
-                        updateServiceForegroundLocked(psr, true);
-                        ignoreForeground = true;
-                        logFGSStateChangeLocked(r,
-                                FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
-                                0, FGS_STOP_REASON_UNKNOWN, FGS_TYPE_POLICY_CHECK_UNKNOWN);
-                        if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
-                                r.appInfo.uid)) {
-                            throw new ForegroundServiceStartNotAllowedException(msg);
+                    if (!bypassBfslCheck) {
+                        logFgsBackgroundStart(r);
+                        if (r.mAllowStartForeground == REASON_DENIED
+                                && isBgFgsRestrictionEnabledForService) {
+                            final String msg = "Service.startForeground() not allowed due to "
+                                    + "mAllowStartForeground false: service "
+                                    + r.shortInstanceName
+                                    + (isOldTypeShortFgs ? " (Called on SHORT_SERVICE)" : "");
+                            Slog.w(TAG, msg);
+                            showFgsBgRestrictedNotificationLocked(r);
+                            updateServiceForegroundLocked(psr, true);
+                            ignoreForeground = true;
+                            logFGSStateChangeLocked(r,
+                                    FOREGROUND_SERVICE_STATE_CHANGED__STATE__DENIED,
+                                    0, FGS_STOP_REASON_UNKNOWN, FGS_TYPE_POLICY_CHECK_UNKNOWN);
+                            if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
+                                    r.appInfo.uid)) {
+                                throw new ForegroundServiceStartNotAllowedException(msg);
+                            }
                         }
                     }
 
@@ -3114,11 +3128,17 @@ public final class ActiveServices {
             unscheduleShortFgsTimeoutLocked(sr);
             return;
         }
-        if (DEBUG_SHORT_SERVICE) {
-            Slog.i(TAG_SERVICE, "Short FGS started: " + sr);
-        }
 
-        if (extendTimeout || !sr.hasShortFgsInfo()) {
+        final boolean isAlreadyShortFgs = sr.hasShortFgsInfo();
+
+        if (extendTimeout || !isAlreadyShortFgs) {
+            if (DEBUG_SHORT_SERVICE) {
+                if (isAlreadyShortFgs) {
+                    Slog.i(TAG_SERVICE, "Extending SHORT_SERVICE time out: " + sr);
+                } else {
+                    Slog.i(TAG_SERVICE, "Short FGS started: " + sr);
+                }
+            }
             sr.setShortFgsInfo(SystemClock.uptimeMillis());
 
             // We'll restart the timeout.
@@ -3128,6 +3148,10 @@ public final class ActiveServices {
                     ActivityManagerService.SERVICE_SHORT_FGS_TIMEOUT_MSG, sr);
             mAm.mHandler.sendMessageAtTime(msg, sr.getShortFgsInfo().getTimeoutTime());
         } else {
+            if (DEBUG_SHORT_SERVICE) {
+                Slog.w(TAG_SERVICE, "NOT extending SHORT_SERVICE time out: " + sr);
+            }
+
             // We only (potentially) update the start command, start count, but not the timeout
             // time.
             // In this case, we keep the existing timeout running.
