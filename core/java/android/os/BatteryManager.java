@@ -147,6 +147,25 @@ public class BatteryManager {
     public static final String EXTRA_SEQUENCE = "seq";
 
     /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Int value representing the battery charging cycle count.
+     */
+    public static final String EXTRA_CYCLE_COUNT = "android.os.extra.CYCLE_COUNT";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Int value representing the measured battery state of health (remaining
+     * estimate full charge capacity relative to the rated capacity in %).
+     */
+    public static final String EXTRA_STATE_OF_HEALTH = "android.os.extra.STATE_OF_HEALTH";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Int value representing the battery charging status.
+     */
+    public static final String EXTRA_CHARGING_STATUS = "android.os.extra.CHARGING_STATUS";
+
+    /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED}:
      * Contains list of Bundles representing battery events
      * @hide
@@ -189,6 +208,35 @@ public class BatteryManager {
     public static final int BATTERY_PLUGGED_WIRELESS = OsProtoEnums.BATTERY_PLUGGED_WIRELESS; // = 4
     /** Power source is dock. */
     public static final int BATTERY_PLUGGED_DOCK = OsProtoEnums.BATTERY_PLUGGED_DOCK; // = 8
+
+    // values for "charge policy" property
+    /**
+     * Default policy (e.g. normal).
+     * @hide
+     */
+    @SystemApi
+    public static final int CHARGING_POLICY_DEFAULT = OsProtoEnums.CHARGING_POLICY_DEFAULT; // = 1
+    /**
+     * Optimized for battery health using static thresholds (e.g stop at 80%).
+     * @hide
+     */
+    @SystemApi
+    public static final int CHARGING_POLICY_ADAPTIVE_AON =
+                                            OsProtoEnums.CHARGING_POLICY_ADAPTIVE_AON; // = 2
+    /**
+     * Optimized for battery health using adaptive thresholds.
+     * @hide
+     */
+    @SystemApi
+    public static final int CHARGING_POLICY_ADAPTIVE_AC =
+                                            OsProtoEnums.CHARGING_POLICY_ADAPTIVE_AC; // = 3
+    /**
+     * Optimized for battery health, devices always connected to power.
+     * @hide
+     */
+    @SystemApi
+    public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE =
+                                            OsProtoEnums.CHARGING_POLICY_ADAPTIVE_LONGLIFE; // = 4
 
     /** @hide */
     public static final int BATTERY_PLUGGED_ANY =
@@ -254,6 +302,62 @@ public class BatteryManager {
      */
     public static final int BATTERY_PROPERTY_STATUS = 6;
 
+    /**
+     * Battery manufacturing date is reported in epoch. The 0 timepoint
+     * begins at midnight Coordinated Universal Time (UTC) on January 1, 1970.
+     * It is a long integer in seconds.
+     *
+     * <p class="note">
+     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * Example: <code>
+     *  // The value returned from the API can be used to create a Date, used
+     *  // to set the time on a calendar and coverted to a string.
+     *  import java.util.Date;
+     *
+     *  mBatteryManager = mContext.getSystemService(BatteryManager.class);
+     *  final long manufacturingDate =
+     *      mBatteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_MANUFACTURING_DATE);
+     *  Date date = new Date(manufacturingDate);
+     *  Calendar calendar = Calendar.getInstance();
+     *  calendar.setTime(date);
+     * // Convert to yyyy-MM-dd HH:mm:ss format string
+     *  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+     *  String dateString = sdf.format(date);
+     * </code>
+     * @hide
+     */
+    @RequiresPermission(permission.BATTERY_STATS)
+    @SystemApi
+    public static final int BATTERY_PROPERTY_MANUFACTURING_DATE = 7;
+
+    /**
+     * The date of first usage is reported in epoch. The 0 timepoint
+     * begins at midnight Coordinated Universal Time (UTC) on January 1, 1970.
+     * It is a long integer in seconds.
+     *
+     * <p class="note">
+     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * {@link BATTERY_PROPERTY_MANUFACTURING_DATE for sample code}
+     * @hide
+     */
+    @RequiresPermission(permission.BATTERY_STATS)
+    @SystemApi
+    public static final int BATTERY_PROPERTY_FIRST_USAGE_DATE = 8;
+
+    /**
+     * Battery charging policy from a CHARGING_POLICY_* value..
+     *
+     * <p class="note">
+     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(permission.BATTERY_STATS)
+    @SystemApi
+    public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9;
+
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
     private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
@@ -307,7 +411,6 @@ public class BatteryManager {
 
         try {
             BatteryProperty prop = new BatteryProperty();
-
             if (mBatteryPropertiesRegistrar.getProperty(id, prop) == 0)
                 ret = prop.getLong();
             else
