@@ -43,7 +43,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 import javax.inject.Named
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
@@ -131,9 +130,17 @@ constructor(
         }
     }
 
-    /** Starts the dream content and dream overlay entry animations. */
+    /**
+     * Starts the dream content and dream overlay entry animations.
+     *
+     * @param downwards if true, the entry animation translations downwards into position rather
+     *   than upwards.
+     */
     @JvmOverloads
-    fun startEntryAnimations(animatorBuilder: () -> AnimatorSet = { AnimatorSet() }) {
+    fun startEntryAnimations(
+        downwards: Boolean,
+        animatorBuilder: () -> AnimatorSet = { AnimatorSet() }
+    ) {
         cancelAnimations()
 
         mAnimator =
@@ -153,7 +160,7 @@ constructor(
                         interpolator = Interpolators.LINEAR
                     ),
                     translationYAnimator(
-                        from = mDreamInTranslationYDistance.toFloat(),
+                        from = mDreamInTranslationYDistance.toFloat() * (if (downwards) -1 else 1),
                         to = 0f,
                         durationMs = mDreamInTranslationYDurationMs,
                         interpolator = Interpolators.EMPHASIZED_DECELERATE
@@ -178,19 +185,6 @@ constructor(
         mAnimator =
             mAnimator?.let {
                 it.cancel()
-                null
-            }
-    }
-
-    /**
-     * Ends the dream content and dream overlay animations, if they're currently running.
-     *
-     * @see [AnimatorSet.end]
-     */
-    fun endAnimations() {
-        mAnimator =
-            mAnimator?.let {
-                it.end()
                 null
             }
     }
