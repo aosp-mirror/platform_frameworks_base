@@ -275,7 +275,6 @@ public class AccessibilityMenuService extends AccessibilityService
                 info.brightnessMinimum,
                 info.brightnessMaximum
         );
-        mDisplayManager.setTemporaryBrightness(getDisplayId(), brightness);
         mDisplayManager.setBrightness(getDisplayId(), brightness);
         mA11yMenuLayout.showSnackbar(
                 getString(R.string.brightness_percentage_label,
