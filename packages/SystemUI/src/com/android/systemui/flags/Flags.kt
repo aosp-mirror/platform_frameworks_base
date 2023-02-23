@@ -298,6 +298,9 @@ object Flags {
     val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
         unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
 
+    // TODO(b/265892345): Tracking Bug
+    val PLUG_IN_STATUS_BAR_CHIP = unreleasedFlag(265892345, "plug_in_status_bar_chip")
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag(700, "ongoing_call_status_bar_chip")

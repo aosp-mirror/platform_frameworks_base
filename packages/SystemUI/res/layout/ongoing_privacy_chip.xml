@@ -16,16 +16,15 @@
 -->
 
 
-<com.android.systemui.privacy.OngoingPrivacyChip
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/privacy_chip"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="wrap_content"
     android:layout_gravity="center_vertical|end"
-    android:focusable="true"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingStart="8dp"
+    tools:parentTag="com.android.systemui.privacy.OngoingPrivacyChip">
     >
 
         <LinearLayout
@@ -35,8 +34,9 @@
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:gravity="center"
+            android:clipToOutline="true"
+            android:clipToPadding="false"
             android:layout_gravity="center"
             android:minWidth="@dimen/ongoing_appops_chip_min_width"
-            android:maxWidth="@dimen/ongoing_appops_chip_max_width"
-            />
-</com.android.systemui.privacy.OngoingPrivacyChip>
+            android:maxWidth="@dimen/ongoing_appops_chip_max_width" />
+</merge>

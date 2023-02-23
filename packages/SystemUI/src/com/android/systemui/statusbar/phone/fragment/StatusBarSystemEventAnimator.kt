@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.phone.fragment
 
-import android.animation.Animator
-import android.animation.AnimatorSet
-import android.animation.ValueAnimator
+import androidx.core.animation.Animator
+import androidx.core.animation.AnimatorSet
+import androidx.core.animation.ValueAnimator
 import android.content.res.Resources
 import android.view.View
 import com.android.systemui.R
@@ -46,15 +46,19 @@ class StatusBarSystemEventAnimator(
             R.dimen.ongoing_appops_chip_animation_out_status_bar_translation_x)
 
     override fun onSystemEventAnimationBegin(): Animator {
-        val moveOut = ValueAnimator.ofFloat(0f, 1f).setDuration(23.frames)
-        moveOut.interpolator = STATUS_BAR_X_MOVE_OUT
-        moveOut.addUpdateListener { animation: ValueAnimator ->
-            animatedView.translationX = -(translationXIn * animation.animatedValue as Float)
+        val moveOut = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 23.frames
+            interpolator = STATUS_BAR_X_MOVE_OUT
+            addUpdateListener {
+                animatedView.translationX = -(translationXIn * animatedValue as Float)
+            }
         }
-        val alphaOut = ValueAnimator.ofFloat(1f, 0f).setDuration(8.frames)
-        alphaOut.interpolator = null
-        alphaOut.addUpdateListener { animation: ValueAnimator ->
-            animatedView.alpha = animation.animatedValue as Float
+        val alphaOut = ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = 8.frames
+            interpolator = null
+            addUpdateListener {
+                animatedView.alpha = animatedValue as Float
+            }
         }
 
         val animSet = AnimatorSet()
@@ -64,17 +68,21 @@ class StatusBarSystemEventAnimator(
 
     override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
         animatedView.translationX = translationXOut.toFloat()
-        val moveIn = ValueAnimator.ofFloat(1f, 0f).setDuration(28.frames)
-        moveIn.startDelay = 2.frames
-        moveIn.interpolator = STATUS_BAR_X_MOVE_IN
-        moveIn.addUpdateListener { animation: ValueAnimator ->
-            animatedView.translationX = translationXOut * animation.animatedValue as Float
+        val moveIn = ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = 23.frames
+            startDelay = 7.frames
+            interpolator = STATUS_BAR_X_MOVE_IN
+            addUpdateListener {
+                animatedView.translationX = translationXOut * animatedValue as Float
+            }
         }
-        val alphaIn = ValueAnimator.ofFloat(0f, 1f).setDuration(10.frames)
-        alphaIn.startDelay = 4.frames
-        alphaIn.interpolator = null
-        alphaIn.addUpdateListener { animation: ValueAnimator ->
-            animatedView.alpha = animation.animatedValue as Float
+        val alphaIn = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 5.frames
+            startDelay = 11.frames
+            interpolator = null
+            addUpdateListener {
+                animatedView.alpha = animatedValue as Float
+            }
         }
 
         val animatorSet = AnimatorSet()
