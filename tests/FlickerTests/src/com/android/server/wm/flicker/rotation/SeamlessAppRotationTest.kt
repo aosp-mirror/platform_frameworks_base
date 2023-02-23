@@ -18,16 +18,16 @@ package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.ScenarioBuilder
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.ScenarioBuilder
 import com.android.server.wm.flicker.helpers.SeamlessRotationAppHelper
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test
@@ -108,8 +108,10 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
     fun appWindowFullScreen() {
         flicker.assertWm {
             this.invoke("isFullScreen") {
-                val appWindow = it.windowState(testApp.`package`)
-                val flags = appWindow.windowState?.attributes?.flags ?: 0
+                val appWindow =
+                    it.windowState(testApp.`package`)
+                        ?: error("App window for package ${testApp.`package`} not found")
+                val flags = appWindow.windowState.attributes.flags
                 appWindow
                     .check { "isFullScreen" }
                     .that(flags.and(WindowManager.LayoutParams.FLAG_FULLSCREEN))
@@ -124,8 +126,10 @@ open class SeamlessAppRotationTest(flicker: FlickerTest) : RotationTransition(fl
     fun appWindowSeamlessRotation() {
         flicker.assertWm {
             this.invoke("isRotationSeamless") {
-                val appWindow = it.windowState(testApp.`package`)
-                val rotationAnimation = appWindow.windowState?.attributes?.rotationAnimation ?: 0
+                val appWindow =
+                    it.windowState(testApp.`package`)
+                        ?: error("App window for package ${testApp.`package`} not found")
+                val rotationAnimation = appWindow.windowState.attributes.rotationAnimation
                 appWindow
                     .check { "isRotationSeamless" }
                     .that(

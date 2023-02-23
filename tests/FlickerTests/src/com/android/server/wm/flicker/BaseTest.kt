@@ -18,11 +18,13 @@ package com.android.server.wm.flicker
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerBuilderProvider
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.junit.FlickerBuilderProvider
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.AssumptionViolatedException
 import org.junit.Test

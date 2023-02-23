@@ -19,17 +19,19 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
+import android.tools.common.datatypes.Rect
+import android.tools.common.datatypes.Region
+import android.tools.common.datatypes.component.IComponentMatcher
+import android.tools.common.traces.ConditionsFactory
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.helpers.FIND_TIMEOUT
+import android.tools.device.helpers.SYSTEMUI_PACKAGE
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import android.util.Log
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.helpers.GestureHelper.Tuple
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.Rect
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
-import com.android.server.wm.traces.common.region.Region
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 open class PipAppHelper(instrumentation: Instrumentation) :
     StandardAppHelper(
@@ -93,10 +95,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
         // if the distance per step is less than 1, carry out the animation in two steps
         gestureHelper.pinch(
-            Tuple(initLeftX, yCoord),
-            Tuple(initRightX, yCoord),
-            Tuple(finalLeftX, yCoord),
-            Tuple(finalRightX, yCoord),
+            GestureHelper.Tuple(initLeftX, yCoord),
+            GestureHelper.Tuple(initRightX, yCoord),
+            GestureHelper.Tuple(finalLeftX, yCoord),
+            GestureHelper.Tuple(finalRightX, yCoord),
             adjustedSteps
         )
 
@@ -141,10 +143,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
         // if the distance per step is less than 1, carry out the animation in two steps
         gestureHelper.pinch(
-            Tuple(initLeftX, yCoord),
-            Tuple(initRightX, yCoord),
-            Tuple(finalLeftX, yCoord),
-            Tuple(finalRightX, yCoord),
+            GestureHelper.Tuple(initLeftX, yCoord),
+            GestureHelper.Tuple(initRightX, yCoord),
+            GestureHelper.Tuple(finalLeftX, yCoord),
+            GestureHelper.Tuple(finalRightX, yCoord),
             adjustedSteps
         )
 
@@ -167,7 +169,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             launchedAppComponentMatcherOverride,
             action,
             stringExtras,
-            waitConditions = arrayOf(WindowManagerConditionsFactory.hasPipWindow())
+            waitConditions = arrayOf(ConditionsFactory.hasPipWindow())
         )
 
         wmHelper.StateSyncBuilder().withPipShown().waitForAndVerify()
