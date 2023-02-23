@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.events
 
-import android.animation.Animator
+import androidx.core.animation.Animator
 import android.annotation.UiThread
 import android.graphics.Point
 import android.graphics.Rect
