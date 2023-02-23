@@ -69,6 +69,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     private static final ComponentName LOW_LIGHT_COMPONENT = new ComponentName("package",
             "lowlight");
     private static final String DREAM_COMPONENT = "package/dream";
+    private static final String WINDOW_NAME = "test";
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
 
@@ -148,7 +149,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mKeyguardUpdateMonitor,
                 mUiEventLogger,
                 LOW_LIGHT_COMPONENT,
-                mDreamOverlayCallbackController);
+                mDreamOverlayCallbackController,
+                WINDOW_NAME);
     }
 
     public IDreamOverlayClient getClient() throws RemoteException {
