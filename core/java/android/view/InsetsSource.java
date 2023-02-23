@@ -133,7 +133,7 @@ public class InsetsSource implements Parcelable {
         return mVisibleFrame == null || !mVisibleFrame.isEmpty();
     }
 
-    public boolean getInsetsRoundedCornerFrame() {
+    public boolean insetsRoundedCornerFrame() {
         return mInsetsRoundedCornerFrame;
     }
 

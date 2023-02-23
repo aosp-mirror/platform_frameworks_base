@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.window.ITaskOrganizerController;
 import android.window.TaskAppearedInfo;
 import android.window.WindowContainerToken;
@@ -57,7 +58,6 @@ import com.android.wm.shell.unfold.UnfoldAnimationController;
 
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -130,14 +130,34 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             new DisplayInsetsController.OnInsetsChangedListener() {
         @Override
         public void insetsChanged(InsetsState insetsState) {
-            // Update bounds only when the insets of navigation bar or task bar is changed.
-            if (Objects.equals(insetsState.peekSource(InsetsState.ITYPE_NAVIGATION_BAR),
-                    mInsetsState.peekSource(InsetsState.ITYPE_NAVIGATION_BAR))
-                    && Objects.equals(insetsState.peekSource(
-                            InsetsState.ITYPE_EXTRA_NAVIGATION_BAR),
-                    mInsetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR))) {
+            final boolean[] navigationBarChanged = {false};
+            InsetsState.traverse(insetsState, mInsetsState, new InsetsState.OnTraverseCallbacks() {
+                @Override
+                public void onIdMatch(InsetsSource source1, InsetsSource source2) {
+                    if (source1.getType() == WindowInsets.Type.navigationBars()
+                            && !source1.equals(source2)) {
+                        navigationBarChanged[0] = true;
+                    }
+                }
+
+                @Override
+                public void onIdNotFoundInState1(int index2, InsetsSource source2) {
+                    if (source2.getType() == WindowInsets.Type.navigationBars()) {
+                        navigationBarChanged[0] = true;
+                    }
+                }
+
+                @Override
+                public void onIdNotFoundInState2(int index1, InsetsSource source1) {
+                    if (source1.getType() == WindowInsets.Type.navigationBars()) {
+                        navigationBarChanged[0] = true;
+                    }
+                }
+            });
+            if (!navigationBarChanged[0]) {
                 return;
             }
+            // Update bounds only when the insets of navigation bar or task bar is changed.
             mInsetsState.set(insetsState);
             updateBounds();
         }
@@ -344,16 +364,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     private Rect calculateBounds() {
         final Rect bounds = new Rect(0, 0, mDisplayWidth, mDisplayHeight);
-        final InsetsSource navBarSource = mInsetsState.peekSource(InsetsState.ITYPE_NAVIGATION_BAR);
-        final InsetsSource taskBarSource = mInsetsState.peekSource(
-                InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
-        if (navBarSource != null && !navBarSource.getFrame().isEmpty()) {
-            bounds.inset(navBarSource.calculateInsets(bounds, false /* ignoreVisibility */));
-        } else if (taskBarSource != null && !taskBarSource.getFrame().isEmpty()) {
-            bounds.inset(taskBarSource.calculateInsets(bounds, false /* ignoreVisibility */));
-        } else {
-            bounds.setEmpty();
-        }
+        bounds.inset(mInsetsState.calculateInsets(
+                bounds, WindowInsets.Type.navigationBars(), false /* ignoreVisibility */));
         return bounds;
     }
 
