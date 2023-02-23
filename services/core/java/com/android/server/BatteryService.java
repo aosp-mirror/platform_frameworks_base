@@ -149,6 +149,8 @@ public final class BatteryService extends SystemService {
     private int mLastMaxChargingCurrent;
     private int mLastMaxChargingVoltage;
     private int mLastChargeCounter;
+    private int mLastBatteryCycleCount;
+    private int mLastCharingState;
 
     private int mSequence = 1;
 
@@ -503,7 +505,9 @@ public final class BatteryService extends SystemService {
                         || mHealthInfo.maxChargingCurrentMicroamps != mLastMaxChargingCurrent
                         || mHealthInfo.maxChargingVoltageMicrovolts != mLastMaxChargingVoltage
                         || mHealthInfo.batteryChargeCounterUah != mLastChargeCounter
-                        || mInvalidCharger != mLastInvalidCharger)) {
+                        || mInvalidCharger != mLastInvalidCharger
+                        || mHealthInfo.batteryCycleCount != mLastBatteryCycleCount
+                        || mHealthInfo.chargingState != mLastCharingState)) {
 
             if (mPlugType != mLastPlugType) {
                 if (mLastPlugType == BATTERY_PLUGGED_NONE) {
@@ -677,6 +681,8 @@ public final class BatteryService extends SystemService {
             mLastChargeCounter = mHealthInfo.batteryChargeCounterUah;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
+            mLastBatteryCycleCount = mHealthInfo.batteryCycleCount;
+            mLastCharingState = mHealthInfo.chargingState;
         }
     }
 
@@ -708,6 +714,8 @@ public final class BatteryService extends SystemService {
                 BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE,
                 mHealthInfo.maxChargingVoltageMicrovolts);
         intent.putExtra(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounterUah);
+        intent.putExtra(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
+        intent.putExtra(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
         if (DEBUG) {
             Slog.d(TAG, "Sending ACTION_BATTERY_CHANGED. scale:" + BATTERY_SCALE
                     + ", info:" + mHealthInfo.toString());
@@ -731,6 +739,8 @@ public final class BatteryService extends SystemService {
         event.putInt(BatteryManager.EXTRA_TEMPERATURE, mHealthInfo.batteryTemperatureTenthsCelsius);
         event.putInt(BatteryManager.EXTRA_CHARGE_COUNTER, mHealthInfo.batteryChargeCounterUah);
         event.putLong(BatteryManager.EXTRA_EVENT_TIMESTAMP, now);
+        event.putInt(BatteryManager.EXTRA_CYCLE_COUNT, mHealthInfo.batteryCycleCount);
+        event.putInt(BatteryManager.EXTRA_CHARGING_STATUS, mHealthInfo.chargingState);
 
         boolean queueWasEmpty = mBatteryLevelsEventQueue.isEmpty();
         mBatteryLevelsEventQueue.add(event);
@@ -1241,11 +1251,20 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    // Reduced IBatteryPropertiesRegistrar that only implements getProperty for usage
-    // in BatteryManager.
+    // Reduced IBatteryPropertiesRegistrar that implements getProperty for usage
+    // in BatteryManager and enforce permissions.
     private final class BatteryPropertiesRegistrar extends IBatteryPropertiesRegistrar.Stub {
         @Override
         public int getProperty(int id, final BatteryProperty prop) throws RemoteException {
+            switch (id) {
+                case BatteryManager.BATTERY_PROPERTY_MANUFACTURING_DATE:
+                case BatteryManager.BATTERY_PROPERTY_FIRST_USAGE_DATE:
+                case BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY:
+                case BatteryManager.BATTERY_PROPERTY_STATE_OF_HEALTH:
+                    mContext.enforceCallingPermission(
+                            android.Manifest.permission.BATTERY_STATS, null);
+                    break;
+            }
             return mHealthServiceWrapper.getProperty(id, prop);
         }
         @Override

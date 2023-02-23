@@ -30910,6 +30910,8 @@ package android.os {
     field public static final int BATTERY_STATUS_NOT_CHARGING = 4; // 0x4
     field public static final int BATTERY_STATUS_UNKNOWN = 1; // 0x1
     field public static final String EXTRA_BATTERY_LOW = "battery_low";
+    field public static final String EXTRA_CHARGING_STATUS = "android.os.extra.CHARGING_STATUS";
+    field public static final String EXTRA_CYCLE_COUNT = "android.os.extra.CYCLE_COUNT";
     field public static final String EXTRA_HEALTH = "health";
     field public static final String EXTRA_ICON_SMALL = "icon-small";
     field public static final String EXTRA_LEVEL = "level";

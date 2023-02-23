@@ -9152,6 +9152,14 @@ package android.os {
 
   public class BatteryManager {
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setChargingStateUpdateDelayMillis(int);
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9; // 0x9
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_FIRST_USAGE_DATE = 8; // 0x8
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_MANUFACTURING_DATE = 7; // 0x7
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_STATE_OF_HEALTH = 10; // 0xa
+    field public static final int CHARGING_POLICY_ADAPTIVE_AC = 3; // 0x3
+    field public static final int CHARGING_POLICY_ADAPTIVE_AON = 2; // 0x2
+    field public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE = 4; // 0x4
+    field public static final int CHARGING_POLICY_DEFAULT = 1; // 0x1
     field public static final String EXTRA_EVENTS = "android.os.extra.EVENTS";
     field public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
   }
