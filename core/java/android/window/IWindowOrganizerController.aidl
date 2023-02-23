@@ -63,7 +63,7 @@ interface IWindowOrganizerController {
      * @param transitionToken A token associated with the transition to start.
      * @param t Operations that are part of the transition.
      */
-    oneway void startTransition(IBinder transitionToken, in @nullable WindowContainerTransaction t);
+    void startTransition(IBinder transitionToken, in @nullable WindowContainerTransaction t);
 
     /**
      * Starts a legacy transition.
