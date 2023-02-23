@@ -43,6 +43,8 @@ package com.android.server.am {
     method @Deprecated public boolean bindSdkSandboxService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int, @NonNull String, @NonNull String, int) throws android.os.RemoteException;
     method public boolean canStartForegroundService(int, int, @NonNull String);
     method public void killSdkSandboxClientAppProcess(@NonNull android.os.IBinder);
+    method @Nullable public android.content.ComponentName startSdkSandboxService(@NonNull android.content.Intent, int, @NonNull String, @NonNull String) throws android.os.RemoteException;
+    method public boolean stopSdkSandboxService(@NonNull android.content.Intent, int, @NonNull String, @NonNull String);
   }
 
 }
