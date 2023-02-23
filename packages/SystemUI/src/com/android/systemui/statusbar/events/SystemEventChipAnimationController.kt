@@ -117,16 +117,21 @@ class SystemEventChipAnimationController @Inject constructor(
             interpolator = null
             addUpdateListener { currentAnimatedView?.view?.alpha = animatedValue as Float }
         }
+        currentAnimatedView?.contentView?.alpha = 0f
+        val contentAlphaIn = ValueAnimator.ofFloat(0f, 1f).apply {
+            startDelay = 10.frames
+            duration = 10.frames
+            interpolator = null
+            addUpdateListener { currentAnimatedView?.contentView?.alpha = animatedValue as Float }
+        }
         val moveIn = ValueAnimator.ofInt(chipMinWidth, chipWidth).apply {
             startDelay = 7.frames
             duration = 23.frames
             interpolator = STATUS_BAR_X_MOVE_IN
-            addUpdateListener {
-                updateAnimatedViewBoundsWidth(animatedValue as Int)
-            }
+            addUpdateListener { updateAnimatedViewBoundsWidth(animatedValue as Int) }
         }
         val animSet = AnimatorSet()
-        animSet.playTogether(alphaIn, moveIn)
+        animSet.playTogether(alphaIn, contentAlphaIn, moveIn)
         return animSet
     }
 
@@ -210,15 +215,32 @@ class SystemEventChipAnimationController @Inject constructor(
     }
 
     private fun createMoveOutAnimationDefault(): Animator {
+        val alphaOut = ValueAnimator.ofFloat(1f, 0f).apply {
+            startDelay = 6.frames
+            duration = 6.frames
+            interpolator = null
+            addUpdateListener { currentAnimatedView?.view?.alpha = animatedValue as Float }
+        }
+
+        val contentAlphaOut = ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = 5.frames
+            interpolator = null
+            addUpdateListener { currentAnimatedView?.contentView?.alpha = animatedValue as Float }
+        }
+
         val moveOut = ValueAnimator.ofInt(chipWidth, chipMinWidth).apply {
             duration = 23.frames
+            interpolator = STATUS_BAR_X_MOVE_OUT
             addUpdateListener {
                 currentAnimatedView?.apply {
                     updateAnimatedViewBoundsWidth(it.animatedValue as Int)
                 }
             }
         }
-        return moveOut
+
+        val animSet = AnimatorSet()
+        animSet.playTogether(alphaOut, contentAlphaOut, moveOut)
+        return animSet
     }
 
     private fun init() {
@@ -296,6 +318,8 @@ class SystemEventChipAnimationController @Inject constructor(
 interface BackgroundAnimatableView {
     val view: View // Since this can't extend View, add a view prop
         get() = this as View
+    val contentView: View? // This will be alpha faded during appear and disappear animation
+        get() = null
     val chipWidth: Int
         get() = view.measuredWidth
     fun setBoundsForAnimation(l: Int, t: Int, r: Int, b: Int)

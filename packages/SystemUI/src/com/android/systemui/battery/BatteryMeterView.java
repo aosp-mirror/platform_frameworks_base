@@ -24,6 +24,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -195,7 +196,13 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         return false;
     }
 
-    void onBatteryLevelChanged(int level, boolean pluggedIn) {
+    /**
+     * Update battery level
+     *
+     * @param level     int between 0 and 100 (representing percentage value)
+     * @param pluggedIn whether the device is plugged in or not
+     */
+    public void onBatteryLevelChanged(@IntRange(from = 0, to = 100) int level, boolean pluggedIn) {
         mDrawable.setCharging(pluggedIn);
         mDrawable.setBatteryLevel(level);
         mCharging = pluggedIn;

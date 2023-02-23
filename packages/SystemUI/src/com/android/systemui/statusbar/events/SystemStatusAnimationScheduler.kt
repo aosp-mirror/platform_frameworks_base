@@ -66,7 +66,8 @@ open class SystemStatusAnimationScheduler @Inject constructor(
     companion object {
         private const val PROPERTY_ENABLE_IMMERSIVE_INDICATOR = "enable_immersive_indicator"
     }
-    public fun isImmersiveIndicatorEnabled(): Boolean {
+
+    fun isImmersiveIndicatorEnabled(): Boolean {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 PROPERTY_ENABLE_IMMERSIVE_INDICATOR, true)
     }
@@ -80,11 +81,7 @@ open class SystemStatusAnimationScheduler @Inject constructor(
 
     private var scheduledEvent: StatusEvent? = null
     private var cancelExecutionRunnable: Runnable? = null
-    private val listeners = mutableSetOf<SystemStatusAnimationCallback>()
-
-    fun getListeners(): MutableSet<SystemStatusAnimationCallback> {
-        return listeners
-    }
+    val listeners = mutableSetOf<SystemStatusAnimationCallback>()
 
     init {
         coordinator.attachScheduler(this)
@@ -99,9 +96,8 @@ open class SystemStatusAnimationScheduler @Inject constructor(
 
         // Don't deal with threading for now (no need let's be honest)
         Assert.isMainThread()
-        if ((event.priority > scheduledEvent?.priority ?: -1) &&
-                animationState != ANIMATING_OUT &&
-                (animationState != SHOWING_PERSISTENT_DOT && event.forceVisible)) {
+        if ((event.priority > (scheduledEvent?.priority ?: -1)) &&
+                animationState != ANIMATING_OUT && animationState != SHOWING_PERSISTENT_DOT) {
             // events can only be scheduled if a higher priority or no other event is in progress
             if (DEBUG) {
                 Log.d(TAG, "scheduling event $event")
@@ -143,7 +139,7 @@ open class SystemStatusAnimationScheduler @Inject constructor(
         }
     }
 
-    public fun isTooEarly(): Boolean {
+    fun isTooEarly(): Boolean {
         return systemClock.uptimeMillis() - Process.getStartUptimeMillis() < MIN_UPTIME
     }
 
