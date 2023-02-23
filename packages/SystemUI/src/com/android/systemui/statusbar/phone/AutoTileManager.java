@@ -31,7 +31,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.AutoAddTracker;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.external.CustomTile;
@@ -75,7 +75,7 @@ public class AutoTileManager implements UserAwareController {
     private final String mSafetySpec;
 
     protected final Context mContext;
-    protected final QSTileHost mHost;
+    protected final QSHost mHost;
     protected final Handler mHandler;
     protected final SecureSettings mSecureSettings;
     protected final AutoAddTracker mAutoTracker;
@@ -92,7 +92,7 @@ public class AutoTileManager implements UserAwareController {
     private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
     public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
-            QSTileHost host,
+            QSHost host,
             @Background Handler handler,
             SecureSettings secureSettings,
             HotspotController hotspotController,
