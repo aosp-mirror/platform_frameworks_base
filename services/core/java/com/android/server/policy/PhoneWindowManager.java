@@ -2977,7 +2977,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_H:
-                if (down && event.isMetaPressed()) {
+                if (event.isMetaPressed()) {
                     return handleHomeShortcuts(displayId, focusedToken, event);
                 }
                 break;
@@ -3018,25 +3018,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
                     enterStageSplitFromRunningApp(true /* leftOrTop */);
                     return key_consumed;
-                } else if (!down && event.isMetaPressed()) {
-                    boolean backKeyHandled = backKeyPress();
-                    if (backKeyHandled) {
-                        return key_consumed;
-                    }
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
                     enterStageSplitFromRunningApp(false /* leftOrTop */);
                     return key_consumed;
-                }
-                break;
-            case KeyEvent.KEYCODE_GRAVE:
-                if (!down && event.isMetaPressed()) {
-                    boolean backKeyHandled = backKeyPress();
-                    if (backKeyHandled) {
-                        return key_consumed;
-                    }
                 }
                 break;
             case KeyEvent.KEYCODE_SLASH:
