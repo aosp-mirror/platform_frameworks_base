@@ -118,6 +118,7 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                     try {
                         enforcePermissionsForDataDelivery();
                     } catch (SecurityException e) {
+                        Slog.w(TAG, "Ignoring #onDetected due to a SecurityException", e);
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
@@ -132,6 +133,7 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                     try {
                         newResult = mHotwordAudioStreamCopier.startCopyingAudioStreams(result);
                     } catch (IOException e) {
+                        Slog.w(TAG, "Ignoring #onDetected due to a IOException", e);
                         // TODO: Write event
                         mSoftwareCallback.onError(new HotwordDetectionServiceFailure(
                                 CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
