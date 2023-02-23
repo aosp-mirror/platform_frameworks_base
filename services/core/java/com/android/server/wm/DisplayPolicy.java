@@ -1802,8 +1802,7 @@ public class DisplayPolicy {
                 dc.getDisplayPolicy().simulateLayoutDisplay(df);
                 final InsetsState insetsState = df.mInsetsState;
                 final Rect displayFrame = insetsState.getDisplayFrame();
-                final Insets decor = insetsState.calculateInsets(displayFrame, DECOR_TYPES,
-                        true /* ignoreVisibility */);
+                final Insets decor = calculateDecorInsetsWithInternalTypes(insetsState);
                 final Insets statusBar = insetsState.calculateInsets(displayFrame,
                         Type.statusBars(), true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
@@ -1835,8 +1834,17 @@ public class DisplayPolicy {
             }
         }
 
-
-        static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
+        // TODO (b/235842600): Use public type once we can treat task bar as navigation bar.
+        static final int[] INTERNAL_DECOR_TYPES;
+        static {
+            final ArraySet<Integer> decorTypes = InsetsState.toInternalType(
+                    Type.displayCutout() | Type.navigationBars());
+            decorTypes.remove(ITYPE_EXTRA_NAVIGATION_BAR);
+            INTERNAL_DECOR_TYPES = new int[decorTypes.size()];
+            for (int i = 0; i < INTERNAL_DECOR_TYPES.length; i++) {
+                INTERNAL_DECOR_TYPES[i] = decorTypes.valueAt(i);
+            }
+        }
 
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];
@@ -1862,6 +1870,20 @@ public class DisplayPolicy {
             for (Info info : mInfoForRotation) {
                 info.mNeedUpdate = true;
             }
+        }
+
+        // TODO (b/235842600): Remove this method once we can treat task bar as navigation bar.
+        private static Insets calculateDecorInsetsWithInternalTypes(InsetsState state) {
+            final Rect frame = state.getDisplayFrame();
+            Insets insets = Insets.NONE;
+            for (int i = INTERNAL_DECOR_TYPES.length - 1; i >= 0; i--) {
+                final InsetsSource source = state.peekSource(INTERNAL_DECOR_TYPES[i]);
+                if (source != null) {
+                    insets = Insets.max(source.calculateInsets(frame, true /* ignoreVisibility */),
+                            insets);
+                }
+            }
+            return insets;
         }
     }
 
