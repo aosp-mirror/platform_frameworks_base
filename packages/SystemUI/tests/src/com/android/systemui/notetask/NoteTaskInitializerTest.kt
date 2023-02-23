@@ -15,15 +15,11 @@
  */
 package com.android.systemui.notetask
 
-import android.app.KeyguardManager
 import android.test.suitebuilder.annotation.SmallTest
 import android.view.KeyEvent
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.notetask.NoteTaskController.ShowNoteTaskUiEvent
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import org.junit.Before
@@ -48,27 +44,22 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     @Mock lateinit var commandQueue: CommandQueue
     @Mock lateinit var bubbles: Bubbles
-    @Mock lateinit var optionalBubbles: Optional<Bubbles>
     @Mock lateinit var noteTaskController: NoteTaskController
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        whenever(optionalBubbles.isPresent).thenReturn(true)
-        whenever(optionalBubbles.orElse(null)).thenReturn(bubbles)
     }
 
     private fun createNoteTaskInitializer(
         isEnabled: Boolean = true,
-        optionalKeyguardManager: Optional<KeyguardManager> = Optional.empty(),
+        bubbles: Bubbles? = this.bubbles,
     ): NoteTaskInitializer {
         return NoteTaskInitializer(
-            optionalBubbles = optionalBubbles,
-            noteTaskController = noteTaskController,
+            controller = noteTaskController,
             commandQueue = commandQueue,
+            optionalBubbles = Optional.ofNullable(bubbles),
             isEnabled = isEnabled,
-            optionalKeyguardManager = optionalKeyguardManager,
         )
     }
 
@@ -89,9 +80,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     @Test
     fun initialize_bubblesNotPresent_shouldDoNothing() {
-        whenever(optionalBubbles.isPresent).thenReturn(false)
-
-        createNoteTaskInitializer().initialize()
+        createNoteTaskInitializer(bubbles = null).initialize()
 
         verify(commandQueue, never()).addCallback(any())
     }
@@ -113,37 +102,12 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
     // region handleSystemKey
     @Test
-    fun handleSystemKey_receiveValidSystemKey_keyguardNotLocked_shouldShowNoteTaskWithUnlocked() {
-        val keyguardManager =
-            mock<KeyguardManager>() { whenever(isKeyguardLocked).thenReturn(false) }
-        createNoteTaskInitializer(optionalKeyguardManager = Optional.of(keyguardManager))
+    fun handleSystemKey_receiveValidSystemKey_shouldShowNoteTask() {
+        createNoteTaskInitializer()
             .callbacks
             .handleSystemKey(NoteTaskController.NOTE_TASK_KEY_EVENT)
 
-        verify(noteTaskController)
-            .showNoteTask(uiEvent = ShowNoteTaskUiEvent.NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON)
-    }
-
-    @Test
-    fun handleSystemKey_receiveValidSystemKey_keyguardLocked_shouldShowNoteTaskWithLocked() {
-        val keyguardManager =
-            mock<KeyguardManager>() { whenever(isKeyguardLocked).thenReturn(true) }
-        createNoteTaskInitializer(optionalKeyguardManager = Optional.of(keyguardManager))
-            .callbacks
-            .handleSystemKey(NoteTaskController.NOTE_TASK_KEY_EVENT)
-
-        verify(noteTaskController)
-            .showNoteTask(uiEvent = ShowNoteTaskUiEvent.NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED)
-    }
-
-    @Test
-    fun handleSystemKey_receiveValidSystemKey_nullKeyguardManager_shouldShowNoteTaskWithUnlocked() {
-        createNoteTaskInitializer(optionalKeyguardManager = Optional.empty())
-            .callbacks
-            .handleSystemKey(NoteTaskController.NOTE_TASK_KEY_EVENT)
-
-        verify(noteTaskController)
-            .showNoteTask(uiEvent = ShowNoteTaskUiEvent.NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON)
+        verify(noteTaskController).showNoteTask(entryPoint = NoteTaskEntryPoint.TAIL_BUTTON)
     }
 
     @Test

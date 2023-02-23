@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.notetask
 
-package com.android.systemui.notetask.quickaffordance
+/** Contextual information required to launch a Note Task by [NoteTaskController]. */
+data class NoteTaskInfo(
+    val packageName: String,
+    val uid: Int,
+    val entryPoint: NoteTaskEntryPoint? = null,
+    val isInMultiWindowMode: Boolean = false,
+    val isKeyguardLocked: Boolean = false,
+) {
 
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
-
-@Module
-interface NoteTaskQuickAffordanceModule {
-
-    @[Binds IntoSet]
-    fun NoteTaskQuickAffordanceConfig.bindNoteTaskQuickAffordance(): KeyguardQuickAffordanceConfig
+    val launchMode: NoteTaskLaunchMode =
+        if (isInMultiWindowMode || isKeyguardLocked) {
+            NoteTaskLaunchMode.Activity
+        } else {
+            NoteTaskLaunchMode.AppBubble
+        }
 }

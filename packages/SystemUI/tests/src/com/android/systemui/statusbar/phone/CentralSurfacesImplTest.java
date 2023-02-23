@@ -114,6 +114,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
@@ -259,6 +260,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private StatusBarWindowStateController mStatusBarWindowStateController;
     @Mock private UserSwitcherController mUserSwitcherController;
     @Mock private Bubbles mBubbles;
+    @Mock private NoteTaskController mNoteTaskController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
@@ -472,6 +474,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mWakefulnessLifecycle,
                 mStatusBarStateController,
                 Optional.of(mBubbles),
+                () -> mNoteTaskController,
                 mDeviceProvisionedController,
                 mNavigationBarController,
                 mAccessibilityFloatingMenuController,
