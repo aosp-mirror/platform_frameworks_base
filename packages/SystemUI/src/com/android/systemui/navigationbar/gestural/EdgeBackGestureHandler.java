@@ -580,7 +580,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             }
 
             // Register input event receiver
-            mInputMonitor = InputManager.getInstance().monitorGestureInput(
+            mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
                     "edge-swipe", mDisplayId);
             mInputEventReceiver = new InputChannelCompat.InputEventReceiver(
                     mInputMonitor.getInputChannel(), Looper.getMainLooper(),
@@ -1039,7 +1039,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 InputDevice.SOURCE_KEYBOARD);
 
         ev.setDisplayId(mContext.getDisplay().getDisplayId());
-        return InputManager.getInstance()
+        return mContext.getSystemService(InputManager.class)
                 .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
