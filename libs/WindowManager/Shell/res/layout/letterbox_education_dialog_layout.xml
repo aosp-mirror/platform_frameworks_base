@@ -69,6 +69,8 @@
                     android:text="@string/letterbox_education_dialog_title"
                     android:textAlignment="center"
                     android:textColor="@color/compat_controls_text"
+                    android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"
                     android:textSize="24sp"/>
 
                 <LinearLayout
@@ -95,10 +97,16 @@
                 </LinearLayout>
 
                 <Button
+                    android:fontFamily="@*android:string/config_bodyFontFamily"
+                    android:fontWeight="500"
+                    android:lineHeight="20dp"
+                    android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Small"
                     android:id="@+id/letterbox_education_dialog_dismiss_button"
+                    android:textStyle="bold"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="40dp"
+                    android:textSize="14sp"
                     android:background=
                         "@drawable/letterbox_education_dismiss_button_background_ripple"
                     android:text="@string/letterbox_education_got_it"
