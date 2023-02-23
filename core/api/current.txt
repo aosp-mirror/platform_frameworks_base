@@ -18285,7 +18285,7 @@ package android.hardware.camera2.params {
   public final class OutputConfiguration implements android.os.Parcelable {
     ctor public OutputConfiguration(@NonNull android.view.Surface);
     ctor public OutputConfiguration(int, @NonNull android.view.Surface);
-    ctor public OutputConfiguration(@NonNull android.util.Size, @NonNull Class<T>);
+    ctor public <T> OutputConfiguration(@NonNull android.util.Size, @NonNull Class<T>);
     method public void addSensorPixelModeUsed(int);
     method public void addSurface(@NonNull android.view.Surface);
     method @NonNull public static java.util.Collection<android.hardware.camera2.params.OutputConfiguration> createInstancesForMultiResolutionOutput(@NonNull android.hardware.camera2.MultiResolutionImageReader);
