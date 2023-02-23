@@ -99,7 +99,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
-import android.widget.Editor;
 import android.window.ImeOnBackInvokedDispatcher;
 import android.window.WindowOnBackInvokedDispatcher;
 
@@ -1553,7 +1552,11 @@ public final class InputMethodManager {
         if (fallbackContext == null) {
             return false;
         }
-        if (!isStylusHandwritingEnabled(fallbackContext)) {
+        if (Settings.Global.getInt(fallbackContext.getContentResolver(),
+                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
+            if (DEBUG) {
+                Log.d(TAG, "Stylus handwriting is not enabled in settings.");
+            }
             return false;
         }
         return IInputMethodManagerGlobalInvoker.isStylusHandwritingAvailableAsUser(userId);
@@ -2230,173 +2233,35 @@ public final class InputMethodManager {
      * @see #isStylusHandwritingAvailable()
      */
     public void startStylusHandwriting(@NonNull View view) {
-        startStylusHandwritingInternal(view, null /* delegatorPackageName */);
-    }
-
-    private boolean startStylusHandwritingInternal(
-            @NonNull View view, @Nullable String delegatorPackageName) {
-        Objects.requireNonNull(view);
-
         // Re-dispatch if there is a context mismatch.
         final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
         if (fallbackImm != null) {
-            fallbackImm.startStylusHandwritingInternal(view, delegatorPackageName);
+            fallbackImm.startStylusHandwriting(view);
         }
+        Objects.requireNonNull(view);
 
-        boolean useDelegation = !TextUtils.isEmpty(delegatorPackageName);
-        if (!isStylusHandwritingEnabled(view.getContext())) {
-            Log.w(TAG, "Stylus handwriting pref is disabled. "
-                    + "Ignoring calls to start stylus handwriting.");
-            return false;
+        if (Settings.Global.getInt(view.getContext().getContentResolver(),
+                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
+            Log.d(TAG, "Ignoring startStylusHandwriting(view) as stylus handwriting is disabled");
+            return;
         }
 
         checkFocus();
         synchronized (mH) {
             if (!hasServedByInputMethodLocked(view)) {
                 Log.w(TAG,
-                        "Ignoring startStylusHandwriting as view=" + view + " is not served.");
-                return false;
+                        "Ignoring startStylusHandwriting() as view=" + view + " is not served.");
+                return;
             }
             if (view.getViewRootImpl() != mCurRootView) {
-                Log.w(TAG,
-                        "Ignoring startStylusHandwriting: View's window does not have focus.");
-                return false;
+                Log.w(TAG, "Ignoring startStylusHandwriting: View's window does not have focus.");
+                return;
             }
-            if (useDelegation) {
-                return IInputMethodManagerGlobalInvoker.acceptStylusHandwritingDelegation(
-                        mClient, view.getContext().getOpPackageName(), delegatorPackageName);
-            } else {
-                IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
-            }
-            return false;
+
+            IInputMethodManagerGlobalInvoker.startStylusHandwriting(mClient);
+            // TODO(b/210039666): do we need any extra work for supporting non-native
+            //   UI toolkits?
         }
-    }
-
-    private boolean isStylusHandwritingEnabled(@NonNull Context context) {
-        if (Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.STYLUS_HANDWRITING_ENABLED, 0) == 0) {
-            Log.d(TAG, "Stylus handwriting pref is disabled.");
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Prepares delegation of starting stylus handwriting session to a different editor in same
-     * or different window than the view on which initial handwriting stroke was detected.
-     *
-     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
-     * its {@link InputConnection} is started. Calling this method starts buffering of stylus
-     * motion events until {@link #acceptStylusHandwritingDelegation(View)} is called, at which
-     * point the handwriting session can be started and the buffered stylus motion events will be
-     * delivered to the IME.
-     * e.g. Delegation can be used when initial handwriting stroke is
-     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
-     * {@link Editor} is on a different window.
-     *
-     * <p> Note: If an actual {@link Editor} capable of {@link InputConnection} is being scribbled
-     * upon using stylus, use {@link #startStylusHandwriting(View)} instead.</p>
-     *
-     * @param delegatorView the view that receives initial stylus stroke and delegates it to the
-     *  actual editor. Its window must {@link View#hasWindowFocus have focus}.
-     * @see #prepareStylusHandwritingDelegation(View, String)
-     * @see #acceptStylusHandwritingDelegation(View)
-     * @see #startStylusHandwriting(View)
-     */
-    public void prepareStylusHandwritingDelegation(@NonNull View delegatorView) {
-        prepareStylusHandwritingDelegation(
-                delegatorView, delegatorView.getContext().getOpPackageName());
-    }
-
-    /**
-     * Prepares delegation of starting stylus handwriting session to a different editor in same or a
-     * different window in a different package than the view on which initial handwriting stroke
-     * was detected.
-     *
-     * Delegation can be used to start stylus handwriting session before the {@link Editor} view or
-     * its {@link InputConnection} is started. Calling this method starts buffering of stylus
-     * motion events until {@link #acceptStylusHandwritingDelegation(View, String)} is called, at
-     * which point the handwriting session can be started and the buffered stylus motion events will
-     * be delivered to the IME.
-     * e.g. Delegation can be used when initial handwriting stroke is
-     * on a pseudo {@link Editor} like widget (with no {@link InputConnection}) but actual
-     * {@link Editor} is on a different window in the given package.
-     *
-     * <p>Note: If delegator and delegate are in same package use
-     * {@link #prepareStylusHandwritingDelegation(View)} instead.</p>
-     *
-     * @param delegatorView  the view that receives initial stylus stroke and delegates it to the
-     * actual editor. Its window must {@link View#hasWindowFocus have focus}.
-     * @param delegatePackageName package name that contains actual {@link Editor} which should
-     *  start stylus handwriting session by calling {@link #acceptStylusHandwritingDelegation}.
-     * @see #prepareStylusHandwritingDelegation(View)
-     * @see #acceptStylusHandwritingDelegation(View, String)
-     */
-    public void prepareStylusHandwritingDelegation(
-            @NonNull View delegatorView, @NonNull String delegatePackageName) {
-        Objects.requireNonNull(delegatorView);
-        Objects.requireNonNull(delegatePackageName);
-
-        // Re-dispatch if there is a context mismatch.
-        final InputMethodManager fallbackImm =
-                getFallbackInputMethodManagerIfNecessary(delegatorView);
-        if (fallbackImm != null) {
-            fallbackImm.prepareStylusHandwritingDelegation(delegatorView, delegatePackageName);
-        }
-
-        if (!isStylusHandwritingEnabled(delegatorView.getContext())) {
-            Log.w(TAG, "Stylus handwriting pref is disabled. "
-                    + "Ignoring prepareStylusHandwritingDelegation().");
-            return;
-        }
-        IInputMethodManagerGlobalInvoker.prepareStylusHandwritingDelegation(
-                mClient,
-                delegatePackageName,
-                delegatorView.getContext().getOpPackageName());
-    }
-
-    /**
-     * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
-     * initiation delegation was previously requested using
-     * {@link #prepareStylusHandwritingDelegation(View)} from the delegator.
-     *
-     * <p>Note: If delegator and delegate are in different application packages, use
-     * {@link #acceptStylusHandwritingDelegation(View, String)} instead.</p>
-     *
-     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
-     *  on which {@link #startStylusHandwriting(View)} will be called.
-     * @return {@code true} if view belongs to same application package as used in
-     *  {@link #prepareStylusHandwritingDelegation(View)} and handwriting session can start.
-     * @see #acceptStylusHandwritingDelegation(View, String)
-     * @see #prepareStylusHandwritingDelegation(View)
-     */
-    public boolean acceptStylusHandwritingDelegation(@NonNull View delegateView) {
-        return startStylusHandwritingInternal(
-                delegateView, delegateView.getContext().getOpPackageName());
-    }
-
-    /**
-     * Accepts and starts a stylus handwriting session on the delegate view, if handwriting
-     * initiation delegation was previously requested using
-     * {@link #prepareStylusHandwritingDelegation(View, String)} from te delegator and the view
-     * belongs to a specified delegate package.
-     *
-     * <p>Note: If delegator and delegate are in same application package use
-     * {@link #acceptStylusHandwritingDelegation(View)} instead.</p>
-     *
-     * @param delegateView delegate view capable of receiving input via {@link InputConnection}
-     *  on which {@link #startStylusHandwriting(View)} will be called.
-     * @param delegatorPackageName package name of the delegator that handled initial stylus stroke.
-     * @return {@code true} if view belongs to allowed delegate package declared in
-     *  {@link #prepareStylusHandwritingDelegation(View, String)} and handwriting session can start.
-     * @see #prepareStylusHandwritingDelegation(View, String)
-     * @see #acceptStylusHandwritingDelegation(View)
-     */
-    public boolean acceptStylusHandwritingDelegation(
-            @NonNull View delegateView, @NonNull String delegatorPackageName) {
-        Objects.requireNonNull(delegatorPackageName);
-
-        return startStylusHandwritingInternal(delegateView, delegatorPackageName);
     }
 
     /**
