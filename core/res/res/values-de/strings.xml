@@ -295,7 +295,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Zum persönlichen Profil wechseln"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>

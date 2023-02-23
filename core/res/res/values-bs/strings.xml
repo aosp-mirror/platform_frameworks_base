@@ -2041,7 +2041,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"IPAK OTVORI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Otkrivena je štetna aplikacija"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Dozvoliti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratan pristup"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratni pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dozvoliti"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke. Stoga pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju. Saznajte više"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
