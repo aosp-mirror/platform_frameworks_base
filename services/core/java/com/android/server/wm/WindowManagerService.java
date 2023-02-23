@@ -443,16 +443,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean ENABLE_FIXED_ROTATION_TRANSFORM =
             SystemProperties.getBoolean("persist.wm.fixed_rotation_transform", true);
 
-    /**
-     * Whether the device supports the WindowManager Extensions.
-     * OEMs can enable this by having their device config to inherit window_extensions.mk, such as:
-     * <pre>
-     * $(call inherit-product, $(SRC_TARGET_DIR)/product/window_extensions.mk)
-     * </pre>
-     */
-    static final boolean sWindowExtensionsEnabled =
-            SystemProperties.getBoolean("persist.wm.extensions.enabled", false);
-
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})
