@@ -993,7 +993,7 @@ final class LetterboxUiController {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(WindowState mainWindow) {
-        return isSurfaceReadyAndVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
+        return isSurfaceVisible(mainWindow) && mainWindow.areAppWindowBoundsLetterboxed()
                 // Check for FLAG_SHOW_WALLPAPER explicitly instead of using
                 // WindowContainer#showWallpaper because the later will return true when this
                 // activity is using blurred wallpaper for letterbox background.
@@ -1001,11 +1001,8 @@ final class LetterboxUiController {
     }
 
     @VisibleForTesting
-    boolean isSurfaceReadyAndVisible(WindowState mainWindow) {
-        boolean surfaceReady = mainWindow.isDrawn() // Regular case
-                // Waiting for relayoutWindow to call preserveSurface
-                || mainWindow.isDragResizeChanged();
-        return surfaceReady && (mActivityRecord.isVisible()
+    boolean isSurfaceVisible(WindowState mainWindow) {
+        return mainWindow.isOnScreen() && (mActivityRecord.isVisible()
                 || mActivityRecord.isVisibleRequested());
     }
 
