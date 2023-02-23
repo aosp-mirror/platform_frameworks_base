@@ -344,6 +344,7 @@ import android.window.TransitionInfo.AnimationOptions;
 import android.window.WindowContainerToken;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
@@ -508,7 +509,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private RemoteTransition mPendingRemoteTransition;
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
+    @GuardedBy("this")
     ActivityServiceConnectionsHolder mServiceConnectionsHolder; // Service connections.
+    /** @see android.content.Context#BIND_ADJUST_WITH_ACTIVITY */
+    volatile boolean mVisibleForServiceConnection;
     UriPermissionOwner uriPermissions; // current special URI access perms.
     WindowProcessController app;      // if non-null, hosting application
     private State mState;    // current state we are in
@@ -557,7 +561,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     long lastLaunchTime;    // time of last launch of this activity
     ComponentName requestedVrComponent; // the requested component for handling VR mode.
 
-    boolean inHistory;  // are we in the history task?
+    /** Whether this activity is reachable from hierarchy. */
+    volatile boolean inHistory;
     final ActivityTaskSupervisor mTaskSupervisor;
     final RootWindowContainer mRootWindowContainer;
 
@@ -1917,7 +1922,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
-    static @Nullable ActivityRecord forTokenLocked(IBinder token) {
+    /** Gets the corresponding record by the token. Note that it may not exist in the hierarchy. */
+    @Nullable
+    static ActivityRecord forToken(IBinder token) {
         if (token == null) return null;
         final Token activityToken;
         try {
@@ -1926,7 +1933,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG, "Bad activity token: " + token, e);
             return null;
         }
-        final ActivityRecord r = activityToken.mActivityRef.get();
+        return activityToken.mActivityRef.get();
+    }
+
+    static @Nullable ActivityRecord forTokenLocked(IBinder token) {
+        final ActivityRecord r = forToken(token);
         return r == null || r.getRootTask() == null ? null : r;
     }
 
@@ -4059,17 +4070,32 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mDisplayContent.getDisplayPolicy().removeRelaunchingApp(this);
     }
 
+    ActivityServiceConnectionsHolder getOrCreateServiceConnectionsHolder() {
+        synchronized (this) {
+            if (mServiceConnectionsHolder == null) {
+                mServiceConnectionsHolder = new ActivityServiceConnectionsHolder(this);
+            }
+            return mServiceConnectionsHolder;
+        }
+    }
+
     /**
      * Perform clean-up of service connections in an activity record.
      */
     private void cleanUpActivityServices() {
-        if (mServiceConnectionsHolder == null) {
-            return;
+        synchronized (this) {
+            if (mServiceConnectionsHolder == null) {
+                return;
+            }
+            // Throw away any services that have been bound by this activity.
+            mServiceConnectionsHolder.disconnectActivityFromServices();
+            // This activity record is removing, make sure not to disconnect twice.
+            mServiceConnectionsHolder = null;
         }
-        // Throw away any services that have been bound by this activity.
-        mServiceConnectionsHolder.disconnectActivityFromServices();
-        // This activity record is removing, make sure not to disconnect twice.
-        mServiceConnectionsHolder = null;
+    }
+
+    private void updateVisibleForServiceConnection() {
+        mVisibleForServiceConnection = mVisibleRequested || mState == RESUMED || mState == PAUSING;
     }
 
     /**
@@ -5155,6 +5181,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean setVisibleRequested(boolean visible) {
         if (!super.setVisibleRequested(visible)) return false;
         setInsetsFrozen(!visible);
+        updateVisibleForServiceConnection();
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
@@ -5660,6 +5687,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return;
             }
         }
+        updateVisibleForServiceConnection();
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);
         }
