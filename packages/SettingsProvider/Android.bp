@@ -48,6 +48,7 @@ android_test {
         "test/**/*.java",
         "src/android/provider/settings/backup/*",
         "src/android/provider/settings/validators/*",
+        "src/com/android/providers/settings/GenerationRegistry.java",
         "src/com/android/providers/settings/SettingsBackupAgent.java",
         "src/com/android/providers/settings/SettingsState.java",
         "src/com/android/providers/settings/SettingsHelper.java",
