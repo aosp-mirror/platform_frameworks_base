@@ -135,6 +135,39 @@ public class ClipboardManager extends android.text.ClipboardManager {
     }
 
     /**
+     * Determine if the Clipboard Access Notifications are enabled
+     *
+     * @return true if notifications are enabled, false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION)
+    public boolean areClipboardAccessNotificationsEnabled() {
+        try {
+            return mService.areClipboardAccessNotificationsEnabledForUser(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     *
+     * Set the enable state of the Clipboard Access Notifications
+     * @param enable Whether to enable notifications
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION)
+    public void setClipboardAccessNotificationsEnabled(boolean enable) {
+        try {
+            mService.setClipboardAccessNotificationsEnabledForUser(enable, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the current primary clip on the clipboard.  This is the clip that
      * is involved in normal cut and paste operations.
      *
