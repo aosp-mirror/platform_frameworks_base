@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Partea de sus: 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Partea de sus: 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Partea de jos pe ecran complet"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"Împarte în stânga"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"Împarte în dreapta"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"Împarte în sus"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"Împarte în jos"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Folosirea modului cu o mână"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Pentru a ieși, glisează în sus din partea de jos a ecranului sau atinge oriunde deasupra ferestrei aplicației"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Activează modul cu o mână"</string>
@@ -102,9 +98,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"Închide"</string>
     <string name="back_button_text" msgid="1469718707134137085">"Înapoi"</string>
     <string name="handle_text" msgid="1766582106752184456">"Ghidaj"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"Pictograma aplicației"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"Ecran complet"</string>
     <string name="desktop_text" msgid="1077633567027630454">"Modul desktop"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"Ecran împărțit"</string>
     <string name="more_button_text" msgid="3655388105592893530">"Mai multe"</string>
     <string name="float_button_text" msgid="9221657008391364581">"Flotantă"</string>
+    <string name="select_text" msgid="5139083974039906583">"Selectează"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"Captură de ecran"</string>
+    <string name="close_text" msgid="4986518933445178928">"Închide"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"Închide meniul"</string>
 </resources>

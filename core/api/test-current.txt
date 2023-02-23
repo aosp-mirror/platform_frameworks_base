@@ -1444,6 +1444,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
     field public static final String DISPLAY_CATEGORY_REAR = "android.hardware.display.category.REAR";
+    field public static final String HDR_OUTPUT_CONTROL_FLAG = "enable_hdr_output_control";
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
     field public static final int SWITCHING_TYPE_NONE = 0; // 0x0
     field public static final int SWITCHING_TYPE_RENDER_FRAME_RATE_ONLY = 3; // 0x3
@@ -1947,8 +1948,17 @@ package android.net {
 package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
+    method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
+  }
+
+}
+
+package android.net.wifi.sharedconnectivity.service {
+
+  public abstract class SharedConnectivityService extends android.app.Service {
+    method public void onBind();
   }
 
 }
@@ -3310,6 +3320,7 @@ package android.view {
 
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
+    method public static boolean hasWindowExtensionsEnabled();
     method public default void holdLock(android.os.IBinder, int);
     method public default boolean isGlobalKey(int);
     method public default boolean isTaskSnapshotSupported();
@@ -3732,7 +3743,7 @@ package android.window {
 
   public final class TaskFragmentCreationParams implements android.os.Parcelable {
     method @NonNull public android.os.IBinder getFragmentToken();
-    method @NonNull public android.graphics.Rect getInitialBounds();
+    method @NonNull public android.graphics.Rect getInitialRelativeBounds();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizer();
     method @NonNull public android.os.IBinder getOwnerToken();
     method public int getWindowingMode();
@@ -3742,7 +3753,7 @@ package android.window {
   public static final class TaskFragmentCreationParams.Builder {
     ctor public TaskFragmentCreationParams.Builder(@NonNull android.window.TaskFragmentOrganizerToken, @NonNull android.os.IBinder, @NonNull android.os.IBinder);
     method @NonNull public android.window.TaskFragmentCreationParams build();
-    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialBounds(@NonNull android.graphics.Rect);
+    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialRelativeBounds(@NonNull android.graphics.Rect);
     method @NonNull public android.window.TaskFragmentCreationParams.Builder setWindowingMode(int);
   }
 

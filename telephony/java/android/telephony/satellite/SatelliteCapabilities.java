@@ -30,7 +30,7 @@ public final class SatelliteCapabilities implements Parcelable {
     /**
      * List of technologies supported by the satellite modem.
      */
-    private Set<Integer> mSupportedRadioTechnologies;
+    @NonNull @SatelliteManager.NTRadioTechnology private Set<Integer> mSupportedRadioTechnologies;
 
     /**
      * Whether satellite modem is always on.
@@ -53,7 +53,8 @@ public final class SatelliteCapabilities implements Parcelable {
      */
     public SatelliteCapabilities(Set<Integer> supportedRadioTechnologies, boolean isAlwaysOn,
             boolean needsPointingToSatellite, boolean needsSeparateSimProfile) {
-        mSupportedRadioTechnologies = supportedRadioTechnologies;
+        mSupportedRadioTechnologies = supportedRadioTechnologies == null
+                ? new HashSet<>() : supportedRadioTechnologies;
         mIsAlwaysOn = isAlwaysOn;
         mNeedsPointingToSatellite = needsPointingToSatellite;
         mNeedsSeparateSimProfile = needsSeparateSimProfile;
@@ -126,7 +127,8 @@ public final class SatelliteCapabilities implements Parcelable {
     /**
      * @return The list of technologies supported by the satellite modem.
      */
-    @NonNull public Set<Integer> getSupportedRadioTechnologies() {
+    @NonNull @SatelliteManager.NTRadioTechnology public Set<Integer>
+            getSupportedRadioTechnologies() {
         return mSupportedRadioTechnologies;
     }
 

@@ -75,7 +75,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
     private final boolean mAllowBackgroundAuthentication;
-    private final boolean mIsKeyguardBypassEnabled;
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
     //  the state. We should think of a way to improve this in the future.
     @State
@@ -95,7 +94,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
-            boolean shouldVibrate, boolean isKeyguardBypassEnabled, int sensorStrength) {
+            boolean shouldVibrate, int sensorStrength) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 shouldVibrate, biometricLogger, biometricContext);
         mIsStrongBiometric = isStrongBiometric;
@@ -107,7 +106,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
         mAllowBackgroundAuthentication = allowBackgroundAuthentication;
-        mIsKeyguardBypassEnabled = isKeyguardBypassEnabled;
         mShouldUseLockoutTracker = lockoutTracker != null;
         mSensorStrength = sensorStrength;
     }
@@ -372,14 +370,6 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @State
     public int getState() {
         return mState;
-    }
-
-    /**
-     * @return true if the client supports bypass (e.g. passive auth such as face), and if it's
-     * enabled by the user.
-     */
-    public boolean isKeyguardBypassEnabled() {
-        return mIsKeyguardBypassEnabled;
     }
 
     @Override

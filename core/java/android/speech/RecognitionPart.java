@@ -55,7 +55,7 @@ public final class RecognitionPart implements Parcelable {
     public static final int CONFIDENCE_LEVEL_LOW = 1;
 
     /** Second-lowest level of confidence out of five levels. */
-    public static final int CONFIDENCE_LEVEL_LOW_MEDIUM = 2;
+    public static final int CONFIDENCE_LEVEL_MEDIUM_LOW = 2;
 
     /** Medium level of confidence out of five levels. */
     public static final int CONFIDENCE_LEVEL_MEDIUM = 3;
@@ -152,7 +152,7 @@ public final class RecognitionPart implements Parcelable {
     @android.annotation.IntDef(prefix = "CONFIDENCE_LEVEL_", value = {
         CONFIDENCE_LEVEL_UNKNOWN,
         CONFIDENCE_LEVEL_LOW,
-        CONFIDENCE_LEVEL_LOW_MEDIUM,
+        CONFIDENCE_LEVEL_MEDIUM_LOW,
         CONFIDENCE_LEVEL_MEDIUM,
         CONFIDENCE_LEVEL_MEDIUM_HIGH,
         CONFIDENCE_LEVEL_HIGH
@@ -169,8 +169,8 @@ public final class RecognitionPart implements Parcelable {
                     return "CONFIDENCE_LEVEL_UNKNOWN";
             case CONFIDENCE_LEVEL_LOW:
                     return "CONFIDENCE_LEVEL_LOW";
-            case CONFIDENCE_LEVEL_LOW_MEDIUM:
-                    return "CONFIDENCE_LEVEL_LOW_MEDIUM";
+            case CONFIDENCE_LEVEL_MEDIUM_LOW:
+                    return "CONFIDENCE_LEVEL_MEDIUM_LOW";
             case CONFIDENCE_LEVEL_MEDIUM:
                     return "CONFIDENCE_LEVEL_MEDIUM";
             case CONFIDENCE_LEVEL_MEDIUM_HIGH:
@@ -196,7 +196,7 @@ public final class RecognitionPart implements Parcelable {
 
         if (!(mConfidenceLevel == CONFIDENCE_LEVEL_UNKNOWN)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_LOW)
-                && !(mConfidenceLevel == CONFIDENCE_LEVEL_LOW_MEDIUM)
+                && !(mConfidenceLevel == CONFIDENCE_LEVEL_MEDIUM_LOW)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_MEDIUM)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_MEDIUM_HIGH)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_HIGH)) {
@@ -204,7 +204,7 @@ public final class RecognitionPart implements Parcelable {
                     "confidenceLevel was " + mConfidenceLevel + " but must be one of: "
                             + "CONFIDENCE_LEVEL_UNKNOWN(" + CONFIDENCE_LEVEL_UNKNOWN + "), "
                             + "CONFIDENCE_LEVEL_LOW(" + CONFIDENCE_LEVEL_LOW + "), "
-                            + "CONFIDENCE_LEVEL_LOW_MEDIUM(" + CONFIDENCE_LEVEL_LOW_MEDIUM + "), "
+                            + "CONFIDENCE_LEVEL_MEDIUM_LOW(" + CONFIDENCE_LEVEL_MEDIUM_LOW + "), "
                             + "CONFIDENCE_LEVEL_MEDIUM(" + CONFIDENCE_LEVEL_MEDIUM + "), "
                             + "CONFIDENCE_LEVEL_MEDIUM_HIGH(" + CONFIDENCE_LEVEL_MEDIUM_HIGH + "), "
                             + "CONFIDENCE_LEVEL_HIGH(" + CONFIDENCE_LEVEL_HIGH + ")");
@@ -344,7 +344,7 @@ public final class RecognitionPart implements Parcelable {
 
         if (!(mConfidenceLevel == CONFIDENCE_LEVEL_UNKNOWN)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_LOW)
-                && !(mConfidenceLevel == CONFIDENCE_LEVEL_LOW_MEDIUM)
+                && !(mConfidenceLevel == CONFIDENCE_LEVEL_MEDIUM_LOW)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_MEDIUM)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_MEDIUM_HIGH)
                 && !(mConfidenceLevel == CONFIDENCE_LEVEL_HIGH)) {
@@ -352,7 +352,7 @@ public final class RecognitionPart implements Parcelable {
                     "confidenceLevel was " + mConfidenceLevel + " but must be one of: "
                             + "CONFIDENCE_LEVEL_UNKNOWN(" + CONFIDENCE_LEVEL_UNKNOWN + "), "
                             + "CONFIDENCE_LEVEL_LOW(" + CONFIDENCE_LEVEL_LOW + "), "
-                            + "CONFIDENCE_LEVEL_LOW_MEDIUM(" + CONFIDENCE_LEVEL_LOW_MEDIUM + "), "
+                            + "CONFIDENCE_LEVEL_MEDIUM_LOW(" + CONFIDENCE_LEVEL_MEDIUM_LOW + "), "
                             + "CONFIDENCE_LEVEL_MEDIUM(" + CONFIDENCE_LEVEL_MEDIUM + "), "
                             + "CONFIDENCE_LEVEL_MEDIUM_HIGH(" + CONFIDENCE_LEVEL_MEDIUM_HIGH + "), "
                             + "CONFIDENCE_LEVEL_HIGH(" + CONFIDENCE_LEVEL_HIGH + ")");
@@ -474,10 +474,10 @@ public final class RecognitionPart implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1676294616910L,
+            time = 1677008539189L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/speech/RecognitionPart.java",
-            inputSignatures = "public static final  int CONFIDENCE_LEVEL_UNKNOWN\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_LOW_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\nprivate final @android.annotation.NonNull java.lang.String mRawText\nprivate final @android.annotation.Nullable java.lang.String mFormattedText\nprivate final  long mTimestampMillis\nprivate final @android.speech.RecognitionPart.ConfidenceLevel int mConfidenceLevel\nprivate static  java.lang.String defaultFormattedText()\nprivate static  long defaultTimestampMillis()\nprivate static @android.speech.RecognitionPart.ConfidenceLevel int defaultConfidenceLevel()\nprivate  void onConstructed()\nclass RecognitionPart extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.speech.RecognitionPart.Builder setFormattedText(java.lang.String)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genToString=true)\npublic @android.annotation.NonNull android.speech.RecognitionPart.Builder setFormattedText(java.lang.String)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "public static final  int CONFIDENCE_LEVEL_UNKNOWN\npublic static final  int CONFIDENCE_LEVEL_LOW\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_LOW\npublic static final  int CONFIDENCE_LEVEL_MEDIUM\npublic static final  int CONFIDENCE_LEVEL_MEDIUM_HIGH\npublic static final  int CONFIDENCE_LEVEL_HIGH\nprivate final @android.annotation.NonNull java.lang.String mRawText\nprivate final @android.annotation.Nullable java.lang.String mFormattedText\nprivate final  long mTimestampMillis\nprivate final @android.speech.RecognitionPart.ConfidenceLevel int mConfidenceLevel\nprivate static  java.lang.String defaultFormattedText()\nprivate static  long defaultTimestampMillis()\nprivate static @android.speech.RecognitionPart.ConfidenceLevel int defaultConfidenceLevel()\nprivate  void onConstructed()\nclass RecognitionPart extends java.lang.Object implements [android.os.Parcelable]\npublic @android.annotation.NonNull android.speech.RecognitionPart.Builder setFormattedText(java.lang.String)\nclass BaseBuilder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genToString=true)\npublic @android.annotation.NonNull android.speech.RecognitionPart.Builder setFormattedText(java.lang.String)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

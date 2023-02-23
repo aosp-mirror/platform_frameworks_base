@@ -31,6 +31,7 @@ import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
@@ -665,19 +666,20 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
-            int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
-            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
+            int cookie, @NonNull ClientMonitorCallbackConverter receiver,
+            @NonNull FaceAuthenticateOptions options, long requestId, boolean restricted,
+            int statsClient, boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
+            final int userId = options.getUserId();
             scheduleUpdateActiveUserWithoutHandler(userId);
 
             final boolean isStrongBiometric = Utils.isStrongBiometric(mSensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, requestId, receiver, userId, operationId, restricted,
-                    opPackageName, cookie, false /* requireConfirmation */, mSensorId,
+                    options.getOpPackageName(), cookie, false /* requireConfirmation */, mSensorId,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric, mLockoutTracker,
-                    mUsageStats, allowBackgroundAuthentication, isKeyguardBypassEnabled,
+                    mUsageStats, allowBackgroundAuthentication,
                     Utils.getCurrentStrength(mSensorId));
             mScheduler.scheduleClientMonitor(client);
         });
@@ -685,14 +687,13 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
-            int userId, int cookie, @NonNull ClientMonitorCallbackConverter receiver,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled) {
+            int cookie, @NonNull ClientMonitorCallbackConverter receiver,
+            @NonNull FaceAuthenticateOptions options, boolean restricted, int statsClient,
+            boolean allowBackgroundAuthentication) {
         final long id = mRequestCounter.incrementAndGet();
 
-        scheduleAuthenticate(sensorId, token, operationId, userId, cookie, receiver,
-                opPackageName, id, restricted, statsClient,
-                allowBackgroundAuthentication, isKeyguardBypassEnabled);
+        scheduleAuthenticate(sensorId, token, operationId, cookie, receiver,
+                options, id, restricted, statsClient, allowBackgroundAuthentication);
 
         return id;
     }

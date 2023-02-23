@@ -136,7 +136,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession>
                 null /* lockoutCache */,
                 allowBackgroundAuthentication,
                 false /* shouldVibrate */,
-                false /* isKeyguardBypassEnabled */,
                 biometricStrength);
         setRequestId(requestId);
         mSensorOverlays = new SensorOverlays(udfpsOverlayController,

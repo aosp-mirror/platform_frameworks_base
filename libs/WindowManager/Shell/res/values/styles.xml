@@ -87,6 +87,9 @@
         <item name="android:textAppearance">
             @*android:style/TextAppearance.DeviceDefault.Headline
         </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamilyMedium
+        </item>
     </style>
 
     <style name="RestartDialogBodyText">
@@ -97,24 +100,44 @@
         <item name="android:textAppearance">
             @*android:style/TextAppearance.DeviceDefault.Body2
         </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamily
+        </item>
     </style>
 
     <style name="RestartDialogCheckboxText">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:lineSpacingExtra">4sp</item>
-        <item name="android:textAppearance">@*android:style/TextAppearance.DeviceDefault</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Headline
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamilyMedium
+        </item>
     </style>
 
     <style name="RestartDialogDismissButton">
         <item name="android:lineSpacingExtra">2sp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Body2
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamily
+        </item>
     </style>
 
     <style name="RestartDialogConfirmButton">
         <item name="android:lineSpacingExtra">2sp</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textAppearance">
+            @*android:style/TextAppearance.DeviceDefault.Body2
+        </item>
+        <item name="android:fontFamily">
+            @*android:string/config_bodyFontFamily
+        </item>
     </style>
 </resources>

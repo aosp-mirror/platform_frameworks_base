@@ -209,6 +209,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Особисті додатки заблоковано, доки ви не ввімкнете робочий профіль"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Особисті додатки буде заблоковано <xliff:g id="DATE">%1$s</xliff:g> о <xliff:g id="TIME">%2$s</xliff:g>. Ваш ІТ-адміністратор не дозволяє, щоб робочий профіль був неактивний більше ніж <xliff:g id="NUMBER">%3$d</xliff:g> дн."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Увімкнути"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Дзвінки та повідомлення вимкнено"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Ви призупинили робочі додатки. Телефонні дзвінки й текстові повідомлення не надходитимуть."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Увімкнути робочі додатки"</string>
     <string name="me" msgid="6207584824693813140">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Парам. пристрою"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Опції Android TV"</string>
@@ -340,6 +343,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Може фіксувати жести на сканері відбитків пальців."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Робити знімки екрана"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Може робити знімки екрана."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> (попередній перегляд)"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"вимикати чи змін. рядок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дозволяє програмі вимикати рядок стану чи додавати та видаляти піктограми системи."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"відображатися як рядок стану"</string>
@@ -1360,8 +1364,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Режим PTP через USB ввімкнено"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Режим USB-модема ввімкнено"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режим MIDI через USB ввімкнено"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Пристрій підключено як веб-камеру"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Під’єднано USB-аксесуар"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Торкніться, щоб переглянути більше опцій."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Під’єднаний пристрій заряджається. Торкніться, щоб побачити більше опцій."</string>
@@ -1710,8 +1713,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Інверсія кольорів"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Корекція кольору"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим керування однією рукою"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Додаткове зменшення яскравості"</string>

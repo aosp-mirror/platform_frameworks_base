@@ -33,5 +33,5 @@ oneway interface ISatelliteStateCallback {
      *
      * @param state The current satellite modem state.
      */
-    void onSatelliteModemStateChange(in int state);
+    void onSatelliteModemStateChanged(in int state);
 }

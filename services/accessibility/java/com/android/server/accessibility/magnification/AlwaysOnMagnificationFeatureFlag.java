@@ -16,9 +16,12 @@
 
 package com.android.server.accessibility.magnification;
 
+import android.annotation.NonNull;
 import android.provider.DeviceConfig;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.concurrent.Executor;
 
 /**
  * Encapsulates the feature flags for always on magnification. {@see DeviceConfig}
@@ -49,5 +52,40 @@ public class AlwaysOnMagnificationFeatureFlag {
                 FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION,
                 Boolean.toString(isEnabled),
                 /* makeDefault= */ false);
+    }
+
+    /**
+     * Adds a listener for when the feature flag changes.
+     *
+     * <p>{@see DeviceConfig#addOnPropertiesChangedListener(
+     * String, Executor, DeviceConfig.OnPropertiesChangedListener)}
+     */
+    @NonNull
+    public static DeviceConfig.OnPropertiesChangedListener addOnChangedListener(
+            @NonNull Executor executor, @NonNull Runnable listener) {
+        DeviceConfig.OnPropertiesChangedListener onChangedListener =
+                properties -> {
+                    if (properties.getKeyset().contains(
+                            FEATURE_NAME_ENABLE_ALWAYS_ON_MAGNIFICATION)) {
+                        listener.run();
+                    }
+                };
+        DeviceConfig.addOnPropertiesChangedListener(
+                NAMESPACE,
+                executor,
+                onChangedListener);
+
+        return onChangedListener;
+    }
+
+    /**
+     * Remove a listener for when the feature flag changes.
+     *
+     * <p>{@see DeviceConfig#addOnPropertiesChangedListener(String, Executor,
+     * DeviceConfig.OnPropertiesChangedListener)}
+     */
+    public static void removeOnChangedListener(
+            @NonNull DeviceConfig.OnPropertiesChangedListener onChangedListener) {
+        DeviceConfig.removeOnPropertiesChangedListener(onChangedListener);
     }
 }

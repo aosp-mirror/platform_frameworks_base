@@ -484,6 +484,51 @@ public class ClipboardService extends SystemService {
                     sourcePackage);
         }
 
+        @Override
+        public boolean areClipboardAccessNotificationsEnabledForUser(int userId) {
+            int result = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("areClipboardAccessNotificationsEnable requires "
+                        + "permission MANAGE_CLIPBOARD_ACCESS_NOTIFICATION");
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                return Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                        Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS,
+                        getDefaultClipboardAccessNotificationsSetting(), userId) != 0;
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
+        @Override
+        public void setClipboardAccessNotificationsEnabledForUser(boolean enable, int userId) {
+            int result = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("areClipboardAccessNotificationsEnable requires "
+                        + "permission MANAGE_CLIPBOARD_ACCESS_NOTIFICATION");
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                ContentResolver resolver = getContext()
+                        .createContextAsUser(UserHandle.of(userId), 0).getContentResolver();
+                Settings.Secure.putInt(resolver,
+                        Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, (enable ? 1 : 0));
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
+        private int getDefaultClipboardAccessNotificationsSetting() {
+            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
+                    ClipboardManager.DEVICE_CONFIG_SHOW_ACCESS_NOTIFICATIONS,
+                    ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS) ? 1 : 0;
+        }
+
         private void checkAndSetPrimaryClip(
                 ClipData clip,
                 String callingPackage,

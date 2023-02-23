@@ -16,14 +16,19 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.content.Context
 import android.content.res.ColorStateList
 import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
 import android.view.View
+import android.util.Log
+import com.android.keyguard.KeyguardConstants
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.DejankUtils
+import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -60,8 +65,9 @@ constructor(
     private val primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor,
     private val falsingCollector: FalsingCollector,
     private val dismissCallbackRegistry: DismissCallbackRegistry,
+    private val context: Context,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     keyguardBypassController: KeyguardBypassController,
-    keyguardUpdateMonitor: KeyguardUpdateMonitor,
 ) {
     /** Whether we want to wait for face auth. */
     private val primaryBouncerFaceDelay =
@@ -88,7 +94,6 @@ constructor(
     }
 
     val keyguardAuthenticated: Flow<Boolean> = repository.keyguardAuthenticated.filterNotNull()
-    val screenTurnedOff: Flow<Unit> = repository.onScreenTurnedOff.filter { it }.map {}
     val show: Flow<KeyguardBouncerModel> = repository.primaryBouncerShow.filterNotNull()
     val hide: Flow<Unit> = repository.primaryBouncerHide.filter { it }.map {}
     val startingToHide: Flow<Unit> = repository.primaryBouncerStartingToHide.filter { it }.map {}
@@ -113,6 +118,24 @@ constructor(
         }
     /** Allow for interaction when just about fully visible */
     val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
+    val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
+
+    init {
+        keyguardUpdateMonitor.registerCallback(
+            object : KeyguardUpdateMonitorCallback() {
+                override fun onBiometricRunningStateChanged(
+                    running: Boolean,
+                    biometricSourceType: BiometricSourceType?
+                ) {
+                    updateSideFpsVisibility()
+                }
+
+                override fun onStrongAuthStateChanged(userId: Int) {
+                    updateSideFpsVisibility()
+                }
+            }
+        )
+    }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
     // TODO(b/243695312): Encapsulate all of the show logic for the bouncer.
@@ -120,7 +143,6 @@ constructor(
     @JvmOverloads
     fun show(isScrimmed: Boolean) {
         // Reset some states as we show the bouncer.
-        repository.setOnScreenTurnedOff(false)
         repository.setKeyguardAuthenticated(null)
         repository.setPrimaryHide(false)
         repository.setPrimaryStartingToHide(false)
@@ -254,11 +276,6 @@ constructor(
         repository.setKeyguardAuthenticated(strongAuth)
     }
 
-    /** Tell the bouncer the screen has turned off. */
-    fun onScreenTurnedOff() {
-        repository.setOnScreenTurnedOff(true)
-    }
-
     /** Update the position of the bouncer when showing. */
     fun setKeyguardPosition(position: Float) {
         repository.setKeyguardPosition(position)
@@ -291,6 +308,35 @@ constructor(
             repository.setPrimaryStartDisappearAnimation(null)
         }
         repository.setPrimaryStartDisappearAnimation(finishRunnable)
+    }
+
+    /** Determine whether to show the side fps animation. */
+    fun updateSideFpsVisibility() {
+        val sfpsEnabled: Boolean =
+            context.resources.getBoolean(R.bool.config_show_sidefps_hint_on_bouncer)
+        val fpsDetectionRunning: Boolean = keyguardUpdateMonitor.isFingerprintDetectionRunning
+        val isUnlockingWithFpAllowed: Boolean =
+            keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed
+        val bouncerVisible = repository.primaryBouncerVisible.value
+        val toShow =
+            (repository.primaryBouncerVisible.value &&
+                sfpsEnabled &&
+                fpsDetectionRunning &&
+                isUnlockingWithFpAllowed &&
+                !isAnimatingAway())
+
+        if (KeyguardConstants.DEBUG) {
+            Log.d(
+                TAG,
+                ("sideFpsToShow=$toShow\n" +
+                    "bouncerVisible=$bouncerVisible\n" +
+                    "configEnabled=$sfpsEnabled\n" +
+                    "fpsDetectionRunning=$fpsDetectionRunning\n" +
+                    "isUnlockingWithFpAllowed=$isUnlockingWithFpAllowed\n" +
+                    "isAnimatingAway=${isAnimatingAway()}")
+            )
+        }
+        repository.setSideFpsShowing(toShow)
     }
 
     /** Returns whether bouncer is fully showing. */
@@ -335,5 +381,9 @@ constructor(
     private fun cancelShowRunnable() {
         DejankUtils.removeCallbacks(showRunnable)
         mainHandler.removeCallbacks(showRunnable)
+    }
+
+    companion object {
+        private const val TAG = "PrimaryBouncerInteractor"
     }
 }

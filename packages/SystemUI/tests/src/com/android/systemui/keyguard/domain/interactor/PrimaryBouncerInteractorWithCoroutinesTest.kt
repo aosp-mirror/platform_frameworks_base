@@ -26,7 +26,6 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
-import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -44,7 +43,6 @@ import org.mockito.MockitoAnnotations
 class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardBouncerRepository
     @Mock private lateinit var bouncerView: BouncerView
-    @Mock private lateinit var bouncerViewDelegate: BouncerViewDelegate
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
     @Mock private lateinit var primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor
@@ -69,8 +67,9 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
                 primaryBouncerCallbackInteractor,
                 falsingCollector,
                 dismissCallbackRegistry,
-                keyguardBypassController,
+                context,
                 keyguardUpdateMonitor,
+                keyguardBypassController,
             )
     }
 

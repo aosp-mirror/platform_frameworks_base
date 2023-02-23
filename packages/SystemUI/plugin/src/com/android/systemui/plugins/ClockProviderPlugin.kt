@@ -113,7 +113,7 @@ interface ClockEvents {
     fun onColorPaletteChanged(resources: Resources) {}
 
     /** Call whenever the weather data should update */
-    fun onWeatherDataChanged(data: Weather) {}
+    fun onWeatherDataChanged(data: WeatherData) {}
 }
 
 /** Methods which trigger various clock animations */

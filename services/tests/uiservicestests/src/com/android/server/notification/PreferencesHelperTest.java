@@ -57,6 +57,7 @@ import static junit.framework.Assert.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -1576,6 +1577,47 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 new NotificationChannel("bananas", "bananas", IMPORTANCE_MAX), true, false));
     }
 
+    @Test
+    public void testUpdateChannel_downgradeImportance() {
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_DEFAULT),
+                true, false);
+
+        assertTrue(mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_LOW), true, false));
+    }
+
+    @Test
+    public void testUpdateChannel_upgradeImportance_ignored() {
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_DEFAULT),
+                true, false);
+
+        assertFalse(mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_MAX), true, false));
+    }
+
+    @Test
+    public void testUpdateChannel_badImportance() {
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                new NotificationChannel("bananas", "bananas", IMPORTANCE_DEFAULT),
+                true, false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                        new NotificationChannel("bananas", "bananas", IMPORTANCE_NONE - 1), true,
+                        false));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                        new NotificationChannel("bananas", "bananas", IMPORTANCE_UNSPECIFIED), true,
+                        false));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1,
+                        new NotificationChannel("bananas", "bananas", IMPORTANCE_MAX + 1), true,
+                        false));
+    }
 
     @Test
     public void testUpdate() throws Exception {

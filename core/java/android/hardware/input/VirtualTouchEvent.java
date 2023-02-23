@@ -18,6 +18,7 @@ package android.hardware.input;
 
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
@@ -81,6 +82,10 @@ public final class VirtualTouchEvent implements Parcelable {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {}
+
+    // The maximum number of pointers that can be touching the screen at once. (See MAX_POINTERS
+    // in frameworks/native/include/input/Input.h)
+    private static final int MAX_POINTERS = 16;
 
     private final int mPointerId;
     private final @ToolType int mToolType;
@@ -214,9 +219,17 @@ public final class VirtualTouchEvent implements Parcelable {
         /**
          * Sets the pointer id of the event.
          *
+         * <p>A Valid pointer id need to be in the range of 0 to 15.
+         *
          * @return this builder, to allow for chaining of calls
          */
-        public @NonNull Builder setPointerId(int pointerId) {
+        public @NonNull Builder setPointerId(
+                @IntRange(from = 0, to = MAX_POINTERS - 1) int pointerId) {
+            if (pointerId < 0 || pointerId > 15) {
+                throw new IllegalArgumentException(
+                        "The pointer id must be in the range 0 - " + (MAX_POINTERS - 1)
+                                + "inclusive, but was: " + pointerId);
+            }
             mPointerId = pointerId;
             return this;
         }

@@ -177,6 +177,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     public static final int FLUSH_REASON_SESSION_CONNECTED = 7;
     /** @hide */
     public static final int FLUSH_REASON_FORCE_FLUSH = 8;
+    /** @hide */
+    public static final int FLUSH_REASON_VIEW_TREE_APPEARING = 9;
+    /** @hide */
+    public static final int FLUSH_REASON_VIEW_TREE_APPEARED = 10;
 
     @ChangeId
     @EnabledSince(targetSdkVersion = UPSIDE_DOWN_CAKE)
@@ -191,7 +195,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             FLUSH_REASON_IDLE_TIMEOUT,
             FLUSH_REASON_TEXT_CHANGE_TIMEOUT,
             FLUSH_REASON_SESSION_CONNECTED,
-            FLUSH_REASON_FORCE_FLUSH
+            FLUSH_REASON_FORCE_FLUSH,
+            FLUSH_REASON_VIEW_TREE_APPEARING,
+            FLUSH_REASON_VIEW_TREE_APPEARED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FlushReason{}
@@ -671,6 +677,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
                 return "CONNECTED";
             case FLUSH_REASON_FORCE_FLUSH:
                 return "FORCE_FLUSH";
+            case FLUSH_REASON_VIEW_TREE_APPEARING:
+                return "VIEW_TREE_APPEARING";
+            case FLUSH_REASON_VIEW_TREE_APPEARED:
+                return "VIEW_TREE_APPEARED";
             default:
                 return "UNKOWN-" + reason;
         }

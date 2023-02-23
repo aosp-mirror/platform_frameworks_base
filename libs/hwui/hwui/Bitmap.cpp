@@ -464,7 +464,7 @@ bool Bitmap::compress(JavaCompressFormat format, int32_t quality, SkWStream* str
         SkBitmap baseBitmap = getSkBitmap();
         SkBitmap gainmapBitmap = gainmap()->bitmap->getSkBitmap();
         SkJpegEncoder::Options options{.fQuality = quality};
-        return SkJpegGainmapEncoder::EncodeJpegR(stream, baseBitmap.pixmap(), options,
+        return SkJpegGainmapEncoder::EncodeHDRGM(stream, baseBitmap.pixmap(), options,
                                                  gainmapBitmap.pixmap(), options, gainmap()->info);
     }
 #endif

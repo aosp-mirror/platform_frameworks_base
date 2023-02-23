@@ -143,8 +143,8 @@ public class MockingOomAdjusterTests {
     private static final String MOCKAPP5_PROCESSNAME = "test #5";
     private static final String MOCKAPP5_PACKAGENAME = "com.android.test.test5";
     private static final int MOCKAPP2_UID_OTHER = MOCKAPP2_UID + UserHandle.PER_USER_RANGE;
-    private static final int FIRST_CACHED_ADJ = ProcessList.CACHED_APP_MIN_ADJ
-            + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+    private static int sFirstCachedAdj = ProcessList.CACHED_APP_MIN_ADJ
+                                          + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
     private static Context sContext;
     private static PackageManagerInternal sPackageManagerInternal;
     private static ActivityManagerService sService;
@@ -208,6 +208,9 @@ public class MockingOomAdjusterTests {
                 new ActiveUids(sService, false));
         sService.mOomAdjuster.mAdjSeq = 10000;
         sService.mWakefulness = new AtomicInteger(PowerManagerInternal.WAKEFULNESS_AWAKE);
+        if (sService.mConstants.USE_TIERED_CACHED_ADJ) {
+            sFirstCachedAdj = ProcessList.CACHED_APP_MIN_ADJ + 10;
+        }
     }
 
     @AfterClass
@@ -834,7 +837,7 @@ public class MockingOomAdjusterTests {
         updateOomAdj(client, app);
         doReturn(null).when(sService).getTopApp();
 
-        assertProcStates(app, PROCESS_STATE_SERVICE, FIRST_CACHED_ADJ, SCHED_GROUP_BACKGROUND);
+        assertProcStates(app, PROCESS_STATE_SERVICE, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -882,7 +885,7 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, FIRST_CACHED_ADJ, SCHED_GROUP_BACKGROUND);
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1286,7 +1289,7 @@ public class MockingOomAdjusterTests {
         bindProvider(app, app, null, null, false);
         updateOomAdj(app);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, FIRST_CACHED_ADJ, SCHED_GROUP_BACKGROUND);
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1301,7 +1304,7 @@ public class MockingOomAdjusterTests {
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
         updateOomAdj(app, client);
 
-        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, FIRST_CACHED_ADJ, SCHED_GROUP_BACKGROUND);
+        assertProcStates(app, PROCESS_STATE_CACHED_EMPTY, sFirstCachedAdj, SCHED_GROUP_BACKGROUND);
     }
 
     @SuppressWarnings("GuardedBy")
@@ -2378,8 +2381,12 @@ public class MockingOomAdjusterTests {
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, false));
         final int userOwner = 0;
         final int userOther = 1;
-        final int cachedAdj1 = CACHED_APP_MIN_ADJ + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
-        final int cachedAdj2 = cachedAdj1 + ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
+        final int cachedAdj1 = sService.mConstants.USE_TIERED_CACHED_ADJ
+                               ? CACHED_APP_MIN_ADJ + 10
+                               : CACHED_APP_MIN_ADJ + ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
+        final int cachedAdj2 = sService.mConstants.USE_TIERED_CACHED_ADJ
+                               ? CACHED_APP_MIN_ADJ + 10
+                               : cachedAdj1 + ProcessList.CACHED_APP_IMPORTANCE_LEVELS * 2;
         doReturn(userOwner).when(sService.mUserController).getCurrentUserId();
 
         final ArrayList<ProcessRecord> lru = sService.mProcessList.getLruProcessesLOSP();

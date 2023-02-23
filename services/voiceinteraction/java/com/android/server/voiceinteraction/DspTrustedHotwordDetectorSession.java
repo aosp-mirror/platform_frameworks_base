@@ -126,7 +126,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                         enforcePermissionsForDataDelivery();
                         enforceExtraKeyphraseIdNotLeaked(result, recognitionEvent);
                     } catch (SecurityException e) {
-                        Slog.i(TAG, "Ignoring #onDetected due to a SecurityException", e);
+                        Slog.w(TAG, "Ignoring #onDetected due to a SecurityException", e);
                         HotwordMetricsLogger.writeKeyphraseTriggerEvent(
                                 HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
                                 METRICS_KEYPHRASE_TRIGGERED_DETECT_SECURITY_EXCEPTION,
@@ -141,6 +141,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     try {
                         newResult = mHotwordAudioStreamCopier.startCopyingAudioStreams(result);
                     } catch (IOException e) {
+                        Slog.w(TAG, "Ignoring #onDetected due to a IOException", e);
                         externalCallback.onDetectionFailure(new HotwordDetectionServiceFailure(
                                 CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
                                 "Copy audio stream failure."));
