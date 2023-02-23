@@ -154,13 +154,6 @@ public class BatteryManager {
 
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
-     * Int value representing the measured battery state of health (remaining
-     * estimate full charge capacity relative to the rated capacity in %).
-     */
-    public static final String EXTRA_STATE_OF_HEALTH = "android.os.extra.STATE_OF_HEALTH";
-
-    /**
-     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * Int value representing the battery charging status.
      */
     public static final String EXTRA_CHARGING_STATUS = "android.os.extra.CHARGING_STATUS";
@@ -357,6 +350,20 @@ public class BatteryManager {
     @RequiresPermission(permission.BATTERY_STATS)
     @SystemApi
     public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9;
+
+    /**
+     *
+     * Percentage representing the measured battery state of health (remaining
+     * estimated full charge capacity relative to the rated capacity in %).
+     *
+     * <p class="note">
+     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(permission.BATTERY_STATS)
+    @SystemApi
+    public static final int BATTERY_PROPERTY_STATE_OF_HEALTH = 10;
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
