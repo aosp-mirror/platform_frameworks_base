@@ -372,8 +372,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
 
-    void animateKeyguardUnoccluding();
-
     void startLaunchTransitionTimeout();
 
     boolean hideKeyguardImpl(boolean forceStateChange);
