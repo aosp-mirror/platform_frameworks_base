@@ -1148,6 +1148,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final int previousPolicy;
         boolean mustInitialize = false;
         int brightnessAdjustmentFlags = 0;
+        mBrightnessReasonTemp.set(null);
         mTempBrightnessEvent.reset();
         SparseArray<DisplayPowerControllerInterface> displayBrightnessFollowers;
         synchronized (mLock) {
