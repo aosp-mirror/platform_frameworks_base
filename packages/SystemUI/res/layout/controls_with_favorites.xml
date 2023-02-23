@@ -50,11 +50,9 @@
         <LinearLayout
             android:id="@+id/controls_header"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
-            android:minHeight="48dp"
             android:orientation="horizontal">
 
             <TextView
@@ -64,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:clickable="false"
-                tools:text="Test app" />
+                tools:text="@tools:sample/lorem" />
         </LinearLayout>
 
         <ImageView

@@ -138,6 +138,14 @@
                   android:finishOnCloseSystemDialogs="true"
                   android:excludeFromRecents="true" />
 
+        <activity android:name="com.android.systemui.activity.EmptyTestActivity"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.startup.InitializationProvider"
             tools:replace="android:authorities"

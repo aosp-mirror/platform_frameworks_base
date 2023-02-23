@@ -1200,6 +1200,13 @@
     <dimen name="control_menu_item_min_height">56dp</dimen>
     <dimen name="control_menu_vertical_padding">12dp</dimen>
     <dimen name="control_menu_horizontal_padding">16dp</dimen>
+    <dimen name="control_popup_item_corner_radius">4dp</dimen>
+    <dimen name="control_popup_item_height">56dp</dimen>
+    <dimen name="control_popup_item_padding">16dp</dimen>
+    <dimen name="control_popup_items_divider_height">1dp</dimen>
+    <dimen name="control_popup_max_width">380dp</dimen>
+    <dimen name="control_popup_corner_radius">28dp</dimen>
+    <dimen name="control_popup_horizontal_margin">16dp</dimen>
     <dimen name="control_spinner_padding_vertical">24dp</dimen>
     <dimen name="control_spinner_padding_horizontal">20dp</dimen>
     <dimen name="control_text_size">14sp</dimen>
