@@ -505,7 +505,19 @@ public final class CredentialManager {
      *
      * @hide
      */
-    public static boolean isCredentialDescriptionApiEnabled() {
+    public static boolean isCredentialDescriptionApiEnabled(Context context) {
+        if (context == null) {
+            return false;
+        }
+        CredentialManager credentialManager =
+                (CredentialManager) context.getSystemService(Context.CREDENTIAL_SERVICE);
+        if (credentialManager != null) {
+            return credentialManager.isCredentialDescriptionApiEnabled();
+        }
+        return false;
+    }
+
+    private boolean isCredentialDescriptionApiEnabled() {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API, false);
     }
@@ -527,11 +539,6 @@ public final class CredentialManager {
      */
     public void registerCredentialDescription(
             @NonNull RegisterCredentialDescriptionRequest request) {
-
-        if (!isCredentialDescriptionApiEnabled()) {
-            throw new UnsupportedOperationException("This API is not currently supported.");
-        }
-
         requireNonNull(request, "request must not be null");
 
         try {
@@ -550,11 +557,6 @@ public final class CredentialManager {
      */
     public void unregisterCredentialDescription(
             @NonNull UnregisterCredentialDescriptionRequest request) {
-
-        if (!isCredentialDescriptionApiEnabled()) {
-            throw new UnsupportedOperationException("This API is not currently supported.");
-        }
-
         requireNonNull(request, "request must not be null");
 
         try {
