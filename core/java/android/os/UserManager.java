@@ -3056,6 +3056,7 @@ public class UserManager {
      *
      * @hide
      */
+    @TestApi
     public int getDisplayIdAssignedToUser() {
         try {
             return mService.getDisplayIdAssignedToUser();
