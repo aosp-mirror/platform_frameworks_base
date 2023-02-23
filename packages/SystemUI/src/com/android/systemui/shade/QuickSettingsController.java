@@ -1710,12 +1710,16 @@ public class QuickSettingsController {
      */
     private void flingQs(float vel, int type, final Runnable onFinishRunnable,
             boolean isClick) {
+        mShadeLog.flingQs(type, isClick);
         float target;
         switch (type) {
             case FLING_EXPAND:
                 target = getMaxExpansionHeight();
                 break;
             case FLING_COLLAPSE:
+                if (mSplitShadeEnabled) { // TODO:(b/269742565) remove below log
+                    Log.wtfStack(TAG, "FLING_COLLAPSE called in split shade");
+                }
                 target = getMinExpansionHeight();
                 break;
             case FLING_HIDE:
