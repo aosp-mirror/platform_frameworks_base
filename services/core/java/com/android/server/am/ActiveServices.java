@@ -747,16 +747,30 @@ public final class ActiveServices {
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
             int callingPid, int callingUid, boolean fgRequired, String callingPackage,
-            @Nullable String callingFeatureId, final int userId)
+            @Nullable String callingFeatureId, final int userId, boolean isSdkSandboxService,
+            int sdkSandboxClientAppUid, String sdkSandboxClientAppPackage, String instanceName)
             throws TransactionTooLargeException {
         return startServiceLocked(caller, service, resolvedType, callingPid, callingUid, fgRequired,
-                callingPackage, callingFeatureId, userId, BackgroundStartPrivileges.NONE);
+                callingPackage, callingFeatureId, userId, BackgroundStartPrivileges.NONE,
+                isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
+                instanceName);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
             int callingPid, int callingUid, boolean fgRequired,
             String callingPackage, @Nullable String callingFeatureId, final int userId,
             BackgroundStartPrivileges backgroundStartPrivileges)
+            throws TransactionTooLargeException {
+        return startServiceLocked(caller, service, resolvedType, callingPid, callingUid, fgRequired,
+                callingPackage, callingFeatureId, userId, backgroundStartPrivileges,
+                false /* isSdkSandboxService */, INVALID_UID, null, null);
+    }
+
+    ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
+            int callingPid, int callingUid, boolean fgRequired,
+            String callingPackage, @Nullable String callingFeatureId, final int userId,
+            BackgroundStartPrivileges backgroundStartPrivileges, boolean isSdkSandboxService,
+            int sdkSandboxClientAppUid, String sdkSandboxClientAppPackage, String instanceName)
             throws TransactionTooLargeException {
         if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
@@ -775,9 +789,9 @@ public final class ActiveServices {
             callerFg = true;
         }
 
-        ServiceLookupResult res =
-            retrieveServiceLocked(service, null, resolvedType, callingPackage,
-                    callingPid, callingUid, userId, true, callerFg, false, false, false);
+        ServiceLookupResult res = retrieveServiceLocked(service, instanceName, isSdkSandboxService,
+                sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, callingPackage,
+                callingPid, callingUid, userId, true, callerFg, false, false, null, false);
         if (res == null) {
             return null;
         }
@@ -801,16 +815,30 @@ public final class ActiveServices {
             return null;
         }
 
+        // For the SDK sandbox, we start the service on behalf of the client app.
+        final int appUid = isSdkSandboxService ? sdkSandboxClientAppUid : r.appInfo.uid;
+        final String appPackageName =
+                isSdkSandboxService ? sdkSandboxClientAppPackage : r.packageName;
+        int appTargetSdkVersion = r.appInfo.targetSdkVersion;
+        if (isSdkSandboxService) {
+            try {
+                appTargetSdkVersion = AppGlobals.getPackageManager().getApplicationInfo(
+                        appPackageName, ActivityManagerService.STOCK_PM_FLAGS,
+                        userId).targetSdkVersion;
+            } catch (RemoteException ignored) {
+            }
+        }
+
         // If we're starting indirectly (e.g. from PendingIntent), figure out whether
         // we're launching into an app in a background state.  This keys off of the same
         // idleness state tracking as e.g. O+ background service start policy.
-        final boolean bgLaunch = !mAm.isUidActiveLOSP(r.appInfo.uid);
+        final boolean bgLaunch = !mAm.isUidActiveLOSP(appUid);
 
         // If the app has strict background restrictions, we treat any bg service
         // start analogously to the legacy-app forced-restrictions case, regardless
         // of its target SDK version.
         boolean forcedStandby = false;
-        if (bgLaunch && appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
+        if (bgLaunch && appRestrictedAnyInBackground(appUid, appPackageName)) {
             if (DEBUG_FOREGROUND_SERVICE) {
                 Slog.d(TAG, "Forcing bg-only service start only for " + r.shortInstanceName
                         + " : bgLaunch=" + bgLaunch + " callerFg=" + callerFg);
@@ -840,7 +868,7 @@ public final class ActiveServices {
         boolean forceSilentAbort = false;
         if (fgRequired) {
             final int mode = mAm.getAppOpsManager().checkOpNoThrow(
-                    AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
+                    AppOpsManager.OP_START_FOREGROUND, appUid, appPackageName);
             switch (mode) {
                 case AppOpsManager.MODE_ALLOWED:
                 case AppOpsManager.MODE_DEFAULT:
@@ -862,12 +890,12 @@ public final class ActiveServices {
         }
 
         // If this isn't a direct-to-foreground start, check our ability to kick off an
-        // arbitrary service
+        // arbitrary service.
         if (forcedStandby || (!r.startRequested && !fgRequired)) {
             // Before going further -- if this app is not allowed to start services in the
             // background, then at this point we aren't going to let it period.
-            final int allowed = mAm.getAppStartModeLOSP(r.appInfo.uid, r.packageName,
-                    r.appInfo.targetSdkVersion, callingPid, false, false, forcedStandby);
+            final int allowed = mAm.getAppStartModeLOSP(appUid, appPackageName, appTargetSdkVersion,
+                    callingPid, false, false, forcedStandby);
             if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                 Slog.w(TAG, "Background start not allowed: service "
                         + service + " to " + r.shortInstanceName
@@ -891,7 +919,7 @@ public final class ActiveServices {
                 }
                 // This app knows it is in the new model where this operation is not
                 // allowed, so tell it what has happened.
-                UidRecord uidRec = mAm.mProcessList.getUidRecordLOSP(r.appInfo.uid);
+                UidRecord uidRec = mAm.mProcessList.getUidRecordLOSP(appUid);
                 return new ComponentName("?", "app is in background uid " + uidRec);
             }
         }
@@ -900,10 +928,10 @@ public final class ActiveServices {
         // an ordinary startService() or a startForegroundService().  Now, only require that
         // the app follow through on the startForegroundService() -> startForeground()
         // contract if it actually targets O+.
-        if (r.appInfo.targetSdkVersion < Build.VERSION_CODES.O && fgRequired) {
+        if (appTargetSdkVersion < Build.VERSION_CODES.O && fgRequired) {
             if (DEBUG_BACKGROUND_CHECK || DEBUG_FOREGROUND_SERVICE) {
                 Slog.i(TAG, "startForegroundService() but host targets "
-                        + r.appInfo.targetSdkVersion + " - not requiring startForeground()");
+                        + appTargetSdkVersion + " - not requiring startForeground()");
             }
             fgRequired = false;
         }
@@ -1377,7 +1405,8 @@ public final class ActiveServices {
     }
 
     int stopServiceLocked(IApplicationThread caller, Intent service,
-            String resolvedType, int userId) {
+            String resolvedType, int userId, boolean isSdkSandboxService,
+            int sdkSandboxClientAppUid, String sdkSandboxClientAppPackage, String instanceName) {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "stopService: " + service
                 + " type=" + resolvedType);
 
@@ -1390,9 +1419,10 @@ public final class ActiveServices {
         }
 
         // If this service is active, make sure it is stopped.
-        ServiceLookupResult r = retrieveServiceLocked(service, null, resolvedType, null,
+        ServiceLookupResult r = retrieveServiceLocked(service, instanceName, isSdkSandboxService,
+                sdkSandboxClientAppUid, sdkSandboxClientAppPackage, resolvedType, null,
                 Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false, false, false,
-                false);
+                null, false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
