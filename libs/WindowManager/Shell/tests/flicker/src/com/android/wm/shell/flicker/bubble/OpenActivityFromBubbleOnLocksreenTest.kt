@@ -18,14 +18,14 @@ package com.android.wm.shell.flicker.bubble
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.test.filters.RequiresDevice
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtEnd
 import com.android.server.wm.flicker.navBarLayerPositionAtEnd
 import org.junit.Assume
@@ -36,7 +36,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching a new activity from bubble.
  *
- * To run this test: `atest WMShellFlickerTests:LaunchBubbleFromLockScreen`
+ * To run this test: `atest WMShellFlickerTests:OpenActivityFromBubbleOnLocksreenTest`
  *
  * Actions:
  * ```
@@ -46,7 +46,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class OpenActivityFromBubbleOnLockreenTest(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
+class OpenActivityFromBubbleOnLocksreenTest(flicker: FlickerTest) : BaseBubbleScreen(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit

@@ -15,7 +15,7 @@
  */
 package com.android.test
 
-import com.android.server.wm.flicker.traces.layers.LayersTraceSubject
+import android.tools.common.flicker.subject.layers.LayersTraceSubject
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.Test

@@ -20,12 +20,12 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.wm.shell.flicker.appWindowBecomesInvisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.layerBecomesInvisible
@@ -104,14 +104,12 @@ class DismissSplitScreenByDivider(flicker: FlickerTest) : SplitScreenBase(flicke
     @Test
     fun secondaryAppBoundsIsFullscreenAtEnd() {
         flicker.assertLayers {
-            this.isVisible(secondaryApp)
-                .then()
-                .isInvisible(secondaryApp)
-                .then()
-                .invoke("secondaryAppBoundsIsFullscreenAtEnd") {
-                    val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
-                    it.visibleRegion(secondaryApp).coversExactly(displayBounds)
-                }
+            this.isVisible(secondaryApp).then().isInvisible(secondaryApp).then().invoke(
+                "secondaryAppBoundsIsFullscreenAtEnd"
+            ) {
+                val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
+                it.visibleRegion(secondaryApp).coversExactly(displayBounds)
+            }
         }
     }
 

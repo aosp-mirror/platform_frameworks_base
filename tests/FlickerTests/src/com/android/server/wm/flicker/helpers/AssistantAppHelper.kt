@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.helpers
 import android.app.Instrumentation
 import android.content.ComponentName
 import android.provider.Settings
+import android.tools.device.helpers.FIND_TIMEOUT
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
@@ -31,10 +32,10 @@ constructor(
     val instr: Instrumentation,
     val component: ComponentName = ActivityOptions.ASSISTANT_SERVICE_COMPONENT_NAME,
 ) {
-    protected val uiDevice: UiDevice = UiDevice.getInstance(instr)
-    protected val defaultAssistant: String? =
+    private val uiDevice: UiDevice = UiDevice.getInstance(instr)
+    private val defaultAssistant: String? =
         Settings.Secure.getString(instr.targetContext.contentResolver, Settings.Secure.ASSISTANT)
-    protected val defaultVoiceInteractionService: String? =
+    private val defaultVoiceInteractionService: String? =
         Settings.Secure.getString(
             instr.targetContext.contentResolver,
             Settings.Secure.VOICE_INTERACTION_SERVICE

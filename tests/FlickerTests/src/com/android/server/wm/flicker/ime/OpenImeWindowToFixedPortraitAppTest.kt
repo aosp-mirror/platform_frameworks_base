@@ -16,17 +16,18 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Postsubmit
+import android.tools.common.NavBar
+import android.tools.common.Rotation
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.flicker.subject.region.RegionSubject
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.traces.region.RegionSubject
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -107,10 +108,9 @@ class OpenImeWindowToFixedPortraitAppTest(flicker: FlickerTest) : BaseTest(flick
             return FlickerTestFactory.nonRotationTests(
                 supportedRotations =
                     listOf(
-                        PlatformConsts.Rotation.ROTATION_90,
+                        Rotation.ROTATION_90,
                     ),
-                supportedNavigationModes =
-                    listOf(PlatformConsts.NavBar.MODE_3BUTTON, PlatformConsts.NavBar.MODE_GESTURAL)
+                supportedNavigationModes = listOf(NavBar.MODE_3BUTTON, NavBar.MODE_GESTURAL)
             )
         }
     }
