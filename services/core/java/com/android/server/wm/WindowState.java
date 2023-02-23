@@ -221,8 +221,6 @@ import android.view.IWindow;
 import android.view.IWindowFocusObserver;
 import android.view.IWindowId;
 import android.view.InputChannel;
-import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -572,12 +570,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mRemoveOnExit;
 
     /**
-     * Whether the app died while it was visible, if true we might need
-     * to continue to show it until it's restarted.
-     */
-    boolean mAppDied;
-
-    /**
      * Set when the orientation is changing and this window has not yet
      * been updated for the new orientation.
      */
@@ -760,7 +752,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private InsetsState mFrozenInsetsState;
 
-    private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
 
     /**
@@ -1504,13 +1495,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
 
-            // If it's a dead window left on screen, and the configuration changed, there is nothing
-            // we can do about it. Remove the window now.
-            if (mActivityRecord != null && mAppDied) {
-                mActivityRecord.removeDeadWindows();
-                return;
-            }
-
             onResizeHandled();
             mWmService.makeWindowFreezingScreenIfNeededLocked(this);
 
@@ -2009,7 +1993,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isInteresting() {
         final RecentsAnimationController recentsAnimationController =
                 mWmService.getRecentsAnimationController();
-        return mActivityRecord != null && !mAppDied
+        return mActivityRecord != null
                 && (!mActivityRecord.isFreezingScreen() || !mAppFreezing)
                 && mViewVisibility == View.VISIBLE
                 && (recentsAnimationController == null
@@ -2443,11 +2427,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void removeIfPossible() {
-        super.removeIfPossible();
-        removeIfPossible(false /*keepVisibleDeadWindow*/);
-    }
-
-    private void removeIfPossible(boolean keepVisibleDeadWindow) {
         mWindowRemovalAllowed = true;
         ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                 "removeIfPossible: %s callers=%s", this, Debug.getCallers(5));
@@ -2521,21 +2500,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
                 // If we are not currently running the exit animation, we need to see about starting one
                 wasVisible = isVisible();
-
-                if (keepVisibleDeadWindow) {
-                    ProtoLog.v(WM_DEBUG_ADD_REMOVE,
-                            "Not removing %s because app died while it's visible", this);
-
-                    mAppDied = true;
-                    setDisplayLayoutNeeded();
-                    mWmService.mWindowPlacerLocked.performSurfacePlacement();
-
-                    // Set up a replacement input channel since the app is now dead.
-                    // We need to catch tapping on the dead window to restart the app.
-                    openInputChannel(null);
-                    displayContent.getInputMonitor().updateInputWindowsLw(true /*force*/);
-                    return;
-                }
 
                 // Remove immediately if there is display transition because the animation is
                 // usually unnoticeable (e.g. covered by rotation animation) and the animation
@@ -2710,19 +2674,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || (isVisible() && mActivityRecord != null && mActivityRecord.isVisible());
     }
 
-    private final class DeadWindowEventReceiver extends InputEventReceiver {
-        DeadWindowEventReceiver(InputChannel inputChannel) {
-            super(inputChannel, mWmService.mH.getLooper());
-        }
-        @Override
-        public void onInputEvent(InputEvent event) {
-            finishInputEvent(event, true);
-        }
-    }
-    /** Fake event receiver for windows that died visible. */
-    private DeadWindowEventReceiver mDeadWindowEventReceiver;
-
-    void openInputChannel(InputChannel outInputChannel) {
+    void openInputChannel(@NonNull InputChannel outInputChannel) {
         if (mInputChannel != null) {
             throw new IllegalStateException("Window already has an input channel.");
         }
@@ -2731,14 +2683,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputChannelToken = mInputChannel.getToken();
         mInputWindowHandle.setToken(mInputChannelToken);
         mWmService.mInputToWindowMap.put(mInputChannelToken, this);
-        if (outInputChannel != null) {
-            mInputChannel.copyTo(outInputChannel);
-        } else {
-            // If the window died visible, we setup a fake input channel, so that taps
-            // can still detected by input monitor channel, and we can relaunch the app.
-            // Create fake event receiver that simply reports all events as handled.
-            mDeadWindowEventReceiver = new DeadWindowEventReceiver(mInputChannel);
-        }
+        mInputChannel.copyTo(outInputChannel);
     }
 
     /**
@@ -2749,10 +2694,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     void disposeInputChannel() {
-        if (mDeadWindowEventReceiver != null) {
-            mDeadWindowEventReceiver.dispose();
-            mDeadWindowEventReceiver = null;
-        }
         if (mInputChannelToken != null) {
             // Unregister server channel first otherwise it complains about broken channel.
             mWmService.mInputManager.removeInputChannel(mInputChannelToken);
@@ -3079,11 +3020,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                             .windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
-                        final DisplayContent dc = getDisplayContent();
                         if (win.mActivityRecord != null && win.mActivityRecord.findMainWindow() == win) {
                             mWmService.mTaskSnapshotController.onAppDied(win.mActivityRecord);
                         }
-                        win.removeIfPossible(shouldKeepVisibleDeadAppWindow());
+                        win.removeIfPossible();
                     } else if (mHasSurface) {
                         Slog.e(TAG, "!!! LEAK !!! Window removed but surface still valid.");
                         WindowState.this.removeIfPossible();
@@ -3093,32 +3033,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // This will happen if the window has already been removed.
             }
         }
-    }
-
-    /**
-     * Returns true if this window is visible and belongs to a dead app and shouldn't be removed,
-     * because we want to preserve its location on screen to be re-activated later when the user
-     * interacts with it.
-     */
-    private boolean shouldKeepVisibleDeadAppWindow() {
-        if (!isVisible() || mActivityRecord == null || !mActivityRecord.isClientVisible()) {
-            // Not a visible app window or the app isn't dead.
-            return false;
-        }
-
-        if (mAttrs.token != mClient.asBinder()) {
-            // The window was add by a client using another client's app token. We don't want to
-            // keep the dead window around for this case since this is meant for 'real' apps.
-            return false;
-        }
-
-        if (mAttrs.type == TYPE_APPLICATION_STARTING) {
-            // We don't keep starting windows since they were added by the window manager before
-            // the app even launched.
-            return false;
-        }
-
-        return getWindowConfiguration().keepVisibleDeadAppWindowOnScreen();
     }
 
     /** Returns {@code true} if this window desires key events. */
@@ -3967,7 +3881,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void notifyInsetsControlChanged() {
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "notifyInsetsControlChanged for %s ", this);
-        if (mAppDied || mRemoved) {
+        if (mRemoved) {
             return;
         }
         final InsetsStateController stateController =
@@ -4273,7 +4187,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             pw.println(prefix + "mToken=" + mToken);
             if (mActivityRecord != null) {
                 pw.println(prefix + "mActivityRecord=" + mActivityRecord);
-                pw.print(prefix + "mAppDied=" + mAppDied);
                 pw.print(prefix + "drawnStateEvaluated=" + getDrawnStateEvaluated());
                 pw.println(prefix + "mightAffectAllDrawn=" + mightAffectAllDrawn());
             }
@@ -5402,10 +5315,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void applyDims() {
-        if (!mAnimatingExit && mAppDied) {
-            mIsDimming = true;
-            getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
-        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
+        if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || shouldDrawBlurBehind())
                    && isVisibleNow() && !mHidden) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or blur behind is requested

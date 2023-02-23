@@ -4091,9 +4091,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (!mVisibleRequested && launchCount > 2
                 && lastLaunchTime > (SystemClock.uptimeMillis() - 60000)) {
             // We have launched this activity too many times since it was able to run, so give up
-            // and remove it. (Note if the activity is visible, we don't remove the record. We leave
-            // the dead window on the screen but the process will not be restarted unless user
-            // explicitly tap on it.)
+            // and remove it.
             remove = true;
         } else {
             // The process may be gone, but the activity lives on!
@@ -4115,11 +4113,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (DEBUG_APP) {
                 Slog.v(TAG_APP, "Keeping entry during removeHistory for activity " + this);
             }
-            // Set nowVisible to previous visible state. If the app was visible while it died, we
-            // leave the dead window on screen so it's basically visible. This is needed when user
-            // later tap on the dead window, we need to stop other apps when user transfers focus
-            // to the restarted activity.
-            nowVisible = mVisibleRequested;
         }
         // upgrade transition trigger to task if this is the last activity since it means we are
         // closing the task.
@@ -5237,10 +5230,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLastDeferHidingClient = deferHidingClient;
 
         if (!visible) {
-            // If the app is dead while it was visible, we kept its dead window on screen.
-            // Now that the app is going invisible, we can remove it. It will be restarted
-            // if made visible again.
-            removeDeadWindows();
             // If this activity is about to finish/stopped and now becomes invisible, remove it
             // from the unknownApp list in case the activity does not want to draw anything, which
             // keep the user waiting for the next transition to start.
@@ -6588,9 +6577,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // stop tracking
         mSplashScreenStyleSolidColor = true;
 
-        // We now have a good window to show, remove dead placeholders
-        removeDeadWindows();
-
         if (mStartingWindow != null) {
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Finish starting %s"
                     + ": first real window is shown, no animation", win.mToken);
@@ -7323,20 +7309,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // we need to get rid of the starting transition.
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Last window, removing starting window %s", win);
             removeStartingWindow();
-        }
-    }
-
-    void removeDeadWindows() {
-        for (int winNdx = mChildren.size() - 1; winNdx >= 0; --winNdx) {
-            WindowState win = mChildren.get(winNdx);
-            if (win.mAppDied) {
-                ProtoLog.w(WM_DEBUG_ADD_REMOVE,
-                        "removeDeadWindows: %s", win);
-                // Set mDestroying, we don't want any animation or delayed removal here.
-                win.mDestroying = true;
-                // Also removes child windows.
-                win.removeIfPossible();
-            }
         }
     }
 
