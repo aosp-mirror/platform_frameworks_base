@@ -339,6 +339,12 @@ class SplitScreenTransitions {
     IBinder startResizeTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler,
             @Nullable TransitionFinishedCallback finishCallback) {
+        if (mPendingResize != null) {
+            mPendingResize.cancel(null);
+            mAnimations.clear();
+            onFinish(null /* wct */, null /* wctCB */);
+        }
+
         IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
         setResizeTransition(transition, finishCallback);
         return transition;

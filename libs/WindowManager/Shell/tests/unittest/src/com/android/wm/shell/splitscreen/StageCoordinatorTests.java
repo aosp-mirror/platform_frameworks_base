@@ -134,6 +134,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
         when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
         when(mSplitLayout.isLandscape()).thenReturn(false);
+        when(mSplitLayout.applyTaskChanges(any(), any(), any())).thenReturn(true);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
