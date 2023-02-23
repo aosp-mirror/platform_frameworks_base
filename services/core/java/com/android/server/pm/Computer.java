@@ -678,4 +678,8 @@ public interface Computer extends PackageDataSnapshot {
 
     @NonNull
     Collection<SharedUserSetting> getAllSharedUsers();
+
+    boolean isChangeEnabled(long changeId, int uid);
+
+    boolean isChangeEnabled(long changeId, ApplicationInfo info);
 }
