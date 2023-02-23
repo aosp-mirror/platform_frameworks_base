@@ -16,6 +16,7 @@
 
 package com.android.server.voiceinteraction;
 
+import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_DETECTED_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_PROCESS_RESTARTED_EXCEPTION;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_REJECTED_EXCEPTION;
@@ -139,6 +140,10 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                                     "Security exception occurs in #onDetected method."));
                         } catch (RemoteException e1) {
                             notifyOnDetectorRemoteException();
+                            HotwordMetricsLogger.writeDetectorEvent(
+                                    HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
+                                    HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
+                                    mVoiceInteractionServiceUid);
                             throw e1;
                         }
                         return;
@@ -165,6 +170,10 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                                 + " bits from hotword trusted process");
                     } catch (RemoteException e) {
                         notifyOnDetectorRemoteException();
+                        HotwordMetricsLogger.writeDetectorEvent(
+                                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
+                                HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_DETECTED_EXCEPTION,
+                                mVoiceInteractionServiceUid);
                         throw e;
                     }
                     if (mDebugHotwordLogging) {
@@ -202,6 +211,10 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                         externalCallback.onRejected(result);
                     } catch (RemoteException e) {
                         notifyOnDetectorRemoteException();
+                        HotwordMetricsLogger.writeDetectorEvent(
+                                HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP,
+                                HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_REJECTED_EXCEPTION,
+                                mVoiceInteractionServiceUid);
                         throw e;
                     }
                     mLastHotwordRejectedResult = result;
