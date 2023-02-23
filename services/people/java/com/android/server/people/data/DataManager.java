@@ -113,6 +113,7 @@ public class DataManager {
     private static final long USAGE_STATS_QUERY_INTERVAL_SEC = 120L;
     @VisibleForTesting
     static final int MAX_CACHED_RECENT_SHORTCUTS = 30;
+    private static final int DEBOUNCE_LENGTH_MS = 500;
 
     private final Context mContext;
     private final Injector mInjector;
@@ -129,6 +130,7 @@ public class DataManager {
     private final List<PeopleService.ConversationsListener> mConversationsListeners =
             new ArrayList<>(1);
     private final Handler mHandler;
+    private final PerPackageThrottler mShortcutsThrottler;
 
     private ContentObserver mCallLogContentObserver;
     private ContentObserver mMmsSmsContentObserver;
@@ -140,14 +142,17 @@ public class DataManager {
     private ConversationStatusExpirationBroadcastReceiver mStatusExpReceiver;
 
     public DataManager(Context context) {
-        this(context, new Injector(), BackgroundThread.get().getLooper());
+        this(context, new Injector(), BackgroundThread.get().getLooper(),
+                new PerPackageThrottlerImpl(BackgroundThread.getHandler(), DEBOUNCE_LENGTH_MS));
     }
 
-    DataManager(Context context, Injector injector, Looper looper) {
+    DataManager(Context context, Injector injector, Looper looper,
+            PerPackageThrottler shortcutsThrottler) {
         mContext = context;
         mInjector = injector;
         mScheduledExecutor = mInjector.createScheduledExecutor();
         mHandler = new Handler(looper);
+        mShortcutsThrottler = shortcutsThrottler;
     }
 
     /** Initialization. Called when the system services are up running. */
@@ -851,12 +856,12 @@ public class DataManager {
         // pair of <package name, conversation info>
         List<Pair<String, ConversationInfo>> cachedConvos = new ArrayList<>();
         userData.forAllPackages(packageData -> {
-                packageData.forAllConversations(conversationInfo -> {
-                    if (isEligibleForCleanUp(conversationInfo)) {
-                        cachedConvos.add(
-                                Pair.create(packageData.getPackageName(), conversationInfo));
-                    }
-                });
+            packageData.forAllConversations(conversationInfo -> {
+                if (isEligibleForCleanUp(conversationInfo)) {
+                    cachedConvos.add(
+                            Pair.create(packageData.getPackageName(), conversationInfo));
+                }
+            });
         });
         if (cachedConvos.size() <= targetCachedCount) {
             return;
@@ -867,8 +872,8 @@ public class DataManager {
                 numToUncache + 1,
                 Comparator.comparingLong((Pair<String, ConversationInfo> pair) ->
                         Math.max(
-                            pair.second.getLastEventTimestamp(),
-                            pair.second.getCreationTimestamp())).reversed());
+                                pair.second.getLastEventTimestamp(),
+                                pair.second.getCreationTimestamp())).reversed());
         for (Pair<String, ConversationInfo> cached : cachedConvos) {
             if (hasActiveNotifications(cached.first, userId, cached.second.getShortcutId())) {
                 continue;
@@ -1104,26 +1109,35 @@ public class DataManager {
         @Override
         public void onShortcutsAddedOrUpdated(@NonNull String packageName,
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
-            mInjector.getBackgroundExecutor().execute(() -> {
-                PackageData packageData = getPackage(packageName, user.getIdentifier());
-                for (ShortcutInfo shortcut : shortcuts) {
-                    if (ShortcutHelper.isConversationShortcut(
-                            shortcut, mShortcutServiceInternal, user.getIdentifier())) {
-                        if (shortcut.isCached()) {
-                            ConversationInfo conversationInfo = packageData != null
-                                    ? packageData.getConversationInfo(shortcut.getId()) : null;
-                            if (conversationInfo == null
-                                    || !conversationInfo.isShortcutCachedForNotification()) {
-                                // This is a newly cached shortcut. Clean up the existing cached
-                                // shortcuts to ensure the cache size is under the limit.
-                                cleanupCachedShortcuts(user.getIdentifier(),
-                                        MAX_CACHED_RECENT_SHORTCUTS - 1);
+            mShortcutsThrottler.scheduleDebounced(
+                    new Pair<>(packageName, user.getIdentifier()),
+                    () -> {
+                        PackageData packageData = getPackage(packageName, user.getIdentifier());
+                        List<ShortcutInfo> queriedShortcuts = getShortcuts(packageName,
+                                user.getIdentifier(), null);
+                        boolean hasCachedShortcut = false;
+                        for (ShortcutInfo shortcut : queriedShortcuts) {
+                            if (ShortcutHelper.isConversationShortcut(
+                                    shortcut, mShortcutServiceInternal, user.getIdentifier())) {
+                                if (shortcut.isCached()) {
+                                    ConversationInfo info = packageData != null
+                                            ? packageData.getConversationInfo(shortcut.getId())
+                                            : null;
+                                    if (info == null
+                                            || !info.isShortcutCachedForNotification()) {
+                                        hasCachedShortcut = true;
+                                    }
+                                }
+                                addOrUpdateConversationInfo(shortcut);
                             }
                         }
-                        addOrUpdateConversationInfo(shortcut);
-                    }
-                }
-            });
+                        // Added at least one new conversation. Uncache older existing cached
+                        // shortcuts to ensure the cache size is under the limit.
+                        if (hasCachedShortcut) {
+                            cleanupCachedShortcuts(user.getIdentifier(),
+                                    MAX_CACHED_RECENT_SHORTCUTS);
+                        }
+                    });
         }
 
         @Override
