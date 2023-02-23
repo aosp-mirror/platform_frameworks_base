@@ -17,7 +17,6 @@
 package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
-import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
@@ -36,7 +35,6 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricSourceType;
 import android.media.AudioManager;
 import android.metrics.LogMaker;
 import android.os.SystemClock;
@@ -320,7 +318,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     KeyguardSecurityContainerController.this.onDensityOrFontScaleChanged();
                 }
             };
-    private boolean mBouncerVisible = false;
     private final KeyguardUpdateMonitorCallback mKeyguardUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -354,19 +351,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 @Override
                 public void onDevicePolicyManagerStateChanged() {
                     showPrimarySecurityScreen(false);
-                }
-
-                @Override
-                public void onBiometricRunningStateChanged(boolean running,
-                        BiometricSourceType biometricSourceType) {
-                    if (biometricSourceType == FINGERPRINT) {
-                        updateSideFpsVisibility();
-                    }
-                }
-
-                @Override
-                public void onStrongAuthStateChanged(int userId) {
-                    updateSideFpsVisibility();
                 }
             };
 
@@ -459,35 +443,24 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             getCurrentSecurityController().onPause();
         }
         mView.onPause();
-        // It might happen that onStartingToHide is not called when the device is locked while on
-        // bouncer.
-        setBouncerVisible(false);
         mView.clearFocus();
     }
 
-    private void updateSideFpsVisibility() {
+    /**
+     * Shows and hides the side finger print sensor animation.
+     *
+     * @param isVisible sets whether we show or hide the side fps animation
+     */
+    public void updateSideFpsVisibility(boolean isVisible) {
         if (!mSideFpsController.isPresent()) {
             return;
         }
-        final boolean sfpsEnabled = getResources().getBoolean(
-                R.bool.config_show_sidefps_hint_on_bouncer);
-        final boolean fpsDetectionRunning = mUpdateMonitor.isFingerprintDetectionRunning();
-        final boolean isUnlockingWithFpAllowed =
-                mUpdateMonitor.isUnlockingWithFingerprintAllowed();
 
-        boolean toShow = mBouncerVisible && sfpsEnabled && fpsDetectionRunning
-                && isUnlockingWithFpAllowed;
-
-        if (DEBUG) {
-            Log.d(TAG, "sideFpsToShow=" + toShow + ", "
-                    + "mBouncerVisible=" + mBouncerVisible + ", "
-                    + "configEnabled=" + sfpsEnabled + ", "
-                    + "fpsDetectionRunning=" + fpsDetectionRunning + ", "
-                    + "isUnlockingWithFpAllowed=" + isUnlockingWithFpAllowed);
-        }
-        if (toShow) {
-            mSideFpsController.get().show(SideFpsUiRequestSource.PRIMARY_BOUNCER,
-                    BiometricOverlayConstants.REASON_AUTH_KEYGUARD);
+        if (isVisible) {
+            mSideFpsController.get().show(
+                    SideFpsUiRequestSource.PRIMARY_BOUNCER,
+                    BiometricOverlayConstants.REASON_AUTH_KEYGUARD
+            );
         } else {
             mSideFpsController.get().hide(SideFpsUiRequestSource.PRIMARY_BOUNCER);
         }
@@ -636,7 +609,6 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             SysUiStatsLog.write(SysUiStatsLog.KEYGUARD_BOUNCER_STATE_CHANGED, state);
 
             getCurrentSecurityController().onResume(reason);
-            updateSideFpsVisibility();
         }
         mView.onResume(
                 mSecurityModel.getSecurityMode(KeyguardUpdateMonitor.getCurrentUser()),
@@ -690,20 +662,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (mCurrentSecurityMode != SecurityMode.None) {
             getCurrentSecurityController().onStartingToHide();
         }
-        setBouncerVisible(false);
     }
 
     /** Called when the bouncer changes visibility. */
-    public void onBouncerVisibilityChanged(@View.Visibility int visibility) {
-        setBouncerVisible(visibility == View.VISIBLE);
-        if (visibility == View.INVISIBLE) {
+    public void onBouncerVisibilityChanged(boolean isVisible) {
+        if (!isVisible) {
             mView.resetScale();
         }
-    }
-
-    private void setBouncerVisible(boolean visible) {
-        mBouncerVisible = visible;
-        updateSideFpsVisibility();
     }
 
     /**

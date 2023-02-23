@@ -638,6 +638,7 @@ public class KeyguardService extends Service {
             checkPermission();
             mKeyguardViewMediator.onScreenTurnedOff();
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_OFF);
+            mScreenOnCoordinator.onScreenTurnedOff();
         }
 
         @Override // Binder interface

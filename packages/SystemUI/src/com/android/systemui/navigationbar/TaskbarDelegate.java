@@ -41,7 +41,6 @@ import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode
 
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.WindowVisibleState;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -68,7 +67,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.utilities.Utilities;
-import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
@@ -78,6 +76,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
@@ -169,16 +168,20 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private BackAnimation mBackAnimation;
 
+    private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Inject
     public TaskbarDelegate(Context context,
             EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
-            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory,
+            StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
 
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mPipListener = mEdgeBackGestureHandler::setPipStashExclusionBounds;
+        mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mStatusBarKeyguardViewManager.setTaskbarDelegate(this);
     }
 
     public void setDependencies(CommandQueue commandQueue,

@@ -197,6 +197,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Painel de notificações."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Definições rápidas."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Ecrã de bloqueio."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Ecrã de bloqueio de trabalho"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Fechar"</string>
@@ -778,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"gravação de ecrã"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sem título"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Tamanho do tipo de letra"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Diminuir"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Aumentar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controlos da janela de ampliação"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Aumentar zoom"</string>
@@ -1045,4 +1044,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Mudar para perfil de trabalho"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fechar"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Definições do ecrã de bloqueio"</string>
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi indisponível"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Câmara bloqueada"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Câmara e microfone bloqueados"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Microfone bloqueado"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Modo Prioridade ativado"</string>
 </resources>

@@ -96,19 +96,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"ਬੰਦ ਕਰੋ"</string>
     <string name="back_button_text" msgid="1469718707134137085">"ਪਿੱਛੇ"</string>
     <string name="handle_text" msgid="1766582106752184456">"ਹੈਂਡਲ"</string>
-    <!-- no translation found for app_icon_text (2823268023931811747) -->
-    <skip />
+    <string name="app_icon_text" msgid="2823268023931811747">"ਐਪ ਪ੍ਰਤੀਕ"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"ਪੂਰੀ-ਸਕ੍ਰੀਨ"</string>
     <string name="desktop_text" msgid="1077633567027630454">"ਡੈਸਕਟਾਪ ਮੋਡ"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"ਸਪਲਿਟ ਸਕ੍ਰੀਨ"</string>
     <string name="more_button_text" msgid="3655388105592893530">"ਹੋਰ"</string>
     <string name="float_button_text" msgid="9221657008391364581">"ਫ਼ਲੋਟ"</string>
-    <!-- no translation found for select_text (5139083974039906583) -->
-    <skip />
-    <!-- no translation found for screenshot_text (1477704010087786671) -->
-    <skip />
-    <!-- no translation found for close_text (4986518933445178928) -->
-    <skip />
-    <!-- no translation found for collapse_menu_text (7515008122450342029) -->
-    <skip />
+    <string name="select_text" msgid="5139083974039906583">"ਚੁਣੋ"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="close_text" msgid="4986518933445178928">"ਬੰਦ ਕਰੋ"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"ਮੀਨੂ ਬੰਦ ਕਰੋ"</string>
 </resources>

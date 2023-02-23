@@ -665,7 +665,7 @@ class MediaDataManager(
         appIntent: PendingIntent,
         packageName: String
     ) {
-        if (TextUtils.isEmpty(desc.title)) {
+        if (desc.title.isNullOrBlank()) {
             Log.e(TAG, "Description incomplete")
             // Delete the placeholder entry
             mediaEntries.remove(packageName)
@@ -1405,6 +1405,13 @@ class MediaDataManager(
     /** Set the given [MediaData] as a resume state player and notify listeners */
     private fun convertToResumePlayer(key: String, data: MediaData) {
         if (DEBUG) Log.d(TAG, "Converting $key to resume")
+        // Resumption controls must have a title.
+        if (data.song.isNullOrBlank()) {
+            Log.e(TAG, "Description incomplete")
+            notifyMediaDataRemoved(key)
+            logger.logMediaRemoved(data.appUid, data.packageName, data.instanceId)
+            return
+        }
         // Move to resume key (aka package name) if that key doesn't already exist.
         val resumeAction = data.resumeAction?.let { getResumeMediaAction(it) }
         val actions = resumeAction?.let { listOf(resumeAction) } ?: emptyList()

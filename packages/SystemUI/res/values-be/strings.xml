@@ -197,6 +197,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Цень апавяшчэння.."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Хуткія налады."</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Экран блакіроўкі."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Экран блакіроўкі дзейнасці"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Закрыць"</string>
@@ -257,8 +259,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Яркасць"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Інверсія колераў"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Карэкцыя колераў"</string>
-    <!-- no translation found for quick_settings_font_scaling_label (5289001009876936768) -->
-    <skip />
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Памер шрыфту"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Кіраваць карыстальнікамі"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Гатова"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Закрыць"</string>
@@ -779,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"запіс экрана"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без назвы"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Рэжым чакання"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Памер шрыфту"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Паменшыць"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Павялічыць"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Акно павелічэння"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Налады акна павелічэння"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Павялічыць маштаб"</string>
@@ -909,10 +907,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Не ўдалося запусціць трансляцыю"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Не ўдалося захаваць. Паўтарыце спробу."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Не ўдалося захаваць."</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Скарыстайце не менш як 4 сімвалы"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Скарыстайце менш за 16 сімвалаў"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Нумар зборкі"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Нумар зборкі скапіраваны ў буфер абмену."</string>
     <string name="basic_status" msgid="2315371112182658176">"Адкрытая размова"</string>
@@ -1032,16 +1028,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Даступная хаця б адна прылада."</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Дакраніцеся і ўтрымлівайце ярлык"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасаваць"</string>
-    <!-- no translation found for rear_display_bottom_sheet_confirm (1507591562761552899) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_title (3930008746560711990) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_title (6291111173057304055) -->
-    <skip />
-    <!-- no translation found for rear_display_folded_bottom_sheet_description (6842767125783222695) -->
-    <skip />
-    <!-- no translation found for rear_display_unfolded_bottom_sheet_description (7229961336309960201) -->
-    <skip />
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Пераключыцца на іншы экран"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Раскрыйце тэлефон"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Пераключыцца на іншы экран?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Каб рабіць фота з больш высокай раздзяляльнасцю, выкарыстоўвайце заднюю камеру"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Каб зрабіць фота з больш высокай раздзяляльнасцю, павярніце тэлефон"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складная прылада ў раскладзеным выглядзе"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Перавернутая складная прылада"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Засталося зараду: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
@@ -1053,4 +1044,14 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Пераключыцца на працоўны профіль"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Закрыць"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Налады экрана блакіроўкі"</string>
+    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
+    <skip />
+    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
+    <skip />
+    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
+    <skip />
+    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
+    <skip />
+    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
+    <skip />
 </resources>

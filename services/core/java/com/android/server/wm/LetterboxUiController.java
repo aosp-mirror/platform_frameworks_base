@@ -193,12 +193,6 @@ final class LetterboxUiController {
     // The app compat state for the opaque activity if any
     private int mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
 
-    // If true it means that the opaque activity beneath a translucent one is in SizeCompatMode.
-    private boolean mIsInheritedInSizeCompatMode;
-
-    // This is the SizeCompatScale of the opaque activity beneath a translucent one
-    private float mInheritedSizeCompatScale;
-
     // The CompatDisplayInsets of the opaque activity beneath the translucent one.
     private ActivityRecord.CompatDisplayInsets mInheritedCompatDisplayInsets;
 
@@ -735,8 +729,21 @@ final class LetterboxUiController {
                     : mActivityRecord.inMultiWindowMode()
                             ? mActivityRecord.getTask().getBounds()
                             : mActivityRecord.getRootTask().getParent().getBounds();
+            // In case of translucent activities an option is to use the WindowState#getFrame() of
+            // the first opaque activity beneath. In some cases (e.g. an opaque activity is using
+            // non MATCH_PARENT layouts or a Dialog theme) this might not provide the correct
+            // information and in particular it might provide a value for a smaller area making
+            // the letterbox overlap with the translucent activity's frame.
+            // If we use WindowState#getFrame() for the translucent activity's letterbox inner
+            // frame, the letterbox will then be overlapped with the translucent activity's frame.
+            // Because the surface layer of letterbox is lower than an activity window, this
+            // won't crop the content, but it may affect other features that rely on values stored
+            // in mLetterbox, e.g. transitions, a status bar scrim and recents preview in Launcher
+            // For this reason we use ActivityRecord#getBounds() that the translucent activity
+            // inherits from the first opaque activity beneath and also takes care of the scaling
+            // in case of activities in size compat mode.
             final Rect innerFrame = hasInheritedLetterboxBehavior()
-                    ? mActivityRecord.getWindowConfiguration().getBounds() : w.getFrame();
+                    ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
@@ -1386,10 +1393,10 @@ final class LetterboxUiController {
             mLetterboxConfigListener.onRemoved();
             clearInheritedConfig();
         }
-        // In case mActivityRecord.getCompatDisplayInsets() is not null we don't apply the
+        // In case mActivityRecord.hasCompatDisplayInsetsWithoutOverride() we don't apply the
         // opaque activity constraints because we're expecting the activity is already letterboxed.
-        if (mActivityRecord.getTask() == null || mActivityRecord.getCompatDisplayInsets() != null
-                || mActivityRecord.fillsParent()) {
+        if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
+                || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
             return;
         }
         final ActivityRecord firstOpaqueActivityBeneath = mActivityRecord.getTask().getActivity(
@@ -1417,6 +1424,7 @@ final class LetterboxUiController {
                     // We need to initialize appBounds to avoid NPE. The actual value will
                     // be set ahead when resolving the Configuration for the activity.
                     mutatedConfiguration.windowConfiguration.setAppBounds(new Rect());
+                    inheritConfiguration(firstOpaqueActivityBeneath);
                     return mutatedConfiguration;
                 });
     }
@@ -1457,16 +1465,12 @@ final class LetterboxUiController {
         return mInheritedAppCompatState;
     }
 
-    float getInheritedSizeCompatScale() {
-        return mInheritedSizeCompatScale;
-    }
-
     @Configuration.Orientation
     int getInheritedOrientation() {
         return mInheritedOrientation;
     }
 
-    public ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
+    ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
         return mInheritedCompatDisplayInsets;
     }
 
@@ -1486,7 +1490,7 @@ final class LetterboxUiController {
      * @return The first not finishing opaque activity beneath the current translucent activity
      * if it exists and the strategy is enabled.
      */
-    private Optional<ActivityRecord> findOpaqueNotFinishingActivityBelow() {
+    Optional<ActivityRecord> findOpaqueNotFinishingActivityBelow() {
         if (!hasInheritedLetterboxBehavior() || mActivityRecord.getTask() == null) {
             return Optional.empty();
         }
@@ -1508,8 +1512,6 @@ final class LetterboxUiController {
         }
         mInheritedOrientation = firstOpaque.getRequestedConfigurationOrientation();
         mInheritedAppCompatState = firstOpaque.getAppCompatState();
-        mIsInheritedInSizeCompatMode = firstOpaque.inSizeCompatMode();
-        mInheritedSizeCompatScale = firstOpaque.getCompatScale();
         mInheritedCompatDisplayInsets = firstOpaque.getCompatDisplayInsets();
     }
 
@@ -1519,8 +1521,6 @@ final class LetterboxUiController {
         mInheritedMaxAspectRatio = UNDEFINED_ASPECT_RATIO;
         mInheritedOrientation = Configuration.ORIENTATION_UNDEFINED;
         mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
-        mIsInheritedInSizeCompatMode = false;
-        mInheritedSizeCompatScale = 1f;
         mInheritedCompatDisplayInsets = null;
     }
 }

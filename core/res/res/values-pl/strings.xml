@@ -344,8 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Może przechwytywać gesty wykonywane na czytniku linii papilarnych w urządzeniu."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Robienie zrzutu ekranu"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Może robić zrzuty ekranu wyświetlacza."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Podgląd, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"wyłączanie lub zmienianie paska stanu"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Pozwala aplikacji na wyłączanie paska stanu oraz dodawanie i usuwanie ikon systemowych."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"działanie jako pasek stanu"</string>

@@ -56,7 +56,6 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
@@ -110,7 +109,7 @@ public class QuickSettingsController {
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final NotificationShadeDepthController mDepthController;
-    private final LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
+    private final ShadeHeaderController mShadeHeaderController;
     private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
@@ -276,7 +275,7 @@ public class QuickSettingsController {
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             NotificationShadeDepthController notificationShadeDepthController,
-            LargeScreenShadeHeaderController largeScreenShadeHeaderController,
+            ShadeHeaderController shadeHeaderController,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController keyguardBypassController,
@@ -315,7 +314,7 @@ public class QuickSettingsController {
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mDepthController = notificationShadeDepthController;
-        mLargeScreenShadeHeaderController = largeScreenShadeHeaderController;
+        mShadeHeaderController = shadeHeaderController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = keyguardBypassController;
@@ -396,18 +395,10 @@ public class QuickSettingsController {
                 mResources.getDimensionPixelSize(R.dimen.large_screen_shade_header_height);
         int topMargin = mUseLargeScreenShadeHeader ? mLargeScreenShadeHeaderHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
-        mLargeScreenShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
+        mShadeHeaderController.setLargeScreenActive(mUseLargeScreenShadeHeader);
         mAmbientState.setStackTopMargin(topMargin);
 
-        // TODO: When the flag is eventually removed, it means that we have a single view that is
-        // the same height in QQS and in Large Screen (large_screen_shade_header_height). Eventually
-        // the concept of largeScreenHeader or quickQsHeader will disappear outside of the class
-        // that controls the view as the offset needs to be the same regardless.
-        if (mUseLargeScreenShadeHeader || mFeatureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)) {
-            mQuickQsHeaderHeight = mLargeScreenShadeHeaderHeight;
-        } else {
-            mQuickQsHeaderHeight = SystemBarUtils.getQuickQsOffsetHeight(mPanelView.getContext());
-        }
+        mQuickQsHeaderHeight = mLargeScreenShadeHeaderHeight;
 
         mEnableClipping = mResources.getBoolean(R.bool.qs_enable_clipping);
     }
@@ -432,6 +423,11 @@ public class QuickSettingsController {
 
     private void onNotificationScrolled(int newScrollPosition) {
         updateExpansionEnabledAmbient();
+    }
+
+    @VisibleForTesting
+    void setStatusBarMinHeight(int height) {
+        mStatusBarMinHeight = height;
     }
 
     int getHeaderHeight() {
@@ -483,7 +479,8 @@ public class QuickSettingsController {
     }
 
     /** Returns whether or not event should open QS */
-    private boolean isOpenQsEvent(MotionEvent event) {
+    @VisibleForTesting
+    boolean isOpenQsEvent(MotionEvent event) {
         final int pointerCount = event.getPointerCount();
         final int action = event.getActionMasked();
 
@@ -663,8 +660,15 @@ public class QuickSettingsController {
         mDozing = dozing;
     }
 
-    /** set QS state to closed */
+    /**
+     * This method closes QS but in split shade it should be used only in special cases: to make
+     * sure QS closes when shade is closed as well. Otherwise it will result in QS disappearing
+     * from split shade
+     */
     public void closeQs() {
+        if (mSplitShadeEnabled) {
+            mShadeLog.d("Closing QS while in split shade");
+        }
         cancelExpansionAnimation();
         setExpansionHeight(getMinExpansionHeight());
         // qsExpandImmediate is a safety latch in case we're calling closeQS while we're in the
@@ -803,6 +807,10 @@ public class QuickSettingsController {
         }
     }
 
+    void setOverScrollAmount(int overExpansion) {
+        mQs.setOverScrollAmount(overExpansion);
+    }
+
     private void setOverScrolling(boolean overscrolling) {
         mStackScrollerOverscrolling = overscrolling;
         if (mQs != null) {
@@ -843,6 +851,11 @@ public class QuickSettingsController {
 
     void setTwoFingerExpandPossible(boolean expandPossible) {
         mTwoFingerExpandPossible = expandPossible;
+    }
+
+    @VisibleForTesting
+    boolean isTwoFingerExpandPossible() {
+        return mTwoFingerExpandPossible;
     }
 
     /** Called when Qs starts expanding */
@@ -920,9 +933,9 @@ public class QuickSettingsController {
         float shadeExpandedFraction = mBarState == KEYGUARD
                 ? mPanelViewControllerLazy.get().getLockscreenShadeDragProgress()
                 : mShadeExpandedFraction;
-        mLargeScreenShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
-        mLargeScreenShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
-        mLargeScreenShadeHeaderController.setQsVisible(mVisible);
+        mShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
+        mShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
+        mShadeHeaderController.setQsVisible(mVisible);
     }
 
     /** */
@@ -1361,7 +1374,8 @@ public class QuickSettingsController {
         return mTouchAboveFalsingThreshold;
     }
 
-    private void onHeightChanged() {
+    @VisibleForTesting
+    void onHeightChanged() {
         mMaxExpansionHeight = isQsFragmentCreated() ? mQs.getDesiredHeight() : 0;
         if (mExpanded && mFullyExpanded) {
             mExpansionHeight = mMaxExpansionHeight;
@@ -1391,7 +1405,7 @@ public class QuickSettingsController {
     }
 
     private void onScroll(int scrollY) {
-        mLargeScreenShadeHeaderController.setQsScrollY(scrollY);
+        mShadeHeaderController.setQsScrollY(scrollY);
         if (scrollY > 0 && !mFullyExpanded) {
             // TODO (b/265193930): remove dependency on NPVC
             // If we are scrolling QS, we should be fully expanded.
@@ -1666,7 +1680,8 @@ public class QuickSettingsController {
         return false;
     }
 
-    private void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
+    @VisibleForTesting
+    void onPanelExpansionChanged(ShadeExpansionChangeEvent event) {
         mShadeExpandedFraction = event.getFraction();
     }
 
@@ -1710,12 +1725,16 @@ public class QuickSettingsController {
      */
     private void flingQs(float vel, int type, final Runnable onFinishRunnable,
             boolean isClick) {
+        mShadeLog.flingQs(type, isClick);
         float target;
         switch (type) {
             case FLING_EXPAND:
                 target = getMaxExpansionHeight();
                 break;
             case FLING_COLLAPSE:
+                if (mSplitShadeEnabled) { // TODO:(b/269742565) remove below log
+                    Log.wtfStack(TAG, "FLING_COLLAPSE called in split shade");
+                }
                 target = getMinExpansionHeight();
                 break;
             case FLING_HIDE:

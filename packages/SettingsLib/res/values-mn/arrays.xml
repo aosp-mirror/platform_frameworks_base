@@ -273,12 +273,10 @@
   </string-array>
   <string-array name="avatar_image_descriptions">
   </string-array>
-    <!-- no translation found for entries_font_size:0 (9181293769180886675) -->
-    <!-- no translation found for entries_font_size:0 (6490061470416867723) -->
-    <!-- no translation found for entries_font_size:1 (1484561228522634915) -->
-    <!-- no translation found for entries_font_size:1 (3579015730662088893) -->
-    <!-- no translation found for entries_font_size:2 (4014311587094503943) -->
-    <!-- no translation found for entries_font_size:2 (1678068858001018666) -->
-    <!-- no translation found for entries_font_size:3 (2904569270831156685) -->
-    <!-- no translation found for entries_font_size:3 (490158884605093126) -->
+  <string-array name="entries_font_size">
+    <item msgid="9181293769180886675">"Жижиг"</item>
+    <item msgid="1484561228522634915">"Өгөгдмөл"</item>
+    <item msgid="4014311587094503943">"Том"</item>
+    <item msgid="2904569270831156685">"Хамгийн том"</item>
+  </string-array>
 </resources>

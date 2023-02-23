@@ -344,8 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Dokáže rozpoznat gesta zadaná na snímači otisků prstů."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Pořídit snímek obrazovky"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Může pořídit snímek obrazovky."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Náhled, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"zakázání či změny stavového řádku"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Umožňuje aplikaci zakázat stavový řádek nebo přidat či odebrat systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vydávání se za stavový řádek"</string>
