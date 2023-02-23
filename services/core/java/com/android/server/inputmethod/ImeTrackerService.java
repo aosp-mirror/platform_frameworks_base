@@ -28,10 +28,10 @@ import android.util.Log;
 import android.view.inputmethod.ImeTracker;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.internal.view.IImeTracker;
 
 import java.io.PrintWriter;
 import java.time.Instant;
