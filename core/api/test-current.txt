@@ -922,7 +922,7 @@ package android.content.pm {
     method @Nullable public String getDefaultTextClassifierPackageName();
     method @RequiresPermission(android.Manifest.permission.INJECT_EVENTS) public android.os.IBinder getHoldLockToken();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
-    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @NonNull public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(@NonNull android.content.pm.PackageManager.ApplicationInfoFlags, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method @NonNull public String getPermissionControllerPackageName();
