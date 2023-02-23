@@ -39,24 +39,24 @@ public class SatellitePositionUpdateCallback {
         }
 
         @Override
-        public void onSatellitePositionUpdate(@NonNull PointingInfo pointingInfo) {
+        public void onSatellitePositionChanged(@NonNull PointingInfo pointingInfo) {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() ->
-                        mLocalCallback.onSatellitePositionUpdate(pointingInfo));
+                        mLocalCallback.onSatellitePositionChanged(pointingInfo));
             } finally {
                 restoreCallingIdentity(callingIdentity);
             }
         }
 
         @Override
-        public void onDatagramTransferStateUpdate(
+        public void onDatagramTransferStateChanged(
                 @SatelliteManager.SatelliteDatagramTransferState int state, int sendPendingCount,
                 int receivePendingCount, @SatelliteManager.SatelliteError int errorCode) {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() ->
-                        mLocalCallback.onDatagramTransferStateUpdate(
+                        mLocalCallback.onDatagramTransferStateChanged(
                                 state, sendPendingCount, receivePendingCount, errorCode));
             } finally {
                 restoreCallingIdentity(callingIdentity);
@@ -69,23 +69,23 @@ public class SatellitePositionUpdateCallback {
     }
 
     /**
-     * Called when the satellite position changes.
+     * Called when the satellite position changed.
      *
      * @param pointingInfo The pointing info containing the satellite location.
      */
-    public void onSatellitePositionUpdate(@NonNull PointingInfo pointingInfo) {
+    public void onSatellitePositionChanged(@NonNull PointingInfo pointingInfo) {
         // Base Implementation
     }
 
     /**
-     * Called when satellite datagram transfer state changes.
+     * Called when satellite datagram transfer state changed.
      *
      * @param state The new datagram transfer state.
      * @param sendPendingCount The number of datagrams that are currently being sent.
      * @param receivePendingCount The number of datagrams that are currently being received.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
-    public void onDatagramTransferStateUpdate(
+    public void onDatagramTransferStateChanged(
             @SatelliteManager.SatelliteDatagramTransferState int state, int sendPendingCount,
             int receivePendingCount, @SatelliteManager.SatelliteError int errorCode) {
         // Base Implementation

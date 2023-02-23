@@ -21,12 +21,25 @@ package android.telephony.satellite.stub;
  */
 @Backing(type="int")
 enum NTRadioTechnology {
-    /* 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology. */
-    NB_IOT_NTN,
-    /* 3GPP 5G NR over Non-Terrestrial-Networks technology. */
-    NR_NTN,
-    /* 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology. */
-    EMTC_NTN,
-    /* Proprietary technology. */
-    PROPRIETARY,
+    /**
+     * 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
+     */
+    NB_IOT_NTN = 0,
+    /*
+     * 3GPP 5G NR over Non-Terrestrial-Networks technology.
+     */
+    NR_NTN = 1,
+    /**
+     * 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology.
+     */
+    EMTC_NTN = 2,
+    /**
+     * Proprietary technology.
+     */
+    PROPRIETARY = 3,
+    /**
+     * Unknown Non-Terrestrial radio technology. This generic radio technology should be used
+     * only when the radio technology cannot be mapped to other specific radio technologies.
+     */
+    UNKNOWN = -1,
 }

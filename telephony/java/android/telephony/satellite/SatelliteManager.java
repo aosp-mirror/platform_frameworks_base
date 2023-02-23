@@ -116,6 +116,13 @@ public class SatelliteManager {
 
     /**
      * Bundle key to get the response from
+     * {@link #requestIsSatelliteDemoModeEnabled(Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_DEMO_MODE_ENABLED = "demo_mode_enabled";
+
+    /**
+     * Bundle key to get the response from
      * {@link #requestIsSatelliteSupported(Executor, OutcomeReceiver)}.
      * @hide
      */
@@ -284,6 +291,39 @@ public class SatelliteManager {
     public @interface SatelliteError {}
 
     /**
+     * 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_NB_IOT_NTN = 0;
+    /**
+     * 3GPP 5G NR over Non-Terrestrial-Networks technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_NR_NTN = 1;
+    /**
+     * 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_EMTC_NTN = 2;
+    /**
+     * Proprietary technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_PROPRIETARY = 3;
+    /**
+     * Unknown Non-Terrestrial radio technology. This generic radio technology should be used
+     * only when the radio technology cannot be mapped to other specific radio technologies.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_UNKNOWN = -1;
+
+    /** @hide */
+    @IntDef(prefix = "NT_RADIO_TECHNOLOGY_", value = {
+            NT_RADIO_TECHNOLOGY_NB_IOT_NTN,
+            NT_RADIO_TECHNOLOGY_NR_NTN,
+            NT_RADIO_TECHNOLOGY_EMTC_NTN,
+            NT_RADIO_TECHNOLOGY_PROPRIETARY,
+            NT_RADIO_TECHNOLOGY_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface NTRadioTechnology {}
+
+    /**
      * Request to enable or disable the satellite modem. If the satellite modem is enabled, this
      * will also disable the cellular modem, and if the satellite modem is disabled, this will also
      * re-enable the cellular modem.
@@ -372,6 +412,97 @@ public class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("requestIsSatelliteEnabled() RemoteException: " + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to enable or disable the satellite service demo mode.
+     *
+     * @param enable {@code true} to enable the satellite demo mode and {@code false} to disable.
+     * @param executor The executor on which the error code listener will be called.
+     * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestSatelliteDemoModeEnabled(boolean enable,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Integer> errorCodeListener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(errorCodeListener);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                IIntegerConsumer errorCallback = new IIntegerConsumer.Stub() {
+                    @Override
+                    public void accept(int result) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(
+                                () -> errorCodeListener.accept(result)));
+                    }
+                };
+                telephony.requestSatelliteDemoModeEnabled(mSubId, enable, errorCallback);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "requestSatelliteDemoModeEnabled() RemoteException: ", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Request to get whether the satellite service demo mode is enabled.
+     *
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *                 If the request is successful, {@link OutcomeReceiver#onResult(Object)}
+     *                 will return a {@code boolean} with value {@code true} if the satellite
+     *                 demo mode is enabled and {@code false} otherwise.
+     *                 If the request is not successful, {@link OutcomeReceiver#onError(Throwable)}
+     *                 will return a {@link SatelliteException} with the {@link SatelliteError}.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    public void requestIsSatelliteDemoModeEnabled(@NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_ERROR_NONE) {
+                            if (resultData.containsKey(KEY_DEMO_MODE_ENABLED)) {
+                                boolean isDemoModeEnabled =
+                                        resultData.getBoolean(KEY_DEMO_MODE_ENABLED);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(isDemoModeEnabled)));
+                            } else {
+                                loge("KEY_DEMO_MODE_ENABLED does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(
+                                                new SatelliteException(SATELLITE_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.requestIsSatelliteDemoModeEnabled(mSubId, receiver);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("requestIsSatelliteDemoModeEnabled() RemoteException: " + ex);
             ex.rethrowFromSystemServer();
         }
     }
@@ -513,6 +644,12 @@ public class SatelliteManager {
      * must be sent before reporting any additional datagram transfer state changes.
      */
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED = 5;
+    /**
+     * The datagram transfer state is unknown. This generic datagram transfer state should be used
+     * only when the datagram transfer state cannot be mapped to other specific datagram transfer
+     * states.
+     */
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN = -1;
 
     /** @hide */
     @IntDef(prefix = {"SATELLITE_DATAGRAM_TRANSFER_STATE_"}, value = {
@@ -521,46 +658,70 @@ public class SatelliteManager {
             SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING,
             SATELLITE_DATAGRAM_TRANSFER_STATE_RETRYING,
             SATELLITE_DATAGRAM_TRANSFER_STATE_SUCCESS,
-            SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED
+            SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteDatagramTransferState {}
 
-    /* Satellite modem is in idle state. */
+    /**
+     * Satellite modem is in idle state.
+     */
     public static final int SATELLITE_MODEM_STATE_IDLE = 0;
-
-    /* Satellite modem is listening for incoming datagrams. */
+    /**
+     * Satellite modem is listening for incoming datagrams.
+     */
     public static final int SATELLITE_MODEM_STATE_LISTENING = 1;
-
-    /* Satellite modem is sending and/or receiving datagrams. */
+    /**
+     * Satellite modem is sending and/or receiving datagrams.
+     */
     public static final int SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2;
-
-    /* Satellite modem is powered off. */
-    public static final int SATELLITE_MODEM_STATE_OFF = 3;
+    /**
+     * Satellite modem is retrying to send and/or receive datagrams.
+     */
+    public static final int SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3;
+    /**
+     * Satellite modem is powered off.
+     */
+    public static final int SATELLITE_MODEM_STATE_OFF = 4;
+    /**
+     * Satellite modem state is unknown. This generic modem state should be used only when the
+     * modem state cannot be mapped to other specific modem states.
+     */
+    public static final int SATELLITE_MODEM_STATE_UNKNOWN = -1;
 
     /** @hide */
-    @IntDef(prefix = {"SATELLITE_STATE_"},
-            value = {
-                    SATELLITE_MODEM_STATE_IDLE,
-                    SATELLITE_MODEM_STATE_LISTENING,
-                    SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING,
-                    SATELLITE_MODEM_STATE_OFF
-            })
+    @IntDef(prefix = {"SATELLITE_MODEM_STATE_"}, value = {
+            SATELLITE_MODEM_STATE_IDLE,
+            SATELLITE_MODEM_STATE_LISTENING,
+            SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING,
+            SATELLITE_MODEM_STATE_DATAGRAM_RETRYING,
+            SATELLITE_MODEM_STATE_OFF,
+            SATELLITE_MODEM_STATE_UNKNOWN
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteModemState {}
 
-    /** Datagram type indicating that the datagram to be sent or received is of type SOS message. */
+    /**
+     * Datagram type indicating that the datagram to be sent or received is of type SOS message.
+     */
     public static final int DATAGRAM_TYPE_SOS_MESSAGE = 0;
+    /**
+     * Datagram type indicating that the datagram to be sent or received is of type
+     * location sharing.
+     */
+    public static final int DATAGRAM_TYPE_LOCATION_SHARING = 1;
+    /**
+     * Datagram type is unknown. This generic datagram type should be used only when the
+     * datagram type cannot be mapped to other specific datagram types.
+     */
+    public static final int DATAGRAM_TYPE_UNKNOWN = -1;
 
-    /** Datagram type indicating that the datagram to be sent or received is of type
-     * location sharing. */
-    public static final int DATAGRAM_TYPE_LOCATION_SHARING = 3;
-
-    @IntDef(
-            prefix = "DATAGRAM_TYPE_",
-            value = {
-                    DATAGRAM_TYPE_SOS_MESSAGE,
-                    DATAGRAM_TYPE_LOCATION_SHARING,
-            })
+    @IntDef(prefix = "DATAGRAM_TYPE_", value = {
+            DATAGRAM_TYPE_SOS_MESSAGE,
+            DATAGRAM_TYPE_LOCATION_SHARING,
+            DATAGRAM_TYPE_UNKNOWN
+    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
 
@@ -802,7 +963,7 @@ public class SatelliteManager {
     }
 
     /**
-     * Register for the satellite provision state change.
+     * Registers for the satellite provision state changed.
      *
      * @param executor The executor on which the callback will be called.
      * @param callback The callback to handle the satellite provision state changed event.
@@ -836,7 +997,7 @@ public class SatelliteManager {
     }
 
     /**
-     * Unregister for the satellite provision state change.
+     * Unregisters for the satellite provision state changed.
      * If callback was not registered before, the request will be ignored.
      *
      * @param callback The callback that was passed to
@@ -918,10 +1079,10 @@ public class SatelliteManager {
     }
 
     /**
-     * Register for listening to satellite modem state changes.
+     * Registers for modem state changed from satellite modem.
      *
      * @param executor The executor on which the callback will be called.
-     * @param callback The callback to handle the satellite modem state change event.
+     * @param callback The callback to handle the satellite modem state changed event.
      *
      * @return The {@link SatelliteError} result of the operation.
      *
@@ -929,7 +1090,7 @@ public class SatelliteManager {
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    @SatelliteError public int registerForSatelliteModemStateChange(
+    @SatelliteError public int registerForSatelliteModemStateChanged(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull SatelliteStateCallback callback) {
         Objects.requireNonNull(executor);
@@ -939,41 +1100,41 @@ public class SatelliteManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 callback.setExecutor(executor);
-                return telephony.registerForSatelliteModemStateChange(mSubId,
+                return telephony.registerForSatelliteModemStateChanged(mSubId,
                         callback.getBinder());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("registerForSatelliteModemStateChange() RemoteException:" + ex);
+            loge("registerForSatelliteModemStateChanged() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
         return SATELLITE_REQUEST_FAILED;
     }
 
     /**
-     * Unregister to stop listening to satellite modem state changes.
+     * Unregisters for modem state changed from satellite modem.
      * If callback was not registered before, the request will be ignored.
      *
      * @param callback The callback that was passed to
-     * {@link #registerForSatelliteModemStateChange(Executor, SatelliteStateCallback)}.
+     * {@link #registerForSatelliteModemStateChanged(Executor, SatelliteStateCallback)}.
      *
      * @throws SecurityException if the caller doesn't have required permission.
      * @throws IllegalStateException if the Telephony process is not currently available.
      */
     @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
-    public void unregisterForSatelliteModemStateChange(@NonNull SatelliteStateCallback callback) {
+    public void unregisterForSatelliteModemStateChanged(@NonNull SatelliteStateCallback callback) {
         Objects.requireNonNull(callback);
 
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.unregisterForSatelliteModemStateChange(mSubId, callback.getBinder());
+                telephony.unregisterForSatelliteModemStateChanged(mSubId, callback.getBinder());
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            loge("unregisterForSatelliteModemStateChange() RemoteException:" + ex);
+            loge("unregisterForSatelliteModemStateChanged() RemoteException:" + ex);
             ex.rethrowFromSystemServer();
         }
     }
