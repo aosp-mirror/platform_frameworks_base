@@ -1092,6 +1092,7 @@ package android.credentials {
     method @Nullable public CharSequence getLabel(@NonNull android.content.Context);
     method @Nullable public android.graphics.drawable.Drawable getServiceIcon(@NonNull android.content.Context);
     method @NonNull public android.content.pm.ServiceInfo getServiceInfo();
+    method @Nullable public CharSequence getSettingsSubtitle();
     method @NonNull public boolean hasCapability(@NonNull String);
     method public boolean isEnabled();
     method public boolean isSystemProvider();
@@ -1104,6 +1105,7 @@ package android.credentials {
     method @NonNull public android.credentials.CredentialProviderInfo.Builder addCapabilities(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.credentials.CredentialProviderInfo build();
     method @NonNull public android.credentials.CredentialProviderInfo.Builder setEnabled(boolean);
+    method @NonNull public android.credentials.CredentialProviderInfo.Builder setSettingsSubtitle(@Nullable CharSequence);
     method @NonNull public android.credentials.CredentialProviderInfo.Builder setSystemProvider(boolean);
   }
 
