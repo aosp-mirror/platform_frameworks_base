@@ -23,6 +23,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.IFaceService;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -64,8 +65,11 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
             String opPackageName, long requestId, int cookie, boolean allowBackgroundAuthentication)
             throws RemoteException {
         mFaceService.prepareForAuthentication(mSensorId, requireConfirmation, token, operationId,
-                userId, sensorReceiver, opPackageName, requestId, cookie,
-                allowBackgroundAuthentication);
+                sensorReceiver, new FaceAuthenticateOptions.Builder()
+                        .setUserId(userId)
+                        .setOpPackageName(opPackageName)
+                        .build(),
+                requestId, cookie, allowBackgroundAuthentication);
     }
 
     @Override

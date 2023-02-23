@@ -159,7 +159,7 @@ public class FaceAuthenticationClientTest {
                 false /* requireConfirmation */, 9 /* sensorId */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
                 mUsageStats, null /* mLockoutCache */, false /* allowBackgroundAuthentication */,
-                false /* isKeyguardBypassEnabled */, null /* sensorPrivacyManager */,
+                null /* sensorPrivacyManager */,
                 0 /* biometricStrength */) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {
