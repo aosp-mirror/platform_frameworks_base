@@ -122,6 +122,10 @@ public interface StatusBarManagerInternal {
      */
     void onEmergencyActionLaunchGestureDetected();
 
+    /** Toggle the task bar stash state. */
+    void toggleTaskbar();
+
+    /** Toggle recents. */
     void toggleRecentApps();
 
     void setCurrentUser(int newUserId);
