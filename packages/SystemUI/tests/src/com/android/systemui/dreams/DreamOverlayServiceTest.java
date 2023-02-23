@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -229,6 +230,31 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         mMainExecutor.runAllReady();
 
         verify(mWindowManager).addView(any(), any());
+    }
+
+    // Validates that {@link DreamOverlayService} properly handles the case where the dream's
+    // window is no longer valid by the time start is called.
+    @Test
+    public void testInvalidWindowAddStart() throws Exception {
+        final IDreamOverlayClient client = getClient();
+
+        doThrow(new WindowManager.BadTokenException()).when(mWindowManager).addView(any(), any());
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        verify(mWindowManager).addView(any(), any());
+
+        verify(mStateController).setOverlayActive(false);
+        verify(mStateController).setLowLightActive(false);
+        verify(mStateController).setEntryAnimationsFinished(false);
+
+        verify(mStateController, never()).setOverlayActive(true);
+        verify(mUiEventLogger, never()).log(
+                DreamOverlayService.DreamOverlayEvent.DREAM_OVERLAY_COMPLETE_START);
+
+        verify(mDreamOverlayCallbackController, never()).onStartDream();
     }
 
     @Test
