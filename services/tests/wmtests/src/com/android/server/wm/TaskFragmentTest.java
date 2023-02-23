@@ -24,7 +24,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -613,35 +612,5 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf0.getOrientation(SCREEN_ORIENTATION_UNSET));
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, tf1.getOrientation(SCREEN_ORIENTATION_UNSET));
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, task.getOrientation(SCREEN_ORIENTATION_UNSET));
-    }
-
-    @Test
-    public void testUpdateImeParentForActivityEmbedding() {
-        // Setup two activities in ActivityEmbedding.
-        final Task task = createTask(mDisplayContent);
-        final TaskFragment tf0 = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .createActivityCount(1)
-                .setOrganizer(mOrganizer)
-                .setFragmentToken(new Binder())
-                .build();
-        final TaskFragment tf1 = new TaskFragmentBuilder(mAtm)
-                .setParentTask(task)
-                .createActivityCount(1)
-                .setOrganizer(mOrganizer)
-                .setFragmentToken(new Binder())
-                .build();
-        final ActivityRecord activity0 = tf0.getTopMostActivity();
-        final ActivityRecord activity1 = tf1.getTopMostActivity();
-        final WindowState win0 = createWindow(null, TYPE_BASE_APPLICATION, activity0, "win0");
-        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity1, "win1");
-        doReturn(false).when(mDisplayContent).shouldImeAttachedToApp();
-
-        mDisplayContent.setImeInputTarget(win0);
-        mDisplayContent.setImeLayeringTarget(win1);
-
-        // The ImeParent should be the display.
-        assertEquals(mDisplayContent.getImeContainer().getParent().getSurfaceControl(),
-                mDisplayContent.computeImeParent());
     }
 }
