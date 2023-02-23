@@ -16,10 +16,6 @@
 
 package com.android.systemui.statusbar.events
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
-import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Rect
 import android.view.ContextThemeWrapper
@@ -30,6 +26,10 @@ import android.view.View.MeasureSpec.AT_MOST
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
+import androidx.core.animation.Animator
+import androidx.core.animation.AnimatorListenerAdapter
+import androidx.core.animation.AnimatorSet
+import androidx.core.animation.ValueAnimator
 import com.android.systemui.R
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -144,7 +144,7 @@ class SystemEventChipAnimationController @Inject constructor(
         }
 
         finish.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 animationWindowView.removeView(currentAnimatedView!!.view)
             }
         })
@@ -157,7 +157,7 @@ class SystemEventChipAnimationController @Inject constructor(
             duration = 9.frames
             interpolator = STATUS_CHIP_WIDTH_TO_DOT_KEYFRAME_1
             addUpdateListener {
-                updateAnimatedViewBoundsWidth(it.animatedValue as Int)
+                updateAnimatedViewBoundsWidth(animatedValue as Int)
             }
         }
 
@@ -166,7 +166,7 @@ class SystemEventChipAnimationController @Inject constructor(
             duration = 20.frames
             interpolator = STATUS_CHIP_WIDTH_TO_DOT_KEYFRAME_2
             addUpdateListener {
-                updateAnimatedViewBoundsWidth(it.animatedValue as Int)
+                updateAnimatedViewBoundsWidth(animatedValue as Int)
             }
         }
 
@@ -179,7 +179,7 @@ class SystemEventChipAnimationController @Inject constructor(
             duration = 6.frames
             interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_1
             addUpdateListener {
-                updateAnimatedViewBoundsHeight(it.animatedValue as Int, chipVerticalCenter)
+                updateAnimatedViewBoundsHeight(animatedValue as Int, chipVerticalCenter)
             }
         }
 
@@ -188,7 +188,7 @@ class SystemEventChipAnimationController @Inject constructor(
             duration = 15.frames
             interpolator = STATUS_CHIP_HEIGHT_TO_DOT_KEYFRAME_2
             addUpdateListener {
-                updateAnimatedViewBoundsHeight(it.animatedValue as Int, chipVerticalCenter)
+                updateAnimatedViewBoundsHeight(animatedValue as Int, chipVerticalCenter)
             }
         }
 
@@ -233,7 +233,7 @@ class SystemEventChipAnimationController @Inject constructor(
             interpolator = STATUS_BAR_X_MOVE_OUT
             addUpdateListener {
                 currentAnimatedView?.apply {
-                    updateAnimatedViewBoundsWidth(it.animatedValue as Int)
+                    updateAnimatedViewBoundsWidth(animatedValue as Int)
                 }
             }
         }

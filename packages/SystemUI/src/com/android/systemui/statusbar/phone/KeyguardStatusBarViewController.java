@@ -21,9 +21,6 @@ import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -36,13 +33,16 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.animation.Animator;
+import androidx.core.animation.AnimatorListenerAdapter;
+import androidx.core.animation.ValueAnimator;
 
 import com.android.keyguard.CarrierTextController;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.animation.InterpolatorsAndroidX;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.log.LogLevel;
@@ -166,7 +166,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
     private final ValueAnimator.AnimatorUpdateListener mAnimatorUpdateListener =
             animation -> {
-                mKeyguardStatusBarAnimateAlpha = (float) animation.getAnimatedValue();
+                mKeyguardStatusBarAnimateAlpha =
+                        (float) ((ValueAnimator) animation).getAnimatedValue();
                 updateViewState();
             };
 
@@ -434,7 +435,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
         anim.addUpdateListener(mAnimatorUpdateListener);
         anim.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        anim.setInterpolator(InterpolatorsAndroidX.LINEAR_OUT_SLOW_IN);
         anim.start();
     }
 
@@ -445,7 +446,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         anim.addUpdateListener(mAnimatorUpdateListener);
         anim.setStartDelay(startDelay);
         anim.setDuration(duration);
-        anim.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        anim.setInterpolator(InterpolatorsAndroidX.LINEAR_OUT_SLOW_IN);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

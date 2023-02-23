@@ -16,14 +16,14 @@
 
 package com.android.systemui.statusbar.events
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
+import androidx.core.animation.Animator
+import androidx.core.animation.AnimatorSet
 import android.annotation.IntDef
 import android.os.Process
 import android.provider.DeviceConfig
 import android.util.Log
-import android.view.animation.PathInterpolator
+import androidx.core.animation.AnimatorListenerAdapter
+import androidx.core.animation.PathInterpolator
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -185,7 +185,7 @@ open class SystemStatusAnimationScheduler @Inject constructor(
                     "Expected: 500, actual: ${animSet.totalDuration}")
         }
         animSet.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
+            override fun onAnimationEnd(animation: Animator) {
                 animationState = RUNNING_CHIP_ANIM
             }
         })
@@ -195,7 +195,7 @@ open class SystemStatusAnimationScheduler @Inject constructor(
             val animSet2 = collectFinishAnimations()
             animationState = ANIMATING_OUT
             animSet2.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     animationState = if (hasPersistentDot) {
                         SHOWING_PERSISTENT_DOT
                     } else {
