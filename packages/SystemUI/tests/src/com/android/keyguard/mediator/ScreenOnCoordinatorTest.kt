@@ -32,6 +32,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import java.util.Optional
@@ -80,6 +81,33 @@ class ScreenOnCoordinatorTest : SysuiTestCase() {
 
         // Should be called when both unfold overlay and keyguard drawn ready
         verify(runnable).run()
+    }
+
+    @Test
+    fun testTasksReady_onScreenTurningOnAndTurnedOnEventsCalledTogether_callsDrawnCallback() {
+        screenOnCoordinator.onScreenTurningOn(runnable)
+        screenOnCoordinator.onScreenTurnedOn()
+
+        onUnfoldOverlayReady()
+        onFoldAodReady()
+        waitHandlerIdle(testHandler)
+
+        // Should be called when both unfold overlay and keyguard drawn ready
+        verify(runnable).run()
+    }
+
+    @Test
+    fun testTasksReady_onScreenTurnedOnAndTurnedOffBeforeCompletion_doesNotCallDrawnCallback() {
+        screenOnCoordinator.onScreenTurningOn(runnable)
+        screenOnCoordinator.onScreenTurnedOn()
+        screenOnCoordinator.onScreenTurnedOff()
+
+        onUnfoldOverlayReady()
+        onFoldAodReady()
+        waitHandlerIdle(testHandler)
+
+        // Should not be called because this screen turning on call is not valid anymore
+        verify(runnable, never()).run()
     }
 
     @Test
