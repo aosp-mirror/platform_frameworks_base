@@ -2993,6 +2993,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return key_consumed;
                 }
                 break;
+            case KeyEvent.KEYCODE_T:
+                if (down && event.isMetaPressed()) {
+                    toggleTaskbar();
+                    return key_consumed;
+                }
+                break;
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (down && event.isMetaPressed() && event.isCtrlPressed() && repeatCount == 0) {
                     StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
@@ -3661,6 +3667,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (statusbar != null) {
                 statusbar.cancelPreloadRecentApps();
             }
+        }
+    }
+
+    private void toggleTaskbar() {
+        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
+        if (statusbar != null) {
+            statusbar.toggleTaskbar();
         }
     }
 

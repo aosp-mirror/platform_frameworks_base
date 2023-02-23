@@ -436,6 +436,19 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
     }
 
+    @Override
+    public void toggleTaskbar() {
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onTaskbarToggled();
+        } catch (RemoteException e) {
+            Log.e(TAG, "onTaskbarToggled() failed", e);
+        }
+    }
+
     private void clearTransient() {
         if (mTaskbarTransientShowing) {
             mTaskbarTransientShowing = false;
