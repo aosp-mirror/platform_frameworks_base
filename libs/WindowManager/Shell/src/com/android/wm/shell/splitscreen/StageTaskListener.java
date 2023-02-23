@@ -92,7 +92,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     protected SurfaceControl mDimLayer;
     protected SparseArray<ActivityManager.RunningTaskInfo> mChildrenTaskInfo = new SparseArray<>();
     private final SparseArray<SurfaceControl> mChildrenLeashes = new SparseArray<>();
-    private int mLastVisibleTaskId = INVALID_TASK_ID;
     // TODO(b/204308910): Extracts SplitDecorManager related code to common package.
     private SplitDecorManager mSplitDecorManager;
 
@@ -121,13 +120,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     boolean containsContainer(IBinder binder) {
         return contains(t -> t.token.asBinder() == binder);
-    }
-
-    /**
-     * Returns the last visible task's id.
-     */
-    int getLastVisibleTaskId() {
-        return mLastVisibleTaskId;
     }
 
     /**
@@ -229,9 +221,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
                 return;
             }
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
-            if (taskInfo.isVisible && taskInfo.taskId != mLastVisibleTaskId) {
-                mLastVisibleTaskId = taskInfo.taskId;
-            }
             mCallbacks.onChildTaskStatusChanged(taskInfo.taskId, true /* present */,
                     taskInfo.isVisible);
             if (!ENABLE_SHELL_TRANSITIONS) {
@@ -264,9 +253,6 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         } else if (mChildrenTaskInfo.contains(taskId)) {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
-            if (taskId == mLastVisibleTaskId) {
-                mLastVisibleTaskId = INVALID_TASK_ID;
-            }
             mCallbacks.onChildTaskStatusChanged(taskId, false /* present */, taskInfo.isVisible);
             if (ENABLE_SHELL_TRANSITIONS) {
                 // Status is managed/synchronized by the transition lifecycle.
