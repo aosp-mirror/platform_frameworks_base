@@ -41,6 +41,7 @@ public final class CredentialProviderInfo implements Parcelable {
     @NonNull private final ServiceInfo mServiceInfo;
     @NonNull private final List<String> mCapabilities = new ArrayList<>();
     @Nullable private final CharSequence mOverrideLabel;
+    @Nullable private CharSequence mSettingsSubtitle = null;
     private final boolean mIsSystemProvider;
     private final boolean mIsEnabled;
 
@@ -53,6 +54,7 @@ public final class CredentialProviderInfo implements Parcelable {
         mServiceInfo = builder.mServiceInfo;
         mCapabilities.addAll(builder.mCapabilities);
         mIsSystemProvider = builder.mIsSystemProvider;
+        mSettingsSubtitle = builder.mSettingsSubtitle;
         mIsEnabled = builder.mIsEnabled;
         mOverrideLabel = builder.mOverrideLabel;
     }
@@ -100,6 +102,12 @@ public final class CredentialProviderInfo implements Parcelable {
         return mIsEnabled;
     }
 
+    /** Returns the settings subtitle. */
+    @Nullable
+    public CharSequence getSettingsSubtitle() {
+        return mSettingsSubtitle;
+    }
+
     /** Returns the component name for the service. */
     @NonNull
     public ComponentName getComponentName() {
@@ -113,6 +121,7 @@ public final class CredentialProviderInfo implements Parcelable {
         dest.writeStringList(mCapabilities);
         dest.writeBoolean(mIsEnabled);
         TextUtils.writeToParcel(mOverrideLabel, dest, flags);
+        TextUtils.writeToParcel(mSettingsSubtitle, dest, flags);
     }
 
     @Override
@@ -135,6 +144,9 @@ public final class CredentialProviderInfo implements Parcelable {
                 + "overrideLabel="
                 + mOverrideLabel
                 + ", "
+                + "settingsSubtitle="
+                + mSettingsSubtitle
+                + ", "
                 + "capabilities="
                 + String.join(",", mCapabilities)
                 + "}";
@@ -146,6 +158,7 @@ public final class CredentialProviderInfo implements Parcelable {
         in.readStringList(mCapabilities);
         mIsEnabled = in.readBoolean();
         mOverrideLabel = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSettingsSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
     }
 
     public static final @NonNull Parcelable.Creator<CredentialProviderInfo> CREATOR =
@@ -167,6 +180,7 @@ public final class CredentialProviderInfo implements Parcelable {
         @NonNull private ServiceInfo mServiceInfo;
         @NonNull private List<String> mCapabilities = new ArrayList<>();
         private boolean mIsSystemProvider = false;
+        @Nullable private CharSequence mSettingsSubtitle = null;
         private boolean mIsEnabled = false;
         @Nullable private CharSequence mOverrideLabel = null;
 
@@ -192,6 +206,12 @@ public final class CredentialProviderInfo implements Parcelable {
          */
         public @NonNull Builder setOverrideLabel(@NonNull CharSequence overrideLabel) {
             mOverrideLabel = overrideLabel;
+            return this;
+        }
+
+        /** Sets the settings subtitle. */
+        public @NonNull Builder setSettingsSubtitle(@Nullable CharSequence settingsSubtitle) {
+            mSettingsSubtitle = settingsSubtitle;
             return this;
         }
 

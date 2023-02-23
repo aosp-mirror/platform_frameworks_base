@@ -192,7 +192,6 @@ public abstract class CredentialProviderService extends Service {
       */
     public static final String SERVICE_META_DATA = "android.credentials.provider";
 
-
     /** @hide */
     public static final String TEST_SYSTEM_PROVIDER_META_DATA_KEY =
             "android.credentials.testsystemprovider";
