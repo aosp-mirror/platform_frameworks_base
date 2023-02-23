@@ -262,14 +262,23 @@ class BackNavigationController {
                 if (!isOccluded || prevActivity.canShowWhenLocked()) {
                     // We have another Activity in the same currentTask to go to
                     final WindowContainer parent = currentActivity.getParent();
-                    final boolean isCustomize = parent != null
+                    final boolean canCustomize = parent != null
                             && (parent.asTask() != null
                             || (parent.asTaskFragment() != null
-                            && parent.canCustomizeAppTransition()))
-                            && isCustomizeExitAnimation(window);
-                    if (isCustomize) {
-                        infoBuilder.setWindowAnimations(
-                                window.mAttrs.packageName, window.mAttrs.windowAnimations);
+                            && parent.canCustomizeAppTransition()));
+                    if (canCustomize) {
+                        if (isCustomizeExitAnimation(window)) {
+                            infoBuilder.setWindowAnimations(
+                                    window.mAttrs.packageName, window.mAttrs.windowAnimations);
+                        }
+                        final ActivityRecord.CustomAppTransition customAppTransition =
+                                currentActivity.getCustomAnimation(false/* open */);
+                        if (customAppTransition != null) {
+                            infoBuilder.setCustomAnimation(currentActivity.packageName,
+                                    customAppTransition.mExitAnim,
+                                    customAppTransition.mEnterAnim,
+                                    customAppTransition.mBackgroundColor);
+                        }
                     }
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivity.getTask();
