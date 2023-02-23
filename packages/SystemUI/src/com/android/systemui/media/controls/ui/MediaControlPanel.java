@@ -227,7 +227,7 @@ public class MediaControlPanel {
     private final BroadcastDialogController mBroadcastDialogController;
     private boolean mIsCurrentBroadcastedApp = false;
     private boolean mShowBroadcastDialogButton = false;
-    private String mSwitchBroadcastApp;
+    private String mCurrentBroadcastApp;
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
     private final FeatureFlags mFeatureFlags;
@@ -573,9 +573,8 @@ public class MediaControlPanel {
             // TODO(b/233698402): Use the package name instead of app label to avoid the
             // unexpected result.
             mIsCurrentBroadcastedApp = device != null
-                    && TextUtils.equals(device.getName(),
-                    MediaDataUtils.getAppLabel(mContext, mPackageName, mContext.getString(
-                            R.string.bt_le_audio_broadcast_dialog_unknown_name)));
+                && TextUtils.equals(device.getName(),
+                    mContext.getString(R.string.broadcasting_description_is_broadcasting));
             useDisabledAlpha = !mIsCurrentBroadcastedApp;
             // Always be enabled if the broadcast button is shown
             isTapEnabled = true;
@@ -630,8 +629,8 @@ public class MediaControlPanel {
                         // media output dialog.
                         if (!mIsCurrentBroadcastedApp) {
                             mLogger.logOpenBroadcastDialog(mUid, mPackageName, mInstanceId);
-                            mSwitchBroadcastApp = device.getName().toString();
-                            mBroadcastDialogController.createBroadcastDialog(mSwitchBroadcastApp,
+                            mCurrentBroadcastApp = device.getName().toString();
+                            mBroadcastDialogController.createBroadcastDialog(mCurrentBroadcastApp,
                                     mPackageName, true, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
