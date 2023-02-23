@@ -229,7 +229,6 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.VibrationEffect;
-import android.permission.PermissionCheckerManager;
 import android.permission.PermissionManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -6774,7 +6773,7 @@ public class NotificationManagerService extends SystemService {
                 final int permissionResult = mPermissionManager.checkPermissionForDataDelivery(
                         Manifest.permission.USE_FULL_SCREEN_INTENT, source, /* message= */ null);
 
-                if (permissionResult != PermissionCheckerManager.PERMISSION_GRANTED) {
+                if (permissionResult != PermissionManager.PERMISSION_GRANTED) {
                     makeStickyHun(notification);
                 }
 
