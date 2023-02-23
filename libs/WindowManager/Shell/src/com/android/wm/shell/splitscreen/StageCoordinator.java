@@ -936,7 +936,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
-                                onRemoteAnimationFinishedOrCancelled(false /* cancel */, evictWct);
+                                onRemoteAnimationFinishedOrCancelled(evictWct);
                                 finishedCallback.onAnimationFinished();
                             }
                         };
@@ -952,7 +952,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled(boolean isKeyguardOccluded) {
-                onRemoteAnimationFinishedOrCancelled(true /* cancel */, evictWct);
+                onRemoteAnimationFinishedOrCancelled(evictWct);
                 try {
                     adapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
                 } catch (RemoteException e) {
@@ -973,15 +973,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
     }
 
-    private void onRemoteAnimationFinishedOrCancelled(boolean cancel,
-            WindowContainerTransaction evictWct) {
+    private void onRemoteAnimationFinishedOrCancelled(WindowContainerTransaction evictWct) {
         mIsSplitEntering = false;
         mShouldUpdateRecents = true;
         mSplitRequest = null;
         // If any stage has no child after animation finished, it means that split will display
         // nothing, such status will happen if task and intent is same app but not support
         // multi-instance, we should exit split and expand that app as full screen.
-        if (!cancel && (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0)) {
+        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
             mMainExecutor.execute(() ->
                     exitSplitScreen(mMainStage.getChildCount() == 0
                             ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
@@ -1236,8 +1235,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
             if (shouldBreakPairedTaskInRecents(exitReason) && mShouldUpdateRecents) {
-                recentTasks.removeSplitPair(mMainStage.getLastVisibleTaskId());
-                recentTasks.removeSplitPair(mSideStage.getLastVisibleTaskId());
+                recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
+                recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
             }
         });
         mShouldUpdateRecents = false;
