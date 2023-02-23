@@ -1747,6 +1747,13 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
+    void onDetectorRemoteException() {
+        Message.obtain(mHandler, MSG_DETECTION_ERROR,
+                new HotwordDetectionServiceFailure(
+                        HotwordDetectionServiceFailure.ERROR_CODE_REMOTE_EXCEPTION,
+                        "Detector remote exception occurs")).sendToTarget();
+    }
+
     class MyHandler extends Handler {
         MyHandler(@NonNull Looper looper) {
             super(looper);

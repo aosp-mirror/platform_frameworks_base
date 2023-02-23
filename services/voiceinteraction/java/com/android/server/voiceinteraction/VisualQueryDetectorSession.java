@@ -38,6 +38,7 @@ import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVisualQueryDetectionAttentionListener;
+import com.android.server.voiceinteraction.VoiceInteractionManagerServiceImpl.DetectorRemoteExceptionListener;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -64,13 +65,15 @@ final class VisualQueryDetectorSession extends DetectorSession {
             @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
-            @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
+            @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
+            @NonNull DetectorRemoteExceptionListener listener) {
         super(remoteService, lock, context, token, callback,
                 voiceInteractionServiceUid, voiceInteractorIdentity, scheduledExecutorService,
-                logging);
+                logging, listener);
         mEgressingData = false;
         mQueryStreaming = false;
         mAttentionListener = null;
+        // TODO: handle notify RemoteException to client
     }
 
     @Override

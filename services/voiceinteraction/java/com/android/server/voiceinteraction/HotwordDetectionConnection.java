@@ -69,6 +69,7 @@ import com.android.internal.app.IVisualQueryDetectionAttentionListener;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.LocalServices;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.voiceinteraction.VoiceInteractionManagerServiceImpl.DetectorRemoteExceptionListener;
 
 import java.io.PrintWriter;
 import java.time.Instant;
@@ -147,6 +148,8 @@ final class HotwordDetectionConnection {
     @GuardedBy("mLock")
     private boolean mDebugHotwordLogging = false;
 
+    private DetectorRemoteExceptionListener mRemoteExceptionListener;
+
     /**
      * For multiple detectors feature, we only support one AlwaysOnHotwordDetector and one
      * SoftwareHotwordDetector at the same time. We use SparseArray with detector type as the key
@@ -159,7 +162,8 @@ final class HotwordDetectionConnection {
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName hotwordDetectionServiceName,
             ComponentName visualQueryDetectionServiceName, int userId,
-            boolean bindInstantServiceAllowed, int detectorType) {
+            boolean bindInstantServiceAllowed, int detectorType,
+            DetectorRemoteExceptionListener listener) {
         mLock = lock;
         mContext = context;
         mVoiceInteractionServiceUid = voiceInteractionServiceUid;
@@ -168,6 +172,7 @@ final class HotwordDetectionConnection {
         mVisualQueryDetectionComponentName = visualQueryDetectionServiceName;
         mUser = userId;
         mDetectorType = detectorType;
+        mRemoteExceptionListener = listener;
         mReStartPeriodSeconds = DeviceConfig.getInt(DeviceConfig.NAMESPACE_VOICE_INTERACTION,
                 KEY_RESTART_PERIOD_IN_SECONDS, 0);
 
@@ -251,6 +256,7 @@ final class HotwordDetectionConnection {
     void cancelLocked() {
         Slog.v(TAG, "cancelLocked");
         clearDebugHotwordLoggingTimeoutLocked();
+        mRemoteExceptionListener = null;
         runForEachDetectorSessionLocked((session) -> {
             session.destroyLocked();
         });
@@ -772,7 +778,8 @@ final class HotwordDetectionConnection {
             }
             session = new DspTrustedHotwordDetectorSession(mRemoteHotwordDetectionService,
                     mLock, mContext, token, callback, mVoiceInteractionServiceUid,
-                    mVoiceInteractorIdentity, mScheduledExecutorService, mDebugHotwordLogging);
+                    mVoiceInteractorIdentity, mScheduledExecutorService, mDebugHotwordLogging,
+                    mRemoteExceptionListener);
         } else if (detectorType == HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
             if (mRemoteVisualQueryDetectionService == null) {
                 mRemoteVisualQueryDetectionService =
@@ -781,7 +788,7 @@ final class HotwordDetectionConnection {
             session = new VisualQueryDetectorSession(
                     mRemoteVisualQueryDetectionService, mLock, mContext, token, callback,
                     mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging);
+                    mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener);
         } else {
             if (mRemoteHotwordDetectionService == null) {
                 mRemoteHotwordDetectionService =
@@ -790,7 +797,7 @@ final class HotwordDetectionConnection {
             session = new SoftwareTrustedHotwordDetectorSession(
                     mRemoteHotwordDetectionService, mLock, mContext, token, callback,
                     mVoiceInteractionServiceUid, mVoiceInteractorIdentity,
-                    mScheduledExecutorService, mDebugHotwordLogging);
+                    mScheduledExecutorService, mDebugHotwordLogging, mRemoteExceptionListener);
         }
         mDetectorSessions.put(detectorType, session);
         session.initialize(options, sharedMemory);
