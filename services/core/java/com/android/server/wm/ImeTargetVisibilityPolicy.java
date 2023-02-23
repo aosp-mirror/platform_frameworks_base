@@ -19,6 +19,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
+import android.annotation.Nullable;
 import android.os.IBinder;
 import android.view.WindowManager;
 
@@ -50,12 +51,17 @@ public abstract class ImeTargetVisibilityPolicy {
      * Called when {@link DisplayContent#computeImeParent()} to check if it's valid to keep
      * computing the ime parent.
      *
+     * @param imeLayeringTarget The window which IME target to layer on top of it.
+     * @param imeInputTarget The window which start the input connection, receive input from IME.
      * @return {@code true} to keep computing the ime parent, {@code false} to defer this operation
      */
-    public static boolean isReadyToComputeImeParent(WindowState imeLayeringTarget,
-            InputTarget imeInputTarget) {
+    public static boolean canComputeImeParent(@Nullable WindowState imeLayeringTarget,
+            @Nullable InputTarget imeInputTarget) {
         if (imeLayeringTarget == null) {
             return false;
+        }
+        if (shouldComputeImeParentForEmbeddedActivity(imeLayeringTarget, imeInputTarget)) {
+            return true;
         }
         // Ensure changing the IME parent when the layering target that may use IME has
         // became to the input target for preventing IME flickers.
@@ -69,12 +75,53 @@ public abstract class ImeTargetVisibilityPolicy {
         boolean imeLayeringTargetMayUseIme =
                 WindowManager.LayoutParams.mayUseInputMethod(imeLayeringTarget.mAttrs.flags)
                         || imeLayeringTarget.mAttrs.type == TYPE_APPLICATION_STARTING;
-
         // Do not change parent if the window hasn't requested IME.
         var inputAndLayeringTargetsDisagree = (imeInputTarget == null
                 || imeLayeringTarget.mActivityRecord != imeInputTarget.getActivityRecord());
         var inputTargetStale = imeLayeringTargetMayUseIme && inputAndLayeringTargetsDisagree;
 
         return !inputTargetStale;
+    }
+
+
+    /**
+     * Called from {@link DisplayContent#computeImeParent()} to check the given IME targets if the
+     * IME surface parent should be updated in ActivityEmbeddings.
+     *
+     * As the IME layering target is calculated according to the window hierarchy by
+     * {@link DisplayContent#computeImeTarget}, the layering target and input target may be
+     * different when the window hasn't started input connection, WindowManagerService hasn't yet
+     * received the input target which reported from InputMethodManagerService. To make the IME
+     * surface will be shown on the best fit IME layering target, we basically won't update IME
+     * parent until both IME input and layering target updated for better IME transition.
+     *
+     * However, in activity embedding, tapping a window won't update it to the top window so the
+     * calculated IME layering target may higher than input target. Update IME parent for this case.
+     *
+     * @return {@code true} means the layer of IME layering target is higher than the input target
+     * and {@link DisplayContent#computeImeParent()} should keep progressing to update the IME
+     * surface parent on the display in case the IME surface left behind.
+     */
+    private static boolean shouldComputeImeParentForEmbeddedActivity(
+            @Nullable WindowState imeLayeringTarget, @Nullable InputTarget imeInputTarget) {
+        if (imeInputTarget == null || imeLayeringTarget == null) {
+            return false;
+        }
+        final WindowState inputTargetWindow = imeInputTarget.getWindowState();
+        if (inputTargetWindow == null || !imeLayeringTarget.isAttached()
+                || !inputTargetWindow.isAttached()) {
+            return false;
+        }
+
+        final ActivityRecord inputTargetRecord = imeInputTarget.getActivityRecord();
+        final ActivityRecord layeringTargetRecord = imeLayeringTarget.getActivityRecord();
+        if (inputTargetRecord == null || layeringTargetRecord == null
+                || inputTargetRecord == layeringTargetRecord
+                || (inputTargetRecord.getTask() != layeringTargetRecord.getTask())
+                || !inputTargetRecord.isEmbedded() || !layeringTargetRecord.isEmbedded()) {
+            // Check whether the input target and layering target are embedded in the same Task.
+            return false;
+        }
+        return imeLayeringTarget.compareTo(inputTargetWindow) > 0;
     }
 }
