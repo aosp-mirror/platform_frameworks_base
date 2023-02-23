@@ -17,9 +17,9 @@ package com.android.systemui.surfaceeffects.ripple
 
 import android.graphics.RuntimeShader
 import android.util.Log
-import android.util.MathUtils
+import android.view.animation.Interpolator
+import android.view.animation.PathInterpolator
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.surfaceeffects.shaderutil.SdfShaderLibrary
 import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
 
@@ -180,6 +180,13 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
 
             return Math.min(fadeIn, fadeOut)
         }
+
+        private fun lerp(start: Float, stop: Float, amount: Float): Float {
+            return start + (stop - start) * amount
+        }
+
+        // Copied from [Interpolators#STANDARD]. This is to remove dependency on AnimationLib.
+        private val STANDARD: Interpolator = PathInterpolator(0.2f, 0f, 0f, 1f)
     }
 
     /** Sets the center position of the ripple. */
@@ -207,7 +214,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
     var rawProgress: Float = 0.0f
         set(value) {
             field = value
-            progress = Interpolators.STANDARD.getInterpolation(value)
+            progress = STANDARD.getInterpolation(value)
 
             setFloatUniform("in_fadeSparkle", getFade(sparkleRingFadeParams, value))
             setFloatUniform("in_fadeRing", getFade(baseRingFadeParams, value))
@@ -228,8 +235,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
                 "in_cornerRadius",
                 Math.min(rippleSize.currentWidth, rippleSize.currentHeight)
             )
-
-            setFloatUniform("in_blur", MathUtils.lerp(blurStart, blurEnd, value))
+            setFloatUniform("in_blur", lerp(1.25f, 0.5f, value))
         }
 
     /** Play time since the start of the effect. */
@@ -431,8 +437,9 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
                             "[setSizeAtProgresses] before playing the animation."
                     )
                 }
-                // If there's no size is set, we set everything to 0.
+                // If there's no size is set, we set everything to 0 and return early.
                 setSizeAtProgresses(initialSize)
+                return currentSizeIndex
             }
 
             var candidate = sizes[currentSizeIndex]

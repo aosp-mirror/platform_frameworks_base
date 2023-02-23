@@ -198,6 +198,8 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Pantalla de notificaciones"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Ajustes rápidos"</string>
+    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
+    <skip />
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Pantalla de bloqueo."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Pantalla de bloqueo para el perfil de trabajo"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Cerrar"</string>
@@ -258,6 +260,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillo"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Invertir colores"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Corrección de color"</string>
+    <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Tamaño de fuente"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Gestionar usuarios"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Hecho"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Cerrar"</string>
@@ -613,14 +616,48 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Notificaciones"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Ver combinaciones de teclas"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Cambiar diseño del teclado"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Borrar texto"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Combinaciones de teclas"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Buscar combinaciones de teclas"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ninguna encontrada"</string>
+    <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Sistema"</string>
+    <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Entrada"</string>
+    <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Apps abiertas"</string>
+    <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"App en uso"</string>
+    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Acceder a la pantalla de notificaciones"</string>
+    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Hacer una captura de pantalla completa"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Acceder a la lista de combinaciones de teclas de apps y del sistema"</string>
+    <string name="group_system_go_back" msgid="8838454003680364227">"Atrás: volver al estado anterior (botón para volver)"</string>
+    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Acceder a la pantalla de inicio"</string>
+    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Vista general de aplicaciones abiertas"</string>
+    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Recorrer aplicaciones recientes (hacia delante)"</string>
+    <string name="group_system_cycle_back" msgid="5163464503638229131">"Recorrer aplicaciones recientes (hacia atrás)"</string>
+    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Acceder a la lista de todas las apps y a la búsqueda (Buscar/Launcher)"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Ocultar y mostrar la barra de tareas"</string>
+    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Acceder a los ajustes del sistema"</string>
+    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Acceder al Asistente de Google"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Pantalla de bloqueo"</string>
+    <string name="group_system_quick_memo" msgid="2914234890158583919">"Abrir la aplicación de notas para tomar una nota rápida"</string>
+    <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Función multitarea del sistema"</string>
+    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Iniciar pantalla dividida con esta aplicación en el lado derecho"</string>
+    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Iniciar pantalla dividida con esta aplicación en el lado izquierdo"</string>
+    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Cambiar de pantalla dividida a pantalla completa"</string>
+    <string name="system_multitasking_replace" msgid="844285282472557186">"Con pantalla dividida: reemplazar una aplicación por otra"</string>
+    <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Entrada"</string>
+    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Cambiar idioma de entrada (idioma siguiente)"</string>
+    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Cambiar idioma de entrada (idioma anterior)"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"Acceder a los emojis"</string>
+    <string name="input_access_voice_typing" msgid="7291201476395326141">"Acceder a Escribir por voz"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplicaciones"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Asistencia"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Navegador"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Navegador (Chrome como predeterminado)"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Contactos"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Correo electrónico"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Correo (Gmail como predeterminado)"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Música"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Calendario"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6316043911946540137">"Calculadora"</string>
+    <string name="keyboard_shortcut_group_applications_maps" msgid="7312554713993114342">"Maps"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"No molestar"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Acceso directo de los botones de volumen"</string>
     <string name="battery" msgid="769686279459897127">"Batería"</string>
@@ -783,6 +820,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"grabación de pantalla"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sin título"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Tamaño de fuente"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Reducir tamaño"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Aumentar tamaño"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ventana de controles de ampliación"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Ampliar"</string>
@@ -889,10 +929,8 @@
     <string name="media_transfer_failed" msgid="7955354964610603723">"Se ha producido un error. Inténtalo de nuevo."</string>
     <string name="media_transfer_loading" msgid="5544017127027152422">"Cargando"</string>
     <string name="media_ttt_default_device_type" msgid="4457646436153370169">"tablet"</string>
-    <!-- no translation found for media_transfer_receiver_content_description_unknown_app (7381771464846263667) -->
-    <skip />
-    <!-- no translation found for media_transfer_receiver_content_description_with_app_name (8555975056850659389) -->
-    <skip />
+    <string name="media_transfer_receiver_content_description_unknown_app" msgid="7381771464846263667">"Enviando tu contenido multimedia"</string>
+    <string name="media_transfer_receiver_content_description_with_app_name" msgid="8555975056850659389">"Enviando <xliff:g id="APP_LABEL">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"No se ha encontrado"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Control no disponible"</string>
@@ -929,10 +967,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"No se puede emitir"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"No se puede guardar. Inténtalo de nuevo."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"No se puede guardar."</string>
-    <!-- no translation found for media_output_broadcast_code_hint_no_less_than_min (4663836092607696185) -->
-    <skip />
-    <!-- no translation found for media_output_broadcast_code_hint_no_more_than_max (9181869364856175638) -->
-    <skip />
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Usa 4 caracteres como mínimo"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Usa menos de 16 caracteres"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Número de compilación copiado en el portapapeles."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversación abierta"</string>
@@ -1059,11 +1095,11 @@
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Al menos un dispositivo debe estar disponible"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantén pulsado el acceso directo"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
-    <string name="rear_display_bottom_sheet_confirm" msgid="4383356544661421206">"Usar ahora"</string>
-    <string name="rear_display_fold_bottom_sheet_title" msgid="6081542277622721548">"Despliega el teléfono para hacer un selfie mejor"</string>
-    <string name="rear_display_unfold_bottom_sheet_title" msgid="2137403802960396357">"¿Usar pantalla frontal para hacer mejores selfies?"</string>
-    <string name="rear_display_bottom_sheet_description" msgid="1852662982816810352">"Usa la cámara trasera para hacer fotos más amplias y con mayor resolución."</string>
-    <string name="rear_display_bottom_sheet_warning" msgid="800995919558238930"><b>"✱ Esta pantalla se apagará"</b></string>
+    <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Cambia de pantalla ahora"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Abre el teléfono"</string>
+    <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"¿Cambiar de pantalla?"</string>
+    <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Para una mayor resolución, usa la cámara trasera"</string>
+    <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Para una mayor resolución, gira el teléfono"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Dispositivo plegable desplegándose"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Dispositivo plegable mostrado desde varios ángulos"</string>
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"Batería restante: <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
@@ -1075,4 +1111,16 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Cambiar al perfil de trabajo"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Cerrar"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Ajustes de pantalla de bloqueo"</string>
+    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
+    <skip />
+    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
+    <skip />
+    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
+    <skip />
+    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
+    <skip />
+    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
+    <skip />
+    <!-- no translation found for assistant_attention_content_description (6830215897604642875) -->
+    <skip />
 </resources>

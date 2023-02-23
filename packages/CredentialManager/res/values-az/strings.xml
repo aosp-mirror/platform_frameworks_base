@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"Davam edin"</string>
     <string name="string_more_options" msgid="7990658711962795124">"Digər seçimlər"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Ətraflı məlumat"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"Parolu göstərin"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"Parolu gizlədin"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Giriş açarları ilə daha təhlükəsiz"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Giriş açarları ilə mürəkkəb parollar yaratmağa və ya yadda saxlamağa ehtiyac yoxdur"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Giriş açarları barmaq izi, üz və ya ekran kilidindən istifadə edərək yaratdığınız şifrələnmiş rəqəmsal açarlardır"</string>
@@ -49,7 +47,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"Digər parol menecerləri"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Səhifəni bağlayın"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Əvvəlki səhifəyə qayıdın"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Ekranın aşağı hissəsində görünən Giriş Məlumatları Meneceri əməliyyat təklifini bağlayın"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Bağlayın"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün yadda saxlanmış giriş açarı istifadə edilsin?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün yadda saxlanmış girişdən istifadə edilsin?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> üçün yadda saxlanmış girişi seçin"</string>
@@ -59,10 +57,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Giriş seçimləri"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> üçün"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Kilidli parol menecerləri"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Kiliddən çıxarmaq üçün toxunun"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Giriş məlumatı yoxdur"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> giriş məlumatı mövcud deyil"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Girişləri idarə edin"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Başqa cihazdan"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Başqa cihaz istifadə edin"</string>

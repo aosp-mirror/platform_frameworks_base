@@ -17,29 +17,26 @@
 package com.android.systemui.process.condition;
 
 import com.android.systemui.process.ProcessWrapper;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.condition.Condition;
 
 import javax.inject.Inject;
 
 /**
- * {@link UserProcessCondition} provides a signal when the process handle belongs to the current
- * user.
+ * {@link SystemProcessCondition} checks to make sure the current process is being ran by the
+ * System User.
  */
-public class UserProcessCondition extends Condition {
+public class SystemProcessCondition extends Condition {
     private final ProcessWrapper mProcessWrapper;
-    private final UserTracker mUserTracker;
 
     @Inject
-    public UserProcessCondition(ProcessWrapper processWrapper, UserTracker userTracker) {
+    public SystemProcessCondition(ProcessWrapper processWrapper) {
+        super();
         mProcessWrapper = processWrapper;
-        mUserTracker = userTracker;
     }
 
     @Override
     protected void start() {
-        updateCondition(mUserTracker.getUserId()
-                == mProcessWrapper.getUserHandleIdentifier());
+        updateCondition(mProcessWrapper.isSystemUser());
     }
 
     @Override

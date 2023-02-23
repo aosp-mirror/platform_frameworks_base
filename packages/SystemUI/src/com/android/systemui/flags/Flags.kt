@@ -62,7 +62,7 @@ object Flags {
     val FSI_REQUIRES_KEYGUARD = releasedFlag(110, "fsi_requires_keyguard")
 
     // TODO(b/259130119): Tracking Bug
-    val FSI_ON_DND_UPDATE = unreleasedFlag(259130119, "fsi_on_dnd_update", teamfood = true)
+    val FSI_ON_DND_UPDATE = releasedFlag(259130119, "fsi_on_dnd_update")
 
     // TODO(b/265804648): Tracking Bug
     @JvmField val DISABLE_FSI = unreleasedFlag(265804648, "disable_fsi")
@@ -237,8 +237,6 @@ object Flags {
 
     // 500 - quick settings
 
-    // TODO(b/254512321): Tracking Bug
-    @JvmField val COMBINED_QS_HEADERS = releasedFlag(501, "combined_qs_headers")
     val PEOPLE_TILE = resourceBooleanFlag(502, R.bool.flag_conversations, "people_tile")
 
     @JvmField
@@ -265,6 +263,12 @@ object Flags {
     // TODO(b/269341316): Tracking Bug
     @JvmField
     val ENABLE_FONT_SCALING_TILE = unreleasedFlag(509, "enable_font_scaling_tile", teamfood = false)
+
+    /** Enables new QS Edit Mode visual refresh */
+    // TODO(b/269787742): Tracking Bug
+    @JvmField
+    val ENABLE_NEW_QS_EDIT_MODE =
+        unreleasedFlag(510, "enable_new_qs_edit_mode", teamfood = false)
 
     // 600- status bar
 
@@ -630,7 +634,8 @@ object Flags {
 
     // 2600 - keyboard
     // TODO(b/259352579): Tracking Bug
-    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT = unreleasedFlag(2600, "shortcut_list_search_layout")
+    @JvmField val SHORTCUT_LIST_SEARCH_LAYOUT =
+            unreleasedFlag(2600, "shortcut_list_search_layout", teamfood = true)
 
     // TODO(b/259428678): Tracking Bug
     @JvmField

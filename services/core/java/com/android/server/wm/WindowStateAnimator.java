@@ -32,7 +32,6 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
-import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
@@ -424,7 +423,7 @@ class WindowStateAnimator {
 
         computeShownFrameLocked();
 
-        if (w.isParentWindowHidden() || !w.isOnScreen()) {
+        if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");
             mWallpaperControllerLocked.hideWallpapers(w);
 
@@ -449,29 +448,22 @@ class WindowStateAnimator {
 
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
-                    if (showSurfaceRobustlyLocked(t)) {
-                        mAnimator.requestRemovalOfReplacedWindows(w);
-                        mLastHidden = false;
-                        final DisplayContent displayContent = w.getDisplayContent();
-                        if (!displayContent.getLastHasContent()) {
-                            // This draw means the difference between unique content and mirroring.
-                            // Run another pass through performLayout to set mHasContent in the
-                            // LogicalDisplay.
-                            displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
-                            if (DEBUG_LAYOUT_REPEATS) {
-                                mService.mWindowPlacerLocked.debugLayoutRepeats(
-                                        "showSurfaceRobustlyLocked " + w,
-                                        displayContent.pendingLayoutChanges);
-                            }
+                    mSurfaceController.showRobustly(t);
+                    mAnimator.requestRemovalOfReplacedWindows(w);
+                    mLastHidden = false;
+                    final DisplayContent displayContent = w.getDisplayContent();
+                    if (!displayContent.getLastHasContent()) {
+                        // This draw means the difference between unique content and mirroring.
+                        // Run another pass through performLayout to set mHasContent in the
+                        // LogicalDisplay.
+                        displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
+                        if (DEBUG_LAYOUT_REPEATS) {
+                            mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                    "showSurfaceRobustlyLocked " + w,
+                                    displayContent.pendingLayoutChanges);
                         }
-                    } else {
-                        w.setOrientationChanging(false);
                     }
                 }
-            }
-        } else {
-            if (mWin.isAnimating(TRANSITION | PARENTS)) {
-                ProtoLog.v(WM_DEBUG_ANIM, "prepareSurface: No changes in animation for %s", this);
             }
         }
 
@@ -509,22 +501,6 @@ class WindowStateAnimator {
             return;
         }
         mSurfaceController.setColorSpaceAgnostic(mWin.getPendingTransaction(), agnostic);
-    }
-
-    /**
-     * Have the surface flinger show a surface, robustly dealing with
-     * error conditions.  In particular, if there is not enough memory
-     * to show the surface, then we will try to get rid of other surfaces
-     * in order to succeed.
-     *
-     * @return Returns true if the surface was successfully shown.
-     */
-    private boolean showSurfaceRobustlyLocked(SurfaceControl.Transaction t) {
-        boolean shown = mSurfaceController.showRobustly(t);
-        if (!shown)
-            return false;
-
-        return true;
     }
 
     void applyEnterAnimationLocked() {

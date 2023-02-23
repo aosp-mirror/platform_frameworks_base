@@ -336,7 +336,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final ScrimController mScrimController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
-    private final LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
+    private final ShadeHeaderController mShadeHeaderController;
     private final boolean mVibrateOnOpening;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final FlingAnimationUtils mFlingAnimationUtilsClosing;
@@ -693,7 +693,7 @@ public final class NotificationPanelViewController implements Dumpable {
             FragmentService fragmentService,
             ContentResolver contentResolver,
             RecordingController recordingController,
-            LargeScreenShadeHeaderController largeScreenShadeHeaderController,
+            ShadeHeaderController shadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             ShadeExpansionStateManager shadeExpansionStateManager,
@@ -813,7 +813,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mSplitShadeEnabled =
                 LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
         mView.setWillNotDraw(!DEBUG_DRAWABLE);
-        mLargeScreenShadeHeaderController = largeScreenShadeHeaderController;
+        mShadeHeaderController = shadeHeaderController;
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mFalsingCollector = falsingCollector;
@@ -1040,7 +1040,7 @@ public final class NotificationPanelViewController implements Dumpable {
         }
 
         mTapAgainViewController.init();
-        mLargeScreenShadeHeaderController.init();
+        mShadeHeaderController.init();
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));
@@ -1197,6 +1197,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void onSplitShadeEnabledChanged() {
+        mShadeLog.logSplitShadeChanged(mSplitShadeEnabled);
         // when we switch between split shade and regular shade we want to enforce setting qs to
         // the default state: expanded for split shade and collapsed otherwise
         if (!isOnKeyguard() && mPanelExpanded) {
@@ -1777,7 +1778,7 @@ public final class NotificationPanelViewController implements Dumpable {
         if (animate && !isFullyCollapsed()) {
             animateCloseQs(true);
         } else {
-            mQsController.closeQs();
+            closeQsIfPossible();
         }
         mNotificationStackScrollLayoutController.setOverScrollAmount(0f, true /* onTop */, animate,
                 !animate /* cancelAnimators */);
@@ -1914,7 +1915,6 @@ public final class NotificationPanelViewController implements Dumpable {
         // we want to perform an overshoot animation when flinging open
         final boolean addOverscroll =
                 expand
-                        && !mSplitShadeEnabled // Split shade has its own overscroll logic
                         && mStatusBarStateController.getState() != KEYGUARD
                         && mOverExpansion == 0.0f
                         && vel >= 0;
@@ -2590,9 +2590,14 @@ public final class NotificationPanelViewController implements Dumpable {
             return;
         }
         mOverExpansion = overExpansion;
-        // Translating the quick settings by half the overexpansion to center it in the background
-        // frame
-        mQsController.updateQsFrameTranslation();
+        if (mSplitShadeEnabled) {
+            mQsController.setOverScrollAmount((int) overExpansion);
+            mScrimController.setNotificationsOverScrollAmount((int) overExpansion);
+        } else {
+            // Translating the quick settings by half the overexpansion to center it in the
+            // background frame
+            mQsController.updateQsFrameTranslation();
+        }
         mNotificationStackScrollLayoutController.setOverExpansion(overExpansion);
     }
 
@@ -3332,7 +3337,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     public void disable(int state1, int state2, boolean animated) {
-        mLargeScreenShadeHeaderController.disable(state1, state2, animated);
+        mShadeHeaderController.disable(state1, state2, animated);
     }
 
     /**
@@ -3594,7 +3599,7 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private void fling(float vel, boolean expand, float collapseSpeedUpFactor,
             boolean expandBecauseOfFalsing) {
-        float target = expand ? getMaxPanelHeight() : 0;
+        float target = expand ? getMaxPanelTransitionDistance() : 0;
         if (!expand) {
             setClosing(true);
         }
@@ -3679,7 +3684,7 @@ public final class NotificationPanelViewController implements Dumpable {
             float maxPanelHeight = getMaxPanelTransitionDistance();
             if (mHeightAnimator == null) {
                 // Split shade has its own overscroll logic
-                if (mTracking && !mSplitShadeEnabled) {
+                if (mTracking) {
                     float overExpansionPixels = Math.max(0, h - maxPanelHeight);
                     setOverExpansionInternal(overExpansionPixels, true /* isFromGesture */);
                 }
@@ -4025,9 +4030,17 @@ public final class NotificationPanelViewController implements Dumpable {
         return mExpandingFromHeadsUp;
     }
 
-    /** TODO: remove need for this delegate (b/254870148) */
-    public void closeQs() {
-        mQsController.closeQs();
+    /**
+     * We don't always want to close QS when requested as shade might be in a different state
+     * already e.g. when going from collapse to expand very quickly. In that case StatusBar
+     * window might send signal to collapse QS but we might be already expanding and in split
+     * shade QS are always expanded
+     */
+    private void closeQsIfPossible() {
+        boolean openOrOpening = isShadeFullyOpen() || isExpanding();
+        if (!(mSplitShadeEnabled && openOrOpening)) {
+            mQsController.closeQs();
+        }
     }
 
     /** TODO: remove need for this delegate (b/254870148) */

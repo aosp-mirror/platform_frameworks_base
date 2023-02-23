@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ActivityStarter
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -121,7 +122,6 @@ object KeyguardBouncerViewBinder {
                     launch {
                         viewModel.hide.collect {
                             securityContainerController.cancelDismissAction()
-                            securityContainerController.onPause()
                             securityContainerController.reset()
                         }
                     }
@@ -155,10 +155,15 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.isBouncerVisible.collect { isVisible ->
-                            val visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
-                            view.visibility = visibility
-                            securityContainerController.onBouncerVisibilityChanged(visibility)
+                            view.visibility = if (isVisible) View.VISIBLE else View.INVISIBLE
+                            securityContainerController.onBouncerVisibilityChanged(isVisible)
                         }
+                    }
+
+                    launch {
+                        viewModel.isBouncerVisible
+                            .filter { !it }
+                            .collect { securityContainerController.onPause() }
                     }
 
                     launch {
@@ -204,10 +209,14 @@ object KeyguardBouncerViewBinder {
                     }
 
                     launch {
-                        viewModel.screenTurnedOff.collect {
-                            if (view.visibility == View.VISIBLE) {
-                                securityContainerController.onPause()
-                            }
+                        viewModel.shouldUpdateSideFps.collect {
+                            viewModel.updateSideFpsVisibility()
+                        }
+                    }
+
+                    launch {
+                        viewModel.sideFpsShowing.collect {
+                            securityContainerController.updateSideFpsVisibility(it)
                         }
                     }
                     awaitCancellation()

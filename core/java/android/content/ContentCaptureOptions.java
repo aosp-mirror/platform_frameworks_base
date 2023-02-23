@@ -70,6 +70,12 @@ public final class ContentCaptureOptions implements Parcelable {
     public final int logHistorySize;
 
     /**
+     * Disable flush when receiving a VIEW_TREE_APPEARING event.
+     * @hide
+     */
+    public final boolean disableFlushForViewTreeAppearing;
+
+    /**
      * List of activities explicitly allowlisted for content capture (or {@code null} if allowlisted
      * for all acitivites in the package).
      */
@@ -90,7 +96,8 @@ public final class ContentCaptureOptions implements Parcelable {
     public ContentCaptureOptions(int loggingLevel) {
         this(/* lite= */ true, loggingLevel, /* maxBufferSize= */ 0,
                 /* idleFlushingFrequencyMs= */ 0, /* textChangeFlushingFrequencyMs= */ 0,
-                /* logHistorySize= */ 0, /* whitelistedComponents= */ null);
+                /* logHistorySize= */ 0, /* disableFlushForViewTreeAppearing= */ false,
+                /* whitelistedComponents= */ null);
     }
 
     /**
@@ -98,10 +105,23 @@ public final class ContentCaptureOptions implements Parcelable {
      */
     public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
             int textChangeFlushingFrequencyMs, int logHistorySize,
-            @SuppressLint("NullableCollection")
+            @SuppressLint({"ConcreteCollection", "NullableCollection"})
             @Nullable ArraySet<ComponentName> whitelistedComponents) {
         this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
-                textChangeFlushingFrequencyMs, logHistorySize, whitelistedComponents);
+                textChangeFlushingFrequencyMs, logHistorySize,
+                ContentCaptureManager.DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
+                whitelistedComponents);
+    }
+
+    /** @hide */
+    public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
+            int textChangeFlushingFrequencyMs, int logHistorySize,
+            boolean disableFlushForViewTreeAppearing,
+            @SuppressLint({"ConcreteCollection", "NullableCollection"})
+            @Nullable ArraySet<ComponentName> whitelistedComponents) {
+        this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
+                textChangeFlushingFrequencyMs, logHistorySize, disableFlushForViewTreeAppearing,
+                whitelistedComponents);
     }
 
     /** @hide */
@@ -111,11 +131,14 @@ public final class ContentCaptureOptions implements Parcelable {
                 ContentCaptureManager.DEFAULT_MAX_BUFFER_SIZE,
                 ContentCaptureManager.DEFAULT_IDLE_FLUSHING_FREQUENCY_MS,
                 ContentCaptureManager.DEFAULT_TEXT_CHANGE_FLUSHING_FREQUENCY_MS,
-                ContentCaptureManager.DEFAULT_LOG_HISTORY_SIZE, whitelistedComponents);
+                ContentCaptureManager.DEFAULT_LOG_HISTORY_SIZE,
+                ContentCaptureManager.DEFAULT_DISABLE_FLUSH_FOR_VIEW_TREE_APPEARING,
+                whitelistedComponents);
     }
 
     private ContentCaptureOptions(boolean lite, int loggingLevel, int maxBufferSize,
             int idleFlushingFrequencyMs, int textChangeFlushingFrequencyMs, int logHistorySize,
+            boolean disableFlushForViewTreeAppearing,
             @Nullable ArraySet<ComponentName> whitelistedComponents) {
         this.lite = lite;
         this.loggingLevel = loggingLevel;
@@ -123,6 +146,7 @@ public final class ContentCaptureOptions implements Parcelable {
         this.idleFlushingFrequencyMs = idleFlushingFrequencyMs;
         this.textChangeFlushingFrequencyMs = textChangeFlushingFrequencyMs;
         this.logHistorySize = logHistorySize;
+        this.disableFlushForViewTreeAppearing = disableFlushForViewTreeAppearing;
         this.whitelistedComponents = whitelistedComponents;
     }
 
@@ -171,7 +195,8 @@ public final class ContentCaptureOptions implements Parcelable {
             .append(", maxBufferSize=").append(maxBufferSize)
             .append(", idleFlushingFrequencyMs=").append(idleFlushingFrequencyMs)
             .append(", textChangeFlushingFrequencyMs=").append(textChangeFlushingFrequencyMs)
-            .append(", logHistorySize=").append(logHistorySize);
+            .append(", logHistorySize=").append(logHistorySize)
+            .append(", disableFlushForViewTreeAppearing=").append(disableFlushForViewTreeAppearing);
         if (whitelistedComponents != null) {
             string.append(", whitelisted=").append(whitelistedComponents);
         }
@@ -189,6 +214,7 @@ public final class ContentCaptureOptions implements Parcelable {
         pw.print(", idle="); pw.print(idleFlushingFrequencyMs);
         pw.print(", textIdle="); pw.print(textChangeFlushingFrequencyMs);
         pw.print(", logSize="); pw.print(logHistorySize);
+        pw.print(", disableFlushForViewTreeAppearing="); pw.print(disableFlushForViewTreeAppearing);
         if (whitelistedComponents != null) {
             pw.print(", whitelisted="); pw.print(whitelistedComponents);
         }
@@ -209,6 +235,7 @@ public final class ContentCaptureOptions implements Parcelable {
         parcel.writeInt(idleFlushingFrequencyMs);
         parcel.writeInt(textChangeFlushingFrequencyMs);
         parcel.writeInt(logHistorySize);
+        parcel.writeBoolean(disableFlushForViewTreeAppearing);
         parcel.writeArraySet(whitelistedComponents);
     }
 
@@ -226,12 +253,13 @@ public final class ContentCaptureOptions implements Parcelable {
                     final int idleFlushingFrequencyMs = parcel.readInt();
                     final int textChangeFlushingFrequencyMs = parcel.readInt();
                     final int logHistorySize = parcel.readInt();
+                    final boolean disableFlushForViewTreeAppearing = parcel.readBoolean();
                     @SuppressWarnings("unchecked")
                     final ArraySet<ComponentName> whitelistedComponents =
                             (ArraySet<ComponentName>) parcel.readArraySet(null);
                     return new ContentCaptureOptions(loggingLevel, maxBufferSize,
                             idleFlushingFrequencyMs, textChangeFlushingFrequencyMs, logHistorySize,
-                            whitelistedComponents);
+                            disableFlushForViewTreeAppearing, whitelistedComponents);
                 }
 
                 @Override

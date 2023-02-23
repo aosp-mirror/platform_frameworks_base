@@ -540,17 +540,13 @@
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"এই ফোন"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"এই ট্যাবলেট"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফোনটি"</string>
-    <!-- no translation found for media_output_status_unknown_error (5098565887497902222) -->
-    <skip />
+    <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইসে চালানো যাবে না"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"পরিবর্তন করতে অ্যাকাউন্ট আপগ্রেড করুন"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"এখানে ডাউনলোড করা যাবে না"</string>
     <string name="media_output_status_try_after_ad" msgid="8312579066856015441">"বিজ্ঞাপনের পরে আবার চেষ্টা করুন"</string>
-    <!-- no translation found for media_output_status_device_in_low_power_mode (8184631698321758451) -->
-    <skip />
-    <!-- no translation found for media_output_status_unauthorized (5880222828273853838) -->
-    <skip />
-    <!-- no translation found for media_output_status_track_unsupported (5576313219317709664) -->
-    <skip />
+    <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"এখানে চালানোর জন্য ডিভাইসকে জাগান"</string>
+    <string name="media_output_status_unauthorized" msgid="5880222828273853838">"চালানোর জন্য ডিভাইসের অনুমতি নেই"</string>
+    <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"এখানে এই মিডিয়া চালানো যাচ্ছে না"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"কানেক্ট করতে সমস্যা হচ্ছে। ডিভাইস বন্ধ করে আবার চালু করুন"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ওয়্যার অডিও ডিভাইস"</string>
     <string name="help_label" msgid="3528360748637781274">"সহায়তা ও মতামত"</string>

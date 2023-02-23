@@ -379,8 +379,6 @@ public final class UsbDirectMidiDevice implements Closeable {
                                     Log.w(TAG, "input thread interrupted");
                                     break;
                                 }
-                                // Record time of event immediately after waking.
-                                long timestamp = System.nanoTime();
                                 final ByteBuffer byteBuffer = ByteBuffer.wrap(inputBuffer);
                                 if (!request.queue(byteBuffer)) {
                                     Log.w(TAG, "Cannot queue request");
@@ -395,6 +393,9 @@ public final class UsbDirectMidiDevice implements Closeable {
                                     Log.w(TAG, "Skipping response");
                                     continue;
                                 }
+
+                                // Record time of event after receiving response.
+                                long timestamp = System.nanoTime();
 
                                 int bytesRead = byteBuffer.position();
 

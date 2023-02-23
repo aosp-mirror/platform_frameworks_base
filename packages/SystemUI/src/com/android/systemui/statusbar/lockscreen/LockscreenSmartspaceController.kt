@@ -52,18 +52,19 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.shared.regionsampling.UpdateColorCallback
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER_SMARTSPACE_DATA_PLUGIN
-import com.android.systemui.plugins.Weather
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.time.Instant
 import java.util.Optional
@@ -81,6 +82,7 @@ constructor(
         private val smartspaceManager: SmartspaceManager,
         private val activityStarter: ActivityStarter,
         private val falsingManager: FalsingManager,
+        private val systemClock: SystemClock,
         private val secureSettings: SecureSettings,
         private val userTracker: UserTracker,
         private val contentResolver: ContentResolver,
@@ -153,6 +155,18 @@ constructor(
 
         // The weather data plugin takes unfiltered targets and performs the filtering internally.
         weatherPlugin?.onTargetsAvailable(targets)
+        val now = Instant.ofEpochMilli(systemClock.currentTimeMillis())
+        val weatherTarget = targets.find { t ->
+            t.featureType == SmartspaceTarget.FEATURE_WEATHER &&
+                    now.isAfter(Instant.ofEpochMilli(t.creationTimeMillis)) &&
+                    now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
+        }
+        if (weatherTarget != null) {
+            val weatherData = WeatherData.fromBundle(weatherTarget.baseAction.extras)
+            if (weatherData != null) {
+                keyguardUpdateMonitor.sendWeatherData(weatherData)
+            }
+        }
 
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
         plugin?.onTargetsAvailable(filteredTargets)
@@ -173,17 +187,6 @@ constructor(
                 updateTextColorFromWallpaper()
             }
             isContentUpdatedOnce = true
-        }
-
-        val now = Instant.now()
-        val weatherTarget = targets.find { t ->
-            t.featureType == SmartspaceTarget.FEATURE_WEATHER &&
-                    now.isAfter(Instant.ofEpochMilli(t.creationTimeMillis)) &&
-                    now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
-        }
-        if (weatherTarget != null) {
-            val weatherData = Weather.fromBundle(weatherTarget.baseAction.extras)
-            keyguardUpdateMonitor.sendWeatherData(weatherData)
         }
     }
 
