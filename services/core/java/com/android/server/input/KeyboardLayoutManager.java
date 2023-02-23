@@ -343,9 +343,9 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     private void visitAllKeyboardLayouts(KeyboardLayoutVisitor visitor) {
         final PackageManager pm = mContext.getPackageManager();
         Intent intent = new Intent(InputManager.ACTION_QUERY_KEYBOARD_LAYOUTS);
-        for (ResolveInfo resolveInfo : pm.queryBroadcastReceivers(intent,
+        for (ResolveInfo resolveInfo : pm.queryBroadcastReceiversAsUser(intent,
                 PackageManager.GET_META_DATA | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE)) {
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, UserHandle.USER_SYSTEM)) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
             final int priority = resolveInfo.priority;
             visitKeyboardLayoutsInPackage(pm, activityInfo, null, priority, visitor);
