@@ -187,6 +187,7 @@ constructor(
                             previewMode.isInPreviewMode &&
                                 previewMode.shouldHighlightSelectedAffordance &&
                                 !isSelected,
+                        forceInactive = previewMode.isInPreviewMode
                     )
                 }
                 .distinctUntilChanged()
@@ -198,6 +199,7 @@ constructor(
         isClickable: Boolean,
         isSelected: Boolean,
         isDimmed: Boolean,
+        forceInactive: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -213,7 +215,7 @@ constructor(
                         )
                     },
                     isClickable = isClickable,
-                    isActivated = activationState is ActivationState.Active,
+                    isActivated = !forceInactive && activationState is ActivationState.Active,
                     isSelected = isSelected,
                     useLongPress = quickAffordanceInteractor.useLongPress,
                     isDimmed = isDimmed,
