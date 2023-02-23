@@ -168,6 +168,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_GO_TO_FULLSCREEN_FROM_SPLIT = 70 << MSG_SHIFT;
     private static final int MSG_ENTER_STAGE_SPLIT_FROM_RUNNING_APP = 71 << MSG_SHIFT;
     private static final int MSG_SHOW_MEDIA_OUTPUT_SWITCHER = 72 << MSG_SHIFT;
+    private static final int MSG_TOGGLE_TASKBAR = 73 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -229,6 +230,7 @@ public class CommandQueue extends IStatusBar.Stub implements
                 @BackDispositionMode int backDisposition, boolean showImeSwitcher) { }
         default void showRecentApps(boolean triggeredFromAltTab) { }
         default void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey) { }
+        default void toggleTaskbar() { }
         default void toggleRecentApps() { }
         default void toggleSplitScreen() { }
         default void preloadRecentApps() { }
@@ -712,6 +714,13 @@ public class CommandQueue extends IStatusBar.Stub implements
         synchronized (mLock) {
             mHandler.removeMessages(MSG_TOGGLE_APP_SPLIT_SCREEN);
             mHandler.obtainMessage(MSG_TOGGLE_APP_SPLIT_SCREEN, 0, 0, null).sendToTarget();
+        }
+    }
+
+    public void toggleTaskbar() {
+        synchronized (mLock) {
+            mHandler.removeMessages(MSG_TOGGLE_TASKBAR);
+            mHandler.obtainMessage(MSG_TOGGLE_TASKBAR, 0, 0, null).sendToTarget();
         }
     }
 
@@ -1414,6 +1423,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_HIDE_RECENT_APPS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).hideRecentApps(msg.arg1 != 0, msg.arg2 != 0);
+                    }
+                    break;
+                case MSG_TOGGLE_TASKBAR:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).toggleTaskbar();
                     }
                     break;
                 case MSG_TOGGLE_RECENT_APPS:
