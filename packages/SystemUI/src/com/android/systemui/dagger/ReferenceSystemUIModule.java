@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.dagger.StartCentralSurfacesModule;
+import com.android.systemui.statusbar.events.StatusBarEventsModule;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
@@ -104,6 +105,7 @@ import dagger.Provides;
         QSModule.class,
         ReferenceScreenshotModule.class,
         RotationLockModule.class,
+        StatusBarEventsModule.class,
         StartCentralSurfacesModule.class,
         VolumeModule.class,
         KeyboardShortcutsModule.class

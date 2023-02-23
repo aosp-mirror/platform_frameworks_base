@@ -66,7 +66,7 @@ class SystemEventCoordinator @Inject constructor(
     }
 
     fun notifyPrivacyItemsEmpty() {
-        scheduler.setShouldShowPersistentPrivacyIndicator(false)
+        scheduler.removePersistentDot()
     }
 
     fun notifyPrivacyItemsChanged(showAnimation: Boolean = true) {
