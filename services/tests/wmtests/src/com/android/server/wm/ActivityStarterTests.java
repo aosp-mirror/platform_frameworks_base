@@ -145,7 +145,8 @@ import java.util.Set;
 public class ActivityStarterTests extends WindowTestsBase {
 
     private static final String ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER =
-            "enable_default_rescind_bal_privileges_from_pending_intent_sender";
+            "DefaultRescindBalPrivilegesFromPendingIntentSender__"
+                    + "enable_default_rescind_bal_privileges_from_pending_intent_sender";
     private static final int PRECONDITION_NO_CALLER_APP = 1;
     private static final int PRECONDITION_NO_INTENT_COMPONENT = 1 << 1;
     private static final int PRECONDITION_NO_ACTIVITY_INFO = 1 << 2;
