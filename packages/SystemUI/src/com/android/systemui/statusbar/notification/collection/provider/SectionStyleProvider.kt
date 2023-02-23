@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.provider
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import javax.inject.Inject
@@ -27,6 +28,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class SectionStyleProvider @Inject constructor() {
+    private lateinit var silentSections: Set<NotifSectioner>
     private lateinit var lowPrioritySections: Set<NotifSectioner>
 
     /**
@@ -38,9 +40,42 @@ class SectionStyleProvider @Inject constructor() {
     }
 
     /**
-     * Determine if the given section is minimized
+     * Determine if the given section is minimized.
      */
     fun isMinimizedSection(section: NotifSection): Boolean {
         return lowPrioritySections.contains(section.sectioner)
+    }
+
+    /**
+     * Determine if the given entry is minimized.
+     */
+    @JvmOverloads
+    fun isMinimized(entry: ListEntry, ifNotInSection: Boolean = true): Boolean {
+        val section = entry.section ?: return ifNotInSection
+        return isMinimizedSection(section)
+    }
+
+    /**
+     * Feed the provider the information it needs about which sections are silent, so that it can
+     * calculate which entries are in a "silent" section.
+     */
+    fun setSilentSections(sections: Collection<NotifSectioner>) {
+        silentSections = sections.toSet()
+    }
+
+    /**
+     * Determine if the given section is silent.
+     */
+    fun isSilentSection(section: NotifSection): Boolean {
+        return silentSections.contains(section.sectioner)
+    }
+
+    /**
+     * Determine if the given entry is silent.
+     */
+    @JvmOverloads
+    fun isSilent(entry: ListEntry, ifNotInSection: Boolean = true): Boolean {
+        val section = entry.section ?: return ifNotInSection
+        return isSilentSection(section)
     }
 }
