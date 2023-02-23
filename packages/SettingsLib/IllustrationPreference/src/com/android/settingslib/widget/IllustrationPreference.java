@@ -55,6 +55,7 @@ public class IllustrationPreference extends Preference {
 
     private int mMaxHeight = SIZE_UNSPECIFIED;
     private int mImageResId;
+    private boolean mCacheComposition = true;
     private boolean mIsAutoScale;
     private Uri mImageUri;
     private Drawable mImageDrawable;
@@ -133,6 +134,7 @@ public class IllustrationPreference extends Preference {
         lp.width = screenWidth < screenHeight ? screenWidth : screenHeight;
         illustrationFrame.setLayoutParams(lp);
 
+        illustrationView.setCacheComposition(mCacheComposition);
         handleImageWithAnimation(illustrationView);
         handleImageFrameMaxHeight(backgroundView, illustrationView);
 
@@ -427,6 +429,8 @@ public class IllustrationPreference extends Preference {
             TypedArray a = context.obtainStyledAttributes(attrs,
                     R.styleable.LottieAnimationView, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);
             mImageResId = a.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
+            mCacheComposition = a.getBoolean(
+                    R.styleable.LottieAnimationView_lottie_cacheComposition, true);
 
             a = context.obtainStyledAttributes(attrs,
                     R.styleable.IllustrationPreference, 0 /*defStyleAttr*/, 0 /*defStyleRes*/);

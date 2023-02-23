@@ -63,13 +63,17 @@
     <item msgid="6336372935919715515">"Чыпкалар иштетилди"</item>
     <item msgid="2779123106632690576">"Иштетилди"</item>
   </string-array>
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:0 (5118179698172834473) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:1 (4818549483446395865) -->
-    <!-- no translation found for bt_hci_snoop_log_filters_entries:2 (8207123990453243311) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:0 (6348114316510677939) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:1 (5884245882825346396) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:2 (6569400572915342949) -->
-    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:3 (1239386221416967664) -->
+  <string-array name="bt_hci_snoop_log_filters_entries">
+    <item msgid="5118179698172834473">"Жогорку колонтитулдар чыпкаланды"</item>
+    <item msgid="4818549483446395865">"A2DP медиа топтомдор чыпкаланды"</item>
+    <item msgid="8207123990453243311">"RFCOMM каналы чыпкаланды"</item>
+  </string-array>
+  <string-array name="bt_hci_snoop_log_profile_filter_entries">
+    <item msgid="6348114316510677939">"Өчүрүлдү"</item>
+    <item msgid="5884245882825346396">"Сыйкырдуу"</item>
+    <item msgid="6569400572915342949">"Жогорку колонтитул"</item>
+    <item msgid="1239386221416967664">"Толук чыпка"</item>
+  </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (Демейки)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>

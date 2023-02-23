@@ -24,6 +24,7 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.hardware.display.DisplayManager.EventsMask;
+import static android.hardware.display.DisplayManager.HDR_OUTPUT_CONTROL_FLAG;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
@@ -38,8 +39,10 @@ import static android.hardware.display.DisplayManagerGlobal.DisplayEvent;
 import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
 import static android.hardware.display.DisplayViewport.VIEWPORT_VIRTUAL;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPORTED;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
+import static android.provider.DeviceConfig.NAMESPACE_DISPLAY_MANAGER;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -137,6 +140,7 @@ import android.window.ScreenCapture;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
@@ -232,6 +236,9 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATIONS = 6;
     private static final int MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE = 7;
     private static final int MSG_DELIVER_DISPLAY_GROUP_EVENT = 8;
+    private static final int[] EMPTY_ARRAY = new int[0];
+    private static final HdrConversionMode HDR_CONVERSION_MODE_UNSUPPORTED = new HdrConversionMode(
+            HDR_CONVERSION_UNSUPPORTED);
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
@@ -249,6 +256,10 @@ public final class DisplayManagerService extends SystemService {
     private int[] mSupportedHdrOutputType;
     @GuardedBy("mSyncRoot")
     private boolean mAreUserDisabledHdrTypesAllowed = true;
+
+    // This value indicates whether or not HDR output control is enabled.
+    // It is read from DeviceConfig and is updated via a listener if the config changes.
+    private volatile boolean mIsHdrOutputControlEnabled;
 
     // Display mode chosen by user.
     private Display.Mode mUserPreferredMode;
@@ -674,6 +685,11 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             mSafeMode = safeMode;
             mSystemReady = true;
+            mIsHdrOutputControlEnabled = isDeviceConfigHdrOutputControlEnabled();
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_DISPLAY_MANAGER,
+                    BackgroundThread.getExecutor(),
+                    properties -> mIsHdrOutputControlEnabled =
+                            isDeviceConfigHdrOutputControlEnabled());
             // Just in case the top inset changed before the system was ready. At this point, any
             // relevant configuration should be in place.
             recordTopInsetLocked(mLogicalDisplayMapper.getDisplayLocked(Display.DEFAULT_DISPLAY));
@@ -681,7 +697,9 @@ public final class DisplayManagerService extends SystemService {
             updateSettingsLocked();
             updateUserDisabledHdrTypesFromSettingsLocked();
             updateUserPreferredDisplayModeSettingsLocked();
-            updateHdrConversionModeSettingsLocked();
+            if (mIsHdrOutputControlEnabled) {
+                updateHdrConversionModeSettingsLocked();
+            }
         }
 
         mDisplayModeDirector.setDesiredDisplayModeSpecsListener(
@@ -700,6 +718,12 @@ public final class DisplayManagerService extends SystemService {
         filter.addAction(Intent.ACTION_DOCK_EVENT);
 
         mContext.registerReceiver(mIdleModeReceiver, filter);
+    }
+
+    private boolean isDeviceConfigHdrOutputControlEnabled() {
+        return DeviceConfig.getBoolean(NAMESPACE_DISPLAY_MANAGER,
+                HDR_OUTPUT_CONTROL_FLAG,
+                true);
     }
 
     @VisibleForTesting
@@ -2117,7 +2141,7 @@ public final class DisplayManagerService extends SystemService {
 
     private HdrConversionMode getHdrConversionModeSettingInternal() {
         if (!mInjector.getHdrOutputConversionSupport()) {
-            return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_UNSUPPORTED);
+            return HDR_CONVERSION_MODE_UNSUPPORTED;
         }
         synchronized (mSyncRoot) {
             if (mHdrConversionMode != null) {
@@ -2129,7 +2153,7 @@ public final class DisplayManagerService extends SystemService {
 
     private HdrConversionMode getHdrConversionModeInternal() {
         if (!mInjector.getHdrOutputConversionSupport()) {
-            return new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_UNSUPPORTED);
+            return HDR_CONVERSION_MODE_UNSUPPORTED;
         }
         HdrConversionMode mode;
         synchronized (mSyncRoot) {
@@ -3948,6 +3972,9 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void setHdrConversionMode(HdrConversionMode hdrConversionMode) {
+            if (!mIsHdrOutputControlEnabled) {
+                return;
+            }
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.MODIFY_HDR_CONVERSION_MODE,
                     "Permission required to set the HDR conversion mode.");
@@ -3961,6 +3988,9 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public HdrConversionMode getHdrConversionModeSetting() {
+            if (!mIsHdrOutputControlEnabled) {
+                return HDR_CONVERSION_MODE_UNSUPPORTED;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 return getHdrConversionModeSettingInternal();
@@ -3971,6 +4001,9 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public HdrConversionMode getHdrConversionMode() {
+            if (!mIsHdrOutputControlEnabled) {
+                return HDR_CONVERSION_MODE_UNSUPPORTED;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 return getHdrConversionModeInternal();
@@ -3982,6 +4015,9 @@ public final class DisplayManagerService extends SystemService {
         @Display.HdrCapabilities.HdrType
         @Override // Binder call
         public int[] getSupportedHdrOutputTypes() {
+            if (!mIsHdrOutputControlEnabled) {
+                return EMPTY_ARRAY;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 return getSupportedHdrOutputTypesInternal();

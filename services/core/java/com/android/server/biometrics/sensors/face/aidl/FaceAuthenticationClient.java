@@ -85,11 +85,11 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled, @Authenticators.Types int sensorStrength) {
+            @Authenticators.Types int sensorStrength) {
         this(context, lazyDaemon, token, requestId, listener, targetUserId, operationId,
                 restricted, owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, usageStats, lockoutCache /* lockoutCache */,
-                allowBackgroundAuthentication, isKeyguardBypassEnabled,
+                allowBackgroundAuthentication,
                 context.getSystemService(SensorPrivacyManager.class), sensorStrength);
     }
 
@@ -102,13 +102,13 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled, SensorPrivacyManager sensorPrivacyManager,
+            SensorPrivacyManager sensorPrivacyManager,
             @Authenticators.Types int biometricStrength) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */, null /* lockoutCache */,
                 allowBackgroundAuthentication, false /* shouldVibrate */,
-                isKeyguardBypassEnabled, biometricStrength);
+                biometricStrength);
         setRequestId(requestId);
         mUsageStats = usageStats;
         mNotificationManager = context.getSystemService(NotificationManager.class);

@@ -1721,13 +1721,13 @@
     <string name="keyboard_shortcut_search_list_hint">Search shortcuts</string>
     <!-- The description for no shortcuts results [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_list_no_result">No shortcuts found</string>
-    <!-- The title of system category in shortcut search list. [CHAR LIMIT=15] -->
+    <!-- The title of system category in shortcut search list. [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_category_system">System</string>
-    <!-- The title of input category in shortcut search list. [CHAR LIMIT=15] -->
+    <!-- The title of input category in shortcut search list. [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_category_input">Input</string>
-    <!-- The title of open apps category in shortcut search list. [CHAR LIMIT=15] -->
+    <!-- The title of open apps category in shortcut search list. [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_category_open_apps">Open apps</string>
-    <!-- The title of current app category in shortcut search list. [CHAR LIMIT=15] -->
+    <!-- The title of current app category in shortcut search list. [CHAR LIMIT=25] -->
     <string name="keyboard_shortcut_search_category_current_app">Current app</string>
 
     <!-- User visible title for the keyboard shortcut that triggers the notification shade. [CHAR LIMIT=70] -->

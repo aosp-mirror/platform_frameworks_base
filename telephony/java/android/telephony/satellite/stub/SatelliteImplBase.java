@@ -16,7 +16,6 @@
 
 package android.telephony.satellite.stub;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -26,8 +25,6 @@ import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.util.TelephonyUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -41,53 +38,6 @@ import java.util.concurrent.Executor;
  */
 public class SatelliteImplBase extends SatelliteService {
     private static final String TAG = "SatelliteImplBase";
-
-    /** @hide */
-    @IntDef(prefix = "NT_RADIO_TECHNOLOGY_", value = {
-            NT_RADIO_TECHNOLOGY_NB_IOT_NTN,
-            NT_RADIO_TECHNOLOGY_NR_NTN,
-            NT_RADIO_TECHNOLOGY_EMTC_NTN,
-            NT_RADIO_TECHNOLOGY_PROPRIETARY
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface NTRadioTechnology {}
-
-    /** 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology. */
-    public static final int NT_RADIO_TECHNOLOGY_NB_IOT_NTN =
-            android.telephony.satellite.stub.NTRadioTechnology.NB_IOT_NTN;
-    /** 3GPP 5G NR over Non-Terrestrial-Networks technology. */
-    public static final int NT_RADIO_TECHNOLOGY_NR_NTN =
-            android.telephony.satellite.stub.NTRadioTechnology.NR_NTN;
-    /** 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology. */
-    public static final int NT_RADIO_TECHNOLOGY_EMTC_NTN =
-            android.telephony.satellite.stub.NTRadioTechnology.EMTC_NTN;
-    /** Proprietary technology. */
-    public static final int NT_RADIO_TECHNOLOGY_PROPRIETARY =
-            android.telephony.satellite.stub.NTRadioTechnology.PROPRIETARY;
-
-    /** @hide */
-    @IntDef(prefix = "SATELLITE_MODEM_STATE_", value = {
-            SATELLITE_MODEM_STATE_IDLE,
-            SATELLITE_MODEM_STATE_LISTENING,
-            SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING,
-            SATELLITE_MODEM_STATE_OFF
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SatelliteModemState {}
-
-    /** Satellite modem is in idle state. */
-    public static final int SATELLITE_MODEM_STATE_IDLE =
-            android.telephony.satellite.stub.SatelliteModemState.SATELLITE_MODEM_STATE_IDLE;
-    /** Satellite modem is listening for incoming messages. */
-    public static final int SATELLITE_MODEM_STATE_LISTENING =
-            android.telephony.satellite.stub.SatelliteModemState.SATELLITE_MODEM_STATE_LISTENING;
-    /** Satellite modem is sending and/or receiving messages. */
-    public static final int SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING =
-            android.telephony.satellite.stub.SatelliteModemState
-                    .SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING;
-    /** Satellite modem is powered off. */
-    public static final int SATELLITE_MODEM_STATE_OFF =
-            android.telephony.satellite.stub.SatelliteModemState.SATELLITE_MODEM_STATE_OFF;
 
     protected final Executor mExecutor;
 
@@ -121,12 +71,12 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void setSatelliteListeningEnabled(boolean enable, IIntegerConsumer errorCallback)
-                throws RemoteException {
+        public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode,
+                IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .setSatelliteListeningEnabled(enable, errorCallback),
-                    "setSatelliteListeningEnabled");
+                            .requestSatelliteListeningEnabled(enable, isDemoMode, errorCallback),
+                    "requestSatelliteListeningEnabled");
         }
 
         @Override
@@ -223,11 +173,12 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void sendSatelliteDatagram(SatelliteDatagram datagram, boolean isEmergency,
-                IIntegerConsumer errorCallback) throws RemoteException {
+        public void sendSatelliteDatagram(SatelliteDatagram datagram, boolean isDemoMode,
+                boolean isEmergency, IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .sendSatelliteDatagram(datagram, isEmergency, errorCallback),
+                            .sendSatelliteDatagram(
+                                    datagram, isDemoMode, isEmergency, errorCallback),
                     "sendSatelliteDatagram");
         }
 
@@ -296,10 +247,11 @@ public class SatelliteImplBase extends SatelliteService {
     }
 
     /**
-     * Enable or disable the satellite service listening mode.
+     * Request to enable or disable the satellite service listening mode.
      * Listening mode allows the satellite service to listen for incoming pages.
      *
      * @param enable True to enable satellite listening mode and false to disable.
+     * @param isDemoMode Whether demo mode is enabled.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -312,7 +264,7 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    public void setSatelliteListeningEnabled(boolean enable,
+    public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
@@ -411,7 +363,7 @@ public class SatelliteImplBase extends SatelliteService {
     /**
      * User started pointing to the satellite.
      * The satellite service should report the satellite pointing info via
-     * ISatelliteListener#onSatellitePointingInfoChanged as the user device/satellite moves.
+     * ISatelliteListener#onSatellitePositionChanged as the user device/satellite moves.
      *
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -549,8 +501,9 @@ public class SatelliteImplBase extends SatelliteService {
     }
 
     /**
-     * Poll the pending datagrams.
-     * The satellite service should report the new datagrams via ISatelliteListener#onNewDatagrams.
+     * Poll the pending datagrams to be received over satellite.
+     * The satellite service should check if there are any pending datagrams to be received over
+     * satellite and report them via ISatelliteListener#onSatelliteDatagramsReceived.
      *
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -575,10 +528,9 @@ public class SatelliteImplBase extends SatelliteService {
 
     /**
      * Send datagram over satellite.
-     * Once sent, the satellite service should report whether the operation was successful via
-     * SatelliteListener#onDatagramsDelivered.
      *
      * @param datagram Datagram to send in byte format.
+     * @param isDemoMode Whether demo mode is enabled.
      * @param isEmergency Whether this is an emergency datagram.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -598,8 +550,8 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:SATELLITE_NOT_REACHABLE
      *   SatelliteError:NOT_AUTHORIZED
      */
-    public void sendSatelliteDatagram(@NonNull SatelliteDatagram datagram, boolean isEmergency,
-            @NonNull IIntegerConsumer errorCallback) {
+    public void sendSatelliteDatagram(@NonNull SatelliteDatagram datagram, boolean isDemoMode,
+            boolean isEmergency, @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
 

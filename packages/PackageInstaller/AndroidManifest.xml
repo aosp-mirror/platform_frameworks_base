@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools"
           package="com.android.packageinstaller">
 
     <original-package android:name="com.android.packageinstaller" />
@@ -149,6 +150,9 @@
                   android:authorities="com.google.android.packageinstaller.wear.provider"
                   android:grantUriPermissions="true"
                   android:exported="false" />
+
+        <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            tools:node="remove" />
     </application>
 
 </manifest>

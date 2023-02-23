@@ -133,6 +133,7 @@ public class UserControllerTest {
     private static final int TEST_USER_ID1 = 101;
     private static final int TEST_USER_ID2 = 102;
     private static final int TEST_USER_ID3 = 103;
+    private static final int SYSTEM_USER_ID = UserHandle.SYSTEM.getIdentifier();
     private static final int NONEXIST_USER_ID = 2;
     private static final int TEST_PRE_CREATED_USER_ID = 103;
 
@@ -228,6 +229,31 @@ public class UserControllerTest {
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testStartUser_sendsNoBroadcastsForSystemUserInNonHeadlessMode() {
+        setUpUser(SYSTEM_USER_ID, UserInfo.FLAG_SYSTEM, /* preCreated= */ false,
+                UserManager.USER_TYPE_FULL_SYSTEM);
+        mockIsHeadlessSystemUserMode(false);
+
+        mUserController.startUser(SYSTEM_USER_ID, USER_START_MODE_FOREGROUND);
+
+        assertWithMessage("Broadcasts for starting the system user in non-headless mode")
+                .that(mInjector.mSentIntents).isEmpty();
+    }
+
+    @Test
+    public void testStartUser_sendsBroadcastsForSystemUserInHeadlessMode() {
+        setUpUser(SYSTEM_USER_ID, UserInfo.FLAG_SYSTEM, /* preCreated= */ false,
+                UserManager.USER_TYPE_SYSTEM_HEADLESS);
+        mockIsHeadlessSystemUserMode(true);
+
+        mUserController.startUser(SYSTEM_USER_ID, USER_START_MODE_FOREGROUND);
+
+        assertWithMessage("Broadcasts for starting the system user in headless mode")
+                .that(getActions(mInjector.mSentIntents)).containsExactly(
+                        Intent.ACTION_USER_STARTED, Intent.ACTION_USER_STARTING);
     }
 
     @Test
@@ -997,6 +1023,10 @@ public class UserControllerTest {
             });
             lock.wait(waitTimeMs);
         }
+    }
+
+    private void mockIsHeadlessSystemUserMode(boolean value) {
+        when(mInjector.isHeadlessSystemUserMode()).thenReturn(value);
     }
 
     private void mockIsUsersOnSecondaryDisplaysEnabled(boolean value) {

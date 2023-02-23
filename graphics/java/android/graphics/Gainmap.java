@@ -96,8 +96,8 @@ public final class Gainmap implements Parcelable {
             throw new RuntimeException("internal error: native gainmap is 0");
         }
 
-        mGainmapContents = gainmapContents;
         mNativePtr = nativeGainmap;
+        setGainmapContents(gainmapContents);
 
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, nativeGainmap);
     }

@@ -31,7 +31,8 @@ import java.io.PrintWriter;
  */
 public class ShellProtoLogImpl extends BaseProtoLogImpl {
     private static final String TAG = "ProtoLogImpl";
-    private static final int BUFFER_CAPACITY = 128 * 1024;
+    private static final int BUFFER_CAPACITY = 1024 * 1024;
+    // TODO: find a proper location to save the protolog message file
     private static final String LOG_FILENAME = "/data/misc/wmtrace/shell_log.winscope";
     private static final String VIEWER_CONFIG_FILENAME = "/system_ext/etc/wmshell.protolog.json.gz";
 

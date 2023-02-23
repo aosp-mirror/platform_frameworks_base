@@ -20,8 +20,9 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewStub;
+
+import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.LockIconView;
@@ -32,7 +33,6 @@ import com.android.systemui.biometrics.AuthRippleView;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.settings.UserTracker;
@@ -85,9 +85,7 @@ import dagger.multibindings.IntoSet;
 @Module(subcomponents = StatusBarFragmentComponent.class)
 public abstract class StatusBarViewModule {
 
-    public static final String LARGE_SCREEN_SHADE_HEADER = "large_screen_shade_header";
-    private static final String SPLIT_SHADE_BATTERY_VIEW = "split_shade_battery_view";
-    public static final String LARGE_SCREEN_BATTERY_CONTROLLER = "split_shade_battery_controller";
+    public static final String SHADE_HEADER = "large_screen_shade_header";
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
 
     /** */
@@ -171,17 +169,15 @@ public abstract class StatusBarViewModule {
 
     /** */
     @Provides
-    @Named(LARGE_SCREEN_SHADE_HEADER)
+    @Named(SHADE_HEADER)
     @CentralSurfacesComponent.CentralSurfacesScope
-    public static View getLargeScreenShadeHeaderBarView(
+    public static MotionLayout getLargeScreenShadeHeaderBarView(
             NotificationShadeWindowView notificationShadeWindowView,
             FeatureFlags featureFlags) {
         ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
-        int layoutId = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)
-                ? R.layout.combined_qs_header
-                : R.layout.large_screen_shade_header;
+        int layoutId = R.layout.combined_qs_header;
         stub.setLayoutResource(layoutId);
-        View v = stub.inflate();
+        MotionLayout v = (MotionLayout) stub.inflate();
         return v;
     }
 
@@ -197,7 +193,7 @@ public abstract class StatusBarViewModule {
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
     public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
-            @Named(LARGE_SCREEN_SHADE_HEADER) View header) {
+            @Named(SHADE_HEADER) MotionLayout header) {
         return header.findViewById(R.id.privacy_chip);
     }
 
@@ -205,23 +201,23 @@ public abstract class StatusBarViewModule {
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
     static StatusIconContainer providesStatusIconContainer(
-            @Named(LARGE_SCREEN_SHADE_HEADER) View header) {
+            @Named(SHADE_HEADER) MotionLayout header) {
         return header.findViewById(R.id.statusIcons);
     }
 
     /** */
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(SPLIT_SHADE_BATTERY_VIEW)
-    static BatteryMeterView getBatteryMeterView(@Named(LARGE_SCREEN_SHADE_HEADER) View view) {
+    @Named(SHADE_HEADER)
+    static BatteryMeterView getBatteryMeterView(@Named(SHADE_HEADER) MotionLayout view) {
         return view.findViewById(R.id.batteryRemainingIcon);
     }
 
     @Provides
     @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(LARGE_SCREEN_BATTERY_CONTROLLER)
+    @Named(SHADE_HEADER)
     static BatteryMeterViewController getBatteryMeterViewController(
-            @Named(SPLIT_SHADE_BATTERY_VIEW) BatteryMeterView batteryMeterView,
+            @Named(SHADE_HEADER) BatteryMeterView batteryMeterView,
             UserTracker userTracker,
             ConfigurationController configurationController,
             TunerService tunerService,

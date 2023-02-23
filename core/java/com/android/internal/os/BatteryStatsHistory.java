@@ -330,7 +330,10 @@ public class BatteryStatsHistory {
         }
     }
 
-    public BatteryStatsHistory(HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
+    public BatteryStatsHistory(int maxHistoryFiles, int maxHistoryBufferSize,
+            HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock) {
+        mMaxHistoryFiles = maxHistoryFiles;
+        mMaxHistoryBufferSize = maxHistoryBufferSize;
         mStepDetailsCalculator = stepDetailsCalculator;
         mTracer = new TraceDelegate();
         mClock = clock;

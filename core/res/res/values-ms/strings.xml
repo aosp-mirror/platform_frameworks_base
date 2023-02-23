@@ -207,6 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Apl peribadi anda disekat sehingga anda menghidupkan profil kerja"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Apl peribadi akan disekat pada <xliff:g id="DATE">%1$s</xliff:g> pukul <xliff:g id="TIME">%2$s</xliff:g>. Pentadbir IT anda tidak membenarkan profil kerja anda dimatikan melebihi <xliff:g id="NUMBER">%3$d</xliff:g> hari."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Hidupkan"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Panggilan dan mesej dimatikan"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Anda telah menjeda apl kerja. Anda tidak akan menerima panggilan telefon atau mesej teks."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Nyahjeda apl kj"</string>
     <string name="me" msgid="6207584824693813140">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Pilihan tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Pilihan Android TV"</string>
@@ -338,6 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Boleh menangkap gerak isyarat yang dilakukan pada penderia cap jari peranti."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ambil tangkapan skrin"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Boleh mengambil tangkapan skrin paparan."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Pratonton, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"lumpuhkan atau ubah suai bar status"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Membenarkan apl melumpuhkan bar status atau menambah dan mengalih keluar ikon sistem."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"jadi bar status"</string>
@@ -1358,8 +1362,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP melalui USB dihidupkan"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Penambatan USB dihidupkan"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI melalui USB dihidupkan"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Peranti disambungkan sebagai Kamera Web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Aksesori USB disambungkan"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Ketik untuk mendapatkan lagi pilihan."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Mengecas peranti tersambung. Ketik untuk mendapatkan lagi pilihan."</string>
@@ -1708,8 +1711,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Selesai"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Matikan pintasan"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Penyongsangan warna"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Pembetulan warna"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mod sebelah tangan"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Amat malap"</string>

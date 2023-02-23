@@ -4577,6 +4577,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return false;
     }
 
+    /**
+     * Called when always on magnification feature flag flips to check if the feature should be
+     * enabled for current user state.
+     */
+    public void updateAlwaysOnMagnification() {
+        synchronized (mLock) {
+            readAlwaysOnMagnificationLocked(getCurrentUserState());
+        }
+    }
+
+    @GuardedBy("mLock")
     boolean readAlwaysOnMagnificationLocked(AccessibilityUserState userState) {
         final boolean isSettingsAlwaysOnEnabled = Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),

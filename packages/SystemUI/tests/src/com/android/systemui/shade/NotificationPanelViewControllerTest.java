@@ -272,7 +272,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     @Mock private NavigationModeController mNavigationModeController;
     @Mock private NavigationBarController mNavigationBarController;
     @Mock private QuickSettingsController mQsController;
-    @Mock private LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
+    @Mock private ShadeHeaderController mShadeHeaderController;
     @Mock private ContentResolver mContentResolver;
     @Mock private TapAgainViewController mTapAgainViewController;
     @Mock private KeyguardIndicationController mKeyguardIndicationController;
@@ -516,7 +516,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mFragmentService,
                 mContentResolver,
                 mRecordingController,
-                mLargeScreenShadeHeaderController,
+                mShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
                 mShadeExpansionStateManager,
@@ -592,7 +592,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
-                mLargeScreenShadeHeaderController,
+                mShadeHeaderController,
                 mStatusBarTouchableRegionManager,
                 mKeyguardStateController,
                 mKeyguardBypassController,

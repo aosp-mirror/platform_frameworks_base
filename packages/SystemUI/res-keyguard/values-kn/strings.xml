@@ -31,6 +31,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ವೇಗವಾಗಿ ಚಾರ್ಜ್‌ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಬ್ಯಾಟರಿಯನ್ನು ರಕ್ಷಿಸಲು ಚಾರ್ಜಿಂಗ್ ಅನ್ನು ಆಪ್ಟಿಮೈಸ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="5712938022567388098">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ಹೊಂದಾಣಿಕೆಯಾಗದ ಚಾರ್ಜಿಂಗ್"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"ಅನ್‌ಲಾಕ್ ಮಾಡಲು ಮೆನು ಒತ್ತಿರಿ."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ನೆಟ್‌ವರ್ಕ್ ಲಾಕ್ ಆಗಿದೆ"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM ಇಲ್ಲ"</string>

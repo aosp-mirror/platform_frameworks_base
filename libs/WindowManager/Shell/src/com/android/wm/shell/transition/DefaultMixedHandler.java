@@ -186,7 +186,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
 
     private boolean isHomeOpening(@NonNull TransitionInfo.Change change) {
         return change.getTaskInfo() != null
-                && change.getTaskInfo().getActivityType() != ACTIVITY_TYPE_HOME;
+                && change.getTaskInfo().getActivityType() == ACTIVITY_TYPE_HOME;
     }
 
     private boolean isWallpaper(@NonNull TransitionInfo.Change change) {

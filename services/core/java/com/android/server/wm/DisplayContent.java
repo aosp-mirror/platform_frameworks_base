@@ -4761,6 +4761,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void updateWindowsForAnimator() {
         forAllWindows(mUpdateWindowsForAnimator, true /* traverseTopToBottom */);
+        if (mAsyncRotationController != null) {
+            mAsyncRotationController.updateTargetWindows();
+        }
     }
 
     boolean isInputMethodClientFocus(int uid, int pid) {
