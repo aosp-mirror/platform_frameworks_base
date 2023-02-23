@@ -25,7 +25,6 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
-import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.util.TestFoldStateProvider
 import org.junit.Before
 import org.junit.Test
@@ -50,7 +49,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         runOnMainThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendHingeAngleUpdate(180f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
@@ -67,7 +66,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         runOnMainThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendHingeAngleUpdate(180f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
@@ -84,7 +83,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendHingeAngleUpdate(180f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
         )
 
         with(listener.ensureTransitionFinished()) {
@@ -113,7 +112,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     fun testUnfoldAndStopUnfolding_finishesTheUnfoldTransition() {
         runOnMainThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN) },
@@ -129,7 +128,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     fun testFoldImmediatelyAfterUnfold_runsFoldAnimation() {
         runOnMainThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
-            { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE) },
+            { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
             {

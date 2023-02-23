@@ -61,8 +61,6 @@ class FoldStateLoggingProviderImpl(
         foldStateProvider.stop()
     }
 
-    override fun onHingeAngleUpdate(angle: Float) {}
-
     override fun onFoldUpdate(@FoldUpdate update: Int) {
         val now = clock.elapsedRealtime()
         when (update) {
@@ -75,6 +73,10 @@ class FoldStateLoggingProviderImpl(
             FOLD_UPDATE_FINISH_FULL_OPEN -> dispatchState(FULLY_OPENED)
             FOLD_UPDATE_FINISH_CLOSED -> dispatchState(FULLY_CLOSED)
         }
+    }
+
+    override fun onUnfoldedScreenAvailable() {
+        Log.d(TAG, "Unfolded screen available")
     }
 
     private fun dispatchState(@LoggedFoldedStates current: Int) {
