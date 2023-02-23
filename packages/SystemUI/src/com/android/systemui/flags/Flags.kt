@@ -367,6 +367,9 @@ object Flags {
     // TODO(b/267166152) : Tracking Bug
     val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
 
+    // TODO(b/270437894): Tracking Bug
+    val MEDIA_REMOTE_RESUME = unreleasedFlag(917, "media_remote_resume")
+
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
 

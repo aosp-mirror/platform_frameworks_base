@@ -137,6 +137,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock private lateinit var logger: MediaUiEventLogger
     lateinit var mediaDataManager: MediaDataManager
     lateinit var mediaNotification: StatusBarNotification
+    lateinit var remoteCastNotification: StatusBarNotification
     @Captor lateinit var mediaDataCaptor: ArgumentCaptor<MediaData>
     private val clock = FakeSystemClock()
     @Mock private lateinit var tunerService: TunerService
@@ -205,6 +206,20 @@ class MediaDataManagerTest : SysuiTestCase() {
                 }
                 build()
             }
+        remoteCastNotification =
+            SbnBuilder().run {
+                setPkg(SYSTEM_PACKAGE_NAME)
+                modifyNotification(context).also {
+                    it.setSmallIcon(android.R.drawable.ic_media_pause)
+                    it.setStyle(
+                        MediaStyle().apply {
+                            setMediaSession(session.sessionToken)
+                            setRemotePlaybackInfo("Remote device", 0, null)
+                        }
+                    )
+                }
+                build()
+            }
         metadataBuilder =
             MediaMetadata.Builder().apply {
                 putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
@@ -244,6 +259,7 @@ class MediaDataManagerTest : SysuiTestCase() {
         whenever(mediaFlags.isExplicitIndicatorEnabled()).thenReturn(true)
         whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(false)
         whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
+        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(false)
         whenever(logger.getNewInstanceId()).thenReturn(instanceIdSequence.newInstanceId())
         whenever(keyguardUpdateMonitor.isUserInLockdown(any())).thenReturn(false)
     }
@@ -404,33 +420,8 @@ class MediaDataManagerTest : SysuiTestCase() {
 
     @Test
     fun testOnNotificationAdded_isRcn_markedRemote() {
-        val rcn =
-            SbnBuilder().run {
-                setPkg(SYSTEM_PACKAGE_NAME)
-                modifyNotification(context).also {
-                    it.setSmallIcon(android.R.drawable.ic_media_pause)
-                    it.setStyle(
-                        MediaStyle().apply {
-                            setMediaSession(session.sessionToken)
-                            setRemotePlaybackInfo("Remote device", 0, null)
-                        }
-                    )
-                }
-                build()
-            }
+        addNotificationAndLoad(remoteCastNotification)
 
-        mediaDataManager.onNotificationAdded(KEY, rcn)
-        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
-        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
-        verify(listener)
-            .onMediaDataLoaded(
-                eq(KEY),
-                eq(null),
-                capture(mediaDataCaptor),
-                eq(true),
-                eq(0),
-                eq(false)
-            )
         assertThat(mediaDataCaptor.value!!.playbackLocation)
             .isEqualTo(MediaData.PLAYBACK_CAST_REMOTE)
         verify(logger)
@@ -640,6 +631,56 @@ class MediaDataManagerTest : SysuiTestCase() {
             )
 
         // WHEN the notification is removed
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // THEN the media data is removed
+        verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
+    @Test
+    fun testOnNotificationRemoved_withResumption_isRemoteAndRemoteAllowed() {
+        // With the flag enabled to allow remote media to resume
+        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(true)
+
+        // GIVEN that the manager has a notification with a resume action, but is not local
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        whenever(playbackInfo.playbackType)
+            .thenReturn(MediaController.PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+        val dataRemoteWithResume =
+            data.copy(resumeAction = Runnable {}, playbackLocation = MediaData.PLAYBACK_CAST_LOCAL)
+        mediaDataManager.onMediaDataLoaded(KEY, null, dataRemoteWithResume)
+
+        // WHEN the notification is removed
+        mediaDataManager.onNotificationRemoved(KEY)
+
+        // THEN the media data is converted to a resume state
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.resumption).isTrue()
+    }
+
+    @Test
+    fun testOnNotificationRemoved_withResumption_isRcnAndRemoteAllowed() {
+        // With the flag enabled to allow remote media to resume
+        whenever(mediaFlags.isRemoteResumeAllowed()).thenReturn(true)
+
+        // GIVEN that the manager has a remote cast notification
+        addNotificationAndLoad(remoteCastNotification)
+        val data = mediaDataCaptor.value
+        assertThat(data.playbackLocation).isEqualTo(MediaData.PLAYBACK_CAST_REMOTE)
+        val dataRemoteWithResume = data.copy(resumeAction = Runnable {})
+        mediaDataManager.onMediaDataLoaded(KEY, null, dataRemoteWithResume)
+
+        // WHEN the RCN is removed
         mediaDataManager.onNotificationRemoved(KEY)
 
         // THEN the media data is removed
@@ -1526,22 +1567,7 @@ class MediaDataManagerTest : SysuiTestCase() {
             )
 
         // update to remote cast
-        val rcn =
-            SbnBuilder().run {
-                setPkg(SYSTEM_PACKAGE_NAME) // System package
-                modifyNotification(context).also {
-                    it.setSmallIcon(android.R.drawable.ic_media_pause)
-                    it.setStyle(
-                        MediaStyle().apply {
-                            setMediaSession(session.sessionToken)
-                            setRemotePlaybackInfo("Remote device", 0, null)
-                        }
-                    )
-                }
-                build()
-            }
-
-        mediaDataManager.onNotificationAdded(KEY, rcn)
+        mediaDataManager.onNotificationAdded(KEY, remoteCastNotification)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         verify(logger)
@@ -1911,9 +1937,14 @@ class MediaDataManagerTest : SysuiTestCase() {
         verify(listener).onMediaDataRemoved(eq(KEY))
     }
 
-    /** Helper function to add a media notification and capture the resulting MediaData */
+    /** Helper function to add a basic media notification and capture the resulting MediaData */
     private fun addNotificationAndLoad() {
-        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        addNotificationAndLoad(mediaNotification)
+    }
+
+    /** Helper function to add the given notification and capture the resulting MediaData */
+    private fun addNotificationAndLoad(sbn: StatusBarNotification) {
+        mediaDataManager.onNotificationAdded(KEY, sbn)
         assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
         assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
         verify(listener)
