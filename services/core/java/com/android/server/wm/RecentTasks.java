@@ -978,9 +978,10 @@ class RecentTasks {
 
             if (!task.mUserSetupComplete) {
                 // Don't include task launched while user is not done setting-up.
-                if (DEBUG_RECENTS) {
-                    Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + task);
-                }
+
+                // NOTE: not guarding with DEBUG_RECENTS as it's not frequent enough to spam logcat,
+                // but is useful when running CTS.
+                Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + task);
                 continue;
             }
 

@@ -1154,6 +1154,8 @@ class ActivityMetricsLogger {
         sb.setLength(0);
         sb.append("Displayed ");
         sb.append(info.launchedActivityShortComponentName);
+        sb.append(" for user ");
+        sb.append(info.userId);
         sb.append(": ");
         TimeUtils.formatDuration(info.windowsDrawnDelayMs, sb);
         Log.i(TAG, sb.toString());
