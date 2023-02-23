@@ -663,8 +663,15 @@ public class QuickSettingsController {
         mDozing = dozing;
     }
 
-    /** set QS state to closed */
+    /**
+     * This method closes QS but in split shade it should be used only in special cases: to make
+     * sure QS closes when shade is closed as well. Otherwise it will result in QS disappearing
+     * from split shade
+     */
     public void closeQs() {
+        if (mSplitShadeEnabled) {
+            mShadeLog.d("Closing QS while in split shade");
+        }
         cancelExpansionAnimation();
         setExpansionHeight(getMinExpansionHeight());
         // qsExpandImmediate is a safety latch in case we're calling closeQS while we're in the
