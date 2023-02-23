@@ -195,7 +195,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             mDreamOverlayTouchMonitor.init();
 
             mStateController.setShouldShowComplications(shouldShowComplications());
-            addOverlayWindowLocked(layoutParams);
+
+            // If we are not able to add the overlay window, reset the overlay.
+            if (!addOverlayWindowLocked(layoutParams)) {
+                resetCurrentDreamOverlayLocked();
+                return;
+            }
+
+
             setCurrentStateLocked(Lifecycle.State.RESUMED);
             mStateController.setOverlayActive(true);
             final ComponentName dreamComponent = getDreamComponent();
@@ -241,7 +248,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      * @param layoutParams The {@link android.view.WindowManager.LayoutParams} which allow inserting
      *                     into the dream window.
      */
-    private void addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
+    private boolean addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
         mWindow = new PhoneWindow(mContext);
         // Default to SystemUI name for TalkBack.
         mWindow.setTitle("");
@@ -266,9 +273,22 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         // risk an IllegalStateException in some cases when setting the container view as the
         // window's content view and the container view hasn't been properly removed previously).
         removeContainerViewFromParentLocked();
+
         mWindow.setContentView(mDreamOverlayContainerViewController.getContainerView());
 
-        mWindowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
+        // It is possible that a dream's window (and the dream as a whole) is no longer valid by
+        // the time the overlay service processes the dream. This can happen for example if
+        // another dream is started immediately after the existing dream begins. In this case, the
+        // overlay service should identify the situation through the thrown exception and tear down
+        // the overlay.
+        try {
+            mWindowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
+            return true;
+        } catch (WindowManager.BadTokenException exception) {
+            Log.e(TAG, "Dream activity window invalid: " + layoutParams.packageName,
+                    exception);
+            return false;
+        }
     }
 
     private void removeContainerViewFromParentLocked() {
