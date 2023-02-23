@@ -1207,7 +1207,7 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
+        mNanoAppStateManager.foreachNanoAppInstanceInfo(pw::println);
 
         pw.println("");
         pw.println("=================== PRELOADED NANOAPPS ====================");
@@ -1255,16 +1255,17 @@ public class ContextHubService extends IContextHubService.Stub {
         proto.flush();
     }
 
-    /**
-     * Dumps preloaded nanoapps to the console
-     */
+    /** Dumps preloaded nanoapps to the console */
     private void dumpPreloadedNanoapps(PrintWriter pw) {
         if (mContextHubWrapper == null) {
             return;
         }
 
         long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds();
-        for (long preloadedNanoappId: preloadedNanoappIds) {
+        if (preloadedNanoappIds == null) {
+            return;
+        }
+        for (long preloadedNanoappId : preloadedNanoappIds) {
             pw.print("ID: 0x");
             pw.println(Long.toHexString(preloadedNanoappId));
         }
