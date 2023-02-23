@@ -55,12 +55,12 @@ public interface ComponentResolverApi {
 
     @Nullable
     List<ResolveInfo> queryActivities(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId);
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId);
 
     @Nullable
     List<ResolveInfo> queryActivities(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedActivity> activities,
-            @UserIdInt int userId);
+            int callingUid, @UserIdInt int userId);
 
     @Nullable
     ProviderInfo queryProvider(@NonNull Computer computer, @NonNull String authority, long flags,
@@ -68,12 +68,12 @@ public interface ComponentResolverApi {
 
     @Nullable
     List<ResolveInfo> queryProviders(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId);
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId);
 
     @Nullable
     List<ResolveInfo> queryProviders(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedProvider> providers,
-            @UserIdInt int userId);
+            int callingUid, @UserIdInt int userId);
 
     @Nullable
     List<ProviderInfo> queryProviders(@NonNull Computer computer, @Nullable String processName,
@@ -81,21 +81,21 @@ public interface ComponentResolverApi {
 
     @Nullable
     List<ResolveInfo> queryReceivers(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId);
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId);
 
     @Nullable
     List<ResolveInfo> queryReceivers(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedActivity> receivers,
-            @UserIdInt int userId);
+            int callingUid, @UserIdInt int userId);
 
     @Nullable
     List<ResolveInfo> queryServices(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId);
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId);
 
     @Nullable
     List<ResolveInfo> queryServices(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedService> services,
-            @UserIdInt int userId);
+            int callingUid, @UserIdInt int userId);
 
     void querySyncProviders(@NonNull Computer computer, @NonNull List<String> outNames,
             @NonNull List<ProviderInfo> outInfo, boolean safeMode, @UserIdInt int userId);

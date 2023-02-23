@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.content.IntentFilter.BLOCK_NULL_ACTION_INTENTS;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
@@ -94,7 +95,6 @@ import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
-import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -1166,16 +1166,19 @@ public class PackageManagerServiceUtils {
         return (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
     }
 
-    // Static to give access to ComputeEngine
     public static void applyEnforceIntentFilterMatching(
-            PlatformCompat compat, ComponentResolverApi resolver,
-            List<ResolveInfo> resolveInfos, boolean isReceiver,
+            Computer computer, List<ResolveInfo> resolveInfos, boolean isReceiver,
             Intent intent, String resolvedType, int filterCallingUid) {
         if (DISABLE_ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS.get()) return;
 
         final Printer logPrinter = DEBUG_INTENT_MATCHING
                 ? new LogPrinter(Log.VERBOSE, TAG, Log.LOG_ID_SYSTEM)
                 : null;
+
+        final boolean callerBlocksNullAction = computer.isChangeEnabled(
+                BLOCK_NULL_ACTION_INTENTS, filterCallingUid);
+
+        final ComponentResolverApi resolver = computer.getComponentResolver();
 
         for (int i = resolveInfos.size() - 1; i >= 0; --i) {
             final ComponentInfo info = resolveInfos.get(i).getComponentInfo();
@@ -1187,10 +1190,14 @@ public class PackageManagerServiceUtils {
             }
 
             // Only enforce filter matching if target app's target SDK >= T
-            if (!compat.isChangeEnabledInternal(
+            if (!computer.isChangeEnabled(
                     ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo)) {
                 continue;
             }
+
+            // Block null action intent if either source or target app's target SDK >= U
+            final boolean blockNullAction = callerBlocksNullAction
+                    || computer.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS, info.applicationInfo);
 
             final ParsedMainComponent comp;
             if (info instanceof ActivityInfo) {
@@ -1213,7 +1220,8 @@ public class PackageManagerServiceUtils {
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
-                if (IntentResolver.intentMatchesFilter(intentFilter, intent, resolvedType)) {
+                if (IntentResolver.intentMatchesFilter(
+                        intentFilter, intent, resolvedType, blockNullAction)) {
                     match = true;
                     break;
                 }
