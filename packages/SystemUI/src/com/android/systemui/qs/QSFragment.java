@@ -227,7 +227,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
                     // Lazily update animators whenever the scrolling changes
                     mQSAnimator.requestAnimatorUpdate();
-                    mHeader.setExpandedScrollAmount(scrollY);
                     if (mScrollListener != null) {
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
@@ -647,8 +646,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         int heightDiff = getHeightDiff();
         float panelTranslationY = translationScaleY * heightDiff;
 
-        // Let the views animate their contents correctly by giving them the necessary context.
-        mHeader.setExpansion(onKeyguardAndExpanded, expansion, panelTranslationY);
         if (expansion < 1 && expansion > 0.99) {
             if (mQuickQSPanelController.switchTileLayout(false)) {
                 mHeader.updateResources();
