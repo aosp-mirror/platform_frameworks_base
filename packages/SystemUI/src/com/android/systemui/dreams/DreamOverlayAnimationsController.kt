@@ -174,6 +174,71 @@ constructor(
             }
     }
 
+    /**
+     * Starts the dream content and dream overlay exit animations.
+     *
+     * This should only be used when the low light dream is entering, animations to/from other SysUI
+     * views is controlled by `transitionViewModel`.
+     */
+    // TODO(b/256916668): integrate with the keyguard transition model once dream surfaces work is
+    // done.
+    @JvmOverloads
+    fun startExitAnimations(animatorBuilder: () -> AnimatorSet = { AnimatorSet() }): Animator {
+        cancelAnimations()
+
+        mAnimator =
+            animatorBuilder().apply {
+                playTogether(
+                    translationYAnimator(
+                        from = 0f,
+                        to = -mDreamInTranslationYDistance.toFloat(),
+                        durationMs = mDreamInTranslationYDurationMs,
+                        delayMs = 0,
+                        interpolator = Interpolators.EMPHASIZED
+                    ),
+                    alphaAnimator(
+                            from =
+                                mCurrentAlphaAtPosition.getOrDefault(
+                                    key = POSITION_BOTTOM,
+                                    defaultValue = 1f
+                                ),
+                            to = 0f,
+                            durationMs = mDreamInComplicationsAnimDurationMs,
+                            delayMs = 0,
+                            positions = POSITION_BOTTOM
+                        )
+                        .apply {
+                            doOnEnd {
+                                // The logical end of the animation is once the alpha and blur
+                                // animations finish, end the animation so that any listeners are
+                                // notified. The Y translation animation is much longer than all of
+                                // the other animations due to how the spec is defined, but is not
+                                // expected to run to completion.
+                                mAnimator?.end()
+                            }
+                        },
+                    alphaAnimator(
+                        from =
+                            mCurrentAlphaAtPosition.getOrDefault(
+                                key = POSITION_TOP,
+                                defaultValue = 1f
+                            ),
+                        to = 0f,
+                        durationMs = mDreamInComplicationsAnimDurationMs,
+                        delayMs = 0,
+                        positions = POSITION_TOP
+                    )
+                )
+                doOnEnd {
+                    mAnimator = null
+                    mOverlayStateController.setExitAnimationsRunning(false)
+                }
+                start()
+            }
+        mOverlayStateController.setExitAnimationsRunning(true)
+        return mAnimator as AnimatorSet
+    }
+
     /** Starts the dream content and dream overlay exit animations. */
     fun wakeUp(doneCallback: Runnable, executor: DelayableExecutor) {
         cancelAnimations()

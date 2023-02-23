@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
@@ -64,6 +65,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Mock
     DreamOverlayStatusBarViewController mDreamOverlayStatusBarViewController;
+
+    @Mock
+    LowLightTransitionCoordinator mLowLightTransitionCoordinator;
 
     @Mock
     DreamOverlayContainerView mDreamOverlayContainerView;
@@ -110,6 +114,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mDreamOverlayStatusBarViewController,
+                mLowLightTransitionCoordinator,
                 mBlurUtils,
                 mHandler,
                 mResources,
@@ -232,6 +237,13 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         // Entry animations should be started then immediately ended to skip to the end.
         verify(mAnimationsController).startEntryAnimations(true);
+    }
+
+    @Test
+    public void testStartsExitAnimationsBeforeEnteringLowLight() {
+        mController.onBeforeEnterLowLight();
+
+        verify(mAnimationsController).startExitAnimations();
     }
 
     @Test

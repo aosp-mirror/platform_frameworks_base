@@ -1,5 +1,6 @@
 package com.android.systemui.dreams
 
+import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.testing.AndroidTestingRunner
@@ -11,6 +12,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransition
 import com.android.systemui.statusbar.BlurUtils
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.Dispatchers
@@ -71,6 +73,19 @@ class DreamOverlayAnimationsControllerTest : SysuiTestCase() {
         whenever(mockView.resources).thenReturn(mContext.resources)
 
         runBlocking(Dispatchers.Main.immediate) { controller.init(mockView) }
+    }
+
+    @Test
+    fun testExitAnimationUpdatesState() {
+        controller.startExitAnimations(animatorBuilder = { mockAnimator })
+
+        verify(stateController).setExitAnimationsRunning(true)
+
+        val captor = argumentCaptor<Animator.AnimatorListener>()
+        verify(mockAnimator).addListener(captor.capture())
+
+        captor.value.onAnimationEnd(mockAnimator)
+        verify(stateController).setExitAnimationsRunning(false)
     }
 
     @Test
