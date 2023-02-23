@@ -253,6 +253,7 @@ public final class NotificationPanelViewController implements Dumpable {
     public static final float FLING_SPEED_UP_FACTOR = 0.6f;
     public static final float FLING_CLOSING_MAX_LENGTH_SECONDS = 0.6f;
     public static final float FLING_CLOSING_SPEED_UP_FACTOR = 0.6f;
+    public static final int WAKEUP_ANIMATION_DELAY_MS = 250;
     private static final boolean DEBUG_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean SPEW_LOGCAT = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
     private static final boolean DEBUG_DRAWABLE = false;
@@ -275,6 +276,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private static final int NO_FIXED_DURATION = -1;
     private static final long SHADE_OPEN_SPRING_OUT_DURATION = 350L;
     private static final long SHADE_OPEN_SPRING_BACK_DURATION = 400L;
+
     /**
      * The factor of the usual high velocity that is needed in order to reach the maximum overshoot
      * when flinging. A low value will make it that most flings will reach the maximum overshoot.

@@ -114,6 +114,15 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
             }
         )
     }
+
+    fun logClockTransitionAnimationStarting(delayWakeUpAnimation: Boolean) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            { bool1 = delayWakeUpAnimation },
+            { "clockTransitionAnimationStarting() withDelay=$bool1" }
+        )
+    }
 }
 
 private const val TAG = "NotificationWakeUpCoordinator"

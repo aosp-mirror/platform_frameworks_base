@@ -84,7 +84,7 @@ class NotificationWakeUpCoordinator @Inject constructor(
     var fullyAwake: Boolean = false
 
     var wakingUp = false
-        set(value) {
+        private set(value) {
             field = value
             willWakeUp = false
             if (value) {
@@ -294,6 +294,21 @@ class NotificationWakeUpCoordinator @Inject constructor(
         }
     }
 
+    /**
+     * Notifies the wakeup coordinator that we're waking up.
+     *
+     * [requestDelayedAnimation] is used to request that we delay the start of the wakeup animation
+     * in order to wait for a potential fingerprint authentication to arrive, since unlocking during
+     * the wakeup animation looks chaotic.
+     */
+    fun setWakingUp(
+            wakingUp: Boolean,
+            requestDelayedAnimation: Boolean,
+    ) {
+        this.wakingUp = wakingUp
+        // TODO(jeffdq): Delay the wakeup animation if we're pressing to unlock.
+    }
+
     override fun onStateChanged(newState: Int) {
         logger.logOnStateChanged(newState = newState, storedState = state)
         if (state == StatusBarState.SHADE && newState == StatusBarState.SHADE) {
@@ -498,6 +513,10 @@ class NotificationWakeUpCoordinator @Inject constructor(
         pw.println("pulsing: $pulsing")
         pw.println("notificationsFullyHidden: $notificationsFullyHidden")
         pw.println("canShowPulsingHuns: $canShowPulsingHuns")
+    }
+
+    fun logClockTransitionAnimationStarting(delayWakeUpAnimation: Boolean) {
+        logger.logClockTransitionAnimationStarting(delayWakeUpAnimation)
     }
 
     interface WakeUpListener {

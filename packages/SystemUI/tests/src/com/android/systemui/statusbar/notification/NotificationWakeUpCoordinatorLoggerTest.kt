@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.notification
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.plugins.log.LogcatEchoTracker
