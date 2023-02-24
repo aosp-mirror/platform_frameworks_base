@@ -16,8 +16,6 @@
 
 package com.android.credentialmanager
 
-import android.app.slice.Slice
-import android.app.slice.SliceSpec
 import android.content.Context
 import android.content.Intent
 import android.credentials.CreateCredentialRequest
@@ -35,7 +33,6 @@ import android.credentials.ui.RequestInfo
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.ProviderPendingIntentResponse
 import android.credentials.ui.UserSelectionDialogResult
-import android.net.Uri
 import android.os.IBinder
 import android.os.Binder
 import android.os.Bundle
@@ -230,7 +227,8 @@ class CredentialManagerRepo(
                             context,
                             "key1", "subkey-1", "elisa.beckett@gmail.com",
                             20, 7, 27, Instant.ofEpochSecond(10L),
-                            "Legal note"
+                            "You can use your passkey on this or other devices. It is saved to " +
+                                "the Password Manager for elisa.beckett@gmail.com."
                         ),
                         CreateTestUtils.newCreateEntry(
                             context,
@@ -239,11 +237,9 @@ class CredentialManagerRepo(
                             null
                         ),
                     )
-                )
-                .setRemoteEntry(
-                    newRemoteEntry("key2", "subkey-1")
-                )
-                .build(),
+                ).setRemoteEntry(
+                    CreateTestUtils.newRemoteCreateEntry(context, "key2", "subkey-1")
+                ).build(),
             CreateCredentialProviderData
                 .Builder("com.dashlane")
                 .setSaveEntries(
@@ -258,11 +254,11 @@ class CredentialManagerRepo(
                             context,
                             "key1", "subkey-4", "elisa.work@dashlane.com",
                             20, 7, 27, Instant.ofEpochSecond(14L),
-                            null
+                            "You can use your passkey on this or other devices. It is saved to " +
+                                "the Password Manager for elisa.work@dashlane.com"
                         ),
                     )
-                )
-                .build(),
+                ).build(),
         )
     }
 
@@ -318,7 +314,7 @@ class CredentialManagerRepo(
                         ),
                     )
                 ).setRemoteEntry(
-                    newRemoteEntry("key4", "subkey-1")
+                    GetTestUtils.newRemoteCredentialEntry(context, "key4", "subkey-1")
                 ).build(),
             GetCredentialProviderData.Builder("com.dashlane")
                 .setCredentialEntries(
@@ -333,10 +329,12 @@ class CredentialManagerRepo(
                         ),
                     )
                 ).setAuthenticationEntries(
-                     listOf(GetTestUtils.newAuthenticationEntry(
-                         context, "key2", "subkey-1", "foo@email.com",
-                         AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT
-                     ))
+                     listOf(
+                         GetTestUtils.newAuthenticationEntry(
+                             context, "key2", "subkey-1", "foo@email.com",
+                             AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT,
+                         )
+                     )
                 ).setActionChips(
                     listOf(
                         GetTestUtils.newActionEntry(
@@ -345,20 +343,6 @@ class CredentialManagerRepo(
                         ),
                     )
                 ).build(),
-        )
-    }
-
-
-    private fun newRemoteEntry(
-        key: String,
-        subkey: String,
-    ): Entry {
-        return Entry(
-            key,
-            subkey,
-            Slice.Builder(
-                Uri.EMPTY, SliceSpec("type", 1)
-            ).build()
         )
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.theme
+package com.android.credentialmanager.common.ui
 
-import android.annotation.AttrRes
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
-/** Read the [Color] from the given [attribute]. */
-@Composable
-@ReadOnlyComposable
-fun colorAttr(@AttrRes attribute: Int): Color {
-    return AndroidColorScheme.getColor(LocalContext.current, attribute)
+/** Copied from androidx.compose.material3.tokens. */
+internal object ElevationTokens {
+    val Level0 = 0.0.dp
+    val Level1 = 1.0.dp
+    val Level2 = 3.0.dp
+    val Level3 = 6.0.dp
+    val Level4 = 8.0.dp
+    val Level5 = 12.0.dp
 }

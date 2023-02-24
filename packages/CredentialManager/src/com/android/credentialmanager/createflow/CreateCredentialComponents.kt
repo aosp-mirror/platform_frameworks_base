@@ -8,28 +8,19 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,9 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
@@ -49,15 +37,21 @@ import com.android.credentialmanager.common.BaseEntry
 import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.ui.ActionButton
+import com.android.credentialmanager.common.ui.BodyMediumText
+import com.android.credentialmanager.common.ui.BodySmallText
 import com.android.credentialmanager.common.ui.ConfirmButton
+import com.android.credentialmanager.common.ui.CredentialContainerCard
+import com.android.credentialmanager.common.ui.CtaButtonRow
 import com.android.credentialmanager.common.ui.Entry
+import com.android.credentialmanager.common.ui.EntryListColumn
+import com.android.credentialmanager.common.ui.HeadlineIcon
+import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.ModalBottomSheet
-import com.android.credentialmanager.common.ui.TextOnSurface
-import com.android.credentialmanager.common.ui.TextSecondary
-import com.android.credentialmanager.common.ui.TextOnSurfaceVariant
-import com.android.credentialmanager.common.ui.ContainerCard
-import com.android.credentialmanager.common.ui.ToggleVisibilityButton
-import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
+import com.android.credentialmanager.common.ui.MoreAboutPasskeySectionHeader
+import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
+import com.android.credentialmanager.common.ui.SheetContainerCard
+import com.android.credentialmanager.common.ui.PasskeyBenefitRow
+import com.android.credentialmanager.common.ui.HeadlineText
 
 @Composable
 fun CreateCredentialScreen(
@@ -73,7 +67,7 @@ fun CreateCredentialScreen(
             when (viewModel.uiState.providerActivityState) {
                 ProviderActivityState.NOT_APPLICABLE -> {
                     when (createCredentialUiState.currentScreenState) {
-                        CreateScreenState.PASSKEY_INTRO -> ConfirmationCard(
+                        CreateScreenState.PASSKEY_INTRO -> PasskeyIntroCard(
                             onConfirm = viewModel::createFlowOnConfirmIntro,
                             onLearnMore = viewModel::createFlowOnLearnMore,
                         )
@@ -157,119 +151,59 @@ fun CreateCredentialScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmationCard(
+fun PasskeyIntroCard(
     onConfirm: () -> Unit,
     onLearnMore: () -> Unit,
 ) {
-    ContainerCard() {
-        Column() {
-            val onboardingImageResource = remember {
-                mutableStateOf(R.drawable.ic_passkeys_onboarding)
-            }
-            if (isSystemInDarkTheme()) {
-                onboardingImageResource.value = R.drawable.ic_passkeys_onboarding_dark
-            } else {
-                onboardingImageResource.value = R.drawable.ic_passkeys_onboarding
-            }
-            Image(
-                painter = painterResource(onboardingImageResource.value),
-                contentDescription = null,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(top = 24.dp, bottom = 12.dp).size(316.dp, 168.dp)
-            )
-            TextOnSurface(
-                text = stringResource(R.string.passkey_creation_intro_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-            )
-            Divider(
-                thickness = 16.dp,
-                color = Color.Transparent
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
-                Image(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_passkeys_onboarding_password),
-                    contentDescription = null
-                )
-                TextSecondary(
-                    text = stringResource(R.string.passkey_creation_intro_body_password),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 4.dp),
-                )
-            }
-            Divider(
-                thickness = 16.dp,
-                color = Color.Transparent
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
-                Image(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_passkeys_onboarding_fingerprint),
-                    contentDescription = null
-                )
-                TextSecondary(
-                    text = stringResource(R.string.passkey_creation_intro_body_fingerprint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 4.dp),
-                )
-            }
-            Divider(
-                thickness = 16.dp,
-                color = Color.Transparent
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
-                Image(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_passkeys_onboarding_device),
-                    contentDescription = null
-                )
-                TextSecondary(
-                    text = stringResource(R.string.passkey_creation_intro_body_device),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(start = 16.dp, end = 4.dp),
-                )
-            }
-            Divider(
-                thickness = 32.dp,
-                color = Color.Transparent
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
+    SheetContainerCard {
+        val onboardingImageResource = remember {
+            mutableStateOf(R.drawable.ic_passkeys_onboarding)
+        }
+        if (isSystemInDarkTheme()) {
+            onboardingImageResource.value = R.drawable.ic_passkeys_onboarding_dark
+        } else {
+            onboardingImageResource.value = R.drawable.ic_passkeys_onboarding
+        }
+        Image(
+            painter = painterResource(onboardingImageResource.value),
+            contentDescription = null,
+            modifier = Modifier
+                .align(alignment = Alignment.CenterHorizontally).size(316.dp, 168.dp)
+        )
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        HeadlineText(text = stringResource(R.string.passkey_creation_intro_title))
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        PasskeyBenefitRow(
+            leadingIconPainter = painterResource(R.drawable.ic_passkeys_onboarding_password),
+            text = stringResource(R.string.passkey_creation_intro_body_password),
+        )
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        PasskeyBenefitRow(
+            leadingIconPainter = painterResource(R.drawable.ic_passkeys_onboarding_fingerprint),
+            text = stringResource(R.string.passkey_creation_intro_body_fingerprint),
+        )
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        PasskeyBenefitRow(
+            leadingIconPainter = painterResource(R.drawable.ic_passkeys_onboarding_device),
+            text = stringResource(R.string.passkey_creation_intro_body_device),
+        )
+        Divider(thickness = 24.dp, color = Color.Transparent)
+
+        CtaButtonRow(
+            leftButton = {
                 ActionButton(
                     stringResource(R.string.string_learn_more),
                     onClick = onLearnMore
                 )
+            },
+            rightButton = {
                 ConfirmButton(
                     stringResource(R.string.string_continue),
                     onClick = onConfirm
                 )
-            }
-            Divider(
-                thickness = 18.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 18.dp)
-            )
-        }
+            },
+        )
     }
 }
 
@@ -283,102 +217,68 @@ fun ProviderSelectionCard(
     onDisabledProvidersSelected: () -> Unit,
     onMoreOptionsSelected: () -> Unit,
 ) {
-    ContainerCard() {
-        Column() {
-            Icon(
-                bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap(),
-                contentDescription = null,
-                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(top = 24.dp, bottom = 16.dp).size(32.dp)
+    SheetContainerCard {
+        HeadlineIcon(bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap())
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        HeadlineText(
+            text = stringResource(
+                R.string.choose_provider_title,
+                when (requestDisplayInfo.type) {
+                    CredentialType.PASSKEY ->
+                        stringResource(R.string.passkeys)
+                    CredentialType.PASSWORD ->
+                        stringResource(R.string.passwords)
+                    CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
+                }
             )
-            TextOnSurface(
-                text = stringResource(
-                    R.string.choose_provider_title,
-                    when (requestDisplayInfo.type) {
-                        CredentialType.PASSKEY ->
-                            stringResource(R.string.passkeys)
-                        CredentialType.PASSWORD ->
-                            stringResource(R.string.passwords)
-                        CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                    }
-                ),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-            )
-            Divider(
-                thickness = 16.dp,
-                color = Color.Transparent
-            )
-            TextSecondary(
-                text = stringResource(R.string.choose_provider_body),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(horizontal = 28.dp),
-            )
-            ContainerCard(
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(
-                    start = 24.dp,
-                    end = 24.dp,
-                    top = 24.dp,
-                    bottom = if (hasRemoteEntry) 24.dp else 16.dp
-                ).align(alignment = Alignment.CenterHorizontally),
+        )
+        Divider(thickness = 24.dp, color = Color.Transparent)
+
+        BodyMediumText(text = stringResource(R.string.choose_provider_body))
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        CredentialContainerCard {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    sortedCreateOptionsPairs.forEach { entry ->
-                        item {
-                            MoreOptionsInfoRow(
-                                requestDisplayInfo = requestDisplayInfo,
-                                providerInfo = entry.second,
-                                createOptionInfo = entry.first,
-                                onOptionSelected = {
-                                    onOptionSelected(
-                                        ActiveEntry(
-                                            entry.second,
-                                            entry.first
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    }
+                sortedCreateOptionsPairs.forEach { entry ->
                     item {
-                        MoreOptionsDisabledProvidersRow(
-                            disabledProviders = disabledProviderList,
-                            onDisabledProvidersSelected =
-                            onDisabledProvidersSelected,
+                        MoreOptionsInfoRow(
+                            requestDisplayInfo = requestDisplayInfo,
+                            providerInfo = entry.second,
+                            createOptionInfo = entry.first,
+                            onOptionSelected = {
+                                onOptionSelected(
+                                    ActiveEntry(
+                                        entry.second,
+                                        entry.first
+                                    )
+                                )
+                            }
                         )
                     }
                 }
+                item {
+                    MoreOptionsDisabledProvidersRow(
+                        disabledProviders = disabledProviderList,
+                        onDisabledProvidersSelected = onDisabledProvidersSelected,
+                    )
+                }
             }
-            if (hasRemoteEntry) {
-                Divider(
-                    thickness = 24.dp,
-                    color = Color.Transparent
-                )
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-                ) {
+        }
+        if (hasRemoteEntry) {
+            Divider(thickness = 24.dp, color = Color.Transparent)
+            CtaButtonRow(
+                leftButton = {
                     ActionButton(
                         stringResource(R.string.string_more_options),
                         onMoreOptionsSelected
                     )
                 }
-            }
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent,
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsSelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
@@ -393,158 +293,103 @@ fun MoreOptionsSelectionCard(
     onDisabledProvidersSelected: () -> Unit,
     onRemoteEntrySelected: (BaseEntry) -> Unit,
 ) {
-    ContainerCard() {
-        Column() {
-            TopAppBar(
-                title = {
-                    TextOnSurface(
-                        text =
-                        stringResource(
-                            R.string.save_credential_to_title,
-                            when (requestDisplayInfo.type) {
-                                CredentialType.PASSKEY ->
-                                    stringResource(R.string.passkey)
-                                CredentialType.PASSWORD ->
-                                    stringResource(R.string.password)
-                                CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                            }
-                        ),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick =
-                        if (isFromProviderSelection)
-                            onBackProviderSelectionButtonSelected
-                        else onBackCreationSelectionButtonSelected
-                    ) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            stringResource(R.string.accessibility_back_arrow_button)
+    SheetContainerCard(topAppBar = {
+        MoreOptionTopAppBar(
+            text = stringResource(
+                R.string.save_credential_to_title,
+                when (requestDisplayInfo.type) {
+                    CredentialType.PASSKEY ->
+                        stringResource(R.string.passkey)
+                    CredentialType.PASSWORD ->
+                        stringResource(R.string.password)
+                    CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
+                }
+            ),
+            onNavigationIconClicked =
+            if (isFromProviderSelection) onBackProviderSelectionButtonSelected
+            else onBackCreationSelectionButtonSelected,
+        )
+    }) {
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        CredentialContainerCard {
+            EntryListColumn {
+                // Only in the flows with default provider(not first time use) we can show the
+                // createOptions here, or they will be shown on ProviderSelectionCard
+                if (hasDefaultProvider) {
+                    sortedCreateOptionsPairs.forEach { entry ->
+                        item {
+                            MoreOptionsInfoRow(
+                                requestDisplayInfo = requestDisplayInfo,
+                                providerInfo = entry.second,
+                                createOptionInfo = entry.first,
+                                onOptionSelected = {
+                                    onOptionSelected(
+                                        ActiveEntry(
+                                            entry.second,
+                                            entry.first
+                                        )
+                                    )
+                                })
+                        }
+                    }
+                    item {
+                        MoreOptionsDisabledProvidersRow(
+                            disabledProviders = disabledProviderList,
+                            onDisabledProvidersSelected =
+                            onDisabledProvidersSelected,
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                modifier = Modifier.padding(top = 12.dp)
-            )
-            Divider(
-                thickness = 8.dp,
-                color = Color.Transparent
-            )
-            ContainerCard(
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally)
-            ) {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    // Only in the flows with default provider(not first time use) we can show the
-                    // createOptions here, or they will be shown on ProviderSelectionCard
-                    if (hasDefaultProvider) {
-                        sortedCreateOptionsPairs.forEach { entry ->
-                            item {
-                                MoreOptionsInfoRow(
-                                    requestDisplayInfo = requestDisplayInfo,
-                                    providerInfo = entry.second,
-                                    createOptionInfo = entry.first,
-                                    onOptionSelected = {
-                                        onOptionSelected(
-                                            ActiveEntry(
-                                                entry.second,
-                                                entry.first
-                                            )
-                                        )
-                                    })
-                            }
-                        }
+                }
+                enabledProviderList.forEach {
+                    if (it.remoteEntry != null) {
                         item {
-                            MoreOptionsDisabledProvidersRow(
-                                disabledProviders = disabledProviderList,
-                                onDisabledProvidersSelected =
-                                onDisabledProvidersSelected,
+                            RemoteEntryRow(
+                                remoteInfo = it.remoteEntry!!,
+                                onRemoteEntrySelected = onRemoteEntrySelected,
                             )
                         }
-                    }
-                    enabledProviderList.forEach {
-                        if (it.remoteEntry != null) {
-                            item {
-                                RemoteEntryRow(
-                                    remoteInfo = it.remoteEntry!!,
-                                    onRemoteEntrySelected = onRemoteEntrySelected,
-                                )
-                            }
-                            return@forEach
-                        }
+                        return@forEach
                     }
                 }
             }
-            Divider(
-                thickness = 8.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsRowIntroCard(
     providerInfo: EnabledProviderInfo,
     onChangeDefaultSelected: () -> Unit,
     onUseOnceSelected: () -> Unit,
 ) {
-    ContainerCard() {
-        Column() {
-            Icon(
-                Icons.Outlined.NewReleases,
-                contentDescription = null,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(all = 24.dp),
-                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
+    SheetContainerCard {
+        HeadlineIcon(imageVector = Icons.Outlined.NewReleases)
+        Divider(thickness = 24.dp, color = Color.Transparent)
+        HeadlineText(
+            text = stringResource(
+                R.string.use_provider_for_all_title,
+                providerInfo.displayName
             )
-            TextOnSurface(
-                text = stringResource(
-                    R.string.use_provider_for_all_title,
-                    providerInfo.displayName
-                ),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-            )
-            TextSecondary(
-                text = stringResource(R.string.use_provider_for_all_description),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(all = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
+        )
+        Divider(thickness = 24.dp, color = Color.Transparent)
+        BodyMediumText(text = stringResource(R.string.use_provider_for_all_description))
+        CtaButtonRow(
+            leftButton = {
                 ActionButton(
                     stringResource(R.string.use_once),
                     onClick = onUseOnceSelected
                 )
+            },
+            rightButton = {
                 ConfirmButton(
                     stringResource(R.string.set_as_default),
                     onClick = onChangeDefaultSelected
                 )
-            }
-            Divider(
-                thickness = 18.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 40.dp)
-            )
-        }
+            },
+        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreationSelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
@@ -556,113 +401,82 @@ fun CreationSelectionCard(
     onMoreOptionsSelected: () -> Unit,
     hasDefaultProvider: Boolean,
 ) {
-    ContainerCard() {
-        Column() {
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent
-            )
-            Icon(
-                bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
-                contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally).size(32.dp)
-            )
-            TextSecondary(
-                text = providerInfo.displayName,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(vertical = 10.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-            )
-            TextOnSurface(
-                text = when (requestDisplayInfo.type) {
-                    CredentialType.PASSKEY -> stringResource(
-                        R.string.choose_create_option_passkey_title,
-                        requestDisplayInfo.appName
-                    )
-                    CredentialType.PASSWORD -> stringResource(
-                        R.string.choose_create_option_password_title,
-                        requestDisplayInfo.appName
-                    )
-                    CredentialType.UNKNOWN -> stringResource(
-                        R.string.choose_create_option_sign_in_title,
-                        requestDisplayInfo.appName
-                    )
-                },
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-            )
-            ContainerCard(
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(all = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-            ) {
-                PrimaryCreateOptionRow(
-                    requestDisplayInfo = requestDisplayInfo,
-                    entryInfo = createOptionInfo,
-                    onOptionSelected = onOptionSelected
+    SheetContainerCard {
+        HeadlineIcon(
+            bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
+            tint = Color.Unspecified,
+        )
+        Divider(thickness = 4.dp, color = Color.Transparent)
+        LargeLabelTextOnSurfaceVariant(text = providerInfo.displayName)
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        HeadlineText(
+            text = when (requestDisplayInfo.type) {
+                CredentialType.PASSKEY -> stringResource(
+                    R.string.choose_create_option_passkey_title,
+                    requestDisplayInfo.appName
+                )
+                CredentialType.PASSWORD -> stringResource(
+                    R.string.choose_create_option_password_title,
+                    requestDisplayInfo.appName
+                )
+                CredentialType.UNKNOWN -> stringResource(
+                    R.string.choose_create_option_sign_in_title,
+                    requestDisplayInfo.appName
                 )
             }
-            var createOptionsSize = 0
-            var remoteEntry: RemoteInfo? = null
-            enabledProviderList.forEach { enabledProvider ->
-                if (enabledProvider.remoteEntry != null) {
-                    remoteEntry = enabledProvider.remoteEntry
-                }
-                createOptionsSize += enabledProvider.createOptions.size
+        )
+        Divider(thickness = 24.dp, color = Color.Transparent)
+        CredentialContainerCard {
+            PrimaryCreateOptionRow(
+                requestDisplayInfo = requestDisplayInfo,
+                entryInfo = createOptionInfo,
+                onOptionSelected = onOptionSelected
+            )
+        }
+        Divider(thickness = 24.dp, color = Color.Transparent)
+        var createOptionsSize = 0
+        var remoteEntry: RemoteInfo? = null
+        enabledProviderList.forEach { enabledProvider ->
+            if (enabledProvider.remoteEntry != null) {
+                remoteEntry = enabledProvider.remoteEntry
             }
-            val shouldShowMoreOptionsButton = if (!hasDefaultProvider) {
-                // User has already been presented with all options on the default provider
-                // selection screen. Don't show them again. Therefore, only show the more option
-                // button if remote option is present.
-                remoteEntry != null
-            } else {
-                createOptionsSize > 1 || remoteEntry != null
-            }
-            Row(
-                horizontalArrangement =
-                if (shouldShowMoreOptionsButton) Arrangement.SpaceBetween else Arrangement.End,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
-                if (shouldShowMoreOptionsButton) {
+            createOptionsSize += enabledProvider.createOptions.size
+        }
+        val shouldShowMoreOptionsButton = if (!hasDefaultProvider) {
+            // User has already been presented with all options on the default provider
+            // selection screen. Don't show them again. Therefore, only show the more option
+            // button if remote option is present.
+            remoteEntry != null
+        } else {
+            createOptionsSize > 1 || remoteEntry != null
+        }
+        CtaButtonRow(
+            leftButton = if (shouldShowMoreOptionsButton) {
+                {
                     ActionButton(
                         stringResource(R.string.string_more_options),
-                        onClick = onMoreOptionsSelected
+                        onMoreOptionsSelected
                     )
                 }
+            } else null,
+            rightButton = {
                 ConfirmButton(
                     stringResource(R.string.string_continue),
                     onClick = onConfirm
                 )
-            }
-            if (createOptionInfo.footerDescription != null) {
-                Divider(
-                    thickness = 1.dp,
-                    color = Color.LightGray,
-                    modifier = Modifier.padding(start = 24.dp, end = 24.dp, top = 18.dp)
-                )
-                TextSecondary(
-                    text = createOptionInfo.footerDescription,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(
-                        start = 29.dp, top = 8.dp, bottom = 18.dp, end = 28.dp
-                    )
-                )
-            }
+            },
+        )
+        if (createOptionInfo.footerDescription != null) {
             Divider(
-                thickness = 18.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 16.dp)
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                modifier = Modifier.padding(vertical = 16.dp)
             )
+            BodySmallText(text = createOptionInfo.footerDescription)
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExternalOnlySelectionCard(
     requestDisplayInfo: RequestDisplayInfo,
@@ -670,148 +484,75 @@ fun ExternalOnlySelectionCard(
     onOptionSelected: (BaseEntry) -> Unit,
     onConfirm: () -> Unit,
 ) {
-    ContainerCard() {
-        Column() {
-            Icon(
-                painter = painterResource(R.drawable.ic_other_devices),
-                contentDescription = null,
-                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    .padding(all = 24.dp).size(32.dp)
+    SheetContainerCard {
+        HeadlineIcon(painter = painterResource(R.drawable.ic_other_devices))
+        Divider(thickness = 16.dp, color = Color.Transparent)
+        HeadlineText(text = stringResource(R.string.create_passkey_in_other_device_title))
+        Divider(
+            thickness = 24.dp,
+            color = Color.Transparent
+        )
+        CredentialContainerCard {
+            PrimaryCreateOptionRow(
+                requestDisplayInfo = requestDisplayInfo,
+                entryInfo = activeRemoteEntry,
+                onOptionSelected = onOptionSelected
             )
-            TextOnSurface(
-                text = stringResource(R.string.create_passkey_in_other_device_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-            )
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent
-            )
-            ContainerCard(
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp)
-                    .align(alignment = Alignment.CenterHorizontally),
-            ) {
-                PrimaryCreateOptionRow(
-                    requestDisplayInfo = requestDisplayInfo,
-                    entryInfo = activeRemoteEntry,
-                    onOptionSelected = onOptionSelected
-                )
-            }
-            Divider(
-                thickness = 24.dp,
-                color = Color.Transparent
-            )
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)
-            ) {
+        }
+        Divider(thickness = 24.dp, color = Color.Transparent)
+        CtaButtonRow(
+            rightButton = {
                 ConfirmButton(
                     stringResource(R.string.string_continue),
                     onClick = onConfirm
                 )
-            }
-            Divider(
-                thickness = 18.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-        }
+            },
+        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreAboutPasskeysIntroCard(
     onBackPasskeyIntroButtonSelected: () -> Unit,
 ) {
-    ContainerCard() {
-        Column() {
-            TopAppBar(
-                title = {
-                    TextOnSurface(
-                        text =
-                        stringResource(
-                            R.string.more_about_passkeys_title
-                        ),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onBackPasskeyIntroButtonSelected
-                    ) {
-                        Icon(
-                            Icons.Filled.ArrowBack,
-                            stringResource(R.string.accessibility_back_arrow_button)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-                modifier = Modifier.padding(top = 12.dp)
-            )
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 68.dp)
-            ) {
-                TextOnSurfaceVariant(
-                    text = stringResource(R.string.passwordless_technology_title),
-                    style = MaterialTheme.typography.titleLarge,
+    SheetContainerCard(topAppBar = {
+        MoreOptionTopAppBar(
+            text = stringResource(R.string.more_about_passkeys_title),
+            onNavigationIconClicked = onBackPasskeyIntroButtonSelected,
+        )
+    }) {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                MoreAboutPasskeySectionHeader(
+                    text = stringResource(R.string.passwordless_technology_title)
                 )
-                TextSecondary(
-                    text = stringResource(R.string.passwordless_technology_detail),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Divider(
-                    thickness = 24.dp,
-                    color = Color.Transparent
-                )
-                TextOnSurfaceVariant(
-                    text = stringResource(R.string.public_key_cryptography_title),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                TextSecondary(
-                    text = stringResource(R.string.public_key_cryptography_detail),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Divider(
-                    thickness = 24.dp,
-                    color = Color.Transparent
-                )
-                TextOnSurfaceVariant(
-                    text = stringResource(R.string.improved_account_security_title),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                TextSecondary(
-                    text = stringResource(R.string.improved_account_security_detail),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-                Divider(
-                    thickness = 24.dp,
-                    color = Color.Transparent
-                )
-                TextOnSurfaceVariant(
-                    text = stringResource(R.string.seamless_transition_title),
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                TextSecondary(
-                    text = stringResource(R.string.seamless_transition_detail),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                BodyMediumText(text = stringResource(R.string.passwordless_technology_detail))
             }
-            Divider(
-                thickness = 18.dp,
-                color = Color.Transparent,
-                modifier = Modifier.padding(bottom = 24.dp)
-            )
+            item {
+                MoreAboutPasskeySectionHeader(
+                    text = stringResource(R.string.public_key_cryptography_title)
+                )
+                BodyMediumText(text = stringResource(R.string.public_key_cryptography_detail))
+            }
+            item {
+                MoreAboutPasskeySectionHeader(
+                    text = stringResource(R.string.improved_account_security_title)
+                )
+                BodyMediumText(text = stringResource(R.string.improved_account_security_detail))
+            }
+            item {
+                MoreAboutPasskeySectionHeader(
+                    text = stringResource(R.string.seamless_transition_title)
+                )
+                BodyMediumText(text = stringResource(R.string.seamless_transition_detail))
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrimaryCreateOptionRow(
     requestDisplayInfo: RequestDisplayInfo,
@@ -820,115 +561,37 @@ fun PrimaryCreateOptionRow(
 ) {
     Entry(
         onClick = { onOptionSelected(entryInfo) },
-        icon = {
-            if (entryInfo is CreateOptionInfo && entryInfo.profileIcon != null) {
-                Image(
-                    bitmap = entryInfo.profileIcon.toBitmap().asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                )
-            } else {
-                Icon(
-                    bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap(),
-                    contentDescription = null,
-                    tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                    modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                )
-            }
+        iconImageBitmap =
+        if (entryInfo is CreateOptionInfo && entryInfo.profileIcon != null) {
+            entryInfo.profileIcon.toBitmap().asImageBitmap()
+        } else {
+            requestDisplayInfo.typeIcon.toBitmap().asImageBitmap()
         },
-        label = {
-            Column() {
-                when (requestDisplayInfo.type) {
-                    CredentialType.PASSKEY -> {
-                        TextOnSurfaceVariant(
-                            text = requestDisplayInfo.title,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(top = 16.dp, start = 5.dp),
-                        )
-                        TextSecondary(
-                            text = if (requestDisplayInfo.subtitle != null) {
-                                requestDisplayInfo.subtitle + " • " + stringResource(
-                                    R.string.passkey_before_subtitle
-                                )
-                            } else {
-                                stringResource(R.string.passkey_before_subtitle)
-                            },
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    }
-                    CredentialType.PASSWORD -> {
-                        TextOnSurfaceVariant(
-                            text = requestDisplayInfo.title,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(top = 16.dp, start = 5.dp),
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(
-                                top = 4.dp, bottom = 16.dp,
-                                start = 5.dp
-                            ),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val visualTransformation = remember { PasswordVisualTransformation() }
-                            // This subtitle would never be null for create password
-                            val originalPassword by remember {
-                                mutableStateOf(requestDisplayInfo.subtitle ?: "")
-                            }
-                            val displayedPassword = remember {
-                                mutableStateOf(
-                                    visualTransformation.filter(
-                                        AnnotatedString(originalPassword)
-                                    ).text.text
-                                )
-                            }
-                            TextSecondary(
-                                text = displayedPassword.value,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
-                            )
-
-                            ToggleVisibilityButton(modifier = Modifier.padding(start = 4.dp)
-                                .height(24.dp).width(24.dp), onToggle = {
-                                if (it) {
-                                    displayedPassword.value = originalPassword
-                                } else {
-                                    displayedPassword.value = visualTransformation.filter(
-                                        AnnotatedString(originalPassword)
-                                    ).text.text
-                                }
-                            })
-                        }
-                    }
-                    CredentialType.UNKNOWN -> {
-                        if (requestDisplayInfo.subtitle != null) {
-                            TextOnSurfaceVariant(
-                                text = requestDisplayInfo.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(top = 16.dp, start = 5.dp),
-                            )
-                            TextOnSurfaceVariant(
-                                text = requestDisplayInfo.subtitle,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                            )
-                        } else {
-                            TextOnSurfaceVariant(
-                                text = requestDisplayInfo.title,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(
-                                    top = 16.dp, bottom = 16.dp, start = 5.dp
-                                ),
-                            )
-                        }
-                    }
+        shouldApplyIconImageBitmapTint = !(entryInfo is CreateOptionInfo &&
+            entryInfo.profileIcon != null),
+        entryHeadlineText = requestDisplayInfo.title,
+        entrySecondLineText = when (requestDisplayInfo.type) {
+            CredentialType.PASSKEY -> {
+                if (requestDisplayInfo.subtitle != null) {
+                    requestDisplayInfo.subtitle + " • " + stringResource(
+                        R.string.passkey_before_subtitle
+                    )
+                } else {
+                    stringResource(R.string.passkey_before_subtitle)
                 }
             }
-        }
+            // Set passwordValue instead
+            CredentialType.PASSWORD -> null
+            CredentialType.UNKNOWN -> requestDisplayInfo.subtitle
+        },
+        passwordValue =
+        if (requestDisplayInfo.type == CredentialType.PASSWORD)
+        // This subtitle would never be null for create password
+            requestDisplayInfo.subtitle ?: ""
+        else null,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsInfoRow(
     requestDisplayInfo: RequestDisplayInfo,
@@ -938,93 +601,46 @@ fun MoreOptionsInfoRow(
 ) {
     Entry(
         onClick = onOptionSelected,
-        icon = {
-            Image(
-                modifier = Modifier.padding(start = 10.dp).size(32.dp),
-                bitmap = providerInfo.icon.toBitmap().asImageBitmap(),
-                contentDescription = null
-            )
-        },
-        label = {
-            Column() {
-                TextOnSurfaceVariant(
-                    text = providerInfo.displayName,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 16.dp, start = 5.dp),
+        iconImageBitmap = providerInfo.icon.toBitmap().asImageBitmap(),
+        entryHeadlineText = providerInfo.displayName,
+        entrySecondLineText = createOptionInfo.userProviderDisplayName,
+        entryThirdLineText =
+        if (requestDisplayInfo.type == CredentialType.PASSKEY ||
+            requestDisplayInfo.type == CredentialType.PASSWORD) {
+            if (createOptionInfo.passwordCount != null &&
+                createOptionInfo.passkeyCount != null
+            ) {
+                stringResource(
+                    R.string.more_options_usage_passwords_passkeys,
+                    createOptionInfo.passwordCount,
+                    createOptionInfo.passkeyCount
                 )
-                if (createOptionInfo.userProviderDisplayName != null) {
-                    TextSecondary(
-                        text = createOptionInfo.userProviderDisplayName,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 5.dp),
-                    )
-                }
-                if (requestDisplayInfo.type == CredentialType.PASSKEY ||
-                    requestDisplayInfo.type == CredentialType.PASSWORD
-                ) {
-                    if (createOptionInfo.passwordCount != null &&
-                        createOptionInfo.passkeyCount != null
-                    ) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_passwords_passkeys,
-                                createOptionInfo.passwordCount,
-                                createOptionInfo.passkeyCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else if (createOptionInfo.passwordCount != null) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_passwords,
-                                createOptionInfo.passwordCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else if (createOptionInfo.passkeyCount != null) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_passkeys,
-                                createOptionInfo.passkeyCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else {
-                        Divider(
-                            thickness = 16.dp,
-                            color = Color.Transparent,
-                        )
-                    }
-                } else {
-                    if (createOptionInfo.totalCredentialCount != null) {
-                        TextSecondary(
-                            text =
-                            stringResource(
-                                R.string.more_options_usage_credentials,
-                                createOptionInfo.totalCredentialCount
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                        )
-                    } else {
-                        Divider(
-                            thickness = 16.dp,
-                            color = Color.Transparent,
-                        )
-                    }
-                }
+            } else if (createOptionInfo.passwordCount != null) {
+                stringResource(
+                    R.string.more_options_usage_passwords,
+                    createOptionInfo.passwordCount
+                )
+            } else if (createOptionInfo.passkeyCount != null) {
+                stringResource(
+                    R.string.more_options_usage_passkeys,
+                    createOptionInfo.passkeyCount
+                )
+            } else {
+                null
             }
-        }
+        } else {
+            if (createOptionInfo.totalCredentialCount != null) {
+                stringResource(
+                    R.string.more_options_usage_credentials,
+                    createOptionInfo.totalCredentialCount
+                )
+            } else {
+                null
+            }
+        },
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsDisabledProvidersRow(
     disabledProviders: List<ProviderInfo>?,
@@ -1033,36 +649,15 @@ fun MoreOptionsDisabledProvidersRow(
     if (disabledProviders != null && disabledProviders.isNotEmpty()) {
         Entry(
             onClick = onDisabledProvidersSelected,
-            icon = {
-                Icon(
-                    Icons.Filled.Add,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 16.dp),
-                    tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                )
+            iconImageVector = Icons.Filled.Add,
+            entryHeadlineText = stringResource(R.string.other_password_manager),
+            entrySecondLineText = disabledProviders.joinToString(separator = " • ") {
+                it.displayName
             },
-            label = {
-                Column() {
-                    TextOnSurfaceVariant(
-                        text = stringResource(R.string.other_password_manager),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(top = 16.dp, start = 5.dp),
-                    )
-                    // TODO: Update the subtitle once design is confirmed
-                    TextSecondary(
-                        text = disabledProviders.joinToString(separator = " • ") {
-                            it.displayName
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp, start = 5.dp),
-                    )
-                }
-            }
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemoteEntryRow(
     remoteInfo: RemoteInfo,
@@ -1070,23 +665,7 @@ fun RemoteEntryRow(
 ) {
     Entry(
         onClick = { onRemoteEntrySelected(remoteInfo) },
-        icon = {
-            Icon(
-                painter = painterResource(R.drawable.ic_other_devices),
-                contentDescription = null,
-                tint = LocalAndroidColorScheme.current.colorAccentPrimaryVariant,
-                modifier = Modifier.padding(start = 10.dp)
-            )
-        },
-        label = {
-            Column() {
-                TextOnSurfaceVariant(
-                    text = stringResource(R.string.another_device),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(start = 10.dp, top = 18.dp, bottom = 18.dp)
-                        .align(alignment = Alignment.CenterHorizontally),
-                )
-            }
-        }
+        iconPainter = painterResource(R.drawable.ic_other_devices),
+        entryHeadlineText = stringResource(R.string.another_device),
     )
 }

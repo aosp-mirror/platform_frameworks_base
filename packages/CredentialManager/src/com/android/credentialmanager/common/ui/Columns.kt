@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.ui.theme
+package com.android.credentialmanager.common.ui
 
-import android.annotation.AttrRes
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
-/** Read the [Color] from the given [attribute]. */
 @Composable
-@ReadOnlyComposable
-fun colorAttr(@AttrRes attribute: Int): Color {
-    return AndroidColorScheme.getColor(LocalContext.current, attribute)
+fun EntryListColumn(content: LazyListScope.() -> Unit) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        content = content,
+    )
 }
