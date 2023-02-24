@@ -22,6 +22,8 @@ import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TAB
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
 import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -36,6 +38,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.wifi.sharedconnectivity.service.ISharedConnectivityService;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.RemoteException;
 
@@ -46,6 +49,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -95,6 +99,7 @@ public class SharedConnectivityManagerTest {
     @Test
     public void bindingToService() {
         SharedConnectivityManager.create(mContext);
+
         verify(mContext).bindService(any(), any(), anyInt());
     }
 
@@ -104,6 +109,7 @@ public class SharedConnectivityManagerTest {
     @Test
     public void resourcesNotDefined() {
         when(mResources.getString(anyInt())).thenThrow(new Resources.NotFoundException());
+
         assertNull(SharedConnectivityManager.create(mContext));
     }
 
@@ -115,8 +121,10 @@ public class SharedConnectivityManagerTest {
             throws Exception {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
+
         // Since the binder is embedded in a proxy class, the call to registerCallback is done on
         // the proxy. So instead verifying that the proxy is calling the binder.
         verify(mIBinder).transact(anyInt(), any(Parcel.class), any(Parcel.class), anyInt());
@@ -126,9 +134,11 @@ public class SharedConnectivityManagerTest {
     public void registerCallback_serviceNotConnected_canUnregisterAndReregister() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.unregisterCallback(mClientCallback);
         manager.registerCallback(mExecutor, mClientCallback);
+
         verify(mClientCallback, never()).onRegisterCallbackFailed(any(Exception.class));
     }
 
@@ -136,7 +146,9 @@ public class SharedConnectivityManagerTest {
     public void registerCallback_serviceConnected() throws Exception {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.registerCallback(mExecutor, mClientCallback);
+
         verify(mService).registerCallback(any());
         verify(mClientCallback, never()).onRegisterCallbackFailed(any(Exception.class));
     }
@@ -145,8 +157,10 @@ public class SharedConnectivityManagerTest {
     public void registerCallback_doubleRegistration_shouldFail() throws Exception {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.registerCallback(mExecutor, mClientCallback);
+
         verify(mClientCallback).onRegisterCallbackFailed(any(IllegalStateException.class));
     }
 
@@ -155,7 +169,9 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).registerCallback(any());
+
         manager.registerCallback(mExecutor, mClientCallback);
+
         verify(mClientCallback).onRegisterCallbackFailed(any(RemoteException.class));
     }
 
@@ -166,6 +182,7 @@ public class SharedConnectivityManagerTest {
     public void unregisterCallback_withoutRegisteringFirst_serviceNotConnected_shouldFail() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         assertFalse(manager.unregisterCallback(mClientCallback));
     }
 
@@ -173,6 +190,7 @@ public class SharedConnectivityManagerTest {
     public void unregisterCallback_withoutRegisteringFirst_serviceConnected_shouldFail() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         assertFalse(manager.unregisterCallback(mClientCallback));
     }
 
@@ -180,7 +198,9 @@ public class SharedConnectivityManagerTest {
     public void unregisterCallback() throws Exception {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.registerCallback(mExecutor, mClientCallback);
+
         assertTrue(manager.unregisterCallback(mClientCallback));
         verify(mService).unregisterCallback(any());
     }
@@ -189,8 +209,10 @@ public class SharedConnectivityManagerTest {
     public void unregisterCallback_doubleUnregistration_serviceConnected_shouldFail() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.unregisterCallback(mClientCallback);
+
         assertFalse(manager.unregisterCallback(mClientCallback));
     }
 
@@ -198,8 +220,10 @@ public class SharedConnectivityManagerTest {
     public void unregisterCallback_doubleUnregistration_serviceNotConnected_shouldFail() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.unregisterCallback(mClientCallback);
+
         assertFalse(manager.unregisterCallback(mClientCallback));
     }
 
@@ -207,7 +231,9 @@ public class SharedConnectivityManagerTest {
     public void unregisterCallback_remoteException_shouldFail() throws Exception {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         doThrow(new RemoteException()).when(mService).unregisterCallback(any());
+
         assertFalse(manager.unregisterCallback(mClientCallback));
     }
 
@@ -217,16 +243,20 @@ public class SharedConnectivityManagerTest {
     @Test
     public void onServiceConnected_registerCallbackBeforeConnection() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
+
         verify(mClientCallback).onServiceConnected();
     }
 
     @Test
     public void onServiceConnected_registerCallbackAfterConnection() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+
         manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
         manager.registerCallback(mExecutor, mClientCallback);
+
         verify(mClientCallback).onServiceConnected();
     }
 
@@ -236,18 +266,22 @@ public class SharedConnectivityManagerTest {
     @Test
     public void onServiceDisconnected_registerCallbackBeforeConnection() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+
         manager.registerCallback(mExecutor, mClientCallback);
         manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
         manager.getServiceConnection().onServiceDisconnected(COMPONENT_NAME);
+
         verify(mClientCallback).onServiceDisconnected();
     }
 
     @Test
     public void onServiceDisconnected_registerCallbackAfterConnection() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+
         manager.getServiceConnection().onServiceConnected(COMPONENT_NAME, mIBinder);
         manager.registerCallback(mExecutor, mClientCallback);
         manager.getServiceConnection().onServiceDisconnected(COMPONENT_NAME);
+
         verify(mClientCallback).onServiceDisconnected();
     }
 
@@ -259,6 +293,7 @@ public class SharedConnectivityManagerTest {
         TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         assertFalse(manager.connectTetherNetwork(network));
     }
 
@@ -267,7 +302,9 @@ public class SharedConnectivityManagerTest {
         TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.connectTetherNetwork(network);
+
         verify(mService).connectTetherNetwork(network);
     }
 
@@ -277,6 +314,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).connectTetherNetwork(network);
+
         assertFalse(manager.connectTetherNetwork(network));
     }
 
@@ -288,6 +326,7 @@ public class SharedConnectivityManagerTest {
         TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         assertFalse(manager.disconnectTetherNetwork(network));
     }
 
@@ -296,7 +335,9 @@ public class SharedConnectivityManagerTest {
         TetherNetwork network = buildTetherNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.disconnectTetherNetwork(network);
+
         verify(mService).disconnectTetherNetwork(network);
     }
 
@@ -306,6 +347,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).disconnectTetherNetwork(any());
+
         assertFalse(manager.disconnectTetherNetwork(network));
     }
 
@@ -317,6 +359,7 @@ public class SharedConnectivityManagerTest {
         KnownNetwork network = buildKnownNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         assertFalse(manager.connectKnownNetwork(network));
     }
 
@@ -325,7 +368,9 @@ public class SharedConnectivityManagerTest {
         KnownNetwork network = buildKnownNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.connectKnownNetwork(network);
+
         verify(mService).connectKnownNetwork(network);
     }
 
@@ -335,6 +380,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).connectKnownNetwork(network);
+
         assertFalse(manager.connectKnownNetwork(network));
     }
 
@@ -346,6 +392,7 @@ public class SharedConnectivityManagerTest {
         KnownNetwork network = buildKnownNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
+
         assertFalse(manager.forgetKnownNetwork(network));
     }
 
@@ -354,7 +401,9 @@ public class SharedConnectivityManagerTest {
         KnownNetwork network = buildKnownNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
+
         manager.forgetKnownNetwork(network);
+
         verify(mService).forgetKnownNetwork(network);
     }
 
@@ -364,7 +413,160 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).forgetKnownNetwork(network);
+
         assertFalse(manager.forgetKnownNetwork(network));
+    }
+
+    /**
+     * Verify getters.
+     */
+    @Test
+    public void getTetherNetworks_serviceNotConnected_shouldReturnEmptyList() {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(null);
+
+        assertArrayEquals(List.of().toArray(), manager.getTetherNetworks().toArray());
+    }
+
+    @Test
+    public void getTetherNetworks_remoteException_shouldReturnEmptyList() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(mService);
+        doThrow(new RemoteException()).when(mService).getTetherNetworks();
+
+        assertArrayEquals(List.of().toArray(), manager.getTetherNetworks().toArray());
+    }
+
+    @Test
+    public void getTetherNetworks_shouldReturnNetworksList() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        List<TetherNetwork> networks = List.of(buildTetherNetwork());
+        List<TetherNetwork> expected = List.of(buildTetherNetwork());
+        manager.setService(mService);
+        when(mService.getTetherNetworks()).thenReturn(networks);
+
+        assertArrayEquals(expected.toArray(), manager.getTetherNetworks().toArray());
+    }
+
+    @Test
+    public void getKnownNetworks_serviceNotConnected_shouldReturnEmptyList()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(null);
+
+        assertArrayEquals(List.of().toArray(), manager.getKnownNetworks().toArray());
+    }
+
+    @Test
+    public void getKnownNetworks_remoteException_shouldReturnEmptyList() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(mService);
+        doThrow(new RemoteException()).when(mService).getKnownNetworks();
+
+        assertArrayEquals(List.of().toArray(), manager.getKnownNetworks().toArray());
+    }
+
+    @Test
+    public void getKnownNetworks_shouldReturnNetworksList() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        List<KnownNetwork> networks = List.of(buildKnownNetwork());
+        List<KnownNetwork> expected = List.of(buildKnownNetwork());
+        manager.setService(mService);
+        when(mService.getKnownNetworks()).thenReturn(networks);
+
+        assertArrayEquals(expected.toArray(), manager.getKnownNetworks().toArray());
+    }
+
+    @Test
+    public void getSettingsState_serviceNotConnected_shouldReturnNull() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(null);
+
+        assertNull(manager.getSettingsState());
+    }
+
+    @Test
+    public void getSettingsState_remoteException_shouldReturnNull() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(mService);
+        doThrow(new RemoteException()).when(mService).getSettingsState();
+
+        assertNull(manager.getSettingsState());
+    }
+
+    @Test
+    public void getSettingsState_serviceConnected_shouldReturnState() throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        SharedConnectivitySettingsState state = new SharedConnectivitySettingsState.Builder()
+                .setInstantTetherEnabled(true).setExtras(new Bundle()).build();
+        manager.setService(mService);
+        when(mService.getSettingsState()).thenReturn(state);
+
+        assertEquals(state, manager.getSettingsState());
+    }
+
+    @Test
+    public void getTetherNetworkConnectionStatus_serviceNotConnected_shouldReturnNull()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(null);
+
+        assertNull(manager.getTetherNetworkConnectionStatus());
+    }
+
+    @Test
+    public void getTetherNetworkConnectionStatus_remoteException_shouldReturnNull()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(mService);
+        doThrow(new RemoteException()).when(mService).getTetherNetworkConnectionStatus();
+
+        assertNull(manager.getTetherNetworkConnectionStatus());
+    }
+
+    @Test
+    public void getTetherNetworkConnectionStatus_serviceConnected_shouldReturnStatus()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        TetherNetworkConnectionStatus status = new TetherNetworkConnectionStatus.Builder()
+                .setStatus(TetherNetworkConnectionStatus.CONNECTION_STATUS_ENABLING_HOTSPOT)
+                .setExtras(new Bundle()).build();
+        manager.setService(mService);
+        when(mService.getTetherNetworkConnectionStatus()).thenReturn(status);
+
+        assertEquals(status, manager.getTetherNetworkConnectionStatus());
+    }
+
+    @Test
+    public void getKnownNetworkConnectionStatus_serviceNotConnected_shouldReturnNull()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(null);
+
+        assertNull(manager.getKnownNetworkConnectionStatus());
+    }
+
+    @Test
+    public void getKnownNetworkConnectionStatus_remoteException_shouldReturnNull()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        manager.setService(mService);
+        doThrow(new RemoteException()).when(mService).getKnownNetworkConnectionStatus();
+
+        assertNull(manager.getKnownNetworkConnectionStatus());
+    }
+
+    @Test
+    public void getKnownNetworkConnectionStatus_serviceConnected_shouldReturnStatus()
+            throws RemoteException {
+        SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
+        KnownNetworkConnectionStatus status = new KnownNetworkConnectionStatus.Builder()
+                .setStatus(KnownNetworkConnectionStatus.CONNECTION_STATUS_SAVED)
+                .setExtras(new Bundle()).build();
+        manager.setService(mService);
+        when(mService.getKnownNetworkConnectionStatus()).thenReturn(status);
+
+        assertEquals(status, manager.getKnownNetworkConnectionStatus());
     }
 
     private void setResources(@Mock Context context) {

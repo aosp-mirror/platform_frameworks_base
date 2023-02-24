@@ -192,9 +192,9 @@ public class SharedConnectivityManager {
                 mService = ISharedConnectivityService.Stub.asInterface(service);
                 if (!mCallbackProxyCache.isEmpty()) {
                     synchronized (mCallbackProxyCache) {
-                        mCallbackProxyCache.keySet().forEach(callback -> {
-                            registerCallbackInternal(callback, mCallbackProxyCache.get(callback));
-                        });
+                        mCallbackProxyCache.keySet().forEach(callback ->
+                                registerCallbackInternal(
+                                        callback, mCallbackProxyCache.get(callback)));
                         mCallbackProxyCache.clear();
                     }
                 }
@@ -417,5 +417,105 @@ public class SharedConnectivityManager {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Gets the list of tether networks the user can select to connect to.
+     *
+     * @return Returns a {@link List} of {@link TetherNetwork} objects, empty list on failure.
+     */
+    @NonNull
+    public List<TetherNetwork> getTetherNetworks() {
+        if (mService == null) {
+            return List.of();
+        }
+
+        try {
+            return mService.getTetherNetworks();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in getTetherNetworks", e);
+        }
+        return List.of();
+    }
+
+    /**
+     * Gets the list of known networks the user can select to connect to.
+     *
+     * @return Returns a {@link List} of {@link KnownNetwork} objects, empty list on failure.
+     */
+    @NonNull
+    public List<KnownNetwork> getKnownNetworks() {
+        if (mService == null) {
+            return List.of();
+        }
+
+        try {
+            return mService.getKnownNetworks();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in getKnownNetworks", e);
+        }
+        return List.of();
+    }
+
+    /**
+     * Gets the shared connectivity settings state.
+     *
+     * @return Returns a {@link SharedConnectivitySettingsState} object with the state, null on
+     * failure.
+     */
+    @Nullable
+    public SharedConnectivitySettingsState getSettingsState() {
+        if (mService == null) {
+            return null;
+        }
+
+        try {
+            return mService.getSettingsState();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in getSettingsState", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the connection status of the tether network the user selected to connect to.
+     *
+     * @return Returns a {@link TetherNetworkConnectionStatus} object with the connection status,
+     * null on failure. If no connection is active the status will be
+     * {@link TetherNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
+     */
+    @Nullable
+    public TetherNetworkConnectionStatus getTetherNetworkConnectionStatus() {
+        if (mService == null) {
+            return null;
+        }
+
+        try {
+            return mService.getTetherNetworkConnectionStatus();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in getTetherNetworkConnectionStatus", e);
+        }
+        return null;
+    }
+
+    /**
+     * Gets the connection status of the known network the user selected to connect to.
+     *
+     * @return Returns a {@link KnownNetworkConnectionStatus} object with the connection status,
+     * null on failure. If no connection is active the status will be
+     * {@link KnownNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
+     */
+    @Nullable
+    public KnownNetworkConnectionStatus getKnownNetworkConnectionStatus() {
+        if (mService == null) {
+            return null;
+        }
+
+        try {
+            return mService.getKnownNetworkConnectionStatus();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Exception in getKnownNetworkConnectionStatus", e);
+        }
+        return null;
     }
 }
