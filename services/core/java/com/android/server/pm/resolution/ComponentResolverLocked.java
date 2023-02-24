@@ -92,9 +92,9 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Nullable
     @Override
     public List<ResolveInfo> queryActivities(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId) {
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryActivities(computer, intent, resolvedType, flags, userId);
+            return super.queryActivities(computer, intent, resolvedType, flags, callingUid, userId);
         }
     }
 
@@ -102,9 +102,10 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Override
     public List<ResolveInfo> queryActivities(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedActivity> activities,
-            @UserIdInt int userId) {
+            int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryActivities(computer, intent, resolvedType, flags, activities, userId);
+            return super.queryActivities(computer, intent, resolvedType, flags, activities,
+                    callingUid, userId);
         }
     }
 
@@ -120,9 +121,9 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Nullable
     @Override
     public List<ResolveInfo> queryProviders(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId) {
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryProviders(computer, intent, resolvedType, flags, userId);
+            return super.queryProviders(computer, intent, resolvedType, flags, callingUid, userId);
         }
     }
 
@@ -130,9 +131,10 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Override
     public List<ResolveInfo> queryProviders(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedProvider> providers,
-            @UserIdInt int userId) {
+            int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryProviders(computer, intent, resolvedType, flags, providers, userId);
+            return super.queryProviders(computer, intent, resolvedType, flags, providers,
+                    callingUid, userId);
         }
     }
 
@@ -149,9 +151,9 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Nullable
     @Override
     public List<ResolveInfo> queryReceivers(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId) {
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryReceivers(computer, intent, resolvedType, flags, userId);
+            return super.queryReceivers(computer, intent, resolvedType, flags, callingUid, userId);
         }
     }
 
@@ -159,18 +161,19 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Override
     public List<ResolveInfo> queryReceivers(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedActivity> receivers,
-            @UserIdInt int userId) {
+            int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryReceivers(computer, intent, resolvedType, flags, receivers, userId);
+            return super.queryReceivers(computer, intent, resolvedType, flags, receivers,
+                    callingUid, userId);
         }
     }
 
     @Nullable
     @Override
     public List<ResolveInfo> queryServices(@NonNull Computer computer, @NonNull Intent intent,
-            @Nullable String resolvedType, long flags, @UserIdInt int userId) {
+            @Nullable String resolvedType, long flags, int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryServices(computer, intent, resolvedType, flags, userId);
+            return super.queryServices(computer, intent, resolvedType, flags, callingUid, userId);
         }
     }
 
@@ -178,9 +181,10 @@ public abstract class ComponentResolverLocked extends ComponentResolverBase {
     @Override
     public List<ResolveInfo> queryServices(@NonNull Computer computer, @NonNull Intent intent,
             @Nullable String resolvedType, long flags, @NonNull List<ParsedService> services,
-            @UserIdInt int userId) {
+            int callingUid, @UserIdInt int userId) {
         synchronized (mLock) {
-            return super.queryServices(computer, intent, resolvedType, flags, services, userId);
+            return super.queryServices(computer, intent, resolvedType, flags, services, callingUid,
+                    userId);
         }
     }
 

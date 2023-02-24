@@ -23,6 +23,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.os.Binder;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.app.IntentForwarderActivity;
@@ -278,7 +279,7 @@ public final class DefaultCrossProfileResolver extends CrossProfileResolver {
         }
 
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(computer, intent,
-                resolvedType, flags, targetUserId);
+                resolvedType, flags, Binder.getCallingUid(), targetUserId);
         if (CollectionUtils.isEmpty(resultTargetUser)) {
             return null;
         }
