@@ -193,7 +193,12 @@ public class QuickSettingsController {
     private boolean mAnimatingHiddenFromCollapsed;
     private boolean mVisible;
     private float mExpansionHeight;
+    /**
+     * QS height when QS expansion fraction is 0 so when QS is collapsed. That state doesn't really
+     * exist for split shade so currently this value is always 0 then.
+     */
     private int mMinExpansionHeight;
+    /** QS height when QS expansion fraction is 1 so qs is fully expanded */
     private int mMaxExpansionHeight;
     /** Expansion fraction of the notification shade */
     private float mShadeExpandedFraction;
@@ -697,6 +702,7 @@ public class QuickSettingsController {
 
     /** update Qs height state */
     public void setExpansionHeight(float height) {
+        checkCorrectSplitShadeState(height);
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);
@@ -715,6 +721,14 @@ public class QuickSettingsController {
 
         if (mExpansionHeightListener != null) {
             mExpansionHeightListener.onQsSetExpansionHeightCalled(getFullyExpanded());
+        }
+    }
+
+    /** TODO(b/269742565) Remove this logging */
+    private void checkCorrectSplitShadeState(float height) {
+        if (mSplitShadeEnabled && height == 0
+                && mPanelViewControllerLazy.get().isShadeFullyOpen()) {
+            Log.wtfStack(TAG, "qsExpansion set to 0 while split shade is expanding or open");
         }
     }
 
