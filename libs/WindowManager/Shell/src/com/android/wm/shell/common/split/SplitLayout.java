@@ -486,6 +486,17 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     /**
+     * Set divider should interactive to user or not.
+     *
+     * @param interactive divider interactive.
+     * @param hideHandle divider handle hidden or not, only work when interactive is false.
+     * @param from caller from where.
+     */
+    public void setDividerInteractive(boolean interactive, boolean hideHandle, String from) {
+        mSplitWindowManager.setInteractive(interactive, hideHandle, from);
+    }
+
+    /**
      * Sets new divide position and updates bounds correspondingly. Notifies listener if the new
      * target indicates dismissing split.
      */
@@ -735,21 +746,28 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         }
     }
 
-    /** Apply recorded task layout to the {@link WindowContainerTransaction}. */
-    public void applyTaskChanges(WindowContainerTransaction wct,
+    /** Apply recorded task layout to the {@link WindowContainerTransaction}.
+     *
+     * @return true if stage bounds actually update.
+     */
+    public boolean applyTaskChanges(WindowContainerTransaction wct,
             ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2) {
+        boolean boundsChanged = false;
         if (!mBounds1.equals(mWinBounds1) || !task1.token.equals(mWinToken1)) {
             wct.setBounds(task1.token, mBounds1);
             wct.setSmallestScreenWidthDp(task1.token, getSmallestWidthDp(mBounds1));
             mWinBounds1.set(mBounds1);
             mWinToken1 = task1.token;
+            boundsChanged = true;
         }
         if (!mBounds2.equals(mWinBounds2) || !task2.token.equals(mWinToken2)) {
             wct.setBounds(task2.token, mBounds2);
             wct.setSmallestScreenWidthDp(task2.token, getSmallestWidthDp(mBounds2));
             mWinBounds2.set(mBounds2);
             mWinToken2 = task2.token;
+            boundsChanged = true;
         }
+        return boundsChanged;
     }
 
     private int getSmallestWidthDp(Rect bounds) {
@@ -1091,8 +1109,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // ImePositionProcessor#onImeVisibilityChanged directly in DividerView is not enough
             // because DividerView won't receive onImeVisibilityChanged callback after it being
             // re-inflated.
-            mSplitWindowManager.setInteractive(!mImeShown || !mHasImeFocus,
-                    "onImeStartPositioning");
+            setDividerInteractive(!mImeShown || !mHasImeFocus, true, "onImeStartPositioning");
 
             return needOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
@@ -1118,7 +1135,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // Restore the split layout when wm-shell is not controlling IME insets anymore.
             if (!controlling && mImeShown) {
                 reset();
-                mSplitWindowManager.setInteractive(true, "onImeControlTargetChanged");
+                setDividerInteractive(true, true, "onImeControlTargetChanged");
                 mSplitLayoutHandler.setLayoutOffsetTarget(0, 0, SplitLayout.this);
                 mSplitLayoutHandler.onLayoutPositionChanging(SplitLayout.this);
             }
