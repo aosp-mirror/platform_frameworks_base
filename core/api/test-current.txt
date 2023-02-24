@@ -725,6 +725,14 @@ package android.app.contentsuggestions {
 
 }
 
+package android.app.job {
+
+  public class JobParameters implements android.os.Parcelable {
+    field public static final int INTERNAL_STOP_REASON_USER_UI_STOP = 11; // 0xb
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictor {

@@ -931,7 +931,7 @@ public class DisplayPolicy {
         }
 
         final InsetsSourceProvider provider = win.getControllableInsetProvider();
-        if (provider != null && provider.getSource().getInsetsRoundedCornerFrame()
+        if (provider != null && provider.getSource().insetsRoundedCornerFrame()
                 != attrs.insetsRoundedCornerFrame) {
             provider.getSource().setInsetsRoundedCornerFrame(attrs.insetsRoundedCornerFrame);
         }
@@ -1364,9 +1364,8 @@ public class DisplayPolicy {
         applyKeyguardPolicy(win, imeTarget);
 
         // Check if the freeform window overlaps with the navigation bar area.
-        final boolean isOverlappingWithNavBar = isOverlappingWithNavBar(win);
-        if (isOverlappingWithNavBar && !mIsFreeformWindowOverlappingWithNavBar
-                && win.inFreeformWindowingMode()) {
+        if (!mIsFreeformWindowOverlappingWithNavBar && win.inFreeformWindowingMode()
+                && win.mActivityRecord != null && isOverlappingWithNavBar(win)) {
             mIsFreeformWindowOverlappingWithNavBar = true;
         }
 
@@ -1454,7 +1453,7 @@ public class DisplayPolicy {
             // mode; if it's in gesture navigation mode, the navigation bar will be
             // NAV_BAR_FORCE_TRANSPARENT and its appearance won't be decided by overlapping
             // windows.
-            if (isOverlappingWithNavBar) {
+            if (isOverlappingWithNavBar(win)) {
                 if (mNavBarColorWindowCandidate == null) {
                     mNavBarColorWindowCandidate = win;
                     addSystemBarColorApp(win);
@@ -1482,7 +1481,7 @@ public class DisplayPolicy {
                     addSystemBarColorApp(win);
                 }
             }
-            if (isOverlappingWithNavBar && mNavBarColorWindowCandidate == null) {
+            if (isOverlappingWithNavBar(win) && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
             }
         }
@@ -2591,6 +2590,7 @@ public class DisplayPolicy {
         lp.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        lp.privateFlags |= LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
         lp.setFitInsetsTypes(0);
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         if (ActivityManager.isHighEndGfx()) {
@@ -2646,7 +2646,7 @@ public class DisplayPolicy {
 
     @VisibleForTesting
     static boolean isOverlappingWithNavBar(@NonNull WindowState win) {
-        if (win.mActivityRecord == null || !win.isVisible()) {
+        if (!win.isVisible()) {
             return false;
         }
 

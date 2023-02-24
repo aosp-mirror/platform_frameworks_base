@@ -1447,7 +1447,6 @@ public class JobInfo implements Parcelable {
          * reasonable estimates should use the sentinel value
          * {@link JobInfo#NETWORK_BYTES_UNKNOWN}.
          * </ul>
-         * TODO(255371817): update documentation to reflect how this data will be used
          * Note that the system may choose to delay jobs with large network
          * usage estimates when the device has a poor network connection, in
          * order to save battery and possible network costs.
@@ -1478,6 +1477,7 @@ public class JobInfo implements Parcelable {
          * @see JobInfo#getEstimatedNetworkUploadBytes()
          * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long)
          */
+        // TODO(b/255371817): update documentation to reflect how this data will be used
         public Builder setEstimatedNetworkBytes(@BytesLong long downloadBytes,
                 @BytesLong long uploadBytes) {
             mNetworkDownloadBytes = downloadBytes;

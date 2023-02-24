@@ -17,21 +17,17 @@
 package com.android.systemui.notetask
 
 import android.app.KeyguardManager
-import android.app.admin.DevicePolicyManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.UserManager
 import android.util.Log
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -53,10 +49,8 @@ constructor(
     private val optionalBubbles: Optional<Bubbles>,
     private val optionalKeyguardManager: Optional<KeyguardManager>,
     private val optionalUserManager: Optional<UserManager>,
-    private val devicePolicyManager: DevicePolicyManager,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
     private val uiEventLogger: UiEventLogger,
-    private val userTracker: UserTracker,
 ) {
 
     /**
@@ -86,18 +80,6 @@ constructor(
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
 
-        val isKeyguardLocked = keyguardManager.isKeyguardLocked
-        // KeyguardQuickAffordanceInteractor blocks the quick affordance from showing in the
-        // keyguard if it is not allowed by the admin policy. Here we block any other way to show
-        // note task when the screen is locked.
-        if (
-            isKeyguardLocked &&
-                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
-        ) {
-            logDebug { "Enterprise policy disallows launching note app when the screen is locked." }
-            return
-        }
-
         val noteTaskInfo = resolver.resolveInfo() ?: return
 
         uiEvent?.let { uiEventLogger.log(it, noteTaskInfo.uid, noteTaskInfo.packageName) }
@@ -105,7 +87,7 @@ constructor(
         // TODO(b/266686199): We should handle when app not available. For now, we log.
         val intent = noteTaskInfo.toCreateNoteIntent()
         try {
-            if (isInMultiWindowMode || isKeyguardLocked) {
+            if (isInMultiWindowMode || keyguardManager.isKeyguardLocked) {
                 context.startActivity(intent)
             } else {
                 bubbles.showOrHideAppBubble(intent)
@@ -162,7 +144,7 @@ constructor(
     }
 
     companion object {
-        val TAG = NoteTaskController::class.simpleName.orEmpty()
+        private val TAG = NoteTaskController::class.simpleName.orEmpty()
 
         private fun NoteTaskInfoResolver.NoteTaskInfo.toCreateNoteIntent(): Intent {
             return Intent(ACTION_CREATE_NOTE)
@@ -181,11 +163,5 @@ constructor(
 
         // TODO(b/265912743): Use Intent.INTENT_EXTRA_USE_STYLUS_MODE instead.
         const val INTENT_EXTRA_USE_STYLUS_MODE = "android.intent.extra.USE_STYLUS_MODE"
-    }
-}
-
-private inline fun logDebug(message: () -> String) {
-    if (Build.IS_DEBUGGABLE) {
-        Log.d(NoteTaskController.TAG, message())
     }
 }

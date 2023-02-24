@@ -275,7 +275,7 @@ public class InsetsState implements Parcelable {
         final Rect roundedCornerFrame = new Rect(mRoundedCornerFrame);
         for (int i = mSources.size() - 1; i >= 0; i--) {
             final InsetsSource source = mSources.valueAt(i);
-            if (source.getInsetsRoundedCornerFrame()) {
+            if (source.insetsRoundedCornerFrame()) {
                 final Insets insets = source.calculateInsets(roundedCornerFrame, false);
                 roundedCornerFrame.inset(insets);
             }

@@ -79,7 +79,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    @Nullable protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
 
@@ -104,7 +103,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     private final Rect mClippingRect = new Rect();
     private ViewGroup mMediaHostView;
     private boolean mShouldMoveMediaOnExpansion = true;
-    private boolean mUsingCombinedHeaders = false;
     private QSLogger mQsLogger;
     /**
      * Specifies if we can collapse to QQS in current state. In split shade that should be always
@@ -153,10 +151,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
         }
-    }
-
-    void setUsingCombinedHeaders(boolean usingCombinedHeaders) {
-        mUsingCombinedHeaders = usingCombinedHeaders;
     }
 
     protected void setHorizontalContentContainerClipping() {
@@ -364,11 +358,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         }
     }
 
-    @Nullable
-    public QSTileHost getHost() {
-        return mHost;
-    }
-
     public void updateResources() {
         updatePadding();
 
@@ -383,9 +372,7 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     protected void updatePadding() {
         final Resources res = mContext.getResources();
-        int paddingTop = res.getDimensionPixelSize(
-                mUsingCombinedHeaders ? R.dimen.qs_panel_padding_top_combined_headers
-                        : R.dimen.qs_panel_padding_top);
+        int paddingTop = res.getDimensionPixelSize(R.dimen.qs_panel_padding_top);
         int paddingBottom = res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom);
         setPaddingRelative(getPaddingStart(),
                 paddingTop,

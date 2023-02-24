@@ -664,7 +664,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private fun mockQueryActivities(action: String, vararg activities: ActivityInfo) {
         whenever(mocks.componentResolver.queryActivities(any(),
                 argThat { intent: Intent? -> intent != null && (action == intent.action) },
-                nullable(), anyLong(), anyInt())) {
+                nullable(), anyLong(), anyInt(), anyInt())) {
             ArrayList(activities.asList().map { info: ActivityInfo? ->
                 ResolveInfo().apply { activityInfo = info }
             })
@@ -674,7 +674,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
     private fun mockQueryServices(action: String, vararg services: ServiceInfo) {
         whenever(mocks.componentResolver.queryServices(any(),
                 argThat { intent: Intent? -> intent != null && (action == intent.action) },
-                nullable(), anyLong(), anyInt())) {
+                nullable(), anyLong(), anyInt(), anyInt())) {
             ArrayList(services.asList().map { info ->
                 ResolveInfo().apply { serviceInfo = info }
             })

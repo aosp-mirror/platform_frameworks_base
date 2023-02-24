@@ -410,11 +410,14 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
 
         @Override
         public boolean isSticky() {
-            final boolean isSticky = (mEntry.isRowPinned() && expanded)
+            return (mEntry.isRowPinned() && expanded)
                     || remoteInputActive
-                    || hasFullScreenIntent(mEntry)
-                    || mEntry.isStickyAndNotDemoted();
-            return isSticky;
+                    || hasFullScreenIntent(mEntry);
+        }
+
+        @Override
+        public boolean isStickyForSomeTime() {
+            return mEntry.isStickyAndNotDemoted();
         }
 
         @Override
@@ -476,10 +479,10 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
          */
         @Override
         protected long calculateFinishTime() {
-            if (isSticky()) {
-                return mEntry.mCreationElapsedRealTime + mStickyDisplayTime;
-            }
-            return mPostTime + getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
+            final long duration = getRecommendedHeadsUpTimeoutMs(
+                    isStickyForSomeTime() ? mStickyDisplayTime : mAutoDismissNotificationDecay);
+
+            return mPostTime + duration;
         }
 
         /**

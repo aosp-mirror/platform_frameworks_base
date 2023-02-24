@@ -370,11 +370,6 @@ public class ContextHubService extends IContextHubService.Stub {
             mLastRestartTimestampMap.put(contextHubId,
                     new AtomicLong(SystemClock.elapsedRealtimeNanos()));
 
-            IContextHubClient client = mClientManager.registerClient(
-                    contextHubInfo, createDefaultClientCallback(contextHubId),
-                    /* attributionTag= */ null, mTransactionManager, mContext.getPackageName());
-            defaultClientMap.put(contextHubId, client);
-
             try {
                 mContextHubWrapper.registerCallback(contextHubId,
                         new ContextHubServiceCallback(contextHubId));
@@ -382,6 +377,11 @@ public class ContextHubService extends IContextHubService.Stub {
                 Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
                         + contextHubId + ")", e);
             }
+
+            IContextHubClient client = mClientManager.registerClient(
+                    contextHubInfo, createDefaultClientCallback(contextHubId),
+                    /* attributionTag= */ null, mTransactionManager, mContext.getPackageName());
+            defaultClientMap.put(contextHubId, client);
 
             // Do a query to initialize the service cache list of nanoapps
             // TODO(b/194289715): Remove this when old API is deprecated
@@ -1207,7 +1207,7 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
+        mNanoAppStateManager.foreachNanoAppInstanceInfo(pw::println);
 
         pw.println("");
         pw.println("=================== PRELOADED NANOAPPS ====================");
@@ -1255,16 +1255,17 @@ public class ContextHubService extends IContextHubService.Stub {
         proto.flush();
     }
 
-    /**
-     * Dumps preloaded nanoapps to the console
-     */
+    /** Dumps preloaded nanoapps to the console */
     private void dumpPreloadedNanoapps(PrintWriter pw) {
         if (mContextHubWrapper == null) {
             return;
         }
 
         long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds();
-        for (long preloadedNanoappId: preloadedNanoappIds) {
+        if (preloadedNanoappIds == null) {
+            return;
+        }
+        for (long preloadedNanoappId : preloadedNanoappIds) {
             pw.print("ID: 0x");
             pw.println(Long.toHexString(preloadedNanoappId));
         }

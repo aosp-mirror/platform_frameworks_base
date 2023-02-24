@@ -173,6 +173,7 @@ package android {
     field public static final String MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED = "android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED";
     field public static final String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
+    field public static final String MANAGE_CLIPBOARD_ACCESS_NOTIFICATION = "android.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION";
     field public static final String MANAGE_CLOUDSEARCH = "android.permission.MANAGE_CLOUDSEARCH";
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
@@ -842,6 +843,7 @@ package android.app {
     method public int getPendingIntentBackgroundActivityStartMode();
     method public boolean isDeferUntilActive();
     method @Deprecated public boolean isPendingIntentBackgroundActivityLaunchAllowed();
+    method @Deprecated @NonNull public static android.app.BroadcastOptions makeBasic();
     method @RequiresPermission(android.Manifest.permission.ACCESS_BROADCAST_RESPONSE_STATS) public void recordResponseEventWhileInBackground(@IntRange(from=0) long);
     method @RequiresPermission(android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND) public void setBackgroundActivityStartsAllowed(boolean);
     method @NonNull public android.app.BroadcastOptions setDeferUntilActive(boolean);
@@ -3399,6 +3401,8 @@ package android.content {
   }
 
   public class ClipboardManager extends android.text.ClipboardManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION) public boolean areClipboardAccessNotificationsEnabled();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION) public void setClipboardAccessNotificationsEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.SET_CLIP_SOURCE) public void setPrimaryClipAsPackage(@NonNull android.content.ClipData, @NonNull String);
   }
 
@@ -10202,6 +10206,14 @@ package android.os {
 
   public class BatteryManager {
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setChargingStateUpdateDelayMillis(int);
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_CHARGING_POLICY = 9; // 0x9
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_FIRST_USAGE_DATE = 8; // 0x8
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_MANUFACTURING_DATE = 7; // 0x7
+    field @RequiresPermission(android.Manifest.permission.BATTERY_STATS) public static final int BATTERY_PROPERTY_STATE_OF_HEALTH = 10; // 0xa
+    field public static final int CHARGING_POLICY_ADAPTIVE_AC = 3; // 0x3
+    field public static final int CHARGING_POLICY_ADAPTIVE_AON = 2; // 0x2
+    field public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE = 4; // 0x4
+    field public static final int CHARGING_POLICY_DEFAULT = 1; // 0x1
     field public static final String EXTRA_EVENTS = "android.os.extra.EVENTS";
     field public static final String EXTRA_EVENT_TIMESTAMP = "android.os.extra.EVENT_TIMESTAMP";
   }

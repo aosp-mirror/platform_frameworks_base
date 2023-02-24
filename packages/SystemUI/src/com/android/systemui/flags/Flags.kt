@@ -237,8 +237,6 @@ object Flags {
 
     // 500 - quick settings
 
-    // TODO(b/254512321): Tracking Bug
-    @JvmField val COMBINED_QS_HEADERS = releasedFlag(501, "combined_qs_headers")
     val PEOPLE_TILE = resourceBooleanFlag(502, R.bool.flag_conversations, "people_tile")
 
     @JvmField
@@ -248,6 +246,9 @@ object Flags {
             R.bool.flag_lockscreen_qs_user_detail_shortcut,
             "qs_user_detail_shortcut"
         )
+
+    @JvmField
+    val QS_PIPELINE_NEW_HOST = unreleasedFlag(504, "qs_pipeline_new_host", teamfood = false)
 
     // TODO(b/254512383): Tracking Bug
     @JvmField
@@ -296,6 +297,9 @@ object Flags {
     // TODO(b/260881289): Tracking Bug
     val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
         unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
+
+    // TODO(b/265892345): Tracking Bug
+    val PLUG_IN_STATUS_BAR_CHIP = unreleasedFlag(265892345, "plug_in_status_bar_chip")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug

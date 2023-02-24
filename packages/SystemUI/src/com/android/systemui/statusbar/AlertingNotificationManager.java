@@ -234,7 +234,7 @@ public abstract class AlertingNotificationManager {
 
     /**
      * @param key
-     * @return true if the entry is pinned
+     * @return true if the entry is (pinned and expanded) or (has an active remote input)
      */
     public boolean isSticky(String key) {
         AlertEntry alerting = mAlertEntries.get(key);
@@ -252,15 +252,6 @@ public abstract class AlertingNotificationManager {
         AlertEntry alerting = mAlertEntries.get(key);
         if (alerting != null) {
             return Math.max(0, alerting.mEarliestRemovaltime - mClock.currentTimeMillis());
-        }
-        return 0;
-    }
-
-    @VisibleForTesting
-    public long getCalculatedEarliestRemovalTime(String key) {
-        AlertEntry alerting = mAlertEntries.get(key);
-        if (alerting != null) {
-            return alerting.mEarliestRemovaltime;
         }
         return 0;
     }
@@ -285,11 +276,6 @@ public abstract class AlertingNotificationManager {
             updateEntry(true /* updatePostTime */);
         }
 
-        @VisibleForTesting
-        long getEarliestRemovaltime() {
-            return mEarliestRemovaltime;
-        }
-
         /**
          * Updates an entry's removal time.
          * @param updatePostTime whether or not to refresh the post time
@@ -305,23 +291,26 @@ public abstract class AlertingNotificationManager {
             }
             removeAutoRemovalCallbacks();
 
-            final long finishTime = calculateFinishTime();
-            final long timeRemaining = isSticky()
-                    ? finishTime - mClock.currentTimeMillis()
-                    : Math.max(finishTime - now, mMinimumDisplayTime);
-
-            mHandler.postDelayed(mRemoveAlertRunnable, timeRemaining);
+            if (!isSticky()) {
+                final long finishTime = calculateFinishTime();
+                final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
+                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
+            }
         }
 
         /**
          * Whether or not the notification is "sticky" i.e. should stay on screen regardless
-         * of the timer and should be removed externally.
+         * of the timer (forever) and should be removed externally.
          * @return true if the notification is sticky
          */
         public boolean isSticky() {
             // This implementation is overridden by HeadsUpManager HeadsUpEntry #isSticky
-            // but we keep this here for use by unit tests.
-            return mEntry.isStickyAndNotDemoted();
+            return false;
+        }
+
+        public boolean isStickyForSomeTime() {
+            // This implementation is overridden by HeadsUpManager HeadsUpEntry #isStickyForSomeTime
+            return false;
         }
 
         /**
@@ -360,8 +349,9 @@ public abstract class AlertingNotificationManager {
         public void removeAsSoonAsPossible() {
             if (mRemoveAlertRunnable != null) {
                 removeAutoRemovalCallbacks();
-                mHandler.postDelayed(mRemoveAlertRunnable,
-                        mEarliestRemovaltime - mClock.currentTimeMillis());
+
+                final long timeLeft = mEarliestRemovaltime - mClock.currentTimeMillis();
+                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
             }
         }
 

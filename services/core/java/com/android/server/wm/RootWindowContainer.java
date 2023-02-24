@@ -1997,6 +1997,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // of the activity entering PIP
             r.getDisplayContent().prepareAppTransition(TRANSIT_NONE);
 
+            transitionController.collect(task);
+
+            // Defer the windowing mode change until after the transition to prevent the activity
+            // from doing work and changing the activity visuals while animating
+            // TODO(task-org): Figure-out more structured way to do this long term.
+            r.setWindowingMode(r.getWindowingMode());
+            r.mWaitForEnteringPinnedMode = true;
+
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
             final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
             if (singleActivity) {
@@ -2004,6 +2012,30 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
                 // Apply the last recents animation leash transform to the task entering PIP
                 rootTask.maybeApplyLastRecentsAnimationTransaction();
+
+                if (rootTask.getParent() != taskDisplayArea) {
+                    // root task is nested, but pinned tasks need to be direct children of their
+                    // display area, so reparent.
+                    rootTask.reparent(taskDisplayArea, true /* onTop */);
+                }
+
+                rootTask.forAllTaskFragments(tf -> {
+                    if (!tf.isOrganizedTaskFragment()) {
+                        return;
+                    }
+                    tf.resetAdjacentTaskFragment();
+                    tf.setCompanionTaskFragment(null /* companionTaskFragment */);
+                    tf.setAnimationParams(TaskFragmentAnimationParams.DEFAULT);
+                    if (tf.getTopNonFinishingActivity() != null) {
+                        // When the Task is entering picture-in-picture, we should clear all
+                        // override from the client organizer, so the PIP activity can get the
+                        // correct config from the Task, and prevent conflict with the
+                        // PipTaskOrganizer. TaskFragmentOrganizer may have requested relative
+                        // bounds, so reset the relative bounds before update configuration.
+                        tf.setRelativeEmbeddedBounds(new Rect());
+                        tf.updateRequestedOverrideConfiguration(EMPTY);
+                    }
+                });
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task. Note that we explicitly defer the task
@@ -2016,6 +2048,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         .setIntent(r.intent)
                         .setDeferTaskAppear(true)
                         .setHasBeenVisible(true)
+                        .setWindowingMode(task.getRequestedOverrideWindowingMode())
                         .build();
                 // Establish bi-directional link between the original and pinned task.
                 r.setLastParentBeforePip(launchIntoPipHostActivity);
@@ -2049,6 +2082,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     organizedTf.mClearedTaskFragmentForPip = true;
                 }
 
+                transitionController.collect(rootTask);
+
+                if (transitionController.isShellTransitionsEnabled()) {
+                    // set mode NOW so that when we reparent the activity, it won't be resumed.
+                    // During recents animations, the original task is "occluded" by launcher but
+                    // it wasn't paused (due to transient-launch). If we reparent to the (top) task
+                    // now, it will take focus briefly which confuses the RecentTasks tracker.
+                    rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
+                }
+
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
@@ -2073,40 +2116,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 }
             }
 
-            transitionController.collect(rootTask);
-
-            // The intermediate windowing mode to be set on the ActivityRecord later.
-            // This needs to happen before the re-parenting, otherwise we will always set the
-            // ActivityRecord to be fullscreen.
-            final int intermediateWindowingMode = rootTask.getWindowingMode();
-            if (rootTask.getParent() != taskDisplayArea) {
-                // root task is nested, but pinned tasks need to be direct children of their
-                // display area, so reparent.
-                rootTask.reparent(taskDisplayArea, true /* onTop */);
-            }
-
-            // Defer the windowing mode change until after the transition to prevent the activity
-            // from doing work and changing the activity visuals while animating
-            // TODO(task-org): Figure-out more structured way to do this long term.
-            r.setWindowingMode(intermediateWindowingMode);
-            r.mWaitForEnteringPinnedMode = true;
-            rootTask.forAllTaskFragments(tf -> {
-                if (!tf.isOrganizedTaskFragment()) {
-                    return;
-                }
-                tf.resetAdjacentTaskFragment();
-                tf.setCompanionTaskFragment(null /* companionTaskFragment */);
-                tf.setAnimationParams(TaskFragmentAnimationParams.DEFAULT);
-                if (tf.getTopNonFinishingActivity() != null) {
-                    // When the Task is entering picture-in-picture, we should clear all override
-                    // from the client organizer, so the PIP activity can get the correct config
-                    // from the Task, and prevent conflict with the PipTaskOrganizer.
-                    // TaskFragmentOrganizer may have requested relative bounds, so reset the
-                    // relative bounds before update configuration.
-                    tf.setRelativeEmbeddedBounds(new Rect());
-                    tf.updateRequestedOverrideConfiguration(EMPTY);
-                }
-            });
+            // TODO(remove-legacy-transit): Move this to the `singleActivity` case when removing
+            //                              legacy transit.
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
             // Set the launch bounds for launch-into-pip Activity on the root task.
             if (r.getOptions() != null && r.getOptions().isLaunchIntoPip()) {

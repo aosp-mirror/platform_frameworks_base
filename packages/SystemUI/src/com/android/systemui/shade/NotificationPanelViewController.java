@@ -336,7 +336,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final ScrimController mScrimController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final TapAgainViewController mTapAgainViewController;
-    private final LargeScreenShadeHeaderController mLargeScreenShadeHeaderController;
+    private final ShadeHeaderController mShadeHeaderController;
     private final boolean mVibrateOnOpening;
     private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final FlingAnimationUtils mFlingAnimationUtilsClosing;
@@ -693,7 +693,7 @@ public final class NotificationPanelViewController implements Dumpable {
             FragmentService fragmentService,
             ContentResolver contentResolver,
             RecordingController recordingController,
-            LargeScreenShadeHeaderController largeScreenShadeHeaderController,
+            ShadeHeaderController shadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             ShadeExpansionStateManager shadeExpansionStateManager,
@@ -813,7 +813,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mSplitShadeEnabled =
                 LargeScreenUtils.shouldUseSplitNotificationShade(mResources);
         mView.setWillNotDraw(!DEBUG_DRAWABLE);
-        mLargeScreenShadeHeaderController = largeScreenShadeHeaderController;
+        mShadeHeaderController = shadeHeaderController;
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mFalsingCollector = falsingCollector;
@@ -1040,7 +1040,7 @@ public final class NotificationPanelViewController implements Dumpable {
         }
 
         mTapAgainViewController.init();
-        mLargeScreenShadeHeaderController.init();
+        mShadeHeaderController.init();
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));
@@ -3337,7 +3337,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     public void disable(int state1, int state2, boolean animated) {
-        mLargeScreenShadeHeaderController.disable(state1, state2, animated);
+        mShadeHeaderController.disable(state1, state2, animated);
     }
 
     /**

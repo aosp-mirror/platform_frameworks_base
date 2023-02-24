@@ -34,6 +34,7 @@ import com.android.systemui.statusbar.notification.dagger.AlertingHeader;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -43,8 +44,8 @@ import javax.inject.Inject;
  * Filters out NotificationEntries based on its Ranking and dozing state.
  * Assigns alerting / silent section based on the importance of the notification entry.
  * We check the NotificationEntry's Ranking for:
- *  - whether the notification's app is suspended or hiding its notifications
- *  - whether DND settings are hiding notifications from ambient display or the notification list
+ * - whether the notification's app is suspended or hiding its notifications
+ * - whether DND settings are hiding notifications from ambient display or the notification list
  */
 @CoordinatorScope
 public class RankingCoordinator implements Coordinator {
@@ -78,6 +79,8 @@ public class RankingCoordinator implements Coordinator {
     public void attach(NotifPipeline pipeline) {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
         mSectionStyleProvider.setMinimizedSections(Collections.singleton(mMinimizedNotifSectioner));
+        mSectionStyleProvider.setSilentSections(
+                Arrays.asList(mSilentNotifSectioner, mMinimizedNotifSectioner));
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
         pipeline.addPreGroupFilter(mDndVisualEffectsFilter);

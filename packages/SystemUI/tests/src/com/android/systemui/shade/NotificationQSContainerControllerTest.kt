@@ -12,7 +12,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.fragments.FragmentService
 import com.android.systemui.navigationbar.NavigationModeController
@@ -40,8 +39,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -68,11 +67,9 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var notificationsQSContainer: NotificationsQuickSettingsContainer
     @Mock
-    private lateinit var largeScreenShadeHeaderController: LargeScreenShadeHeaderController
+    private lateinit var mShadeHeaderController: ShadeHeaderController
     @Mock
     private lateinit var shadeExpansionStateManager: ShadeExpansionStateManager
-    @Mock
-    private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var fragmentService: FragmentService
     @Mock
@@ -109,9 +106,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 notificationsQSContainer,
                 navigationModeController,
                 overviewProxyService,
-                largeScreenShadeHeaderController,
+                mShadeHeaderController,
                 shadeExpansionStateManager,
-                featureFlags,
                 fragmentService,
                 delayableExecutor
         )
@@ -396,9 +392,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
                 container,
                 navigationModeController,
                 overviewProxyService,
-                largeScreenShadeHeaderController,
+                mShadeHeaderController,
                 shadeExpansionStateManager,
-                featureFlags,
                 fragmentService,
                 delayableExecutor
         )
@@ -429,16 +424,16 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testStartCustomizingWithDuration() {
         controller.setCustomizerShowing(true, 100L)
-        verify(largeScreenShadeHeaderController).startCustomizingAnimation(true, 100L)
+        verify(mShadeHeaderController).startCustomizingAnimation(true, 100L)
     }
 
     @Test
     fun testEndCustomizingWithDuration() {
         controller.setCustomizerShowing(true, 0L) // Only tracks changes
-        reset(largeScreenShadeHeaderController)
+        reset(mShadeHeaderController)
 
         controller.setCustomizerShowing(false, 100L)
-        verify(largeScreenShadeHeaderController).startCustomizingAnimation(false, 100L)
+        verify(mShadeHeaderController).startCustomizingAnimation(false, 100L)
     }
 
     @Test

@@ -19,7 +19,6 @@ package android.credentials;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
@@ -102,8 +101,11 @@ public class CredentialManagerTest {
         mGetRequest = new GetCredentialRequest.Builder(Bundle.EMPTY).addCredentialOption(
                 new CredentialOption(Credential.TYPE_PASSWORD_CREDENTIAL, Bundle.EMPTY,
                         Bundle.EMPTY, false)).build();
-        mCreateRequest = new CreateCredentialRequest(Credential.TYPE_PASSWORD_CREDENTIAL,
-                Bundle.EMPTY, Bundle.EMPTY, false, false);
+        mCreateRequest = new CreateCredentialRequest.Builder(Bundle.EMPTY, Bundle.EMPTY)
+                .setType(Credential.TYPE_PASSWORD_CREDENTIAL)
+                .setIsSystemProviderRequired(false)
+                .setAlwaysSendAppInfoToProvider(false)
+                .build();
         mClearRequest = new ClearCredentialStateRequest(Bundle.EMPTY);
 
         final Slice slice = new Slice.Builder(Uri.parse("foo://bar"), null).addText("some text",
@@ -593,15 +595,12 @@ public class CredentialManagerTest {
 
     @Test
     public void testRegisterCredentialDescription_nullRequest() {
-        assumeTrue(CredentialManager.isCredentialDescriptionApiEnabled());
         assertThrows(NullPointerException.class,
                 () -> mCredentialManager.registerCredentialDescription(null));
     }
 
     @Test
     public void testRegisterCredentialDescription_success() throws RemoteException {
-        assumeTrue(CredentialManager.isCredentialDescriptionApiEnabled());
-
         mCredentialManager.registerCredentialDescription(mRegisterRequest);
         verify(mMockCredentialManagerService).registerCredentialDescription(same(mRegisterRequest),
                 eq(mPackageName));
@@ -609,16 +608,12 @@ public class CredentialManagerTest {
 
     @Test
     public void testUnregisterCredentialDescription_nullRequest() {
-        assumeTrue(CredentialManager.isCredentialDescriptionApiEnabled());
-
         assertThrows(NullPointerException.class,
                 () -> mCredentialManager.unregisterCredentialDescription(null));
     }
 
     @Test
     public void testUnregisterCredentialDescription_success() throws RemoteException {
-        assumeTrue(CredentialManager.isCredentialDescriptionApiEnabled());
-
         mCredentialManager.unregisterCredentialDescription(mUnregisterRequest);
         verify(mMockCredentialManagerService).unregisterCredentialDescription(
                 same(mUnregisterRequest), eq(mPackageName));
