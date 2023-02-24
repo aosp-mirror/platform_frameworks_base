@@ -40,9 +40,8 @@ import android.util.SparseArray;
 
 import androidx.test.annotation.UiThreadTest;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.internal.widget.LockSettingsInternal;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.UserState;
 import com.android.server.pm.UserManagerService.UserData;
@@ -50,13 +49,14 @@ import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
 /**
  * Run as {@code atest FrameworksMockingServicesTests:com.android.server.pm.UserManagerServiceTest}
  */
-public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
+public final class UserManagerServiceTest {
 
     private static final String TAG = UserManagerServiceTest.class.getSimpleName();
 
@@ -84,6 +84,13 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
      */
     private static final int PROFILE_USER_ID = 643;
 
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(UserManager.class)
+            .spyStatic(LocalServices.class)
+            .mockStatic(Settings.Global.class)
+            .build();
+
     private final Object mPackagesLock = new Object();
     private final Context mRealContext = androidx.test.InstrumentationRegistry.getInstrumentation()
             .getTargetContext();
@@ -108,14 +115,6 @@ public final class UserManagerServiceTest extends ExtendedMockitoTestCase {
      * Reference to the {@link UserManagerInternal} being tested.
      */
     private UserManagerInternal mUmi;
-
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder
-                .spyStatic(UserManager.class)
-                .spyStatic(LocalServices.class)
-                .mockStatic(Settings.Global.class);
-    }
 
     @Before
     @UiThreadTest // Needed to initialize main handler

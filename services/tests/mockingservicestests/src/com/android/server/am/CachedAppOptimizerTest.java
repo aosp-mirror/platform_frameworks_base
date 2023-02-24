@@ -40,9 +40,8 @@ import android.text.TextUtils;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.modules.utils.testing.TestableDeviceConfig;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
@@ -69,7 +68,7 @@ import java.util.concurrent.TimeUnit;
  * atest FrameworksMockingServicesTests:CachedAppOptimizerTest
  */
 @Presubmit
-public final class CachedAppOptimizerTest extends ExtendedMockitoTestCase {
+public final class CachedAppOptimizerTest {
 
     private ServiceThread mThread;
 
@@ -93,10 +92,11 @@ public final class CachedAppOptimizerTest extends ExtendedMockitoTestCase {
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        mDeviceConfig.setUpMockedClasses(builder);
-    }
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .dynamiclyConfigureSessionBuilder(
+                    sessionBuilder -> mDeviceConfig.setUpMockedClasses(sessionBuilder))
+            .build();
 
     @Before
     public void setUp() {
