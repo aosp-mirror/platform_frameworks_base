@@ -16325,6 +16325,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // TODO(b/111541062): This method is only used for updating OOM adjustments. We need to update
     // the logic there and in mBatteryStatsService to make them aware of multiple resumed activities
+    @Nullable
     ProcessRecord getTopApp() {
         final WindowProcessController wpc = mAtmInternal != null ? mAtmInternal.getTopApp() : null;
         final ProcessRecord r = wpc != null ? (ProcessRecord) wpc.mOwner : null;
