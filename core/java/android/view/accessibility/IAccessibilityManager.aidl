@@ -120,8 +120,6 @@ interface IAccessibilityManager {
     // Used by UiAutomation for tests on the InputFilter
     void injectInputEventToInputFilter(in InputEvent event);
 
-    float getUiContrast();
-
     boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
     boolean stopFlashNotificationSequence(String opPkg);
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);

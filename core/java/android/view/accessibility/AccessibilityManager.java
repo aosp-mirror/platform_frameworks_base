@@ -25,7 +25,6 @@ import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
-import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -76,7 +75,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -138,21 +136,6 @@ public final class AccessibilityManager {
 
     /** @hide */
     public static final int AUTOCLICK_DELAY_DEFAULT = 600;
-
-    /**
-     * The contrast is defined as a float in [-1, 1], with a default value of 0.
-     * @hide
-     */
-    public static final float CONTRAST_MIN_VALUE = -1f;
-
-    /** @hide */
-    public static final float CONTRAST_MAX_VALUE = 1f;
-
-    /** @hide */
-    public static final float CONTRAST_DEFAULT_VALUE = 0f;
-
-    /** @hide */
-    public static final float CONTRAST_NOT_SET = Float.MIN_VALUE;
 
     /**
      * Activity action: Launch UI to manage which accessibility service or feature is assigned
@@ -288,8 +271,6 @@ public final class AccessibilityManager {
     @UnsupportedAppUsage(trackingBug = 123768939L)
     boolean mIsHighTextContrastEnabled;
 
-    private float mUiContrast;
-
     boolean mIsAudioDescriptionByDefaultRequested;
 
     // accessibility tracing state
@@ -313,9 +294,6 @@ public final class AccessibilityManager {
 
     private final ArrayMap<HighTextContrastChangeListener, Handler>
             mHighTextContrastStateChangeListeners = new ArrayMap<>();
-
-    private final ArrayMap<UiContrastChangeListener, Executor>
-            mUiContrastChangeListeners = new ArrayMap<>();
 
     private final ArrayMap<AccessibilityServicesStateChangeListener, Executor>
             mServicesStateChangeListeners = new ArrayMap<>();
@@ -390,7 +368,7 @@ public final class AccessibilityManager {
          *
          * @param manager The manager that is calling back
          */
-        void onAccessibilityServicesStateChanged(@NonNull AccessibilityManager manager);
+        void onAccessibilityServicesStateChanged(@NonNull  AccessibilityManager manager);
     }
 
     /**
@@ -409,21 +387,6 @@ public final class AccessibilityManager {
          * @param enabled Whether high text contrast is enabled.
          */
         void onHighTextContrastStateChanged(boolean enabled);
-    }
-
-    /**
-     * Listener for the UI contrast. To listen for changes to
-     * the UI contrast on the device, implement this interface and
-     * register it with the system by calling {@link #addUiContrastChangeListener}.
-     */
-    public interface UiContrastChangeListener {
-
-        /**
-         * Called when the color contrast enabled state changes.
-         *
-         * @param uiContrast The color contrast as in {@link #getUiContrast}
-         */
-        void onUiContrastChanged(@FloatRange(from = -1.0f, to = 1.0f) float uiContrast);
     }
 
     /**
@@ -539,16 +502,6 @@ public final class AccessibilityManager {
             synchronized (mLock) {
                 updateFocusAppearanceLocked(strokeWidth, color);
             }
-        }
-
-        @Override
-        public void setUiContrast(float contrast) {
-            synchronized (mLock) {
-                // if value changed in the settings, update the cached value and notify listeners
-                if (Math.abs(mUiContrast - contrast) < 1e-10) return;
-                mUiContrast = contrast;
-            }
-            mHandler.obtainMessage(MyCallback.MSG_NOTIFY_CONTRAST_CHANGED).sendToTarget();
         }
     };
 
@@ -720,7 +673,7 @@ public final class AccessibilityManager {
     /**
      * Returns if the high text contrast in the system is enabled.
      * <p>
-     * <strong>Note:</strong> You need to query this only if your application is
+     * <strong>Note:</strong> You need to query this only if you application is
      * doing its own rendering and does not rely on the platform rendering pipeline.
      * </p>
      *
@@ -736,24 +689,6 @@ public final class AccessibilityManager {
                 return false;
             }
             return mIsHighTextContrastEnabled;
-        }
-    }
-
-    /**
-     * Returns the color contrast for the user.
-     * <p>
-     * <strong>Note:</strong> You need to query this only if your application is
-     * doing its own rendering and does not rely on the platform rendering pipeline.
-     * </p>
-     * @return The color contrast, float in [-1, 1] where
-     *          0 corresponds to the default contrast
-     *         -1 corresponds to the minimum contrast that the user can set
-     *          1 corresponds to the maximum contrast that the user can set
-     */
-    @FloatRange(from = -1.0f, to = 1.0f)
-    public float getUiContrast() {
-        synchronized (mLock) {
-            return mUiContrast;
         }
     }
 
@@ -1342,35 +1277,6 @@ public final class AccessibilityManager {
             @NonNull HighTextContrastChangeListener listener) {
         synchronized (mLock) {
             mHighTextContrastStateChangeListeners.remove(listener);
-        }
-    }
-
-    /**
-     * Registers a {@link UiContrastChangeListener} for the current user.
-     *
-     * @param executor The executor on which the listener should be called back.
-     * @param listener The listener.
-     */
-    public void addUiContrastChangeListener(
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull UiContrastChangeListener listener) {
-        Objects.requireNonNull(executor);
-        Objects.requireNonNull(listener);
-        synchronized (mLock) {
-            mUiContrastChangeListeners.put(listener, executor);
-        }
-    }
-
-    /**
-     * Unregisters a {@link UiContrastChangeListener} for the current user.
-     * If the listener was not registered, does nothing and returns.
-     *
-     * @param listener The listener to unregister.
-     */
-    public void removeUiContrastChangeListener(@NonNull UiContrastChangeListener listener) {
-        Objects.requireNonNull(listener);
-        synchronized (mLock) {
-            mUiContrastChangeListeners.remove(listener);
         }
     }
 
@@ -2232,7 +2138,6 @@ public final class AccessibilityManager {
             mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
             updateUiTimeout(service.getRecommendedTimeoutMillis());
             updateFocusAppearanceLocked(service.getFocusStrokeWidth(), service.getFocusColor());
-            mUiContrast = service.getUiContrast();
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
@@ -2308,22 +2213,6 @@ public final class AccessibilityManager {
             listeners.valueAt(i).post(() ->
                     listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
-    }
-
-    /**
-     * Notifies the registered {@link UiContrastChangeListener}s if the value changed.
-     */
-    private void notifyUiContrastChanged() {
-        final ArrayMap<UiContrastChangeListener, Executor> listeners;
-        synchronized (mLock) {
-            listeners = new ArrayMap<>(mUiContrastChangeListeners);
-        }
-
-        listeners.entrySet().forEach(entry -> {
-            UiContrastChangeListener listener = entry.getKey();
-            Executor executor = entry.getValue();
-            executor.execute(() -> listener.onUiContrastChanged(mUiContrast));
-        });
     }
 
     /**
@@ -2416,7 +2305,6 @@ public final class AccessibilityManager {
 
     private final class MyCallback implements Handler.Callback {
         public static final int MSG_SET_STATE = 1;
-        public static final int MSG_NOTIFY_CONTRAST_CHANGED = 2;
 
         @Override
         public boolean handleMessage(Message message) {
@@ -2428,9 +2316,6 @@ public final class AccessibilityManager {
                         setStateLocked(state);
                     }
                 } break;
-                case MSG_NOTIFY_CONTRAST_CHANGED: {
-                    notifyUiContrastChanged();
-                }
             }
             return true;
         }
