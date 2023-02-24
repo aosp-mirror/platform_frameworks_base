@@ -6083,4 +6083,9 @@
     <!-- Whether the lock screen is allowed to run its own live wallpaper,
          different from the home screen wallpaper. -->
     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
+
+    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
+    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
+    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
+    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
 </resources>
