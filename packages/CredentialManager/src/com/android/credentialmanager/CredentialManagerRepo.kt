@@ -402,30 +402,26 @@ class CredentialManagerRepo(
         )
         val credentialData = request.credentialData
         return RequestInfo.newCreateRequestInfo(
-            Binder(),
-            CreateCredentialRequest(
-                "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
-                credentialData,
-                /*candidateQueryData=*/ Bundle(),
-                /*isSystemProviderRequired=*/ false,
-                /*alwaysSendAppInfoToProvider=*/ true
-            ),
-            "com.google.android.youtube"
+                Binder(),
+                CreateCredentialRequest.Builder(credentialData, Bundle())
+                        .setType("androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL")
+                        .setIsSystemProviderRequired(false)
+                        .setAlwaysSendAppInfoToProvider(true)
+                        .build(),
+                "com.google.android.youtube"
         )
     }
 
     private fun testCreatePasswordRequestInfo(): RequestInfo {
         val request = CreatePasswordRequest("beckett-bakert@gmail.com", "password123")
         return RequestInfo.newCreateRequestInfo(
-            Binder(),
-            CreateCredentialRequest(
-                TYPE_PASSWORD_CREDENTIAL,
-                request.credentialData,
-                request.candidateQueryData,
-                /*isSystemProviderRequired=*/ false,
-                /*alwaysSendAppInfoToProvider=*/ true
-            ),
-            "com.google.android.youtube"
+                Binder(),
+                CreateCredentialRequest.Builder(request.credentialData, request.candidateQueryData)
+                        .setType(TYPE_PASSWORD_CREDENTIAL)
+                        .setIsSystemProviderRequired(false)
+                        .setAlwaysSendAppInfoToProvider(true)
+                        .build(),
+                "com.google.android.youtube"
         )
     }
 
@@ -437,15 +433,13 @@ class CredentialManagerRepo(
             displayInfo.toBundle()
         )
         return RequestInfo.newCreateRequestInfo(
-            Binder(),
-            CreateCredentialRequest(
-                "other-sign-ins",
-                data,
-                /*candidateQueryData=*/ Bundle(),
-                /*isSystemProviderRequired=*/ false,
-                /*alwaysSendAppInfoToProvider=*/ true
-            ),
-            "com.google.android.youtube"
+                Binder(),
+                CreateCredentialRequest.Builder(data, Bundle())
+                        .setType("other-sign-ins")
+                        .setIsSystemProviderRequired(false)
+                        .setAlwaysSendAppInfoToProvider(true)
+                        .build(),
+                "com.google.android.youtube"
         )
     }
 
