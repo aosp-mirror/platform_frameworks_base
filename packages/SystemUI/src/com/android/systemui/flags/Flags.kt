@@ -155,7 +155,7 @@ object Flags {
     // TODO(b/255618149): Tracking Bug
     @JvmField
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
-        releasedFlag(216, "customizable_lock_screen_quick_affordances")
+        unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = true)
 
     /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
     // TODO(b/256513609): Tracking Bug
@@ -187,7 +187,7 @@ object Flags {
 
     // TODO(b/262780002): Tracking Bug
     @JvmField
-    val REVAMPED_WALLPAPER_UI = releasedFlag(222, "revamped_wallpaper_ui")
+    val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = true)
 
     /** A different path for unocclusion transitions back to keyguard */
     // TODO(b/262859270): Tracking Bug
@@ -214,9 +214,10 @@ object Flags {
     // TODO(b/266242192): Tracking Bug
     @JvmField
     val LOCK_SCREEN_LONG_PRESS_ENABLED =
-        releasedFlag(
+        unreleasedFlag(
             228,
-            "lock_screen_long_press_enabled"
+            "lock_screen_long_press_enabled",
+            teamfood = true,
         )
 
     // 300 - power menu
