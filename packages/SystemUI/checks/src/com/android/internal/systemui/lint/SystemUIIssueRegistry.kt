@@ -32,6 +32,7 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 BindServiceOnMainThreadDetector.ISSUE,
                 BroadcastSentViaContextDetector.ISSUE,
                 CleanArchitectureDependencyViolationDetector.ISSUE,
+                DumpableNotRegisteredDetector.ISSUE,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY,
                 NonInjectedMainThreadDetector.ISSUE,
