@@ -23,7 +23,6 @@ java_defaults {
         "compatibility-device-util-axt",
         "mockito-target-extended-minus-junit4",
         "truth-prebuilt",
-        "ub-uiautomator",
     ],
     libs: ["android.test.base"],
     srcs: [
