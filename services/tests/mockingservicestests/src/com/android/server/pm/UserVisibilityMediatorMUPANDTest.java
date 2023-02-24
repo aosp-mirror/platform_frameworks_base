@@ -20,8 +20,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
-import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
-import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE;
 import static com.android.server.pm.UserVisibilityChangedEvent.onInvisible;
 import static com.android.server.pm.UserVisibilityChangedEvent.onVisible;
@@ -128,7 +126,8 @@ public final class UserVisibilityMediatorMUPANDTest
 
         listener.verify();
     }
-  /* TODO: re-add
+
+  /* TODO(b/261538337): re-add after the reverted CL is merged again
 
     @Test
     public void
