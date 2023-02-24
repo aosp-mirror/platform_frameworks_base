@@ -26,7 +26,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -526,27 +525,25 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
 
     private fun assertConnection(
         conn: DemoMobileConnectionRepository,
-        model: FakeNetworkEventModel
+        model: FakeNetworkEventModel,
     ) {
         when (model) {
             is FakeNetworkEventModel.Mobile -> {
-                val connectionInfo: MobileConnectionModel = conn.connectionInfo.value
                 assertThat(conn.subId).isEqualTo(model.subId)
-                assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-                assertThat(connectionInfo.dataActivityDirection)
+                assertThat(conn.cdmaLevel.value).isEqualTo(model.level)
+                assertThat(conn.primaryLevel.value).isEqualTo(model.level)
+                assertThat(conn.dataActivityDirection.value)
                     .isEqualTo((model.activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel())
-                assertThat(connectionInfo.carrierNetworkChangeActive)
+                assertThat(conn.carrierNetworkChangeActive.value)
                     .isEqualTo(model.carrierNetworkChange)
-                assertThat(connectionInfo.isRoaming).isEqualTo(model.roaming)
+                assertThat(conn.isRoaming.value).isEqualTo(model.roaming)
                 assertThat(conn.networkName.value)
                     .isEqualTo(NetworkNameModel.IntentDerived(model.name))
 
                 // TODO(b/261029387) check these once we start handling them
-                assertThat(connectionInfo.isEmergencyOnly).isFalse()
-                assertThat(connectionInfo.isGsm).isFalse()
-                assertThat(connectionInfo.dataConnectionState)
-                    .isEqualTo(DataConnectionState.Connected)
+                assertThat(conn.isEmergencyOnly.value).isFalse()
+                assertThat(conn.isGsm.value).isFalse()
+                assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
             }
             else -> {}
         }
@@ -556,15 +553,14 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         conn: DemoMobileConnectionRepository,
         model: FakeWifiEventModel.CarrierMerged,
     ) {
-        val connectionInfo: MobileConnectionModel = conn.connectionInfo.value
         assertThat(conn.subId).isEqualTo(model.subscriptionId)
-        assertThat(connectionInfo.cdmaLevel).isEqualTo(model.level)
-        assertThat(connectionInfo.primaryLevel).isEqualTo(model.level)
-        assertThat(connectionInfo.carrierNetworkChangeActive).isEqualTo(false)
-        assertThat(connectionInfo.isRoaming).isEqualTo(false)
-        assertThat(connectionInfo.isEmergencyOnly).isFalse()
-        assertThat(connectionInfo.isGsm).isFalse()
-        assertThat(connectionInfo.dataConnectionState).isEqualTo(DataConnectionState.Connected)
+        assertThat(conn.cdmaLevel.value).isEqualTo(model.level)
+        assertThat(conn.primaryLevel.value).isEqualTo(model.level)
+        assertThat(conn.carrierNetworkChangeActive.value).isEqualTo(false)
+        assertThat(conn.isRoaming.value).isEqualTo(false)
+        assertThat(conn.isEmergencyOnly.value).isFalse()
+        assertThat(conn.isGsm.value).isFalse()
+        assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
     }
 }
 
