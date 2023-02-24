@@ -395,7 +395,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mContext.startActivity(launchIntent);
             mActivityStarter.startActivity(launchIntent, true, controller);
         }
     }
