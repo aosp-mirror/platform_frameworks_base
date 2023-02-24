@@ -47,6 +47,8 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_SHELL_PIP = "extra_shell_pip";
     // See ISplitScreen.aidl
     public static final String KEY_EXTRA_SHELL_SPLIT_SCREEN = "extra_shell_split_screen";
+    // See IFloatingTasks.aidl
+    public static final String KEY_EXTRA_SHELL_FLOATING_TASKS = "extra_shell_floating_tasks";
     // See IOneHanded.aidl
     public static final String KEY_EXTRA_SHELL_ONE_HANDED = "extra_shell_one_handed";
     // See IShellTransitions.aidl
@@ -60,6 +62,8 @@ public class QuickStepContract {
     // See IRecentTasks.aidl
     public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
     public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
+    // See IDesktopMode.aidl
+    public static final String KEY_EXTRA_SHELL_DESKTOP_MODE = "extra_shell_desktop_mode";
 
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
@@ -201,28 +205,6 @@ public class QuickStepContract {
      */
     public static final float getQuickStepTouchSlopPx(Context context) {
         return QUICKSTEP_TOUCH_SLOP_RATIO * ViewConfiguration.get(context).getScaledTouchSlop();
-    }
-
-    /**
-     * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
-     * home button press/long press over are ignored and will start to drag when exceeded and the
-     * touch slop is when the respected operation will occur when exceeded. Touch slop must be
-     * larger than the drag slop.
-     */
-    public static int getQuickStepDragSlopPx() {
-        return convertDpToPixel(10);
-    }
-
-    public static int getQuickStepTouchSlopPx() {
-        return convertDpToPixel(24);
-    }
-
-    public static int getQuickScrubTouchSlopPx() {
-        return convertDpToPixel(24);
-    }
-
-    private static int convertDpToPixel(float dp) {
-        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
     }
 
     /**

@@ -158,7 +158,6 @@ public class BubbleData {
     @Nullable
     private Listener mListener;
 
-    @Nullable
     private Bubbles.BubbleMetadataFlagListener mBubbleMetadataFlagListener;
     private Bubbles.PendingIntentCanceledListener mCancelledListener;
 
@@ -1136,7 +1135,7 @@ public class BubbleData {
     /**
      * Description of current bubble data state.
      */
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw) {
         pw.print("selected: ");
         pw.println(mSelectedBubble != null
                 ? mSelectedBubble.getKey()
@@ -1147,13 +1146,13 @@ public class BubbleData {
         pw.print("stack bubble count:    ");
         pw.println(mBubbles.size());
         for (Bubble bubble : mBubbles) {
-            bubble.dump(pw, args);
+            bubble.dump(pw);
         }
 
         pw.print("overflow bubble count:    ");
         pw.println(mOverflowBubbles.size());
         for (Bubble bubble : mOverflowBubbles) {
-            bubble.dump(pw, args);
+            bubble.dump(pw);
         }
 
         pw.print("summaryKeys: ");

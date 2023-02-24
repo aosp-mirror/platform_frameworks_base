@@ -20,6 +20,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.android.settingslib.utils.BuildCompatUtils;
+import com.android.settingslib.widget.R;
 
 import com.google.android.material.appbar.AppBarLayout;
 

@@ -57,7 +57,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        style="?attr/hybridNotificationTextStyle"
+        android:paddingEnd="4dp"
+        style="@*android:style/Widget.DeviceDefault.Notification.Text"
     />
 
     <TextView
@@ -65,6 +66,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        style="?attr/hybridNotificationTextStyle"
+        android:paddingEnd="4dp"
+        style="@*android:style/Widget.DeviceDefault.Notification.Text"
     />
 </com.android.systemui.statusbar.notification.row.HybridConversationNotificationView>

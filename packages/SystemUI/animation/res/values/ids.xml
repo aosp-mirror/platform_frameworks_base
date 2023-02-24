@@ -21,6 +21,7 @@
 
     <!-- ViewBoundsAnimator -->
     <item type="id" name="tag_animator"/>
+    <item type="id" name="tag_alpha_animator"/>
     <item type="id" name="tag_layout_listener"/>
     <item type="id" name="tag_override_bottom"/>
     <item type="id" name="tag_override_left"/>

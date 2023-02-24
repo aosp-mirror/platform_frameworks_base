@@ -23,6 +23,7 @@ import android.service.notification.NotificationStats;
 
 import androidx.annotation.NonNull;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifCollection.CancellationReason;
@@ -33,10 +34,13 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
+import javax.inject.Inject;
+
 /**
  * Callback for when a user interacts with a {@see ExpandableNotificationRow}. Sends relevant
  * information about the interaction to the notification pipeline.
  */
+@SysUISingleton
 public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback {
     private final NotificationVisibilityProvider mVisibilityProvider;
     private final NotifCollection mNotifCollection;
@@ -44,6 +48,7 @@ public class OnUserInteractionCallbackImpl implements OnUserInteractionCallback 
     private final StatusBarStateController mStatusBarStateController;
     private final VisualStabilityCoordinator mVisualStabilityCoordinator;
 
+    @Inject
     public OnUserInteractionCallbackImpl(
             NotificationVisibilityProvider visibilityProvider,
             NotifCollection notifCollection,

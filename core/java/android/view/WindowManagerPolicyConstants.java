@@ -237,10 +237,6 @@ public interface WindowManagerPolicyConstants {
      */
     int LAYER_OFFSET_THUMBNAIL = WINDOW_LAYER_MULTIPLIER - 1;
 
-    // TODO(b/207185041): Remove this divider workaround after we full remove leagacy split and
-    //                    make app pair split only have single root then we can just attach the
-    //                    divider to the single root task in shell.
-    int SPLIT_DIVIDER_LAYER = TYPE_LAYER_MULTIPLIER * 3;
     int WATERMARK_LAYER = TYPE_LAYER_MULTIPLIER * 100;
     int STRICT_MODE_LAYER = TYPE_LAYER_MULTIPLIER * 101;
     int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;

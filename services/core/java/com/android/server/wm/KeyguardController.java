@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.KeyguardControllerProto.AOD_SHOWING;
+import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_GOING_AWAY;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_PER_DISPLAY;
 import static com.android.server.wm.KeyguardControllerProto.KEYGUARD_SHOWING;
 
@@ -72,6 +73,8 @@ class KeyguardController {
 
     static final String KEYGUARD_SLEEP_TOKEN_TAG = "keyguard";
 
+    private static final int DEFER_WAKE_TRANSITION_TIMEOUT_MS = 5000;
+
     private final ActivityTaskSupervisor mTaskSupervisor;
     private WindowManagerService mWindowManager;
 
@@ -79,7 +82,7 @@ class KeyguardController {
     private final ActivityTaskManagerService mService;
     private RootWindowContainer mRootWindowContainer;
     private final ActivityTaskManagerInternal.SleepTokenAcquirer mSleepTokenAcquirer;
-
+    private boolean mWaitingForWakeTransition;
 
     KeyguardController(ActivityTaskManagerService service,
             ActivityTaskSupervisor taskSupervisor) {
@@ -167,10 +170,14 @@ class KeyguardController {
 
         final KeyguardDisplayState state = getDisplayState(displayId);
         final boolean aodChanged = aodShowing != state.mAodShowing;
+        final boolean aodRemoved = state.mAodShowing && !aodShowing;
         // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
-        // Do not reset keyguardChanged status if this is aodChanged.
+        // Do not reset keyguardChanged status when only AOD is removed.
         final boolean keyguardChanged = (keyguardShowing != state.mKeyguardShowing)
-                || (state.mKeyguardGoingAway && keyguardShowing && !aodChanged);
+                || (state.mKeyguardGoingAway && keyguardShowing && !aodRemoved);
+        if (aodRemoved) {
+            updateDeferWakeTransition(false /* waiting */);
+        }
         if (!keyguardChanged && !aodChanged) {
             setWakeTransitionReady();
             return;
@@ -199,10 +206,6 @@ class KeyguardController {
 
         state.mKeyguardShowing = keyguardShowing;
         state.mAodShowing = aodShowing;
-        if (aodChanged) {
-            // Ensure the new state takes effect.
-            mWindowManager.mWindowPlacerLocked.performSurfacePlacement();
-        }
 
         if (keyguardChanged) {
             // Irrelevant to AOD.
@@ -220,6 +223,10 @@ class KeyguardController {
         mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
         InputMethodManagerInternal.get().updateImeWindowStatus(false /* disableImeIcon */);
         setWakeTransitionReady();
+        if (aodChanged) {
+            // Ensure the new state takes effect.
+            mWindowManager.mWindowPlacerLocked.performSurfacePlacement();
+        }
     }
 
     private void setWakeTransitionReady() {
@@ -526,6 +533,33 @@ class KeyguardController {
         }
     }
 
+    private final Runnable mResetWaitTransition = () -> {
+        synchronized (mWindowManager.mGlobalLock) {
+            updateDeferWakeTransition(false /* waiting */);
+        }
+    };
+
+    void updateDeferWakeTransition(boolean waiting) {
+        if (waiting == mWaitingForWakeTransition) {
+            return;
+        }
+        if (!mWindowManager.mAtmService.getTransitionController().isShellTransitionsEnabled()) {
+            return;
+        }
+        // if aod is showing, defer the wake transition until aod state changed.
+        if (waiting && isAodShowing(DEFAULT_DISPLAY)) {
+            mWaitingForWakeTransition = true;
+            mWindowManager.mAtmService.getTransitionController().deferTransitionReady();
+            mWindowManager.mH.postDelayed(mResetWaitTransition, DEFER_WAKE_TRANSITION_TIMEOUT_MS);
+        } else if (!waiting) {
+            // dismiss the deferring if the aod state change or cancel awake.
+            mWaitingForWakeTransition = false;
+            mWindowManager.mAtmService.getTransitionController().continueTransitionReady();
+            mWindowManager.mH.removeCallbacks(mResetWaitTransition);
+        }
+    }
+
+
     /** Represents Keyguard state per individual display. */
     private static class KeyguardDisplayState {
         private final int mDisplayId;
@@ -589,13 +623,12 @@ class KeyguardController {
                     mTopTurnScreenOnActivity = top;
                 }
 
-                final boolean isKeyguardSecure = controller.mWindowManager.isKeyguardSecure(
-                        controller.mService.getCurrentUserId());
-                if (top.mDismissKeyguardIfInsecure && mKeyguardShowing && !isKeyguardSecure) {
+                if (top.mDismissKeyguard && mKeyguardShowing) {
                     mKeyguardGoingAway = true;
                 } else if (top.canShowWhenLocked()) {
                     mTopOccludesActivity = top;
                 }
+                top.mDismissKeyguard = false;
 
                 // Only the top activity may control occluded, as we can't occlude the Keyguard
                 // if the top app doesn't want to occlude it.
@@ -673,6 +706,7 @@ class KeyguardController {
             proto.write(KeyguardPerDisplayProto.KEYGUARD_SHOWING, mKeyguardShowing);
             proto.write(KeyguardPerDisplayProto.AOD_SHOWING, mAodShowing);
             proto.write(KeyguardPerDisplayProto.KEYGUARD_OCCLUDED, mOccluded);
+            proto.write(KeyguardPerDisplayProto.KEYGUARD_GOING_AWAY, mKeyguardGoingAway);
             proto.end(token);
         }
     }
@@ -693,6 +727,7 @@ class KeyguardController {
         final long token = proto.start(fieldId);
         proto.write(AOD_SHOWING, default_state.mAodShowing);
         proto.write(KEYGUARD_SHOWING, default_state.mKeyguardShowing);
+        proto.write(KEYGUARD_GOING_AWAY, default_state.mKeyguardGoingAway);
         writeDisplayStatesToProto(proto, KEYGUARD_PER_DISPLAY);
         proto.end(token);
     }

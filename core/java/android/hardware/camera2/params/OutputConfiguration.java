@@ -159,8 +159,9 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <li> For a SurfaceView output surface, the timestamp base is {@link
      * #TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED}. The timestamp is overridden with choreographer
-     * pulses from the display subsystem for smoother display of camera frames. The timestamp
-     * is roughly in the same time base as {@link android.os.SystemClock#uptimeMillis}.</li>
+     * pulses from the display subsystem for smoother display of camera frames when the camera
+     * device runs in fixed frame rate. The timestamp is roughly in the same time base as
+     * {@link android.os.SystemClock#uptimeMillis}.</li>
      * <li> For an output surface of MediaRecorder, MediaCodec, or ImageReader with {@link
      * android.hardware.HardwareBuffer#USAGE_VIDEO_ENCODE} usge flag, the timestamp base is
      * {@link #TIMESTAMP_BASE_MONOTONIC}, which is roughly the same time base as
@@ -231,7 +232,8 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <p>The timestamp of the output images are overridden with choreographer pulses from the
      * display subsystem for smoother display of camera frames. An output target of SurfaceView
-     * uses this time base by default.</p>
+     * uses this time base by default. Note that the timestamp override is done for fixed camera
+     * frame rate only.</p>
      *
      * <p>This timestamp base isn't applicable to SurfaceTexture targets. SurfaceTexture's
      * {@link android.graphics.SurfaceTexture#updateTexImage updateTexImage} function always
@@ -245,6 +247,26 @@ public final class OutputConfiguration implements Parcelable {
      */
     public static final int TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED = 4;
 
+    /**
+     * Timestamp is the start of readout in the same time domain as TIMESTAMP_BASE_SENSOR.
+     *
+     * <p>The start of the camera sensor readout after exposure. For a rolling shutter camera
+     * sensor, the timestamp is typically equal to the start of exposure time +
+     * exposure time + certain fixed offset. The fixed offset could be due to camera sensor
+     * level crop. The benefit of using readout time is that when camera runs in a fixed
+     * frame rate, the timestamp intervals between frames are constant.</p>
+     *
+     * <p>This timestamp is in the same time domain as in TIMESTAMP_BASE_SENSOR, with the exception
+     * that one is start of exposure, and the other is start of readout.</p>
+     *
+     * <p>This timestamp base is supported only if {@link
+     * CameraCharacteristics#SENSOR_READOUT_TIMESTAMP} is
+     * {@link CameraMetadata#SENSOR_READOUT_TIMESTAMP_HARDWARE}.</p>
+     *
+     * @hide
+     */
+    public static final int TIMESTAMP_BASE_READOUT_SENSOR = 5;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"TIMESTAMP_BASE_"}, value =
@@ -252,7 +274,8 @@ public final class OutputConfiguration implements Parcelable {
          TIMESTAMP_BASE_SENSOR,
          TIMESTAMP_BASE_MONOTONIC,
          TIMESTAMP_BASE_REALTIME,
-         TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED})
+         TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED,
+         TIMESTAMP_BASE_READOUT_SENSOR})
     public @interface TimestampBase {};
 
     /** @hide */
@@ -974,7 +997,7 @@ public final class OutputConfiguration implements Parcelable {
     public void setTimestampBase(@TimestampBase int timestampBase) {
         // Verify that the value is in range
         if (timestampBase < TIMESTAMP_BASE_DEFAULT ||
-                timestampBase > TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED) {
+                timestampBase > TIMESTAMP_BASE_READOUT_SENSOR) {
             throw new IllegalArgumentException("Not a valid timestamp base value " +
                     timestampBase);
         }

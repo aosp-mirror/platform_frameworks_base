@@ -50,6 +50,7 @@ public class QSIconViewImpl extends QSIconView {
     protected int mIconSizePx;
     private boolean mAnimationEnabled = true;
     private int mState = -1;
+    private boolean mDisabledByPolicy = false;
     private int mTint;
     @Nullable
     private QSTile.Icon mLastIcon;
@@ -159,14 +160,10 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected void setIcon(ImageView iv, QSTile.State state, boolean allowAnimations) {
-        if (state.disabledByPolicy) {
-            iv.setColorFilter(getContext().getColor(R.color.qs_tile_disabled_color));
-        } else {
-            iv.clearColorFilter();
-        }
-        if (state.state != mState) {
-            int color = getColor(state.state);
+        if (state.state != mState || state.disabledByPolicy != mDisabledByPolicy) {
+            int color = getColor(state);
             mState = state.state;
+            mDisabledByPolicy = state.disabledByPolicy;
             if (mTint != 0 && allowAnimations && shouldAnimate(iv)) {
                 animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state, allowAnimations));
             } else {
@@ -183,7 +180,7 @@ public class QSIconViewImpl extends QSIconView {
         }
     }
 
-    protected int getColor(int state) {
+    protected int getColor(QSTile.State state) {
         return getIconColorForState(getContext(), state);
     }
 
@@ -239,19 +236,18 @@ public class QSIconViewImpl extends QSIconView {
     /**
      * Color to tint the tile icon based on state
      */
-    public static int getIconColorForState(Context context, int state) {
-        switch (state) {
-            case Tile.STATE_UNAVAILABLE:
-                return Utils.applyAlpha(QSTileViewImpl.UNAVAILABLE_ALPHA,
-                        Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary));
-            case Tile.STATE_INACTIVE:
-                return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
-            case Tile.STATE_ACTIVE:
-                return Utils.getColorAttrDefaultColor(context,
-                        com.android.internal.R.attr.textColorOnAccent);
-            default:
-                Log.e("QSIconView", "Invalid state " + state);
-                return 0;
+    private static int getIconColorForState(Context context, QSTile.State state) {
+        if (state.disabledByPolicy || state.state == Tile.STATE_UNAVAILABLE) {
+            return Utils.getColorAttrDefaultColor(
+                    context, com.android.internal.R.attr.textColorTertiary);
+        } else if (state.state == Tile.STATE_INACTIVE) {
+            return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary);
+        } else if (state.state == Tile.STATE_ACTIVE) {
+            return Utils.getColorAttrDefaultColor(context,
+                    com.android.internal.R.attr.textColorOnAccent);
+        } else {
+            Log.e("QSIconView", "Invalid state " + state);
+            return 0;
         }
     }
 

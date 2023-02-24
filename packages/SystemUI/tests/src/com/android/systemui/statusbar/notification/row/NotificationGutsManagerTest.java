@@ -26,7 +26,6 @@ import static android.service.notification.NotificationListenerService.Ranking.U
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertEquals;
@@ -37,7 +36,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -72,23 +70,21 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.settings.UserContextProvider;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.wmshell.BubblesManager;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -128,7 +124,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private AccessibilityManager mAccessibilityManager;
     @Mock private HighPriorityProvider mHighPriorityProvider;
     @Mock private INotificationManager mINotificationManager;
-    @Mock private NotificationEntryManager mNotificationEntryManager;
     @Mock private LauncherApps mLauncherApps;
     @Mock private ShortcutManager mShortcutManager;
     @Mock private ChannelEditorDialogController mChannelEditorDialogController;
@@ -156,13 +151,13 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
 
         mGutsManager = new NotificationGutsManager(mContext,
                 () -> Optional.of(mCentralSurfaces), mHandler, mHandler, mAccessibilityManager,
-                mHighPriorityProvider, mINotificationManager, mNotificationEntryManager,
+                mHighPriorityProvider, mINotificationManager,
                 mPeopleSpaceWidgetManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mAssistantFeedbackController,
                 Optional.of(mBubblesManager), new UiEventLoggerFake(), mOnUserInteractionCallback,
-                mShadeController, mock(DumpManager.class));
+                mShadeController);
         mGutsManager.setUpWithPresenter(mPresenter, mNotificationListContainer,
-                mCheckSaveListener, mOnSettingsClickListener);
+                mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
     }
 
@@ -444,36 +439,6 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(false),
                 eq(false), /* wasShownHighPriority */
                 eq(mAssistantFeedbackController));
-    }
-
-    @Test
-    public void testShouldExtendLifetime() {
-        NotificationGuts guts = new NotificationGuts(mContext);
-        ExpandableNotificationRow row = spy(createTestNotificationRow());
-        doReturn(guts).when(row).getGuts();
-        NotificationEntry entry = row.getEntry();
-        entry.setRow(row);
-        mGutsManager.setExposedGuts(guts);
-
-        assertTrue(mGutsManager.shouldExtendLifetime(entry));
-    }
-
-    @Test
-    @Ignore
-    public void testSetShouldManageLifetime_setShouldManage() {
-        NotificationEntry entry = createTestNotificationRow().getEntry();
-        mGutsManager.setShouldManageLifetime(entry, true /* shouldManage */);
-
-        assertTrue(entry.getKey().equals(mGutsManager.mKeyToRemoveOnGutsClosed));
-    }
-
-    @Test
-    public void testSetShouldManageLifetime_setShouldNotManage() {
-        NotificationEntry entry = createTestNotificationRow().getEntry();
-        mGutsManager.mKeyToRemoveOnGutsClosed = entry.getKey();
-        mGutsManager.setShouldManageLifetime(entry, false /* shouldManage */);
-
-        assertNull(mGutsManager.mKeyToRemoveOnGutsClosed);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

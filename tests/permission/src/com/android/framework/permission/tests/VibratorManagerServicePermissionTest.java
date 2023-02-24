@@ -50,6 +50,7 @@ import org.junit.runners.JUnit4;
 public class VibratorManagerServicePermissionTest {
 
     private static final String PACKAGE_NAME = "com.android.framework.permission.tests";
+    private static final int DISPLAY_ID = 1;
     private static final CombinedVibration EFFECT =
             CombinedVibration.createParallel(
                     VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
@@ -106,7 +107,8 @@ public class VibratorManagerServicePermissionTest {
     @Test
     public void testVibrateWithoutPermissionFails() throws RemoteException {
         expectSecurityException("VIBRATE");
-        mVibratorService.vibrate(Process.myUid(), PACKAGE_NAME, EFFECT, ATTRS, "testVibrate",
+        mVibratorService.vibrate(Process.myUid(), DISPLAY_ID, PACKAGE_NAME, EFFECT, ATTRS,
+                "testVibrate",
                 new Binder());
     }
 
@@ -115,7 +117,8 @@ public class VibratorManagerServicePermissionTest {
             throws RemoteException {
         getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
                 Manifest.permission.VIBRATE);
-        mVibratorService.vibrate(Process.myUid(), PACKAGE_NAME, EFFECT, ATTRS, "testVibrate",
+        mVibratorService.vibrate(Process.myUid(), DISPLAY_ID, PACKAGE_NAME, EFFECT, ATTRS,
+                "testVibrate",
                 new Binder());
     }
 
@@ -124,7 +127,8 @@ public class VibratorManagerServicePermissionTest {
         expectSecurityException("UPDATE_APP_OPS_STATS");
         getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
                 Manifest.permission.VIBRATE);
-        mVibratorService.vibrate(Process.SYSTEM_UID, "android", EFFECT, ATTRS, "testVibrate",
+        mVibratorService.vibrate(Process.SYSTEM_UID, DISPLAY_ID, "android", EFFECT, ATTRS,
+                "testVibrate",
                 new Binder());
     }
 
@@ -133,7 +137,8 @@ public class VibratorManagerServicePermissionTest {
         getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
                 Manifest.permission.VIBRATE,
                 Manifest.permission.UPDATE_APP_OPS_STATS);
-        mVibratorService.vibrate(Process.SYSTEM_UID, "android", EFFECT, ATTRS, "testVibrate",
+        mVibratorService.vibrate(Process.SYSTEM_UID, DISPLAY_ID, "android", EFFECT, ATTRS,
+                "testVibrate",
                 new Binder());
     }
 

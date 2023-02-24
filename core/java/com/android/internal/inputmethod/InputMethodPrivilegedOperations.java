@@ -253,18 +253,19 @@ public final class InputMethodPrivilegedOperations {
      * Calls {@link IInputMethodPrivilegedOperations#hideMySoftInput(int, IVoidResultCallback)}
      *
      * @param flags additional operating flags
+     * @param reason the reason to hide soft input
      * @see android.view.inputmethod.InputMethodManager#HIDE_IMPLICIT_ONLY
      * @see android.view.inputmethod.InputMethodManager#HIDE_NOT_ALWAYS
      */
     @AnyThread
-    public void hideMySoftInput(int flags) {
+    public void hideMySoftInput(int flags, @SoftInputShowHideReason int reason) {
         final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
         if (ops == null) {
             return;
         }
         try {
             final AndroidFuture<Void> future = new AndroidFuture<>();
-            ops.hideMySoftInput(flags, future);
+            ops.hideMySoftInput(flags, reason, future);
             CompletableFutureUtil.getResult(future);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

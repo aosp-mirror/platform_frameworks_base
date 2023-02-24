@@ -77,8 +77,7 @@ class UdfpsControllerOverlay(
     private val systemClock: SystemClock,
     private val keyguardStateController: KeyguardStateController,
     private val unlockedScreenOffAnimationController: UnlockedScreenOffAnimationController,
-    private val halControlsIllumination: Boolean,
-    private var hbmProvider: UdfpsHbmProvider,
+    private var udfpsDisplayModeProvider: UdfpsDisplayModeProvider,
     val requestId: Long,
     @ShowReason val requestReason: Int,
     private val controllerCallback: IUdfpsOverlayControllerCallback,
@@ -102,8 +101,8 @@ class UdfpsControllerOverlay(
         fitInsetsTypes = 0
         gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        flags =
-            (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
+        flags = (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or
+          WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
         privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
         // Avoid announcing window title.
         accessibilityTitle = " "
@@ -140,8 +139,7 @@ class UdfpsControllerOverlay(
                     R.layout.udfps_view, null, false
                 ) as UdfpsView).apply {
                     overlayParams = params
-                    halControlsIllumination = this@UdfpsControllerOverlay.halControlsIllumination
-                    setHbmProvider(hbmProvider)
+                    setUdfpsDisplayModeProvider(udfpsDisplayModeProvider)
                     val animation = inflateUdfpsAnimation(this, controller)
                     if (animation != null) {
                         animation.init()
@@ -250,8 +248,8 @@ class UdfpsControllerOverlay(
         val wasShowing = isShowing
 
         overlayView?.apply {
-            if (isIlluminationRequested) {
-                stopIllumination()
+            if (isDisplayConfigured) {
+                unconfigureDisplay()
             }
             windowManager.removeView(this)
             setOnTouchListener(null)

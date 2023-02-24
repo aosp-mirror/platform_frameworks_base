@@ -42,6 +42,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
@@ -309,6 +310,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 R.integer.dock_enter_exit_duration);
         mForceWindowDrawsBarBackgrounds = context.getResources().getBoolean(
                 R.bool.config_forceWindowDrawsStatusBarBackground)
+                && params.type != TYPE_INPUT_METHOD
                 && context.getApplicationInfo().targetSdkVersion >= N;
         mSemiTransparentBarColor = context.getResources().getColor(
                 R.color.system_bar_background_semi_transparent, null /* theme */);
@@ -1164,8 +1166,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     0 /* sideInset */, animate && !disallowAnimate,
                     mForceWindowDrawsBarBackgrounds, controller);
             boolean oldDrawLegacy = mDrawLegacyNavigationBarBackground;
-            mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
-                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+            mDrawLegacyNavigationBarBackground =
+                    (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
                 mDrawLegacyNavigationBarBackgroundHandled =
                         mWindow.onDrawLegacyNavigationBarBackgroundChanged(
@@ -1206,7 +1208,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         boolean hideNavigation = (sysUiVisibility & SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 || !(controller == null || controller.isRequestedVisible(ITYPE_NAVIGATION_BAR));
         boolean decorFitsSystemWindows = mWindow.mDecorFitsSystemWindows;
-        boolean forceConsumingNavBar = (mForceWindowDrawsBarBackgrounds
+        boolean forceConsumingNavBar =
+                ((mForceWindowDrawsBarBackgrounds || mDrawLegacyNavigationBarBackgroundHandled)
                         && (attrs.flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
                         && (sysUiVisibility & SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) == 0
                         && decorFitsSystemWindows
@@ -1437,8 +1440,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             int size, boolean verticalBar, boolean seascape, int sideMargin, boolean animate,
             boolean force, WindowInsetsController controller) {
         state.present = state.attributes.isPresent(
-                        controller.isRequestedVisible(state.attributes.insetsType),
-                        mWindow.getAttributes().flags, force);
+                (controller.isRequestedVisible(state.attributes.insetsType)
+                        || mLastShouldAlwaysConsumeSystemBars),
+                mWindow.getAttributes().flags, force);
         boolean show = state.attributes.isVisible(state.present, color,
                 mWindow.getAttributes().flags, force);
         boolean showView = show && !isResizing() && !mHasCaption && size > 0;

@@ -265,6 +265,7 @@ public class ResolverListAdapter extends BaseAdapter {
             return mResolverListController.getResolversForIntent(
                             /* shouldGetResolvedFilter= */ true,
                             mResolverListCommunicator.shouldGetActivityMetadata(),
+                            mResolverListCommunicator.shouldGetOnlyDefaultActivities(),
                             mIntents);
         }
     }
@@ -416,8 +417,9 @@ public class ResolverListAdapter extends BaseAdapter {
                     if (ii == null) {
                         continue;
                     }
-                    ActivityInfo ai = ii.resolveActivityInfo(
-                            mPm, 0);
+                    // Because of AIDL bug, resolveActivityInfo can't accept subclasses of Intent.
+                    final Intent rii = (ii.getClass() == Intent.class) ? ii : new Intent(ii);
+                    ActivityInfo ai = rii.resolveActivityInfo(mPm, 0);
                     if (ai == null) {
                         Log.w(TAG, "No activity found for " + ii);
                         continue;
@@ -727,6 +729,7 @@ public class ResolverListAdapter extends BaseAdapter {
     protected List<ResolvedComponentInfo> getResolversForUser(UserHandle userHandle) {
         return mResolverListController.getResolversForIntentAsUser(true,
                 mResolverListCommunicator.shouldGetActivityMetadata(),
+                mResolverListCommunicator.shouldGetOnlyDefaultActivities(),
                 mIntents, userHandle);
     }
 
@@ -819,6 +822,12 @@ public class ResolverListAdapter extends BaseAdapter {
         boolean useLayoutWithDefault();
 
         boolean shouldGetActivityMetadata();
+
+        /**
+         * @return true to filter only apps that can handle
+         *     {@link android.content.Intent#CATEGORY_DEFAULT} intents
+         */
+        default boolean shouldGetOnlyDefaultActivities() { return true; };
 
         Intent getTargetIntent();
 
@@ -942,7 +951,7 @@ public class ResolverListAdapter extends BaseAdapter {
         protected void onPostExecute(Drawable d) {
             if (getOtherProfile() == mDisplayResolveInfo) {
                 mResolverListCommunicator.updateProfileViewButton();
-            } else {
+            } else if (!mDisplayResolveInfo.hasDisplayIcon()) {
                 mDisplayResolveInfo.setDisplayIcon(d);
                 mHolder.bindIcon(mDisplayResolveInfo);
                 // Notify in case view is already bound to resolve the race conditions on

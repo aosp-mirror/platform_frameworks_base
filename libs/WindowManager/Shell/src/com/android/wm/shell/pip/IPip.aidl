@@ -37,12 +37,13 @@ interface IPip {
      * @param activityInfo ActivityInfo tied to the Activity
      * @param pictureInPictureParams PictureInPictureParams tied to the Activity
      * @param launcherRotation Launcher rotation to calculate the PiP destination bounds
-     * @param shelfHeight Shelf height of launcher to calculate the PiP destination bounds
+     * @param hotseatKeepClearArea Bounds of Hotseat to avoid used to calculate PiP destination
+              bounds
      * @return destination bounds the PiP window should land into
      */
     Rect startSwipePipToHome(in ComponentName componentName, in ActivityInfo activityInfo,
                 in PictureInPictureParams pictureInPictureParams,
-                int launcherRotation, int shelfHeight) = 1;
+                int launcherRotation, in Rect hotseatKeepClearArea) = 1;
 
     /**
      * Notifies the swiping Activity to PiP onto home transition is finished

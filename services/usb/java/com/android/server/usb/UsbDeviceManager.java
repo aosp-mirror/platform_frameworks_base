@@ -44,6 +44,7 @@ import android.debug.AdbManagerInternal;
 import android.debug.AdbNotifications;
 import android.debug.AdbTransportType;
 import android.debug.IAdbTransport;
+import android.hardware.usb.IUsbOperationInternal;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConfiguration;
@@ -54,9 +55,7 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
 import android.hardware.usb.gadget.V1_0.GadgetFunction;
-import android.hardware.usb.gadget.V1_0.IUsbGadget;
 import android.hardware.usb.gadget.V1_0.Status;
-import android.hardware.usb.gadget.V1_2.IUsbGadgetCallback;
 import android.hardware.usb.gadget.V1_2.UsbSpeed;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
@@ -88,9 +87,12 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.usb.hal.gadget.UsbGadgetHal;
+import com.android.server.usb.hal.gadget.UsbGadgetHalInstance;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
@@ -105,6 +107,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * UsbDeviceManager manages USB state in device mode.
@@ -215,6 +218,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
     private static UsbDeviceLogger sEventLogger;
 
+    private UsbGadgetHal mUsbGadgetHal;
+
+    /**
+     * Counter for tracking UsbOperation operations.
+     */
+    private static final AtomicInteger sUsbOperationCount = new AtomicInteger();
+
     static {
         sDenyInterfaces = new HashSet<>();
         sDenyInterfaces.add(UsbConstants.USB_CLASS_AUDIO);
@@ -297,15 +307,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
         initRndisAddress();
 
+        int operationId = sUsbOperationCount.incrementAndGet();
         boolean halNotPresent = false;
-        try {
-            IUsbGadget.getService(true);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "USB GADGET HAL present but exception thrown", e);
-        } catch (NoSuchElementException e) {
-            halNotPresent = true;
-            Slog.i(TAG, "USB GADGET HAL not present in the device", e);
-        }
+
+        mUsbGadgetHal = UsbGadgetHalInstance.getInstance(this, null);
+        Slog.d(TAG, "getInstance done");
 
         mControlFds = new HashMap<>();
         FileDescriptor mtpFd = nativeOpenControl(UsbManager.USB_FUNCTION_MTP);
@@ -319,7 +325,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
         mControlFds.put(UsbManager.FUNCTION_PTP, ptpFd);
 
-        if (halNotPresent) {
+        if (mUsbGadgetHal == null) {
             /**
              * Initialze the legacy UsbHandler
              */
@@ -332,6 +338,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             mHandler = new UsbHandlerHal(FgThread.get().getLooper(), mContext, this,
                     alsaManager, permissionManager);
         }
+
+        mHandler.handlerInitDone(operationId);
 
         if (nativeIsStartRequested()) {
             if (DEBUG) Slog.d(TAG, "accessory attached at boot");
@@ -454,6 +462,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private void startAccessoryMode() {
         if (!mHasUsbAccessory) return;
 
+        int operationId = sUsbOperationCount.incrementAndGet();
+
         mAccessoryStrings = nativeGetAccessoryStrings();
         boolean enableAudio = (nativeGetAudioMode() == AUDIO_MODE_SOURCE);
         // don't start accessory mode if our mandatory strings have not been set
@@ -474,7 +484,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     ACCESSORY_REQUEST_TIMEOUT);
             mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_ACCESSORY_HANDSHAKE_TIMEOUT),
                     ACCESSORY_HANDSHAKE_TIMEOUT);
-            setCurrentFunctions(functions);
+            setCurrentFunctions(functions, operationId);
         }
     }
 
@@ -500,6 +510,20 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             FileUtils.stringToFile(RNDIS_ETH_ADDR_PATH, addrString);
         } catch (IOException e) {
             Slog.i(TAG, "failed to write to " + RNDIS_ETH_ADDR_PATH);
+        }
+    }
+
+    public static void logAndPrint(int priority, IndentingPrintWriter pw, String msg) {
+        Slog.println(priority, TAG, msg);
+        if (pw != null) {
+            pw.println(msg);
+        }
+    }
+
+    public static void logAndPrintException(IndentingPrintWriter pw, String msg, Exception e) {
+        Slog.e(TAG, msg, e);
+        if (pw != null) {
+            pw.println(msg + e);
         }
     }
 
@@ -605,10 +629,39 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             sendMessage(m);
         }
 
+        public boolean sendMessage(int what) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            return sendMessageDelayed(m,0);
+        }
+
+        public void sendMessage(int what, int operationId) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            m.arg1 = operationId;
+            sendMessage(m);
+        }
+
         public void sendMessage(int what, Object arg) {
             removeMessages(what);
             Message m = Message.obtain(this, what);
             m.obj = arg;
+            sendMessage(m);
+        }
+
+        public void sendMessage(int what, Object arg, int operationId) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            m.obj = arg;
+            m.arg1 = operationId;
+            sendMessage(m);
+        }
+
+        public void sendMessage(int what, boolean arg, int operationId) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            m.arg1 = (arg ? 1 : 0);
+            m.arg2 = operationId;
             sendMessage(m);
         }
 
@@ -617,6 +670,15 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             Message m = Message.obtain(this, what);
             m.obj = arg;
             m.arg1 = (arg1 ? 1 : 0);
+            sendMessage(m);
+        }
+
+        public void sendMessage(int what, long arg, boolean arg1, int operationId) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            m.obj = arg;
+            m.arg1 = (arg1 ? 1 : 0);
+            m.arg2 = operationId;
             sendMessage(m);
         }
 
@@ -677,7 +739,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             sendMessageDelayed(msg, HOST_STATE_UPDATE_DELAY);
         }
 
-        private void setAdbEnabled(boolean enable) {
+        private void setAdbEnabled(boolean enable, int operationId) {
             if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
 
             if (enable) {
@@ -686,7 +748,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 setSystemProperty(USB_PERSISTENT_CONFIG_PROPERTY, "");
             }
 
-            setEnabledFunctions(mCurrentFunctions, true);
+            setEnabledFunctions(mCurrentFunctions, true, operationId);
             updateAdbNotification(false);
         }
 
@@ -698,6 +760,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private void updateCurrentAccessory() {
             // We are entering accessory mode if we have received a request from the host
             // and the request has not timed out yet.
+            int operationId = sUsbOperationCount.incrementAndGet();
+
             boolean enteringAccessoryMode = hasMessages(MSG_ACCESSORY_MODE_ENTER_TIMEOUT);
 
             if (mConfigured && enteringAccessoryMode) {
@@ -729,18 +793,18 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 }
             } else {
                 if (!enteringAccessoryMode) {
-                    notifyAccessoryModeExit();
+                    notifyAccessoryModeExit(operationId);
                 } else if (DEBUG) {
                     Slog.v(TAG, "Debouncing accessory mode exit");
                 }
             }
         }
 
-        private void notifyAccessoryModeExit() {
+        private void notifyAccessoryModeExit(int operationId) {
             // make sure accessory mode is off
             // and restore default functions
             Slog.d(TAG, "exited USB accessory mode");
-            setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+            setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
 
             if (mCurrentAccessory != null) {
                 if (mBootCompleted) {
@@ -866,8 +930,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     mMidiEnabled && mConfigured, mMidiCard, mMidiDevice);
         }
 
-        private void setScreenUnlockedFunctions() {
-            setEnabledFunctions(mScreenUnlockedFunctions, false);
+        private void setScreenUnlockedFunctions(int operationId) {
+            setEnabledFunctions(mScreenUnlockedFunctions, false, operationId);
         }
 
         private static class AdbTransport extends IAdbTransport.Stub {
@@ -880,7 +944,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             @Override
             public void onAdbEnabled(boolean enabled, byte transportType) {
                 if (transportType == AdbTransportType.USB) {
-                    mHandler.sendMessage(MSG_ENABLE_ADB, enabled);
+                    int operationId = sUsbOperationCount.incrementAndGet();
+                    mHandler.sendMessage(MSG_ENABLE_ADB, enabled, operationId);
                 }
             }
         }
@@ -903,6 +968,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_UPDATE_STATE:
+                    int operationId = sUsbOperationCount.incrementAndGet();
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
 
@@ -920,9 +986,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             // restore defaults when USB is disconnected
                             if (!mScreenLocked
                                     && mScreenUnlockedFunctions != UsbManager.FUNCTION_NONE) {
-                                setScreenUnlockedFunctions();
+                                setScreenUnlockedFunctions(operationId);
                             } else {
-                                setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                                setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
                             }
                         }
                         updateUsbFunctions();
@@ -1026,13 +1092,15 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     updateUsbNotification(false);
                     break;
                 case MSG_ENABLE_ADB:
-                    setAdbEnabled(msg.arg1 == 1);
+                    setAdbEnabled(msg.arg1 == 1, msg.arg2);
                     break;
                 case MSG_SET_CURRENT_FUNCTIONS:
                     long functions = (Long) msg.obj;
-                    setEnabledFunctions(functions, false);
+                    operationId = (int) msg.arg1;
+                    setEnabledFunctions(functions, false, operationId);
                     break;
                 case MSG_SET_SCREEN_UNLOCKED_FUNCTIONS:
+                    operationId = sUsbOperationCount.incrementAndGet();
                     mScreenUnlockedFunctions = (Long) msg.obj;
                     if (mSettings != null) {
                         SharedPreferences.Editor editor = mSettings.edit();
@@ -1043,12 +1111,13 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     }
                     if (!mScreenLocked && mScreenUnlockedFunctions != UsbManager.FUNCTION_NONE) {
                         // If the screen is unlocked, also set current functions.
-                        setScreenUnlockedFunctions();
+                        setScreenUnlockedFunctions(operationId);
                     } else {
-                        setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                        setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
                     }
                     break;
                 case MSG_UPDATE_SCREEN_LOCK:
+                    operationId = sUsbOperationCount.incrementAndGet();
                     if (msg.arg1 == 1 == mScreenLocked) {
                         break;
                     }
@@ -1058,23 +1127,25 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     }
                     if (mScreenLocked) {
                         if (!mConnected) {
-                            setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                            setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
                         }
                     } else {
                         if (mScreenUnlockedFunctions != UsbManager.FUNCTION_NONE
                                 && mCurrentFunctions == UsbManager.FUNCTION_NONE) {
                             // Set the screen unlocked functions if current function is charging.
-                            setScreenUnlockedFunctions();
+                            setScreenUnlockedFunctions(operationId);
                         }
                     }
                     break;
                 case MSG_UPDATE_USER_RESTRICTIONS:
+                    operationId = sUsbOperationCount.incrementAndGet();
                     // Restart the USB stack if USB transfer is enabled but no longer allowed.
                     if (isUsbDataTransferActive(mCurrentFunctions) && !isUsbTransferAllowed()) {
-                        setEnabledFunctions(UsbManager.FUNCTION_NONE, true);
+                        setEnabledFunctions(UsbManager.FUNCTION_NONE, true, operationId);
                     }
                     break;
                 case MSG_SYSTEM_READY:
+                    operationId = sUsbOperationCount.incrementAndGet();
                     mNotificationManager = (NotificationManager)
                             mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -1092,17 +1163,19 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                         NotificationManager.IMPORTANCE_HIGH));
                     }
                     mSystemReady = true;
-                    finishBoot();
+                    finishBoot(operationId);
                     break;
                 case MSG_LOCALE_CHANGED:
                     updateAdbNotification(true);
                     updateUsbNotification(true);
                     break;
                 case MSG_BOOT_COMPLETED:
+                    operationId = sUsbOperationCount.incrementAndGet();
                     mBootCompleted = true;
-                    finishBoot();
+                    finishBoot(operationId);
                     break;
                 case MSG_USER_SWITCHED: {
+                    operationId = sUsbOperationCount.incrementAndGet();
                     if (mCurrentUser != msg.arg1) {
                         if (DEBUG) {
                             Slog.v(TAG, "Current user switched to " + msg.arg1);
@@ -1115,16 +1188,18 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                     mSettings.getString(String.format(Locale.ENGLISH,
                                             UNLOCKED_CONFIG_PREF, mCurrentUser), ""));
                         }
-                        setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                        setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
                     }
                     break;
                 }
                 case MSG_ACCESSORY_MODE_ENTER_TIMEOUT: {
+                    operationId = sUsbOperationCount.incrementAndGet();
                     if (DEBUG) {
-                        Slog.v(TAG, "Accessory mode enter timeout: " + mConnected);
+                        Slog.v(TAG, "Accessory mode enter timeout: " + mConnected
+                                    + " ,operationId: " + operationId);
                     }
                     if (!mConnected || (mCurrentFunctions & UsbManager.FUNCTION_ACCESSORY) == 0) {
-                        notifyAccessoryModeExit();
+                        notifyAccessoryModeExit(operationId);
                     }
                     break;
                 }
@@ -1147,7 +1222,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             }
         }
 
-        protected void finishBoot() {
+        public abstract void handlerInitDone(int operationId);
+
+        protected void finishBoot(int operationId) {
             if (mBootCompleted && mCurrentUsbFunctionsReceived && mSystemReady) {
                 if (mPendingBootBroadcast) {
                     updateUsbStateBroadcastIfNeeded(getAppliedFunctions(mCurrentFunctions));
@@ -1155,9 +1232,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 }
                 if (!mScreenLocked
                         && mScreenUnlockedFunctions != UsbManager.FUNCTION_NONE) {
-                    setScreenUnlockedFunctions();
+                    setScreenUnlockedFunctions(operationId);
                 } else {
-                    setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                    setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
                 }
                 if (mCurrentAccessory != null) {
                     mUsbDeviceManager.getCurrentSettings().accessoryAttached(mCurrentAccessory);
@@ -1491,7 +1568,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         /**
          * Evaluates USB function policies and applies the change accordingly.
          */
-        protected abstract void setEnabledFunctions(long functions, boolean forceRestart);
+        protected abstract void setEnabledFunctions(long functions,
+                boolean forceRestart, int operationId);
 
         public void setAccessoryUEventTime(long accessoryConnectionStartTime) {
             mAccessoryConnectionStartTime = accessoryConnectionStartTime;
@@ -1506,6 +1584,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             mSendStringCount = 0;
             mStartAccessory = false;
         }
+
+        public abstract void setCurrentUsbFunctionsCb(long functions,
+                    int status, int mRequest, long mFunctions, boolean mChargingFunctions);
+
+        public abstract void getUsbSpeedCb(int speed);
     }
 
     private static final class UsbHandlerLegacy extends UsbHandler {
@@ -1523,6 +1606,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private String mCurrentOemFunctions;
         private String mCurrentFunctionsStr;
         private boolean mUsbDataUnlocked;
+
+        /**
+         * Keeps track of the latest setCurrentUsbFunctions request number.
+         */
+        private int mCurrentRequest = 0;
 
         UsbHandlerLegacy(Looper looper, Context context, UsbDeviceManager deviceManager,
                 UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
@@ -1555,6 +1643,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             } catch (Exception e) {
                 Slog.e(TAG, "Error initializing UsbHandler", e);
             }
+        }
+
+        @Override
+        public void handlerInitDone(int operationId) {
         }
 
         private void readOemUsbOverrideConfig(Context context) {
@@ -1659,11 +1751,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
 
         @Override
-        protected void setEnabledFunctions(long usbFunctions, boolean forceRestart) {
+        protected void setEnabledFunctions(long usbFunctions,
+                boolean forceRestart, int operationId) {
             boolean usbDataUnlocked = isUsbDataTransferActive(usbFunctions);
             if (DEBUG) {
-                Slog.d(TAG, "setEnabledFunctions functions=" + usbFunctions + ", "
-                        + "forceRestart=" + forceRestart + ", usbDataUnlocked=" + usbDataUnlocked);
+                Slog.d(TAG, "setEnabledFunctions functions=" + usbFunctions +
+                        " ,forceRestart=" + forceRestart +
+                        " ,usbDataUnlocked=" + usbDataUnlocked +
+                        " ,operationId=" + operationId);
             }
 
             if (usbDataUnlocked != mUsbDataUnlocked) {
@@ -1759,7 +1854,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     || !mCurrentFunctionsStr.equals(functions)
                     || !mCurrentFunctionsApplied
                     || forceRestart) {
-                Slog.i(TAG, "Setting USB config to " + functions);
                 mCurrentFunctionsStr = functions;
                 mCurrentOemFunctions = oemFunctions;
                 mCurrentFunctionsApplied = false;
@@ -1855,15 +1949,18 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
             return true;
         }
+
+        @Override
+        public void setCurrentUsbFunctionsCb(long functions,
+                    int status, int mRequest, long mFunctions, boolean mChargingFunctions){
+        }
+
+        @Override
+        public void getUsbSpeedCb(int speed){
+        }
     }
 
-    private static final class UsbHandlerHal extends UsbHandler {
-
-        /**
-         * Proxy object for the usb gadget hal daemon.
-         */
-        @GuardedBy("mGadgetProxyLock")
-        private IUsbGadget mGadgetProxy;
+    private final class UsbHandlerHal extends UsbHandler {
 
         private final Object mGadgetProxyLock = new Object();
 
@@ -1910,33 +2007,20 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         UsbHandlerHal(Looper looper, Context context, UsbDeviceManager deviceManager,
                 UsbAlsaManager alsaManager, UsbPermissionManager permissionManager) {
             super(looper, context, deviceManager, alsaManager, permissionManager);
+            int operationId = sUsbOperationCount.incrementAndGet();
             try {
-                ServiceNotification serviceNotification = new ServiceNotification();
-
-                boolean ret = IServiceManager.getService()
-                        .registerForNotifications(GADGET_HAL_FQ_NAME, "", serviceNotification);
-                if (!ret) {
-                    Slog.e(TAG, "Failed to register usb gadget service start notification");
-                    return;
-                }
 
                 synchronized (mGadgetProxyLock) {
-                    mGadgetProxy = IUsbGadget.getService(true);
-                    mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
-                            USB_GADGET_HAL_DEATH_COOKIE);
                     mCurrentFunctions = UsbManager.FUNCTION_NONE;
                     mCurrentUsbFunctionsRequested = true;
                     mUsbSpeed = UsbSpeed.UNKNOWN;
                     mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_0;
-                    mGadgetProxy.getCurrentUsbFunctions(new UsbGadgetCallback());
+                    updateUsbGadgetHalVersion();
                 }
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
-                updateUsbGadgetHalVersion();
             } catch (NoSuchElementException e) {
                 Slog.e(TAG, "Usb gadget hal not found", e);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Usb Gadget hal not responding", e);
             } catch (Exception e) {
                 Slog.e(TAG, "Error initializing UsbHandler", e);
             }
@@ -1949,7 +2033,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 if (cookie == USB_GADGET_HAL_DEATH_COOKIE) {
                     Slog.e(TAG, "Usb Gadget hal service died cookie: " + cookie);
                     synchronized (mGadgetProxyLock) {
-                        mGadgetProxy = null;
+                        mUsbGadgetHal = null;
                     }
                 }
             }
@@ -1972,18 +2056,22 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_SET_CHARGING_FUNCTIONS:
-                    setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                    int operationId = sUsbOperationCount.incrementAndGet();
+                    setEnabledFunctions(UsbManager.FUNCTION_NONE, false, operationId);
                     break;
                 case MSG_SET_FUNCTIONS_TIMEOUT:
-                    Slog.e(TAG, "Set functions timed out! no reply from usb hal");
+                    operationId = sUsbOperationCount.incrementAndGet();
+                    Slog.e(TAG, "Set functions timed out! no reply from usb hal"
+                                + " ,operationId:" + operationId);
                     if (msg.arg1 != 1) {
                         // Set this since default function may be selected from Developer options
-                        setEnabledFunctions(mScreenUnlockedFunctions, false);
+                        setEnabledFunctions(mScreenUnlockedFunctions, false, operationId);
                     }
                     break;
                 case MSG_GET_CURRENT_USB_FUNCTIONS:
                     Slog.i(TAG, "processing MSG_GET_CURRENT_USB_FUNCTIONS");
                     mCurrentUsbFunctionsReceived = true;
+                    operationId = msg.arg2;
 
                     if (mCurrentUsbFunctionsRequested) {
                         Slog.i(TAG, "updating mCurrentFunctions");
@@ -1993,91 +2081,71 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                 "mCurrentFunctions:" + mCurrentFunctions + "applied:" + msg.arg1);
                         mCurrentFunctionsApplied = msg.arg1 == 1;
                     }
-                    finishBoot();
+                    finishBoot(operationId);
                     break;
                 case MSG_FUNCTION_SWITCH_TIMEOUT:
                     /**
                      * Dont force to default when the configuration is already set to default.
                      */
+                    operationId = sUsbOperationCount.incrementAndGet();
                     if (msg.arg1 != 1) {
                         // Set this since default function may be selected from Developer options
-                        setEnabledFunctions(mScreenUnlockedFunctions, false);
+                        setEnabledFunctions(mScreenUnlockedFunctions, false, operationId);
                     }
                     break;
                 case MSG_GADGET_HAL_REGISTERED:
                     boolean preexisting = msg.arg1 == 1;
+                    operationId = sUsbOperationCount.incrementAndGet();
                     synchronized (mGadgetProxyLock) {
                         try {
-                            mGadgetProxy = IUsbGadget.getService();
-                            mGadgetProxy.linkToDeath(new UsbGadgetDeathRecipient(),
-                                    USB_GADGET_HAL_DEATH_COOKIE);
+                            mUsbGadgetHal = UsbGadgetHalInstance.getInstance(mUsbDeviceManager,
+                                    null);
                             if (!mCurrentFunctionsApplied && !preexisting) {
-                                setEnabledFunctions(mCurrentFunctions, false);
+                                setEnabledFunctions(mCurrentFunctions, false, operationId);
                             }
                         } catch (NoSuchElementException e) {
                             Slog.e(TAG, "Usb gadget hal not found", e);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Usb Gadget hal not responding", e);
                         }
                     }
                     break;
                 case MSG_RESET_USB_GADGET:
                     synchronized (mGadgetProxyLock) {
-                        if (mGadgetProxy == null) {
-                            Slog.e(TAG, "reset Usb Gadget mGadgetProxy is null");
+                        if (mUsbGadgetHal == null) {
+                            Slog.e(TAG, "reset Usb Gadget mUsbGadgetHal is null");
                             break;
                         }
 
                         try {
-                            android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxy =
-                                    android.hardware.usb.gadget.V1_1.IUsbGadget
-                                            .castFrom(mGadgetProxy);
-                            gadgetProxy.reset();
-                        } catch (RemoteException e) {
+                            mUsbGadgetHal.reset();
+                        } catch (Exception e) {
                             Slog.e(TAG, "reset Usb Gadget failed", e);
                         }
                     }
                     break;
                 case MSG_UPDATE_USB_SPEED:
-                    synchronized (mGadgetProxyLock) {
-                        if (mGadgetProxy == null) {
-                            Slog.e(TAG, "mGadgetProxy is null");
-                            break;
-                        }
+                    operationId = sUsbOperationCount.incrementAndGet();
+                    if (mUsbGadgetHal == null) {
+                        Slog.e(TAG, "mGadgetHal is null, operationId:" + operationId);
+                        break;
+                    }
 
-                        try {
-                            android.hardware.usb.gadget.V1_2.IUsbGadget gadgetProxy =
-                                    android.hardware.usb.gadget.V1_2.IUsbGadget
-                                            .castFrom(mGadgetProxy);
-                            if (gadgetProxy != null) {
-                                gadgetProxy.getUsbSpeed(new UsbGadgetCallback());
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "get UsbSpeed failed", e);
-                        }
+                    try {
+                        mUsbGadgetHal.getUsbSpeed(operationId);
+                    } catch (Exception e) {
+                        Slog.e(TAG, "get UsbSpeed failed", e);
                     }
                     break;
                 case MSG_UPDATE_HAL_VERSION:
-                    synchronized (mGadgetProxyLock) {
-                        if (mGadgetProxy == null) {
-                            Slog.e(TAG, "mGadgetProxy is null");
-                            break;
+                    if (mUsbGadgetHal == null) {
+                        Slog.e(TAG, "mUsbGadgetHal is null");
+                        break;
+                    }
+                    else {
+                        try {
+                            mCurrentGadgetHalVersion = mUsbGadgetHal.getGadgetHalVersion();
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "update Usb gadget version failed", e);
                         }
-
-                        android.hardware.usb.gadget.V1_2.IUsbGadget gadgetProxy =
-                                android.hardware.usb.gadget.V1_2.IUsbGadget.castFrom(mGadgetProxy);
-                        if (gadgetProxy == null) {
-                            android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxyV1By1 =
-                                    android.hardware.usb.gadget.V1_1.IUsbGadget
-                                            .castFrom(mGadgetProxy);
-                            if (gadgetProxyV1By1 == null) {
-                                mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_0;
-                                break;
-                            }
-                            mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_1;
-                            break;
-                        }
-                        mCurrentGadgetHalVersion = UsbManager.GADGET_HAL_V1_2;
                     }
                     break;
                 default:
@@ -2085,56 +2153,31 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             }
         }
 
-        private class UsbGadgetCallback extends IUsbGadgetCallback.Stub {
-            int mRequest;
-            long mFunctions;
-            boolean mChargingFunctions;
+        @Override
+        public void setCurrentUsbFunctionsCb(long functions,
+                    int status, int mRequest, long mFunctions, boolean mChargingFunctions) {
 
-            UsbGadgetCallback() {
+            if ((mCurrentRequest != mRequest) || !hasMessages(MSG_SET_FUNCTIONS_TIMEOUT)
+                  || (mFunctions != functions)) {
+                return;
             }
 
-            UsbGadgetCallback(int request, long functions,
-                    boolean chargingFunctions) {
-                mRequest = request;
-                mFunctions = functions;
-                mChargingFunctions = chargingFunctions;
-            }
-
-            @Override
-            public void setCurrentUsbFunctionsCb(long functions,
-                    int status) {
-                /**
-                 * Callback called for a previous setCurrenUsbFunction
-                 */
-                if ((mCurrentRequest != mRequest) || !hasMessages(MSG_SET_FUNCTIONS_TIMEOUT)
-                        || (mFunctions != functions)) {
-                    return;
-                }
-
-                removeMessages(MSG_SET_FUNCTIONS_TIMEOUT);
-                Slog.e(TAG, "notifyCurrentFunction request:" + mRequest + " status:" + status);
-                if (status == Status.SUCCESS) {
-                    mCurrentFunctionsApplied = true;
-                } else if (!mChargingFunctions) {
-                    Slog.e(TAG, "Setting default fuctions");
-                    sendEmptyMessage(MSG_SET_CHARGING_FUNCTIONS);
-                }
-            }
-
-            @Override
-            public void getCurrentUsbFunctionsCb(long functions,
-                    int status) {
-                sendMessage(MSG_GET_CURRENT_USB_FUNCTIONS, functions,
-                        status == Status.FUNCTIONS_APPLIED);
-            }
-
-            @Override
-            public void getUsbSpeedCb(int speed) {
-                mUsbSpeed = speed;
+            removeMessages(MSG_SET_FUNCTIONS_TIMEOUT);
+            Slog.i(TAG, "notifyCurrentFunction request:" + mRequest + " status:" + status);
+            if (status == Status.SUCCESS) {
+                mCurrentFunctionsApplied = true;
+            } else if (!mChargingFunctions) {
+                Slog.e(TAG, "Setting default fuctions");
+                sendEmptyMessage(MSG_SET_CHARGING_FUNCTIONS);
             }
         }
 
-        private void setUsbConfig(long config, boolean chargingFunctions) {
+        @Override
+        public void getUsbSpeedCb(int speed) {
+            mUsbSpeed = speed;
+        }
+
+        private void setUsbConfig(long config, boolean chargingFunctions, int operationId) {
             if (true) Slog.d(TAG, "setUsbConfig(" + config + ") request:" + ++mCurrentRequest);
             /**
              * Cancel any ongoing requests, if present.
@@ -2144,8 +2187,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             removeMessages(MSG_SET_CHARGING_FUNCTIONS);
 
             synchronized (mGadgetProxyLock) {
-                if (mGadgetProxy == null) {
-                    Slog.e(TAG, "setUsbConfig mGadgetProxy is null");
+                if (mUsbGadgetHal == null) {
+                    Slog.e(TAG, "setUsbConfig mUsbGadgetHal is null");
                     return;
                 }
                 try {
@@ -2162,10 +2205,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         LocalServices.getService(AdbManagerInternal.class)
                                 .stopAdbdForTransport(AdbTransportType.USB);
                     }
-                    UsbGadgetCallback usbGadgetCallback = new UsbGadgetCallback(mCurrentRequest,
-                            config, chargingFunctions);
-                    mGadgetProxy.setCurrentUsbFunctions(config, usbGadgetCallback,
-                            SET_FUNCTIONS_TIMEOUT_MS - SET_FUNCTIONS_LEEWAY_MS);
+                    mUsbGadgetHal.setCurrentUsbFunctions(mCurrentRequest,
+                            config, chargingFunctions,
+                            SET_FUNCTIONS_TIMEOUT_MS - SET_FUNCTIONS_LEEWAY_MS, operationId);
                     sendMessageDelayed(MSG_SET_FUNCTIONS_TIMEOUT, chargingFunctions,
                             SET_FUNCTIONS_TIMEOUT_MS);
                     if (mConnected) {
@@ -2174,17 +2216,19 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                                 SET_FUNCTIONS_TIMEOUT_MS + ENUMERATION_TIME_OUT_MS);
                     }
                     if (DEBUG) Slog.d(TAG, "timeout message queued");
-                } catch (RemoteException e) {
+                } catch (Exception e) {//RemoteException e) {
                     Slog.e(TAG, "Remoteexception while calling setCurrentUsbFunctions", e);
                 }
             }
         }
 
         @Override
-        protected void setEnabledFunctions(long functions, boolean forceRestart) {
+        protected void setEnabledFunctions(long functions, boolean forceRestart, int operationId) {
             if (DEBUG) {
-                Slog.d(TAG, "setEnabledFunctions functions=" + functions + ", "
-                        + "forceRestart=" + forceRestart);
+                Slog.d(TAG, "setEnabledFunctionsi " +
+                        "functions=" + functions +
+                        ", forceRestart=" + forceRestart +
+                        ", operationId=" + operationId);
             }
             if (mCurrentGadgetHalVersion < UsbManager.GADGET_HAL_V1_2) {
                 if ((functions & UsbManager.FUNCTION_NCM) != 0) {
@@ -2205,13 +2249,18 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 functions = getAppliedFunctions(functions);
 
                 // Set the new USB configuration.
-                setUsbConfig(functions, chargingFunctions);
+                setUsbConfig(functions, chargingFunctions, operationId);
 
                 if (mBootCompleted && isUsbDataTransferActive(functions)) {
                     // Start up dependent services.
                     updateUsbStateBroadcastIfNeeded(functions);
                 }
             }
+        }
+
+        @Override
+        public void handlerInitDone(int operationId) {
+            mUsbGadgetHal.getCurrentUsbFunctions(operationId);
         }
     }
 
@@ -2254,6 +2303,21 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         return mHandler.getGadgetHalVersion();
     }
 
+    public void setCurrentUsbFunctionsCb(long functions,
+                    int status, int mRequest, long mFunctions, boolean mChargingFunctions) {
+        mHandler.setCurrentUsbFunctionsCb(functions, status,
+                    mRequest, mFunctions, mChargingFunctions);
+    }
+
+    public void getCurrentUsbFunctionsCb(long functions, int status) {
+        mHandler.sendMessage(MSG_GET_CURRENT_USB_FUNCTIONS, functions,
+                    status == Status.FUNCTIONS_APPLIED);
+    }
+
+    public void getUsbSpeedCb(int speed) {
+        mHandler.getUsbSpeedCb(speed);
+    }
+
     /**
      * Returns a dup of the control file descriptor for the given function.
      */
@@ -2279,7 +2343,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      *
      * @param functions The functions to set, or empty to set the charging function.
      */
-    public void setCurrentFunctions(long functions) {
+    public void setCurrentFunctions(long functions, int operationId) {
         if (DEBUG) {
             Slog.d(TAG, "setCurrentFunctions(" + UsbManager.usbFunctionsToString(functions) + ")");
         }
@@ -2296,7 +2360,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         } else if (functions == UsbManager.FUNCTION_ACCESSORY) {
             MetricsLogger.action(mContext, MetricsEvent.ACTION_USB_CONFIG_ACCESSORY);
         }
-        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions);
+        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTIONS, functions, operationId);
     }
 
     /**
@@ -2324,7 +2388,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     }
 
     private void onAdbEnabled(boolean enabled) {
-        mHandler.sendMessage(MSG_ENABLE_ADB, enabled);
+        int operationId = sUsbOperationCount.incrementAndGet();
+        mHandler.sendMessage(MSG_ENABLE_ADB, enabled, operationId);
     }
 
     /**

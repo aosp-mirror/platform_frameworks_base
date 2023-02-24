@@ -828,6 +828,8 @@ public class PointerLocationView extends View implements InputDeviceListener,
                     mSystemGestureExclusionListener, mContext.getDisplayId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "Failed to unregister window manager callbacks", e);
         }
     }
 

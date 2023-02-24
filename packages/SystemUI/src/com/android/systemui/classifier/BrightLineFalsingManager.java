@@ -80,12 +80,14 @@ public class BrightLineFalsingManager implements FalsingManager {
     private final Collection<FalsingClassifier> mClassifiers;
     private final List<FalsingBeliefListener> mFalsingBeliefListeners = new ArrayList<>();
     private List<FalsingTapListener> mFalsingTapListeners = new ArrayList<>();
+    private ProximityEvent mLastProximityEvent;
 
     private boolean mDestroyed;
 
     private final SessionListener mSessionListener = new SessionListener() {
         @Override
         public void onSessionEnded() {
+            mLastProximityEvent = null;
             mClassifiers.forEach(FalsingClassifier::onSessionEnded);
         }
 
@@ -218,7 +220,7 @@ public class BrightLineFalsingManager implements FalsingManager {
             return r;
         }).collect(Collectors.toList());
 
-        logDebug("False Gesture: " + localResult[0]);
+        logDebug("False Gesture (type: " + interactionType + "): " + localResult[0]);
 
         return localResult[0];
     }
@@ -289,7 +291,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                         FalsingClassifier.Result.falsed(
                                 0, getClass().getSimpleName(), "bad history"));
                 logDebug("False Single Tap: true (bad history)");
-                mFalsingTapListeners.forEach(FalsingTapListener::onDoubleTapRequired);
+                mFalsingTapListeners.forEach(FalsingTapListener::onAdditionalTapRequired);
                 return true;
             } else {
                 mPriorResults = getPassedResult(0.1);
@@ -319,7 +321,7 @@ public class BrightLineFalsingManager implements FalsingManager {
                 mHistoryTracker.falseBelief(),
                 mHistoryTracker.falseConfidence());
         mPriorResults = Collections.singleton(result);
-        logDebug("False Double Tap: " + result.isFalse());
+        logDebug("False Double Tap: " + result.isFalse() + " reason=" + result.getReason());
         return result.isFalse();
     }
 
@@ -336,6 +338,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     public void onProximityEvent(ProximityEvent proximityEvent) {
         // TODO: some of these classifiers might allow us to abort early, meaning we don't have to
         // make these calls.
+        mLastProximityEvent = proximityEvent;
         mClassifiers.forEach((classifier) -> classifier.onProximityEvent(proximityEvent));
     }
 
@@ -345,6 +348,11 @@ public class BrightLineFalsingManager implements FalsingManager {
             mMetricsLogger.histogram(FALSING_SUCCESS, mIsFalseTouchCalls);
             mIsFalseTouchCalls = 0;
         }
+    }
+
+    @Override
+    public boolean isProximityNear() {
+        return mLastProximityEvent != null && mLastProximityEvent.getCovered();
     }
 
     @Override
@@ -443,6 +451,12 @@ public class BrightLineFalsingManager implements FalsingManager {
     static void logDebug(String msg, Throwable throwable) {
         if (DEBUG) {
             Log.d(TAG, msg, throwable);
+        }
+    }
+
+    static void logVerbose(String msg) {
+        if (DEBUG) {
+            Log.v(TAG, msg);
         }
     }
 

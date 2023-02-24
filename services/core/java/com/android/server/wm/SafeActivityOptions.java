@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -116,6 +118,34 @@ public class SafeActivityOptions {
     }
 
     /**
+     * To ensure that two activities, one using this object, and the other using the
+     * SafeActivityOptions returned from this function, are launched into the same display through
+     * ActivityStartController#startActivities, all display-related information, i.e.
+     * displayAreaToken, launchDisplayId and callerDisplayId, are cloned.
+     */
+    @Nullable SafeActivityOptions selectiveCloneDisplayOptions() {
+        final ActivityOptions options = cloneLaunchingDisplayOptions(mOriginalOptions);
+        final ActivityOptions callerOptions = cloneLaunchingDisplayOptions(mCallerOptions);
+        if (options == null && callerOptions == null) {
+            return null;
+        }
+
+        final SafeActivityOptions safeOptions = new SafeActivityOptions(options,
+                mOriginalCallingPid, mOriginalCallingUid);
+        safeOptions.mCallerOptions = callerOptions;
+        safeOptions.mRealCallingPid = mRealCallingPid;
+        safeOptions.mRealCallingUid = mRealCallingUid;
+        return safeOptions;
+    }
+
+    private ActivityOptions cloneLaunchingDisplayOptions(ActivityOptions options) {
+        return options == null ? null : ActivityOptions.makeBasic()
+                .setLaunchTaskDisplayArea(options.getLaunchTaskDisplayArea())
+                .setLaunchDisplayId(options.getLaunchDisplayId())
+                .setCallerDisplayId((options.getCallerDisplayId()));
+    }
+
+    /**
      * Overrides options with options from a caller and records {@link Binder#getCallingPid}/
      * {@link Binder#getCallingUid}. Thus, calling identity MUST NOT be cleared when calling this
      * method.
@@ -174,7 +204,7 @@ public class SafeActivityOptions {
         if (adapter == null) {
             return;
         }
-        if (callingPid == Process.myPid()) {
+        if (callingPid == WindowManagerService.MY_PID) {
             Slog.wtf(TAG, "Safe activity options constructed after clearing calling id");
             return;
         }
@@ -248,6 +278,14 @@ public class SafeActivityOptions {
                 throw new SecurityException(msg);
             }
         }
+        if (options.getTransientLaunch() && !supervisor.mRecentTasks.isCallerRecents(callingUid)
+                && ActivityTaskManagerService.checkPermission(
+                        MANAGE_ACTIVITY_TASKS, callingPid, callingUid) == PERMISSION_DENIED) {
+            final String msg = "Permission Denial: starting transient launch from " + callerApp
+                    + ", pid=" + callingPid + ", uid=" + callingUid;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
         // Check if the caller is allowed to launch on the specified display area.
         final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
         TaskDisplayArea taskDisplayArea = daToken != null
@@ -311,6 +349,20 @@ public class SafeActivityOptions {
                 final String msg = "Permission Denial: starting " + getIntentString(intent)
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with overrideTaskTransition=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+        }
+
+        // Check if the caller is allowed to dismiss keyguard.
+        final boolean dismissKeyguard = options.getDismissKeyguard();
+        if (aInfo != null && dismissKeyguard) {
+            final int controlKeyguardPerm = ActivityTaskManagerService.checkPermission(
+                    CONTROL_KEYGUARD, callingPid, callingUid);
+            if (controlKeyguardPerm != PERMISSION_GRANTED) {
+                final String msg = "Permission Denial: starting " + getIntentString(intent)
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with dismissKeyguard=true";
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }

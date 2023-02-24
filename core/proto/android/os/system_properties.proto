@@ -514,7 +514,10 @@ message SystemPropertiesProto {
 
         optional string gfx_driver_whitelist_0 = 45;
 
-        // Next Tag: 46
+        optional bool  egl_blobcache_multifile = 46;
+        optional int32 egl_blobcache_multifile_limit = 47;
+
+        // Next Tag: 48
     }
     optional Ro ro = 21;
 

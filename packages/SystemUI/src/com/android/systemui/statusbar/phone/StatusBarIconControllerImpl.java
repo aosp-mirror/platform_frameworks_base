@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.StatusBarIconList.Slot;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Icon;
@@ -56,11 +58,12 @@ import javax.inject.Inject;
  * registered with it.
  */
 @SysUISingleton
-public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
+public class StatusBarIconControllerImpl implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController, DemoMode {
 
     private static final String TAG = "StatusBarIconController";
 
+    private final StatusBarIconList mStatusBarIconList;
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconHideList = new ArraySet<>();
 
@@ -74,15 +77,12 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             DemoModeController demoModeController,
             ConfigurationController configurationController,
             TunerService tunerService,
-            DumpManager dumpManager) {
-        super(context.getResources().getStringArray(
-                com.android.internal.R.array.config_statusBarIcons));
-        configurationController.addCallback(this);
-
+            DumpManager dumpManager,
+            StatusBarIconList statusBarIconList) {
+        mStatusBarIconList = statusBarIconList;
         mContext = context;
 
-        loadDimens();
-
+        configurationController.addCallback(this);
         commandQueue.addCallback(this);
         tunerService.addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
@@ -101,15 +101,14 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
         group.setController(this);
         mIconGroups.add(group);
-        List<Slot> allSlots = getSlots();
+        List<Slot> allSlots = mStatusBarIconList.getSlots();
         for (int i = 0; i < allSlots.size(); i++) {
             Slot slot = allSlots.get(i);
             List<StatusBarIconHolder> holders = slot.getHolderListInViewOrder();
             boolean hidden = mIconHideList.contains(slot.getName());
 
             for (StatusBarIconHolder holder : holders) {
-                int tag = holder.getTag();
-                int viewIndex = getViewIndex(getSlotIndex(slot.getName()), holder.getTag());
+                int viewIndex = mStatusBarIconList.getViewIndex(slot.getName(), holder.getTag());
                 group.onIconAdded(viewIndex, slot.getName(), hidden, holder);
             }
         }
@@ -144,7 +143,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
         mIconHideList.clear();
         mIconHideList.addAll(StatusBarIconController.getIconHideList(mContext, newValue));
-        ArrayList<Slot> currentSlots = getSlots();
+        List<Slot> currentSlots = mStatusBarIconList.getSlots();
         ArrayMap<Slot, List<StatusBarIconHolder>> slotsToReAdd = new ArrayMap<>();
 
         // This is a little hacky... Peel off all of the holders on all of the slots
@@ -163,17 +162,13 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             List<StatusBarIconHolder> iconsForSlot = slotsToReAdd.get(item);
             if (iconsForSlot == null) continue;
             for (StatusBarIconHolder holder : iconsForSlot) {
-                setIcon(getSlotIndex(item.getName()), holder);
+                setIcon(item.getName(), holder);
             }
         }
     }
 
-    private void loadDimens() {
-    }
-
-    private void addSystemIcon(int index, StatusBarIconHolder holder) {
-        String slot = getSlotName(index);
-        int viewIndex = getViewIndex(index, holder.getTag());
+    private void addSystemIcon(String slot, StatusBarIconHolder holder) {
+        int viewIndex = mStatusBarIconList.getViewIndex(slot, holder.getTag());
         boolean hidden = mIconHideList.contains(slot);
 
         mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, hidden, holder));
@@ -182,18 +177,17 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     /** */
     @Override
     public void setIcon(String slot, int resourceId, CharSequence contentDescription) {
-        int index = getSlotIndex(slot);
-        StatusBarIconHolder holder = getIcon(index, 0);
+        StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, 0);
         if (holder == null) {
             StatusBarIcon icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
                     Icon.createWithResource(
                             mContext, resourceId), 0, 0, contentDescription);
             holder = StatusBarIconHolder.fromIcon(icon);
-            setIcon(index, holder);
+            setIcon(slot, holder);
         } else {
             holder.getIcon().icon = Icon.createWithResource(mContext, resourceId);
             holder.getIcon().contentDescription = contentDescription;
-            handleSet(index, holder);
+            handleSet(slot, holder);
         }
     }
 
@@ -203,21 +197,18 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
      */
     @Override
     public void setSignalIcon(String slot, WifiIconState state) {
-
-        int index = getSlotIndex(slot);
-
         if (state == null) {
-            removeIcon(index, 0);
+            removeIcon(slot, 0);
             return;
         }
 
-        StatusBarIconHolder holder = getIcon(index, 0);
+        StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, 0);
         if (holder == null) {
             holder = StatusBarIconHolder.fromWifiIconState(state);
-            setIcon(index, holder);
+            setIcon(slot, holder);
         } else {
             holder.setWifiState(state);
-            handleSet(index, holder);
+            handleSet(slot, holder);
         }
     }
 
@@ -229,8 +220,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
      */
     @Override
     public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
-        Slot mobileSlot = getSlot(slot);
-        int slotIndex = getSlotIndex(slot);
+        Slot mobileSlot = mStatusBarIconList.getSlot(slot);
 
         // Reverse the sort order to show icons with left to right([Slot1][Slot2]..).
         // StatusBarIconList has UI design that first items go to the right of second items.
@@ -241,10 +231,10 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             StatusBarIconHolder holder = mobileSlot.getHolderForTag(state.subId);
             if (holder == null) {
                 holder = StatusBarIconHolder.fromMobileIconState(state);
-                setIcon(slotIndex, holder);
+                setIcon(slot, holder);
             } else {
                 holder.setMobileState(state);
-                handleSet(slotIndex, holder);
+                handleSet(slot, holder);
             }
         }
     }
@@ -256,21 +246,19 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
      */
     @Override
     public void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states) {
-        Slot callStrengthSlot = getSlot(slot);
-        int callStrengthSlotIndex = getSlotIndex(slot);
+        Slot callStrengthSlot = mStatusBarIconList.getSlot(slot);
         Collections.reverse(states);
         for (CallIndicatorIconState state : states) {
             if (!state.isNoCalling) {
                 StatusBarIconHolder holder = callStrengthSlot.getHolderForTag(state.subId);
                 if (holder == null) {
                     holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
-                    setIcon(callStrengthSlotIndex, holder);
                 } else {
                     holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
                             Icon.createWithResource(mContext, state.callStrengthResId), 0, 0,
                             state.callStrengthDescription));
-                    setIcon(callStrengthSlotIndex, holder);
                 }
+                setIcon(slot, holder);
             }
             setIconVisibility(slot, !state.isNoCalling, state.subId);
         }
@@ -283,21 +271,19 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
      */
     @Override
     public void setNoCallingIcons(String slot, List<CallIndicatorIconState> states) {
-        Slot noCallingSlot = getSlot(slot);
-        int noCallingSlotIndex = getSlotIndex(slot);
+        Slot noCallingSlot = mStatusBarIconList.getSlot(slot);
         Collections.reverse(states);
         for (CallIndicatorIconState state : states) {
             if (state.isNoCalling) {
                 StatusBarIconHolder holder = noCallingSlot.getHolderForTag(state.subId);
                 if (holder == null) {
                     holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
-                    setIcon(noCallingSlotIndex, holder);
                 } else {
                     holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
                             Icon.createWithResource(mContext, state.noCallingResId), 0, 0,
                             state.noCallingDescription));
-                    setIcon(noCallingSlotIndex, holder);
                 }
+                setIcon(slot, holder);
             }
             setIconVisibility(slot, state.isNoCalling, state.subId);
         }
@@ -305,42 +291,31 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     @Override
     public void setExternalIcon(String slot) {
-        int viewIndex = getViewIndex(getSlotIndex(slot), 0);
+        int viewIndex = mStatusBarIconList.getViewIndex(slot, 0);
         int height = mContext.getResources().getDimensionPixelSize(
                 R.dimen.status_bar_icon_drawing_size);
         mIconGroups.forEach(l -> l.onIconExternal(viewIndex, height));
     }
 
     //TODO: remove this (used in command queue and for 3rd party tiles?)
-    @Override
     public void setIcon(String slot, StatusBarIcon icon) {
-        setIcon(getSlotIndex(slot), icon);
-    }
-
-    /**
-     * For backwards compatibility, in the event that someone gives us a slot and a status bar icon
-     */
-    private void setIcon(int index, StatusBarIcon icon) {
-        String slot = getSlotName(index);
         if (icon == null) {
             removeAllIconsForSlot(slot);
             return;
         }
 
         StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
-        setIcon(index, holder);
+        setIcon(slot, holder);
     }
 
-    /** */
-    @Override
-    public void setIcon(int index, @NonNull StatusBarIconHolder holder) {
-        boolean isNew = getIcon(index, holder.getTag()) == null;
-        super.setIcon(index, holder);
+    private void setIcon(String slot, @NonNull StatusBarIconHolder holder) {
+        boolean isNew = mStatusBarIconList.getIconHolder(slot, holder.getTag()) == null;
+        mStatusBarIconList.setIcon(slot, holder);
 
         if (isNew) {
-            addSystemIcon(index, holder);
+            addSystemIcon(slot, holder);
         } else {
-            handleSet(index, holder);
+            handleSet(slot, holder);
         }
     }
 
@@ -351,34 +326,33 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
 
     /** */
     public void setIconVisibility(String slot, boolean visibility, int tag) {
-        int index = getSlotIndex(slot);
-        StatusBarIconHolder holder = getIcon(index, tag);
+        StatusBarIconHolder holder = mStatusBarIconList.getIconHolder(slot, tag);
         if (holder == null || holder.isVisible() == visibility) {
             return;
         }
 
         holder.setVisible(visibility);
-        handleSet(index, holder);
+        handleSet(slot, holder);
     }
 
     /** */
     @Override
     public void setIconAccessibilityLiveRegion(String slotName, int accessibilityLiveRegion) {
-        Slot slot = getSlot(slotName);
+        Slot slot = mStatusBarIconList.getSlot(slotName);
         if (!slot.hasIconsInSlot()) {
             return;
         }
 
-        int slotIndex = getSlotIndex(slotName);
         List<StatusBarIconHolder> iconsToUpdate = slot.getHolderListInViewOrder();
         for (StatusBarIconHolder holder : iconsToUpdate) {
-            int viewIndex = getViewIndex(slotIndex, holder.getTag());
+            int viewIndex = mStatusBarIconList.getViewIndex(slotName, holder.getTag());
             mIconGroups.forEach(l -> l.mGroup.getChildAt(viewIndex)
                     .setAccessibilityLiveRegion(accessibilityLiveRegion));
         }
     }
 
     /** */
+    @Override
     public void removeIcon(String slot) {
         removeAllIconsForSlot(slot);
     }
@@ -386,39 +360,34 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     /** */
     @Override
     public void removeIcon(String slot, int tag) {
-        removeIcon(getSlotIndex(slot), tag);
+        if (mStatusBarIconList.getIconHolder(slot, tag) == null) {
+            return;
+        }
+        int viewIndex = mStatusBarIconList.getViewIndex(slot, tag);
+        mStatusBarIconList.removeIcon(slot, tag);
+        mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
     }
 
     /** */
     @Override
     public void removeAllIconsForSlot(String slotName) {
-        Slot slot = getSlot(slotName);
+        Slot slot = mStatusBarIconList.getSlot(slotName);
         if (!slot.hasIconsInSlot()) {
             return;
         }
 
-        int slotIndex = getSlotIndex(slotName);
         List<StatusBarIconHolder> iconsToRemove = slot.getHolderListInViewOrder();
         for (StatusBarIconHolder holder : iconsToRemove) {
-            int viewIndex = getViewIndex(slotIndex, holder.getTag());
+            int viewIndex = mStatusBarIconList.getViewIndex(slotName, holder.getTag());
             slot.removeForTag(holder.getTag());
             mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
         }
     }
 
-    /** */
-    @Override
-    public void removeIcon(int index, int tag) {
-        if (getIcon(index, tag) == null) {
-            return;
-        }
-        super.removeIcon(index, tag);
-        int viewIndex = getViewIndex(index, 0);
-        mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
-    }
 
-    private void handleSet(int index, StatusBarIconHolder holder) {
-        int viewIndex = getViewIndex(index, holder.getTag());
+
+    private void handleSet(String slotName, StatusBarIconHolder holder) {
+        int viewIndex = mStatusBarIconList.getViewIndex(slotName, holder.getTag());
         mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
     }
 
@@ -438,7 +407,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
             }
         }
 
-        super.dump(pw);
+        mStatusBarIconList.dump(pw);
     }
 
     /** */
@@ -482,7 +451,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     /** */
     @Override
     public void onDensityOrFontScaleChanged() {
-        loadDimens();
         refreshIconGroups();
     }
 }

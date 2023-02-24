@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.dialog
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.media.AudioManager
 import android.media.session.MediaSessionManager
@@ -45,7 +46,8 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val nearbyMediaDevicesManagerOptional: Optional<NearbyMediaDevicesManager>,
     private val audioManager: AudioManager,
-    private val powerExemptionManager: PowerExemptionManager
+    private val powerExemptionManager: PowerExemptionManager,
+    private val keyGuardManager: KeyguardManager
 ) {
     var mediaOutputBroadcastDialog: MediaOutputBroadcastDialog? = null
 
@@ -57,7 +59,7 @@ class MediaOutputBroadcastDialogFactory @Inject constructor(
         val controller = MediaOutputController(context, packageName,
                 mediaSessionManager, lbm, starter, notifCollection,
                 dialogLaunchAnimator, nearbyMediaDevicesManagerOptional, audioManager,
-                powerExemptionManager)
+                powerExemptionManager, keyGuardManager)
         val dialog =
                 MediaOutputBroadcastDialog(context, aboveStatusBar, broadcastSender, controller)
         mediaOutputBroadcastDialog = dialog

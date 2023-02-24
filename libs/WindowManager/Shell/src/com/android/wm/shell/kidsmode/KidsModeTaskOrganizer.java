@@ -50,7 +50,9 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.recents.RecentTasksController;
-import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.unfold.UnfoldAnimationController;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -72,6 +74,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     private final Handler mMainHandler;
     private final Context mContext;
+    private final ShellCommandHandler mShellCommandHandler;
     private final SyncTransactionQueue mSyncQueue;
     private final DisplayController mDisplayController;
     private final DisplayInsetsController mDisplayInsetsController;
@@ -139,45 +142,61 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     KidsModeTaskOrganizer(
-            ITaskOrganizerController taskOrganizerController,
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
             Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ITaskOrganizerController taskOrganizerController,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
+            Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasks,
-            KidsModeSettingsObserver kidsModeSettingsObserver) {
-        super(taskOrganizerController, mainExecutor, context, /* compatUI= */ null, recentTasks);
+            KidsModeSettingsObserver kidsModeSettingsObserver,
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
+        // Note: we don't call super with the shell init because we will be initializing manually
+        super(/* shellInit= */ null, /* shellCommandHandler= */ null, taskOrganizerController,
+                /* compatUI= */ null, unfoldAnimationController, recentTasks, mainExecutor);
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         mKidsModeSettingsObserver = kidsModeSettingsObserver;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     public KidsModeTaskOrganizer(
-            ShellExecutor mainExecutor,
-            Handler mainHandler,
             Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
             SyncTransactionQueue syncTransactionQueue,
             DisplayController displayController,
             DisplayInsetsController displayInsetsController,
-            Optional<RecentTasksController> recentTasks) {
-        super(mainExecutor, context, /* compatUI= */ null, recentTasks);
+            Optional<UnfoldAnimationController> unfoldAnimationController,
+            Optional<RecentTasksController> recentTasks,
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
+        // Note: we don't call super with the shell init because we will be initializing manually
+        super(/* shellInit= */ null, /* taskOrganizerController= */ null, /* compatUI= */ null,
+                unfoldAnimationController, recentTasks, mainExecutor);
         mContext = context;
+        mShellCommandHandler = shellCommandHandler;
         mMainHandler = mainHandler;
         mSyncQueue = syncTransactionQueue;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     /**
      * Initializes kids mode status.
      */
-    public void initialize(StartingWindowController startingWindowController) {
-        initStartingWindow(startingWindowController);
+    public void onInit() {
+        if (mShellCommandHandler != null) {
+            mShellCommandHandler.addDumpCallback(this::dump, this);
+        }
         if (mKidsModeSettingsObserver == null) {
             mKidsModeSettingsObserver = new KidsModeSettingsObserver(mMainHandler, mContext);
         }
@@ -297,11 +316,13 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
                 true /* onTop */);
         wct.reorder(rootToken, mEnabled /* onTop */);
         mSyncQueue.queue(wct);
-        final SurfaceControl rootLeash = mLaunchRootLeash;
-        mSyncQueue.runInSync(t -> {
-            t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
-            t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
-        });
+        if (mEnabled) {
+            final SurfaceControl rootLeash = mLaunchRootLeash;
+            mSyncQueue.runInSync(t -> {
+                t.setPosition(rootLeash, taskBounds.left, taskBounds.top);
+                t.setWindowCrop(rootLeash, taskBounds.width(), taskBounds.height());
+            });
+        }
     }
 
     private Rect calculateBounds() {

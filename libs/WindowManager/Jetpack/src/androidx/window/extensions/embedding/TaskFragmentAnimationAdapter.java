@@ -16,7 +16,6 @@
 
 package androidx.window.extensions.embedding;
 
-import static android.graphics.Matrix.MSCALE_X;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 
@@ -41,30 +40,44 @@ class TaskFragmentAnimationAdapter {
      */
     private static final int LAYER_NO_OVERRIDE = -1;
 
+    @NonNull
     final Animation mAnimation;
+    @NonNull
     final RemoteAnimationTarget mTarget;
+    @NonNull
     final SurfaceControl mLeash;
+    /** Area in absolute coordinate that the animation surface shouldn't go beyond. */
+    @NonNull
+    private final Rect mWholeAnimationBounds = new Rect();
 
+    @NonNull
     final Transformation mTransformation = new Transformation();
+    @NonNull
     final float[] mMatrix = new float[9];
+    @NonNull
     final float[] mVecs = new float[4];
+    @NonNull
     final Rect mRect = new Rect();
     private boolean mIsFirstFrame = true;
     private int mOverrideLayer = LAYER_NO_OVERRIDE;
 
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
             @NonNull RemoteAnimationTarget target) {
-        this(animation, target, target.leash);
+        this(animation, target, target.leash, target.screenSpaceBounds);
     }
 
     /**
      * @param leash the surface to animate.
+     * @param wholeAnimationBounds  area in absolute coordinate that the animation surface shouldn't
+     *                              go beyond.
      */
     TaskFragmentAnimationAdapter(@NonNull Animation animation,
-            @NonNull RemoteAnimationTarget target, @NonNull SurfaceControl leash) {
+            @NonNull RemoteAnimationTarget target, @NonNull SurfaceControl leash,
+            @NonNull Rect wholeAnimationBounds) {
         mAnimation = animation;
         mTarget = target;
         mLeash = leash;
+        mWholeAnimationBounds.set(wholeAnimationBounds);
     }
 
     /**
@@ -94,23 +107,32 @@ class TaskFragmentAnimationAdapter {
 
     /** To be overridden by subclasses to adjust the animation surface change. */
     void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
+        // Update the surface position and alpha.
         mTransformation.getMatrix().postTranslate(
                 mTarget.localBounds.left, mTarget.localBounds.top);
         t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
         t.setAlpha(mLeash, mTransformation.getAlpha());
-        // Get current animation position.
+
+        // Get current surface bounds in absolute coordinate.
+        // positionX/Y are in local coordinate, so minus the local offset to get the slide amount.
         final int positionX = Math.round(mMatrix[MTRANS_X]);
         final int positionY = Math.round(mMatrix[MTRANS_Y]);
-        // The exiting surface starts at position: mTarget.localBounds and moves with
-        // positionX varying. Offset our crop region by the amount we have slided so crop
-        // regions stays exactly on the original container in split.
-        final int cropOffsetX = mTarget.localBounds.left - positionX;
-        final int cropOffsetY = mTarget.localBounds.top - positionY;
-        final Rect cropRect = new Rect();
-        cropRect.set(mTarget.localBounds);
-        // Because window crop uses absolute position.
-        cropRect.offsetTo(0, 0);
-        cropRect.offset(cropOffsetX, cropOffsetY);
+        final Rect cropRect = new Rect(mTarget.screenSpaceBounds);
+        final Rect localBounds = mTarget.localBounds;
+        cropRect.offset(positionX - localBounds.left, positionY - localBounds.top);
+
+        // Store the current offset of the surface top left from (0,0) in absolute coordinate.
+        final int offsetX = cropRect.left;
+        final int offsetY = cropRect.top;
+
+        // Intersect to make sure the animation happens within the whole animation bounds.
+        if (!cropRect.intersect(mWholeAnimationBounds)) {
+            // Hide the surface when it is outside of the animation area.
+            t.setAlpha(mLeash, 0);
+        }
+
+        // cropRect is in absolute coordinate, so we need to translate it to surface top left.
+        cropRect.offset(-offsetX, -offsetY);
         t.setCrop(mLeash, cropRect);
     }
 
@@ -124,52 +146,6 @@ class TaskFragmentAnimationAdapter {
     }
 
     /**
-     * Should be used when the {@link RemoteAnimationTarget} is in split with others, and want to
-     * animate together as one. This adapter will offset the animation leash to make the animate of
-     * two windows look like a single window.
-     */
-    static class SplitAdapter extends TaskFragmentAnimationAdapter {
-        private final boolean mIsLeftHalf;
-        private final int mWholeAnimationWidth;
-
-        /**
-         * @param isLeftHalf whether this is the left half of the animation.
-         * @param wholeAnimationWidth the whole animation windows width.
-         */
-        SplitAdapter(@NonNull Animation animation, @NonNull RemoteAnimationTarget target,
-                boolean isLeftHalf, int wholeAnimationWidth) {
-            super(animation, target);
-            mIsLeftHalf = isLeftHalf;
-            mWholeAnimationWidth = wholeAnimationWidth;
-            if (wholeAnimationWidth == 0) {
-                throw new IllegalArgumentException("SplitAdapter must provide wholeAnimationWidth");
-            }
-        }
-
-        @Override
-        void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
-            float posX = mTarget.localBounds.left;
-            final float posY = mTarget.localBounds.top;
-            // This window is half of the whole animation window. Offset left/right to make it
-            // look as one with the other half.
-            mTransformation.getMatrix().getValues(mMatrix);
-            final int targetWidth = mTarget.localBounds.width();
-            final float scaleX = mMatrix[MSCALE_X];
-            final float totalOffset = mWholeAnimationWidth * (1 - scaleX) / 2;
-            final float curOffset = targetWidth * (1 - scaleX) / 2;
-            final float offsetDiff = totalOffset - curOffset;
-            if (mIsLeftHalf) {
-                posX += offsetDiff;
-            } else {
-                posX -= offsetDiff;
-            }
-            mTransformation.getMatrix().postTranslate(posX, posY);
-            t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
-            t.setAlpha(mLeash, mTransformation.getAlpha());
-        }
-    }
-
-    /**
      * Should be used for the animation of the snapshot of a {@link RemoteAnimationTarget} that has
      * size change.
      */
@@ -177,7 +153,7 @@ class TaskFragmentAnimationAdapter {
 
         SnapshotAdapter(@NonNull Animation animation, @NonNull RemoteAnimationTarget target) {
             // Start leash is the snapshot of the starting surface.
-            super(animation, target, target.startLeash);
+            super(animation, target, target.startLeash, target.screenSpaceBounds);
         }
 
         @Override

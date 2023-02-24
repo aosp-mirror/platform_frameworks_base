@@ -20,10 +20,13 @@ import android.app.ActivityThread;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.window.extensions.area.WindowAreaComponent;
+import androidx.window.extensions.area.WindowAreaComponentImpl;
 import androidx.window.extensions.embedding.ActivityEmbeddingComponent;
 import androidx.window.extensions.embedding.SplitController;
 import androidx.window.extensions.layout.WindowLayoutComponent;
 import androidx.window.extensions.layout.WindowLayoutComponentImpl;
+
 
 /**
  * The reference implementation of {@link WindowExtensions} that implements the initial API version.
@@ -33,7 +36,9 @@ public class WindowExtensionsImpl implements WindowExtensions {
     private final Object mLock = new Object();
     private volatile WindowLayoutComponent mWindowLayoutComponent;
     private volatile SplitController mSplitController;
+    private volatile WindowAreaComponent mWindowAreaComponent;
 
+    // TODO(b/241126279) Introduce constants to better version functionality
     @Override
     public int getVendorApiLevel() {
         return 1;
@@ -74,5 +79,24 @@ public class WindowExtensionsImpl implements WindowExtensions {
             }
         }
         return mSplitController;
+    }
+
+    /**
+     * Returns a reference implementation of {@link WindowAreaComponent} if available,
+     * {@code null} otherwise. The implementation must match the API level reported in
+     * {@link WindowExtensions#getWindowAreaComponent()}.
+     * @return {@link WindowAreaComponent} OEM implementation.
+     */
+    public WindowAreaComponent getWindowAreaComponent() {
+        if (mWindowAreaComponent == null) {
+            synchronized (mLock) {
+                if (mWindowAreaComponent == null) {
+                    Context context = ActivityThread.currentApplication();
+                    mWindowAreaComponent =
+                            new WindowAreaComponentImpl(context);
+                }
+            }
+        }
+        return mWindowAreaComponent;
     }
 }

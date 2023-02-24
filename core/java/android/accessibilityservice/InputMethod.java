@@ -517,7 +517,8 @@ public class InputMethod {
         @Override
         public void invalidateInput(EditorInfo editorInfo,
                 IRemoteAccessibilityInputConnection connection, int sessionId) {
-            if (!mStartedInputConnection.isSameConnection(connection)) {
+            if (!mEnabled || mStartedInputConnection == null
+                    || !mStartedInputConnection.isSameConnection(connection)) {
                 // This is not an error, and can be safely ignored.
                 return;
             }

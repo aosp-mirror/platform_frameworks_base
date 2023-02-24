@@ -418,10 +418,10 @@ public class AdaptiveIconDrawable extends Drawable implements Drawable.Callback 
     /** @hide */
     @TestApi
     public Region getSafeZone() {
-        mMaskMatrix.reset();
+        Path mask = getIconMask();
         mMaskMatrix.setScale(SAFEZONE_SCALE, SAFEZONE_SCALE, getBounds().centerX(), getBounds().centerY());
         Path p = new Path();
-        mMask.transform(mMaskMatrix, p);
+        mask.transform(mMaskMatrix, p);
         Region safezoneRegion = new Region(getBounds());
         safezoneRegion.setPath(p, safezoneRegion);
         return safezoneRegion;

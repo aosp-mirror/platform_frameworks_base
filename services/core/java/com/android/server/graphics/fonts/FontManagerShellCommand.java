@@ -28,6 +28,7 @@ import android.graphics.fonts.FontUpdateRequest;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.os.Binder;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.ShellCommand;
@@ -102,6 +103,10 @@ public class FontManagerShellCommand extends ShellCommand {
         w.println();
         w.println("update-family [family definition XML path]");
         w.println("    Update font families with the new definitions.");
+        w.println();
+        w.println("install-debug-cert [cert file path]");
+        w.println("    Install debug certificate file. This command can be used only on userdebug");
+        w.println("    or eng device with root user.");
         w.println();
         w.println("clear");
         w.println("    Remove all installed font files and reset to the initial state.");
@@ -322,6 +327,33 @@ public class FontManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int installCert(ShellCommand shell) throws SystemFontException {
+        if (!(Build.IS_USERDEBUG || Build.IS_ENG)) {
+            throw new SecurityException("Only userdebug/eng device can add debug certificate");
+        }
+        if (Binder.getCallingUid() != Process.ROOT_UID) {
+            throw new SecurityException("Only root can add debug certificate");
+        }
+
+        String certPath = shell.getNextArg();
+        if (certPath == null) {
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_INVALID_DEBUG_CERTIFICATE,
+                    "Cert file path argument is required.");
+        }
+        File file = new File(certPath);
+        if (!file.isFile()) {
+            throw new SystemFontException(
+                    FontManager.RESULT_ERROR_INVALID_DEBUG_CERTIFICATE,
+                    "Cert file (" + file + ") is not found");
+        }
+
+        mService.addDebugCertificate(certPath);
+        mService.restart();
+        shell.getOutPrintWriter().println("Success");
+        return 0;
+    }
+
     private int update(ShellCommand shell) throws SystemFontException {
         String fontPath = shell.getNextArg();
         if (fontPath == null) {
@@ -494,6 +526,8 @@ public class FontManagerShellCommand extends ShellCommand {
                     return restart(shell);
                 case "status":
                     return status(shell);
+                case "install-debug-cert":
+                    return installCert(shell);
                 default:
                     return shell.handleDefaultCommands(cmd);
             }

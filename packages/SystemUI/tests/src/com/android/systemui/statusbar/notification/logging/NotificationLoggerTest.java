@@ -44,8 +44,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifLiveData;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -85,11 +83,9 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
 
     // Dependency mocks:
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
     @Mock private NotifLiveData<List<NotificationEntry>> mActiveNotifEntries;
     @Mock private NotificationVisibilityProvider mVisibilityProvider;
-    @Mock private NotificationEntryManager mEntryManager;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotificationListener mListener;
 
@@ -103,7 +99,6 @@ public class NotificationLoggerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(true);
         when(mNotifLiveDataStore.getActiveNotifList()).thenReturn(mActiveNotifEntries);
 
         mEntry = new NotificationEntryBuilder()
@@ -119,17 +114,14 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mLogger = new TestableNotificationLogger(
                 mListener,
                 mUiBgExecutor,
-                mNotifPipelineFlags,
                 mNotifLiveDataStore,
                 mVisibilityProvider,
-                mEntryManager,
                 mNotifPipeline,
                 mock(StatusBarStateControllerImpl.class),
                 mBarService,
                 mExpansionStateLogger
         );
         mLogger.setUpWithContainer(mListContainer);
-        verify(mEntryManager, never()).addNotificationEntryListener(any());
         verify(mNotifPipeline).addCollectionListener(any());
     }
 
@@ -267,10 +259,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
 
         TestableNotificationLogger(NotificationListener notificationListener,
                 Executor uiBgExecutor,
-                NotifPipelineFlags notifPipelineFlags,
                 NotifLiveDataStore notifLiveDataStore,
                 NotificationVisibilityProvider visibilityProvider,
-                NotificationEntryManager entryManager,
                 NotifPipeline notifPipeline,
                 StatusBarStateControllerImpl statusBarStateController,
                 IStatusBarService barService,
@@ -278,10 +268,8 @@ public class NotificationLoggerTest extends SysuiTestCase {
             super(
                     notificationListener,
                     uiBgExecutor,
-                    notifPipelineFlags,
                     notifLiveDataStore,
                     visibilityProvider,
-                    entryManager,
                     notifPipeline,
                     statusBarStateController,
                     expansionStateLogger,

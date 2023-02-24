@@ -16,6 +16,8 @@
 
 package com.android.server.logcat;
 
+import static android.os.Process.getParentPid;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -38,6 +40,8 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.ILogAccessDialogCallback;
+import com.android.internal.app.LogAccessDialogActivity;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -45,6 +49,7 @@ import com.android.server.SystemService;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -98,7 +103,7 @@ public final class LogcatManagerService extends SystemService {
     private final Injector mInjector;
     private final Supplier<Long> mClock;
     private final BinderService mBinderService;
-    private final LogcatManagerServiceInternal mLocalService;
+    private final LogAccessDialogCallback mDialogCallback;
     private final Handler mHandler;
     private ActivityManagerInternal mActivityManagerInternal;
     private ILogd mLogdService;
@@ -203,7 +208,8 @@ public final class LogcatManagerService extends SystemService {
         }
     }
 
-    final class LogcatManagerServiceInternal {
+    final class LogAccessDialogCallback extends ILogAccessDialogCallback.Stub {
+        @Override
         public void approveAccessForClient(int uid, @NonNull String packageName) {
             final LogAccessClient client = new LogAccessClient(uid, packageName);
             if (DEBUG) {
@@ -213,6 +219,7 @@ public final class LogcatManagerService extends SystemService {
             mHandler.sendMessageAtTime(msg, mClock.get());
         }
 
+        @Override
         public void declineAccessForClient(int uid, @NonNull String packageName) {
             final LogAccessClient client = new LogAccessClient(uid, packageName);
             if (DEBUG) {
@@ -299,7 +306,7 @@ public final class LogcatManagerService extends SystemService {
         mInjector = injector;
         mClock = injector.createClock();
         mBinderService = new BinderService();
-        mLocalService = new LogcatManagerServiceInternal();
+        mDialogCallback = new LogAccessDialogCallback();
         mHandler = new LogAccessRequestHandler(injector.getLooper(), this);
     }
 
@@ -308,15 +315,14 @@ public final class LogcatManagerService extends SystemService {
         try {
             mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
             publishBinderService("logcat", mBinderService);
-            publishLocalService(LogcatManagerServiceInternal.class, mLocalService);
         } catch (Throwable t) {
             Slog.e(TAG, "Could not start the LogcatManagerService.", t);
         }
     }
 
     @VisibleForTesting
-    LogcatManagerServiceInternal getLocalService() {
-        return mLocalService;
+    LogAccessDialogCallback getDialogCallback() {
+        return mDialogCallback;
     }
 
     @VisibleForTesting
@@ -340,13 +346,6 @@ public final class LogcatManagerService extends SystemService {
      * access
      */
     private String getPackageName(LogAccessRequest request) {
-        if (mActivityManagerInternal != null) {
-            String packageName = mActivityManagerInternal.getPackageNameByPid(request.mPid);
-            if (packageName != null) {
-                return packageName;
-            }
-        }
-
         PackageManager pm = mContext.getPackageManager();
         if (pm == null) {
             // Decline the logd access if PackageManager is null
@@ -355,15 +354,28 @@ public final class LogcatManagerService extends SystemService {
         }
 
         String[] packageNames = pm.getPackagesForUid(request.mUid);
-
         if (ArrayUtils.isEmpty(packageNames)) {
             // Decline the logd access if the app name is unknown
             Slog.e(TAG, "Unknown calling package name, declining the logd access");
             return null;
         }
 
-        String firstPackageName = packageNames[0];
+        if (mActivityManagerInternal != null) {
+            int pid = request.mPid;
+            String packageName = mActivityManagerInternal.getPackageNameByPid(pid);
+            while ((packageName == null || !ArrayUtils.contains(packageNames, packageName))
+                    && pid != -1) {
+                pid = getParentPid(pid);
+                packageName = mActivityManagerInternal.getPackageNameByPid(pid);
+            }
 
+            if (packageName != null && ArrayUtils.contains(packageNames, packageName)) {
+                return packageName;
+            }
+        }
+
+        Arrays.sort(packageNames);
+        String firstPackageName = packageNames[0];
         if (firstPackageName == null || firstPackageName.isEmpty()) {
             // Decline the logd access if the package name from uid is unknown
             Slog.e(TAG, "Unknown calling package name, declining the logd access");
@@ -430,6 +442,7 @@ public final class LogcatManagerService extends SystemService {
         mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_PENDING_TIMEOUT, client),
                 mClock.get() + PENDING_CONFIRMATION_TIMEOUT_MILLIS);
         final Intent mIntent = createIntent(client);
+        mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivityAsUser(mIntent, UserHandle.SYSTEM);
     }
 
@@ -530,6 +543,7 @@ public final class LogcatManagerService extends SystemService {
 
         intent.putExtra(Intent.EXTRA_PACKAGE_NAME, client.mPackageName);
         intent.putExtra(Intent.EXTRA_UID, client.mUid);
+        intent.putExtra(LogAccessDialogActivity.EXTRA_CALLBACK, mDialogCallback.asBinder());
 
         return intent;
     }

@@ -20,21 +20,19 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 
-import android.animation.AnimationHandler;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Trace;
+import android.view.Choreographer;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.annotations.ChoreographerSfVsync;
 import com.android.wm.shell.common.annotations.ExternalMainThread;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
@@ -144,6 +142,25 @@ public abstract class WMShellConcurrencyModule {
     }
 
     /**
+     * Provide a Shell main-thread {@link Choreographer} with the app vsync.
+     *
+     * @param executor the executor of the shell main thread
+     */
+    @WMSingleton
+    @Provides
+    @ShellMainThread
+    public static Choreographer provideShellMainChoreographer(
+            @ShellMainThread ShellExecutor executor) {
+        try {
+            final Choreographer[] choreographer = new Choreographer[1];
+            executor.executeBlocking(() -> choreographer[0] = Choreographer.getInstance());
+            return choreographer[0];
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Failed to obtain main Choreographer.", e);
+        }
+    }
+
+    /**
      * Provide a Shell animation-thread Executor.
      */
     @WMSingleton
@@ -172,30 +189,6 @@ public abstract class WMShellConcurrencyModule {
                 THREAD_PRIORITY_TOP_APP_BOOST);
         shellSplashscreenThread.start();
         return new HandlerExecutor(shellSplashscreenThread.getThreadHandler());
-    }
-
-    /**
-     * Provide a Shell main-thread AnimationHandler.  The AnimationHandler can be set on
-     * {@link android.animation.ValueAnimator}s and will ensure that the animation will run on
-     * the Shell main-thread with the SF vsync.
-     */
-    @WMSingleton
-    @Provides
-    @ChoreographerSfVsync
-    public static AnimationHandler provideShellMainExecutorSfVsyncAnimationHandler(
-            @ShellMainThread ShellExecutor mainExecutor) {
-        try {
-            AnimationHandler handler = new AnimationHandler();
-            mainExecutor.executeBlocking(() -> {
-                // This is called on the animation thread since it calls
-                // Choreographer.getSfInstance() which returns a thread-local Choreographer instance
-                // that uses the SF vsync
-                handler.setProvider(new SfVsyncFrameCallbackProvider());
-            });
-            return handler;
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Failed to initialize SfVsync animation handler in 1s", e);
-        }
     }
 
     /**

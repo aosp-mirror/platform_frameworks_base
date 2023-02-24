@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.service.dreams.IDreamManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -15,6 +14,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager
 import android.widget.LinearLayout
 import androidx.test.filters.SmallTest
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.DecorView
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertEquals
@@ -29,23 +29,24 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.any
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class DialogLaunchAnimatorTest : SysuiTestCase() {
-    private val launchAnimator = LaunchAnimator(TEST_TIMINGS, TEST_INTERPOLATORS)
     private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     private val attachedViews = mutableSetOf<View>()
 
-    @Mock lateinit var dreamManager: IDreamManager
+    @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @get:Rule val rule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
-        dialogLaunchAnimator = DialogLaunchAnimator(
-            dreamManager, launchAnimator, isForTesting = true)
+        dialogLaunchAnimator =
+            fakeDialogLaunchAnimator(interactionJankMonitor = interactionJankMonitor)
     }
 
     @After
@@ -90,7 +91,8 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
 
         // The dialog content is inside this fake window view.
         assertNotNull(
-            dialogContentWithBackground.findViewByPredicate { it === dialog.contentView })
+            dialogContentWithBackground.findViewByPredicate { it === dialog.contentView }
+        )
 
         // Clicking the transparent background should dismiss the dialog.
         runOnMainThreadAndWaitForIdleSync {
@@ -147,6 +149,22 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun testActivityLaunchWhenLockedWithoutAlternateAuth() {
+        val dialogLaunchAnimator =
+            fakeDialogLaunchAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = false)
+        val dialog = createAndShowDialog(dialogLaunchAnimator)
+        assertNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+    }
+
+    @Test
+    fun testActivityLaunchWhenLockedWithAlternateAuth() {
+        val dialogLaunchAnimator =
+            fakeDialogLaunchAnimator(isUnlocked = false, isShowingAlternateAuthOnUnlock = true)
+        val dialog = createAndShowDialog(dialogLaunchAnimator)
+        assertNotNull(dialogLaunchAnimator.createActivityLaunchController(dialog.contentView))
+    }
+
+    @Test
     fun testDialogAnimationIsChangedByAnimator() {
         // Important: the power menu animation relies on this behavior to know when to animate (see
         // http://ag/16774605).
@@ -161,11 +179,39 @@ class DialogLaunchAnimatorTest : SysuiTestCase() {
         assertNotEquals(0, dialog.window.attributes.windowAnimations)
     }
 
-    private fun createAndShowDialog(): TestDialog {
+    @Test
+    fun testCujSpecificationLogsInteraction() {
+        val touchSurface = createTouchSurface()
+        runOnMainThreadAndWaitForIdleSync {
+            val dialog = TestDialog(context)
+            dialogLaunchAnimator.showFromView(
+                dialog, touchSurface, cuj = DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN))
+        }
+
+        verify(interactionJankMonitor).begin(any())
+        verify(interactionJankMonitor).end(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN)
+    }
+
+    @Test
+    fun testShowFromDialogCujSpecificationLogsInteraction() {
+        val firstDialog = createAndShowDialog()
+        runOnMainThreadAndWaitForIdleSync {
+            val dialog = TestDialog(context)
+            dialogLaunchAnimator.showFromDialog(
+                dialog, firstDialog, cuj = DialogCuj(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN))
+            dialog
+        }
+        verify(interactionJankMonitor).begin(any())
+        verify(interactionJankMonitor).end(InteractionJankMonitor.CUJ_USER_DIALOG_OPEN)
+    }
+
+    private fun createAndShowDialog(
+        animator: DialogLaunchAnimator = dialogLaunchAnimator,
+    ): TestDialog {
         val touchSurface = createTouchSurface()
         return runOnMainThreadAndWaitForIdleSync {
             val dialog = TestDialog(context)
-            dialogLaunchAnimator.showFromView(dialog, touchSurface)
+            animator.showFromView(dialog, touchSurface)
             dialog
         }
     }

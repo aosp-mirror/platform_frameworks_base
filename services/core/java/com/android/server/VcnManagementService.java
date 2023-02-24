@@ -371,8 +371,9 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             return new LocationPermissionChecker(context);
         }
 
-        /** Gets the transports that need to be marked as restricted by the VCN */
-        public Set<Integer> getRestrictedTransports(
+        /** Gets transports that need to be marked as restricted by the VCN from CarrierConfig */
+        @VisibleForTesting(visibility = Visibility.PRIVATE)
+        public Set<Integer> getRestrictedTransportsFromCarrierConfig(
                 ParcelUuid subGrp, TelephonySubscriptionSnapshot lastSnapshot) {
             if (!Build.IS_ENG && !Build.IS_USERDEBUG) {
                 return RESTRICTED_TRANSPORTS_DEFAULT;
@@ -396,6 +397,22 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             for (int transport : restrictedTransportsArray) {
                 restrictedTransports.add(transport);
             }
+            return restrictedTransports;
+        }
+
+        /** Gets the transports that need to be marked as restricted by the VCN */
+        public Set<Integer> getRestrictedTransports(
+                ParcelUuid subGrp,
+                TelephonySubscriptionSnapshot lastSnapshot,
+                VcnConfig vcnConfig) {
+            final Set<Integer> restrictedTransports = new ArraySet<>();
+            restrictedTransports.addAll(vcnConfig.getRestrictedUnderlyingNetworkTransports());
+
+            // TODO: b/262269892 Remove the ability to configure restricted transports
+            // via CarrierConfig
+            restrictedTransports.addAll(
+                    getRestrictedTransportsFromCarrierConfig(subGrp, lastSnapshot));
+
             return restrictedTransports;
         }
     }
@@ -719,6 +736,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         if (mVcns.containsKey(subscriptionGroup)) {
             final Vcn vcn = mVcns.get(subscriptionGroup);
             vcn.updateConfig(config);
+            notifyAllPolicyListenersLocked();
         } else {
             // TODO(b/193687515): Support multiple VCNs active at the same time
             if (isActiveSubGroup(subscriptionGroup, mLastSnapshot)) {
@@ -936,7 +954,6 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     }
 
     /** Adds the provided listener for receiving VcnUnderlyingNetworkPolicy updates. */
-    @GuardedBy("mLock")
     @Override
     public void addVcnUnderlyingNetworkPolicyListener(
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
@@ -963,16 +980,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         });
     }
 
-    @VisibleForTesting(visibility = Visibility.PRIVATE)
-    void addVcnUnderlyingNetworkPolicyListenerForTest(
-            @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
-        synchronized (mLock) {
-            addVcnUnderlyingNetworkPolicyListener(listener);
-        }
-    }
-
     /** Removes the provided listener from receiving VcnUnderlyingNetworkPolicy updates. */
-    @GuardedBy("mLock")
     @Override
     public void removeVcnUnderlyingNetworkPolicyListener(
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
@@ -1062,8 +1070,8 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                         isVcnManagedNetwork = true;
                     }
 
-                    final Set<Integer> restrictedTransports =
-                            mDeps.getRestrictedTransports(subGrp, mLastSnapshot);
+                    final Set<Integer> restrictedTransports = mDeps.getRestrictedTransports(
+                            subGrp, mLastSnapshot, mConfigs.get(subGrp));
                     for (int restrictedTransport : restrictedTransports) {
                         if (ncCopy.hasTransport(restrictedTransport)) {
                             if (restrictedTransport == TRANSPORT_CELLULAR) {

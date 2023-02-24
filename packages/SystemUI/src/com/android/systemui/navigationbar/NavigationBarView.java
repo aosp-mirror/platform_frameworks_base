@@ -39,6 +39,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -51,6 +52,7 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.widget.FrameLayout;
@@ -72,22 +74,22 @@ import com.android.systemui.navigationbar.buttons.NearestTouchFrame;
 import com.android.systemui.navigationbar.buttons.RotationContextButton;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shared.rotation.FloatingRotationButton;
 import com.android.systemui.shared.rotation.RotationButton.RotationButtonUpdatesCallback;
 import com.android.systemui.shared.rotation.RotationButtonController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
-import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /** */
@@ -96,6 +98,8 @@ public class NavigationBarView extends FrameLayout {
     final static String TAG = "NavBarView";
 
     final static boolean ALTERNATE_CAR_MODE_UI = false;
+
+    private Executor mBgExecutor;
 
     // The current view is one of mHorizontal or mVertical depending on the current configuration
     View mCurrentView = null;
@@ -347,6 +351,10 @@ public class NavigationBarView extends FrameLayout {
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
         mOnVerticalChangedListener = onVerticalChangedListener;
         notifyVerticalChangedListener(mIsVertical);
+    }
+
+    public void setBackgroundExecutor(Executor bgExecutor) {
+        mBgExecutor = bgExecutor;
     }
 
     public void setTouchHandler(Gefingerpoken touchHandler) {
@@ -768,10 +776,21 @@ public class NavigationBarView extends FrameLayout {
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
-        WindowManagerWrapper.getInstance().setNavBarVirtualKeyHapticFeedbackEnabled(
-                !mShowSwipeUpUi);
+        mBgExecutor.execute(() -> setNavBarVirtualKeyHapticFeedbackEnabled(!mShowSwipeUpUi));
         getHomeButton().setAccessibilityDelegate(
                 mShowSwipeUpUi ? mQuickStepAccessibilityDelegate : null);
+    }
+
+    /**
+     * Enable or disable haptic feedback on the navigation bar buttons.
+     */
+    private void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
+        try {
+            WindowManagerGlobal.getWindowManagerService()
+                    .setNavBarVirtualKeyHapticFeedbackEnabled(enabled);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to enable or disable navigation bar button haptics: ", e);
+        }
     }
 
     /**
@@ -812,6 +831,7 @@ public class NavigationBarView extends FrameLayout {
         mImeDrawsImeNavBar = imeDrawsImeNavBar;
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
         mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
+        mRotationButtonController.onNavigationModeChanged(mNavBarMode);
         updateRotationButton();
     }
 

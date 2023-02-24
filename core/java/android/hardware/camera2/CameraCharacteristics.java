@@ -1326,6 +1326,10 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link android.hardware.camera2.CameraManager#turnOnTorchWithStrengthLevel }.
      * If this value is equal to 1, flashlight brightness control is not supported.
      * The value for this key will be null for devices with no flash unit.</p>
+     * <p>The maximum value is guaranteed to be safe to use for an indefinite duration in
+     * terms of device flashlight lifespan, but may be too bright for comfort for many
+     * use cases. Use the default torch brightness value to avoid problems with an
+     * over-bright flashlight.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
@@ -2605,31 +2609,31 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <table>
      * <thead>
      * <tr>
-     * <th align="left">Input Format</th>
-     * <th align="left">Output Format</th>
-     * <th align="left">Capability</th>
+     * <th style="text-align: left;">Input Format</th>
+     * <th style="text-align: left;">Output Format</th>
+     * <th style="text-align: left;">Capability</th>
      * </tr>
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
-     * <td align="left">PRIVATE_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td style="text-align: left;">PRIVATE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="left">PRIVATE_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: left;">PRIVATE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
-     * <td align="left">YUV_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td style="text-align: left;">YUV_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="left">YUV_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: left;">YUV_REPROCESSING</td>
      * </tr>
      * </tbody>
      * </table>
@@ -2646,26 +2650,26 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <table>
      * <thead>
      * <tr>
-     * <th align="left">Input Format</th>
-     * <th align="left">Output Format</th>
-     * <th align="left">Capability</th>
+     * <th style="text-align: left;">Input Format</th>
+     * <th style="text-align: left;">Output Format</th>
+     * <th style="text-align: left;">Capability</th>
      * </tr>
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
-     * <td align="left">PRIVATE_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td style="text-align: left;">PRIVATE_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
-     * <td align="left">YUV_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td style="text-align: left;">YUV_REPROCESSING</td>
      * </tr>
      * <tr>
-     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
-     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
-     * <td align="left">YUV_REPROCESSING</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td style="text-align: left;">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td style="text-align: left;">YUV_REPROCESSING</td>
      * </tr>
      * </tbody>
      * </table>
@@ -2701,60 +2705,60 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <table>
      * <thead>
      * <tr>
-     * <th align="center">Format</th>
-     * <th align="center">Size</th>
-     * <th align="center">Hardware Level</th>
-     * <th align="center">Notes</th>
+     * <th style="text-align: center;">Format</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Hardware Level</th>
+     * <th style="text-align: center;">Notes</th>
      * </tr>
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
-     * <td align="center">Any</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">1920x1080 (1080p)</td>
-     * <td align="center">Any</td>
-     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">1920x1080 (1080p)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;">if 1080p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">1280x720 (720)</td>
-     * <td align="center">Any</td>
-     * <td align="center">if 720p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">1280x720 (720)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;">if 720p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">640x480 (480p)</td>
-     * <td align="center">Any</td>
-     * <td align="center">if 480p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">640x480 (480p)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;">if 480p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">320x240 (240p)</td>
-     * <td align="center">Any</td>
-     * <td align="center">if 240p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">320x240 (240p)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;">if 240p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">all output sizes available for JPEG</td>
-     * <td align="center">FULL</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">all output sizes available for JPEG</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">all output sizes available for JPEG, up to the maximum video size</td>
-     * <td align="center">LIMITED</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">all output sizes available for JPEG, up to the maximum video size</td>
+     * <td style="text-align: center;">LIMITED</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">IMPLEMENTATION_DEFINED</td>
-     * <td align="center">same as YUV_420_888</td>
-     * <td align="center">Any</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">IMPLEMENTATION_DEFINED</td>
+     * <td style="text-align: center;">same as YUV_420_888</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * </tbody>
      * </table>
@@ -2769,66 +2773,66 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <table>
      * <thead>
      * <tr>
-     * <th align="center">Format</th>
-     * <th align="center">Size</th>
-     * <th align="center">Hardware Level</th>
-     * <th align="center">Notes</th>
+     * <th style="text-align: center;">Format</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Hardware Level</th>
+     * <th style="text-align: center;">Notes</th>
      * </tr>
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
-     * <td align="center">Any</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">JPEG</td>
-     * <td align="center">1920x1080 (1080p)</td>
-     * <td align="center">Any</td>
-     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">1920x1080 (1080p)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;">if 1080p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
-     * <td align="center">FULL</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">1920x1080 (1080p)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">1920x1080 (1080p)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 1080p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">1280x720 (720)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 720p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">1280x720 (720)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 720p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">640x480 (480p)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 480p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">640x480 (480p)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 480p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">320x240 (240p)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 240p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">320x240 (240p)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 240p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">YUV_420_888</td>
-     * <td align="center">all output sizes available for FULL hardware level, up to the maximum video size</td>
-     * <td align="center">LIMITED</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">YUV_420_888</td>
+     * <td style="text-align: center;">all output sizes available for FULL hardware level, up to the maximum video size</td>
+     * <td style="text-align: center;">LIMITED</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">IMPLEMENTATION_DEFINED</td>
-     * <td align="center">same as YUV_420_888</td>
-     * <td align="center">Any</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">IMPLEMENTATION_DEFINED</td>
+     * <td style="text-align: center;">same as YUV_420_888</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * </tbody>
      * </table>
@@ -2983,66 +2987,66 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <table>
      * <thead>
      * <tr>
-     * <th align="center">Format</th>
-     * <th align="center">Size</th>
-     * <th align="center">Hardware Level</th>
-     * <th align="center">Notes</th>
+     * <th style="text-align: center;">Format</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Hardware Level</th>
+     * <th style="text-align: center;">Notes</th>
      * </tr>
      * </thead>
      * <tbody>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
-     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} (*1)</td>
-     * <td align="center">Any</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td style="text-align: center;">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} (*1)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#JPEG }</td>
-     * <td align="center">1920x1080 (1080p)</td>
-     * <td align="center">Any</td>
-     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td style="text-align: center;">1920x1080 (1080p)</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;">if 1080p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="center">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
-     * <td align="center">FULL</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: center;">{@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize}</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="center">1920x1080 (1080p)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 1080p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: center;">1920x1080 (1080p)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 1080p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="center">1280x720 (720)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 720p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: center;">1280x720 (720)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 720p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="center">640x480 (480p)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 480p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: center;">640x480 (480p)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 480p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="center">320x240 (240p)</td>
-     * <td align="center">FULL</td>
-     * <td align="center">if 240p &lt;= activeArraySize</td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: center;">320x240 (240p)</td>
+     * <td style="text-align: center;">FULL</td>
+     * <td style="text-align: center;">if 240p &lt;= activeArraySize</td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
-     * <td align="center">all output sizes available for FULL hardware level, up to the maximum video size</td>
-     * <td align="center">LIMITED</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#YUV_420_888 }</td>
+     * <td style="text-align: center;">all output sizes available for FULL hardware level, up to the maximum video size</td>
+     * <td style="text-align: center;">LIMITED</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * <tr>
-     * <td align="center">{@link android.graphics.ImageFormat#PRIVATE }</td>
-     * <td align="center">same as YUV_420_888</td>
-     * <td align="center">Any</td>
-     * <td align="center"></td>
+     * <td style="text-align: center;">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td style="text-align: center;">same as YUV_420_888</td>
+     * <td style="text-align: center;">Any</td>
+     * <td style="text-align: center;"></td>
      * </tr>
      * </tbody>
      * </table>
@@ -3463,7 +3467,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>An array of mandatory stream combinations which are applicable when device support the
      * 10-bit output capability
      * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT }
-     * This is an app-readable conversion of the maximum resolution mandatory stream combination
+     * This is an app-readable conversion of the 10 bit output mandatory stream combination
      * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
      * <p>The array of
      * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
@@ -3488,8 +3492,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>An array of mandatory stream combinations which are applicable when device lists
      * {@code PREVIEW_STABILIZATION} in {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes}.
-     * This is an app-readable conversion of the maximum resolution mandatory stream combination
-     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * This is an app-readable conversion of the preview stabilization mandatory stream
+     * combination {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
      * <p>The array of
      * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
      * generated according to the documented
@@ -4413,6 +4417,40 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @NonNull
     public static final Key<android.graphics.Rect[]> SENSOR_OPTICAL_BLACK_REGIONS =
             new Key<android.graphics.Rect[]>("android.sensor.opticalBlackRegions", android.graphics.Rect[].class);
+
+    /**
+     * <p>Whether or not the camera device supports readout timestamp and
+     * onReadoutStarted callback.</p>
+     * <p>If this tag is HARDWARE, the camera device calls onReadoutStarted in addition to the
+     * onCaptureStarted callback for each capture. The timestamp passed into the callback
+     * is the start of camera image readout rather than the start of the exposure. In
+     * addition, the application can configure an
+     * {@link android.hardware.camera2.params.OutputConfiguration } with
+     * TIMESTAMP_BASE_READOUT_SENSOR timestamp base, in which case, the timestamp of the
+     * output surface matches the timestamp from the corresponding onReadoutStarted callback.</p>
+     * <p>The readout timestamp is beneficial for video recording, because the encoder favors
+     * uniform timestamps, and the readout timestamps better reflect the cadence camera sensors
+     * output data.</p>
+     * <p>If this tag is HARDWARE, the camera device produces the start-of-exposure and
+     * start-of-readout together. As a result, the onReadoutStarted is called right after
+     * onCaptureStarted. The difference in start-of-readout and start-of-exposure is the sensor
+     * exposure time, plus certain constant offset. The offset is usually due to camera sensor
+     * level crop, and it remains constant for a given camera sensor mode.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED NOT_SUPPORTED}</li>
+     *   <li>{@link #SENSOR_READOUT_TIMESTAMP_HARDWARE HARDWARE}</li>
+     * </ul>
+     *
+     * <p>This key is available on all devices.</p>
+     * @see #SENSOR_READOUT_TIMESTAMP_NOT_SUPPORTED
+     * @see #SENSOR_READOUT_TIMESTAMP_HARDWARE
+     * @hide
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> SENSOR_READOUT_TIMESTAMP =
+            new Key<Integer>("android.sensor.readoutTimestamp", int.class);
 
     /**
      * <p>List of lens shading modes for {@link CaptureRequest#SHADING_MODE android.shading.mode} that are supported by this camera device.</p>

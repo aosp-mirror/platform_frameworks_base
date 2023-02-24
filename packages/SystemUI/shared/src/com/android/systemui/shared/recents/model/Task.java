@@ -16,7 +16,11 @@
 
 package com.android.systemui.shared.recents.model;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_ACTIVITY_TYPES;
+import static com.android.wm.shell.common.split.SplitScreenConstants.CONTROLLED_WINDOWING_MODES;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.TaskDescription;
@@ -30,6 +34,8 @@ import android.view.ViewDebug;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -231,6 +237,13 @@ public class Task {
     public ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData lastSnapshotData =
             new ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData();
 
+    /**
+     * Indicates that this task for the desktop tile in recents.
+     *
+     * Used when desktop mode feature is enabled.
+     */
+    public boolean desktopTile;
+
     public Task() {
         // Do nothing
     }
@@ -240,10 +253,16 @@ public class Task {
      */
     public static Task from(TaskKey taskKey, TaskInfo taskInfo, boolean isLocked) {
         ActivityManager.TaskDescription td = taskInfo.taskDescription;
+        // Also consider undefined activity type to include tasks in overview right after rebooting
+        // the device.
+        final boolean isDockable = taskInfo.supportsMultiWindow
+                && ArrayUtils.contains(CONTROLLED_WINDOWING_MODES, taskInfo.getWindowingMode())
+                && (taskInfo.getActivityType() == ACTIVITY_TYPE_UNDEFINED
+                || ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType()));
         return new Task(taskKey,
                 td != null ? td.getPrimaryColor() : 0,
-                td != null ? td.getBackgroundColor() : 0,
-                taskInfo.supportsSplitScreenMultiWindow, isLocked, td, taskInfo.topActivity);
+                td != null ? td.getBackgroundColor() : 0, isDockable , isLocked, td,
+                taskInfo.topActivity);
     }
 
     public Task(TaskKey key) {
@@ -255,6 +274,7 @@ public class Task {
         this(other.key, other.colorPrimary, other.colorBackground, other.isDockable,
                 other.isLocked, other.taskDescription, other.topActivity);
         lastSnapshotData.set(other.lastSnapshotData);
+        desktopTile = other.desktopTile;
     }
 
     /**

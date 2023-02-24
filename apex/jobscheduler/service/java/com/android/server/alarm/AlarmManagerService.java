@@ -335,12 +335,18 @@ public class AlarmManagerService extends SystemService {
             "REORDER_ALARMS_FOR_TARE",
     });
 
-    BroadcastOptions mOptsWithFgs = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsWithFgsForAlarmClock = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsWithoutFgs = BroadcastOptions.makeBasic();
-    BroadcastOptions mOptsTimeBroadcast = BroadcastOptions.makeBasic();
+    BroadcastOptions mOptsWithFgs = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsWithFgsForAlarmClock = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsWithoutFgs = makeBasicAlarmBroadcastOptions();
+    BroadcastOptions mOptsTimeBroadcast = makeBasicAlarmBroadcastOptions();
     ActivityOptions mActivityOptsRestrictBal = ActivityOptions.makeBasic();
-    BroadcastOptions mBroadcastOptsRestrictBal = BroadcastOptions.makeBasic();
+    BroadcastOptions mBroadcastOptsRestrictBal = makeBasicAlarmBroadcastOptions();
+
+    private static BroadcastOptions makeBasicAlarmBroadcastOptions() {
+        final BroadcastOptions b = BroadcastOptions.makeBasic();
+        b.setAlarmBroadcast(true);
+        return b;
+    }
 
     // TODO(b/172085676): Move inside alarm store.
     private final SparseArray<AlarmManager.AlarmClockInfo> mNextAlarmClockForUser =
@@ -2889,7 +2895,11 @@ public class AlarmManagerService extends SystemService {
                 } else {
                     needsPermission = false;
                     lowerQuota = allowWhileIdle;
-                    idleOptions = allowWhileIdle ? mOptsWithFgs.toBundle() : null;
+                    idleOptions = (allowWhileIdle || (alarmClock != null))
+                            // This avoids exceptions on existing alarms when the app upgrades to
+                            // target S. Note that FGS from pre-S apps isn't restricted anyway.
+                            ? mOptsWithFgs.toBundle()
+                            : null;
                     if (exact) {
                         exactAllowReason = EXACT_ALLOW_REASON_COMPAT;
                     }
@@ -5252,13 +5262,15 @@ public class AlarmManagerService extends SystemService {
                                         + TareBill.getName(bill) + " changed to " + canAfford);
                     }
 
-                    ArrayMap<EconomyManagerInternal.ActionBill, Boolean> actionAffordability =
-                            mAffordabilityCache.get(userId, packageName);
-                    if (actionAffordability == null) {
-                        actionAffordability = new ArrayMap<>();
-                        mAffordabilityCache.add(userId, packageName, actionAffordability);
+                    synchronized (mLock) {
+                        ArrayMap<EconomyManagerInternal.ActionBill, Boolean> actionAffordability =
+                                mAffordabilityCache.get(userId, packageName);
+                        if (actionAffordability == null) {
+                            actionAffordability = new ArrayMap<>();
+                            mAffordabilityCache.add(userId, packageName, actionAffordability);
+                        }
+                        actionAffordability.put(bill, canAfford);
                     }
-                    actionAffordability.put(bill, canAfford);
 
                     mHandler.obtainMessage(AlarmHandler.TARE_AFFORDABILITY_CHANGED, userId,
                             canAfford ? 1 : 0, packageName)

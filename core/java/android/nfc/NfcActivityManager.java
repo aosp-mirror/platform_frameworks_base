@@ -122,7 +122,7 @@ public final class NfcActivityManager extends IAppCallback.Stub
         Binder token;
 
         public NfcActivityState(Activity activity) {
-            if (activity.getWindow().isDestroyed()) {
+            if (activity.isDestroyed()) {
                 throw new IllegalStateException("activity is already destroyed");
             }
             // Check if activity is resumed right now, as we will not

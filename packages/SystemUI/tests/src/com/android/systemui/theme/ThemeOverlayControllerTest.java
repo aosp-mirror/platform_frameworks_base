@@ -310,7 +310,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWithNewHomeWallpapers() {
+    public void onWallpaperColorsChanged_resetThemeWithNewHomeWallpapers() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
@@ -340,6 +340,61 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         assertThat(updatedSetting.getValue().contains(
                 "android.theme.customization.color_both\":\"0")).isTrue();
 
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), any(), anyInt(), any());
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_keepsThemeWhenSetFromLockScreen() {
+        // Should ask for a new theme when wallpaper colors change
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+        String jsonString =
+                "{\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
+                        + "\"android.theme.customization.color_index\":\"2\"}";
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(20);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, USER_SYSTEM))
+                .thenReturn(21);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
+        verify(mSecureSettings, never()).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), any(), anyInt());
+    }
+
+    @Test
+    public void onWallpaperColorsChanged_resetLockScreenThemeWhenBothSet() {
+        // Should ask for a new theme when wallpaper colors change
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+        String jsonString =
+                "{\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                        + "\"android.theme.customization.system_palette\":\"A16B00\","
+                        + "\"android.theme.customization.accent_color\":\"A16B00\","
+                        + "\"android.theme.customization.color_index\":\"2\"}";
+        when(mSecureSettings.getStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
+                .thenReturn(jsonString);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_LOCK, USER_SYSTEM))
+                .thenReturn(20);
+        when(mWallpaperManager.getWallpaperIdForUser(WallpaperManager.FLAG_SYSTEM, USER_SYSTEM))
+                .thenReturn(21);
+
+        mColorsListener.getValue().onColorsChanged(mainColors,
+                WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK,
+                USER_SYSTEM);
+
+        ArgumentCaptor<String> updatedSetting = ArgumentCaptor.forClass(String.class);
+        verify(mSecureSettings).putStringForUser(
+                eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), updatedSetting.capture(),
+                anyInt());
+        assertThat(updatedSetting.getValue().contains(
+                "android.theme.customization.color_both\":\"1")).isTrue();
         verify(mThemeOverlayApplier)
                 .applyCurrentUserOverlays(any(), any(), anyInt(), any());
     }
@@ -381,7 +436,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWithNewHomeAndLockWallpaper() {
+    public void onWallpaperColorsChanged_resetThemeWithNewHomeAndLockWallpaper() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
@@ -450,7 +505,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);
         String jsonString =
-                "{\"android.theme.customization.color_source\":\"lock_wallpaper\","
+                "{\"android.theme.customization.color_source\":\"home_wallpaper\","
                         + "\"android.theme.customization.system_palette\":\"A16B00\","
                         + "\"android.theme.customization.accent_color\":\"A16B00\","
                         + "\"android.theme.customization.color_index\":\"2\"}";
@@ -476,7 +531,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onWallpaperColorsChanged_ResetThemeWhenFromLatestWallpaper() {
+    public void onWallpaperColorsChanged_resetThemeWhenFromLatestWallpaper() {
         // Should ask for a new theme when the colors of the last applied wallpaper change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
                 Color.valueOf(Color.BLUE), null);

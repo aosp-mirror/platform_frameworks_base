@@ -44,10 +44,6 @@
     <dimen name="keyguard_eca_top_margin">18dp</dimen>
     <dimen name="keyguard_eca_bottom_margin">12dp</dimen>
 
-    <!-- EmergencyCarrierArea overlap - amount to overlap the emergency button and carrier text.
-         Should be 0 on devices with plenty of room (e.g. tablets) -->
-    <dimen name="eca_overlap">-10dip</dimen>
-
     <!-- Slice header -->
     <dimen name="widget_title_font_size">20dp</dimen>
     <dimen name="widget_title_line_height">24dp</dimen>
@@ -84,9 +80,13 @@
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
 
+    <!-- Dimens for animation for the Bouncer PIN view -->
+    <dimen name="pin_view_trans_y_entry">120dp</dimen>
+    <dimen name="pin_view_trans_y_entry_offset">10dp</dimen>
+
     <!-- Spacing around each button used for PIN view -->
     <dimen name="num_pad_key_width">72dp</dimen>
-    <dimen name="num_pad_entry_row_margin_bottom">16dp</dimen>
+    <dimen name="num_pad_entry_row_margin_bottom">12dp</dimen>
     <dimen name="num_pad_row_margin_bottom">6dp</dimen>
     <dimen name="num_pad_key_margin_end">12dp</dimen>
 
@@ -102,12 +102,13 @@
          screen. -->
     <item name="half_opened_bouncer_height_ratio" type="dimen" format="float">0.0</item>
 
-    <!-- The actual amount of translation that is applied to the bouncer when it animates from one
-         side of the screen to the other in one-handed mode. Note that it will always translate from
-         the side of the screen to the other (it will "jump" closer to the destination while the
-         opacity is zero), but this controls how much motion will actually be applied to it while
-         animating. Larger values will cause it to move "faster" while fading out/in. -->
-    <dimen name="one_handed_bouncer_move_animation_translation">120dp</dimen>
+    <!-- The actual amount of translation that is applied to the security when it animates from one
+         side of the screen to the other in one-handed or user switcher mode. Note that it will
+         always translate from the side of the screen to the other (it will "jump" closer to the
+         destination while the opacity is zero), but this controls how much motion will actually be
+         applied to it while animating. Larger values will cause it to move "faster" while
+         fading out/in. -->
+    <dimen name="security_shift_animation_translation">120dp</dimen>
 
 
     <dimen name="bouncer_user_switcher_header_text_size">20sp</dimen>

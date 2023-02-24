@@ -221,7 +221,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     static class OnBackInvokedCallbackWrapper extends IOnBackInvokedCallback.Stub {
         private final WeakReference<OnBackInvokedCallback> mCallback;
-
         OnBackInvokedCallbackWrapper(@NonNull OnBackInvokedCallback callback) {
             mCallback = new WeakReference<>(callback);
         }
@@ -263,7 +262,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 if (callback == null) {
                     return;
                 }
-
                 callback.onBackInvoked();
             });
         }
@@ -327,7 +325,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         public boolean checkApplicationCallbackRegistration(int priority,
                 OnBackInvokedCallback callback) {
             if (!mApplicationCallBackEnabled
-                    && !(callback instanceof CompatOnBackInvokedCallback)) {
+                    && !(callback instanceof CompatOnBackInvokedCallback)
+                    && !ALWAYS_ENFORCE_PREDICTIVE_BACK) {
                 Log.w("OnBackInvokedCallback",
                         "OnBackInvokedCallback is not enabled for the application."
                                 + "\nSet 'android:enableOnBackInvokedCallback=\"true\"' in the"

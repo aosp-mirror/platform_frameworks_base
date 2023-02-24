@@ -107,11 +107,11 @@ public class FlagsTest extends SysuiTestCase {
     }
 
     private static class DuplicateFlagContainer {
-        public static final BooleanFlag A_FLAG = new BooleanFlag(0);
-        public static final BooleanFlag B_FLAG = new BooleanFlag(0);
+        public static final BooleanFlag A_FLAG = new UnreleasedFlag(0);
+        public static final BooleanFlag B_FLAG = new UnreleasedFlag(0);
         public static final StringFlag C_FLAG = new StringFlag(0);
 
-        public static final BooleanFlag D_FLAG = new BooleanFlag(1);
+        public static final BooleanFlag D_FLAG = new UnreleasedFlag(1);
 
         public static final DoubleFlag E_FLAG = new DoubleFlag(3);
         public static final DoubleFlag F_FLAG = new DoubleFlag(3);

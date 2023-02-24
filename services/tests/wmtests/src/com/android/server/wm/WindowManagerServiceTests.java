@@ -24,6 +24,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -35,10 +36,15 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_SOLID_COLOR;
+import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -49,17 +55,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.util.MergedConfiguration;
 import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsVisibilities;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
+import android.window.ClientWindowFrames;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -165,6 +177,32 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         doNothing().when(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
         mWm.dismissKeyguard(null, "test-dismiss-keyguard");
         verify(mWm.mAtmService.mTaskSupervisor).wakeUp(anyString());
+    }
+
+    @Test
+    public void testRelayoutExitingWindow() {
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "appWin");
+        final WindowSurfaceController surfaceController = mock(WindowSurfaceController.class);
+        doReturn(true).when(surfaceController).hasSurface();
+        spyOn(win);
+        doReturn(true).when(win).isExitAnimationRunningSelfOrParent();
+        win.mWinAnimator.mSurfaceController = surfaceController;
+        win.mViewVisibility = View.VISIBLE;
+        win.mHasSurface = true;
+        win.mActivityRecord.mAppStopped = true;
+        win.mActivityRecord.mVisibleRequested = false;
+        win.mActivityRecord.setVisible(false);
+        mWm.mWindowMap.put(win.mClient.asBinder(), win);
+        final int w = 100;
+        final int h = 200;
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
+                new ClientWindowFrames(), new MergedConfiguration(), new SurfaceControl(),
+                new InsetsState(), new InsetsSourceControl[0], new Bundle());
+        // Because the window is already invisible, it doesn't need to apply exiting animation
+        // and WMS#tryStartExitingAnimation() will destroy the surface directly.
+        assertFalse(win.mAnimatingExit);
+        assertFalse(win.mHasSurface);
+        assertNull(win.mWinAnimator.mSurfaceController);
     }
 
     @Test
@@ -281,7 +319,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         mWm.addWindow(session, new TestIWindow(), params, View.VISIBLE, DEFAULT_DISPLAY,
                 UserHandle.USER_SYSTEM, new InsetsVisibilities(), null, new InsetsState(),
-                new InsetsSourceControl[0]);
+                new InsetsSourceControl[0], new Rect(), new float[1]);
 
         verify(mWm.mWindowContextListenerController, never()).registerWindowContainerListener(any(),
                 any(), anyInt(), anyInt(), any());
@@ -315,5 +353,95 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         verify(mWm.mInputManager).setInTouchMode(
                 !currentTouchMode, callingPid, callingUid, /* hasPermission= */ false);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_nullCookie() {
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(null);
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_invalidCookie() {
+        Binder cookie = new Binder("test cookie");
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
+        assertThat(wct).isNull();
+
+        final ActivityRecord testActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .build();
+
+        wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_validCookie() {
+        final Binder cookie = new Binder("ginger cookie");
+        final WindowContainerToken launchRootTask = mock(WindowContainerToken.class);
+        setupActivityWithLaunchCookie(cookie, launchRootTask);
+
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie);
+        assertThat(wct).isEqualTo(launchRootTask);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies() {
+        final Binder cookie1 = new Binder("ginger cookie");
+        final WindowContainerToken launchRootTask1 = mock(WindowContainerToken.class);
+        setupActivityWithLaunchCookie(cookie1, launchRootTask1);
+
+        setupActivityWithLaunchCookie(new Binder("choc chip cookie"),
+                mock(WindowContainerToken.class));
+
+        setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
+                mock(WindowContainerToken.class));
+
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(cookie1);
+        assertThat(wct).isEqualTo(launchRootTask1);
+    }
+
+    @Test
+    public void testGetTaskWindowContainerTokenForLaunchCookie_multipleCookies_noneValid() {
+        setupActivityWithLaunchCookie(new Binder("ginger cookie"),
+                mock(WindowContainerToken.class));
+
+        setupActivityWithLaunchCookie(new Binder("choc chip cookie"),
+                mock(WindowContainerToken.class));
+
+        setupActivityWithLaunchCookie(new Binder("peanut butter cookie"),
+                mock(WindowContainerToken.class));
+
+        WindowContainerToken wct = mWm.getTaskWindowContainerTokenForLaunchCookie(
+                new Binder("some other cookie"));
+        assertThat(wct).isNull();
+    }
+
+    @Test
+    public void testisLetterboxBackgroundMultiColored() {
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING)).isTrue();
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND)).isTrue();
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_WALLPAPER)).isTrue();
+        assertThat(setupLetterboxConfigurationWithBackgroundType(
+                LETTERBOX_BACKGROUND_SOLID_COLOR)).isFalse();
+    }
+
+    private void setupActivityWithLaunchCookie(IBinder launchCookie, WindowContainerToken wct) {
+        final WindowContainer.RemoteToken remoteToken = mock(WindowContainer.RemoteToken.class);
+        when(remoteToken.toWindowContainerToken()).thenReturn(wct);
+        final ActivityRecord testActivity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .build();
+        testActivity.mLaunchCookie = launchCookie;
+        testActivity.getTask().mRemoteToken = remoteToken;
+    }
+
+    private boolean setupLetterboxConfigurationWithBackgroundType(
+            @LetterboxConfiguration.LetterboxBackgroundType int letterboxBackgroundType) {
+        mWm.mLetterboxConfiguration.setLetterboxBackgroundType(letterboxBackgroundType);
+        return mWm.isLetterboxBackgroundMultiColored();
     }
 }

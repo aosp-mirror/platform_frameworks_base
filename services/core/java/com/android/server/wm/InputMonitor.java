@@ -64,7 +64,10 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.server.LocalServices;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -288,10 +291,7 @@ final class InputMonitor {
         SurfaceControl touchableRegionCrop = null;
         final Task task = w.getTask();
         if (task != null) {
-            // TODO(b/165794636): Remove the special case for freeform window once drag resizing is
-            // handled by WM shell.
-            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
-                        && !task.inFreeformWindowingMode()) {
+            if (task.isOrganized() && task.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
                 // If the window is in a TaskManaged by a TaskOrganizer then most cropping will
                 // be applied using the SurfaceControl hierarchy from the Organizer. This means
                 // we need to make sure that these changes in crop are reflected in the input
@@ -408,8 +408,28 @@ final class InputMonitor {
                     // Shell transitions doesn't use RecentsAnimationController
                     || getWeak(mActiveRecentsActivity) != null && focus.inTransition();
             if (shouldApplyRecentsInputConsumer) {
-                requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
-                        recentsAnimationInputConsumer.mName);
+                if (mInputFocus != recentsAnimationInputConsumer.mWindowHandle.token) {
+                    requestFocus(recentsAnimationInputConsumer.mWindowHandle.token,
+                            recentsAnimationInputConsumer.mName);
+                    // Hiding IME/IME icon when recents input consumer gain focus.
+                    if (!mDisplayContent.isImeAttachedToApp()) {
+                        // Hiding IME if IME window is not attached to app since it's not proper to
+                        // snapshot Task with IME window to animate together in this case.
+                        final InputMethodManagerInternal inputMethodManagerInternal =
+                                LocalServices.getService(InputMethodManagerInternal.class);
+                        if (inputMethodManagerInternal != null) {
+                            inputMethodManagerInternal.hideCurrentInputMethod(
+                                    SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                        }
+                    } else {
+                        // Disable IME icon explicitly when IME attached to the app in case
+                        // IME icon might flickering while swiping to the next app task still
+                        // in animating before the next app window focused, or IME icon
+                        // persists on the bottom when swiping the task to recents.
+                        InputMethodManagerInternal.get().updateImeWindowStatus(
+                                true /* disableImeIcon */);
+                    }
+                }
                 return;
             }
         }

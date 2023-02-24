@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -466,6 +467,40 @@ public class UdfpsKeyguardViewControllerTest extends SysuiTestCase {
 
         // THEN alpha is 255 (b/c udfps bouncer is requested)
         verify(mView).setUnpausedAlpha(255);
+    }
+
+    @Test
+    public void testUpdatePanelExpansion_pauseAuth() {
+        // GIVEN view is attached + on the keyguard
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureStatusBarExpansionListeners();
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+        reset(mView);
+
+        // WHEN panelViewExpansion changes to hide
+        when(mView.getUnpausedAlpha()).thenReturn(0);
+        updateStatusBarExpansion(0f, false);
+
+        // THEN pause auth is updated to PAUSE
+        verify(mView, atLeastOnce()).setPauseAuth(true);
+    }
+
+    @Test
+    public void testUpdatePanelExpansion_unpauseAuth() {
+        // GIVEN view is attached + on the keyguard + panel expansion is 0f
+        mController.onViewAttached();
+        captureStatusBarStateListeners();
+        captureStatusBarExpansionListeners();
+        sendStatusBarStateChanged(StatusBarState.KEYGUARD);
+        reset(mView);
+
+        // WHEN panelViewExpansion changes to expanded
+        when(mView.getUnpausedAlpha()).thenReturn(255);
+        updateStatusBarExpansion(1f, true);
+
+        // THEN pause auth is updated to NOT pause
+        verify(mView, atLeastOnce()).setPauseAuth(false);
     }
 
     private void sendStatusBarStateChanged(int statusBarState) {

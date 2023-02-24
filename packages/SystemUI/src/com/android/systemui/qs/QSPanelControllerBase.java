@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.res.Configuration;
+import android.content.res.Configuration.Orientation;
 import android.metrics.LogMaker;
 import android.view.View;
 
@@ -60,6 +61,7 @@ import kotlin.jvm.functions.Function1;
  */
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable{
+    private static final String TAG = "QSPanelControllerBase";
     protected final QSTileHost mHost;
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
@@ -73,6 +75,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Nullable
     private Consumer<Boolean> mMediaVisibilityChangedListener;
+    @Orientation
     private int mLastOrientation;
     private String mCachedSpecs = "";
     @Nullable
@@ -86,13 +89,17 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             new QSPanel.OnConfigurationChangedListener() {
                 @Override
                 public void onConfigurationChange(Configuration newConfig) {
+                    mQSLogger.logOnConfigurationChanged(
+                        /* lastOrientation= */ mLastOrientation,
+                        /* newOrientation= */ newConfig.orientation,
+                        /* containerName= */ mView.getDumpableTag());
+
                     mShouldUseSplitNotificationShade =
-                            LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                        LargeScreenUtils.shouldUseSplitNotificationShade(getResources());
+                    mLastOrientation = newConfig.orientation;
+
+                    switchTileLayoutIfNeeded();
                     onConfigurationChanged();
-                    if (newConfig.orientation != mLastOrientation) {
-                        mLastOrientation = newConfig.orientation;
-                        switchTileLayout(false);
-                    }
                 }
             };
 
@@ -164,6 +171,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         mHost.addCallback(mQSHostCallback);
         setTiles();
         mLastOrientation = getResources().getConfiguration().orientation;
+        mQSLogger.logOnViewAttached(mLastOrientation, mView.getDumpableTag());
         switchTileLayout(true);
 
         mDumpManager.registerDumpable(mView.getDumpableTag(), this);
@@ -171,6 +179,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     @Override
     protected void onViewDetached() {
+        mQSLogger.logOnViewDetached(mLastOrientation, mView.getDumpableTag());
         mView.removeOnConfigurationChangedListener(mOnConfigurationChangedListener);
         mHost.removeCallback(mQSHostCallback);
 
@@ -321,10 +330,16 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
     }
 
+    private void switchTileLayoutIfNeeded() {
+        switchTileLayout(/* force= */ false);
+    }
+
     boolean switchTileLayout(boolean force) {
         /* Whether or not the panel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
         if (horizontal != mUsingHorizontalLayout || force) {
+            mQSLogger.logSwitchTileLayout(horizontal, mUsingHorizontalLayout, force,
+                    mView.getDumpableTag());
             mUsingHorizontalLayout = horizontal;
             mView.setUsingHorizontalLayout(mUsingHorizontalLayout, mMediaHost.getHostView(), force);
             updateMediaDisappearParameters();
@@ -402,6 +417,8 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
         }
         if (mMediaHost != null) {
             pw.println("  media bounds: " + mMediaHost.getCurrentBounds());
+            pw.println("  horizontal layout: " + mUsingHorizontalLayout);
+            pw.println("  last orientation: " + mLastOrientation);
         }
     }
 

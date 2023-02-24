@@ -44,6 +44,7 @@ public class PendingInsetsController implements WindowInsetsController {
     private ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
             = new ArrayList<>();
     private int mCaptionInsetsHeight = 0;
+    private WindowInsetsAnimationControlListener mLoggingListener;
 
     @Override
     public void show(int types) {
@@ -176,6 +177,9 @@ public class PendingInsetsController implements WindowInsetsController {
             controller.addOnControllableInsetsChangedListener(
                     mControllableInsetsChangedListeners.get(i));
         }
+        if (mLoggingListener != null) {
+            controller.setSystemDrivenInsetsAnimationLoggingListener(mLoggingListener);
+        }
 
         // Reset all state so it doesn't get applied twice just in case
         mRequests.clear();
@@ -184,7 +188,7 @@ public class PendingInsetsController implements WindowInsetsController {
         mAppearance = 0;
         mAppearanceMask = 0;
         mAnimationsDisabled = false;
-
+        mLoggingListener = null;
         // After replaying, we forward everything directly to the replayed instance.
         mReplayedInsetsController = controller;
     }
@@ -195,6 +199,16 @@ public class PendingInsetsController implements WindowInsetsController {
     @VisibleForTesting
     public void detach() {
         mReplayedInsetsController = null;
+    }
+
+    @Override
+    public void setSystemDrivenInsetsAnimationLoggingListener(
+            @Nullable WindowInsetsAnimationControlListener listener) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.setSystemDrivenInsetsAnimationLoggingListener(listener);
+        } else {
+            mLoggingListener = listener;
+        }
     }
 
     @Override

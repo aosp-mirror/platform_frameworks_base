@@ -18,7 +18,7 @@
 -->
 
 
-<com.android.systemui.statusbar.phone.NotificationPanelView
+<com.android.systemui.shade.NotificationPanelView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/notification_panel"
@@ -67,7 +67,7 @@
 
     </com.android.keyguard.LockIconView>
 
-    <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
+    <com.android.systemui.shade.NotificationsQuickSettingsContainer
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="@integer/notification_panel_layout_gravity"
@@ -109,17 +109,10 @@
             systemui:layout_constraintGuide_percent="0.5"
             android:orientation="vertical"/>
 
-        <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
-            android:id="@+id/notification_stack_scroller"
-            android:layout_marginTop="@dimen/notification_panel_margin_top"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginHorizontal="@dimen/notification_panel_margin_horizontal"
-            android:layout_marginBottom="@dimen/notification_panel_margin_bottom"
-            android:importantForAccessibility="no"
-            systemui:layout_constraintStart_toStartOf="parent"
-            systemui:layout_constraintEnd_toEndOf="parent"
-        />
+        <!-- This layout should always include a version of
+             NotificationStackScrollLayout, as it is expected from
+             NotificationPanelViewController. -->
+        <include layout="@layout/notification_stack_scroll_layout" />
 
         <include layout="@layout/photo_preview_overlay" />
 
@@ -150,11 +143,11 @@
             android:text="@string/tap_again"
             android:visibility="gone"
         />
-    </com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer>
+    </com.android.systemui.shade.NotificationsQuickSettingsContainer>
 
     <FrameLayout
         android:id="@+id/preview_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     </FrameLayout>
-</com.android.systemui.statusbar.phone.NotificationPanelView>
+</com.android.systemui.shade.NotificationPanelView>

@@ -17,7 +17,7 @@
 package com.android.systemui.classifier;
 
 import static com.android.systemui.classifier.Classifier.BRIGHTNESS_SLIDER;
-import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -106,9 +106,9 @@ public class DistanceClassifierTest extends ClassifierTest {
     }
 
     @Test
-    public void testPass_QsSwipeAlwaysPasses() {
+    public void testPass_QsSwipeSideAlwaysPasses() {
         mClassifier.onTouchEvent(appendDownEvent(1, 1));
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 1).isFalse())
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 1).isFalse())
                 .isFalse();
     }
 }

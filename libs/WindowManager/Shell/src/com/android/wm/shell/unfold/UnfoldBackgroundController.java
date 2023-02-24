@@ -79,7 +79,7 @@ public class UnfoldBackgroundController {
     }
 
     private float[] getBackgroundColor(Context context) {
-        int colorInt = context.getResources().getColor(R.color.unfold_transition_background);
+        int colorInt = context.getResources().getColor(R.color.taskbar_background);
         return new float[]{
                 (float) red(colorInt) / 255.0F,
                 (float) green(colorInt) / 255.0F,

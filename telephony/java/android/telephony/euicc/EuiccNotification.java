@@ -44,7 +44,6 @@ public final class EuiccNotification implements Parcelable {
             EVENT_DISABLE,
             EVENT_DELETE
     })
-    /** @hide */
     public @interface Event {}
 
     /** A profile is downloaded and installed. */

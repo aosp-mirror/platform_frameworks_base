@@ -29,6 +29,7 @@ interface Flag<T> {
 
 interface ParcelableFlag<T> : Flag<T>, Parcelable {
     val default: T
+    val overridden: Boolean
     override fun describeContents() = 0
 }
 
@@ -36,44 +37,108 @@ interface ResourceFlag<T> : Flag<T> {
     val resourceId: Int
 }
 
+interface DeviceConfigFlag<T> : Flag<T> {
+    val name: String
+    val namespace: String
+    val default: T
+}
+
 interface SysPropFlag<T> : Flag<T> {
     val name: String
     val default: T
 }
 
+/**
+ * Base class for most common boolean flags.
+ *
+ * See [UnreleasedFlag] and [ReleasedFlag] for useful implementations.
+ */
 // Consider using the "parcelize" kotlin library.
-
-data class BooleanFlag @JvmOverloads constructor(
+abstract class BooleanFlag constructor(
     override val id: Int,
     override val default: Boolean = false,
-    override val teamfood: Boolean = false
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
 ) : ParcelableFlag<Boolean> {
 
     companion object {
         @JvmField
         val CREATOR = object : Parcelable.Creator<BooleanFlag> {
-            override fun createFromParcel(parcel: Parcel) = BooleanFlag(parcel)
+            override fun createFromParcel(parcel: Parcel) = object : BooleanFlag(parcel) {}
             override fun newArray(size: Int) = arrayOfNulls<BooleanFlag>(size)
         }
     }
 
     private constructor(parcel: Parcel) : this(
         id = parcel.readInt(),
-        default = parcel.readBoolean()
+        default = parcel.readBoolean(),
+        teamfood = parcel.readBoolean(),
+        overridden = parcel.readBoolean()
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(id)
         parcel.writeBoolean(default)
+        parcel.writeBoolean(teamfood)
+        parcel.writeBoolean(overridden)
     }
 }
 
+/**
+ * A Flag that is is false by default.
+ *
+ * It can be changed or overridden in debug builds but not in release builds.
+ */
+data class UnreleasedFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
+) : BooleanFlag(id, false, teamfood, overridden)
+
+/**
+ * A Flag that is is true by default.
+ *
+ * It can be changed or overridden in any build, meaning it can be turned off if needed.
+ */
+data class ReleasedFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
+) : BooleanFlag(id, true, teamfood, overridden)
+
+/**
+ * A Flag that reads its default values from a resource overlay instead of code.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
 data class ResourceBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     @BoolRes override val resourceId: Int,
     override val teamfood: Boolean = false
 ) : ResourceFlag<Boolean>
 
+/**
+ * A Flag that can reads its overrides from DeviceConfig.
+ *
+ * This is generally useful for flags that come from or are used _outside_ of SystemUI.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
+data class DeviceConfigBooleanFlag @JvmOverloads constructor(
+    override val id: Int,
+    override val name: String,
+    override val namespace: String,
+    override val default: Boolean = false,
+    override val teamfood: Boolean = false
+) : DeviceConfigFlag<Boolean>
+
+/**
+ * A Flag that can reads its overrides from System Properties.
+ *
+ * This is generally useful for flags that come from or are used _outside_ of SystemUI.
+ *
+ * Prefer [UnreleasedFlag] and [ReleasedFlag].
+ */
 data class SysPropBooleanFlag @JvmOverloads constructor(
     override val id: Int,
     override val name: String,
@@ -86,7 +151,8 @@ data class SysPropBooleanFlag @JvmOverloads constructor(
 data class StringFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: String = "",
-    override val teamfood: Boolean = false
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
 ) : ParcelableFlag<String> {
     companion object {
         @JvmField
@@ -116,7 +182,8 @@ data class ResourceStringFlag @JvmOverloads constructor(
 data class IntFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Int = 0,
-    override val teamfood: Boolean = false
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
 ) : ParcelableFlag<Int> {
 
     companion object {
@@ -147,7 +214,8 @@ data class ResourceIntFlag @JvmOverloads constructor(
 data class LongFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Long = 0,
-    override val teamfood: Boolean = false
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
 ) : ParcelableFlag<Long> {
 
     companion object {
@@ -172,7 +240,8 @@ data class LongFlag @JvmOverloads constructor(
 data class FloatFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Float = 0f,
-    override val teamfood: Boolean = false
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
 ) : ParcelableFlag<Float> {
 
     companion object {
@@ -203,7 +272,8 @@ data class ResourceFloatFlag @JvmOverloads constructor(
 data class DoubleFlag @JvmOverloads constructor(
     override val id: Int,
     override val default: Double = 0.0,
-    override val teamfood: Boolean = false
+    override val teamfood: Boolean = false,
+    override val overridden: Boolean = false
 ) : ParcelableFlag<Double> {
 
     companion object {

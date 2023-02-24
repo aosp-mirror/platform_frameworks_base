@@ -473,6 +473,13 @@ message SecureSettingsProto {
     }
     optional PowerMenuPrivacy power_menu_privacy = 81;
 
+    message ExtraLowPowerMode {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto extra_automatic_power_save_mode = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional ExtraLowPowerMode extra_low_power_mode = 93;
+
     message PrintService {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -679,5 +686,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 93;
+    // Next tag = 94;
 }

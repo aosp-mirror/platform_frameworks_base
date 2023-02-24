@@ -67,7 +67,7 @@ public final class SearchAction implements Parcelable {
     private final UserHandle mUserHandle;
 
     @Nullable
-    private Bundle mExtras;
+    private final Bundle mExtras;
 
     SearchAction(Parcel in) {
         mId = in.readString();
@@ -99,7 +99,7 @@ public final class SearchAction implements Parcelable {
         mPendingIntent = pendingIntent;
         mIntent = intent;
         mUserHandle = userHandle;
-        mExtras = extras;
+        mExtras = extras != null ? extras : new Bundle();
 
         if (mPendingIntent == null && mIntent == null) {
             throw new IllegalStateException("At least one type of intent should be available.");

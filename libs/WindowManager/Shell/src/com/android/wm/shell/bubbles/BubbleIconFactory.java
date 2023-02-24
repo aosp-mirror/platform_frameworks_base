@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 
@@ -64,5 +65,20 @@ public class BubbleIconFactory extends BaseIconFactory {
             }
             return null;
         }
+    }
+
+    /**
+     * Creates the bitmap for the provided drawable and returns the scale used for
+     * drawing the actual drawable.
+     */
+    public Bitmap createIconBitmap(@NonNull Drawable icon, float[] outScale) {
+        if (outScale == null) {
+            outScale = new float[1];
+        }
+        icon = normalizeAndWrapToAdaptiveIcon(icon,
+                true /* shrinkNonAdaptiveIcons */,
+                null /* outscale */,
+                outScale);
+        return createIconBitmap(icon, outScale[0], BITMAP_GENERATION_MODE_WITH_SHADOW);
     }
 }

@@ -73,6 +73,8 @@ public class SettingsHelperTest {
         when(mContext.getSystemService(eq(Context.TELEPHONY_SERVICE))).thenReturn(
                 mTelephonyManager);
         when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getApplicationContext()).thenReturn(mContext);
+        when(mContext.getContentResolver()).thenReturn(getContentResolver());
 
         mSettingsHelper = spy(new SettingsHelper(mContext));
     }
@@ -303,6 +305,63 @@ public class SettingsHelperTest {
                         LocaleList.forLanguageTags("iw-IL,in-ID,ji"),  // restore
                         LocaleList.forLanguageTags("en-US"),  // current
                         new String[] { "he-IL", "id-ID", "yi" }));  // supported
+    }
+
+    @Test
+    public void restoreValue_autoRotation_deviceStateAutoRotationDisabled_restoresValue() {
+        when(mResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
+                .thenReturn(new String[]{});
+        int previousValue = 0;
+        int newValue = 1;
+        setAutoRotationSettingValue(previousValue);
+
+        restoreAutoRotationSetting(newValue);
+
+        assertThat(getAutoRotationSettingValue()).isEqualTo(newValue);
+    }
+
+    @Test
+    public void restoreValue_autoRotation_deviceStateAutoRotationEnabled_doesNotRestoreValue() {
+        when(mResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
+                .thenReturn(new String[]{"0:1", "1:1"});
+        int previousValue = 0;
+        int newValue = 1;
+        setAutoRotationSettingValue(previousValue);
+
+        restoreAutoRotationSetting(newValue);
+
+        assertThat(getAutoRotationSettingValue()).isEqualTo(previousValue);
+    }
+
+    private int getAutoRotationSettingValue() {
+        return Settings.System.getInt(
+                getContentResolver(),
+                Settings.System.ACCELEROMETER_ROTATION,
+                /* default= */ -1);
+    }
+
+    private void setAutoRotationSettingValue(int value) {
+        Settings.System.putInt(
+                getContentResolver(),
+                Settings.System.ACCELEROMETER_ROTATION,
+                value
+        );
+    }
+
+    private void restoreAutoRotationSetting(int newValue) {
+        mSettingsHelper.restoreValue(
+                mContext,
+                getContentResolver(),
+                new ContentValues(),
+                /* destination= */ Settings.System.CONTENT_URI,
+                /* name= */ Settings.System.ACCELEROMETER_ROTATION,
+                /* value= */ String.valueOf(newValue),
+                /* restoredFromSdkInt= */ 0);
+    }
+
+    private ContentResolver getContentResolver() {
+        return InstrumentationRegistry.getInstrumentation().getTargetContext()
+                .getContentResolver();
     }
 
     private void clearLongPressPowerValues() {

@@ -65,16 +65,16 @@ abstract class AppsFilterLocked extends AppsFilterBase {
     }
 
     @Override
-    protected boolean isImplicitlyQueryable(int callingAppId, int targetAppId) {
+    protected boolean isImplicitlyQueryable(int callingUid, int targetUid) {
         synchronized (mImplicitlyQueryableLock) {
-            return super.isImplicitlyQueryable(callingAppId, targetAppId);
+            return super.isImplicitlyQueryable(callingUid, targetUid);
         }
     }
 
     @Override
-    protected boolean isRetainedImplicitlyQueryable(int callingAppId, int targetAppId) {
+    protected boolean isRetainedImplicitlyQueryable(int callingUid, int targetUid) {
         synchronized (mImplicitlyQueryableLock) {
-            return super.isRetainedImplicitlyQueryable(callingAppId, targetAppId);
+            return super.isRetainedImplicitlyQueryable(callingUid, targetUid);
         }
     }
 

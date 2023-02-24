@@ -17,6 +17,7 @@
 package com.android.systemui.qs
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Handler
 import android.os.UserManager
 import android.provider.Settings
@@ -38,9 +39,11 @@ import com.android.systemui.qs.dagger.QSFlagsModule.PM_LITE_ENABLED
 import com.android.systemui.qs.dagger.QSScope
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener
+import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
@@ -53,6 +56,7 @@ import javax.inject.Provider
  * determined by [buttonsVisibleState]
  */
 @QSScope
+// TODO(b/242040009): Remove this file.
 internal class FooterActionsController @Inject constructor(
     view: FooterActionsView,
     multiUserSwitchControllerFactory: MultiUserSwitchController.Factory,
@@ -69,18 +73,43 @@ internal class FooterActionsController @Inject constructor(
     private val uiEventLogger: UiEventLogger,
     @Named(PM_LITE_ENABLED) private val showPMLiteButton: Boolean,
     private val globalSetting: GlobalSettings,
-    private val handler: Handler
+    private val handler: Handler,
+    private val configurationController: ConfigurationController,
 ) : ViewController<FooterActionsView>(view) {
 
     private var globalActionsDialog: GlobalActionsDialogLite? = null
 
     private var lastExpansion = -1f
     private var listening: Boolean = false
+    private var inSplitShade = false
 
-    private val alphaAnimator = TouchAnimator.Builder()
-            .addFloat(mView, "alpha", 0f, 1f)
-            .setStartDelay(0.9f)
+    private val singleShadeAnimator by lazy {
+        // In single shade, the actions footer should only appear at the end of the expansion,
+        // so that it doesn't overlap with the notifications panel.
+        TouchAnimator.Builder().addFloat(mView, "alpha", 0f, 1f).setStartDelay(0.9f).build()
+    }
+
+    private val splitShadeAnimator by lazy {
+        // The Actions footer view has its own background which is the same color as the qs panel's
+        // background.
+        // We don't want it to fade in at the same time as the rest of the panel, otherwise it is
+        // more opaque than the rest of the panel's background. Only applies to split shade.
+        val alphaAnimator = TouchAnimator.Builder().addFloat(mView, "alpha", 0f, 1f).build()
+        val bgAlphaAnimator =
+            TouchAnimator.Builder()
+                .addFloat(mView, "backgroundAlpha", 0f, 1f)
+                .setStartDelay(0.9f)
+                .build()
+        // In split shade, we want the actions footer to fade in exactly at the same time as the
+        // rest of the shade, as there is no overlap.
+        TouchAnimator.Builder()
+            .addFloat(alphaAnimator, "position", 0f, 1f)
+            .addFloat(bgAlphaAnimator, "position", 0f, 1f)
             .build()
+    }
+
+    private val animators: TouchAnimator
+        get() = if (inSplitShade) splitShadeAnimator else singleShadeAnimator
 
     var visible = true
         set(value) {
@@ -95,9 +124,7 @@ internal class FooterActionsController @Inject constructor(
     private val multiUserSwitchController = multiUserSwitchControllerFactory.create(view)
 
     @VisibleForTesting
-    internal val securityFootersSeparator = View(context).apply {
-        visibility = View.GONE
-    }
+    internal val securityFootersSeparator = View(context).apply { visibility = View.GONE }
 
     private val onUserInfoChangedListener = OnUserInfoChangedListener { _, picture, _ ->
         val isGuestUser: Boolean = userManager.isGuestUser(KeyguardUpdateMonitor.getCurrentUser())
@@ -131,6 +158,17 @@ internal class FooterActionsController @Inject constructor(
             uiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
             globalActionsDialog?.showOrHideDialog(false, true, v)
         }
+    }
+
+    private val configurationListener =
+        object : ConfigurationController.ConfigurationListener {
+            override fun onConfigChanged(newConfig: Configuration?) {
+                updateResources()
+            }
+        }
+
+    private fun updateResources() {
+        inSplitShade = LargeScreenUtils.shouldUseSplitNotificationShade(resources)
     }
 
     override fun onInit() {
@@ -189,6 +227,9 @@ internal class FooterActionsController @Inject constructor(
         securityFooterController.setOnVisibilityChangedListener(visibilityListener)
         fgsManagerFooterController.setOnVisibilityChangedListener(visibilityListener)
 
+        configurationController.addCallback(configurationListener)
+
+        updateResources()
         updateView()
     }
 
@@ -201,6 +242,7 @@ internal class FooterActionsController @Inject constructor(
         globalActionsDialog = null
         setListening(false)
         multiUserSetting.isListening = false
+        configurationController.removeCallback(configurationListener)
     }
 
     fun setListening(listening: Boolean) {
@@ -224,7 +266,7 @@ internal class FooterActionsController @Inject constructor(
     }
 
     fun setExpansion(headerExpansionFraction: Float) {
-        alphaAnimator.setPosition(headerExpansionFraction)
+        animators.setPosition(headerExpansionFraction)
     }
 
     fun setKeyguardShowing(showing: Boolean) {

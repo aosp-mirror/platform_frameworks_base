@@ -57,7 +57,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.AssistantFeedbackController;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 
@@ -84,8 +83,6 @@ public class FeedbackInfoTest extends SysuiTestCase {
     private StatusBarNotification mSbn;
 
     @Mock
-    private NotificationEntryManager mNotificationEntryManager;
-    @Mock
     private IStatusBarService mStatusBarService;
     @Mock
     private NotificationGutsManager mNotificationGutsManager;
@@ -94,7 +91,6 @@ public class FeedbackInfoTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mDependency.injectTestDependency(NotificationEntryManager.class, mNotificationEntryManager);
         mDependency.injectTestDependency(IStatusBarService.class, mStatusBarService);
         mDependency.injectTestDependency(NotificationGutsManager.class, mNotificationGutsManager);
 

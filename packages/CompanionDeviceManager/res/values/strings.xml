@@ -48,7 +48,7 @@
     <string name="helper_title_app_streaming">Cross-device services</string>
 
     <!-- Description of the helper dialog for APP_STREAMING profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to access your phone\u2019s photos, media, and notifications</string>
+    <string name="helper_summary_app_streaming"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
 
     <!-- ================= DEVICE_PROFILE_AUTOMOTIVE_PROJECTION ================= -->
 
@@ -82,7 +82,7 @@
     <string name="helper_title_computer">Google Play services</string>
 
     <!-- Description of the helper dialog for COMPUTER profile. [CHAR LIMIT=NONE] -->
-    <string name="helper_summary_computer"> <xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to stream apps between your devices</string>
+    <string name="helper_summary_computer"><xliff:g id="app_name" example="GMS">%1$s</xliff:g> is requesting permission on behalf of your <xliff:g id="device_type" example="Chromebook">%2$s</xliff:g> to access your phone\u2019s photos, media, and notifications</string>
 
     <!-- ================= null profile ================= -->
 

@@ -16,22 +16,20 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
-import android.service.notification.StatusBarNotification
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
-import com.android.systemui.log.dagger.NotificationHeadsUpLog
-import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.log.dagger.NotificationInterruptLog
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 
 class NotificationInterruptLogger @Inject constructor(
-    @NotificationLog val notifBuffer: LogBuffer,
-    @NotificationHeadsUpLog val hunBuffer: LogBuffer
+    @NotificationInterruptLog val buffer: LogBuffer
 ) {
     fun logHeadsUpFeatureChanged(useHeadsUp: Boolean) {
-        hunBuffer.log(TAG, INFO, {
+        buffer.log(TAG, INFO, {
             bool1 = useHeadsUp
         }, {
             "heads up is enabled=$bool1"
@@ -39,118 +37,118 @@ class NotificationInterruptLogger @Inject constructor(
     }
 
     fun logWillDismissAll() {
-        hunBuffer.log(TAG, INFO, {
+        buffer.log(TAG, INFO, {
         }, {
             "dismissing any existing heads up notification on disable event"
         })
     }
 
-    fun logNoBubbleNotAllowed(sbn: StatusBarNotification) {
-        notifBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoBubbleNotAllowed(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No bubble up: not allowed to bubble: $str1"
         })
     }
 
-    fun logNoBubbleNoMetadata(sbn: StatusBarNotification) {
-        notifBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoBubbleNoMetadata(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No bubble up: notification: $str1 doesn't have valid metadata"
         })
     }
 
     fun logNoHeadsUpFeatureDisabled() {
-        hunBuffer.log(TAG, DEBUG, {
+        buffer.log(TAG, DEBUG, {
         }, {
             "No heads up: no huns"
         })
     }
 
-    fun logNoHeadsUpPackageSnoozed(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoHeadsUpPackageSnoozed(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No alerting: snoozed package: $str1"
         })
     }
 
-    fun logNoHeadsUpAlreadyBubbled(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoHeadsUpAlreadyBubbled(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No heads up: in unlocked shade where notification is shown as a bubble: $str1"
         })
     }
 
-    fun logNoHeadsUpSuppressedByDnd(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoHeadsUpSuppressedByDnd(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No heads up: suppressed by DND: $str1"
         })
     }
 
-    fun logNoHeadsUpNotImportant(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoHeadsUpNotImportant(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No heads up: unimportant notification: $str1"
         })
     }
 
-    fun logNoHeadsUpNotInUse(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoHeadsUpNotInUse(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No heads up: not in use: $str1"
         })
     }
 
     fun logNoHeadsUpSuppressedBy(
-        sbn: StatusBarNotification,
+        entry: NotificationEntry,
         suppressor: NotificationInterruptSuppressor
     ) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
             str2 = suppressor.name
         }, {
             "No heads up: aborted by suppressor: $str2 sbnKey=$str1"
         })
     }
 
-    fun logHeadsUp(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logHeadsUp(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "Heads up: $str1"
         })
     }
 
-    fun logNoAlertingFilteredOut(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoAlertingFilteredOut(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No alerting: filtered notification: $str1"
         })
     }
 
-    fun logNoAlertingGroupAlertBehavior(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoAlertingGroupAlertBehavior(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No alerting: suppressed due to group alert behavior: $str1"
         })
     }
 
     fun logNoAlertingSuppressedBy(
-        sbn: StatusBarNotification,
+        entry: NotificationEntry,
         suppressor: NotificationInterruptSuppressor,
         awake: Boolean
     ) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
             str2 = suppressor.name
             bool1 = awake
         }, {
@@ -158,65 +156,65 @@ class NotificationInterruptLogger @Inject constructor(
         })
     }
 
-    fun logNoAlertingRecentFullscreen(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoAlertingRecentFullscreen(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No alerting: recent fullscreen: $str1"
         })
     }
 
-    fun logNoPulsingSettingDisabled(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoPulsingSettingDisabled(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No pulsing: disabled by setting: $str1"
         })
     }
 
-    fun logNoPulsingBatteryDisabled(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoPulsingBatteryDisabled(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No pulsing: disabled by battery saver: $str1"
         })
     }
 
-    fun logNoPulsingNoAlert(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoPulsingNoAlert(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No pulsing: notification shouldn't alert: $str1"
         })
     }
 
-    fun logNoPulsingNoAmbientEffect(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoPulsingNoAmbientEffect(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No pulsing: ambient effect suppressed: $str1"
         })
     }
 
-    fun logNoPulsingNotImportant(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logNoPulsingNotImportant(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "No pulsing: not important enough: $str1"
         })
     }
 
-    fun logPulsing(sbn: StatusBarNotification) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = sbn.key
+    fun logPulsing(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "Pulsing: $str1"
         })
     }
 
     fun logNoFullscreen(entry: NotificationEntry, reason: String) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = entry.key
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
             str2 = reason
         }, {
             "No FullScreenIntent: $str2: $str1"
@@ -224,8 +222,8 @@ class NotificationInterruptLogger @Inject constructor(
     }
 
     fun logNoFullscreenWarning(entry: NotificationEntry, reason: String) {
-        hunBuffer.log(TAG, WARNING, {
-            str1 = entry.key
+        buffer.log(TAG, WARNING, {
+            str1 = entry.logKey
             str2 = reason
         }, {
             "No FullScreenIntent: WARNING: $str2: $str1"
@@ -233,17 +231,17 @@ class NotificationInterruptLogger @Inject constructor(
     }
 
     fun logFullscreen(entry: NotificationEntry, reason: String) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = entry.key
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
             str2 = reason
         }, {
             "FullScreenIntent: $str2: $str1"
         })
     }
 
-    fun keyguardHideNotification(key: String) {
-        hunBuffer.log(TAG, DEBUG, {
-            str1 = key
+    fun keyguardHideNotification(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
         }, {
             "Keyguard Hide Notification: $str1"
         })

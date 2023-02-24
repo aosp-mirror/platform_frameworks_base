@@ -23,5 +23,8 @@ package android.hardware.biometrics;
  * @hide
  */
 oneway interface IBiometricContextListener {
-    void onDozeChanged(boolean isDozing);
+    // Called when doze or awake (screen on) status changes.
+    // These may be called while the device is still transitioning to the new state
+    // (i.e. about to become awake or enter doze)
+    void onDozeChanged(boolean isDozing, boolean isAwake);
 }

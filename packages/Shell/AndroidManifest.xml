@@ -578,11 +578,6 @@
     <!-- Permission required for CTS test - PeopleManagerTest -->
     <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
 
-    <!-- Permissions required for CTS test - TrustTestCases -->
-    <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
-    <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
-    <uses-permission android:name="android.permission.TRUST_LISTENER" />
-
     <!-- Permission required for CTS test - CtsTaskFpsCallbackTestCases -->
     <uses-permission android:name="android.permission.ACCESS_FPS_COUNTER" />
 

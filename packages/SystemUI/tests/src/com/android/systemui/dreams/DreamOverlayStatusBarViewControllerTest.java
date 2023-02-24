@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +58,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -93,6 +96,14 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     DreamOverlayNotificationCountProvider mDreamOverlayNotificationCountProvider;
     @Mock
     StatusBarWindowStateController mStatusBarWindowStateController;
+    @Mock
+    DreamOverlayStatusBarItemsProvider mDreamOverlayStatusBarItemsProvider;
+    @Mock
+    DreamOverlayStatusBarItemsProvider.StatusBarItem mStatusBarItem;
+    @Mock
+    View mStatusBarItemView;
+    @Mock
+    DreamOverlayStateController mDreamOverlayStateController;
 
     private final Executor mMainExecutor = Runnable::run;
 
@@ -115,9 +126,11 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mNextAlarmController,
                 mDateFormatUtil,
                 mSensorPrivacyController,
-                mDreamOverlayNotificationCountProvider,
+                Optional.of(mDreamOverlayNotificationCountProvider),
                 mZenModeController,
-                mStatusBarWindowStateController);
+                mStatusBarWindowStateController,
+                mDreamOverlayStatusBarItemsProvider,
+                mDreamOverlayStateController);
     }
 
     @Test
@@ -127,6 +140,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mSensorPrivacyController).addCallback(any());
         verify(mZenModeController).addCallback(any());
         verify(mDreamOverlayNotificationCountProvider).addCallback(any());
+        verify(mDreamOverlayStatusBarItemsProvider).addCallback(any());
+        verify(mDreamOverlayStateController).addCallback(any());
     }
 
     @Test
@@ -183,6 +198,28 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnViewAttachedShowsMicIconWhenDisabled() {
+        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE))
+                .thenReturn(true);
+        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA))
+                .thenReturn(false);
+        mController.onViewAttached();
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_MIC_DISABLED, true, null);
+    }
+
+    @Test
+    public void testOnViewAttachedShowsCameraIconWhenDisabled() {
+        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE))
+                .thenReturn(false);
+        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA))
+                .thenReturn(true);
+        mController.onViewAttached();
+        verify(mView).showIcon(
+                DreamOverlayStatusBarView.STATUS_ICON_CAMERA_DISABLED, true, null);
+    }
+
+    @Test
     public void testOnViewAttachedShowsMicCameraIconWhenDisabled() {
         when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE))
                 .thenReturn(true);
@@ -191,17 +228,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
         verify(mView).showIcon(
                 DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, true, null);
-    }
-
-    @Test
-    public void testOnViewAttachedHidesMicCameraIconWhenEnabled() {
-        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE))
-                .thenReturn(false);
-        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA))
-                .thenReturn(false);
-        mController.onViewAttached();
-        verify(mView).showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, false, null);
     }
 
     @Test
@@ -228,6 +254,28 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
 
         verify(mView).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(false), isNull());
+    }
+
+    @Test
+    public void testNotificationsIconNotShownWhenCountProviderAbsent() {
+        DreamOverlayStatusBarViewController controller = new DreamOverlayStatusBarViewController(
+                mView,
+                mResources,
+                mMainExecutor,
+                mConnectivityManager,
+                mTouchSession,
+                mAlarmManager,
+                mNextAlarmController,
+                mDateFormatUtil,
+                mSensorPrivacyController,
+                Optional.empty(),
+                mZenModeController,
+                mStatusBarWindowStateController,
+                mDreamOverlayStatusBarItemsProvider,
+                mDreamOverlayStateController);
+        controller.onViewAttached();
+        verify(mView, never()).showIcon(
+                eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());
     }
 
     @Test
@@ -262,6 +310,14 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         verify(mSensorPrivacyController).removeCallback(any());
         verify(mZenModeController).removeCallback(any());
         verify(mDreamOverlayNotificationCountProvider).removeCallback(any());
+        verify(mDreamOverlayStatusBarItemsProvider).removeCallback(any());
+        verify(mDreamOverlayStateController).removeCallback(any());
+    }
+
+    @Test
+    public void testOnViewDetachedRemovesViews() {
+        mController.onViewDetached();
+        verify(mView).removeAllExtraStatusBarItemViews();
     }
 
     @Test
@@ -365,24 +421,6 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testMicCameraIconHiddenWhenSensorsNotBlocked() {
-        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.MICROPHONE))
-                .thenReturn(true).thenReturn(false);
-        when(mSensorPrivacyController.isSensorBlocked(SensorPrivacyManager.Sensors.CAMERA))
-                .thenReturn(true).thenReturn(false);
-        mController.onViewAttached();
-
-        final ArgumentCaptor<IndividualSensorPrivacyController.Callback> callbackCapture =
-                ArgumentCaptor.forClass(IndividualSensorPrivacyController.Callback.class);
-        verify(mSensorPrivacyController).addCallback(callbackCapture.capture());
-        callbackCapture.getValue().onSensorBlockedChanged(
-                SensorPrivacyManager.Sensors.MICROPHONE, false);
-
-        verify(mView).showIcon(
-                DreamOverlayStatusBarView.STATUS_ICON_MIC_CAMERA_DISABLED, false, null);
-    }
-
-    @Test
     public void testPriorityModeIconShownWhenZenModeEnabled() {
         mController.onViewAttached();
 
@@ -427,6 +465,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Test
     public void testStatusBarShownWhenSystemStatusBarHidden() {
         mController.onViewAttached();
+        reset(mView);
 
         final ArgumentCaptor<StatusBarWindowStateListener>
                 callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
@@ -440,6 +479,7 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     public void testUnattachedStatusBarVisibilityUnchangedWhenSystemStatusBarHidden() {
         mController.onViewAttached();
         mController.onViewDetached();
+        reset(mView);
 
         final ArgumentCaptor<StatusBarWindowStateListener>
                 callbackCapture = ArgumentCaptor.forClass(StatusBarWindowStateListener.class);
@@ -447,5 +487,36 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
         callbackCapture.getValue().onStatusBarWindowStateChanged(WINDOW_STATE_SHOWING);
 
         verify(mView, never()).setVisibility(anyInt());
+    }
+
+    @Test
+    public void testExtraStatusBarItemSetWhenItemsChange() {
+        mController.onViewAttached();
+        when(mStatusBarItem.getView()).thenReturn(mStatusBarItemView);
+
+        final ArgumentCaptor<DreamOverlayStatusBarItemsProvider.Callback>
+                callbackCapture = ArgumentCaptor.forClass(
+                        DreamOverlayStatusBarItemsProvider.Callback.class);
+        verify(mDreamOverlayStatusBarItemsProvider).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onStatusBarItemsChanged(List.of(mStatusBarItem));
+
+        verify(mView).setExtraStatusBarItemViews(List.of(mStatusBarItemView));
+    }
+
+    @Test
+    public void testLowLightHidesStatusBar() {
+        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(true);
+        mController.onViewAttached();
+
+        verify(mView).setVisibility(View.INVISIBLE);
+        reset(mView);
+
+        when(mDreamOverlayStateController.isLowLightActive()).thenReturn(false);
+        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
+                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
+        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
+        callbackCapture.getValue().onStateChanged();
+
+        verify(mView).setVisibility(View.VISIBLE);
     }
 }

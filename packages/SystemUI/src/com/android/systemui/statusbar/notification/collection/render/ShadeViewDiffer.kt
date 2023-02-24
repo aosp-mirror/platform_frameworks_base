@@ -123,7 +123,7 @@ class ShadeViewDiffer(
                 when (childNode.parent) {
                     null -> {
                         // A new child (either newly created or coming from some other parent)
-                        logger.logAttachingChild(childNode.label, parentNode.label)
+                        logger.logAttachingChild(childNode.label, parentNode.label, index)
                         parentNode.addChildAt(childNode, index)
                         childNode.parent = parentNode
                     }

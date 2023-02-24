@@ -152,6 +152,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public final boolean excludeLocalRoutes;                     // 25
     public final boolean requiresInternetValidation;             // 26
     public final IkeTunnelConnectionParams ikeTunConnParams;     // 27
+    public final boolean automaticNattKeepaliveTimerEnabled;     // 28
+    public final boolean automaticIpVersionSelectionEnabled;     // 29
 
     // Helper fields.
     @UnsupportedAppUsage
@@ -167,11 +169,21 @@ public final class VpnProfile implements Cloneable, Parcelable {
 
     public VpnProfile(String key, boolean isRestrictedToTestNetworks, boolean excludeLocalRoutes,
             boolean requiresInternetValidation, IkeTunnelConnectionParams ikeTunConnParams) {
+        this(key, isRestrictedToTestNetworks, excludeLocalRoutes, requiresInternetValidation,
+                ikeTunConnParams, false, false);
+    }
+
+    public VpnProfile(String key, boolean isRestrictedToTestNetworks, boolean excludeLocalRoutes,
+            boolean requiresInternetValidation, IkeTunnelConnectionParams ikeTunConnParams,
+            boolean automaticNattKeepaliveTimerEnabled,
+            boolean automaticIpVersionSelectionEnabled) {
         this.key = key;
         this.isRestrictedToTestNetworks = isRestrictedToTestNetworks;
         this.excludeLocalRoutes = excludeLocalRoutes;
         this.requiresInternetValidation = requiresInternetValidation;
         this.ikeTunConnParams = ikeTunConnParams;
+        this.automaticNattKeepaliveTimerEnabled = automaticNattKeepaliveTimerEnabled;
+        this.automaticIpVersionSelectionEnabled = automaticIpVersionSelectionEnabled;
     }
 
     @UnsupportedAppUsage
@@ -207,6 +219,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 in.readParcelable(PersistableBundle.class.getClassLoader());
         ikeTunConnParams = (bundle == null) ? null
                 : TunnelConnectionParamsUtils.fromPersistableBundle(bundle);
+        automaticNattKeepaliveTimerEnabled = in.readBoolean();
+        automaticIpVersionSelectionEnabled = in.readBoolean();
     }
 
     /**
@@ -258,6 +272,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
         out.writeBoolean(requiresInternetValidation);
         out.writeParcelable(ikeTunConnParams == null ? null
                 : TunnelConnectionParamsUtils.toPersistableBundle(ikeTunConnParams), flags);
+        out.writeBoolean(automaticNattKeepaliveTimerEnabled);
+        out.writeBoolean(automaticIpVersionSelectionEnabled);
     }
 
     /**
@@ -282,8 +298,9 @@ public final class VpnProfile implements Cloneable, Parcelable {
             // 27:                                            ...and requiresInternetValidation
             //     (26,27 can only be found on dogfood devices)
             // 28:                                            ...and ikeTunConnParams
+            // 29-30:                                         ...and automatic NATT/IP version
             if ((values.length < 14 || (values.length > 19 && values.length < 24)
-                    || values.length > 28)) {
+                    || (values.length > 28 && values.length < 30) || values.length > 30)) {
                 return null;
             }
 
@@ -322,8 +339,19 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 tempIkeTunConnParams = null;
             }
 
+            final boolean automaticNattKeepaliveTimerEnabled;
+            final boolean automaticIpVersionSelectionEnabled;
+            if (values.length >= 30) {
+                automaticNattKeepaliveTimerEnabled = Boolean.parseBoolean(values[28]);
+                automaticIpVersionSelectionEnabled = Boolean.parseBoolean(values[29]);
+            } else {
+                automaticNattKeepaliveTimerEnabled = false;
+                automaticIpVersionSelectionEnabled = false;
+            }
+
             VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks,
-                    excludeLocalRoutes, requiresInternetValidation, tempIkeTunConnParams);
+                    excludeLocalRoutes, requiresInternetValidation, tempIkeTunConnParams,
+                    automaticNattKeepaliveTimerEnabled, automaticIpVersionSelectionEnabled);
             profile.name = values[0];
             profile.type = Integer.parseInt(values[1]);
             if (profile.type < 0 || profile.type > TYPE_MAX) {
@@ -447,6 +475,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
         } else {
             builder.append(VALUE_DELIMITER).append("");
         }
+        builder.append(VALUE_DELIMITER).append(automaticNattKeepaliveTimerEnabled);
+        builder.append(VALUE_DELIMITER).append(automaticIpVersionSelectionEnabled);
 
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
@@ -529,7 +559,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
             l2tpSecret, ipsecIdentifier, ipsecSecret, ipsecUserCert, ipsecCaCert, ipsecServerCert,
             proxy, mAllowedAlgorithms, isBypassable, isMetered, maxMtu, areAuthParamsInline,
             isRestrictedToTestNetworks, excludeLocalRoutes, requiresInternetValidation,
-            ikeTunConnParams);
+            ikeTunConnParams, automaticNattKeepaliveTimerEnabled,
+            automaticIpVersionSelectionEnabled);
     }
 
     /** Checks VPN profiles for interior equality. */
@@ -565,7 +596,9 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks
                 && excludeLocalRoutes == other.excludeLocalRoutes
                 && requiresInternetValidation == other.requiresInternetValidation
-                && Objects.equals(ikeTunConnParams, other.ikeTunConnParams);
+                && Objects.equals(ikeTunConnParams, other.ikeTunConnParams)
+                && automaticNattKeepaliveTimerEnabled == other.automaticNattKeepaliveTimerEnabled
+                && automaticIpVersionSelectionEnabled == other.automaticIpVersionSelectionEnabled;
     }
 
     @NonNull

@@ -14,18 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<com.android.keyguard.AlphaOptimizedLinearLayout
+<com.android.systemui.statusbar.phone.NotificationIconContainer
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/notification_icon_area_inner"
-    android:layout_width="match_parent"
+    android:id="@+id/notificationIcons"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:clipChildren="false">
-    <com.android.systemui.statusbar.phone.NotificationIconContainer
-        android:id="@+id/notificationIcons"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:clipChildren="false"/>
-</com.android.keyguard.AlphaOptimizedLinearLayout>
+    android:clipChildren="false"/>

@@ -234,7 +234,7 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
     //
     private static boolean isImeLayeringTarget(@NonNull InsetsControlTarget target,
             @NonNull InsetsControlTarget dcTarget) {
-        return !dcTarget.getWindow().isClosing() && target == dcTarget;
+        return !isImeTargetWindowClosing(dcTarget.getWindow()) && target == dcTarget;
     }
 
     private static boolean isAboveImeLayeringTarget(@NonNull InsetsControlTarget target,
@@ -256,7 +256,14 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         final InsetsControlTarget target = mDisplayContent.getImeTarget(IME_TARGET_CONTROL);
         return target == mImeRequester
                 && (mImeRequester.getWindow() == null
-                || !mImeRequester.getWindow().isClosing());
+                || !isImeTargetWindowClosing(mImeRequester.getWindow()));
+    }
+
+    private static boolean isImeTargetWindowClosing(@NonNull WindowState win) {
+        return win.mAnimatingExit || win.mActivityRecord != null
+                && (win.mActivityRecord.isInTransition()
+                    && !win.mActivityRecord.isVisibleRequested()
+                    || win.mActivityRecord.willCloseOrEnterPip());
     }
 
     private boolean isTargetChangedWithinActivity(InsetsControlTarget target) {

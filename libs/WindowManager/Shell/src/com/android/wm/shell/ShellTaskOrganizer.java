@@ -16,13 +16,16 @@
 
 package com.android.wm.shell;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -30,7 +33,6 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
-import android.content.Context;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
@@ -46,6 +48,7 @@ import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -55,6 +58,9 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.unfold.UnfoldAnimationController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -70,6 +76,7 @@ import java.util.function.Consumer;
  */
 public class ShellTaskOrganizer extends TaskOrganizer implements
         CompatUIController.CompatUICallback {
+    private static final String TAG = "ShellTaskOrganizer";
 
     // Intentionally using negative numbers here so the positive numbers can be used
     // for task id specific listeners that will be added later.
@@ -87,8 +94,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             TASK_LISTENER_TYPE_FREEFORM,
     })
     public @interface TaskListenerType {}
-
-    private static final String TAG = "ShellTaskOrganizer";
 
     /**
      * Callbacks for when the tasks change in the system.
@@ -175,40 +180,60 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     @Nullable
     private final CompatUIController mCompatUI;
 
+    @NonNull
+    private final ShellCommandHandler mShellCommandHandler;
+
     @Nullable
     private final Optional<RecentTasksController> mRecentTasks;
 
     @Nullable
+    private final UnfoldAnimationController mUnfoldAnimationController;
+
+    @Nullable
     private RunningTaskInfo mLastFocusedTaskInfo;
 
-    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
-        this(null /* taskOrganizerController */, mainExecutor, context, null /* compatUI */,
-                Optional.empty() /* recentTasksController */);
+    public ShellTaskOrganizer(ShellExecutor mainExecutor) {
+        this(null /* shellInit */, null /* shellCommandHandler */,
+                null /* taskOrganizerController */, null /* compatUI */,
+                Optional.empty() /* unfoldAnimationController */,
+                Optional.empty() /* recentTasksController */,
+                mainExecutor);
     }
 
-    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            CompatUIController compatUI) {
-        this(null /* taskOrganizerController */, mainExecutor, context, compatUI,
-                Optional.empty() /* recentTasksController */);
-    }
-
-    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
-            CompatUIController compatUI,
-            Optional<RecentTasksController> recentTasks) {
-        this(null /* taskOrganizerController */, mainExecutor, context, compatUI,
-                recentTasks);
+    public ShellTaskOrganizer(ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            @Nullable CompatUIController compatUI,
+            Optional<UnfoldAnimationController> unfoldAnimationController,
+            Optional<RecentTasksController> recentTasks,
+            ShellExecutor mainExecutor) {
+        this(shellInit, shellCommandHandler, null /* taskOrganizerController */, compatUI,
+                unfoldAnimationController, recentTasks, mainExecutor);
     }
 
     @VisibleForTesting
-    protected ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController,
-            ShellExecutor mainExecutor, Context context, @Nullable CompatUIController compatUI,
-            Optional<RecentTasksController> recentTasks) {
+    protected ShellTaskOrganizer(ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ITaskOrganizerController taskOrganizerController,
+            @Nullable CompatUIController compatUI,
+            Optional<UnfoldAnimationController> unfoldAnimationController,
+            Optional<RecentTasksController> recentTasks,
+            ShellExecutor mainExecutor) {
         super(taskOrganizerController, mainExecutor);
+        mShellCommandHandler = shellCommandHandler;
         mCompatUI = compatUI;
         mRecentTasks = recentTasks;
-        if (compatUI != null) {
-            compatUI.setCompatUICallback(this);
+        mUnfoldAnimationController = unfoldAnimationController.orElse(null);
+        if (shellInit != null) {
+            shellInit.addInitCallback(this::onInit, this);
         }
+    }
+
+    private void onInit() {
+        mShellCommandHandler.addDumpCallback(this::dump, this);
+        if (mCompatUI != null) {
+            mCompatUI.setCompatUICallback(this);
+        }
+        registerOrganizer();
     }
 
     @Override
@@ -437,8 +462,12 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         if (listener != null) {
             listener.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
+        if (mUnfoldAnimationController != null) {
+            mUnfoldAnimationController.onTaskAppeared(info.getTaskInfo(), info.getLeash());
+        }
         notifyLocusVisibilityIfNeeded(info.getTaskInfo());
         notifyCompatUI(info.getTaskInfo(), listener);
+        mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
     }
 
     /**
@@ -458,6 +487,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {
         synchronized (mLock) {
             ProtoLog.v(WM_SHELL_TASK_ORG, "Task info changed taskId=%d", taskInfo.taskId);
+
+            if (mUnfoldAnimationController != null) {
+                mUnfoldAnimationController.onTaskInfoChanged(taskInfo);
+            }
+
             final TaskAppearedInfo data = mTasks.get(taskInfo.taskId);
             final TaskListener oldListener = getTaskListener(data.getTaskInfo());
             final TaskListener newListener = getTaskListener(taskInfo);
@@ -482,7 +516,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                     || (taskInfo.topActivityType == WindowConfiguration.ACTIVITY_TYPE_HOME
                     && taskInfo.isVisible);
             final boolean focusTaskChanged = (mLastFocusedTaskInfo == null
-                    || mLastFocusedTaskInfo.taskId != taskInfo.taskId) && isFocusedOrHome;
+                    || mLastFocusedTaskInfo.taskId != taskInfo.taskId
+                    || mLastFocusedTaskInfo.getWindowingMode() != taskInfo.getWindowingMode())
+                    && isFocusedOrHome;
             if (focusTaskChanged) {
                 for (int i = 0; i < mFocusListeners.size(); i++) {
                     mFocusListeners.valueAt(i).onFocusTaskChanged(taskInfo);
@@ -507,8 +543,13 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     public void onTaskVanished(RunningTaskInfo taskInfo) {
         synchronized (mLock) {
             ProtoLog.v(WM_SHELL_TASK_ORG, "Task vanished taskId=%d", taskInfo.taskId);
+            if (mUnfoldAnimationController != null) {
+                mUnfoldAnimationController.onTaskVanished(taskInfo);
+            }
+
             final int taskId = taskInfo.taskId;
-            final TaskListener listener = getTaskListener(mTasks.get(taskId).getTaskInfo());
+            final TaskAppearedInfo appearedInfo = mTasks.get(taskId);
+            final TaskListener listener = getTaskListener(appearedInfo.getTaskInfo());
             mTasks.remove(taskId);
             if (listener != null) {
                 listener.onTaskVanished(taskInfo);
@@ -518,6 +559,11 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             notifyCompatUI(taskInfo, null /* taskListener */);
             // Notify the recent tasks that a task has been removed
             mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskRemoved(taskInfo));
+
+            if (!ENABLE_SHELL_TRANSITIONS && (appearedInfo.getLeash() != null)) {
+                // Preemptively clean up the leash only if shell transitions are not enabled
+                appearedInfo.getLeash().release();
+            }
         }
     }
 
@@ -647,6 +693,57 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         taskListener.reparentChildSurfaceToTask(taskId, sc, t);
     }
 
+    /**
+     * Create a {@link WindowContainerTransaction} to clear task bounds.
+     *
+     * Only affects tasks that have {@link RunningTaskInfo#getActivityType()} set to
+     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
+     *
+     * @param displayId display id for tasks that will have bounds cleared
+     * @return {@link WindowContainerTransaction} with pending operations to clear bounds
+     */
+    public WindowContainerTransaction prepareClearBoundsForStandardTasks(int displayId) {
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "prepareClearBoundsForTasks: displayId=%d", displayId);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        for (int i = 0; i < mTasks.size(); i++) {
+            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
+            if ((taskInfo.displayId == displayId) && (taskInfo.getActivityType()
+                    == WindowConfiguration.ACTIVITY_TYPE_STANDARD)) {
+                ProtoLog.d(WM_SHELL_DESKTOP_MODE, "clearing bounds for token=%s taskInfo=%s",
+                        taskInfo.token, taskInfo);
+                wct.setBounds(taskInfo.token, null);
+            }
+        }
+        return wct;
+    }
+
+    /**
+     * Create a {@link WindowContainerTransaction} to clear task level freeform setting.
+     *
+     * Only affects tasks that have {@link RunningTaskInfo#getActivityType()} set to
+     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
+     *
+     * @param displayId display id for tasks that will have windowing mode reset to {@link
+     *                  WindowConfiguration#WINDOWING_MODE_UNDEFINED}
+     * @return {@link WindowContainerTransaction} with pending operations to clear windowing mode
+     */
+    public WindowContainerTransaction prepareClearFreeformForStandardTasks(int displayId) {
+        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "prepareClearFreeformForTasks: displayId=%d", displayId);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        for (int i = 0; i < mTasks.size(); i++) {
+            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
+            if (taskInfo.displayId == displayId
+                    && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+                ProtoLog.d(WM_SHELL_DESKTOP_MODE,
+                        "clearing windowing mode for token=%s taskInfo=%s", taskInfo.token,
+                        taskInfo);
+                wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
+            }
+        }
+        return wct;
+    }
+
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,
             int event) {
         ActivityInfo topActivityInfo = info.getTaskInfo().topActivityInfo;
@@ -773,7 +870,18 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 final int key = mTasks.keyAt(i);
                 final TaskAppearedInfo info = mTasks.valueAt(i);
                 final TaskListener listener = getTaskListener(info.getTaskInfo());
-                pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener);
+                final int windowingMode = info.getTaskInfo().getWindowingMode();
+                String pkg = "";
+                if (info.getTaskInfo().baseActivity != null) {
+                    pkg = info.getTaskInfo().baseActivity.getPackageName();
+                }
+                Rect bounds = info.getTaskInfo().getConfiguration().windowConfiguration.getBounds();
+                boolean running = info.getTaskInfo().isRunning;
+                boolean visible = info.getTaskInfo().isVisible;
+                boolean focused = info.getTaskInfo().isFocused;
+                pw.println(innerPrefix + "#" + i + " task=" + key + " listener=" + listener
+                        + " wmMode=" + windowingMode + " pkg=" + pkg + " bounds=" + bounds
+                        + " running=" + running + " visible=" + visible + " focused=" + focused);
             }
 
             pw.println();
@@ -783,6 +891,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 final TaskListener listener = mLaunchCookieToListener.valueAt(i);
                 pw.println(innerPrefix + "#" + i + " cookie=" + key + " listener=" + listener);
             }
+
         }
     }
 }

@@ -68,6 +68,10 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
 
     default boolean sameAs(Notification.MessagingStyle.Message message) {
         Notification.MessagingStyle.Message ownMessage = getMessage();
+        // We have to make sure both messages are not null to go further comparison
+        if (message == null || ownMessage == null) {
+            return message == ownMessage;
+        }
         if (!Objects.equals(message.getText(), ownMessage.getText())) {
             return false;
         }

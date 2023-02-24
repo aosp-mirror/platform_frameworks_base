@@ -19,11 +19,13 @@ package com.android.wm.shell.common;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.ComponentName;
 import android.os.RemoteException;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
@@ -34,7 +36,9 @@ import android.view.InsetsVisibilities;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 @SmallTest
-public class DisplayInsetsControllerTest {
+public class DisplayInsetsControllerTest extends ShellTestCase {
 
     private static final int SECOND_DISPLAY = DEFAULT_DISPLAY + 10;
 
@@ -53,6 +57,8 @@ public class DisplayInsetsControllerTest {
     private IWindowManager mWm;
     @Mock
     private DisplayController mDisplayController;
+    @Mock
+    private ShellInit mShellInit;
     private DisplayInsetsController mController;
     private SparseArray<IDisplayWindowInsetsController> mInsetsControllersByDisplayId;
     private TestShellExecutor mExecutor;
@@ -67,8 +73,13 @@ public class DisplayInsetsControllerTest {
         mInsetsControllersByDisplayId = new SparseArray<>();
         mDisplayIdCaptor =  ArgumentCaptor.forClass(Integer.class);
         mInsetsControllerCaptor = ArgumentCaptor.forClass(IDisplayWindowInsetsController.class);
-        mController = new DisplayInsetsController(mWm, mDisplayController, mExecutor);
+        mController = new DisplayInsetsController(mWm, mShellInit, mDisplayController, mExecutor);
         addDisplay(DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
@@ -164,7 +175,7 @@ public class DisplayInsetsControllerTest {
         int hideInsetsCount = 0;
 
         @Override
-        public void topFocusedWindowChanged(String packageName,
+        public void topFocusedWindowChanged(ComponentName component,
                 InsetsVisibilities requestedVisibilities) {
             topFocusedWindowChangedCount++;
         }

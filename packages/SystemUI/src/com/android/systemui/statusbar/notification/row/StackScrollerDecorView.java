@@ -74,11 +74,6 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         mSecondaryView = findSecondaryView();
         setVisible(false /* nowVisible */, false /* animate */);
         setSecondaryVisible(false /* nowVisible */, false /* animate */);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
         setOutlineProvider(null);
     }
 

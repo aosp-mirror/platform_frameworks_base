@@ -15,6 +15,7 @@
  */
 package com.android.server.vcn.routeselection;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -45,6 +46,7 @@ import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscription
 import com.android.server.vcn.VcnContext;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -69,9 +71,23 @@ class NetworkPriorityClassifier {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final int WIFI_EXIT_RSSI_THRESHOLD_DEFAULT = -74;
 
-    /** Priority for any other networks (including unvalidated, etc) */
+    /**
+     * Priority for networks that VCN can fall back to.
+     *
+     * <p>If none of the network candidates are validated or match any template, VCN will fall back
+     * to any INTERNET network.
+     */
     @VisibleForTesting(visibility = Visibility.PRIVATE)
-    static final int PRIORITY_ANY = Integer.MAX_VALUE;
+    static final int PRIORITY_FALLBACK = Integer.MAX_VALUE;
+
+    /**
+     * Priority for networks that cannot be selected as VCN's underlying networks.
+     *
+     * <p>VCN MUST never select a non-INTERNET network that are unvalidated or fail to match any
+     * template as the underlying network.
+     */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static final int PRIORITY_INVALID = -1;
 
     /** Gives networks a priority class, based on configured VcnGatewayConnectionConfig */
     public static int calculatePriorityClass(
@@ -86,12 +102,12 @@ class NetworkPriorityClassifier {
 
         if (networkRecord.isBlocked) {
             logWtf("Network blocked for System Server: " + networkRecord.network);
-            return PRIORITY_ANY;
+            return PRIORITY_INVALID;
         }
 
         if (snapshot == null) {
             logWtf("Got null snapshot");
-            return PRIORITY_ANY;
+            return PRIORITY_INVALID;
         }
 
         int priorityIndex = 0;
@@ -108,7 +124,13 @@ class NetworkPriorityClassifier {
             }
             priorityIndex++;
         }
-        return PRIORITY_ANY;
+
+        final NetworkCapabilities caps = networkRecord.networkCapabilities;
+        if (caps.hasCapability(NET_CAPABILITY_INTERNET)
+                || (vcnContext.isInTestMode() && caps.hasTransport(TRANSPORT_TEST))) {
+            return PRIORITY_FALLBACK;
+        }
+        return PRIORITY_INVALID;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -295,6 +317,18 @@ class NetworkPriorityClassifier {
             }
         } else if (opportunisticMatch == MATCH_FORBIDDEN && !isOpportunistic) {
             return false;
+        }
+
+        for (Map.Entry<Integer, Integer> entry :
+                networkPriority.getCapabilitiesMatchCriteria().entrySet()) {
+            final int cap = entry.getKey();
+            final int matchCriteria = entry.getValue();
+
+            if (matchCriteria == MATCH_REQUIRED && !caps.hasCapability(cap)) {
+                return false;
+            } else if (matchCriteria == MATCH_FORBIDDEN && caps.hasCapability(cap)) {
+                return false;
+            }
         }
 
         return true;

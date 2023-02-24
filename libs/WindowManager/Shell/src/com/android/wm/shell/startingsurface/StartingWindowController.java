@@ -42,10 +42,12 @@ import androidx.annotation.BinderThread;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.TriConsumer;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellInit;
 
 /**
  * Implementation to draw the starting window to an application, and remove the starting window
@@ -74,6 +76,7 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     private TriConsumer<Integer, Integer, Integer> mTaskLaunchingCallback;
     private final StartingSurfaceImpl mImpl = new StartingSurfaceImpl();
     private final Context mContext;
+    private final ShellTaskOrganizer mShellTaskOrganizer;
     private final ShellExecutor mSplashScreenExecutor;
     /**
      * Need guarded because it has exposed to StartingSurface
@@ -81,14 +84,20 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
     @GuardedBy("mTaskBackgroundColors")
     private final SparseIntArray mTaskBackgroundColors = new SparseIntArray();
 
-    public StartingWindowController(Context context, ShellExecutor splashScreenExecutor,
-            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm, IconProvider iconProvider,
+    public StartingWindowController(Context context,
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            ShellExecutor splashScreenExecutor,
+            StartingWindowTypeAlgorithm startingWindowTypeAlgorithm,
+            IconProvider iconProvider,
             TransactionPool pool) {
         mContext = context;
+        mShellTaskOrganizer = shellTaskOrganizer;
         mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor,
                 iconProvider, pool);
         mStartingWindowTypeAlgorithm = startingWindowTypeAlgorithm;
         mSplashScreenExecutor = splashScreenExecutor;
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     /**
@@ -96,6 +105,10 @@ public class StartingWindowController implements RemoteCallable<StartingWindowCo
      */
     public StartingSurface asStartingSurface() {
         return mImpl;
+    }
+
+    private void onInit() {
+        mShellTaskOrganizer.initStartingWindow(this);
     }
 
     @Override

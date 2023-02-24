@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static junit.framework.Assert.assertFalse;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -35,6 +36,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotifPanelEvents;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -43,7 +45,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
-import com.android.systemui.statusbar.phone.NotifPanelEvents;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -55,6 +56,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.verification.VerificationMode;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -130,13 +132,14 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         doAnswer(i -> {
             mNotifStabilityManager.onBeginRun();
             return null;
-        }).when(mInvalidateListener).onPluggableInvalidated(eq(mNotifStabilityManager));
+        }).when(mInvalidateListener).onPluggableInvalidated(eq(mNotifStabilityManager), any());
     }
 
     @Test
     public void testScreenOff_groupAndSectionChangesAllowed() {
         // GIVEN screen is off, panel isn't expanded and device isn't pulsing
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(false);
 
@@ -149,9 +152,42 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testScreenTurningOff_groupAndSectionChangesNotAllowed() {
+        // GIVEN the screen is turning off (sleepy but partially dozed)
+        setFullyDozed(false);
+        setSleepy(true);
+        setPanelExpanded(true);
+        setPulsing(false);
+
+        // THEN group changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+
+        // THEN section changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
+    }
+
+    @Test
+    public void testScreenTurningOn_groupAndSectionChangesNotAllowed() {
+        // GIVEN the screen is turning on (still fully dozed, not sleepy)
+        setFullyDozed(true);
+        setSleepy(false);
+        setPanelExpanded(true);
+        setPulsing(false);
+
+        // THEN group changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
+        assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
+
+        // THEN section changes are NOT allowed
+        assertFalse(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
+    }
+
+    @Test
     public void testPanelNotExpanded_groupAndSectionChangesAllowed() {
         // GIVEN screen is on but the panel isn't expanded and device isn't pulsing
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(false);
         setPulsing(false);
 
@@ -166,7 +202,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testPanelExpanded_groupAndSectionChangesNotAllowed() {
         // GIVEN the panel true expanded and device isn't pulsing
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(false);
 
@@ -181,7 +218,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testPulsing_screenOff_groupAndSectionChangesNotAllowed() {
         // GIVEN the device is pulsing and screen is off
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPulsing(true);
 
         // THEN group changes are NOT allowed
@@ -195,7 +233,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testPulsing_panelNotExpanded_groupAndSectionChangesNotAllowed() {
         // GIVEN the device is pulsing and screen is off with the panel not expanded
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(true);
 
@@ -211,7 +250,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     public void testOverrideReorderingSuppression_onlySectionChangesAllowed() {
         // GIVEN section changes typically wouldn't be allowed because the panel is expanded and
         // we're not pulsing
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(true);
 
@@ -233,7 +273,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowSectionChanges_callsInvalidate() {
         // GIVEN section changes typically wouldn't be allowed because the panel is expanded
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(false);
 
@@ -241,13 +282,14 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.uptimeMillis());
 
         // THEN the notification list is invalidated
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
     public void testTemporarilyAllowSectionChanges_noInvalidationCalled() {
         // GIVEN section changes typically WOULD be allowed
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(false);
 
@@ -255,13 +297,14 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.currentTimeMillis());
 
         // THEN invalidate is not called because this entry was never suppressed from reordering
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
     public void testTemporarilyAllowSectionChangesTimeout() {
         // GIVEN section changes typically WOULD be allowed
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(false);
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
@@ -271,7 +314,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN invalidate is not called because this entry was never suppressed from reordering;
         // THEN section changes are allowed for this notification
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
         assertTrue(mNotifStabilityManager.isSectionChangeAllowed(mEntry));
 
         // WHEN we're pulsing (now disallowing reordering)
@@ -292,20 +335,21 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Test
     public void testTemporarilyAllowSectionChanges_isPulsingChangeBeforeTimeout() {
         // GIVEN section changes typically wouldn't be allowed because the device is pulsing
-        setScreenOn(false);
+        setFullyDozed(true);
+        setSleepy(true);
         setPanelExpanded(false);
         setPulsing(true);
 
         // WHEN we temporarily allow section changes for this notification entry
         mCoordinator.temporarilyAllowSectionChanges(mEntry, mFakeSystemClock.currentTimeMillis());
         // can now reorder, so invalidates
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
 
         // WHEN reordering is now allowed because device isn't pulsing anymore
         setPulsing(false);
 
         // THEN invalidate isn't called a second time since reordering was already allowed
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -315,22 +359,26 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         // WHEN device isn't pulsing anymore
         setPulsing(false);
 
-        // WHEN screen isn't on
-        setScreenOn(false);
+        // WHEN fully dozed
+        setFullyDozed(true);
+
+        // WHEN sleepy
+        setSleepy(true);
 
         // WHEN panel isn't expanded
         setPanelExpanded(false);
 
         // THEN we never see any calls to invalidate since there weren't any notifications that
         // were being suppressed from grouping or section changes
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
     public void testNotSuppressingGroupChangesAnymore_invalidationCalled() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
@@ -340,7 +388,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         //  invalidate is called because we were previously suppressing a group change
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -354,7 +402,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setActivityLaunching(false);
 
         // invalidate is called, b/c we were previously suppressing the pipeline from running
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -368,7 +416,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelCollapsing(false);
 
         // invalidate is called, b/c we were previously suppressing the pipeline from running
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
@@ -380,7 +428,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelCollapsing(false);
 
         // THEN invalidate is not called, b/c nothing has been suppressed
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
@@ -392,14 +440,15 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setActivityLaunching(false);
 
         // THEN invalidate is not called, b/c nothing has been suppressed
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
     public void testNotSuppressingEntryReorderingAnymoreWillInvalidate() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
@@ -410,14 +459,15 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         //  invalidate is called because we were previously suppressing an entry reorder
-        verify(mInvalidateListener, times(1)).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(times(1));
     }
 
     @Test
     public void testQueryingEntryReorderingButNotReportingReorderSuppressedDoesNotInvalidate() {
         // GIVEN visual stability is being maintained b/c panel is expanded
         setPulsing(false);
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
 
         assertFalse(mNotifStabilityManager.isEntryReorderingAllowed(mEntry));
@@ -426,13 +476,14 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         setPanelExpanded(false);
 
         // invalidate is not called because we were not told that an entry reorder was suppressed
-        verify(mInvalidateListener, never()).onPluggableInvalidated(mNotifStabilityManager);
+        verifyStabilityManagerWasInvalidated(never());
     }
 
     @Test
     public void testHeadsUp_allowedToChangeGroupAndSection() {
         // GIVEN group + section changes disallowed
-        setScreenOn(true);
+        setFullyDozed(false);
+        setSleepy(false);
         setPanelExpanded(true);
         setPulsing(true);
         assertFalse(mNotifStabilityManager.isGroupChangeAllowed(mEntry));
@@ -450,6 +501,10 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         assertFalse(mNotifStabilityManager.isGroupPruneAllowed(mGroupEntry));
     }
 
+    private void verifyStabilityManagerWasInvalidated(VerificationMode mode) {
+        verify(mInvalidateListener, mode).onPluggableInvalidated(eq(mNotifStabilityManager), any());
+    }
+
     private void setActivityLaunching(boolean activityLaunching) {
         mNotifPanelEventsCallback.onLaunchingActivityChanged(activityLaunching);
     }
@@ -462,11 +517,16 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         mStatusBarStateListener.onPulsingChanged(pulsing);
     }
 
-    private void setScreenOn(boolean screenOn) {
-        if (screenOn) {
-            mWakefulnessObserver.onStartedWakingUp();
-        } else {
+    private void setFullyDozed(boolean fullyDozed) {
+        float dozeAmount = fullyDozed ? 1 : 0;
+        mStatusBarStateListener.onDozeAmountChanged(dozeAmount, dozeAmount);
+    }
+
+    private void setSleepy(boolean sleepy) {
+        if (sleepy) {
             mWakefulnessObserver.onFinishedGoingToSleep();
+        } else {
+            mWakefulnessObserver.onStartedWakingUp();
         }
     }
 

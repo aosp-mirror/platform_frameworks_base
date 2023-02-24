@@ -17,6 +17,7 @@
 package com.android.systemui.dagger
 
 import com.android.keyguard.KeyguardBiometricLockoutLogger
+import com.android.systemui.ChooserSelector
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
 import com.android.systemui.ScreenDecorations
@@ -33,6 +34,7 @@ import com.android.systemui.log.SessionTracker
 import com.android.systemui.media.RingtonePlayer
 import com.android.systemui.power.PowerUI
 import com.android.systemui.recents.Recents
+import com.android.systemui.settings.dagger.MultiUserUtilsModule
 import com.android.systemui.shortcut.ShortcutKeyDispatcher
 import com.android.systemui.statusbar.notification.InstantAppNotifier
 import com.android.systemui.statusbar.phone.KeyguardLiftController
@@ -51,13 +53,19 @@ import dagger.multibindings.IntoMap
 /**
  * Collection of {@link CoreStartable}s that should be run on AOSP.
  */
-@Module
+@Module(includes = [MultiUserUtilsModule::class])
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
     @Binds
     @IntoMap
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
+
+    /** Inject into ChooserCoreStartable. */
+    @Binds
+    @IntoMap
+    @ClassKey(ChooserSelector::class)
+    abstract fun bindChooserSelector(sysui: ChooserSelector): CoreStartable
 
     /** Inject into ClipboardListener.  */
     @Binds

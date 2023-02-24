@@ -157,6 +157,11 @@ public interface BiometricConstants {
     int BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED = 18;
 
     /**
+     * A power press stopped this biometric operation.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_POWER_PRESSED = 19;
+    /**
      * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
      * because the authentication attempt was unsuccessful.
      * @hide

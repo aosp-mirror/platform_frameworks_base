@@ -80,6 +80,11 @@ public class UserAwareBiometricSchedulerTest {
     @Mock
     private BiometricContext mBiometricContext;
 
+    private boolean mShouldFailStopUser = false;
+    private final StopUserClientShouldFail mStopUserClientShouldFail =
+            () -> {
+                return mShouldFailStopUser;
+            };
     private final TestUserStartedCallback mUserStartedCallback = new TestUserStartedCallback();
     private final TestUserStoppedCallback mUserStoppedCallback = new TestUserStoppedCallback();
     private int mCurrentUserId = UserHandle.USER_NULL;
@@ -88,6 +93,7 @@ public class UserAwareBiometricSchedulerTest {
 
     @Before
     public void setUp() {
+        mShouldFailStopUser = false;
         mHandler = new Handler(TestableLooper.get(this).getLooper());
         mScheduler = new UserAwareBiometricScheduler(TAG,
                 mHandler,
@@ -101,7 +107,7 @@ public class UserAwareBiometricSchedulerTest {
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new TestStopUserClient(mContext, Object::new, mToken, userId,
                                 TEST_SENSOR_ID, mBiometricLogger, mBiometricContext,
-                                mUserStoppedCallback);
+                                mUserStoppedCallback, mStopUserClientShouldFail);
                     }
 
                     @NonNull
@@ -240,6 +246,36 @@ public class UserAwareBiometricSchedulerTest {
         assertThat(mUserStoppedCallback.mNumInvocations).isEqualTo(1);
     }
 
+    @Test
+    public void testStartUser_failsClearsStopUserClient() {
+        // When a stop user client fails, check that mStopUserClient
+        // is set to null to prevent the scheduler from getting stuck.
+        BaseClientMonitor nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(10);
+
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        verify(nextClient).start(any());
+
+        // finish first operation
+        mScheduler.getInternalCallback().onClientFinished(nextClient, true /* success */);
+        waitForIdle();
+
+        // schedule second operation but swap out the current operation
+        // before it runs so that it's not current when it's completion callback runs
+        nextClient = mock(BaseClientMonitor.class);
+        when(nextClient.getTargetUserId()).thenReturn(11);
+        mUserStartedCallback.mAfterStart = () -> mScheduler.mCurrentOperation = null;
+        mShouldFailStopUser = true;
+        mScheduler.scheduleClientMonitor(nextClient);
+
+        waitForIdle();
+        assertThat(mUserStartedCallback.mStartedUsers).containsExactly(10, 11).inOrder();
+        assertThat(mUserStoppedCallback.mNumInvocations).isEqualTo(0);
+        assertThat(mScheduler.getStopUserClient()).isEqualTo(null);
+    }
+
     private void waitForIdle() {
         TestableLooper.get(this).processAllMessages();
     }
@@ -268,13 +304,19 @@ public class UserAwareBiometricSchedulerTest {
         }
     }
 
-    private static class TestStopUserClient extends StopUserClient<Object> {
+    private interface StopUserClientShouldFail {
+        boolean shouldFail();
+    }
+
+    private class TestStopUserClient extends StopUserClient<Object> {
+        private StopUserClientShouldFail mShouldFailClient;
         public TestStopUserClient(@NonNull Context context,
                 @NonNull Supplier<Object> lazyDaemon, @Nullable IBinder token, int userId,
                 int sensorId, @NonNull BiometricLogger logger,
                 @NonNull BiometricContext biometricContext,
-                @NonNull UserStoppedCallback callback) {
+                @NonNull UserStoppedCallback callback, StopUserClientShouldFail shouldFail) {
             super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
+            mShouldFailClient = shouldFail;
         }
 
         @Override
@@ -285,7 +327,14 @@ public class UserAwareBiometricSchedulerTest {
         @Override
         public void start(@NonNull ClientMonitorCallback callback) {
             super.start(callback);
-            onUserStopped();
+            if (mShouldFailClient.shouldFail()) {
+                getCallback().onClientFinished(this, false /* success */);
+                // When the above fails, it means that the HAL has died, in this case we
+                // need to ensure the UserSwitchCallback correctly returns the NULL user handle.
+                mCurrentUserId = UserHandle.USER_NULL;
+            } else {
+                onUserStopped();
+            }
         }
 
         @Override

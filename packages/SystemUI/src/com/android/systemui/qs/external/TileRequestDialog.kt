@@ -73,6 +73,7 @@ class TileRequestDialog(
             icon = tileData.icon?.loadDrawable(context)?.let {
                 QSTileImpl.DrawableIcon(it)
             } ?: ResourceIcon.get(R.drawable.android)
+            contentDescription = label
         }
         tile.onStateChanged(state)
         tile.post {

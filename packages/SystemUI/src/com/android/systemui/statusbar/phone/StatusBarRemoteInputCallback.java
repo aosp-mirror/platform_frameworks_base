@@ -37,6 +37,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -66,7 +67,7 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final ActivityStarter mActivityStarter;
     private final Context mContext;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private final ShadeController mShadeController;
+    private final com.android.systemui.shade.ShadeController mShadeController;
     private Executor mExecutor;
     private final ActivityIntentHelper mActivityIntentHelper;
     private final GroupExpansionManager mGroupExpansionManager;
@@ -258,8 +259,9 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         final boolean isActivity = pendingIntent.isActivity();
         if (isActivity || appRequestedAuth) {
             mActionClickLogger.logWaitingToCloseKeyguard(pendingIntent);
-            final boolean afterKeyguardGone = mActivityIntentHelper.wouldLaunchResolverActivity(
-                    pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
+            final boolean afterKeyguardGone = mActivityIntentHelper
+                    .wouldPendingLaunchResolverActivity(pendingIntent,
+                            mLockscreenUserManager.getCurrentUserId());
             mActivityStarter.dismissKeyguardThenExecute(() -> {
                 mActionClickLogger.logKeyguardGone(pendingIntent);
 

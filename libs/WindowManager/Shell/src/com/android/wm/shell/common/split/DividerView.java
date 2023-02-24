@@ -206,12 +206,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mSplitLayout = layout;
         mSplitWindowManager = splitWindowManager;
         mViewHost = viewHost;
-        mDividerBounds.set(layout.getDividerBounds());
+        layout.getDividerBounds(mDividerBounds);
         onInsetsChanged(insetsState, false /* animate */);
     }
 
     void onInsetsChanged(InsetsState insetsState, boolean animate) {
-        mTempRect.set(mSplitLayout.getDividerBounds());
+        mSplitLayout.getDividerBounds(mTempRect);
         final InsetsSource taskBarInsetsSource =
                 insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
@@ -286,6 +286,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
+                mSplitLayout.onStartDragging();
                 break;
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
@@ -301,7 +302,10 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 releaseTouching();
-                if (!mMoving) break;
+                if (!mMoving) {
+                    mSplitLayout.onDraggingCancelled();
+                    break;
+                }
 
                 mVelocityTracker.addMovement(event);
                 mVelocityTracker.computeCurrentVelocity(1000 /* units */);

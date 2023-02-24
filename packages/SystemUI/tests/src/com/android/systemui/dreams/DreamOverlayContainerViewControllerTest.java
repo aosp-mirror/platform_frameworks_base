@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.keyguard.domain.interactor.BouncerCallbackInteractor;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
@@ -88,6 +89,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     @Mock
     ViewRootImpl mViewRoot;
 
+    @Mock
+    BouncerCallbackInteractor mBouncerCallbackInteractor;
+
     DreamOverlayContainerViewController mController;
 
     @Before
@@ -110,7 +114,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mResources,
                 MAX_BURN_IN_OFFSET,
                 BURN_IN_PROTECTION_UPDATE_INTERVAL,
-                MILLIS_UNTIL_FULL_JITTER);
+                MILLIS_UNTIL_FULL_JITTER,
+                mBouncerCallbackInteractor);
     }
 
     @Test

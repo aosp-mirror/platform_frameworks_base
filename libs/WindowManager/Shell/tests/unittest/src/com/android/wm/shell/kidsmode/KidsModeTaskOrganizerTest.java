@@ -44,11 +44,13 @@ import android.window.WindowContainerTransaction;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.startingsurface.StartingWindowController;
+import com.android.wm.shell.sysui.ShellCommandHandler;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +63,7 @@ import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class KidsModeTaskOrganizerTest {
+public class KidsModeTaskOrganizerTest extends ShellTestCase {
     @Mock private ITaskOrganizerController mTaskOrganizerController;
     @Mock private Context mContext;
     @Mock private Handler mHandler;
@@ -72,7 +74,8 @@ public class KidsModeTaskOrganizerTest {
     @Mock private WindowContainerToken mToken;
     @Mock private WindowContainerTransaction mTransaction;
     @Mock private KidsModeSettingsObserver mObserver;
-    @Mock private StartingWindowController mStartingWindowController;
+    @Mock private ShellInit mShellInit;
+    @Mock private ShellCommandHandler mShellCommandHandler;
     @Mock private DisplayInsetsController mDisplayInsetsController;
 
     KidsModeTaskOrganizer mOrganizer;
@@ -86,12 +89,17 @@ public class KidsModeTaskOrganizerTest {
         } catch (RemoteException e) {
         }
         // NOTE: KidsModeTaskOrganizer should have a null CompatUIController.
-        mOrganizer = spy(new KidsModeTaskOrganizer(mTaskOrganizerController, mTestExecutor,
-                mHandler, mContext, mSyncTransactionQueue, mDisplayController,
-                mDisplayInsetsController, Optional.empty(), mObserver));
-        mOrganizer.initialize(mStartingWindowController);
+        mOrganizer = spy(new KidsModeTaskOrganizer(mContext, mShellInit, mShellCommandHandler,
+                mTaskOrganizerController, mSyncTransactionQueue, mDisplayController,
+                mDisplayInsetsController, Optional.empty(), Optional.empty(), mObserver,
+                mTestExecutor, mHandler));
         doReturn(mTransaction).when(mOrganizer).getWindowContainerTransaction();
         doReturn(new InsetsState()).when(mDisplayController).getInsetsState(DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test

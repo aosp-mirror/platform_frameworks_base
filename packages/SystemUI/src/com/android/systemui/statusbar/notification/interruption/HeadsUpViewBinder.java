@@ -41,8 +41,7 @@ import javax.inject.Inject;
  * figuring out the right heads up inflation parameters and inflating/freeing the heads up
  * content view.
  *
- * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated
- * (i.e. when {@link HeadsUpController} is removed).
+ * TODO: This should be moved into {@link HeadsUpCoordinator} when the old pipeline is deprecated.
  */
 @SysUISingleton
 public class HeadsUpViewBinder {
@@ -83,7 +82,7 @@ public class HeadsUpViewBinder {
         params.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
         CancellationSignal signal = mStage.requestRebind(entry, en -> {
-            mLogger.entryBoundSuccessfully(entry.getKey());
+            mLogger.entryBoundSuccessfully(entry);
             en.getRow().setUsesIncreasedHeadsUpHeight(params.useIncreasedHeadsUpHeight());
             // requestRebing promises that if we called cancel before this callback would be
             // invoked, then we will not enter this callback, and because we always cancel before
@@ -94,7 +93,7 @@ public class HeadsUpViewBinder {
             }
         });
         abortBindCallback(entry);
-        mLogger.startBindingHun(entry.getKey());
+        mLogger.startBindingHun(entry);
         mOngoingBindCallbacks.put(entry, signal);
     }
 
@@ -105,7 +104,7 @@ public class HeadsUpViewBinder {
     public void abortBindCallback(NotificationEntry entry) {
         CancellationSignal ongoingBindCallback = mOngoingBindCallbacks.remove(entry);
         if (ongoingBindCallback != null) {
-            mLogger.currentOngoingBindingAborted(entry.getKey());
+            mLogger.currentOngoingBindingAborted(entry);
             ongoingBindCallback.cancel();
         }
     }
@@ -116,7 +115,7 @@ public class HeadsUpViewBinder {
     public void unbindHeadsUpView(NotificationEntry entry) {
         abortBindCallback(entry);
         mStage.getStageParams(entry).markContentViewsFreeable(FLAG_CONTENT_VIEW_HEADS_UP);
-        mLogger.entryContentViewMarkedFreeable(entry.getKey());
-        mStage.requestRebind(entry, e -> mLogger.entryUnbound(e.getKey()));
+        mLogger.entryContentViewMarkedFreeable(entry);
+        mStage.requestRebind(entry, e -> mLogger.entryUnbound(e));
     }
 }

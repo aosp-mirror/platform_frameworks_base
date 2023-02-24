@@ -93,6 +93,9 @@ cc_defaults {
 
 cc_defaults {
     name: "hwui_static_deps",
+    defaults: [
+        "android.hardware.graphics.common-ndk_shared",
+    ],
     shared_libs: [
         "libbase",
         "libharfbuzz_ng",
@@ -106,7 +109,6 @@ cc_defaults {
     target: {
         android: {
             shared_libs: [
-                "android.hardware.graphics.common-V3-ndk",
                 "android.hardware.graphics.common@1.2",
                 "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
@@ -210,6 +212,15 @@ filegroup {
         "apex/java/**/*.java",
     ],
     path: "apex/java",
+}
+
+java_api_contribution {
+    name: "framework-graphics-public-stubs",
+    api_surface: "public",
+    api_file: "api/current.txt",
+    visibility: [
+        "//build/orchestrator/apis",
+    ],
 }
 
 // ------------------------
@@ -632,7 +643,7 @@ cc_library_static {
 cc_defaults {
     name: "hwui_test_defaults",
     defaults: ["hwui_defaults"],
-    test_suites: ["device-tests"],
+    test_suites: ["general-tests"],
     header_libs: ["libandroid_headers_private"],
     target: {
         android: {

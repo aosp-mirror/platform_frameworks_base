@@ -39,7 +39,6 @@ import android.service.carrier.CarrierService;
 import android.telecom.TelecomManager;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.data.ApnSetting;
-import android.telephony.data.DataCallResponse;
 import android.telephony.gba.TlsParams;
 import android.telephony.gba.UaSecurityProtocolIdentifier;
 import android.telephony.ims.ImsReasonInfo;
@@ -1137,27 +1136,6 @@ public class CarrierConfigManager {
     public static final String KEY_DEFAULT_MTU_INT = "default_mtu_int";
 
     /**
-     * The data call retry configuration for different types of APN.
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS =
-            "carrier_data_call_retry_config_strings";
-
-    /**
-     * Delay in milliseconds between trying APN from the pool
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG =
-            "carrier_data_call_apn_delay_default_long";
-
-    /**
-     * Faster delay in milliseconds between trying APN from the pool
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG =
-            "carrier_data_call_apn_delay_faster_long";
-
-    /**
      * Delay in milliseconds for retrying APN after disconnect
      * @hide
      */
@@ -1165,25 +1143,7 @@ public class CarrierConfigManager {
             "carrier_data_call_apn_retry_after_disconnect_long";
 
     /**
-     * The maximum times for telephony to retry data setup on the same APN requested by
-     * network through the data setup response retry timer
-     * {@link DataCallResponse#getRetryDurationMillis()}. This is to prevent that network keeps
-     * asking device to retry data setup forever and causes power consumption issue. For infinite
-     * retring same APN, configure this as 2147483647 (i.e. {@link Integer#MAX_VALUE}).
-     *
-     * Note if network does not suggest any retry timer, frameworks uses the retry configuration
-     * from {@link #KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS}, and the maximum retry times could
-     * be configured there.
-     * @hide
-     */
-    public static final String KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT =
-            "carrier_data_call_retry_network_requested_max_count_int";
-
-    /**
-     * Data call setup permanent failure causes by the carrier.
-     *
-     * @deprecated This API key was added in mistake and is not used anymore by the telephony data
-     * frameworks.
+     * Data call setup permanent failure causes by the carrier
      */
     @Deprecated
     public static final String KEY_CARRIER_DATA_CALL_PERMANENT_FAILURE_STRINGS =
@@ -1202,19 +1162,6 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS =
             "carrier_metered_roaming_apn_types_strings";
 
-    /**
-     * APN types that are not allowed on cellular
-     * @hide
-     */
-    public static final String KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
-            "carrier_wwan_disallowed_apn_types_string_array";
-
-    /**
-     * APN types that are not allowed on IWLAN
-     * @hide
-     */
-    public static final String KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY =
-            "carrier_wlan_disallowed_apn_types_string_array";
     /**
      * CDMA carrier ERI (Enhanced Roaming Indicator) file name
      * @hide
@@ -2112,6 +2059,16 @@ public class CarrierConfigManager {
      * is immediately closed (disabling keep-alive).
      */
     public static final String KEY_MMS_CLOSE_CONNECTION_BOOL = "mmsCloseConnection";
+    /**
+     * Waiting time in milliseconds used before releasing an MMS data call. Not tearing down an MMS
+     * data connection immediately helps to reduce the message delivering latency if messaging
+     * continues between all parties in the conversation since the same data connection can be
+     * reused for further messages.
+     *
+     * This timer will control how long the data call will be kept alive before being torn down.
+     */
+    public static final String KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT =
+            "mms_network_release_timeout_millis_int";
 
     /**
      * The flatten {@link android.content.ComponentName componentName} of the activity that can
@@ -4349,6 +4306,18 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG =
             "data_switch_validation_timeout_long";
+
+    /**
+     * The minimum timeout of UDP port 4500 NAT / firewall entries on the Internet PDN of this
+     * carrier network. This will be used by Android platform VPNs to tune IPsec NAT keepalive
+     * interval. If this value is too low to provide uninterrupted inbound connectivity, then
+     * Android system VPNs may indicate to applications that the VPN cannot support long-lived
+     * TCP connections.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final String KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT =
+            "min_udp_port_4500_nat_timeout_sec_int";
 
     /**
      * Specifies whether the system should prefix the EAP method to the anonymous identity.
@@ -8051,6 +8020,14 @@ public class CarrierConfigManager {
         public static final String KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL =
                 KEY_PREFIX + "supports_eap_aka_fast_reauth_bool";
 
+        /**
+         * Type of IP preference used to prioritize ePDG servers. Possible values are
+         * {@link #EPDG_ADDRESS_IPV4_PREFERRED}, {@link #EPDG_ADDRESS_IPV6_PREFERRED},
+         * {@link #EPDG_ADDRESS_IPV4_ONLY}
+         */
+        public static final String KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT =
+                KEY_PREFIX + "epdg_address_ip_type_preference_int";
+
         /** @hide */
         @IntDef({AUTHENTICATION_METHOD_EAP_ONLY, AUTHENTICATION_METHOD_CERT})
         public @interface AuthenticationMethodType {}
@@ -8114,6 +8091,39 @@ public class CarrierConfigManager {
          *     Exchange Protocol Version 2 (IKEv2)</a>
          */
         public static final int ID_TYPE_KEY_ID = 11;
+
+        /** @hide */
+        @IntDef({
+                EPDG_ADDRESS_IPV4_PREFERRED,
+                EPDG_ADDRESS_IPV6_PREFERRED,
+                EPDG_ADDRESS_IPV4_ONLY,
+                EPDG_ADDRESS_IPV6_ONLY,
+                EPDG_ADDRESS_SYSTEM_PREFERRED
+        })
+        public @interface EpdgAddressIpPreference {}
+
+        /** Prioritize IPv4 ePDG addresses. */
+        public static final int EPDG_ADDRESS_IPV4_PREFERRED = 0;
+
+        /** Prioritize IPv6 ePDG addresses */
+        public static final int EPDG_ADDRESS_IPV6_PREFERRED = 1;
+
+        /** Use IPv4 ePDG addresses only. */
+        public static final int EPDG_ADDRESS_IPV4_ONLY = 2;
+
+        /** Use IPv6 ePDG addresses only.
+         * @hide
+         */
+        public static final int EPDG_ADDRESS_IPV6_ONLY = 3;
+
+        /** Follow the priority from DNS resolution results, which are sorted by using RFC6724
+         * algorithm.
+         *
+         * @see <a href="https://tools.ietf.org/html/rfc6724#section-6">RFC 6724, Default Address
+         *     Selection for Internet Protocol Version 6 (IPv6)</a>
+         * @hide
+         */
+        public static final int EPDG_ADDRESS_SYSTEM_PREFERRED = 4;
 
         private Iwlan() {}
 
@@ -8198,7 +8208,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_EPDG_PCO_ID_IPV6_INT, 0);
             defaults.putInt(KEY_EPDG_PCO_ID_IPV4_INT, 0);
             defaults.putBoolean(KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL, false);
-
+            defaults.putInt(KEY_EPDG_ADDRESS_IP_TYPE_PREFERENCE_INT, EPDG_ADDRESS_IPV4_PREFERRED);
             return defaults;
         }
     }
@@ -8244,8 +8254,9 @@ public class CarrierConfigManager {
             "carrier_certificate_string_array";
 
     /**
-     * Flag specifying whether the incoming call number should be formatted to national number
-     * for Japan. @return {@code true} convert to the national format, {@code false} otherwise.
+     * Flag specifying whether the incoming call number and the conference participant number
+     * should be formatted to national number for Japan.
+     * @return {@code true} convert to the national format, {@code false} otherwise.
      * e.g. "+819012345678" -> "09012345678"
      * @hide
      */
@@ -8339,7 +8350,6 @@ public class CarrierConfigManager {
      * "1800000, maximum_retries=20" means for those capabilities, retry happens in 2.5s, 3s, 5s,
      * 10s, 15s, 20s, 40s, 1m, 2m, 4m, 10m, 20m, 30m, 30m, 30m, until reaching 20 retries.
      *
-     * // TODO: remove KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS
      * @hide
      */
     public static final String KEY_TELEPHONY_DATA_SETUP_RETRY_RULES_STRING_ARRAY =
@@ -8746,27 +8756,13 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_BROADCAST_EMERGENCY_CALL_STATE_CHANGES_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_EMERGENCY_ALERT_ONOFF_BOOL, false);
         sDefaults.putInt(KEY_DEFAULT_MTU_INT, 1500);
-        sDefaults.putStringArray(KEY_CARRIER_DATA_CALL_RETRY_CONFIG_STRINGS, new String[]{
-                "default:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
-                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
-                "mms:default_randomization=2000,5000,10000,20000,40000,80000:5000,160000:5000,"
-                        + "320000:5000,640000:5000,1280000:5000,1800000:5000",
-                "ims:max_retries=10, 5000, 5000, 5000",
-                "others:max_retries=3, 5000, 5000, 5000"});
-        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_DEFAULT_LONG, 20000);
-        sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_DELAY_FASTER_LONG, 3000);
         sDefaults.putLong(KEY_CARRIER_DATA_CALL_APN_RETRY_AFTER_DISCONNECT_LONG, 3000);
-        sDefaults.putInt(KEY_CARRIER_DATA_CALL_RETRY_NETWORK_REQUESTED_MAX_COUNT_INT, 3);
         sDefaults.putString(KEY_CARRIER_ERI_FILE_NAME_STRING, "eri.xml");
         sDefaults.putInt(KEY_DURATION_BLOCKING_DISABLED_AFTER_EMERGENCY_INT, 7200);
         sDefaults.putStringArray(KEY_CARRIER_METERED_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
         sDefaults.putStringArray(KEY_CARRIER_METERED_ROAMING_APN_TYPES_STRINGS,
                 new String[]{"default", "mms", "dun", "supl"});
-        sDefaults.putStringArray(KEY_CARRIER_WWAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
-                new String[]{""});
-        sDefaults.putStringArray(KEY_CARRIER_WLAN_DISALLOWED_APN_TYPES_STRING_ARRAY,
-                new String[]{""});
         sDefaults.putIntArray(KEY_ONLY_SINGLE_DC_ALLOWED_INT_ARRAY,
                 new int[] {TelephonyManager.NETWORK_TYPE_CDMA, TelephonyManager.NETWORK_TYPE_1xRTT,
                         TelephonyManager.NETWORK_TYPE_EVDO_0, TelephonyManager.NETWORK_TYPE_EVDO_A,
@@ -8868,6 +8864,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_LENGTH_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SUBJECT_MAX_LENGTH_INT, 40);
+        sDefaults.putInt(KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT, 5 * 1000);
         sDefaults.putString(KEY_MMS_EMAIL_GATEWAY_NUMBER_STRING, "");
         sDefaults.putString(KEY_MMS_HTTP_PARAMS_STRING, "");
         sDefaults.putString(KEY_MMS_NAI_SUFFIX_STRING, "");
@@ -9179,7 +9176,7 @@ public class CarrierConfigManager {
         sDefaults.putAll(Bsf.getDefaults());
         sDefaults.putAll(Iwlan.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
-         sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
+        sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
@@ -9187,6 +9184,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
+        sDefaults.putInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT, 300);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);

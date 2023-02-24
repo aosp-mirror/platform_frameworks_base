@@ -33,6 +33,8 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
@@ -41,8 +43,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -54,20 +55,21 @@ import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
+import java.util.Optional
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @SmallTest
 class LockscreenSmartspaceControllerTest : SysuiTestCase() {
@@ -81,36 +83,59 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var activityStarter: ActivityStarter
     @Mock
     private lateinit var falsingManager: FalsingManager
+
     @Mock
     private lateinit var secureSettings: SecureSettings
+
     @Mock
     private lateinit var userTracker: UserTracker
+
     @Mock
     private lateinit var contentResolver: ContentResolver
+
     @Mock
     private lateinit var configurationController: ConfigurationController
+
     @Mock
     private lateinit var statusBarStateController: StatusBarStateController
+
+    @Mock
+    private lateinit var keyguardBypassController: KeyguardBypassController
+
     @Mock
     private lateinit var deviceProvisionedController: DeviceProvisionedController
+
+    @Mock
+    private lateinit var bgExecutor: Executor
+
     @Mock
     private lateinit var handler: Handler
 
     @Mock
     private lateinit var plugin: BcSmartspaceDataPlugin
+
     @Mock
     private lateinit var controllerListener: SmartspaceTargetListener
 
     @Captor
     private lateinit var sessionListenerCaptor: ArgumentCaptor<OnTargetsAvailableListener>
+
     @Captor
     private lateinit var userTrackerCaptor: ArgumentCaptor<UserTracker.Callback>
+
     @Captor
     private lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
+
     @Captor
     private lateinit var configChangeListenerCaptor: ArgumentCaptor<ConfigurationListener>
+
     @Captor
     private lateinit var statusBarStateListenerCaptor: ArgumentCaptor<StateListener>
+
+    @Captor
+    private lateinit var bypassStateChangedListenerCaptor:
+        ArgumentCaptor<KeyguardBypassController.OnBypassStateChangedListener>
+
     @Captor
     private lateinit var deviceProvisionedCaptor: ArgumentCaptor<DeviceProvisionedListener>
 
@@ -119,6 +144,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private lateinit var settingsObserver: ContentObserver
     private lateinit var configChangeListener: ConfigurationListener
     private lateinit var statusBarStateListener: StateListener
+    private lateinit var bypassStateChangeListener:
+        KeyguardBypassController.OnBypassStateChangedListener
     private lateinit var deviceProvisionedListener: DeviceProvisionedListener
 
     private lateinit var smartspaceView: SmartspaceView
@@ -177,11 +204,13 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
                 configurationController,
                 statusBarStateController,
                 deviceProvisionedController,
+                keyguardBypassController,
                 execution,
                 executor,
+                bgExecutor,
                 handler,
                 Optional.of(plugin)
-                )
+        )
 
         verify(deviceProvisionedController).addCallback(capture(deviceProvisionedCaptor))
         deviceProvisionedListener = deviceProvisionedCaptor.value
@@ -307,6 +336,19 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         // We pass that along to the view
         verify(smartspaceView).setDozeAmount(0.7f)
+    }
+
+    @Test
+    fun testKeyguardBypassEnabledUpdatesView() {
+        // GIVEN a connected smartspace session
+        connectSession()
+        `when`(keyguardBypassController.bypassEnabled).thenReturn(true)
+
+        // WHEN the doze amount changes
+        bypassStateChangeListener.onBypassStateChanged(true)
+
+        // We pass that along to the view
+        verify(smartspaceView).setKeyguardBypassEnabled(true)
     }
 
     @Test
@@ -457,6 +499,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         verify(contentResolver).unregisterContentObserver(settingsObserver)
         verify(configurationController).removeCallback(configChangeListener)
         verify(statusBarStateController).removeCallback(statusBarStateListener)
+        verify(keyguardBypassController)
+                .unregisterOnBypassStateChangedListener(bypassStateChangeListener)
     }
 
     @Test
@@ -475,6 +519,19 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         // THEN the existing session is reused and views are registered
         verify(smartspaceManager, never()).createSmartspaceSession(any())
         verify(smartspaceView2).registerDataProvider(plugin)
+    }
+
+    @Test
+    fun testViewGetInitializedWithBypassEnabledState() {
+        // GIVEN keyguard bypass is enabled.
+        `when`(keyguardBypassController.bypassEnabled).thenReturn(true)
+
+        // WHEN the view is being built
+        val view = controller.buildAndConnectView(fakeParent)
+        smartspaceView = view as SmartspaceView
+
+        // THEN the view is initialized with the keyguard bypass enabled state.
+        verify(smartspaceView).setKeyguardBypassEnabled(true)
     }
 
     @Test
@@ -517,6 +574,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
         verify(statusBarStateController).addCallback(statusBarStateListenerCaptor.capture())
         statusBarStateListener = statusBarStateListenerCaptor.value
+        verify(keyguardBypassController)
+            .registerOnBypassStateChangedListener(capture(bypassStateChangedListenerCaptor))
+        bypassStateChangeListener = bypassStateChangedListenerCaptor.value
 
         verify(smartspaceSession).requestSmartspaceUpdate()
         clearInvocations(smartspaceSession)
@@ -583,6 +643,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
             }
 
             override fun setDozeAmount(amount: Float) {
+            }
+
+            override fun setKeyguardBypassEnabled(enabled: Boolean) {
             }
 
             override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {

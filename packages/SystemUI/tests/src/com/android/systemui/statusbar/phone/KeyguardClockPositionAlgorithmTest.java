@@ -266,7 +266,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     @Test
     public void clockPositionedDependingOnMarginInSplitShade() {
         setSplitShadeTopMargin(400);
-        mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -294,7 +293,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void notifPaddingAccountsForMultiUserSwitcherInSplitShade() {
         setSplitShadeTopMargin(100);
         mUserSwitchHeight = 150;
-        mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -307,7 +305,6 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     public void clockDoesntAccountForMultiUserSwitcherInSplitShade() {
         setSplitShadeTopMargin(100);
         mUserSwitchHeight = 150;
-        mClockPositionAlgorithm.loadDimens(mResources);
         givenLockScreen();
         mIsSplitShade = true;
         // WHEN the position algorithm is run
@@ -382,8 +379,22 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mQsExpansion = 1;
         // WHEN the clock position algorithm is run
         positionClock();
-        // THEN the clock Y position is the middle of the screen (SCREEN_HEIGHT / 2).
+        // THEN the clock is transparent.
         assertThat(mClockPosition.clockAlpha).isEqualTo(TRANSPARENT);
+    }
+
+    @Test
+    public void clockNotHiddenWhenQsIsExpandedInSplitShade() {
+        // GIVEN on the split lock screen with QS expansion
+        givenLockScreen();
+        mIsSplitShade = true;
+        setSplitShadeTopMargin(100);
+        mQsExpansion = 1;
+
+        // WHEN the clock position algorithm is run
+        positionClock();
+
+        assertThat(mClockPosition.clockAlpha).isEqualTo(1);
     }
 
     @Test
@@ -524,6 +535,7 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
     private void setSplitShadeTopMargin(int value) {
         when(mResources.getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin))
                 .thenReturn(value);
+        mClockPositionAlgorithm.loadDimens(mResources);
     }
 
     private void givenHighestBurnInOffset() {

@@ -207,7 +207,11 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
             case TYPE_HEADER_ALL_OTHERS:
                 TextView textView = (TextView) itemView;
                 if (itemType == TYPE_HEADER_SUGGESTED) {
-                    setTextTo(textView, R.string.language_picker_section_suggested);
+                   if (mCountryMode) {
+                        setTextTo(textView, R.string.language_picker_regions_section_suggested);
+                    } else {
+                        setTextTo(textView, R.string.language_picker_section_suggested);
+                    }
                 } else {
                     if (mCountryMode) {
                         setTextTo(textView, R.string.region_picker_section_all);

@@ -19,14 +19,15 @@ package com.android.internal.util;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_MANAGED;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 
-import static org.junit.Assert.assertEquals;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -51,8 +52,11 @@ import com.android.internal.widget.IWeakEscrowTokenActivatedListener;
 import com.android.internal.widget.IWeakEscrowTokenRemovedListener;
 import com.android.internal.widget.LockPatternUtils;
 
+import com.google.android.collect.Lists;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
@@ -172,13 +176,61 @@ public class LockPatternUtilsTest {
     }
 
     @Test
-    public void testGetEnabledTrustAgentsNotNull() throws RemoteException {
+    public void testSetEnabledTrustAgents() throws RemoteException {
         int testUserId = 10;
         ILockSettings ils = createTestLockSettings();
-        when(ils.getString(anyString(), any(), anyInt())).thenReturn("");
+        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
+        doNothing().when(ils).setString(anyString(), valueCaptor.capture(), anyInt());
+        List<ComponentName> enabledTrustAgents = Lists.newArrayList(
+                ComponentName.unflattenFromString("com.android/.TrustAgent"),
+                ComponentName.unflattenFromString("com.test/.TestAgent"));
+
+        mLockPatternUtils.setEnabledTrustAgents(enabledTrustAgents, testUserId);
+
+        assertThat(valueCaptor.getValue()).isEqualTo("com.android/.TrustAgent,com.test/.TestAgent");
+    }
+
+    @Test
+    public void testGetEnabledTrustAgents() throws RemoteException {
+        int testUserId = 10;
+        ILockSettings ils = createTestLockSettings();
+        when(ils.getString(anyString(), any(), anyInt())).thenReturn(
+                "com.android/.TrustAgent,com.test/.TestAgent");
+
         List<ComponentName> trustAgents = mLockPatternUtils.getEnabledTrustAgents(testUserId);
-        assertNotNull(trustAgents);
-        assertEquals(0, trustAgents.size());
+
+        assertThat(trustAgents).containsExactly(
+                ComponentName.unflattenFromString("com.android/.TrustAgent"),
+                ComponentName.unflattenFromString("com.test/.TestAgent"));
+    }
+
+    @Test
+    public void testSetKnownTrustAgents() throws RemoteException {
+        int testUserId = 10;
+        ILockSettings ils = createTestLockSettings();
+        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
+        doNothing().when(ils).setString(anyString(), valueCaptor.capture(), anyInt());
+        List<ComponentName> knownTrustAgents = Lists.newArrayList(
+                ComponentName.unflattenFromString("com.android/.TrustAgent"),
+                ComponentName.unflattenFromString("com.test/.TestAgent"));
+
+        mLockPatternUtils.setKnownTrustAgents(knownTrustAgents, testUserId);
+
+        assertThat(valueCaptor.getValue()).isEqualTo("com.android/.TrustAgent,com.test/.TestAgent");
+    }
+
+    @Test
+    public void testGetKnownTrustAgents() throws RemoteException {
+        int testUserId = 10;
+        ILockSettings ils = createTestLockSettings();
+        when(ils.getString(anyString(), any(), anyInt())).thenReturn(
+                "com.android/.TrustAgent,com.test/.TestAgent");
+
+        List<ComponentName> trustAgents = mLockPatternUtils.getKnownTrustAgents(testUserId);
+
+        assertThat(trustAgents).containsExactly(
+                ComponentName.unflattenFromString("com.android/.TrustAgent"),
+                ComponentName.unflattenFromString("com.test/.TestAgent"));
     }
 
     private ILockSettings createTestLockSettings() {

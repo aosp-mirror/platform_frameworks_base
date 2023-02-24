@@ -1114,6 +1114,11 @@ bool BootAnimation::parseAnimationDesc(Animation& animation)  {
 
         int nextReadPos;
 
+        if (strlen(l) == 0) {
+            s = ++endl;
+            continue;
+        }
+
         int topLineNumbers = sscanf(l, "%d %d %d %d", &width, &height, &fps, &progress);
         if (topLineNumbers == 3 || topLineNumbers == 4) {
             // SLOGD("> w=%d, h=%d, fps=%d, progress=%d", width, height, fps, progress);

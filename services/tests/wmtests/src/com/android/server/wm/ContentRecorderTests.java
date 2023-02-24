@@ -31,9 +31,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.VirtualDisplay;
@@ -53,6 +55,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -68,17 +72,21 @@ import java.util.concurrent.CountDownLatch;
 public class ContentRecorderTests extends WindowTestsBase {
     private static final IBinder TEST_TOKEN = new RecordingTestToken();
     private static IBinder sTaskWindowContainerToken;
+    private Task mTask;
     private final ContentRecordingSession mDisplaySession =
             ContentRecordingSession.createDisplaySession(TEST_TOKEN);
     private ContentRecordingSession mTaskSession;
     private static Point sSurfaceSize;
     private ContentRecorder mContentRecorder;
+    @Mock private ContentRecorder.MediaProjectionManagerWrapper mMediaProjectionManagerWrapper;
     private SurfaceControl mRecordedSurface;
     // Handle feature flag.
     private ConfigListener mConfigListener;
     private CountDownLatch mLatch;
 
     @Before public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         // GIVEN SurfaceControl can successfully mirror the provided surface.
         sSurfaceSize = new Point(
                 mDefaultDisplay.getDefaultTaskDisplayArea().getBounds().width(),
@@ -92,7 +100,8 @@ public class ContentRecorderTests extends WindowTestsBase {
         final int displayId = virtualDisplay.getDisplay().getDisplayId();
         mWm.mRoot.onDisplayAdded(displayId);
         final DisplayContent virtualDisplayContent = mWm.mRoot.getDisplayContent(displayId);
-        mContentRecorder = new ContentRecorder(virtualDisplayContent);
+        mContentRecorder = new ContentRecorder(virtualDisplayContent,
+                mMediaProjectionManagerWrapper);
         spyOn(virtualDisplayContent);
 
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
@@ -179,7 +188,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.setContentRecordingSession(session);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
-        // TODO(b/219761722) validate VirtualDisplay is torn down when can't set up task recording.
+        verify(mMediaProjectionManagerWrapper).stopActiveProjection();
     }
 
     @Test
@@ -190,7 +199,7 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.setContentRecordingSession(invalidTaskSession);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
-        // TODO(b/219761722) validate VirtualDisplay is torn down when can't set up task recording.
+        verify(mMediaProjectionManagerWrapper).stopActiveProjection();
     }
 
     @Test
@@ -218,9 +227,24 @@ public class ContentRecorderTests extends WindowTestsBase {
         mContentRecorder.updateRecording();
         mContentRecorder.onConfigurationChanged(ORIENTATION_PORTRAIT);
 
-        verify(mTransaction, atLeastOnce()).setPosition(eq(mRecordedSurface), anyFloat(),
+        verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
                 anyFloat());
-        verify(mTransaction, atLeastOnce()).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
+        verify(mTransaction, atLeast(2)).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
+                anyFloat(), anyFloat());
+    }
+
+    @Test
+    public void testOnTaskConfigurationChanged_resizesSurface() {
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+
+        Configuration config = mTask.getConfiguration();
+        config.orientation = ORIENTATION_PORTRAIT;
+        mTask.onConfigurationChanged(config);
+
+        verify(mTransaction, atLeast(2)).setPosition(eq(mRecordedSurface), anyFloat(),
+                anyFloat());
+        verify(mTransaction, atLeast(2)).setMatrix(eq(mRecordedSurface), anyFloat(), anyFloat(),
                 anyFloat(), anyFloat());
     }
 
@@ -240,18 +264,36 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemove_stopsRecording() {
+    public void testStopRecording_stopsRecording() {
         mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
 
-        mContentRecorder.remove();
+        mContentRecorder.stopRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
     }
 
     @Test
-    public void testRemove_neverRecording() {
-        mContentRecorder.remove();
+    public void testStopRecording_neverRecording() {
+        mContentRecorder.stopRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testRemoveTask_stopsRecording() {
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+
+        mTask.removeImmediately();
+
+        verify(mMediaProjectionManagerWrapper).stopActiveProjection();
+    }
+
+    @Test
+    public void testRemoveTask_stopsRecording_nullSessionShouldNotThrowExceptions() {
+        mContentRecorder.setContentRecordingSession(mTaskSession);
+        mContentRecorder.updateRecording();
+        mContentRecorder.setContentRecordingSession(null);
+        mTask.removeImmediately();
     }
 
     @Test
@@ -297,10 +339,10 @@ public class ContentRecorderTests extends WindowTestsBase {
      */
     private IBinder setUpTaskWindowContainerToken(DisplayContent displayContent) {
         final Task rootTask = createTask(displayContent);
-        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        mTask = createTaskInRootTask(rootTask, 0 /* userId */);
         // Ensure the task is not empty.
-        createActivityRecord(displayContent, task);
-        return task.getTaskInfo().token.asBinder();
+        createActivityRecord(displayContent, mTask);
+        return mTask.getTaskInfo().token.asBinder();
     }
 
     /**

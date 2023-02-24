@@ -14,7 +14,7 @@
   ~ limitations under the License
   -->
 
-<resources>
+<resources xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
     <style name="TextAppearanceSmall">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
     </style>
@@ -73,7 +73,7 @@
     </style>
 
     <style name="TextAppearanceBroadcastDialogButton" parent="@android:TextAppearance.DeviceDefault.Headline">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
         <item name="android:textSize">@dimen/broadcast_dialog_btn_text_size</item>
     </style>
 

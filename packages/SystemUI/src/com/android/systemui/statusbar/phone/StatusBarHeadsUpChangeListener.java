@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -119,7 +120,6 @@ public class StatusBarHeadsUpChangeListener implements OnHeadsUpChangedListener 
 
     @Override
     public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
-        mNotificationsController.requestNotificationUpdate("onHeadsUpStateChanged");
         if (mStatusBarStateController.isDozing() && isHeadsUp) {
             entry.setPulseSuppressed(false);
             mDozeServiceHost.fireNotificationPulse(entry);

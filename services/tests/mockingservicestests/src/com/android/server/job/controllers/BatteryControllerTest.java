@@ -312,4 +312,71 @@ public class BatteryControllerTest {
         assertFalse(jobLateFg.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
         assertFalse(jobLateFgLow.isConstraintSatisfied(JobStatus.CONSTRAINT_CHARGING));
     }
+
+    @Test
+    public void testControllerOnlyTracksPowerJobs() {
+        JobStatus batteryJob = createJobStatus("testControllerOnlyTracksPowerJobs",
+                SOURCE_PACKAGE, mSourceUid,
+                createBaseJobInfoBuilder(1).setRequiresBatteryNotLow(true).build());
+        JobStatus chargingJob = createJobStatus("testControllerOnlyTracksPowerJobs",
+                SOURCE_PACKAGE, mSourceUid,
+                createBaseJobInfoBuilder(2).setRequiresCharging(true).build());
+        JobStatus bothPowerJob = createJobStatus("testControllerOnlyTracksPowerJobs",
+                SOURCE_PACKAGE, mSourceUid,
+                createBaseJobInfoBuilder(3)
+                        .setRequiresCharging(true)
+                        .setRequiresBatteryNotLow(true)
+                        .build());
+        JobStatus unrelatedJob = createJobStatus("testControllerOnlyTracksPowerJobs",
+                SOURCE_PACKAGE, mSourceUid, createBaseJobInfoBuilder(4).build());
+
+        // Follow the lifecycle of tracking
+        // Start tracking
+        trackJobs(batteryJob, chargingJob, bothPowerJob, unrelatedJob);
+        final ArraySet<JobStatus> trackedJobs = mBatteryController.getTrackedJobs();
+        final ArraySet<JobStatus> topStartedJobs = mBatteryController.getTopStartedJobs();
+        assertTrue(trackedJobs.contains(batteryJob));
+        assertTrue(trackedJobs.contains(chargingJob));
+        assertTrue(trackedJobs.contains(bothPowerJob));
+        assertFalse(trackedJobs.contains(unrelatedJob));
+        assertFalse(topStartedJobs.contains(batteryJob));
+        assertFalse(topStartedJobs.contains(chargingJob));
+        assertFalse(topStartedJobs.contains(bothPowerJob));
+        assertFalse(topStartedJobs.contains(unrelatedJob));
+
+        // Procstate change shouldn't affect anything
+        setUidBias(mSourceUid, JobInfo.BIAS_TOP_APP);
+        assertTrue(trackedJobs.contains(batteryJob));
+        assertTrue(trackedJobs.contains(chargingJob));
+        assertTrue(trackedJobs.contains(bothPowerJob));
+        assertFalse(trackedJobs.contains(unrelatedJob));
+        assertFalse(topStartedJobs.contains(batteryJob));
+        assertFalse(topStartedJobs.contains(chargingJob));
+        assertFalse(topStartedJobs.contains(bothPowerJob));
+        assertFalse(topStartedJobs.contains(unrelatedJob));
+
+        // Job starts running
+        mBatteryController.prepareForExecutionLocked(batteryJob);
+        mBatteryController.prepareForExecutionLocked(chargingJob);
+        mBatteryController.prepareForExecutionLocked(bothPowerJob);
+        mBatteryController.prepareForExecutionLocked(unrelatedJob);
+        assertTrue(topStartedJobs.contains(batteryJob));
+        assertTrue(topStartedJobs.contains(chargingJob));
+        assertTrue(topStartedJobs.contains(bothPowerJob));
+        assertFalse(topStartedJobs.contains(unrelatedJob));
+
+        // Job cleanup
+        mBatteryController.maybeStopTrackingJobLocked(batteryJob, null, false);
+        mBatteryController.maybeStopTrackingJobLocked(chargingJob, null, false);
+        mBatteryController.maybeStopTrackingJobLocked(bothPowerJob, null, false);
+        mBatteryController.maybeStopTrackingJobLocked(unrelatedJob, null, false);
+        assertFalse(trackedJobs.contains(batteryJob));
+        assertFalse(trackedJobs.contains(chargingJob));
+        assertFalse(trackedJobs.contains(bothPowerJob));
+        assertFalse(trackedJobs.contains(unrelatedJob));
+        assertFalse(topStartedJobs.contains(batteryJob));
+        assertFalse(topStartedJobs.contains(chargingJob));
+        assertFalse(topStartedJobs.contains(bothPowerJob));
+        assertFalse(topStartedJobs.contains(unrelatedJob));
+    }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.provider
 
 import com.android.internal.statusbar.NotificationVisibility
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -25,6 +26,7 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import javax.inject.Inject
 
 /** pipeline-agnostic implementation for getting [NotificationVisibility]. */
+@SysUISingleton
 class NotificationVisibilityProviderImpl @Inject constructor(
     private val notifDataStore: NotifLiveDataStore,
     private val notifCollection: CommonNotifCollection

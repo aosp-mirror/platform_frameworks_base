@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.shared.system.InputChannelCompat;
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -57,6 +58,9 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
 
     @Mock
     TouchInsetManager mTouchInsetManager;
+
+    @Mock
+    StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
     @Mock
     Handler mHandler;
@@ -83,11 +87,44 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
                 mVisibilityController,
                 RESTORE_TIMEOUT,
                 mTouchInsetManager,
+                mStatusBarKeyguardViewManager,
                 mFakeExecutor,
                 mHandler);
 
         // Report multiple active sessions.
         when(mSession.getActiveSessionCount()).thenReturn(2);
+
+        // Bouncer hidden.
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
+
+        // Start session.
+        touchHandler.onSessionStart(mSession);
+
+        // Verify session end.
+        verify(mSession).pop();
+
+        // Verify no interaction with visibility controller.
+        verify(mVisibilityController, never()).setVisibility(anyInt(), anyBoolean());
+    }
+
+    /**
+     * Ensures no actions are taken when the bouncer is showing.
+     */
+    @Test
+    public void testSessionEndWhenBouncerShowing() {
+        final HideComplicationTouchHandler touchHandler = new HideComplicationTouchHandler(
+                mVisibilityController,
+                RESTORE_TIMEOUT,
+                mTouchInsetManager,
+                mStatusBarKeyguardViewManager,
+                mFakeExecutor,
+                mHandler);
+
+        // Report one session.
+        when(mSession.getActiveSessionCount()).thenReturn(1);
+
+        // Bouncer is showing.
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(true);
 
         // Start session.
         touchHandler.onSessionStart(mSession);
@@ -108,11 +145,15 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
                 mVisibilityController,
                 RESTORE_TIMEOUT,
                 mTouchInsetManager,
+                mStatusBarKeyguardViewManager,
                 mFakeExecutor,
                 mHandler);
 
         // Report one session
         when(mSession.getActiveSessionCount()).thenReturn(1);
+
+        // Bouncer hidden.
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
 
         // Start session
         touchHandler.onSessionStart(mSession);
@@ -149,11 +190,15 @@ public class HideComplicationTouchHandlerTest extends SysuiTestCase {
                 mVisibilityController,
                 RESTORE_TIMEOUT,
                 mTouchInsetManager,
+                mStatusBarKeyguardViewManager,
                 mFakeExecutor,
                 mHandler);
 
         // Report one session
         when(mSession.getActiveSessionCount()).thenReturn(1);
+
+        // Bouncer hidden.
+        when(mStatusBarKeyguardViewManager.isBouncerShowing()).thenReturn(false);
 
         // Start session
         touchHandler.onSessionStart(mSession);

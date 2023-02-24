@@ -28,7 +28,7 @@
     android:importantForAccessibility="no"
     android:layout_gravity="center_vertical | start">
 
-    <com.android.systemui.util.SafeMarqueeTextView
+    <com.android.systemui.util.DelayableMarqueeTextView
         android:id="@+id/tile_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -41,7 +41,7 @@
         android:importantForAccessibility="no"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"/>
 
-    <com.android.systemui.util.SafeMarqueeTextView
+    <com.android.systemui.util.DelayableMarqueeTextView
         android:id="@+id/app_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

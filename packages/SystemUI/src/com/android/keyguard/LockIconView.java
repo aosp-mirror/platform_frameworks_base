@@ -19,7 +19,7 @@ package com.android.keyguard;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -54,7 +54,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
     private boolean mAod;
 
     @NonNull private final RectF mSensorRect;
-    @NonNull private PointF mLockIconCenter = new PointF(0f, 0f);
+    @NonNull private Point mLockIconCenter = new Point(0, 0);
     private float mRadius;
     private int mLockIconPadding;
 
@@ -126,7 +126,7 @@ public class LockIconView extends FrameLayout implements Dumpable {
      * Set the location of the lock icon.
      */
     @VisibleForTesting
-    public void setCenterLocation(@NonNull PointF center, float radius, int drawablePadding) {
+    public void setCenterLocation(@NonNull Point center, float radius, int drawablePadding) {
         mLockIconCenter = center;
         mRadius = radius;
         mLockIconPadding = drawablePadding;

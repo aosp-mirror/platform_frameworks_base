@@ -18,6 +18,7 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.soundtrigger.ModelParameterRange;
@@ -32,6 +33,8 @@ import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import com.android.internal.util.LatencyTracker;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -65,9 +68,12 @@ import java.util.Objects;
 public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInternal, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
+    private final @NonNull Context mContext;
 
-    public SoundTriggerMiddlewareLogging(@NonNull ISoundTriggerMiddlewareInternal delegate) {
+    public SoundTriggerMiddlewareLogging(@NonNull Context context,
+            @NonNull ISoundTriggerMiddlewareInternal delegate) {
         mDelegate = delegate;
+        mContext = context;
     }
 
     @Override
@@ -298,6 +304,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                     int captureSession)
                     throws RemoteException {
                 try {
+                    startKeyphraseEventLatencyTracking(event);
                     mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onPhraseRecognition", modelHandle, event);
                 } catch (Exception e) {
@@ -345,6 +352,26 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
 
             private void logVoidReturn(String methodName, Object... args) {
                 logVoidReturnWithObject(this, mOriginatorIdentity, methodName, args);
+            }
+
+            /**
+             * Starts the latency tracking log for keyphrase hotword invocation.
+             * The measurement covers from when the SoundTrigger HAL emits an event to when the
+             * {@link android.service.voice.VoiceInteractionSession} system UI view is shown.
+             */
+            private void startKeyphraseEventLatencyTracking(PhraseRecognitionEvent event) {
+                String latencyTrackerTag = null;
+                if (event.phraseExtras.length > 0) {
+                    latencyTrackerTag = "KeyphraseId=" + event.phraseExtras[0].id;
+                }
+                LatencyTracker latencyTracker = LatencyTracker.getInstance(mContext);
+                // To avoid adding cancel to all of the different failure modes between here and
+                // showing the system UI, we defensively cancel once.
+                // Either we hit the LatencyTracker timeout of 15 seconds or we defensively cancel
+                // here if any error occurs.
+                latencyTracker.onActionCancel(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+                latencyTracker.onActionStart(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION,
+                        latencyTrackerTag);
             }
 
             @Override

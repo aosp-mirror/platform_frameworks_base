@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.Dumpable;
@@ -58,7 +59,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     private ArrayList<View> mMatchParentViews = new ArrayList<View>();
     private static Rect mClipRect = new Rect();
     private boolean mWillBeGone;
-    private int mMinClipTopAmount = 0;
     private boolean mClipToActualHeight = true;
     private boolean mChangingPosition = false;
     private ViewGroup mTransientContainer;
@@ -67,7 +67,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     protected float mContentTransformationAmount;
     protected boolean mIsLastChild;
     protected int mContentShift;
-    private final ExpandableViewState mViewState;
+    @NonNull private final ExpandableViewState mViewState;
     private float mContentTranslation;
     protected boolean mLastInSection;
     protected boolean mFirstInSection;
@@ -187,10 +187,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
      * @param notifyListeners Whether the listener should be informed about the change.
      */
     public void setActualHeight(int actualHeight, boolean notifyListeners) {
-        mActualHeight = actualHeight;
-        updateClipping();
-        if (notifyListeners) {
-            notifyHeightChanged(false  /* needsAnimation */);
+        if (mActualHeight != actualHeight) {
+            mActualHeight = actualHeight;
+            updateClipping();
+            if (notifyListeners) {
+                notifyHeightChanged(false  /* needsAnimation */);
+            }
         }
     }
 
@@ -477,14 +479,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         mWillBeGone = willBeGone;
     }
 
-    public int getMinClipTopAmount() {
-        return mMinClipTopAmount;
-    }
-
-    public void setMinClipTopAmount(int minClipTopAmount) {
-        mMinClipTopAmount = minClipTopAmount;
-    }
-
     @Override
     public void setLayerType(int layerType, Paint paint) {
         // Allow resetting the layerType to NONE regardless of overlappingRendering
@@ -617,6 +611,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public void setActualHeightAnimating(boolean animating) {}
 
+    @NonNull
     protected ExpandableViewState createExpandableViewState() {
         return new ExpandableViewState();
     }
@@ -649,7 +644,12 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         return mViewState;
     }
 
-    @Nullable public ExpandableViewState getViewState() {
+    /**
+     * Get the {@link ExpandableViewState} associated with the view.
+     *
+     * @return the ExpandableView's view state.
+     */
+    @NonNull public ExpandableViewState getViewState() {
         return mViewState;
     }
 

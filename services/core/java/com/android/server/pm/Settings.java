@@ -987,8 +987,7 @@ public final class Settings implements Watchable, Snappable {
                     // Update new package state.
                     .setLastModifiedTime(codePath.lastModified())
                     .setDomainSetId(domainSetId);
-            pkgSetting.setFlags(pkgFlags)
-                    .setPrivateFlags(pkgPrivateFlags);
+            pkgSetting.setPkgFlags(pkgFlags, pkgPrivateFlags);
         } else {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
@@ -1175,15 +1174,15 @@ public final class Settings implements Watchable, Snappable {
                     .setUsesStaticLibrariesVersions(null);
         }
 
-        // These two flags are preserved from the existing PackageSetting. Copied from prior code,
-        // unclear if this is actually necessary.
-        boolean wasExternalStorage = (pkgSetting.getFlags()
-                & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
-        if (wasExternalStorage) {
-            pkgFlags |= ApplicationInfo.FLAG_EXTERNAL_STORAGE;
-        } else {
-            pkgFlags &= ~ApplicationInfo.FLAG_EXTERNAL_STORAGE;
-        }
+        // If what we are scanning is a system (and possibly privileged) package,
+        // then make it so, regardless of whether it was previously installed only
+        // in the data partition. Reset first.
+        int newPkgFlags = pkgSetting.getFlags();
+        newPkgFlags &= ~ApplicationInfo.FLAG_SYSTEM;
+        newPkgFlags |= pkgFlags & ApplicationInfo.FLAG_SYSTEM;
+        // Only set pkgFlags.
+        pkgSetting.setPkgFlags(newPkgFlags, pkgSetting.getPrivateFlags());
+
         boolean wasRequiredForSystemUser = (pkgSetting.getPrivateFlags()
                 & ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER) != 0;
         if (wasRequiredForSystemUser) {
@@ -1191,9 +1190,7 @@ public final class Settings implements Watchable, Snappable {
         } else {
             pkgPrivateFlags &= ~ApplicationInfo.PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER;
         }
-
-        pkgSetting.setFlags(pkgFlags)
-                .setPrivateFlags(pkgPrivateFlags);
+        pkgSetting.setPrivateFlags(pkgPrivateFlags);
     }
 
     /**

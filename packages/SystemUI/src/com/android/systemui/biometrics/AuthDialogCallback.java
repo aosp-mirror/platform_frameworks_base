@@ -47,27 +47,28 @@ public interface AuthDialogCallback {
      * @param reason
      * @param credentialAttestation the HAT received from LockSettingsService upon verification
      */
-    void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation);
+    void onDismissed(@DismissedReason int reason,
+                     @Nullable byte[] credentialAttestation, long requestId);
 
     /**
      * Invoked when the "try again" button is clicked
      */
-    void onTryAgainPressed();
+    void onTryAgainPressed(long requestId);
 
     /**
      * Invoked when the "use password" button is clicked
      */
-    void onDeviceCredentialPressed();
+    void onDeviceCredentialPressed(long requestId);
 
     /**
      * See {@link android.hardware.biometrics.BiometricPrompt.Builder
      * #setReceiveSystemEvents(boolean)}
      * @param event
      */
-    void onSystemEvent(int event);
+    void onSystemEvent(int event, long requestId);
 
     /**
      * Notifies when the dialog has finished animating.
      */
-    void onDialogAnimatedIn();
+    void onDialogAnimatedIn(long requestId);
 }

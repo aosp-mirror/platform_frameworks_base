@@ -43,7 +43,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
     private var hasFaceFeature: Boolean
     private var pendingUnlock: PendingUnlock? = null
     private val listeners = mutableListOf<OnBypassStateChangedListener>()
-    var userHasDeviceEntryIntent: Boolean = false // ie: attempted udfps auth
 
     private val faceAuthEnabledChangedCallback = object : KeyguardStateController.Callback {
         override fun onFaceAuthEnabledChanged() = notifyListeners()
@@ -197,20 +196,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         return false
     }
 
-    /**
-     * If shorter animations should be played when unlocking.
-     */
-    fun canPlaySubtleWindowAnimations(): Boolean {
-        if (bypassEnabled) {
-            return when {
-                statusBarStateController.state != StatusBarState.KEYGUARD -> false
-                qSExpanded -> false
-                else -> true
-            }
-        }
-        return false
-    }
-
     fun onStartedGoingToSleep() {
         pendingUnlock = null
     }
@@ -231,7 +216,6 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
         pw.println("  launchingAffordance: $launchingAffordance")
         pw.println("  qSExpanded: $qSExpanded")
         pw.println("  hasFaceFeature: $hasFaceFeature")
-        pw.println("  userHasDeviceEntryIntent: $userHasDeviceEntryIntent")
     }
 
     /** Registers a listener for bypass state changes. */

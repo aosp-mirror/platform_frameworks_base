@@ -61,10 +61,12 @@ public class BroadcastOptions extends ComponentOptions {
     private String[] mRequireNoneOfPermissions;
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private boolean mRequireCompatChangeEnabled = true;
+    private boolean mIsAlarmBroadcast = false;
     private long mIdForResponseEvent;
     private @DeliveryGroupPolicy int mDeliveryGroupPolicy;
     private @Nullable String mDeliveryGroupMatchingKey;
     private @Nullable IntentFilter mDeliveryGroupMatchingFilter;
+    private boolean mIsDeferUntilActive = false;
 
     /**
      * Change ID which is invalid.
@@ -160,6 +162,13 @@ public class BroadcastOptions extends ComponentOptions {
             "android:broadcast.requireCompatChangeEnabled";
 
     /**
+     * Corresponds to {@link #setAlarmBroadcast(boolean)}
+     * @hide
+     */
+    public static final String KEY_ALARM_BROADCAST =
+            "android:broadcast.is_alarm";
+
+    /**
      * @hide
      * @deprecated Use {@link android.os.PowerExemptionManager#
      * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
@@ -248,6 +257,7 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
         mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
         mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
+        mIsAlarmBroadcast = opts.getBoolean(KEY_ALARM_BROADCAST, false);
     }
 
     /**
@@ -539,6 +549,49 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireCompatChangeEnabled = true;
     }
 
+    /**
+     * When set, this broadcast will be understood as having originated from an
+     * alarm going off.  Only the OS itself can use this option; uses by other
+     * senders will be ignored.
+     * @hide
+     *
+     * @param senderIsAlarm Whether the broadcast is alarm-triggered.
+     */
+    public void setAlarmBroadcast(boolean senderIsAlarm) {
+        mIsAlarmBroadcast = senderIsAlarm;
+    }
+
+    /**
+     * Did this broadcast originate from an alarm triggering?
+     * @return true if this broadcast is an alarm message, false otherwise
+     * @hide
+     */
+    public boolean isAlarmBroadcast() {
+        return mIsAlarmBroadcast;
+    }
+
+    /**
+     * Did this broadcast originate from a push message from the server?
+     *
+     * @return true if this broadcast is a push message, false otherwise.
+     * @hide
+     */
+    public boolean isPushMessagingBroadcast() {
+        return mTemporaryAppAllowlistReasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING;
+    }
+
+    /**
+     * Did this broadcast originate from a push message from the server which was over the allowed
+     * quota?
+     *
+     * @return true if this broadcast is a push message over quota, false otherwise.
+     * @hide
+     */
+    public boolean isPushMessagingOverQuotaBroadcast() {
+        return mTemporaryAppAllowlistReasonCode
+                == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA;
+    }
+
     /** {@hide} */
     public long getRequireCompatChangeId() {
         return mRequireCompatChangeId;
@@ -636,6 +689,41 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Sets whether the broadcast should not run until the process is in an active process state
+     * (ie, a process exists for the app and the app is not in a cached process state).
+     *
+     * Whether an app's process state is considered active is independent of its standby bucket.
+     *
+     * A broadcast that is deferred until the process is active will not execute until the process
+     * is brought to an active state by some other action, like a job, alarm, or service binding. As
+     * a result, the broadcast may be delayed indefinitely. This deferral only applies to runtime
+     * registered receivers of a broadcast. Any manifest receivers will run immediately, similar to
+     * how a manifest receiver would start a new process in order to run a broadcast receiver.
+     *
+     * Ordered broadcasts, alarm broadcasts, interactive broadcasts, and manifest broadcasts are
+     * never deferred.
+     *
+     * Unordered broadcasts and unordered broadcasts with completion callbacks may be
+     * deferred. Completion callbacks for broadcasts deferred until active are
+     * best-effort. Completion callbacks will run when all eligible processes have finished
+     * executing the broadcast. Processes in inactive process states that defer the broadcast are
+     * not considered eligible and may not execute the broadcast prior to the completion callback.
+     *
+     * @hide
+     */
+    @SystemApi
+    public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
+        mIsDeferUntilActive = shouldDefer;
+        return this;
+    }
+
+    /** @hide */
+    @SystemApi
+    public boolean isDeferUntilActive() {
+        return mIsDeferUntilActive;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -651,6 +739,9 @@ public class BroadcastOptions extends ComponentOptions {
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_TYPE, mTemporaryAppAllowlistType);
             b.putInt(KEY_TEMPORARY_APP_ALLOWLIST_REASON_CODE, mTemporaryAppAllowlistReasonCode);
             b.putString(KEY_TEMPORARY_APP_ALLOWLIST_REASON, mTemporaryAppAllowlistReason);
+        }
+        if (mIsAlarmBroadcast) {
+            b.putBoolean(KEY_ALARM_BROADCAST, true);
         }
         if (mMinManifestReceiverApiLevel != 0) {
             b.putInt(KEY_MIN_MANIFEST_RECEIVER_API_LEVEL, mMinManifestReceiverApiLevel);

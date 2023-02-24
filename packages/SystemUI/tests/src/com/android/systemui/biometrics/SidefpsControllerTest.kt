@@ -45,6 +45,8 @@ import android.view.View
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import android.view.WindowMetrics
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
@@ -62,7 +64,6 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.anyInt
@@ -72,6 +73,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when` as whenEver
 import org.mockito.junit.MockitoJUnit
 
 private const val DISPLAY_ID = 2
@@ -126,15 +128,15 @@ class SidefpsControllerTest : SysuiTestCase() {
         context.addMockSystemService(DisplayManager::class.java, displayManager)
         context.addMockSystemService(WindowManager::class.java, windowManager)
 
-        `when`(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sidefpsView)
-        `when`(sidefpsView.findViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
+        whenEver(layoutInflater.inflate(R.layout.sidefps_view, null, false)).thenReturn(sidefpsView)
+        whenEver(sidefpsView.findViewById<LottieAnimationView>(eq(R.id.sidefps_animation)))
             .thenReturn(mock(LottieAnimationView::class.java))
         with(mock(ViewPropertyAnimator::class.java)) {
-            `when`(sidefpsView.animate()).thenReturn(this)
-            `when`(alpha(anyFloat())).thenReturn(this)
-            `when`(setStartDelay(anyLong())).thenReturn(this)
-            `when`(setDuration(anyLong())).thenReturn(this)
-            `when`(setListener(any())).thenAnswer {
+            whenEver(sidefpsView.animate()).thenReturn(this)
+            whenEver(alpha(anyFloat())).thenReturn(this)
+            whenEver(setStartDelay(anyLong())).thenReturn(this)
+            whenEver(setDuration(anyLong())).thenReturn(this)
+            whenEver(setListener(any())).thenAnswer {
                 (it.arguments[0] as Animator.AnimatorListener)
                     .onAnimationEnd(mock(Animator::class.java))
                 this
@@ -177,7 +179,7 @@ class SidefpsControllerTest : SysuiTestCase() {
         displayBounds = Rect(0, 0, displayWidth, displayHeight)
         var locations = listOf(sensorLocation)
 
-        `when`(fingerprintManager.sensorPropertiesInternal).thenReturn(
+        whenEver(fingerprintManager.sensorPropertiesInternal).thenReturn(
             listOf(
                 FingerprintSensorPropertiesInternal(
                     SENSOR_ID,
@@ -196,12 +198,12 @@ class SidefpsControllerTest : SysuiTestCase() {
         displayInfo.initInfo()
         val dmGlobal = mock(DisplayManagerGlobal::class.java)
         val display = Display(dmGlobal, DISPLAY_ID, displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS)
-        `when`(dmGlobal.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(displayInfo)
-        `when`(windowManager.defaultDisplay).thenReturn(display)
-        `when`(windowManager.maximumWindowMetrics).thenReturn(
+        whenEver(dmGlobal.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(displayInfo)
+        whenEver(windowManager.defaultDisplay).thenReturn(display)
+        whenEver(windowManager.maximumWindowMetrics).thenReturn(
                 WindowMetrics(displayBounds, WindowInsets.CONSUMED)
         )
-        `when`(windowManager.currentWindowMetrics).thenReturn(
+        whenEver(windowManager.currentWindowMetrics).thenReturn(
             WindowMetrics(displayBounds, windowInsets)
         )
 
@@ -277,13 +279,13 @@ class SidefpsControllerTest : SysuiTestCase() {
 
     @Test
     fun testShowsForMostSettings() = testWithDisplay {
-        `when`(activityTaskManager.getTasks(anyInt())).thenReturn(listOf(fpEnrollTask()))
+        whenEver(activityTaskManager.getTasks(anyInt())).thenReturn(listOf(fpEnrollTask()))
         testIgnoredFor(REASON_AUTH_SETTINGS, ignored = false)
     }
 
     @Test
     fun testIgnoredForVerySpecificSettings() = testWithDisplay {
-        `when`(activityTaskManager.getTasks(anyInt())).thenReturn(listOf(fpSettingsTask()))
+        whenEver(activityTaskManager.getTasks(anyInt())).thenReturn(listOf(fpSettingsTask()))
         testIgnoredFor(REASON_AUTH_SETTINGS)
     }
 
@@ -423,6 +425,58 @@ class SidefpsControllerTest : SysuiTestCase() {
         verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
         assertThat(overlayViewParamsCaptor.value.x).isEqualTo(displayWidth - boundsWidth)
         assertThat(overlayViewParamsCaptor.value.y).isEqualTo(sensorLocation.sensorLocationY)
+    }
+
+    @Test
+    fun hasSideFpsSensor_withSensorProps_returnsTrue() = testWithDisplay {
+        // By default all those tests assume the side fps sensor is available.
+
+        assertThat(fingerprintManager.hasSideFpsSensor()).isTrue()
+    }
+
+    @Test
+    fun hasSideFpsSensor_withoutSensorProps_returnsFalse() {
+        whenEver(fingerprintManager.sensorPropertiesInternal).thenReturn(null)
+
+        assertThat(fingerprintManager.hasSideFpsSensor()).isFalse()
+    }
+
+    @Test
+    fun testLayoutParams_hasNoMoveAnimationWindowFlag() = testWithDisplay(
+        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
+    ) {
+        sideFpsController.overlayOffsets = sensorLocation
+        sideFpsController.updateOverlayParams(
+            windowManager.defaultDisplay,
+            indicatorBounds
+        )
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+        val lpFlags = overlayViewParamsCaptor.value.privateFlags
+
+        assertThat((lpFlags and PRIVATE_FLAG_NO_MOVE_ANIMATION) != 0).isTrue()
+    }
+
+    @Test
+    fun testLayoutParams_hasTrustedOverlayWindowFlag() = testWithDisplay(
+        deviceConfig = DeviceConfig.Y_ALIGNED_UNFOLDED
+    ) {
+        sideFpsController.overlayOffsets = sensorLocation
+        sideFpsController.updateOverlayParams(
+            windowManager.defaultDisplay,
+            indicatorBounds
+        )
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager).updateViewLayout(any(), overlayViewParamsCaptor.capture())
+
+        val lpFlags = overlayViewParamsCaptor.value.privateFlags
+
+        assertThat((lpFlags and PRIVATE_FLAG_TRUSTED_OVERLAY) != 0).isTrue()
     }
 }
 

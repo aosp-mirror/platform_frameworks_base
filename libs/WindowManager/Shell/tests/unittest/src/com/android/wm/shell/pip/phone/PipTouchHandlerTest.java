@@ -34,10 +34,12 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipKeepClearAlgorithm;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +80,9 @@ public class PipTouchHandlerTest extends ShellTestCase {
     private PipUiEventLogger mPipUiEventLogger;
 
     @Mock
+    private ShellInit mShellInit;
+
+    @Mock
     private ShellExecutor mMainExecutor;
 
     private PipBoundsState mPipBoundsState;
@@ -100,15 +105,16 @@ public class PipTouchHandlerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mPipBoundsState = new PipBoundsState(mContext);
         mPipSnapAlgorithm = new PipSnapAlgorithm();
-        mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState, mPipSnapAlgorithm);
+        mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState, mPipSnapAlgorithm,
+                new PipKeepClearAlgorithm() {});
         PipMotionHelper pipMotionHelper = new PipMotionHelper(mContext, mPipBoundsState,
                 mPipTaskOrganizer, mPhonePipMenuController, mPipSnapAlgorithm,
                 mMockPipTransitionController, mFloatingContentCoordinator);
-        mPipTouchHandler = new PipTouchHandler(mContext, mPhonePipMenuController,
-                mPipBoundsAlgorithm, mPipBoundsState, mPipTaskOrganizer,
-                pipMotionHelper, mFloatingContentCoordinator, mPipUiEventLogger,
-                mMainExecutor);
-        mPipTouchHandler.init();
+        mPipTouchHandler = new PipTouchHandler(mContext, mShellInit, mPhonePipMenuController,
+                mPipBoundsAlgorithm, mPipBoundsState, mPipTaskOrganizer, pipMotionHelper,
+                mFloatingContentCoordinator, mPipUiEventLogger, mMainExecutor);
+        // We aren't actually using ShellInit, so just call init directly
+        mPipTouchHandler.onInit();
         mMotionHelper = Mockito.spy(mPipTouchHandler.getMotionHelper());
         mPipResizeGestureHandler = Mockito.spy(mPipTouchHandler.getPipResizeGestureHandler());
         mPipTouchHandler.setPipMotionHelper(mMotionHelper);
@@ -130,6 +136,11 @@ public class PipTouchHandlerTest extends ShellTestCase {
         mFromShelfAdjustment = false;
         mDisplayRotation = 0;
         mImeHeight = 100;
+    }
+
+    @Test
+    public void instantiate_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test

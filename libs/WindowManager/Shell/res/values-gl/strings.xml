@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Burbulla"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Xestionar"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Ignorouse a burbulla."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Toca o botón para reiniciar esta aplicación e abrila en pantalla completa."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Toca o botón para reiniciar esta aplicación e gozar dunha mellor visualización."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Tes problemas coa cámara?\nToca para reaxustala"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Non se solucionaron os problemas?\nToca para reverter o seu tratamento"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Non hai problemas coa cámara? Tocar para ignorar."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Algunhas aplicacións funcionan mellor en modo vertical"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Proba unha destas opcións para sacar o máximo proveito do espazo da pantalla"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"Xira o dispositivo para ver o contido en pantalla completa"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Toca dúas veces a carón dunha aplicación para cambiala de posición"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Ver e facer máis"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Arrastra outra aplicación para usar a pantalla dividida"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Toca dúas veces fóra da aplicación para cambiala de posición"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Entendido"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Despregar para obter máis información."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Maximizar"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Minimizar"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Pechar"</string>
 </resources>

@@ -573,5 +573,10 @@ public class PersistableBundleUtils {
 
             return isEqual(mBundle, other.mBundle);
         }
+
+        @Override
+        public String toString() {
+            return mBundle.toString();
+        }
     }
 }

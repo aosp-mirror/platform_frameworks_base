@@ -93,6 +93,7 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -254,6 +255,7 @@ public class TrustManagerService extends SystemService {
             return;
         }
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            checkNewAgents();
             mPackageMonitor.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
             mReceiver.register(mContext);
             mLockPatternUtils.registerStrongAuthTracker(mStrongAuthTracker);
@@ -262,7 +264,7 @@ public class TrustManagerService extends SystemService {
             refreshAgentList(UserHandle.USER_ALL);
             refreshDeviceLockedForUser(UserHandle.USER_ALL);
         } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
-            maybeEnableFactoryTrustAgents(mLockPatternUtils, UserHandle.USER_SYSTEM);
+            maybeEnableFactoryTrustAgents(UserHandle.USER_SYSTEM);
         }
     }
 
@@ -600,9 +602,12 @@ public class TrustManagerService extends SystemService {
         synchronized (mUserTrustState) {
             wasTrusted = (mUserTrustState.get(userId) == TrustState.TRUSTED);
             wasTrustable = (mUserTrustState.get(userId) == TrustState.TRUSTABLE);
+            boolean isAutomotive = getContext().getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE);
             boolean renewingTrust = wasTrustable && (
                     (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0);
-            boolean canMoveToTrusted = alreadyUnlocked || isFromUnlock || renewingTrust;
+            boolean canMoveToTrusted =
+                    alreadyUnlocked || isFromUnlock || renewingTrust || isAutomotive;
             boolean upgradingTrustForCurrentUser = (userId == mCurrentUser);
 
             if (trustedByAtLeastOneAgent && wasTrusted) {
@@ -1083,7 +1088,7 @@ public class TrustManagerService extends SystemService {
         return new ComponentName(resolveInfo.serviceInfo.packageName, resolveInfo.serviceInfo.name);
     }
 
-    private void maybeEnableFactoryTrustAgents(LockPatternUtils utils, int userId) {
+    private void maybeEnableFactoryTrustAgents(int userId) {
         if (0 != Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.TRUST_AGENTS_INITIALIZED, 0, userId)) {
             return;
@@ -1100,8 +1105,7 @@ public class TrustManagerService extends SystemService {
         } else { // A default agent is not set; perform regular trust agent discovery
             for (ResolveInfo resolveInfo : resolveInfos) {
                 ComponentName componentName = getComponentName(resolveInfo);
-                int applicationInfoFlags = resolveInfo.serviceInfo.applicationInfo.flags;
-                if ((applicationInfoFlags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                if (!isSystemTrustAgent(resolveInfo)) {
                     Log.i(TAG, "Leaving agent " + componentName + " disabled because package "
                             + "is not a system package.");
                     continue;
@@ -1110,11 +1114,86 @@ public class TrustManagerService extends SystemService {
             }
         }
 
-        List<ComponentName> previouslyEnabledAgents = utils.getEnabledTrustAgents(userId);
-        discoveredAgents.addAll(previouslyEnabledAgents);
-        utils.setEnabledTrustAgents(discoveredAgents, userId);
+        enableNewAgents(discoveredAgents, userId);
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.TRUST_AGENTS_INITIALIZED, 1, userId);
+    }
+
+    private void checkNewAgents() {
+        for (UserInfo userInfo : mUserManager.getAliveUsers()) {
+            checkNewAgentsForUser(userInfo.id);
+        }
+    }
+
+    /**
+     * Checks for any new trust agents that become available after the first boot, add them to the
+     * list of known agents, and enable them if they should be enabled by default.
+     */
+    private void checkNewAgentsForUser(int userId) {
+        // When KNOWN_TRUST_AGENTS_INITIALIZED is not set, only update the known agent list but do
+        // not enable any agent.
+        // These agents will be enabled by #maybeEnableFactoryTrustAgents if this is the first time
+        // that this device boots and TRUST_AGENTS_INITIALIZED is not already set.
+        // Otherwise, these agents may have been manually disabled by the user, and we should not
+        // re-enable them.
+        if (0 == Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED, 0, userId)) {
+            initializeKnownAgents(userId);
+            return;
+        }
+
+        List<ComponentName> knownAgents = mLockPatternUtils.getKnownTrustAgents(userId);
+        List<ResolveInfo> agentInfoList = resolveAllowedTrustAgents(mContext.getPackageManager(),
+                userId);
+        ArraySet<ComponentName> newAgents = new ArraySet<>(agentInfoList.size());
+        ArraySet<ComponentName> newSystemAgents = new ArraySet<>(agentInfoList.size());
+
+        for (ResolveInfo agentInfo : agentInfoList) {
+            ComponentName agentComponentName = getComponentName(agentInfo);
+            if (knownAgents.contains(agentComponentName)) {
+                continue;
+            }
+            newAgents.add(agentComponentName);
+            if (isSystemTrustAgent(agentInfo)) {
+                newSystemAgents.add(agentComponentName);
+            }
+        }
+
+        if (newAgents.isEmpty()) {
+            return;
+        }
+
+        ArraySet<ComponentName> updatedKnowAgents = new ArraySet<>(knownAgents);
+        updatedKnowAgents.addAll(newAgents);
+        mLockPatternUtils.setKnownTrustAgents(updatedKnowAgents, userId);
+
+        // Do not auto enable new trust agents when the default agent is set
+        boolean hasDefaultAgent = getDefaultFactoryTrustAgent(mContext) != null;
+        if (!hasDefaultAgent) {
+            enableNewAgents(newSystemAgents, userId);
+        }
+    }
+
+    private void enableNewAgents(Collection<ComponentName> agents, int userId) {
+        if (agents.isEmpty()) {
+            return;
+        }
+
+        ArraySet<ComponentName> agentsToEnable = new ArraySet<>(agents);
+        agentsToEnable.addAll(mLockPatternUtils.getEnabledTrustAgents(userId));
+        mLockPatternUtils.setEnabledTrustAgents(agentsToEnable, userId);
+    }
+
+    private void initializeKnownAgents(int userId) {
+        List<ResolveInfo> agentInfoList = resolveAllowedTrustAgents(mContext.getPackageManager(),
+                userId);
+        ArraySet<ComponentName> agentComponentNames = new ArraySet<>(agentInfoList.size());
+        for (ResolveInfo agentInfo : agentInfoList) {
+            agentComponentNames.add(getComponentName(agentInfo));
+        }
+        mLockPatternUtils.setKnownTrustAgents(agentComponentNames, userId);
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED, 1, userId);
     }
 
     /**
@@ -1150,6 +1229,10 @@ public class TrustManagerService extends SystemService {
             allowedAgents.add(resolveInfo);
         }
         return allowedAgents;
+    }
+
+    private static boolean isSystemTrustAgent(ResolveInfo agentInfo) {
+        return (agentInfo.serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     // Agent dispatch and aggregation
@@ -1211,7 +1294,7 @@ public class TrustManagerService extends SystemService {
             if (info.userId == userId
                     && info.agent.isTrusted()
                     && info.agent.shouldDisplayTrustGrantedMessage()
-                    && !TextUtils.isEmpty(info.agent.getMessage())) {
+                    && info.agent.getMessage() != null) {
                 trustGrantedMessages.add(info.agent.getMessage().toString());
             }
         }
@@ -1826,7 +1909,13 @@ public class TrustManagerService extends SystemService {
         }
 
         @Override
+        public void onPackageAdded(String packageName, int uid) {
+            checkNewAgentsForUser(UserHandle.getUserId(uid));
+        }
+
+        @Override
         public boolean onPackageChanged(String packageName, int uid, String[] components) {
+            checkNewAgentsForUser(UserHandle.getUserId(uid));
             // We're interested in all changes, even if just some components get enabled / disabled.
             return true;
         }
@@ -1861,7 +1950,7 @@ public class TrustManagerService extends SystemService {
                     action)) {
                 int userId = getUserId(intent);
                 if (userId > 0) {
-                    maybeEnableFactoryTrustAgents(mLockPatternUtils, userId);
+                    maybeEnableFactoryTrustAgents(userId);
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                 int userId = getUserId(intent);

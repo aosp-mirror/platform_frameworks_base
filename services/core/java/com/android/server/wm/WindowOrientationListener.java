@@ -296,9 +296,9 @@ public abstract class WindowOrientationListener {
 
     /**
      * Whether the device is in the lock screen.
-     * @return returns true if the screen is locked. Otherwise, returns false.
+     * @return returns true if the key guard is showing on the lock screen.
      */
-    public abstract boolean isKeyguardLocked();
+    public abstract boolean isKeyguardShowingAndNotOccluded();
 
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
@@ -1151,7 +1151,7 @@ public abstract class WindowOrientationListener {
                     FrameworkStatsLog.DEVICE_ROTATED__ROTATION_EVENT_TYPE__ACTUAL_EVENT);
 
             if (isRotationResolverEnabled()) {
-                if (isKeyguardLocked()) {
+                if (isKeyguardShowingAndNotOccluded()) {
                     if (mLastRotationResolution != ROTATION_UNSET
                             && SystemClock.uptimeMillis() - mLastRotationResolutionTimeStamp
                             < mRotationMemorizationTimeoutMillis) {

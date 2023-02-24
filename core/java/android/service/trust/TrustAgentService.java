@@ -141,7 +141,9 @@ public class TrustAgentService extends Service {
      *
      * Without this flag, the message passed to {@code grantTrust} is only used for debugging
      * purposes. With the flag, it may be displayed to the user as the reason why the device is
-     * unlocked.
+     * unlocked. If this flag isn't set OR the message is set to null, the device will display
+     * its own default message for trust granted. If the TrustAgent intentionally doesn't want to
+     * show any message, then it can set this flag AND set the message to an empty string.
      */
     public static final int FLAG_GRANT_TRUST_DISPLAY_MESSAGE = 1 << 3;
 

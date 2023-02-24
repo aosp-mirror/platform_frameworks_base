@@ -16,6 +16,10 @@
 
 package com.android.systemui.media
 
+import android.bluetooth.BluetoothLeBroadcast
+import android.bluetooth.BluetoothLeBroadcastMetadata
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
@@ -25,8 +29,12 @@ import android.media.session.MediaSession
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
+import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
@@ -42,6 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.any
 import org.mockito.Mockito.mock
@@ -50,8 +59,8 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
 private const val KEY_OLD = "TEST_KEY_OLD"
@@ -60,6 +69,8 @@ private const val SESSION_KEY = "SESSION_KEY"
 private const val DEVICE_ID = "DEVICE_ID"
 private const val DEVICE_NAME = "DEVICE_NAME"
 private const val REMOTE_DEVICE_NAME = "REMOTE_DEVICE_NAME"
+private const val BROADCAST_APP_NAME = "BROADCAST_APP_NAME"
+private const val NORMAL_APP_NAME = "NORMAL_APP_NAME"
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -83,6 +94,12 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var controller: MediaController
     @Mock private lateinit var playbackInfo: PlaybackInfo
     @Mock private lateinit var configurationController: ConfigurationController
+    @Mock private lateinit var bluetoothLeBroadcast: BluetoothLeBroadcast
+    @Mock private lateinit var localBluetoothProfileManager: LocalBluetoothProfileManager
+    @Mock private lateinit var localBluetoothLeBroadcast: LocalBluetoothLeBroadcast
+    @Mock private lateinit var packageManager: PackageManager
+    @Mock private lateinit var applicationInfo: ApplicationInfo
+    private lateinit var localBluetoothManager: LocalBluetoothManager
     private lateinit var session: MediaSession
     private lateinit var mediaData: MediaData
     @JvmField @Rule val mockito = MockitoJUnit.rule()
@@ -91,12 +108,15 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun setUp() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
         fakeBgExecutor = FakeExecutor(FakeSystemClock())
+        localBluetoothManager = mDependency.injectMockDependency(LocalBluetoothManager::class.java)
         manager = MediaDeviceManager(
+                context,
                 controllerFactory,
                 lmmFactory,
                 mr2,
                 muteAwaitFactory,
                 configurationController,
+                localBluetoothManager,
                 fakeFgExecutor,
                 fakeBgExecutor,
                 dumpster
@@ -119,6 +139,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 token = session.sessionToken)
         whenever(controllerFactory.create(session.sessionToken))
                 .thenReturn(controller)
+        setupLeAudioConfiguration(false)
     }
 
     @After
@@ -381,9 +402,10 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
-        // THEN the device is disabled
+        // THEN the device is disabled and name is set to null
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
     }
 
     @Test
@@ -400,9 +422,10 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         deviceCallback.onSelectedDeviceStateChanged(device, 1)
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
-        // THEN the device is disabled
+        // THEN the device is disabled and name is set to null
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
     }
 
     @Test
@@ -419,9 +442,24 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
         fakeBgExecutor.runAllReady()
         fakeFgExecutor.runAllReady()
-        // THEN the device is disabled
+        // THEN the device is disabled and name is set to null
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
+    }
+
+    @Test
+    fun mr2ReturnsRouteWithNullName_useLocalDeviceName() {
+        // GIVEN that MR2Manager returns a routing session that does not have a name
+        whenever(route.name).thenReturn(null)
+        // WHEN a notification is added
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        // THEN the device is enabled and uses the current connected device name
+        val data = captureDeviceData(KEY)
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.enabled).isTrue()
     }
 
     @Test
@@ -545,7 +583,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun testRemotePlaybackDeviceOverride() {
         whenever(route.name).thenReturn(DEVICE_NAME)
-        val deviceData = MediaDeviceData(false, null, REMOTE_DEVICE_NAME, null)
+        val deviceData = MediaDeviceData(false, null, REMOTE_DEVICE_NAME, null,
+                showBroadcastButton = false)
         val mediaDataWithDevice = mediaData.copy(device = deviceData)
 
         // GIVEN media data that already has a device set
@@ -560,10 +599,95 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         verify(lmm, never()).registerCallback(any())
     }
 
+    @Test
+    fun onBroadcastStarted_currentMediaDeviceDataIsBroadcasting() {
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(true)
+        setupBroadcastPackage(BROADCAST_APP_NAME)
+        broadcastCallback.onBroadcastStarted(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isTrue()
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(context.getString(
+                R.string.broadcasting_description_is_broadcasting))
+    }
+
+    @Test
+    fun onBroadcastStarted_currentMediaDeviceDataIsNotBroadcasting() {
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(true)
+        setupBroadcastPackage(NORMAL_APP_NAME)
+        broadcastCallback.onBroadcastStarted(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isTrue()
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(BROADCAST_APP_NAME)
+    }
+
+    @Test
+    fun onBroadcastStopped_bluetoothLeBroadcastIsDisabledAndBroadcastingButtonIsGone() {
+        val broadcastCallback = setupBroadcastCallback()
+        setupLeAudioConfiguration(false)
+        broadcastCallback.onBroadcastStopped(1, 1)
+
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        val data = captureDeviceData(KEY)
+        assertThat(data.showBroadcastButton).isFalse()
+    }
+
     fun captureCallback(): LocalMediaManager.DeviceCallback {
         val captor = ArgumentCaptor.forClass(LocalMediaManager.DeviceCallback::class.java)
         verify(lmm).registerCallback(captor.capture())
         return captor.getValue()
+    }
+
+    fun setupBroadcastCallback(): BluetoothLeBroadcast.Callback {
+        val callback: BluetoothLeBroadcast.Callback = object : BluetoothLeBroadcast.Callback {
+            override fun onBroadcastStarted(reason: Int, broadcastId: Int) {}
+            override fun onBroadcastStartFailed(reason: Int) {}
+            override fun onBroadcastStopped(reason: Int, broadcastId: Int) {}
+            override fun onBroadcastStopFailed(reason: Int) {}
+            override fun onPlaybackStarted(reason: Int, broadcastId: Int) {}
+            override fun onPlaybackStopped(reason: Int, broadcastId: Int) {}
+            override fun onBroadcastUpdated(reason: Int, broadcastId: Int) {}
+            override fun onBroadcastUpdateFailed(reason: Int, broadcastId: Int) {}
+            override fun onBroadcastMetadataChanged(
+                broadcastId: Int,
+                metadata: BluetoothLeBroadcastMetadata
+            ) {}
+        }
+
+        bluetoothLeBroadcast.registerCallback(fakeFgExecutor, callback)
+        return callback
+    }
+
+    fun setupLeAudioConfiguration(isLeAudio: Boolean) {
+        whenever(localBluetoothManager.profileManager).thenReturn(localBluetoothProfileManager)
+        whenever(localBluetoothProfileManager.leAudioBroadcastProfile)
+                .thenReturn(localBluetoothLeBroadcast)
+        whenever(localBluetoothLeBroadcast.isEnabled(any())).thenReturn(isLeAudio)
+        whenever(localBluetoothLeBroadcast.appSourceName).thenReturn(BROADCAST_APP_NAME)
+    }
+
+    fun setupBroadcastPackage(currentName: String) {
+        whenever(lmm.packageName).thenReturn(PACKAGE)
+        whenever(packageManager.getApplicationInfo(eq(PACKAGE), anyInt()))
+                .thenReturn(applicationInfo)
+        whenever(packageManager.getApplicationLabel(applicationInfo)).thenReturn(currentName)
+        context.setMockPackageManager(packageManager)
     }
 
     fun captureDeviceData(key: String, oldKey: String? = null): MediaDeviceData {

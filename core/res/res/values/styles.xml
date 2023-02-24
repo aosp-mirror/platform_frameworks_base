@@ -85,6 +85,9 @@ please see styles_device_defaults.xml.
         <item name="activityOpenExitAnimation">@anim/activity_open_exit</item>
         <item name="activityCloseEnterAnimation">@anim/activity_close_enter</item>
         <item name="activityCloseExitAnimation">@anim/activity_close_exit</item>
+        <item name="dreamActivityCloseExitAnimation">@anim/dream_activity_close_exit</item>
+        <item name="dreamActivityOpenEnterAnimation">@anim/dream_activity_open_enter</item>
+        <item name="dreamActivityOpenExitAnimation">@anim/dream_activity_open_exit</item>
         <item name="taskOpenEnterAnimation">@anim/task_open_enter</item>
         <item name="taskOpenExitAnimation">@anim/task_open_exit</item>
         <item name="launchTaskBehindTargetAnimation">@anim/launch_task_behind_target</item>

@@ -185,7 +185,7 @@ public final class SearchTarget implements Parcelable {
         mShortcutInfo = shortcutInfo;
         mAppWidgetProviderInfo = appWidgetProviderInfo;
         mSliceUri = sliceUri;
-        mExtras = extras;
+        mExtras = extras != null ? extras : new Bundle();
 
         int published = 0;
         if (mSearchAction != null) published++;

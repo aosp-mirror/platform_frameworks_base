@@ -44,7 +44,7 @@ struct PidDmaInfo {
 static jobjectArray KernelAllocationStats_getDmabufAllocations(JNIEnv *env, jobject) {
     std::vector<DmaBuffer> buffers;
 
-    if (!dmabufinfo::ReadDmaBufs(&buffers)) {
+    if (!dmabufinfo::ReadProcfsDmaBufs(&buffers)) {
         return nullptr;
     }
 

@@ -48,8 +48,6 @@ import javax.inject.Inject;
 /** Quick settings tile: Location **/
 public class LocationTile extends QSTileImpl<BooleanState> {
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_location);
-
     private final LocationController mController;
     private final KeyguardStateController mKeyguard;
     private final Callback mCallback = new Callback();
@@ -119,8 +117,8 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         if (state.disabledByPolicy == false) {
             checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_LOCATION);
         }
-        state.icon = mIcon;
-        state.slash.isSlashed = !state.value;
+        state.icon = ResourceIcon.get(state.value
+                ? R.drawable.qs_location_icon_on : R.drawable.qs_location_icon_off);
         state.label = mContext.getString(R.string.quick_settings_location_label);
         state.contentDescription = state.label;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;

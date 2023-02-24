@@ -675,9 +675,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean hasSystemAlertWindowPermission(int callingUid, int callingPid,
             String callingPackage);
 
-    /** Called when the device is waking up */
-    public abstract void notifyWakingUp();
-
     /**
      * Registers a callback which can intercept activity starts.
      * @throws IllegalArgumentException if duplicate ids are provided

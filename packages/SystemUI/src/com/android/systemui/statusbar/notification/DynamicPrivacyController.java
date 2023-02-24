@@ -80,7 +80,7 @@ public class DynamicPrivacyController implements KeyguardStateController.Callbac
 
     @VisibleForTesting
     boolean isDynamicPrivacyEnabled() {
-        return !mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
+        return mLockscreenUserManager.userAllowsNotificationsInPublic(
                 mLockscreenUserManager.getCurrentUserId());
     }
 

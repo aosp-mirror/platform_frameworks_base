@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"বাবল"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"ম্যানেজ করুন"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"বাবল বাতিল করা হয়েছে।"</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন ও \'ফুল-স্ক্রিন\' মোড ব্যবহার করুন।"</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"আরও ভাল ভিউয়ের জন্য এই অ্যাপ রিস্টার্ট করতে ট্যাপ করুন।"</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"ক্যামেরা সংক্রান্ত সমস্যা?\nরিফিট করতে ট্যাপ করুন"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"এখনও সমাধান হয়নি?\nরিভার্ট করার জন্য ট্যাপ করুন"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ক্যামেরা সংক্রান্ত সমস্যা নেই? বাতিল করতে ট্যাপ করুন।"</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"কিছু অ্যাপ \'পোর্ট্রেট\' মোডে সবচেয়ে ভাল কাজ করে"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"আপনার স্পেস সবচেয়ে ভালভাবে কাজে লাগাতে এইসব বিকল্পের মধ্যে কোনও একটি ব্যবহার করে দেখুন"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"\'ফুল স্ক্রিন\' মোডে যেতে ডিভাইস ঘোরান"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"কোনও অ্যাপের পাশে ডবল ট্যাপ করে সেটির জায়গা পরিবর্তন করুন"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"দেখুন ও আরও অনেক কিছু করুন"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"স্প্লিট স্ক্রিনের জন্য অন্য অ্যাপে টেনে আনুন"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"কোনও অ্যাপের স্থান পরিবর্তন করতে তার বাইরে ডবল ট্যাপ করুন"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"বুঝেছি"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"আরও তথ্যের জন্য বড় করুন।"</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"বড় করুন"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"ছোট করুন"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"বন্ধ করুন"</string>
 </resources>

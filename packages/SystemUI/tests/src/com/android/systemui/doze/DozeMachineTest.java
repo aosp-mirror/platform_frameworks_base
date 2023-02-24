@@ -21,7 +21,9 @@ import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_AOD_DOCKED;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSE_DONE;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSING;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_PULSING_BRIGHT;
 import static com.android.systemui.doze.DozeMachine.State.DOZE_REQUEST_PULSE;
+import static com.android.systemui.doze.DozeMachine.State.DOZE_SUSPEND_TRIGGERS;
 import static com.android.systemui.doze.DozeMachine.State.FINISH;
 import static com.android.systemui.doze.DozeMachine.State.INITIALIZED;
 import static com.android.systemui.doze.DozeMachine.State.UNINITIALIZED;
@@ -39,6 +41,8 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.UiModeManager;
+import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.testing.AndroidTestingRunner;
 import android.testing.UiThreadTest;
@@ -50,7 +54,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.wakelock.WakeLockFake;
 
 import org.junit.Before;
@@ -70,9 +73,12 @@ public class DozeMachineTest extends SysuiTestCase {
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
     private DozeLog mDozeLog;
-    @Mock private DockManager mDockManager;
+    @Mock
+    private DockManager mDockManager;
     @Mock
     private DozeHost mHost;
+    @Mock
+    private UiModeManager mUiModeManager;
     private DozeServiceFake mServiceFake;
     private WakeLockFake mWakeLockFake;
     private AmbientDisplayConfiguration mConfigMock;
@@ -89,7 +95,7 @@ public class DozeMachineTest extends SysuiTestCase {
         when(mDockManager.isHidden()).thenReturn(false);
 
         mMachine = new DozeMachine(mServiceFake, mConfigMock, mWakeLockFake,
-                mWakefulnessLifecycle, mock(BatteryController.class), mDozeLog, mDockManager,
+                mWakefulnessLifecycle, mUiModeManager, mDozeLog, mDockManager,
                 mHost, new DozeMachine.Part[]{mPartMock});
     }
 
@@ -442,7 +448,7 @@ public class DozeMachineTest extends SysuiTestCase {
 
     @Test
     public void testWakeUp_wakesUp() {
-        mMachine.wakeUp();
+        mMachine.wakeUp(DozeLog.REASON_SENSOR_PICKUP);
 
         assertTrue(mServiceFake.requestedWakeup);
     }
@@ -461,5 +467,65 @@ public class DozeMachineTest extends SysuiTestCase {
         when(dozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
 
         assertEquals(Display.STATE_ON, DOZE_REQUEST_PULSE.screenState(dozeParameters));
+    }
+
+    @Test
+    public void testTransitionToInitialized_carModeIsEnabled() {
+        when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
+        mMachine.requestState(INITIALIZED);
+
+        verify(mPartMock).transitionTo(UNINITIALIZED, INITIALIZED);
+        verify(mPartMock).transitionTo(INITIALIZED, DOZE_SUSPEND_TRIGGERS);
+        assertEquals(DOZE_SUSPEND_TRIGGERS, mMachine.getState());
+    }
+
+    @Test
+    public void testTransitionToFinish_carModeIsEnabled() {
+        when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
+        mMachine.requestState(INITIALIZED);
+        mMachine.requestState(FINISH);
+
+        assertEquals(FINISH, mMachine.getState());
+    }
+
+    @Test
+    public void testDozeToDozeSuspendTriggers_carModeIsEnabled() {
+        when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
+        mMachine.requestState(INITIALIZED);
+        mMachine.requestState(DOZE);
+
+        assertEquals(DOZE_SUSPEND_TRIGGERS, mMachine.getState());
+    }
+
+    @Test
+    public void testDozeAoDToDozeSuspendTriggers_carModeIsEnabled() {
+        when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
+        mMachine.requestState(INITIALIZED);
+        mMachine.requestState(DOZE_AOD);
+
+        assertEquals(DOZE_SUSPEND_TRIGGERS, mMachine.getState());
+    }
+
+    @Test
+    public void testDozePulsingBrightDozeSuspendTriggers_carModeIsEnabled() {
+        when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
+        mMachine.requestState(INITIALIZED);
+        mMachine.requestState(DOZE_PULSING_BRIGHT);
+
+        assertEquals(DOZE_SUSPEND_TRIGGERS, mMachine.getState());
+    }
+
+    @Test
+    public void testDozeAodDockedDozeSuspendTriggers_carModeIsEnabled() {
+        when(mUiModeManager.getCurrentModeType()).thenReturn(Configuration.UI_MODE_TYPE_CAR);
+        mMachine.requestState(INITIALIZED);
+        mMachine.requestState(DOZE_AOD_DOCKED);
+
+        assertEquals(DOZE_SUSPEND_TRIGGERS, mMachine.getState());
+    }
+
+    @Test
+    public void testDozeSuppressTriggers_screenState() {
+        assertEquals(Display.STATE_OFF, DOZE_SUSPEND_TRIGGERS.screenState(null));
     }
 }

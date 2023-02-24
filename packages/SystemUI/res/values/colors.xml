@@ -129,7 +129,6 @@
     <color name="smart_reply_button_stroke">@*android:color/accent_device_default</color>
 
     <!-- Biometric dialog colors -->
-    <color name="biometric_dialog_dim_color">#80000000</color>              <!-- 50% black -->
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
@@ -183,7 +182,7 @@
     <color name="media_dialog_item_main_content">@color/material_dynamic_primary20</color>
     <color name="media_dialog_item_background">@color/material_dynamic_secondary95</color>
     <color name="media_dialog_connected_item_background">@color/material_dynamic_primary90</color>
-    <color name="media_dialog_seekbar_progress">@color/material_dynamic_secondary40</color>
+    <color name="media_dialog_seekbar_progress">@android:color/system_accent1_200</color>
     <color name="media_dialog_button_background">@color/material_dynamic_primary40</color>
     <color name="media_dialog_solid_button_text">@color/material_dynamic_neutral95</color>
 
@@ -233,4 +232,19 @@
     <color name="connected_network_secondary_color">#41493D</color>
 
     <color name="dream_overlay_camera_mic_off_dot_color">#FCBE03</color>
+
+    <!-- Air Quality -->
+    <color name="dream_overlay_aqi_good">#689F38</color>
+    <color name="dream_overlay_aqi_moderate">#FBC02D</color>
+    <color name="dream_overlay_aqi_unhealthy_sensitive">#F57C00</color>
+    <color name="dream_overlay_aqi_unhealthy">#C53929</color>
+    <color name="dream_overlay_aqi_very_unhealthy">#AD1457</color>
+    <color name="dream_overlay_aqi_hazardous">#880E4F</color>
+    <color name="dream_overlay_aqi_unknown">#BDC1C6</color>
+
+    <!-- Dream overlay text shadows -->
+    <color name="dream_overlay_clock_key_text_shadow_color">#4D000000</color>
+    <color name="dream_overlay_clock_ambient_text_shadow_color">#4D000000</color>
+    <color name="dream_overlay_status_bar_key_text_shadow_color">#66000000</color>
+    <color name="dream_overlay_status_bar_ambient_text_shadow_color">#59000000</color>
 </resources>

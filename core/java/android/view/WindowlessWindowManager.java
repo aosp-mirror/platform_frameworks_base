@@ -149,7 +149,8 @@ public class WindowlessWindowManager implements IWindowSession {
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setFormat(attrs.format)
                 .setBLASTLayer()
@@ -181,6 +182,8 @@ public class WindowlessWindowManager implements IWindowSession {
         synchronized (this) {
             mStateForWindow.put(window.asBinder(), state);
         }
+        outAttachedFrame.set(0, 0, -1, -1);
+        outSizeCompatScale[0] = 1f;
 
         final int res = WindowManagerGlobal.ADD_OKAY | WindowManagerGlobal.ADD_FLAG_APP_VISIBLE |
                         WindowManagerGlobal.ADD_FLAG_USE_BLAST;
@@ -196,15 +199,18 @@ public class WindowlessWindowManager implements IWindowSession {
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
+            InsetsSourceControl[] outActiveControls, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return addToDisplay(window, attrs, viewVisibility, displayId, requestedVisibilities,
-                outInputChannel, outInsetsState, outActiveControls);
+                outInputChannel, outInsetsState, outActiveControls, outAttachedFrame,
+                outSizeCompatScale);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(android.view.IWindow window,
             android.view.WindowManager.LayoutParams attrs, int viewVisibility, int layerStackId,
-            android.view.InsetsState insetsState) {
+            android.view.InsetsState insetsState, Rect outAttachedFrame,
+            float[] outSizeCompatScale) {
         return 0;
     }
 
@@ -280,10 +286,11 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags,
-            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Bundle outSyncSeqIdBundle) {
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId, ClientWindowFrames outFrames,
+            MergedConfiguration outMergedConfiguration, SurfaceControl outSurfaceControl,
+            InsetsState outInsetsState, InsetsSourceControl[] outActiveControls,
+            Bundle outSyncSeqIdBundle) {
         final State state;
         synchronized (this) {
             state = mStateForWindow.get(window.asBinder());
@@ -303,15 +310,23 @@ public class WindowlessWindowManager implements IWindowSession {
 
         if (viewFlags == View.VISIBLE) {
             t.setOpaque(sc, isOpaque(attrs)).show(sc).apply();
-            outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
+            if (outSurfaceControl != null) {
+                outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
+            }
         } else {
             t.hide(sc).apply();
-            outSurfaceControl.release();
+            if (outSurfaceControl != null) {
+                outSurfaceControl.release();
+            }
         }
-        outFrames.frame.set(0, 0, attrs.width, attrs.height);
-        outFrames.displayFrame.set(outFrames.frame);
+        if (outFrames != null) {
+            outFrames.frame.set(0, 0, attrs.width, attrs.height);
+            outFrames.displayFrame.set(outFrames.frame);
+        }
 
-        mergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
+        if (outMergedConfiguration != null) {
+            outMergedConfiguration.setConfiguration(mConfiguration, mConfiguration);
+        }
 
         if ((attrChanges & WindowManager.LayoutParams.FLAGS_CHANGED) != 0
                 && state.mInputChannelToken != null) {
@@ -329,7 +344,7 @@ public class WindowlessWindowManager implements IWindowSession {
             }
         }
 
-        if (mInsetsState != null) {
+        if (outInsetsState != null && mInsetsState != null) {
             outInsetsState.set(mInsetsState);
         }
 
@@ -337,18 +352,13 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public int updateVisibility(IWindow window, WindowManager.LayoutParams inAttrs,
-            int viewVisibility, MergedConfiguration outMergedConfiguration,
-            SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls) {
-        // TODO(b/161810301): Finish the implementation.
-        return 0;
-    }
-
-    @Override
-    public void updateLayout(IWindow window, WindowManager.LayoutParams inAttrs, int flags,
-            ClientWindowFrames clientWindowFrames, int requestedWidth, int requestedHeight) {
-        // TODO(b/161810301): Finish the implementation.
+    public void relayoutAsync(IWindow window, WindowManager.LayoutParams inAttrs,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, int seq,
+            int lastSyncSeqId) {
+        relayout(window, inAttrs, requestedWidth, requestedHeight, viewFlags, flags, seq,
+                lastSyncSeqId, null /* outFrames */, null /* outMergedConfiguration */,
+                null /* outSurfaceControl */, null /* outInsetsState */,
+                null /* outActiveControls */, null /* outSyncSeqIdBundle */);
     }
 
     @Override
@@ -551,5 +561,10 @@ public class WindowlessWindowManager implements IWindowSession {
                 // Too bad
             }
         }
+    }
+
+    @Override
+    public boolean cancelDraw(IWindow window) {
+        return false;
     }
 }

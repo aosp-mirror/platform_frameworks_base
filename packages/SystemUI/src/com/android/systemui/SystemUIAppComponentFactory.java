@@ -16,160 +16,22 @@
 
 package com.android.systemui;
 
-import android.app.Activity;
-import android.app.Application;
-import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.ContentProvider;
 import android.content.Context;
-import android.content.Intent;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.AppComponentFactory;
-
-import com.android.systemui.dagger.ContextComponentHelper;
-import com.android.systemui.dagger.SysUIComponent;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import javax.inject.Inject;
 
 /**
- * Implementation of AppComponentFactory that injects into constructors.
+ * Starts up SystemUI using the AOSP {@link SystemUIInitializerImpl}.
  *
- * This class sets up dependency injection when creating our application.
+ * This initializer relies on reflection to start everything up and should be considered deprecated.
+ * Instead, create your own {@link SystemUIAppComponentFactoryBase}, specify it in your
+ * AndroidManifest.xml and construct your own {@link SystemUIInitializer} directly.
  *
- * Services support dependency injection into their constructors.
- *
- * ContentProviders support injection into member variables - _not_ constructors.
+ * @deprecated Define your own SystemUIAppComponentFactoryBase implementation and use that. This
+ *             implementation may be changed or removed in future releases.
  */
-public class SystemUIAppComponentFactory extends AppComponentFactory {
-
-    private static final String TAG = "AppComponentFactory";
-    @Inject
-    public ContextComponentHelper mComponentHelper;
-
-    public SystemUIAppComponentFactory() {
-        super();
-    }
-
-    @NonNull
+@Deprecated
+public class SystemUIAppComponentFactory extends SystemUIAppComponentFactoryBase {
     @Override
-    public Application instantiateApplicationCompat(
-            @NonNull ClassLoader cl, @NonNull String className)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        Application app = super.instantiateApplicationCompat(cl, className);
-        if (app instanceof ContextInitializer) {
-            ((ContextInitializer) app).setContextAvailableCallback(
-                    context -> {
-                        SystemUIFactory.createFromConfig(context);
-                        SystemUIFactory.getInstance().getSysUIComponent().inject(
-                                SystemUIAppComponentFactory.this);
-                    }
-            );
-        }
-
-        return app;
-    }
-
-    @NonNull
-    @Override
-    public ContentProvider instantiateProviderCompat(
-            @NonNull ClassLoader cl, @NonNull String className)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-
-        ContentProvider contentProvider = super.instantiateProviderCompat(cl, className);
-        if (contentProvider instanceof ContextInitializer) {
-            ((ContextInitializer) contentProvider).setContextAvailableCallback(
-                    context -> {
-                        SystemUIFactory.createFromConfig(context);
-                        SysUIComponent rootComponent =
-                                SystemUIFactory.getInstance().getSysUIComponent();
-                        try {
-                            Method injectMethod = rootComponent.getClass()
-                                    .getMethod("inject", contentProvider.getClass());
-                            injectMethod.invoke(rootComponent, contentProvider);
-                        } catch (NoSuchMethodException
-                                | IllegalAccessException
-                                | InvocationTargetException e) {
-                            Log.w(TAG, "No injector for class: " + contentProvider.getClass(), e);
-                        }
-                    }
-            );
-        }
-
-        return contentProvider;
-    }
-
-    @NonNull
-    @Override
-    public Activity instantiateActivityCompat(@NonNull ClassLoader cl, @NonNull String className,
-            @Nullable Intent intent)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        if (mComponentHelper == null) {
-            // This shouldn't happen, but is seen on occasion.
-            // Bug filed against framework to take a look: http://b/141008541
-            SystemUIFactory.getInstance().getSysUIComponent().inject(
-                    SystemUIAppComponentFactory.this);
-        }
-        Activity activity = mComponentHelper.resolveActivity(className);
-        if (activity != null) {
-            return activity;
-        }
-        return super.instantiateActivityCompat(cl, className, intent);
-    }
-
-    @NonNull
-    @Override
-    public Service instantiateServiceCompat(
-            @NonNull ClassLoader cl, @NonNull String className, Intent intent)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        if (mComponentHelper == null) {
-            // This shouldn't happen, but does when a device is freshly formatted.
-            // Bug filed against framework to take a look: http://b/141008541
-            SystemUIFactory.getInstance().getSysUIComponent().inject(
-                    SystemUIAppComponentFactory.this);
-        }
-        Service service = mComponentHelper.resolveService(className);
-        if (service != null) {
-            return service;
-        }
-        return super.instantiateServiceCompat(cl, className, intent);
-    }
-
-    @NonNull
-    @Override
-    public BroadcastReceiver instantiateReceiverCompat(@NonNull ClassLoader cl,
-            @NonNull String className, @Nullable Intent intent)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException {
-        if (mComponentHelper == null) {
-            // This shouldn't happen, but does when a device is freshly formatted.
-            // Bug filed against framework to take a look: http://b/141008541
-            SystemUIFactory.getInstance().getSysUIComponent().inject(
-                    SystemUIAppComponentFactory.this);
-        }
-        BroadcastReceiver receiver = mComponentHelper.resolveBroadcastReceiver(className);
-        if (receiver != null) {
-            return receiver;
-        }
-
-        return super.instantiateReceiverCompat(cl, className, intent);
-    }
-
-    /**
-     * A callback that receives a Context when one is ready.
-     */
-    public interface ContextAvailableCallback {
-        void onContextAvailable(Context context);
-    }
-
-    /**
-     * Implemented in classes that get started by the system before a context is available.
-     */
-    public interface ContextInitializer {
-        void setContextAvailableCallback(ContextAvailableCallback callback);
+    protected SystemUIInitializer createSystemUIInitializer(Context context) {
+        return SystemUIInitializerFactory.createWithContext(context);
     }
 }

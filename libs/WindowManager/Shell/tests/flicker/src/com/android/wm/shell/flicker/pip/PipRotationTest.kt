@@ -27,12 +27,9 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
-import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
-import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,13 +95,6 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     override fun navBarLayerRotatesAndScales() = testSpec.navBarLayerRotatesAndScales()
 
     /**
-     * Checks the position of the status bar at the start and end of the transition
-     */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = testSpec.statusBarLayerRotatesScales()
-
-    /**
      * Checks that [fixedApp] layer is within [screenBoundsStart] at the start of the transition
      */
     @Presubmit
@@ -141,14 +131,6 @@ open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testS
     @Presubmit
     @Test
     fun pipLayerRotates_StartingBounds() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-        pipLayerRotates_StartingBounds_internal()
-    }
-
-    @FlakyTest(bugId = 228024285)
-    @Test
-    fun pipLayerRotates_StartingBounds_ShellTransit() {
-        Assume.assumeTrue(isShellTransitionsEnabled)
         pipLayerRotates_StartingBounds_internal()
     }
 

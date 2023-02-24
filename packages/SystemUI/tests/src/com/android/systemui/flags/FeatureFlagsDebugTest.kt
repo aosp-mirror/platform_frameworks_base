@@ -26,6 +26,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
@@ -34,6 +35,10 @@ import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import java.io.PrintWriter
+import java.io.Serializable
+import java.io.StringWriter
+import java.util.function.Consumer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -47,12 +52,8 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.MockitoAnnotations
-import java.io.PrintWriter
-import java.io.Serializable
-import java.io.StringWriter
-import java.util.function.Consumer
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 /**
  * NOTE: This test is for the version of FeatureFlagManager in src-release, which should not allow
@@ -74,9 +75,11 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     private val flagMap = mutableMapOf<Int, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
     private lateinit var clearCacheAction: Consumer<Int>
+    private val serverFlagReader = ServerFlagReaderFake()
 
-    private val teamfoodableFlagA = BooleanFlag(500, false, true)
-    private val teamfoodableFlagB = BooleanFlag(501, true, true)
+    private val deviceConfig = DeviceConfigProxyFake()
+    private val teamfoodableFlagA = UnreleasedFlag(500, true)
+    private val teamfoodableFlagB = ReleasedFlag(501, true)
 
     @Before
     fun setup() {
@@ -90,6 +93,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             systemProperties,
             resources,
             dumpManager,
+            deviceConfig,
+            serverFlagReader,
             flagMap,
             commandRegistry,
             barService
@@ -106,40 +111,41 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReadBooleanFlag() {
+    fun readBooleanFlag() {
         // Remember that the TEAMFOOD flag is id#1 and has special behavior.
         whenever(flagManager.readFlagValue<Boolean>(eq(3), any())).thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(4), any())).thenReturn(false)
-        assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(2, true))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(3, false))).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(4, true))).isFalse()
-        assertThat(mFeatureFlagsDebug.isEnabled(BooleanFlag(5, false))).isFalse()
+
+        assertThat(mFeatureFlagsDebug.isEnabled(ReleasedFlag(2))).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(UnreleasedFlag(3))).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(ReleasedFlag(4))).isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(UnreleasedFlag(5))).isFalse()
     }
 
     @Test
-    fun testTeamFoodFlag_False() {
+    fun teamFoodFlag_False() {
         whenever(flagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(false)
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isFalse()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
         // Regular boolean flags should still test the same.
         // Only our teamfoodableFlag should change.
-        testReadBooleanFlag()
+        readBooleanFlag()
     }
 
     @Test
-    fun testTeamFoodFlag_True() {
+    fun teamFoodFlag_True() {
         whenever(flagManager.readFlagValue<Boolean>(eq(1), any())).thenReturn(true)
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagA)).isTrue()
         assertThat(mFeatureFlagsDebug.isEnabled(teamfoodableFlagB)).isTrue()
 
         // Regular boolean flags should still test the same.
         // Only our teamfoodableFlag should change.
-        testReadBooleanFlag()
+        readBooleanFlag()
     }
 
     @Test
-    fun testTeamFoodFlag_Overridden() {
+    fun teamFoodFlag_Overridden() {
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagA.id), any()))
                 .thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.id), any()))
@@ -150,11 +156,11 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
 
         // Regular boolean flags should still test the same.
         // Only our teamfoodableFlag should change.
-        testReadBooleanFlag()
+        readBooleanFlag()
     }
 
     @Test
-    fun testReadResourceBooleanFlag() {
+    fun readResourceBooleanFlag() {
         whenever(resources.getBoolean(1001)).thenReturn(false)
         whenever(resources.getBoolean(1002)).thenReturn(true)
         whenever(resources.getBoolean(1003)).thenReturn(false)
@@ -179,7 +185,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReadSysPropBooleanFlag() {
+    fun readSysPropBooleanFlag() {
         whenever(systemProperties.getBoolean(anyString(), anyBoolean())).thenAnswer {
             if ("b".equals(it.getArgument<String?>(0))) {
                 return@thenAnswer true
@@ -195,7 +201,22 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReadStringFlag() {
+    fun readDeviceConfigBooleanFlag() {
+        val namespace = "test_namespace"
+        deviceConfig.setProperty(namespace, "a", "true", false)
+        deviceConfig.setProperty(namespace, "b", "false", false)
+        deviceConfig.setProperty(namespace, "c", null, false)
+
+        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(1, "a", namespace)))
+            .isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(2, "b", namespace)))
+            .isFalse()
+        assertThat(mFeatureFlagsDebug.isEnabled(DeviceConfigBooleanFlag(3, "c", namespace)))
+            .isFalse()
+    }
+
+    @Test
+    fun readStringFlag() {
         whenever(flagManager.readFlagValue<String>(eq(3), any())).thenReturn("foo")
         whenever(flagManager.readFlagValue<String>(eq(4), any())).thenReturn("bar")
         assertThat(mFeatureFlagsDebug.getString(StringFlag(1, "biz"))).isEqualTo("biz")
@@ -205,7 +226,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReadResourceStringFlag() {
+    fun readResourceStringFlag() {
         whenever(resources.getString(1001)).thenReturn("")
         whenever(resources.getString(1002)).thenReturn("resource2")
         whenever(resources.getString(1003)).thenReturn("resource3")
@@ -235,8 +256,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBroadcastReceiverIgnoresInvalidData() {
-        addFlag(BooleanFlag(1, false))
+    fun broadcastReceiver_IgnoresInvalidData() {
+        addFlag(UnreleasedFlag(1))
         addFlag(ResourceBooleanFlag(2, 1002))
         addFlag(StringFlag(3, "flag3"))
         addFlag(ResourceStringFlag(4, 1004))
@@ -254,10 +275,10 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testIntentWithIdButNoValueKeyClears() {
-        addFlag(BooleanFlag(1, false))
+    fun intentWithId_NoValueKeyClears() {
+        addFlag(UnreleasedFlag(1))
 
-        // trying to erase an id not in the map does noting
+        // trying to erase an id not in the map does nothing
         broadcastReceiver.onReceive(
             mockContext,
             Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_ID, 0)
@@ -273,9 +294,9 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSetBooleanFlag() {
-        addFlag(BooleanFlag(1, false))
-        addFlag(BooleanFlag(2, false))
+    fun setBooleanFlag() {
+        addFlag(UnreleasedFlag(1))
+        addFlag(UnreleasedFlag(2))
         addFlag(ResourceBooleanFlag(3, 1003))
         addFlag(ResourceBooleanFlag(4, 1004))
 
@@ -293,7 +314,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSetStringFlag() {
+    fun setStringFlag() {
         addFlag(StringFlag(1, "flag1"))
         addFlag(ResourceStringFlag(2, 1002))
 
@@ -305,7 +326,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSetFlagClearsCache() {
+    fun setFlag_ClearsCache() {
         val flag1 = addFlag(StringFlag(1, "flag1"))
         whenever(flagManager.readFlagValue<String>(eq(1), any())).thenReturn("original")
 
@@ -327,12 +348,30 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testRegisterCommand() {
+    fun serverSide_Overrides_MakesFalse() {
+        val flag = ReleasedFlag(100)
+
+        serverFlagReader.setFlagValue(flag.id, false)
+
+        assertThat(mFeatureFlagsDebug.isEnabled(flag)).isFalse()
+    }
+
+    @Test
+    fun serverSide_Overrides_MakesTrue() {
+        val flag = UnreleasedFlag(100)
+
+        serverFlagReader.setFlagValue(flag.id, true)
+
+        assertThat(mFeatureFlagsDebug.isEnabled(flag)).isTrue()
+    }
+
+    @Test
+    fun statusBarCommand_IsRegistered() {
         verify(commandRegistry).registerCommand(anyString(), any())
     }
 
     @Test
-    fun testNoOpCommand() {
+    fun noOpCommand() {
         val cmd = captureCommand()
 
         cmd.execute(pw, ArrayList())
@@ -342,35 +381,71 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReadFlagCommand() {
-        addFlag(BooleanFlag(1, false))
+    fun readFlagCommand() {
+        addFlag(UnreleasedFlag(1))
         val cmd = captureCommand()
         cmd.execute(pw, listOf("1"))
         verify(flagManager).readFlagValue<Boolean>(eq(1), any())
     }
 
     @Test
-    fun testSetFlagCommand() {
-        addFlag(BooleanFlag(1, false))
+    fun setFlagCommand() {
+        addFlag(UnreleasedFlag(1))
         val cmd = captureCommand()
         cmd.execute(pw, listOf("1", "on"))
         verifyPutData(1, "{\"type\":\"boolean\",\"value\":true}")
     }
 
     @Test
-    fun testToggleFlagCommand() {
-        addFlag(BooleanFlag(1, true))
+    fun toggleFlagCommand() {
+        addFlag(ReleasedFlag(1))
         val cmd = captureCommand()
         cmd.execute(pw, listOf("1", "toggle"))
         verifyPutData(1, "{\"type\":\"boolean\",\"value\":false}", 2)
     }
 
     @Test
-    fun testEraseFlagCommand() {
-        addFlag(BooleanFlag(1, true))
+    fun eraseFlagCommand() {
+        addFlag(ReleasedFlag(1))
         val cmd = captureCommand()
         cmd.execute(pw, listOf("1", "erase"))
         verify(secureSettings).putStringForUser(eq("key-1"), eq(""), anyInt())
+    }
+
+    @Test
+    fun dumpFormat() {
+        val flag1 = ReleasedFlag(1)
+        val flag2 = ResourceBooleanFlag(2, 1002)
+        val flag3 = UnreleasedFlag(3)
+        val flag4 = StringFlag(4, "")
+        val flag5 = StringFlag(5, "flag5default")
+        val flag6 = ResourceStringFlag(6, 1006)
+        val flag7 = ResourceStringFlag(7, 1007)
+
+        whenever(resources.getBoolean(1002)).thenReturn(true)
+        whenever(resources.getString(1006)).thenReturn("resource1006")
+        whenever(resources.getString(1007)).thenReturn("resource1007")
+        whenever(flagManager.readFlagValue(eq(7), eq(StringFlagSerializer)))
+            .thenReturn("override7")
+
+        // WHEN the flags have been accessed
+        assertThat(mFeatureFlagsDebug.isEnabled(flag1)).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(flag2)).isTrue()
+        assertThat(mFeatureFlagsDebug.isEnabled(flag3)).isFalse()
+        assertThat(mFeatureFlagsDebug.getString(flag4)).isEmpty()
+        assertThat(mFeatureFlagsDebug.getString(flag5)).isEqualTo("flag5default")
+        assertThat(mFeatureFlagsDebug.getString(flag6)).isEqualTo("resource1006")
+        assertThat(mFeatureFlagsDebug.getString(flag7)).isEqualTo("override7")
+
+        // THEN the dump contains the flags and the default values
+        val dump = dumpToString()
+        assertThat(dump).contains(" sysui_flag_1: true\n")
+        assertThat(dump).contains(" sysui_flag_2: true\n")
+        assertThat(dump).contains(" sysui_flag_3: false\n")
+        assertThat(dump).contains(" sysui_flag_4: [length=0] \"\"\n")
+        assertThat(dump).contains(" sysui_flag_5: [length=12] \"flag5default\"\n")
+        assertThat(dump).contains(" sysui_flag_6: [length=12] \"resource1006\"\n")
+        assertThat(dump).contains(" sysui_flag_7: [length=9] \"override7\"\n")
     }
 
     private fun verifyPutData(id: Int, data: String, numReads: Int = 1) {
@@ -401,42 +476,6 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
         verify(commandRegistry).registerCommand(anyString(), capture(captor))
 
         return captor.value.invoke()
-    }
-
-    @Test
-    fun testDump() {
-        val flag1 = BooleanFlag(1, true)
-        val flag2 = ResourceBooleanFlag(2, 1002)
-        val flag3 = BooleanFlag(3, false)
-        val flag4 = StringFlag(4, "")
-        val flag5 = StringFlag(5, "flag5default")
-        val flag6 = ResourceStringFlag(6, 1006)
-        val flag7 = ResourceStringFlag(7, 1007)
-
-        whenever(resources.getBoolean(1002)).thenReturn(true)
-        whenever(resources.getString(1006)).thenReturn("resource1006")
-        whenever(resources.getString(1007)).thenReturn("resource1007")
-        whenever(flagManager.readFlagValue(eq(7), eq(StringFlagSerializer)))
-            .thenReturn("override7")
-
-        // WHEN the flags have been accessed
-        assertThat(mFeatureFlagsDebug.isEnabled(flag1)).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(flag2)).isTrue()
-        assertThat(mFeatureFlagsDebug.isEnabled(flag3)).isFalse()
-        assertThat(mFeatureFlagsDebug.getString(flag4)).isEmpty()
-        assertThat(mFeatureFlagsDebug.getString(flag5)).isEqualTo("flag5default")
-        assertThat(mFeatureFlagsDebug.getString(flag6)).isEqualTo("resource1006")
-        assertThat(mFeatureFlagsDebug.getString(flag7)).isEqualTo("override7")
-
-        // THEN the dump contains the flags and the default values
-        val dump = dumpToString()
-        assertThat(dump).contains(" sysui_flag_1: true\n")
-        assertThat(dump).contains(" sysui_flag_2: true\n")
-        assertThat(dump).contains(" sysui_flag_3: false\n")
-        assertThat(dump).contains(" sysui_flag_4: [length=0] \"\"\n")
-        assertThat(dump).contains(" sysui_flag_5: [length=12] \"flag5default\"\n")
-        assertThat(dump).contains(" sysui_flag_6: [length=12] \"resource1006\"\n")
-        assertThat(dump).contains(" sysui_flag_7: [length=9] \"override7\"\n")
     }
 
     private fun dumpToString(): String {

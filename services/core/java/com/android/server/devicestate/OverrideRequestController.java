@@ -75,6 +75,8 @@ final class OverrideRequestController {
 
     // Handle to the current override request, null if none.
     private OverrideRequest mRequest;
+    // Handle to the current base state override request, null if none.
+    private OverrideRequest mBaseStateRequest;
 
     private boolean mStickyRequestsAllowed;
     // The current request has outlived their process.
@@ -111,13 +113,23 @@ final class OverrideRequestController {
         }
     }
 
+    void addBaseStateRequest(@NonNull OverrideRequest request) {
+        OverrideRequest previousRequest = mBaseStateRequest;
+        mBaseStateRequest = request;
+        mListener.onStatusChanged(request, STATUS_ACTIVE);
+
+        if (previousRequest != null) {
+            cancelRequestLocked(previousRequest);
+        }
+    }
+
     /**
      * Cancels the request with the specified {@code token} and notifies the listener of all changes
      * to request status as a result of this operation.
      */
     void cancelRequest(@NonNull OverrideRequest request) {
         // Either don't have a current request or attempting to cancel an already cancelled request
-        if (!hasRequest(request.getToken())) {
+        if (!hasRequest(request.getToken(), request.getRequestType())) {
             return;
         }
         cancelCurrentRequestLocked();
@@ -144,11 +156,24 @@ final class OverrideRequestController {
     }
 
     /**
+     * Cancels the current base state override request, this could be due to the physical
+     * configuration of the device changing.
+     */
+    void cancelBaseStateOverrideRequest() {
+        cancelCurrentBaseStateRequestLocked();
+    }
+
+    /**
      * Returns {@code true} if this controller is current managing a request with the specified
      * {@code token}, {@code false} otherwise.
      */
-    boolean hasRequest(@NonNull IBinder token) {
-        return mRequest != null && token == mRequest.getToken();
+    boolean hasRequest(@NonNull IBinder token,
+            @OverrideRequest.OverrideRequestType int requestType) {
+        if (requestType == OverrideRequest.OVERRIDE_REQUEST_TYPE_BASE_STATE) {
+            return mBaseStateRequest != null && token == mBaseStateRequest.getToken();
+        } else {
+            return mRequest != null && token == mRequest.getToken();
+        }
     }
 
     /**
@@ -157,11 +182,11 @@ final class OverrideRequestController {
      * operation.
      */
     void handleProcessDied(int pid) {
-        if (mRequest == null) {
-            return;
+        if (mBaseStateRequest != null && mBaseStateRequest.getPid() == pid) {
+            cancelCurrentBaseStateRequestLocked();
         }
 
-        if (mRequest.getPid() == pid) {
+        if (mRequest != null && mRequest.getPid() == pid) {
             if (mStickyRequestsAllowed) {
                 // Do not cancel the requests now because sticky requests are allowed. These
                 // requests will be cancelled on a call to cancelStickyRequests().
@@ -176,7 +201,10 @@ final class OverrideRequestController {
      * Notifies the controller that the base state has changed. The controller will notify the
      * listener of all changes to request status as a result of this change.
      */
-    void handleBaseStateChanged() {
+    void handleBaseStateChanged(int state) {
+        if (mBaseStateRequest != null && state != mBaseStateRequest.getRequestedState()) {
+            cancelBaseStateOverrideRequest();
+        }
         if (mRequest == null) {
             return;
         }
@@ -192,11 +220,12 @@ final class OverrideRequestController {
      * notify the listener of all changes to request status as a result of this change.
      */
     void handleNewSupportedStates(int[] newSupportedStates) {
-        if (mRequest == null) {
-            return;
+        if (mBaseStateRequest != null && !contains(newSupportedStates,
+                mBaseStateRequest.getRequestedState())) {
+            cancelCurrentBaseStateRequestLocked();
         }
 
-        if (!contains(newSupportedStates, mRequest.getRequestedState())) {
+        if (mRequest != null && !contains(newSupportedStates, mRequest.getRequestedState())) {
             cancelCurrentRequestLocked();
         }
     }
@@ -228,8 +257,21 @@ final class OverrideRequestController {
             return;
         }
         mStickyRequest = false;
-        mListener.onStatusChanged(mRequest, STATUS_CANCELED);
+        cancelRequestLocked(mRequest);
         mRequest = null;
+    }
+
+    /**
+     * Handles cancelling {@code mBaseStateRequest}.
+     * Notifies the listener of the canceled status as well.
+     */
+    private void cancelCurrentBaseStateRequestLocked() {
+        if (mBaseStateRequest == null) {
+            Slog.w(TAG, "Attempted to cancel a null OverrideRequest");
+            return;
+        }
+        cancelRequestLocked(mBaseStateRequest);
+        mBaseStateRequest = null;
     }
 
     private static boolean contains(int[] array, int value) {

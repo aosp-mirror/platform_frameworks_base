@@ -256,7 +256,7 @@ class AnrController {
         Slog.i(TAG_WM, "Pre-dump for unresponsive");
 
         final ArrayList<Integer> firstPids = new ArrayList<>(1);
-        firstPids.add(ActivityManagerService.MY_PID);
+        firstPids.add(WindowManagerService.MY_PID);
         ArrayList<Integer> nativePids = null;
         final int[] pids = shouldDumpSf[0]
                 ? Process.getPidsForCommands(new String[] { "/system/bin/surfaceflinger" })

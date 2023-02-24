@@ -1363,19 +1363,31 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
 
             // Consolidate positional feedback to reduce noise during authentication.
             case FACE_ACQUIRED_NOT_DETECTED:
+                return context.getString(R.string.face_acquired_not_detected);
             case FACE_ACQUIRED_TOO_CLOSE:
+                return context.getString(R.string.face_acquired_too_close);
             case FACE_ACQUIRED_TOO_FAR:
+                return context.getString(R.string.face_acquired_too_far);
             case FACE_ACQUIRED_TOO_HIGH:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_low);
             case FACE_ACQUIRED_TOO_LOW:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_high);
             case FACE_ACQUIRED_TOO_RIGHT:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_left);
             case FACE_ACQUIRED_TOO_LEFT:
+                // TODO(b/181269243) Change back once error codes are fixed.
+                return context.getString(R.string.face_acquired_too_right);
             case FACE_ACQUIRED_POOR_GAZE:
-            case FACE_ACQUIRED_PAN_TOO_EXTREME:
-            case FACE_ACQUIRED_TILT_TOO_EXTREME:
-            case FACE_ACQUIRED_ROLL_TOO_EXTREME:
                 return context.getString(R.string.face_acquired_poor_gaze);
-
-            // Provide more detailed feedback for other soft errors.
+            case FACE_ACQUIRED_PAN_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_pan_too_extreme);
+            case FACE_ACQUIRED_TILT_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_tilt_too_extreme);
+            case FACE_ACQUIRED_ROLL_TOO_EXTREME:
+                return context.getString(R.string.face_acquired_roll_too_extreme);
             case FACE_ACQUIRED_INSUFFICIENT:
                 return context.getString(R.string.face_acquired_insufficient);
             case FACE_ACQUIRED_TOO_BRIGHT:
@@ -1394,6 +1406,10 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 return context.getString(R.string.face_acquired_obscured);
             case FACE_ACQUIRED_SENSOR_DIRTY:
                 return context.getString(R.string.face_acquired_sensor_dirty);
+            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
+                return context.getString(R.string.face_acquired_dark_glasses_detected);
+            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
+                return context.getString(R.string.face_acquired_mouth_covering_detected);
 
             // Find and return the appropriate vendor-specific message.
             case FACE_ACQUIRED_VENDOR: {
@@ -1459,11 +1475,13 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             case FACE_ACQUIRED_ROLL_TOO_EXTREME:
                 return context.getString(R.string.face_acquired_roll_too_extreme);
             case FACE_ACQUIRED_FACE_OBSCURED:
-            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
-            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
                 return context.getString(R.string.face_acquired_obscured);
             case FACE_ACQUIRED_SENSOR_DIRTY:
                 return context.getString(R.string.face_acquired_sensor_dirty);
+            case FACE_ACQUIRED_DARK_GLASSES_DETECTED:
+                return context.getString(R.string.face_acquired_dark_glasses_detected);
+            case FACE_ACQUIRED_MOUTH_COVERING_DETECTED:
+                return context.getString(R.string.face_acquired_mouth_covering_detected);
             case FACE_ACQUIRED_VENDOR: {
                 String[] msgArray = context.getResources().getStringArray(
                         R.array.face_acquired_vendor);

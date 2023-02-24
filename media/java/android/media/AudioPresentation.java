@@ -54,7 +54,11 @@ public final class AudioPresentation {
     private final int mProgramId;
     private final ULocale mLanguage;
 
-    /** @hide */
+    /**
+     * The ContentClassifier int definitions represent the AudioPresentation content
+     * classifier (as per TS 103 190-1 v1.2.1 4.3.3.8.1)
+     * @hide
+     */
     @IntDef(
         value = {
         CONTENT_UNKNOWN,
@@ -67,11 +71,6 @@ public final class AudioPresentation {
         CONTENT_EMERGENCY,
         CONTENT_VOICEOVER,
     })
-
-    /**
-     * The ContentClassifier int definitions represent the AudioPresentation content
-     * classifier (as per TS 103 190-1 v1.2.1 4.3.3.8.1)
-    */
     @Retention(RetentionPolicy.SOURCE)
     public @interface ContentClassifier {}
 

@@ -44,6 +44,39 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:checkedButton="@id/enter_pip_on_leave_disabled">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter PiP on home press"/>
+
+        <RadioButton
+            android:id="@+id/enter_pip_on_leave_disabled"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Disabled"
+            android:onClick="onAutoPipSelected"/>
+
+        <RadioButton
+            android:id="@+id/enter_pip_on_leave_manual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Via code behind"
+            android:onClick="onAutoPipSelected"/>
+
+        <RadioButton
+            android:id="@+id/enter_pip_on_leave_autoenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto-enter PiP"
+            android:onClick="onAutoPipSelected"/>
+    </RadioGroup>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:checkedButton="@id/ratio_default">
 
         <TextView

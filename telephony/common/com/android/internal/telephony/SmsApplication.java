@@ -1146,4 +1146,35 @@ public final class SmsApplication {
         }
         return null;
     }
+
+    /**
+     * Check if a package is default mms app (or equivalent, like bluetooth)
+     *
+     * @param context context from the calling app
+     * @param packageName the name of the package to be checked
+     * @return true if the package is default mms app or bluetooth
+     */
+    @UnsupportedAppUsage
+    public static boolean isDefaultMmsApplication(Context context, String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        String defaultMmsPackage = getDefaultMmsApplicationPackageName(context);
+        String bluetoothPackageName = context.getResources()
+                .getString(com.android.internal.R.string.config_systemBluetoothStack);
+
+        if ((defaultMmsPackage != null && defaultMmsPackage.equals(packageName))
+                || bluetoothPackageName.equals(packageName)) {
+            return true;
+        }
+        return false;
+    }
+
+    private static String getDefaultMmsApplicationPackageName(Context context) {
+        ComponentName component = getDefaultMmsApplication(context, false);
+        if (component != null) {
+            return component.getPackageName();
+        }
+        return null;
+    }
 }

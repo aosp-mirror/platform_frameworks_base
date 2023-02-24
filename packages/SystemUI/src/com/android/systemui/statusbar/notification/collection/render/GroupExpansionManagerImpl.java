@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.render;
 
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -28,10 +29,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 /**
  * Provides grouping information for notification entries including information about a group's
  * expanded state.
  */
+@SysUISingleton
 public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordinator {
     private final GroupMembershipManager mGroupMembershipManager;
     private final Set<OnGroupExpansionChangeListener> mOnGroupChangeListeners = new HashSet<>();
@@ -39,6 +43,7 @@ public class GroupExpansionManagerImpl implements GroupExpansionManager, Coordin
     // Set of summary keys whose groups are expanded
     private final Set<NotificationEntry> mExpandedGroups = new HashSet<>();
 
+    @Inject
     public GroupExpansionManagerImpl(GroupMembershipManager groupMembershipManager) {
         mGroupMembershipManager = groupMembershipManager;
     }

@@ -38,7 +38,7 @@ import javax.inject.Inject;
 public class VibratorHelper {
 
     private final Vibrator mVibrator;
-    private static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
+    public static final VibrationAttributes TOUCH_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH);
     private final Executor mExecutor;
 

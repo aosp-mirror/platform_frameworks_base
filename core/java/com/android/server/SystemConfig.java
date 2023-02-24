@@ -339,6 +339,8 @@ public class SystemConfig {
     // A map from package name of vendor APEXes that can be updated to an installer package name
     // allowed to install updates for it.
     private final ArrayMap<String, String> mAllowedVendorApexes = new ArrayMap<>();
+    // A set of package names that are allowed to use <install-constraints> manifest tag.
+    private final Set<String> mInstallConstraintsAllowlist = new ArraySet<>();
 
     private String mModulesInstallerPackageName;
 
@@ -533,6 +535,10 @@ public class SystemConfig {
 
     public Map<String, String> getAllowedVendorApexes() {
         return mAllowedVendorApexes;
+    }
+
+    public Set<String> getInstallConstraintsAllowlist() {
+        return mInstallConstraintsAllowlist;
     }
 
     public String getModulesInstallerPackageName() {
@@ -1455,6 +1461,20 @@ public class SystemConfig {
                         }
                         XmlUtils.skipCurrentTag(parser);
                     } break;
+                    case "install-constraints-allowed": {
+                        if (allowAppConfigs) {
+                            String packageName = parser.getAttributeValue(null, "package");
+                            if (packageName == null) {
+                                Slog.w(TAG, "<" + name + "> without package in " + permFile
+                                        + " at " + parser.getPositionDescription());
+                            } else {
+                                mInstallConstraintsAllowlist.add(packageName);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
                     default: {
                         Slog.w(TAG, "Tag " + name + " is unknown in "
                                 + permFile + " at " + parser.getPositionDescription());
@@ -1501,6 +1521,8 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
         }
 
+        enableIpSecTunnelMigrationOnVsrUAndAbove();
+
         if (isErofsSupported()) {
             if (isKernelVersionAtLeast(5, 10)) {
                 addFeature(PackageManager.FEATURE_EROFS, 0);
@@ -1511,6 +1533,18 @@ public class SystemConfig {
 
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
+        }
+    }
+
+    // This method only enables a new Android feature added in U and will not have impact on app
+    // compatibility
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private void enableIpSecTunnelMigrationOnVsrUAndAbove() {
+        final int vsrApi =
+                SystemProperties.getInt(
+                        "ro.vendor.api_level", Build.VERSION.DEVICE_INITIAL_SDK_INT);
+        if (vsrApi > Build.VERSION_CODES.TIRAMISU) {
+            addFeature(PackageManager.FEATURE_IPSEC_TUNNEL_MIGRATION, 0);
         }
     }
 

@@ -37,9 +37,14 @@ import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
+import com.google.common.truth.Truth.assertThat
+import java.io.File
+import java.util.Optional
+import java.util.function.Consumer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -50,20 +55,20 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
-import java.util.function.Consumer
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -85,6 +90,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     private lateinit var listingController: ControlsListingController
     @Mock(stubOnly = true)
     private lateinit var userTracker: UserTracker
+    @Mock
+    private lateinit var userFileManager: UserFileManager
 
     @Captor
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
@@ -153,6 +160,9 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         canceller = DidRunRunnable()
         `when`(bindingController.bindAndLoad(any(), any())).thenReturn(canceller)
+        `when`(userFileManager.getFile(anyString(), anyInt())).thenReturn(mock(File::class.java))
+        `when`(userFileManager.getSharedPreferences(anyString(), anyInt(), anyInt()))
+            .thenReturn(context.getSharedPreferences("test", Context.MODE_PRIVATE))
 
         controller = ControlsControllerImpl(
                 wrapper,
@@ -161,6 +171,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 bindingController,
                 listingController,
                 broadcastDispatcher,
+                userFileManager,
                 Optional.of(persistenceWrapper),
                 mock(DumpManager::class.java),
                 userTracker
@@ -217,6 +228,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 bindingController,
                 listingController,
                 broadcastDispatcher,
+                userFileManager,
                 Optional.of(persistenceWrapper),
                 mock(DumpManager::class.java),
                 userTracker
@@ -910,6 +922,14 @@ class ControlsControllerImplTest : SysuiTestCase() {
         delayableExecutor.runAllReady()
 
         assertTrue(controller.getFavoritesForStructure(TEST_COMPONENT_2, TEST_STRUCTURE).isEmpty())
+    }
+
+    @Test
+    fun testUserStructure() {
+        val userStructure = UserStructure(context, context.user, userFileManager)
+        verify(userFileManager, times(2))
+            .getFile(ControlsFavoritePersistenceWrapper.FILE_NAME, context.user.identifier)
+        assertThat(userStructure.file).isNotNull()
     }
 }
 

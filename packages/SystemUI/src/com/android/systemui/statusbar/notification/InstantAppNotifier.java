@@ -50,7 +50,6 @@ import android.util.Pair;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -76,20 +75,22 @@ public class InstantAppNotifier extends CoreStartable
     private final Executor mUiBgExecutor;
     private final ArraySet<Pair<String, Integer>> mCurrentNotifs = new ArraySet<>();
     private final CommandQueue mCommandQueue;
-    private KeyguardStateController mKeyguardStateController;
+    private final KeyguardStateController mKeyguardStateController;
 
     @Inject
-    public InstantAppNotifier(Context context, CommandQueue commandQueue,
-            @UiBackground Executor uiBgExecutor) {
+    public InstantAppNotifier(
+            Context context,
+            CommandQueue commandQueue,
+            @UiBackground Executor uiBgExecutor,
+            KeyguardStateController keyguardStateController) {
         super(context);
         mCommandQueue = commandQueue;
         mUiBgExecutor = uiBgExecutor;
+        mKeyguardStateController = keyguardStateController;
     }
 
     @Override
     public void start() {
-        mKeyguardStateController = Dependency.get(KeyguardStateController.class);
-
         // listen for user / profile change.
         try {
             ActivityManager.getService().registerUserSwitchObserver(mUserSwitchListener, TAG);
@@ -260,7 +261,7 @@ public class InstantAppNotifier extends CoreStartable
 
         Intent browserIntent = getTaskIntent(taskId, userId);
         Notification.Builder builder =
-                new Notification.Builder(mContext, NotificationChannels.GENERAL);
+                new Notification.Builder(mContext, NotificationChannels.INSTANT);
         if (browserIntent != null && browserIntent.isWebIntent()) {
             // Make sure that this doesn't resolve back to an instant app
             browserIntent
@@ -288,7 +289,7 @@ public class InstantAppNotifier extends CoreStartable
                             .setComponent(aiaComponent)
                             .setAction(Intent.ACTION_VIEW)
                             .addCategory(Intent.CATEGORY_BROWSABLE)
-                            .addCategory("unique:" + System.currentTimeMillis())
+                            .setIdentifier("unique:" + System.currentTimeMillis())
                             .putExtra(Intent.EXTRA_PACKAGE_NAME, appInfo.packageName)
                             .putExtra(
                                     Intent.EXTRA_VERSION_CODE,

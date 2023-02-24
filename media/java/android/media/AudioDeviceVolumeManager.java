@@ -61,10 +61,12 @@ public class AudioDeviceVolumeManager {
 
     private static IAudioService sService;
 
-    private final String mPackageName;
+    private final @NonNull String mPackageName;
+    private final @Nullable String mAttributionTag;
 
     public AudioDeviceVolumeManager(Context context) {
         mPackageName = context.getApplicationContext().getOpPackageName();
+        mAttributionTag = context.getApplicationContext().getAttributionTag();
     }
 
     /**
@@ -287,7 +289,6 @@ public class AudioDeviceVolumeManager {
      * @hide
      * Removes a previously added listener of changes to device volume behavior.
      */
-
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MODIFY_AUDIO_ROUTING,
             android.Manifest.permission.QUERY_AUDIO_STATE
@@ -296,6 +297,21 @@ public class AudioDeviceVolumeManager {
             @NonNull OnDeviceVolumeBehaviorChangedListener listener) {
         mDeviceVolumeBehaviorChangedListenerMgr.removeListener(listener,
                 "removeOnDeviceVolumeBehaviorChangedListener");
+    }
+
+    /**
+     * @hide
+     * Sets the volume on the given audio device
+     * @param vi the volume information, only stream-based volumes are supported
+     * @param ada the device for which volume is to be modified
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada) {
+        try {
+            getService().setDeviceVolume(vi, ada, mPackageName, mAttributionTag);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**

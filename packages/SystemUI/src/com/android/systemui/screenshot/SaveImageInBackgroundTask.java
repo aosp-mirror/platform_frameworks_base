@@ -38,7 +38,6 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -49,7 +48,6 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
-import com.android.systemui.SystemUIFactory;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -89,7 +87,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     SaveImageInBackgroundTask(Context context, ImageExporter exporter,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotController.SaveImageInBackgroundData data,
-            Supplier<ActionTransition> sharedElementTransition) {
+            Supplier<ActionTransition> sharedElementTransition,
+            ScreenshotNotificationSmartActionsProvider
+                    screenshotNotificationSmartActionsProvider
+    ) {
         mContext = context;
         mScreenshotSmartActions = screenshotSmartActions;
         mImageData = new ScreenshotController.SavedImageData();
@@ -103,15 +104,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         // Initialize screenshot notification smart actions provider.
         mSmartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.ENABLE_SCREENSHOT_NOTIFICATION_SMART_ACTIONS, true);
-        if (mSmartActionsEnabled) {
-            mSmartActionsProvider =
-                    SystemUIFactory.getInstance()
-                            .createScreenshotNotificationSmartActionsProvider(
-                                    context, THREAD_POOL_EXECUTOR, new Handler());
-        } else {
-            // If smart actions is not enabled use empty implementation.
-            mSmartActionsProvider = new ScreenshotNotificationSmartActionsProvider();
-        }
+        mSmartActionsProvider = screenshotNotificationSmartActionsProvider;
     }
 
     @Override

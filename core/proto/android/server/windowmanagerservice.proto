@@ -116,6 +116,7 @@ message KeyguardControllerProto {
     repeated KeyguardOccludedProto keyguard_occluded_states = 2 [deprecated=true];
     optional bool aod_showing = 3;
     repeated KeyguardPerDisplayProto keyguard_per_display = 4;
+    optional bool keyguard_going_away = 5;
 }
 
 message KeyguardOccludedProto {
@@ -132,6 +133,7 @@ message KeyguardPerDisplayProto {
     optional bool keyguard_showing = 2;
     optional bool aod_showing = 3;
     optional bool keyguard_occluded = 4;
+    optional bool keyguard_going_away = 5;
 }
 
 /* represents PhoneWindowManager */
@@ -577,7 +579,7 @@ message InsetsSourceProviderProto {
     optional WindowStateProto pending_control_target = 6;
     optional WindowStateProto fake_control_target = 7;
     optional .android.view.SurfaceControlProto captured_leash = 8;
-    optional .android.graphics.RectProto ime_overridden_frame = 9;
+    optional .android.graphics.RectProto ime_overridden_frame = 9 [deprecated=true];
     optional bool is_leash_ready_for_dispatching = 10;
     optional bool client_visible = 11;
     optional bool server_visible = 12;

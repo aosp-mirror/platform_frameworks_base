@@ -359,6 +359,11 @@ final class UiModeManagerService extends SystemService {
         SystemProperties.set(SYSTEM_PROPERTY_DEVICE_THEME, Integer.toString(mode));
     }
 
+    @VisibleForTesting
+    void setStartDreamImmediatelyOnDock(boolean startDreamImmediatelyOnDock) {
+        mStartDreamImmediatelyOnDock = startDreamImmediatelyOnDock;
+    }
+
     @Override
     public void onUserSwitching(@Nullable TargetUser from, @NonNull TargetUser to) {
         mCurrentUser = to.getUserIdentifier();
@@ -1824,7 +1829,8 @@ final class UiModeManagerService extends SystemService {
 
         // If we did not start a dock app, then start dreaming if appropriate.
         if (category != null && !dockAppStarted && (mStartDreamImmediatelyOnDock
-                || mKeyguardManager.isKeyguardLocked())) {
+                || mWindowManager.isKeyguardShowingAndNotOccluded()
+                || !mPowerManager.isInteractive())) {
             Sandman.startDreamWhenDockedIfAppropriate(getContext());
         }
     }

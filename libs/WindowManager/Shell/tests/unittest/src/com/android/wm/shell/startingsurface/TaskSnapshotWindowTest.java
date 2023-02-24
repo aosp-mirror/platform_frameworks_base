@@ -47,6 +47,7 @@ import android.window.TaskSnapshot;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 
 import org.junit.Test;
@@ -58,7 +59,7 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class TaskSnapshotWindowTest {
+public class TaskSnapshotWindowTest extends ShellTestCase {
 
     private TaskSnapshotWindow mWindow;
 

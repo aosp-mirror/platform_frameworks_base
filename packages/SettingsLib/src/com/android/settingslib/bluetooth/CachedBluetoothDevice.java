@@ -35,7 +35,6 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Pair;
@@ -81,8 +80,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private int mDeviceMode;
     private long mHiSyncId;
     private int mGroupId;
+
     // Need this since there is no method for getting RSSI
     short mRssi;
+
     // mProfiles and mRemovedProfiles does not do swap() between main and sub device. It is
     // because current sub device is only for HearingAid and its profile is the same.
     private final Collection<LocalBluetoothProfile> mProfiles = new CopyOnWriteArrayList<>();
@@ -398,6 +399,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     * @param id the group id from the CSIP.
     */
     public void setGroupId(int id) {
+        Log.d(TAG, this.getDevice().getAnonymizedAddress() + " set GroupId " + id);
         mGroupId = id;
     }
 
@@ -755,16 +757,23 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public boolean isBusy() {
-        synchronized (mProfileLock) {
-            for (LocalBluetoothProfile profile : mProfiles) {
-                int status = getProfileConnectionState(profile);
-                if (status == BluetoothProfile.STATE_CONNECTING
-                        || status == BluetoothProfile.STATE_DISCONNECTING) {
-                    return true;
-                }
+        for (CachedBluetoothDevice memberDevice : getMemberDevice()) {
+            if (isBusyState(memberDevice)) {
+                return true;
             }
-            return getBondState() == BluetoothDevice.BOND_BONDING;
         }
+        return isBusyState(this);
+    }
+
+    private boolean isBusyState(CachedBluetoothDevice device){
+        for (LocalBluetoothProfile profile : device.getProfiles()) {
+            int status = device.getProfileConnectionState(profile);
+            if (status == BluetoothProfile.STATE_CONNECTING
+                    || status == BluetoothProfile.STATE_DISCONNECTING) {
+                return true;
+            }
+        }
+        return device.getBondState() == BluetoothDevice.BOND_BONDING;
     }
 
     private boolean updateProfiles() {
@@ -1010,15 +1019,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (BluetoothUuid.containsAnyUuid(uuids, PbapServerProfile.PBAB_CLIENT_UUIDS)) {
             // The pairing dialog now warns of phone-book access for paired devices.
             // No separate prompt is displayed after pairing.
-            final BluetoothClass bluetoothClass = mDevice.getBluetoothClass();
-            if (mDevice.getPhonebookAccessPermission() == BluetoothDevice.ACCESS_UNKNOWN) {
-                if (bluetoothClass != null && (bluetoothClass.getDeviceClass()
-                        == BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE
-                        || bluetoothClass.getDeviceClass()
-                        == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET)) {
-                    EventLog.writeEvent(0x534e4554, "138529441", -1, "");
-                }
-            }
+            mDevice.getPhonebookAccessPermission();
         }
     }
 
@@ -1431,11 +1432,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * first connected device in the coordinated set, and then switch the content of the main
      * device and member devices.
      *
-     * @param prevMainDevice the previous Main device, it will be added into the member device set.
-     * @param newMainDevice the new Main device, it will be removed from the member device set.
+     * @param newMainDevice the new Main device which is from the previous main device's member
+     *                      list.
      */
-    public void switchMemberDeviceContent(CachedBluetoothDevice prevMainDevice,
-            CachedBluetoothDevice newMainDevice) {
+    public void switchMemberDeviceContent(CachedBluetoothDevice newMainDevice) {
         // Backup from main device
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
@@ -1444,8 +1444,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mDevice = newMainDevice.mDevice;
         mRssi = newMainDevice.mRssi;
         mJustDiscovered = newMainDevice.mJustDiscovered;
-        addMemberDevice(prevMainDevice);
-        mMemberDevices.remove(newMainDevice);
+
         // Set sub device from backup
         newMainDevice.mDevice = tmpDevice;
         newMainDevice.mRssi = tmpRssi;

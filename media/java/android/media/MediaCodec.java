@@ -2472,10 +2472,22 @@ final public class MediaCodec {
     /**
      * Thrown when a crypto error occurs while queueing a secure input buffer.
      */
-    public final static class CryptoException extends RuntimeException {
+    public final static class CryptoException extends RuntimeException
+            implements MediaDrmThrowable {
         public CryptoException(int errorCode, @Nullable String detailMessage) {
-            super(detailMessage);
+            this(detailMessage, errorCode, 0, 0, 0);
+        }
+
+        /**
+         * @hide
+         */
+        public CryptoException(String message, int errorCode, int vendorError, int oemError,
+                int errorContext) {
+            super(message);
             mErrorCode = errorCode;
+            mVendorError = vendorError;
+            mOemError = oemError;
+            mErrorContext = errorContext;
         }
 
         /**
@@ -2594,7 +2606,22 @@ final public class MediaCodec {
             return mErrorCode;
         }
 
-        private int mErrorCode;
+        @Override
+        public int getVendorError() {
+            return mVendorError;
+        }
+
+        @Override
+        public int getOemError() {
+            return mOemError;
+        }
+
+        @Override
+        public int getErrorContext() {
+            return mErrorContext;
+        }
+
+        private final int mErrorCode, mVendorError, mOemError, mErrorContext;
     }
 
     /**
@@ -3835,11 +3862,10 @@ final public class MediaCodec {
     private void invalidateByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index, boolean input) {
         if (buffers == null) {
-            if (index < 0) {
-                throw new IllegalStateException("index is negative (" + index + ")");
+            if (index >= 0) {
+                BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
+                indices.clear(index);
             }
-            BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
-            indices.clear(index);
         } else if (index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -3851,10 +3877,9 @@ final public class MediaCodec {
     private void validateInputByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index) {
         if (buffers == null) {
-            if (index < 0) {
-                throw new IllegalStateException("index is negative (" + index + ")");
+            if (index >= 0) {
+                mValidInputIndices.set(index);
             }
-            mValidInputIndices.set(index);
         } else if (index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {
@@ -3868,11 +3893,10 @@ final public class MediaCodec {
             @Nullable ByteBuffer[] buffers, int index, boolean input) {
         synchronized(mBufferLock) {
             if (buffers == null) {
-                if (index < 0) {
-                    throw new IllegalStateException("index is negative (" + index + ")");
+                if (index >= 0) {
+                    BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
+                    indices.set(index);
                 }
-                BitSet indices = input ? mValidInputIndices : mValidOutputIndices;
-                indices.set(index);
             } else if (index >= 0 && index < buffers.length) {
                 ByteBuffer buffer = buffers[index];
                 if (buffer != null) {
@@ -3885,10 +3909,9 @@ final public class MediaCodec {
     private void validateOutputByteBufferLocked(
             @Nullable ByteBuffer[] buffers, int index, @NonNull BufferInfo info) {
         if (buffers == null) {
-            if (index < 0) {
-                throw new IllegalStateException("index is negative (" + index + ")");
+            if (index >= 0) {
+                mValidOutputIndices.set(index);
             }
-            mValidOutputIndices.set(index);
         } else if (index >= 0 && index < buffers.length) {
             ByteBuffer buffer = buffers[index];
             if (buffer != null) {

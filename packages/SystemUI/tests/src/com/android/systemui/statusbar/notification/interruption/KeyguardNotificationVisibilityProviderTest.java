@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.interruption;
 
+import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.Notification.VISIBILITY_PUBLIC;
 import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -446,6 +447,54 @@ public class KeyguardNotificationVisibilityProviderTest  extends SysuiTestCase {
 
         // THEN do not filter out the entry
         assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void notificationVisibilityPublic() {
+        // GIVEN a VISIBILITY_PUBLIC notification
+        NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
+        entryBuilder.modifyNotification(mContext)
+                .setVisibility(VISIBILITY_PUBLIC);
+        mEntry = entryBuilder.build();
+
+        // WHEN we're in an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // THEN don't hide the entry based on visibility.
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void notificationVisibilityPrivate() {
+        // GIVEN a VISIBILITY_PRIVATE notification
+        NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
+        entryBuilder.modifyNotification(mContext)
+                .setVisibility(VISIBILITY_PRIVATE);
+        mEntry = entryBuilder.build();
+
+        // WHEN we're in an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // THEN don't hide the entry based on visibility. (Redaction is handled elsewhere.)
+        assertFalse(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
+    }
+
+    @Test
+    public void notificationVisibilitySecret() {
+        // GIVEN a VISIBILITY_SECRET notification
+        NotificationEntryBuilder entryBuilder = new NotificationEntryBuilder()
+                .setUser(new UserHandle(NOTIF_USER_ID));
+        entryBuilder.modifyNotification(mContext)
+                .setVisibility(VISIBILITY_SECRET);
+        mEntry = entryBuilder.build();
+
+        // WHEN we're in an 'unfiltered-keyguard-showing' state
+        setupUnfilteredState(mEntry);
+
+        // THEN hide the entry based on visibility.
+        assertTrue(mKeyguardNotificationVisibilityProvider.shouldHideNotification(mEntry));
     }
 
     @Test

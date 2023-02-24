@@ -50,12 +50,15 @@ import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.SurfaceUtils;
 
+import java.util.function.Consumer;
+
 /**
  * Handles split decor like showing resizing hint for a specific split.
  */
 public class SplitDecorManager extends WindowlessWindowManager {
     private static final String TAG = SplitDecorManager.class.getSimpleName();
     private static final String RESIZING_BACKGROUND_SURFACE_NAME = "ResizingBackground";
+    private static final String GAP_BACKGROUND_SURFACE_NAME = "GapBackground";
     private static final long FADE_DURATION = 133;
 
     private final IconProvider mIconProvider;
@@ -67,6 +70,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private SurfaceControl mHostLeash;
     private SurfaceControl mIconLeash;
     private SurfaceControl mBackgroundLeash;
+    private SurfaceControl mGapBackgroundLeash;
 
     private boolean mShown;
     private boolean mIsResizing;
@@ -141,6 +145,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
             t.remove(mBackgroundLeash);
             mBackgroundLeash = null;
         }
+        if (mGapBackgroundLeash != null) {
+            t.remove(mGapBackgroundLeash);
+            mGapBackgroundLeash = null;
+        }
         mHostLeash = null;
         mIcon = null;
         mResizingIconView = null;
@@ -150,7 +158,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Showing resizing hint. */
     public void onResizing(ActivityManager.RunningTaskInfo resizingTask, Rect newBounds,
-            SurfaceControl.Transaction t) {
+            Rect sideBounds, SurfaceControl.Transaction t) {
         if (mResizingIconView == null) {
             return;
         }
@@ -176,6 +184,19 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
 
+        if (mGapBackgroundLeash == null) {
+            final boolean isLandscape = newBounds.height() == sideBounds.height();
+            final int left = isLandscape ? mBounds.width() : 0;
+            final int top = isLandscape ? 0 : mBounds.height();
+            mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
+                    GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
+            // Fill up another side bounds area.
+            t.setColor(mGapBackgroundLeash, getResizingBackgroundColor(resizingTask))
+                    .setLayer(mGapBackgroundLeash, Integer.MAX_VALUE - 2)
+                    .setPosition(mGapBackgroundLeash, left, top)
+                    .setWindowCrop(mGapBackgroundLeash, sideBounds.width(), sideBounds.height());
+        }
+
         if (mIcon == null && resizingTask.topActivityInfo != null) {
             mIcon = mIconProvider.getIcon(resizingTask.topActivityInfo);
             mResizingIconView.setImageDrawable(mIcon);
@@ -193,7 +214,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                 newBounds.height() / 2 - mIconSize / 2);
 
         if (animate) {
-            startFadeAnimation(show, false /* isResized */);
+            startFadeAnimation(show, null /* finishedConsumer */);
             mShown = show;
         }
     }
@@ -224,14 +245,29 @@ public class SplitDecorManager extends WindowlessWindowManager {
             mFadeAnimator.cancel();
         }
         if (mShown) {
-            startFadeAnimation(false /* show */, true /* isResized */);
+            fadeOutDecor(null /* finishedCallback */);
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
         }
     }
 
-    private void startFadeAnimation(boolean show, boolean isResized) {
+    /** Fade-out decor surface with animation end callback, if decor is hidden, run the callback
+     * directly. */
+    public void fadeOutDecor(Runnable finishedCallback) {
+        if (mShown) {
+            startFadeAnimation(false /* show */, transaction -> {
+                releaseDecor(transaction);
+                if (finishedCallback != null) finishedCallback.run();
+            });
+            mShown = false;
+        } else {
+            if (finishedCallback != null) finishedCallback.run();
+        }
+    }
+
+    private void startFadeAnimation(boolean show,
+            Consumer<SurfaceControl.Transaction> finishedConsumer) {
         final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
         mFadeAnimator = ValueAnimator.ofFloat(0f, 1f);
         mFadeAnimator.setDuration(FADE_DURATION);
@@ -249,7 +285,9 @@ public class SplitDecorManager extends WindowlessWindowManager {
             @Override
             public void onAnimationStart(@NonNull Animator animation) {
                 if (show) {
-                    animT.show(mBackgroundLeash).show(mIconLeash).apply();
+                    animT.show(mBackgroundLeash).show(mIconLeash).show(mGapBackgroundLeash).apply();
+                } else {
+                    animT.hide(mGapBackgroundLeash).apply();
                 }
             }
 
@@ -263,8 +301,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
                         animT.hide(mIconLeash);
                     }
                 }
-                if (isResized) {
-                    releaseDecor(animT);
+                if (finishedConsumer != null) {
+                    finishedConsumer.accept(animT);
                 }
                 animT.apply();
                 animT.close();
@@ -278,6 +316,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (mBackgroundLeash != null) {
             t.remove(mBackgroundLeash);
             mBackgroundLeash = null;
+        }
+
+        if (mGapBackgroundLeash != null) {
+            t.remove(mGapBackgroundLeash);
+            mGapBackgroundLeash = null;
         }
 
         if (mIcon != null) {

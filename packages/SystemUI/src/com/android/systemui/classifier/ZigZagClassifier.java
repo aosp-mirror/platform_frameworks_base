@@ -137,8 +137,8 @@ class ZigZagClassifier extends FalsingClassifier {
             runningAbsDy += Math.abs(point.y - pY);
             pX = point.x;
             pY = point.y;
-            logDebug("(x, y, runningAbsDx, runningAbsDy) - (" + pX + ", " + pY + ", " + runningAbsDx
-                    + ", " + runningAbsDy + ")");
+            logVerbose("(x, y, runningAbsDx, runningAbsDy) - ("
+                    + pX + ", " + pY + ", " + runningAbsDx + ", " + runningAbsDy + ")");
         }
 
         float devianceX = runningAbsDx - actualDx;

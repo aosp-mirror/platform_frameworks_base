@@ -23,11 +23,18 @@
     <dimen name="status_view_margin_horizontal">124dp</dimen>
     <dimen name="keyguard_clock_top_margin">80dp</dimen>
     <dimen name="keyguard_status_view_bottom_margin">80dp</dimen>
-    <dimen name="bouncer_user_switcher_y_trans">90dp</dimen>
+    <dimen name="bouncer_user_switcher_y_trans">200dp</dimen>
 
+    <dimen name="large_screen_shade_header_left_padding">24dp</dimen>
     <dimen name="qqs_layout_padding_bottom">40dp</dimen>
 
     <dimen name="notification_panel_margin_horizontal">80dp</dimen>
     <dimen name="notification_side_paddings">40dp</dimen>
+
+    <!-- qs_tiles_page_horizontal_margin should be margin / 2, otherwise full space between two
+     pages is margin * 2, and that makes tiles page not appear immediately after user swipes to the
+     side -->
+    <dimen name="qs_tiles_page_horizontal_margin">60dp</dimen>
+
     <dimen name="notification_section_divider_height">16dp</dimen>
 </resources>

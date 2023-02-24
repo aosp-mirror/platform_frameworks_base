@@ -34,16 +34,18 @@ import android.hardware.fingerprint.ISidefpsController
 import android.os.Handler
 import android.util.Log
 import android.util.RotationUtils
-import android.view.View.AccessibilityDelegate
-import android.view.accessibility.AccessibilityEvent
 import android.view.Display
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Surface
 import android.view.View
+import android.view.View.AccessibilityDelegate
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
+import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+import android.view.accessibility.AccessibilityEvent
 import androidx.annotation.RawRes
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieProperty
@@ -70,13 +72,12 @@ class SidefpsController @Inject constructor(
     private val activityTaskManager: ActivityTaskManager,
     overviewProxyService: OverviewProxyService,
     displayManager: DisplayManager,
-    @Main mainExecutor: DelayableExecutor,
+    @Main private val mainExecutor: DelayableExecutor,
     @Main private val handler: Handler
 ) {
     @VisibleForTesting
     val sensorProps: FingerprintSensorPropertiesInternal = fingerprintManager
-        ?.sensorPropertiesInternal
-        ?.firstOrNull { it.isAnySidefpsType }
+        ?.sideFpsSensorProperties
         ?: throw IllegalStateException("no side fingerprint sensor")
 
     @VisibleForTesting
@@ -131,27 +132,36 @@ class SidefpsController @Inject constructor(
         fitInsetsTypes = 0 // overrides default, avoiding status bars during layout
         gravity = Gravity.TOP or Gravity.LEFT
         layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        privateFlags = WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
+        privateFlags = PRIVATE_FLAG_TRUSTED_OVERLAY or PRIVATE_FLAG_NO_MOVE_ANIMATION
     }
 
     init {
-        fingerprintManager?.setSidefpsController(object : ISidefpsController.Stub() {
-            override fun show(
-                sensorId: Int,
-                @BiometricOverlayConstants.ShowReason reason: Int
-            ) = if (reason.isReasonToShow(activityTaskManager)) doShow() else hide(sensorId)
+        fingerprintManager?.setSidefpsController(
+            object : ISidefpsController.Stub() {
+                override fun show(
+                    sensorId: Int,
+                    @BiometricOverlayConstants.ShowReason reason: Int
+                ) = if (reason.isReasonToShow(activityTaskManager)) show() else hide()
 
-            private fun doShow() = mainExecutor.execute {
-                if (overlayView == null) {
-                    createOverlayForDisplay()
-                } else {
-                    Log.v(TAG, "overlay already shown")
-                }
-            }
-
-            override fun hide(sensorId: Int) = mainExecutor.execute { overlayView = null }
-        })
+                override fun hide(sensorId: Int) = hide()
+            })
         overviewProxyService.addCallback(overviewProxyListener)
+    }
+
+    /** Shows the side fps overlay if not already shown. */
+    fun show() {
+        mainExecutor.execute {
+            if (overlayView == null) {
+                createOverlayForDisplay()
+            } else {
+                Log.v(TAG, "overlay already shown")
+            }
+        }
+    }
+
+    /** Hides the fps overlay if shown. */
+    fun hide() {
+        mainExecutor.execute { overlayView = null }
     }
 
     private fun onOrientationChanged() {
@@ -265,6 +275,12 @@ class SidefpsController @Inject constructor(
         }
     }
 }
+
+private val FingerprintManager?.sideFpsSensorProperties: FingerprintSensorPropertiesInternal?
+    get() = this?.sensorPropertiesInternal?.firstOrNull { it.isAnySidefpsType }
+
+/** Returns [True] when the device has a side fingerprint sensor. */
+fun FingerprintManager?.hasSideFpsSensor(): Boolean = this?.sideFpsSensorProperties != null
 
 @BiometricOverlayConstants.ShowReason
 private fun Int.isReasonToShow(activityTaskManager: ActivityTaskManager): Boolean = when (this) {

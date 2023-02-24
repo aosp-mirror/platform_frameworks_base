@@ -20,6 +20,7 @@ android_test {
     ],
 
     static_libs: [
+        "frameworks-base-testutils",
         "services.accessibility",
         "services.core",
         "services.devicepolicy",
@@ -32,6 +33,7 @@ android_test {
         "platformprotosnano",
         "statsdprotolite",
         "hamcrest-library",
+        "servicestests-utils",
         "testables",
         "truth-prebuilt",
         // TODO: remove once Android migrates to JUnit 4.12,

@@ -162,7 +162,9 @@ public interface Complication {
             COMPLICATION_TYPE_DATE,
             COMPLICATION_TYPE_WEATHER,
             COMPLICATION_TYPE_AIR_QUALITY,
-            COMPLICATION_TYPE_CAST_INFO
+            COMPLICATION_TYPE_CAST_INFO,
+            COMPLICATION_TYPE_HOME_CONTROLS,
+            COMPLICATION_TYPE_SMARTSPACE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ComplicationType {}
@@ -173,6 +175,8 @@ public interface Complication {
     int COMPLICATION_TYPE_WEATHER = 1 << 2;
     int COMPLICATION_TYPE_AIR_QUALITY = 1 << 3;
     int COMPLICATION_TYPE_CAST_INFO = 1 << 4;
+    int COMPLICATION_TYPE_HOME_CONTROLS = 1 << 5;
+    int COMPLICATION_TYPE_SMARTSPACE = 1 << 6;
 
     /**
      * The {@link Host} interface specifies a way a {@link Complication} to communicate with its

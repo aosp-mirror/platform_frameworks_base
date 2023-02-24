@@ -33,6 +33,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.user.UserSwitchDialogController;
+import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.UserSwitcherActivity;
 import com.android.systemui.util.ViewController;
@@ -40,6 +41,7 @@ import com.android.systemui.util.ViewController;
 import javax.inject.Inject;
 
 /** View Controller for {@link MultiUserSwitch}. */
+// TODO(b/242040009): Remove this file.
 public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     private final UserManager mUserManager;
     private final UserSwitcherController mUserSwitcherController;
@@ -48,7 +50,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     private final ActivityStarter mActivityStarter;
     private final FeatureFlags mFeatureFlags;
 
-    private UserSwitcherController.BaseUserAdapter mUserListener;
+    private BaseUserSwitcherAdapter mUserListener;
 
     private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -134,7 +136,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
 
             final UserSwitcherController controller = mUserSwitcherController;
             if (controller != null) {
-                mUserListener = new UserSwitcherController.BaseUserAdapter(controller) {
+                mUserListener = new BaseUserSwitcherAdapter(controller) {
                     @Override
                     public void notifyDataSetChanged() {
                         mView.refreshContentDescription(getCurrentUser());

@@ -328,10 +328,12 @@ java_library {
 
 java_library {
     name: "android_test_stubs_current",
-    // Modules do not have test APIs, but we want to include their SystemApis, like we include
-    // the SystemApi of framework-non-updatable-sources.
     static_libs: [
-        "all-modules-system-stubs",
+        // Updatable modules do not have test APIs, but we want to include their SystemApis, like we
+        // include the SystemApi of framework-non-updatable-sources.
+        "all-updatable-modules-system-stubs",
+        // Non-updatable modules on the other hand can have test APIs, so include their test-stubs.
+        "all-non-updatable-modules-test-stubs",
         "android-non-updatable.stubs.test",
         "private-stub-annotations-jar",
     ],
@@ -373,6 +375,67 @@ java_library {
     java_version: "1.8",
     dist: {
         dir: "apistubs/android/system-server",
+    },
+}
+
+java_library {
+    name: "android_stubs_private_jar",
+    defaults: ["android.jar_defaults"],
+    visibility: [
+        "//visibility:override",
+        "//visibility:private",
+    ],
+    static_libs: [
+        "stable.core.platform.api.stubs",
+        "core-lambda-stubs-for-system-modules",
+        "core-generated-annotation-stubs",
+        "framework",
+        "ext",
+        "framework-res-package-jar",
+        // The order of this matters, it has to be last to provide a
+        // package-private androidx.annotation.RecentlyNonNull without
+        // overriding the public android.annotation.Nullable in framework.jar
+        // with its own package-private android.annotation.Nullable.
+        "private-stub-annotations-jar",
+    ],
+}
+
+java_genrule {
+    name: "android_stubs_private_hjar",
+    visibility: ["//visibility:private"],
+    srcs: [":android_stubs_private_jar{.hjar}"],
+    out: ["android_stubs_private.jar"],
+    cmd: "cp $(in) $(out)",
+}
+
+java_library {
+    name: "android_stubs_private",
+    defaults: ["android_stubs_dists_default"],
+    visibility: ["//visibility:private"],
+    sdk_version: "none",
+    system_modules: "none",
+    static_libs: ["android_stubs_private_hjar"],
+    dist: {
+        dir: "apistubs/android/private",
+    },
+}
+
+java_genrule {
+    name: "android_stubs_private_framework_aidl",
+    visibility: ["//visibility:private"],
+    tools: ["sdkparcelables"],
+    srcs: [":android_stubs_private"],
+    out: ["framework.aidl"],
+    cmd: "rm -f $(genDir)/framework.aidl.merged && " +
+        "for i in $(in); do " +
+        "  rm -f $(genDir)/framework.aidl.tmp && " +
+        "  $(location sdkparcelables) $$i $(genDir)/framework.aidl.tmp && " +
+        "  cat $(genDir)/framework.aidl.tmp >> $(genDir)/framework.aidl.merged; " +
+        "done && " +
+        "sort -u $(genDir)/framework.aidl.merged > $(out)",
+    dist: {
+        targets: ["sdk"],
+        dir: "apistubs/android/private",
     },
 }
 
@@ -467,17 +530,24 @@ droidstubs {
     extensions_info_file: ":sdk-extensions-info",
 }
 
+// This module can be built with:
+// m out/soong/.intermediates/frameworks/base/api_versions_module_lib/android_common/metalava/api-versions.xml
 droidstubs {
     name: "api_versions_module_lib",
     srcs: [":android_module_stubs_current_with_test_libs{.jar}"],
     generate_stubs: false,
     api_levels_annotations_enabled: true,
+    // this only has the non-updatable portions of the module lib sdk,
+    // which can reference classes from updatable apexes, so remove references to them
+    // from this api_versions file.
+    flags: ["--remove-missing-class-references-in-api-levels"],
     api_levels_annotations_dirs: [
         "sdk-dir",
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "module-lib",
-    extensions_info_file: ":sdk-extensions-info",
+    // extensions_info_file is purposefully omitted, because this module should just be
+    // the non-updatable portions of the sdk, and extension sdks are updatable.
 }
 
 droidstubs {
@@ -485,12 +555,17 @@ droidstubs {
     srcs: [":android_system_server_stubs_current_with_test_libs{.jar}"],
     generate_stubs: false,
     api_levels_annotations_enabled: true,
+    // this only has the non-updatable portions of the system server sdk,
+    // which can reference classes from updatable apexes, so remove references to them
+    // from this api_versions file.
+    flags: ["--remove-missing-class-references-in-api-levels"],
     api_levels_annotations_dirs: [
         "sdk-dir",
         "api-versions-jars-dir",
     ],
     api_levels_sdk_type: "system-server",
-    extensions_info_file: ":sdk-extensions-info",
+    // extensions_info_file is purposefully omitted, because this module should just be
+    // the non-updatable portions of the sdk, and extension sdks are updatable.
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -534,4 +609,13 @@ java_library {
         ":hwbinder-stubs-docs",
     ],
     visibility: ["//visibility:public"],
+}
+
+java_api_contribution {
+    name: "frameworks-base-core-api-module-lib-stubs",
+    api_surface: "module-lib",
+    api_file: "core/api/module-lib-current.txt",
+    visibility: [
+        "//build/orchestrator/apis",
+    ],
 }

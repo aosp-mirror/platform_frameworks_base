@@ -107,7 +107,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__ADJUST_VOLUME,
-                getInteractionDeviceType(source));
+                getInteractionDeviceType(source),
+                getLoggingPackageName());
     }
 
     /**
@@ -121,7 +122,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__STOP_CASTING,
-                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE);
+                SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__TARGET__UNKNOWN_TYPE,
+                getLoggingPackageName());
     }
 
     /**
@@ -135,7 +137,8 @@ public class MediaOutputMetricLogger {
         SysUiStatsLog.write(
                 SysUiStatsLog.MEDIAOUTPUT_OP_INTERACTION_REPORT,
                 SysUiStatsLog.MEDIA_OUTPUT_OP_INTERACTION_REPORTED__INTERACTION_TYPE__EXPANSION,
-                getInteractionDeviceType(source));
+                getInteractionDeviceType(source),
+                getLoggingPackageName());
     }
 
     /**

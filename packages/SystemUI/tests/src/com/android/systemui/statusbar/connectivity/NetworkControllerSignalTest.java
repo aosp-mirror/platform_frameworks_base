@@ -43,6 +43,7 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.util.CarrierConfigTracker;
 
@@ -84,9 +85,10 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mDemoModeController,
                 mCarrierConfigTracker,
                 mWifiStatusTrackerFactory,
+                mMobileFactory,
                 mMainHandler,
-                mFeatureFlags,
-                mock(DumpManager.class)
+                mock(DumpManager.class),
+                mock(LogBuffer.class)
         );
         TestableLooper.get(this).processAllMessages();
 
@@ -100,7 +102,8 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         when(mMockProvisionController.isCurrentUserSetup()).thenReturn(true);
 
         // WHEN - a NetworkController is created
-        mNetworkController = new NetworkControllerImpl(mContext,
+        mNetworkController = new NetworkControllerImpl(
+                mContext,
                 mMockCm,
                 mMockTm,
                 mTelephonyListenerManager,
@@ -118,10 +121,10 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
                 mDemoModeController,
                 mCarrierConfigTracker,
                 mWifiStatusTrackerFactory,
+                mMobileFactory,
                 mMainHandler,
-                mFeatureFlags,
-                mock(DumpManager.class)
-        );
+                mock(DumpManager.class),
+                mock(LogBuffer.class));
         TestableLooper.get(this).processAllMessages();
 
         // THEN - NetworkController claims the user is not setup
@@ -133,15 +136,29 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         when(mMockTm.isDataCapable()).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
-                mTelephonyListenerManager, mMockWm, mMockSm, mConfig,
-                Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class),
+        mNetworkController = new NetworkControllerImpl(
+                mContext,
+                mMockCm,
+                mMockTm,
+                mTelephonyListenerManager,
+                mMockWm,
+                mMockSm,
+                mConfig,
+                Looper.getMainLooper(),
+                mFakeExecutor,
+                mCallbackHandler,
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class),
+                mMockSubDefaults,
+                mock(DeviceProvisionedController.class),
+                mMockBd,
+                mDemoModeController,
+                mock(CarrierConfigTracker.class),
                 mWifiStatusTrackerFactory,
-                mMainHandler, mFeatureFlags,
-                mock(DumpManager.class));
+                mMobileFactory,
+                mMainHandler,
+                mock(DumpManager.class),
+                mock(LogBuffer.class));
         setupNetworkController();
 
         verifyLastMobileDataIndicators(false, -1, 0);
@@ -156,14 +173,29 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         when(mMockTm.getServiceState()).thenReturn(mServiceState);
         when(mMockSm.getCompleteActiveSubscriptionInfoList()).thenReturn(Collections.emptyList());
 
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
-                mTelephonyListenerManager, mMockWm, mMockSm, mConfig,
-                Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class),
+        mNetworkController = new NetworkControllerImpl(
+                mContext,
+                mMockCm,
+                mMockTm,
+                mTelephonyListenerManager,
+                mMockWm,
+                mMockSm,
+                mConfig,
+                Looper.getMainLooper(),
+                mFakeExecutor,
+                mCallbackHandler,
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class),
+                mMockSubDefaults,
+                mock(DeviceProvisionedController.class),
+                mMockBd,
+                mDemoModeController,
+                mock(CarrierConfigTracker.class),
                 mWifiStatusTrackerFactory,
-                mMainHandler, mFeatureFlags, mock(DumpManager.class));
+                mMobileFactory,
+                mMainHandler,
+                mock(DumpManager.class),
+                mock(LogBuffer.class));
         mNetworkController.registerListeners();
 
         // Wait for the main looper to execute the previous command
@@ -226,14 +258,29 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
         // Turn off mobile network support.
         when(mMockTm.isDataCapable()).thenReturn(false);
         // Create a new NetworkController as this is currently handled in constructor.
-        mNetworkController = new NetworkControllerImpl(mContext, mMockCm, mMockTm,
-                mTelephonyListenerManager, mMockWm, mMockSm, mConfig,
-                Looper.getMainLooper(), mFakeExecutor, mCallbackHandler,
-                mock(AccessPointControllerImpl.class), mock(DataUsageController.class),
-                mMockSubDefaults, mock(DeviceProvisionedController.class), mMockBd,
-                mDemoModeController, mock(CarrierConfigTracker.class),
+        mNetworkController = new NetworkControllerImpl(
+                mContext,
+                mMockCm,
+                mMockTm,
+                mTelephonyListenerManager,
+                mMockWm,
+                mMockSm,
+                mConfig,
+                Looper.getMainLooper(),
+                mFakeExecutor,
+                mCallbackHandler,
+                mock(AccessPointControllerImpl.class),
+                mock(DataUsageController.class),
+                mMockSubDefaults,
+                mock(DeviceProvisionedController.class),
+                mMockBd,
+                mDemoModeController,
+                mock(CarrierConfigTracker.class),
                 mWifiStatusTrackerFactory,
-                mMainHandler, mFeatureFlags, mock(DumpManager.class));
+                mMobileFactory,
+                mMainHandler,
+                mock(DumpManager.class),
+                mock(LogBuffer.class));
         setupNetworkController();
 
         // No Subscriptions.

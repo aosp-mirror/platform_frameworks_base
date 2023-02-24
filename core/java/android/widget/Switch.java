@@ -61,22 +61,32 @@ import android.widget.RemoteViews.RemoteView;
 import com.android.internal.R;
 
 /**
- * A Switch is a two-state toggle switch widget that can select between two
- * options. The user may drag the "thumb" back and forth to choose the selected option,
- * or simply tap to toggle as if it were a checkbox. The {@link #setText(CharSequence) text}
- * property controls the text displayed in the label for the switch, whereas the
- * {@link #setTextOff(CharSequence) off} and {@link #setTextOn(CharSequence) on} text
- * controls the text on the thumb. Similarly, the
- * {@link #setTextAppearance(android.content.Context, int) textAppearance} and the related
- * setTypeface() methods control the typeface and style of label text, whereas the
- * {@link #setSwitchTextAppearance(android.content.Context, int) switchTextAppearance} and
- * the related setSwitchTypeface() methods control that of the thumb.
+ * A Switch is a two-state toggle widget. Users can drag the switch "thumb" back
+ * and forth to select either of two options or simply tap the switch to toggle
+ * between options.
  *
- * <p>{@link androidx.recyclerview.widget.RecyclerView} is a version of
- * the Switch widget which runs on devices back to API 7.</p>
+ * <p>The {@link #setText(CharSequence) text} property controls
+ * the text of the switch label. The {@link #setTextOn(CharSequence) textOn} and
+ * {@link #setTextOff(CharSequence) textOff} properties control the text of the
+ * thumb. The {@link #setTextAppearance(int) textAppearance} property and the
+ * related {@link #setTypeface(android.graphics.Typeface) setTypeface()} methods
+ * control the typeface and style of the switch label. The
+ * {@link #setSwitchTextAppearance(android.content.Context, int)
+ * switchTextAppearance} property and the related
+ * {@link #setSwitchTypeface(android.graphics.Typeface) setSwitchTypeface()}
+ * methods control the typeface and style of the thumb text.</p>
  *
- * <p>See the <a href="{@docRoot}guide/topics/ui/controls/togglebutton.html">Toggle Buttons</a>
- * guide.</p>
+ * <p class="note"><b>Note:</b> The thumb text is displayed only if the
+ * <a href="{@docRoot}reference/android/widget/Switch#attr_android:showText">
+ * <code>showText</code></a> attribute is set to {@code true}. See also
+ * {@link #setShowText(boolean)} and {@link #getShowText()}.</p>
+ *
+ * <p>{@link androidx.appcompat.widget.SwitchCompat} provides backward
+ * compatibility down to Android 4.0 (API level 14).</p>
+ *
+ * <p>For more information, see the
+ * <a href="{@docRoot}guide/topics/ui/controls/togglebutton.html">
+ * Toggle Buttons</a> guide.</p>
  *
  * @attr ref android.R.styleable#Switch_textOn
  * @attr ref android.R.styleable#Switch_textOff
