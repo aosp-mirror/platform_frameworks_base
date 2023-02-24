@@ -29,6 +29,7 @@ import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_INDEX
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_COLOR_SOURCE;
 import static com.android.systemui.theme.ThemeOverlayApplier.TIMESTAMP_FIELD;
 
+import android.app.UiModeManager;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager;
 import android.app.WallpaperManager.OnColorsChangedListener;
@@ -54,7 +55,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
@@ -140,8 +140,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private boolean mNeedsOverlayCreation;
     // Dominant color extracted from wallpaper, NOT the color used on the overlay
     protected int mMainWallpaperColor = Color.TRANSPARENT;
-    // UI contrast as reported by AccessibilityManager
-    private float mUiContrast = 0;
+    // UI contrast as reported by UiModeManager
+    private float mContrast = 0;
     // Theme variant: Vibrant, Tonal, Expressive, etc
     @VisibleForTesting
     protected Style mThemeStyle = Style.TONAL_SPOT;
@@ -158,7 +158,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final SparseArray<WallpaperColors> mDeferredWallpaperColors = new SparseArray<>();
     private final SparseIntArray mDeferredWallpaperColorsFlags = new SparseIntArray();
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final AccessibilityManager mAccessibilityManager;
+    private final UiModeManager mUiModeManager;
     private DynamicScheme mDynamicSchemeDark;
     private DynamicScheme mDynamicSchemeLight;
 
@@ -392,7 +392,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             FeatureFlags featureFlags,
             @Main Resources resources,
             WakefulnessLifecycle wakefulnessLifecycle,
-            AccessibilityManager accessibilityManager) {
+            UiModeManager uiModeManager) {
         mContext = context;
         mIsMonochromaticEnabled = featureFlags.isEnabled(Flags.MONOCHROMATIC_THEME);
         mIsMonetEnabled = featureFlags.isEnabled(Flags.MONET);
@@ -408,7 +408,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         mUserTracker = userTracker;
         mResources = resources;
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mAccessibilityManager = accessibilityManager;
+        mUiModeManager = uiModeManager;
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -445,9 +445,9 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                     }
                 },
                 UserHandle.USER_ALL);
-        mUiContrast = mAccessibilityManager.getUiContrast();
-        mAccessibilityManager.addUiContrastChangeListener(mMainExecutor, uiContrast -> {
-            mUiContrast = uiContrast;
+        mContrast = mUiModeManager.getContrast();
+        mUiModeManager.addContrastChangeListener(mMainExecutor, contrast -> {
+            mContrast = contrast;
             // Force reload so that we update even when the main color has not changed
             reevaluateSystemTheme(true /* forceReload */);
         });
@@ -586,9 +586,9 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         mSecondaryOverlay = createAccentOverlay();
 
         mDynamicSchemeDark = dynamicSchemeFromStyle(
-                mThemeStyle, color, true /* isDark */, mUiContrast);
+                mThemeStyle, color, true /* isDark */, mContrast);
         mDynamicSchemeLight = dynamicSchemeFromStyle(
-                mThemeStyle, color, false /* isDark */, mUiContrast);
+                mThemeStyle, color, false /* isDark */, mContrast);
         mDynamicOverlay = createDynamicOverlay();
     }
 
