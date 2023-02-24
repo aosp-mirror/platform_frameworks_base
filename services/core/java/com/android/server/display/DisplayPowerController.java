@@ -885,7 +885,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean isInTransition = mLogicalDisplay.isInTransitionLocked();
         final String brightnessThrottlingDataId =
                 mLogicalDisplay.getBrightnessThrottlingDataIdLocked();
-        mHandler.post(() -> {
+        mHandler.postAtTime(() -> {
             boolean changed = false;
             if (mDisplayDevice != device) {
                 changed = true;
@@ -916,7 +916,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             if (changed) {
                 updatePowerState();
             }
-        });
+        }, mClock.uptimeMillis());
     }
 
     /**
@@ -938,10 +938,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             if (mAutomaticBrightnessController != null) {
                 mAutomaticBrightnessController.stop();
-            }
-
-            if (mScreenOffBrightnessSensorController != null) {
-                mScreenOffBrightnessSensorController.stop();
             }
 
             if (mBrightnessSetting != null) {
@@ -1190,6 +1186,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
             if (mScreenOffBrightnessSensorController != null) {
                 mScreenOffBrightnessSensorController.stop();
+                mScreenOffBrightnessSensorController = null;
             }
             loadScreenOffBrightnessSensor();
             int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
@@ -1310,6 +1307,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (mPowerState != null) {
             mPowerState.stop();
             mPowerState = null;
+        }
+
+        if (mScreenOffBrightnessSensorController != null) {
+            mScreenOffBrightnessSensorController.stop();
         }
     }
 

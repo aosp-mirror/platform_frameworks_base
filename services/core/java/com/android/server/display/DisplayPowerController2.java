@@ -729,7 +729,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         final String brightnessThrottlingDataId =
                 mLogicalDisplay.getBrightnessThrottlingDataIdLocked();
 
-        mHandler.post(() -> {
+        mHandler.postAtTime(() -> {
             boolean changed = false;
             if (mDisplayDevice != device) {
                 changed = true;
@@ -761,7 +761,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             if (changed) {
                 updatePowerState();
             }
-        });
+        }, mClock.uptimeMillis());
     }
 
     /**
@@ -1028,6 +1028,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
             mBrightnessEventRingBuffer =
                     new RingBuffer<>(BrightnessEvent.class, RINGBUFFER_MAX);
 
+            if (mScreenOffBrightnessSensorController != null) {
+                mScreenOffBrightnessSensorController.stop();
+                mScreenOffBrightnessSensorController = null;
+            }
             loadScreenOffBrightnessSensor();
             int[] sensorValueToLux = mDisplayDeviceConfig.getScreenOffBrightnessSensorValueToLux();
             if (mScreenOffBrightnessSensor != null && sensorValueToLux != null) {
@@ -1132,6 +1136,10 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         if (mPowerState != null) {
             mPowerState.stop();
             mPowerState = null;
+        }
+
+        if (mScreenOffBrightnessSensorController != null) {
+            mScreenOffBrightnessSensorController.stop();
         }
     }
 
