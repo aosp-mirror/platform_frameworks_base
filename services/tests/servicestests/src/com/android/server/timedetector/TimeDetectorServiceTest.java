@@ -386,16 +386,16 @@ public class TimeDetectorServiceTest {
                 .when(mMockContext).enforceCallingPermission(anyString(), any());
 
         assertThrows(SecurityException.class,
-                () -> mTimeDetectorService.clearNetworkTime());
+                () -> mTimeDetectorService.clearLatestNetworkTime());
         verify(mMockContext).enforceCallingPermission(
                 eq(android.Manifest.permission.SET_TIME), anyString());
     }
 
     @Test
-    public void testClearNetworkTime() throws Exception {
+    public void testClearLatestNetworkSuggestion() throws Exception {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
-        mTimeDetectorService.clearNetworkTime();
+        mTimeDetectorService.clearLatestNetworkTime();
 
         verify(mMockContext).enforceCallingPermission(
                 eq(android.Manifest.permission.SET_TIME), anyString());
@@ -403,53 +403,48 @@ public class TimeDetectorServiceTest {
     }
 
     @Test
-    public void testLatestNetworkTime() {
-        NtpTrustedTime.TimeResult latestNetworkTime = new NtpTrustedTime.TimeResult(
-                1234L, 54321L, 999, InetSocketAddress.createUnresolved("test.timeserver", 123));
-        when(mMockNtpTrustedTime.getCachedTimeResult())
-                .thenReturn(latestNetworkTime);
-        UnixEpochTime expected = new UnixEpochTime(
-                latestNetworkTime.getElapsedRealtimeMillis(), latestNetworkTime.getTimeMillis());
-        assertEquals(expected, mTimeDetectorService.latestNetworkTime());
-    }
-
-    @Test
-    public void testLatestNetworkTime_noTimeAvailable() {
-        when(mMockNtpTrustedTime.getCachedTimeResult()).thenReturn(null);
-        assertThrows(ParcelableException.class, () -> mTimeDetectorService.latestNetworkTime());
-    }
-
-    @Test
     public void testGetLatestNetworkSuggestion() {
-        if (TimeDetectorNetworkTimeHelper.isInUse()) {
-            NetworkTimeSuggestion latestNetworkTime = createNetworkTimeSuggestion();
-            mFakeTimeDetectorStrategySpy.setLatestNetworkTime(latestNetworkTime);
+        NetworkTimeSuggestion latestNetworkSuggestion = createNetworkTimeSuggestion();
+        mFakeTimeDetectorStrategySpy.setLatestNetworkTime(latestNetworkSuggestion);
 
-            assertEquals(latestNetworkTime, mTimeDetectorService.getLatestNetworkSuggestion());
+        assertEquals(latestNetworkSuggestion, mTimeDetectorService.getLatestNetworkSuggestion());
+    }
+
+    @Test
+    public void testGetLatestNetworkSuggestion_noTimeAvailable() {
+        mFakeTimeDetectorStrategySpy.setLatestNetworkTime(null);
+
+        assertNull(mTimeDetectorService.getLatestNetworkSuggestion());
+    }
+
+    @Test
+    public void testLatestNetworkTime() {
+        if (TimeDetectorNetworkTimeHelper.isInUse()) {
+            NetworkTimeSuggestion latestNetworkSuggestion = createNetworkTimeSuggestion();
+            mFakeTimeDetectorStrategySpy.setLatestNetworkTime(latestNetworkSuggestion);
+
+            assertEquals(latestNetworkSuggestion.getUnixEpochTime(),
+                    mTimeDetectorService.latestNetworkTime());
         } else {
             NtpTrustedTime.TimeResult latestNetworkTime = new NtpTrustedTime.TimeResult(
                     1234L, 54321L, 999, InetSocketAddress.createUnresolved("test.timeserver", 123));
             when(mMockNtpTrustedTime.getCachedTimeResult())
                     .thenReturn(latestNetworkTime);
-            UnixEpochTime expectedUnixEpochTime = new UnixEpochTime(
+            UnixEpochTime expected = new UnixEpochTime(
                     latestNetworkTime.getElapsedRealtimeMillis(),
                     latestNetworkTime.getTimeMillis());
-            NetworkTimeSuggestion expected = new NetworkTimeSuggestion(
-                    expectedUnixEpochTime, latestNetworkTime.getUncertaintyMillis());
-            assertEquals(expected, mTimeDetectorService.getLatestNetworkSuggestion());
+            assertEquals(expected, mTimeDetectorService.latestNetworkTime());
         }
     }
 
     @Test
-    public void testGetLatestNetworkSuggestion_noTimeAvailable() {
+    public void testLatestNetworkTime_noTimeAvailable() {
         if (TimeDetectorNetworkTimeHelper.isInUse()) {
             mFakeTimeDetectorStrategySpy.setLatestNetworkTime(null);
-
-            assertNull(mTimeDetectorService.getLatestNetworkSuggestion());
         } else {
             when(mMockNtpTrustedTime.getCachedTimeResult()).thenReturn(null);
-            assertNull(mTimeDetectorService.getLatestNetworkSuggestion());
         }
+        assertThrows(ParcelableException.class, () -> mTimeDetectorService.latestNetworkTime());
     }
 
     @Test
