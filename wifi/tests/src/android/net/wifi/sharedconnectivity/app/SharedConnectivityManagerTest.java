@@ -22,11 +22,8 @@ import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TAB
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
 import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
@@ -49,6 +46,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -110,7 +108,7 @@ public class SharedConnectivityManagerTest {
     public void resourcesNotDefined() {
         when(mResources.getString(anyInt())).thenThrow(new Resources.NotFoundException());
 
-        assertNull(SharedConnectivityManager.create(mContext));
+        assertThat(SharedConnectivityManager.create(mContext)).isNull();
     }
 
     /**
@@ -183,7 +181,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertFalse(manager.unregisterCallback(mClientCallback));
+        assertThat(manager.unregisterCallback(mClientCallback)).isFalse();
     }
 
     @Test
@@ -191,7 +189,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
 
-        assertFalse(manager.unregisterCallback(mClientCallback));
+        assertThat(manager.unregisterCallback(mClientCallback)).isFalse();
     }
 
     @Test
@@ -201,7 +199,7 @@ public class SharedConnectivityManagerTest {
 
         manager.registerCallback(mExecutor, mClientCallback);
 
-        assertTrue(manager.unregisterCallback(mClientCallback));
+        assertThat(manager.unregisterCallback(mClientCallback)).isTrue();
         verify(mService).unregisterCallback(any());
     }
 
@@ -213,7 +211,7 @@ public class SharedConnectivityManagerTest {
         manager.registerCallback(mExecutor, mClientCallback);
         manager.unregisterCallback(mClientCallback);
 
-        assertFalse(manager.unregisterCallback(mClientCallback));
+        assertThat(manager.unregisterCallback(mClientCallback)).isFalse();
     }
 
     @Test
@@ -224,7 +222,7 @@ public class SharedConnectivityManagerTest {
         manager.registerCallback(mExecutor, mClientCallback);
         manager.unregisterCallback(mClientCallback);
 
-        assertFalse(manager.unregisterCallback(mClientCallback));
+        assertThat(manager.unregisterCallback(mClientCallback)).isFalse();
     }
 
     @Test
@@ -234,7 +232,7 @@ public class SharedConnectivityManagerTest {
 
         doThrow(new RemoteException()).when(mService).unregisterCallback(any());
 
-        assertFalse(manager.unregisterCallback(mClientCallback));
+        assertThat(manager.unregisterCallback(mClientCallback)).isFalse();
     }
 
     /**
@@ -294,7 +292,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertFalse(manager.connectTetherNetwork(network));
+        assertThat(manager.connectTetherNetwork(network)).isFalse();
     }
 
     @Test
@@ -315,7 +313,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).connectTetherNetwork(network);
 
-        assertFalse(manager.connectTetherNetwork(network));
+        assertThat(manager.connectTetherNetwork(network)).isFalse();
     }
 
     /**
@@ -327,7 +325,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertFalse(manager.disconnectTetherNetwork(network));
+        assertThat(manager.disconnectTetherNetwork(network)).isFalse();
     }
 
     @Test
@@ -348,7 +346,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).disconnectTetherNetwork(any());
 
-        assertFalse(manager.disconnectTetherNetwork(network));
+        assertThat(manager.disconnectTetherNetwork(network)).isFalse();
     }
 
     /**
@@ -360,7 +358,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertFalse(manager.connectKnownNetwork(network));
+        assertThat(manager.connectKnownNetwork(network)).isFalse();
     }
 
     @Test
@@ -381,7 +379,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).connectKnownNetwork(network);
 
-        assertFalse(manager.connectKnownNetwork(network));
+        assertThat(manager.connectKnownNetwork(network)).isFalse();
     }
 
     /**
@@ -393,7 +391,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertFalse(manager.forgetKnownNetwork(network));
+        assertThat(manager.forgetKnownNetwork(network)).isFalse();
     }
 
     @Test
@@ -414,7 +412,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).forgetKnownNetwork(network);
 
-        assertFalse(manager.forgetKnownNetwork(network));
+        assertThat(manager.forgetKnownNetwork(network)).isFalse();
     }
 
     /**
@@ -425,7 +423,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertArrayEquals(List.of().toArray(), manager.getTetherNetworks().toArray());
+        assertThat(manager.getKnownNetworks()).isEmpty();
     }
 
     @Test
@@ -434,18 +432,17 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getTetherNetworks();
 
-        assertArrayEquals(List.of().toArray(), manager.getTetherNetworks().toArray());
+        assertThat(manager.getKnownNetworks()).isEmpty();
     }
 
     @Test
     public void getTetherNetworks_shouldReturnNetworksList() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         List<TetherNetwork> networks = List.of(buildTetherNetwork());
-        List<TetherNetwork> expected = List.of(buildTetherNetwork());
         manager.setService(mService);
         when(mService.getTetherNetworks()).thenReturn(networks);
 
-        assertArrayEquals(expected.toArray(), manager.getTetherNetworks().toArray());
+        assertThat(manager.getTetherNetworks()).containsExactly(buildTetherNetwork());
     }
 
     @Test
@@ -454,7 +451,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertArrayEquals(List.of().toArray(), manager.getKnownNetworks().toArray());
+        assertThat(manager.getKnownNetworks()).isEmpty();
     }
 
     @Test
@@ -463,18 +460,17 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getKnownNetworks();
 
-        assertArrayEquals(List.of().toArray(), manager.getKnownNetworks().toArray());
+        assertThat(manager.getKnownNetworks()).isEmpty();
     }
 
     @Test
     public void getKnownNetworks_shouldReturnNetworksList() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         List<KnownNetwork> networks = List.of(buildKnownNetwork());
-        List<KnownNetwork> expected = List.of(buildKnownNetwork());
         manager.setService(mService);
         when(mService.getKnownNetworks()).thenReturn(networks);
 
-        assertArrayEquals(expected.toArray(), manager.getKnownNetworks().toArray());
+        assertThat(manager.getKnownNetworks()).containsExactly(buildKnownNetwork());
     }
 
     @Test
@@ -482,7 +478,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertNull(manager.getSettingsState());
+        assertThat(manager.getSettingsState()).isNull();
     }
 
     @Test
@@ -491,7 +487,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getSettingsState();
 
-        assertNull(manager.getSettingsState());
+        assertThat(manager.getSettingsState()).isNull();
     }
 
     @Test
@@ -502,7 +498,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         when(mService.getSettingsState()).thenReturn(state);
 
-        assertEquals(state, manager.getSettingsState());
+        assertThat(manager.getSettingsState()).isEqualTo(state);
     }
 
     @Test
@@ -511,7 +507,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertNull(manager.getTetherNetworkConnectionStatus());
+        assertThat(manager.getTetherNetworkConnectionStatus()).isNull();
     }
 
     @Test
@@ -521,7 +517,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getTetherNetworkConnectionStatus();
 
-        assertNull(manager.getTetherNetworkConnectionStatus());
+        assertThat(manager.getTetherNetworkConnectionStatus()).isNull();
     }
 
     @Test
@@ -534,7 +530,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         when(mService.getTetherNetworkConnectionStatus()).thenReturn(status);
 
-        assertEquals(status, manager.getTetherNetworkConnectionStatus());
+        assertThat(manager.getTetherNetworkConnectionStatus()).isEqualTo(status);
     }
 
     @Test
@@ -543,7 +539,7 @@ public class SharedConnectivityManagerTest {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertNull(manager.getKnownNetworkConnectionStatus());
+        assertThat(manager.getKnownNetworkConnectionStatus()).isNull();
     }
 
     @Test
@@ -553,7 +549,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getKnownNetworkConnectionStatus();
 
-        assertNull(manager.getKnownNetworkConnectionStatus());
+        assertThat(manager.getKnownNetworkConnectionStatus()).isNull();
     }
 
     @Test
@@ -566,7 +562,7 @@ public class SharedConnectivityManagerTest {
         manager.setService(mService);
         when(mService.getKnownNetworkConnectionStatus()).thenReturn(status);
 
-        assertEquals(status, manager.getKnownNetworkConnectionStatus());
+        assertThat(manager.getKnownNetworkConnectionStatus()).isEqualTo(status);
     }
 
     private void setResources(@Mock Context context) {
@@ -576,18 +572,20 @@ public class SharedConnectivityManagerTest {
     }
 
     private TetherNetwork buildTetherNetwork() {
-        return new TetherNetwork.Builder()
+        TetherNetwork.Builder builder =  new TetherNetwork.Builder()
                 .setDeviceId(DEVICE_ID)
                 .setDeviceInfo(DEVICE_INFO)
                 .setNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
-                .setHotspotSsid(HOTSPOT_SSID)
-                .setHotspotSecurityTypes(HOTSPOT_SECURITY_TYPES)
-                .build();
+                .setHotspotSsid(HOTSPOT_SSID);
+        Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(builder::addHotspotSecurityType);
+        return builder.build();
     }
 
     private KnownNetwork buildKnownNetwork() {
-        return new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE).setSsid(SSID)
-                .setSecurityTypes(SECURITY_TYPES).build();
+        KnownNetwork.Builder builder =  new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
+                .setSsid(SSID).setDeviceInfo(DEVICE_INFO);
+        Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
+        return builder.build();
     }
 }

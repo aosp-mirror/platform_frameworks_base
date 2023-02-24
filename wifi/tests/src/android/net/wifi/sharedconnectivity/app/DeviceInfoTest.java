@@ -19,8 +19,7 @@ package android.net.wifi.sharedconnectivity.app;
 import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_LAPTOP;
 import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_PHONE;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 
@@ -29,7 +28,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link android.app.sharedconnectivity.DeviceInfo}.
+ * Unit tests for {@link DeviceInfo}.
  */
 @SmallTest
 public class DeviceInfoTest {
@@ -63,8 +62,8 @@ public class DeviceInfoTest {
         parcelR.setDataPosition(0);
         DeviceInfo fromParcel = DeviceInfo.CREATOR.createFromParcel(parcelR);
 
-        assertEquals(info, fromParcel);
-        assertEquals(info.hashCode(), fromParcel.hashCode());
+        assertThat(fromParcel).isEqualTo(info);
+        assertThat(fromParcel.hashCode()).isEqualTo(info.hashCode());
     }
 
     /**
@@ -74,24 +73,24 @@ public class DeviceInfoTest {
     public void testEqualsOperation() {
         DeviceInfo info1 = buildDeviceInfoBuilder().build();
         DeviceInfo info2 = buildDeviceInfoBuilder().build();
-        assertEquals(info1, info2);
+        assertThat(info1).isEqualTo(info2);
 
         DeviceInfo.Builder builder = buildDeviceInfoBuilder().setDeviceType(DEVICE_TYPE_1);
-        assertNotEquals(info1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(info1);
 
         builder = buildDeviceInfoBuilder().setDeviceName(DEVICE_NAME_1);
-        assertNotEquals(info1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(info1);
 
         builder = buildDeviceInfoBuilder().setModelName(DEVICE_MODEL_1);
-        assertNotEquals(info1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(info1);
 
         builder = buildDeviceInfoBuilder()
                 .setBatteryPercentage(BATTERY_PERCENTAGE_1);
-        assertNotEquals(info1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(info1);
 
         builder = buildDeviceInfoBuilder()
                 .setConnectionStrength(CONNECTION_STRENGTH_1);
-        assertNotEquals(info1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(info1);
     }
 
     /**
@@ -100,12 +99,19 @@ public class DeviceInfoTest {
     @Test
     public void testGetMethods() {
         DeviceInfo info = buildDeviceInfoBuilder().build();
-        assertEquals(info.getDeviceType(), DEVICE_TYPE);
-        assertEquals(info.getDeviceName(), DEVICE_NAME);
-        assertEquals(info.getModelName(), DEVICE_MODEL);
-        assertEquals(info.getBatteryPercentage(), BATTERY_PERCENTAGE);
-        assertEquals(info.getConnectionStrength(), CONNECTION_STRENGTH);
-        assertEquals(info.getConnectionStrength(), CONNECTION_STRENGTH);
+        assertThat(info.getDeviceType()).isEqualTo(DEVICE_TYPE);
+        assertThat(info.getDeviceName()).isEqualTo(DEVICE_NAME);
+        assertThat(info.getModelName()).isEqualTo(DEVICE_MODEL);
+        assertThat(info.getBatteryPercentage()).isEqualTo(BATTERY_PERCENTAGE);
+        assertThat(info.getConnectionStrength()).isEqualTo(CONNECTION_STRENGTH);
+    }
+
+    @Test
+    public void testHashCode() {
+        DeviceInfo info1 = buildDeviceInfoBuilder().build();
+        DeviceInfo info2 = buildDeviceInfoBuilder().build();
+
+        assertThat(info1.hashCode()).isEqualTo(info2.hashCode());
     }
 
     private DeviceInfo.Builder buildDeviceInfoBuilder() {
