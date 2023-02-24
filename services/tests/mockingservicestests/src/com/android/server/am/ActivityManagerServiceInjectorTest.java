@@ -31,11 +31,11 @@ import android.os.UserManager;
 import android.util.Log;
 import android.view.Display;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.am.ActivityManagerService.Injector;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -45,7 +45,7 @@ import java.util.Arrays;
  * Run as {@code atest
  * FrameworksMockingServicesTests:com.android.server.am.ActivityManagerServiceInjectorTest}
  */
-public final class ActivityManagerServiceInjectorTest extends ExtendedMockitoTestCase {
+public final class ActivityManagerServiceInjectorTest {
 
     private static final String TAG = ActivityManagerServiceInjectorTest.class.getSimpleName();
 
@@ -63,10 +63,10 @@ public final class ActivityManagerServiceInjectorTest extends ExtendedMockitoTes
         when(mContext.getSystemService(DisplayManager.class)).thenReturn(mDisplayManager);
     }
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(UserManager.class);
-    }
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .spyStatic(UserManager.class)
+            .build();
 
     @Test
     public void testGetDisplayIdsForStartingBackgroundUsers_notSupported() {

@@ -4401,7 +4401,6 @@ public class SubscriptionManager {
      *
      * @throws IllegalArgumentException if subscription is invalid.
      * @throws SecurityException if the caller doesn't have permissions required.
-     * @throws IllegalStateException if subscription service is not available.
      *
      * @hide
      */
@@ -4418,8 +4417,7 @@ public class SubscriptionManager {
             if (iSub != null) {
                 return iSub.getSubscriptionUserHandle(subscriptionId);
             } else {
-                throw new IllegalStateException("[getSubscriptionUserHandle]: "
-                        + "subscription service unavailable");
+                Log.e(LOG_TAG, "[getSubscriptionUserHandle]: subscription service unavailable");
             }
         } catch (RemoteException ex) {
             ex.rethrowAsRuntimeException();
