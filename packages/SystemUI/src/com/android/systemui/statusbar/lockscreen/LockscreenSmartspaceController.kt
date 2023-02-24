@@ -330,9 +330,9 @@ constructor(
         }
 
         val ssView = plugin.getView(parent)
+        configPlugin?.let { ssView.registerConfigProvider(it) }
         ssView.setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         ssView.registerDataProvider(plugin)
-        configPlugin?.let { ssView.registerConfigProvider(it) }
 
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
             override fun startIntent(view: View, intent: Intent, showOnLockscreen: Boolean) {
