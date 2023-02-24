@@ -27,6 +27,7 @@ import android.compat.testing.PlatformCompatChangeRule;
 import android.os.Bundle;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
+import android.util.PollingCheck;
 import android.view.View;
 import android.widget.TextView;
 
@@ -91,6 +92,9 @@ public class FontScaleConverterActivityTest {
 
         var densityRef = new AtomicReference<Float>();
         scenario.onActivity(activity -> {
+            assertThat(activity.getResources().getConfiguration().fontScale)
+                .isWithin(0.05f)
+                .of(2f);
             densityRef.compareAndSet(null, activity.getResources().getDisplayMetrics().density);
         });
         var density = densityRef.get();
@@ -141,6 +145,15 @@ public class FontScaleConverterActivityTest {
                     fontScale
             );
         });
+
+        PollingCheck.waitFor(/* timeout= */ 5000, () ->
+                InstrumentationRegistry
+                    .getInstrumentation()
+                    .getContext()
+                    .getResources()
+                    .getConfiguration()
+                    .fontScale == fontScale
+        );
     }
 
     private Matcher<View> withTextSizeInRange(float sizeStartPx, float sizeEndPx) {

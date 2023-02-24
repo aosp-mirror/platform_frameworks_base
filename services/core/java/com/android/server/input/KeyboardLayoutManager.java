@@ -343,9 +343,9 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     private void visitAllKeyboardLayouts(KeyboardLayoutVisitor visitor) {
         final PackageManager pm = mContext.getPackageManager();
         Intent intent = new Intent(InputManager.ACTION_QUERY_KEYBOARD_LAYOUTS);
-        for (ResolveInfo resolveInfo : pm.queryBroadcastReceivers(intent,
+        for (ResolveInfo resolveInfo : pm.queryBroadcastReceiversAsUser(intent,
                 PackageManager.GET_META_DATA | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE)) {
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, UserHandle.USER_SYSTEM)) {
             final ActivityInfo activityInfo = resolveInfo.activityInfo;
             final int priority = resolveInfo.priority;
             visitKeyboardLayoutsInPackage(pm, activityInfo, null, priority, visitor);
@@ -464,7 +464,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         return LocaleList.forLanguageTags(languageTags.replace('|', ','));
     }
 
-    private static String getLayoutDescriptor(@NonNull InputDeviceIdentifier identifier) {
+    private String getLayoutDescriptor(@NonNull InputDeviceIdentifier identifier) {
         Objects.requireNonNull(identifier, "identifier must not be null");
         Objects.requireNonNull(identifier.getDescriptor(), "descriptor must not be null");
 
@@ -474,7 +474,21 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         // If vendor id and product id is available, use it as keys. This allows us to have the
         // same setup for all keyboards with same product and vendor id. i.e. User can swap 2
         // identical keyboards and still get the same setup.
-        return "vendor:" + identifier.getVendorId() + ",product:" + identifier.getProductId();
+        StringBuilder key = new StringBuilder();
+        key.append("vendor:").append(identifier.getVendorId()).append(",product:").append(
+                identifier.getProductId());
+
+        InputDevice inputDevice = getInputDevice(identifier);
+        Objects.requireNonNull(inputDevice, "Input device must not be null");
+        // Some keyboards can have same product ID and vendor ID but different Keyboard info like
+        // language tag and layout type.
+        if (!TextUtils.isEmpty(inputDevice.getKeyboardLanguageTag())) {
+            key.append(",languageTag:").append(inputDevice.getKeyboardLanguageTag());
+        }
+        if (!TextUtils.isEmpty(inputDevice.getKeyboardLayoutType())) {
+            key.append(",layoutType:").append(inputDevice.getKeyboardLanguageTag());
+        }
+        return key.toString();
     }
 
     @Nullable
@@ -1075,7 +1089,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                 identifier.getDescriptor()) : null;
     }
 
-    private static String createLayoutKey(InputDeviceIdentifier identifier, int userId,
+    private String createLayoutKey(InputDeviceIdentifier identifier, int userId,
             @NonNull InputMethodSubtypeHandle subtypeHandle) {
         Objects.requireNonNull(subtypeHandle, "subtypeHandle must not be null");
         return "layoutDescriptor:" + getLayoutDescriptor(identifier) + ",userId:" + userId

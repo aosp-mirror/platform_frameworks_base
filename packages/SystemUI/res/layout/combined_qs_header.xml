@@ -141,11 +141,14 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/large_screen_shade_header_min_height"
         android:gravity="center"
-        app:layout_constraintEnd_toEndOf="@id/end_guide"
-        app:layout_constraintTop_toTopOf="@id/date"
         app:layout_constraintBottom_toBottomOf="@id/date"
-        >
-        <include layout="@layout/ongoing_privacy_chip"/>
+        app:layout_constraintEnd_toEndOf="@id/end_guide"
+        app:layout_constraintTop_toTopOf="@id/date">
+
+        <com.android.systemui.privacy.OngoingPrivacyChip
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
     </FrameLayout>
 
 </com.android.systemui.util.NoRemeasureMotionLayout>

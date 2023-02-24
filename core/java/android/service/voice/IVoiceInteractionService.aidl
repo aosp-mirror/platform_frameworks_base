@@ -32,4 +32,5 @@ oneway interface IVoiceInteractionService {
      in IVoiceActionCheckCallback callback);
     void prepareToShowSession(in Bundle args, int flags);
     void showSessionFailed(in Bundle args);
+    void detectorRemoteExceptionOccurred(in IBinder token, int detectorType);
 }

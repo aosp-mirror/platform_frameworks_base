@@ -108,7 +108,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
 
         mSeekbar.setOnSeekBarChangeListener(mSeekBarListener);
 
-        mIconStart.setOnClickListener((view) -> {
+        mIconStartFrame.setOnClickListener((view) -> {
             final int progress = mSeekbar.getProgress();
             if (progress > 0) {
                 mSeekbar.setProgress(progress - 1);
@@ -116,7 +116,7 @@ public class SeekBarWithIconButtonsView extends LinearLayout {
             }
         });
 
-        mIconEnd.setOnClickListener((view) -> {
+        mIconEndFrame.setOnClickListener((view) -> {
             final int progress = mSeekbar.getProgress();
             if (progress < mSeekbar.getMax()) {
                 mSeekbar.setProgress(progress + 1);

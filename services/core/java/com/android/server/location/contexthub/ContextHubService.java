@@ -370,11 +370,6 @@ public class ContextHubService extends IContextHubService.Stub {
             mLastRestartTimestampMap.put(contextHubId,
                     new AtomicLong(SystemClock.elapsedRealtimeNanos()));
 
-            IContextHubClient client = mClientManager.registerClient(
-                    contextHubInfo, createDefaultClientCallback(contextHubId),
-                    /* attributionTag= */ null, mTransactionManager, mContext.getPackageName());
-            defaultClientMap.put(contextHubId, client);
-
             try {
                 mContextHubWrapper.registerCallback(contextHubId,
                         new ContextHubServiceCallback(contextHubId));
@@ -382,6 +377,11 @@ public class ContextHubService extends IContextHubService.Stub {
                 Log.e(TAG, "RemoteException while registering service callback for hub (ID = "
                         + contextHubId + ")", e);
             }
+
+            IContextHubClient client = mClientManager.registerClient(
+                    contextHubInfo, createDefaultClientCallback(contextHubId),
+                    /* attributionTag= */ null, mTransactionManager, mContext.getPackageName());
+            defaultClientMap.put(contextHubId, client);
 
             // Do a query to initialize the service cache list of nanoapps
             // TODO(b/194289715): Remove this when old API is deprecated

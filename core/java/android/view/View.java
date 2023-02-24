@@ -5101,12 +5101,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private boolean mHoveringTouchDelegate = false;
 
-    /**
-     * Configuration for this view to act as a handwriting initiation delegate. This allows
-     * handwriting mode for a delegator editor view to be initiated by stylus movement on this
-     * delegate view.
-     */
-    private HandwritingDelegateConfiguration mHandwritingDelegateConfiguration;
+    // These two fields are set if the view is a handwriting delegator.
+    private Runnable mHandwritingDelegatorCallback;
+    private String mAllowedHandwritingDelegatePackageName;
+
+    // These two fields are set if the view is a handwriting delegate.
+    private boolean mIsHandwritingDelegate;
+    private String mAllowedHandwritingDelegatorPackageName;
 
     /**
      * Solid color to use as a background when creating the drawing cache. Enables
@@ -12410,27 +12411,168 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Configures this view to act as a handwriting initiation delegate. This allows handwriting
-     * mode for a delegator editor view to be initiated by stylus movement on this delegate view.
+     * Sets a callback which should be called when a stylus {@link MotionEvent} occurs within this
+     * view's bounds. The callback will be called from the UI thread.
+     *
+     * <p>Setting a callback allows this view to act as a handwriting delegator, so that handwriting
+     * mode for a delegate editor view can be initiated by stylus movement on this delegator view.
+     * The callback implementation is expected to show and focus the delegate editor view. If a view
+     * which returns {@code true} for {@link #isHandwritingDelegate()} creates an input connection
+     * while the same stylus {@link MotionEvent} sequence is ongoing, handwriting mode will be
+     * initiated for that view.
+     *
+     * <p>A common use case is a custom view which looks like a text editor but does not actually
+     * support text editing itself, and clicking on the custom view causes an EditText to be shown.
+     * To support handwriting initiation in this case, this method can be called on the custom view
+     * to configure it as a delegator. The EditText should call {@link #setIsHandwritingDelegate} to
+     * set it as a delegate. The {@code callback} implementation is typically the same as the click
+     * listener implementation which shows the EditText.
      *
      * <p>If {@code null} is passed, this view will no longer act as a handwriting initiation
-     * delegate.
+     * delegator.
+     *
+     * @param callback a callback which should be called when a stylus {@link MotionEvent} occurs
+     *     within this view's bounds
      */
-    public void setHandwritingDelegateConfiguration(
-            @Nullable HandwritingDelegateConfiguration configuration) {
-        mHandwritingDelegateConfiguration = configuration;
-        if (configuration != null) {
+    public void setHandwritingDelegatorCallback(@Nullable Runnable callback) {
+        mHandwritingDelegatorCallback = callback;
+        if (callback != null) {
+            // By default, the delegate must be from the same package as the delegator view.
+            mAllowedHandwritingDelegatePackageName = mContext.getOpPackageName();
             setHandwritingArea(new Rect(0, 0, getWidth(), getHeight()));
+        } else {
+            mAllowedHandwritingDelegatePackageName = null;
         }
     }
 
     /**
-     * If this view has been configured as a handwriting initiation delegate, returns the delegate
-     * configuration.
+     * Returns the callback set by {@link #setHandwritingDelegatorCallback} which should be called
+     * when a stylus {@link MotionEvent} occurs within this view's bounds. The callback should only
+     * be called from the UI thread.
      */
     @Nullable
-    public HandwritingDelegateConfiguration getHandwritingDelegateConfiguration() {
-        return mHandwritingDelegateConfiguration;
+    public Runnable getHandwritingDelegatorCallback() {
+        return mHandwritingDelegatorCallback;
+    }
+
+    /**
+     * Specifies that this view may act as a handwriting initiation delegator for a delegate editor
+     * view from the specified package. If this method is not called, delegators may only be used to
+     * initiate handwriting mode for a delegate editor view from the same package as the delegator
+     * view. This method allows specifying a different trusted package which may contain a delegate
+     * editor view linked to this delegator view. This should be called after {@link
+     * #setHandwritingDelegatorCallback}.
+     *
+     * <p>If this method is called on the delegator view, then {@link
+     * #setAllowedHandwritingDelegatorPackage} should also be called on the delegate editor view.
+     *
+     * <p>For example, to configure a delegator view in package 1:
+     *
+     * <pre>
+     * delegatorView.setHandwritingDelegatorCallback(callback);
+     * delegatorView.setAllowedHandwritingDelegatePackage(package2);</pre>
+     *
+     * Then to configure the corresponding delegate editor view in package 2:
+     *
+     * <pre>
+     * delegateEditorView.setIsHandwritingDelegate(true);
+     * delegateEditorView.setAllowedHandwritingDelegatorPackage(package1);</pre>
+     *
+     * @param allowedPackageName the package name of a delegate editor view linked to this delegator
+     *     view
+     * @throws IllegalStateException If the view has not been configured as a handwriting delegator
+     *     using {@link #setHandwritingDelegatorCallback}.
+     */
+    public void setAllowedHandwritingDelegatePackage(@NonNull String allowedPackageName) {
+        if (mHandwritingDelegatorCallback == null) {
+            throw new IllegalStateException("This view is not a handwriting delegator.");
+        }
+        mAllowedHandwritingDelegatePackageName = allowedPackageName;
+    }
+
+    /**
+     * Returns the allowed package for delegate editor views for which this view may act as a
+     * handwriting delegator. If {@link #setAllowedHandwritingDelegatePackage} has not been called,
+     * this will return this view's package name, since by default delegators may only be used to
+     * initiate handwriting mode for a delegate editor view from the same package as the delegator
+     * view. This will return a different allowed package if set by {@link
+     * #setAllowedHandwritingDelegatePackage}.
+     *
+     * @throws IllegalStateException If the view has not been configured as a handwriting delegator
+     *     using {@link #setHandwritingDelegatorCallback}.
+     */
+    @NonNull
+    public String getAllowedHandwritingDelegatePackageName() {
+        if (mHandwritingDelegatorCallback == null) {
+            throw new IllegalStateException("This view is not a handwriting delegator.");
+        }
+        return mAllowedHandwritingDelegatePackageName;
+    }
+
+    /**
+     * Sets this view to be a handwriting delegate. If a delegate view creates an input connection
+     * while a stylus {@link MotionEvent} sequence from a delegator view is ongoing, handwriting
+     * mode will be initiated for the delegate view.
+     *
+     * @param isHandwritingDelegate whether this view is a handwriting initiation delegate
+     * @see #setHandwritingDelegatorCallback(Runnable)
+     */
+    public void setIsHandwritingDelegate(boolean isHandwritingDelegate) {
+        mIsHandwritingDelegate = isHandwritingDelegate;
+        if (mIsHandwritingDelegate) {
+            // By default, the delegator must be from the same package as the delegate view.
+            mAllowedHandwritingDelegatorPackageName = mContext.getOpPackageName();
+        } else {
+            mAllowedHandwritingDelegatePackageName = null;
+        }
+    }
+
+    /**
+     * Returns whether this view has been set as a handwriting delegate by {@link
+     * #setIsHandwritingDelegate}.
+     */
+    public boolean isHandwritingDelegate() {
+        return mIsHandwritingDelegate;
+    }
+
+    /**
+     * Specifies that a view from the specified package may act as a handwriting delegator for this
+     * delegate editor view. If this method is not called, only views from the same package as the
+     * delegate editor view may act as a handwriting delegator. This method allows specifying a
+     * different trusted package which may contain a delegator view linked to this delegate editor
+     * view. This should be called after {@link #setIsHandwritingDelegate}.
+     *
+     * <p>If this method is called on the delegate editor view, then {@link
+     * #setAllowedHandwritingDelegatePackage} should also be called on the delegator view.
+     *
+     * @param allowedPackageName the package name of a delegator view linked to this delegate editor
+     *     view
+     * @throws IllegalStateException If the view has not been configured as a handwriting delegate
+     *     using {@link #setIsHandwritingDelegate}.
+     */
+    public void setAllowedHandwritingDelegatorPackage(@NonNull String allowedPackageName) {
+        if (!mIsHandwritingDelegate) {
+            throw new IllegalStateException("This view is not a handwriting delegate.");
+        }
+        mAllowedHandwritingDelegatorPackageName = allowedPackageName;
+    }
+
+    /**
+     * Returns the allowed package for views which may act as a handwriting delegator for this
+     * delegate editor view. If {@link #setAllowedHandwritingDelegatorPackage} has not been called,
+     * this will return this view's package name, since by default only views from the same package
+     * as the delegator editor view may act as a handwriting delegator. This will return a different
+     * allowed package if set by {@link #setAllowedHandwritingDelegatorPackage}.
+     *
+     * @throws IllegalStateException If the view has not been configured as a handwriting delegate
+     *     using {@link #setIsHandwritingDelegate}.
+     */
+    @NonNull
+    public String getAllowedHandwritingDelegatorPackageName() {
+        if (!mIsHandwritingDelegate) {
+            throw new IllegalStateException("This view is not a handwriting delegate.");
+        }
+        return mAllowedHandwritingDelegatorPackageName;
     }
 
     /**
@@ -24474,7 +24616,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         rebuildOutline();
-        if (onCheckIsTextEditor() || mHandwritingDelegateConfiguration != null) {
+        if (onCheckIsTextEditor() || mHandwritingDelegatorCallback != null) {
             setHandwritingArea(new Rect(0, 0, newWidth, newHeight));
         }
     }

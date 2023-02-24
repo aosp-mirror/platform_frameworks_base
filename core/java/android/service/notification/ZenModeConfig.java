@@ -953,7 +953,7 @@ public class ZenModeConfig implements Parcelable {
 
     private static Uri safeUri(TypedXmlPullParser parser, String att) {
         final String val = parser.getAttributeValue(null, att);
-        if (TextUtils.isEmpty(val)) return null;
+        if (val == null) return null;
         return Uri.parse(val);
     }
 

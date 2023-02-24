@@ -18,6 +18,7 @@ package com.android.server.health;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.health.BatteryHealthData;
 import android.hardware.health.HealthInfo;
 import android.hardware.health.IHealth;
 import android.os.BatteryManager;
@@ -113,6 +114,7 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
     private int getPropertyInternal(int id, BatteryProperty prop) throws RemoteException {
         IHealth service = mLastService.get();
         if (service == null) throw new RemoteException("no health service");
+        BatteryHealthData healthData;
         try {
             switch (id) {
                 case BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER:
@@ -132,6 +134,21 @@ class HealthServiceWrapperAidl extends HealthServiceWrapper {
                     break;
                 case BatteryManager.BATTERY_PROPERTY_ENERGY_COUNTER:
                     prop.setLong(service.getEnergyCounterNwh());
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_MANUFACTURING_DATE:
+                    healthData = service.getBatteryHealthData();
+                    prop.setLong(healthData.batteryManufacturingDateSeconds);
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_FIRST_USAGE_DATE:
+                    healthData = service.getBatteryHealthData();
+                    prop.setLong(healthData.batteryFirstUsageSeconds);
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_CHARGING_POLICY:
+                    prop.setLong(service.getChargingPolicy());
+                    break;
+                case BatteryManager.BATTERY_PROPERTY_STATE_OF_HEALTH:
+                    healthData = service.getBatteryHealthData();
+                    prop.setLong(healthData.batteryStateOfHealth);
                     break;
             }
         } catch (UnsupportedOperationException e) {

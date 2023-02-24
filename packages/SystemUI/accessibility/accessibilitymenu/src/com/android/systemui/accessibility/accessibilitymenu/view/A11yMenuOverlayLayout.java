@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.view;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static java.lang.Math.max;
 
 import android.animation.Animator;
@@ -133,7 +135,12 @@ public class A11yMenuOverlayLayout {
             initLayoutParams();
         }
 
-        mLayout = new FrameLayout(mService);
+        final Display display = mService.getSystemService(
+                DisplayManager.class).getDisplay(DEFAULT_DISPLAY);
+
+        mLayout = new FrameLayout(
+                mService.createDisplayContext(display).createWindowContext(
+                        WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY, null));
         updateLayoutPosition();
         inflateLayoutAndSetOnTouchListener(mLayout);
         mA11yMenuViewPager = new A11yMenuViewPager(mService);

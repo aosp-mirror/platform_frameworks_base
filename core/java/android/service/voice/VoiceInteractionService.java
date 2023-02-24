@@ -36,8 +36,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.SoundTrigger;
-import android.media.voice.KeyphraseModelManager;
 import android.media.permission.Identity;
+import android.media.voice.KeyphraseModelManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -180,6 +180,14 @@ public class VoiceInteractionService extends Service {
                     VoiceInteractionService::onShowSessionFailed,
                     VoiceInteractionService.this, args));
         }
+
+        @Override
+        public void detectorRemoteExceptionOccurred(@NonNull IBinder token, int detectorType) {
+            Log.d(TAG, "detectorRemoteExceptionOccurred");
+            Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
+                    VoiceInteractionService::onDetectorRemoteException,
+                    VoiceInteractionService.this, token, detectorType));
+        }
     };
 
     IVoiceInteractionManagerService mSystemService;
@@ -191,6 +199,28 @@ public class VoiceInteractionService extends Service {
     private KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
 
     private final Set<HotwordDetector> mActiveDetectors = new ArraySet<>();
+
+
+    private void onDetectorRemoteException(@NonNull IBinder token, int detectorType) {
+        Log.d(TAG, "onDetectorRemoteException for " + HotwordDetector.detectorTypeToString(
+                detectorType));
+        mActiveDetectors.forEach(detector -> {
+            // TODO: handle normal detector, VQD
+            if (detectorType == HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_DSP
+                    && detector instanceof AlwaysOnHotwordDetector) {
+                AlwaysOnHotwordDetector alwaysOnDetector = (AlwaysOnHotwordDetector) detector;
+                if (alwaysOnDetector.isSameToken(token)) {
+                    alwaysOnDetector.onDetectorRemoteException();
+                }
+            } else if (detectorType == HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE
+                    && detector instanceof SoftwareHotwordDetector) {
+                SoftwareHotwordDetector softwareDetector = (SoftwareHotwordDetector) detector;
+                if (softwareDetector.isSameToken(token)) {
+                    softwareDetector.onDetectorRemoteException();
+                }
+            }
+        });
+    }
 
     /**
      * Called when a user has activated an affordance to launch voice assist from the Keyguard.

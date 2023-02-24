@@ -1,6 +1,5 @@
 package com.android.systemui.statusbar.phone;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -39,6 +38,7 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -73,6 +73,7 @@ public class NotificationIconAreaController implements
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
     private final KeyguardBypassController mBypassController;
     private final DozeParameters mDozeParameters;
+    private final SectionStyleProvider mSectionStyleProvider;
     private final Optional<Bubbles> mBubblesOptional;
     private final StatusBarWindowController mStatusBarWindowController;
     private final ScreenOffAnimationController mScreenOffAnimationController;
@@ -117,6 +118,7 @@ public class NotificationIconAreaController implements
             NotificationMediaManager notificationMediaManager,
             NotificationListener notificationListener,
             DozeParameters dozeParameters,
+            SectionStyleProvider sectionStyleProvider,
             Optional<Bubbles> bubblesOptional,
             DemoModeController demoModeController,
             DarkIconDispatcher darkIconDispatcher,
@@ -128,6 +130,7 @@ public class NotificationIconAreaController implements
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
         mDozeParameters = dozeParameters;
+        mSectionStyleProvider = sectionStyleProvider;
         mWakeUpCoordinator = wakeUpCoordinator;
         wakeUpCoordinator.addListener(this);
         mBypassController = keyguardBypassController;
@@ -260,19 +263,13 @@ public class NotificationIconAreaController implements
     protected boolean shouldShowNotificationIcon(NotificationEntry entry,
             boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
             boolean hideRepliedMessages, boolean hideCurrentMedia, boolean hidePulsing) {
-        if (entry.getRanking().isAmbient() && !showAmbient) {
+        if (!showAmbient && mSectionStyleProvider.isMinimized(entry)) {
             return false;
         }
         if (hideCurrentMedia && entry.getKey().equals(mMediaManager.getMediaNotificationKey())) {
             return false;
         }
-        if (!showLowPriority && entry.getImportance() < NotificationManager.IMPORTANCE_DEFAULT) {
-            return false;
-        }
-        if (!entry.isTopLevelChild()) {
-            return false;
-        }
-        if (entry.getRow().getVisibility() == View.GONE) {
+        if (!showLowPriority && mSectionStyleProvider.isSilent(entry)) {
             return false;
         }
         if (entry.isRowDismissed() && hideDismissed) {

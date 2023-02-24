@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.Flow
 class AlternateBouncerInteractor
 @Inject
 constructor(
+    private val keyguardStateController: KeyguardStateController,
     private val bouncerRepository: KeyguardBouncerRepository,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
@@ -102,7 +104,8 @@ constructor(
                 biometricSettingsRepository.isFingerprintEnrolled.value &&
                 biometricSettingsRepository.isStrongBiometricAllowed.value &&
                 biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
-                !deviceEntryFingerprintAuthRepository.isLockedOut.value
+                !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
+                !keyguardStateController.isUnlocked
         } else {
             legacyAlternateBouncer != null &&
                 keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(true)

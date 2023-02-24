@@ -64,7 +64,7 @@ public class SystemUiSystemPropertiesFlags {
 
         /** Gating the feature which shows FSI-denied notifications as Sticky HUNs */
         public static final Flag SHOW_STICKY_HUN_FOR_DENIED_FSI =
-                devFlag("persist.sysui.notification.show_sticky_hun_for_denied_fsi");
+                releasedFlag("persist.sysui.notification.show_sticky_hun_for_denied_fsi");
 
         /** Gating the ability for users to dismiss ongoing event notifications */
         public static final Flag ALLOW_DISMISS_ONGOING =

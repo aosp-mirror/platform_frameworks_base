@@ -83,6 +83,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.infra.AndroidFuture;
 import com.android.server.LocalServices;
+import com.android.server.voiceinteraction.VoiceInteractionManagerServiceImpl.DetectorRemoteExceptionListener;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -203,12 +204,16 @@ abstract class DetectorSession {
     boolean mPerformingExternalSourceHotwordDetection;
     @NonNull final IBinder mToken;
 
+    @NonNull DetectorRemoteExceptionListener mRemoteExceptionListener;
+
     DetectorSession(
             @NonNull HotwordDetectionConnection.ServiceConnection remoteDetectionService,
             @NonNull Object lock, @NonNull Context context, @NonNull IBinder token,
             @NonNull IHotwordRecognitionStatusCallback callback, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity,
-            @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging) {
+            @NonNull ScheduledExecutorService scheduledExecutorService, boolean logging,
+            @NonNull DetectorRemoteExceptionListener listener) {
+        mRemoteExceptionListener = listener;
         mRemoteDetectionService = remoteDetectionService;
         mLock = lock;
         mContext = context;
@@ -234,6 +239,14 @@ abstract class DetectorSession {
             if (mAttentionManagerInternal != null) {
                 mAttentionManagerInternal.onStartProximityUpdates(mProximityCallbackInternal);
             }
+        }
+    }
+
+    void notifyOnDetectorRemoteException() {
+        Slog.d(TAG, "notifyOnDetectorRemoteException: mRemoteExceptionListener="
+                + mRemoteExceptionListener);
+        if (mRemoteExceptionListener != null) {
+            mRemoteExceptionListener.onDetectorRemoteException(mToken, getDetectorType());
         }
     }
 
@@ -280,6 +293,7 @@ abstract class DetectorSession {
                                     METRICS_CALLBACK_ON_STATUS_REPORTED_EXCEPTION,
                                     mVoiceInteractionServiceUid);
                         }
+                        notifyOnDetectorRemoteException();
                     }
                 }
             };
@@ -319,6 +333,7 @@ abstract class DetectorSession {
                                 METRICS_CALLBACK_ON_STATUS_REPORTED_EXCEPTION,
                                 mVoiceInteractionServiceUid);
                     }
+                    notifyOnDetectorRemoteException();
                 }
             } else if (err != null) {
                 Slog.w(TAG, "Failed to update state: " + err);
@@ -443,6 +458,7 @@ abstract class DetectorSession {
                                 HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
                                 mVoiceInteractionServiceUid);
                     }
+                    notifyOnDetectorRemoteException();
                 }
             } finally {
                 synchronized (mLock) {
@@ -479,8 +495,12 @@ abstract class DetectorSession {
                                                 EXTERNAL_HOTWORD_CLEANUP_MILLIS,
                                                 TimeUnit.MILLISECONDS);
 
-                                        callback.onRejected(result);
-
+                                        try {
+                                            callback.onRejected(result);
+                                        } catch (RemoteException e) {
+                                            notifyOnDetectorRemoteException();
+                                            throw e;
+                                        }
                                         if (result != null) {
                                             Slog.i(TAG, "Egressed 'hotword rejected result' "
                                                     + "from hotword trusted process");
@@ -516,10 +536,15 @@ abstract class DetectorSession {
                                                     getDetectorType(),
                                                     EXTERNAL_SOURCE_DETECT_SECURITY_EXCEPTION,
                                                     mVoiceInteractionServiceUid);
-                                            callback.onError(new HotwordDetectionServiceFailure(
-                                                    CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
-                                                    "Security exception occurs in #onDetected"
-                                                            + " method."));
+                                            try {
+                                                callback.onError(new HotwordDetectionServiceFailure(
+                                                        CALLBACK_ONDETECTED_GOT_SECURITY_EXCEPTION,
+                                                        "Security exception occurs in #onDetected"
+                                                                + " method."));
+                                            } catch (RemoteException e1) {
+                                                notifyOnDetectorRemoteException();
+                                                throw e1;
+                                            }
                                             return;
                                         }
                                         HotwordDetectedResult newResult;
@@ -530,13 +555,23 @@ abstract class DetectorSession {
                                             Slog.w(TAG, "Ignoring #onDetected due to a "
                                                     + "IOException", e);
                                             // TODO: Write event
-                                            callback.onError(new HotwordDetectionServiceFailure(
-                                                    CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
-                                                    "Copy audio stream failure."));
+                                            try {
+                                                callback.onError(new HotwordDetectionServiceFailure(
+                                                        CALLBACK_ONDETECTED_STREAM_COPY_ERROR,
+                                                        "Copy audio stream failure."));
+                                            } catch (RemoteException e1) {
+                                                notifyOnDetectorRemoteException();
+                                                throw e1;
+                                            }
                                             return;
                                         }
-                                        callback.onDetected(newResult, /* audioFormat= */ null,
-                                                /* audioStream= */ null);
+                                        try {
+                                            callback.onDetected(newResult, /* audioFormat= */ null,
+                                                    /* audioStream= */ null);
+                                        } catch (RemoteException e) {
+                                            notifyOnDetectorRemoteException();
+                                            throw e;
+                                        }
                                         Slog.i(TAG, "Egressed "
                                                 + HotwordDetectedResult.getUsageSize(newResult)
                                                 + " bits from hotword trusted process");
@@ -571,6 +606,7 @@ abstract class DetectorSession {
         mDestroyed = true;
         mDebugHotwordLogging = false;
         mRemoteDetectionService = null;
+        mRemoteExceptionListener = null;
         if (mAttentionManagerInternal != null) {
             mAttentionManagerInternal.onStopProximityUpdates(mProximityCallbackInternal);
         }
@@ -599,6 +635,7 @@ abstract class DetectorSession {
                         HOTWORD_DETECTOR_EVENTS__EVENT__CALLBACK_ON_ERROR_EXCEPTION,
                         mVoiceInteractionServiceUid);
             }
+            notifyOnDetectorRemoteException();
         }
     }
 

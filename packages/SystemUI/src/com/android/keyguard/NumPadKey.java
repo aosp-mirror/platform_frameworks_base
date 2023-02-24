@@ -33,7 +33,6 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
-import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -46,7 +45,6 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
 
     private final TextView mDigitText;
     private final TextView mKlondikeText;
-    private final LockPatternUtils mLockPatternUtils;
     private final PowerManager mPM;
 
     private int mDigit = -1;
@@ -107,7 +105,6 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
         setOnHoverListener(new LiftToActivateListener(
                 (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE)));
 
-        mLockPatternUtils = new LockPatternUtils(context);
         mPM = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);

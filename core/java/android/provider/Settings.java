@@ -116,6 +116,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * The Settings provider contains global system-level device preferences.
@@ -2978,19 +2979,22 @@ public final class Settings {
     }
 
     private static final class GenerationTracker {
-        private final MemoryIntArray mArray;
-        private final Runnable mErrorHandler;
+        @NonNull private final String mName;
+        @NonNull private final MemoryIntArray mArray;
+        @NonNull private final Consumer<String> mErrorHandler;
         private final int mIndex;
         private int mCurrentGeneration;
 
-        public GenerationTracker(@NonNull MemoryIntArray array, int index,
-                int generation, Runnable errorHandler) {
+        GenerationTracker(@NonNull String name, @NonNull MemoryIntArray array, int index,
+                int generation, Consumer<String> errorHandler) {
+            mName = name;
             mArray = array;
             mIndex = index;
             mErrorHandler = errorHandler;
             mCurrentGeneration = generation;
         }
 
+        // This method also updates the obsolete generation code stored locally
         public boolean isGenerationChanged() {
             final int currentGeneration = readCurrentGeneration();
             if (currentGeneration >= 0) {
@@ -3011,9 +3015,7 @@ public final class Settings {
                 return mArray.get(mIndex);
             } catch (IOException e) {
                 Log.e(TAG, "Error getting current generation", e);
-                if (mErrorHandler != null) {
-                    mErrorHandler.run();
-                }
+                mErrorHandler.accept(mName);
             }
             return -1;
         }
@@ -3023,9 +3025,6 @@ public final class Settings {
                 mArray.close();
             } catch (IOException e) {
                 Log.e(TAG, "Error closing backing array", e);
-                if (mErrorHandler != null) {
-                    mErrorHandler.run();
-                }
             }
         }
     }
@@ -3088,8 +3087,21 @@ public final class Settings {
         private final ArraySet<String> mAllFields;
         private final ArrayMap<String, Integer> mReadableFieldsWithMaxTargetSdk;
 
+        // Mapping from the name of a setting (or the prefix of a namespace) to a generation tracker
         @GuardedBy("this")
-        private GenerationTracker mGenerationTracker;
+        private ArrayMap<String, GenerationTracker> mGenerationTrackers = new ArrayMap<>();
+
+        private Consumer<String> mGenerationTrackerErrorHandler = (String name) -> {
+            synchronized (NameValueCache.this) {
+                Log.e(TAG, "Error accessing generation tracker - removing");
+                final GenerationTracker tracker = mGenerationTrackers.get(name);
+                if (tracker != null) {
+                    tracker.destroy();
+                    mGenerationTrackers.remove(name);
+                }
+                mValues.remove(name);
+            }
+        };
 
         <T extends NameValueTable> NameValueCache(Uri uri, String getCommand,
                 String setCommand, String deleteCommand, ContentProviderHolder providerHolder,
@@ -3178,6 +3190,43 @@ public final class Settings {
 
         @UnsupportedAppUsage
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
+            final boolean isSelf = (userHandle == UserHandle.myUserId());
+            int currentGeneration = -1;
+            boolean needsGenerationTracker = false;
+
+            if (isSelf) {
+                synchronized (NameValueCache.this) {
+                    final GenerationTracker generationTracker = mGenerationTrackers.get(name);
+                    if (generationTracker != null) {
+                        if (generationTracker.isGenerationChanged()) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Generation changed for setting:" + name
+                                        + " type:" + mUri.getPath()
+                                        + " in package:" + cr.getPackageName()
+                                        + " and user:" + userHandle);
+                            }
+                            mValues.remove(name);
+                        } else if (mValues.containsKey(name)) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Cache hit for setting:" + name);
+                            }
+                            return mValues.get(name);
+                        }
+                        currentGeneration = generationTracker.getCurrentGeneration();
+                    } else {
+                        needsGenerationTracker = true;
+                    }
+                }
+            } else {
+                if (LOCAL_LOGV) {
+                    Log.v(TAG, "get setting for user " + userHandle
+                            + " by user " + UserHandle.myUserId() + " so skipping cache");
+                }
+            }
+            if (DEBUG) {
+                Log.i(TAG, "Cache miss for setting:" + name);
+            }
+
             // Check if the target settings key is readable. Reject if the caller is not system and
             // is trying to access a settings key defined in the Settings.Secure, Settings.System or
             // Settings.Global and is not annotated as @Readable.
@@ -3211,31 +3260,6 @@ public final class Settings {
                 }
             }
 
-            final boolean isSelf = (userHandle == UserHandle.myUserId());
-            int currentGeneration = -1;
-            if (isSelf) {
-                synchronized (NameValueCache.this) {
-                    if (mGenerationTracker != null) {
-                        if (mGenerationTracker.isGenerationChanged()) {
-                            if (DEBUG) {
-                                Log.i(TAG, "Generation changed for type:"
-                                        + mUri.getPath() + " in package:"
-                                        + cr.getPackageName() +" and user:" + userHandle);
-                            }
-                            mValues.clear();
-                        } else if (mValues.containsKey(name)) {
-                            return mValues.get(name);
-                        }
-                        if (mGenerationTracker != null) {
-                            currentGeneration = mGenerationTracker.getCurrentGeneration();
-                        }
-                    }
-                }
-            } else {
-                if (LOCAL_LOGV) Log.v(TAG, "get setting for user " + userHandle
-                        + " by user " + UserHandle.myUserId() + " so skipping cache");
-            }
-
             IContentProvider cp = mProviderHolder.getProvider(cr);
 
             // Try the fast path first, not using query().  If this
@@ -3244,24 +3268,17 @@ public final class Settings {
             // interface.
             if (mCallGetCommand != null) {
                 try {
-                    Bundle args = null;
+                    Bundle args = new Bundle();
                     if (!isSelf) {
-                        args = new Bundle();
                         args.putInt(CALL_METHOD_USER_KEY, userHandle);
                     }
-                    boolean needsGenerationTracker = false;
-                    synchronized (NameValueCache.this) {
-                        if (isSelf && mGenerationTracker == null) {
-                            needsGenerationTracker = true;
-                            if (args == null) {
-                                args = new Bundle();
-                            }
-                            args.putString(CALL_METHOD_TRACK_GENERATION_KEY, null);
-                            if (DEBUG) {
-                                Log.i(TAG, "Requested generation tracker for type: "+ mUri.getPath()
-                                        + " in package:" + cr.getPackageName() +" and user:"
-                                        + userHandle);
-                            }
+                    if (needsGenerationTracker) {
+                        args.putString(CALL_METHOD_TRACK_GENERATION_KEY, null);
+                        if (DEBUG) {
+                            Log.i(TAG, "Requested generation tracker for setting:" + name
+                                    + " type:" + mUri.getPath()
+                                    + " in package:" + cr.getPackageName()
+                                    + " and user:" + userHandle);
                         }
                     }
                     Bundle b;
@@ -3298,33 +3315,24 @@ public final class Settings {
                                         final int generation = b.getInt(
                                                 CALL_METHOD_GENERATION_KEY, 0);
                                         if (DEBUG) {
-                                            Log.i(TAG, "Received generation tracker for type:"
-                                                    + mUri.getPath() + " in package:"
-                                                    + cr.getPackageName() + " and user:"
-                                                    + userHandle + " with index:" + index);
+                                            Log.i(TAG, "Received generation tracker for setting:"
+                                                    + name
+                                                    + " type:" + mUri.getPath()
+                                                    + " in package:" + cr.getPackageName()
+                                                    + " and user:" + userHandle
+                                                    + " with index:" + index);
                                         }
-                                        if (mGenerationTracker != null) {
-                                            mGenerationTracker.destroy();
-                                        }
-                                        mGenerationTracker = new GenerationTracker(array, index,
-                                                generation, () -> {
-                                            synchronized (NameValueCache.this) {
-                                                Log.e(TAG, "Error accessing generation"
-                                                        + " tracker - removing");
-                                                if (mGenerationTracker != null) {
-                                                    GenerationTracker generationTracker =
-                                                            mGenerationTracker;
-                                                    mGenerationTracker = null;
-                                                    generationTracker.destroy();
-                                                    mValues.clear();
-                                                }
-                                            }
-                                        });
+                                        mGenerationTrackers.put(name, new GenerationTracker(name,
+                                                array, index, generation,
+                                                mGenerationTrackerErrorHandler));
                                         currentGeneration = generation;
                                     }
                                 }
-                                if (mGenerationTracker != null && currentGeneration ==
-                                        mGenerationTracker.getCurrentGeneration()) {
+                                if (mGenerationTrackers.get(name) != null && currentGeneration
+                                        == mGenerationTrackers.get(name).getCurrentGeneration()) {
+                                    if (DEBUG) {
+                                        Log.i(TAG, "Updating cache for setting:" + name);
+                                    }
                                     mValues.put(name, value);
                                 }
                             }
@@ -3367,14 +3375,13 @@ public final class Settings {
 
                 String value = c.moveToNext() ? c.getString(0) : null;
                 synchronized (NameValueCache.this) {
-                    if (mGenerationTracker != null
-                            && currentGeneration == mGenerationTracker.getCurrentGeneration()) {
+                    if (mGenerationTrackers.get(name) != null && currentGeneration
+                            == mGenerationTrackers.get(name).getCurrentGeneration()) {
+                        if (DEBUG) {
+                            Log.i(TAG, "Updating cache for setting:" + name + " using query");
+                        }
                         mValues.put(name, value);
                     }
-                }
-                if (LOCAL_LOGV) {
-                    Log.v(TAG, "cache miss [" + mUri.getLastPathSegment() + "]: " +
-                            name + " = " + (value == null ? "(null)" : value));
                 }
                 return value;
             } catch (RemoteException e) {
@@ -3409,18 +3416,29 @@ public final class Settings {
             Config.enforceReadPermission(namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
+            boolean needsGenerationTracker = false;
 
             synchronized (NameValueCache.this) {
-                if (mGenerationTracker != null) {
-                    if (mGenerationTracker.isGenerationChanged()) {
+                final GenerationTracker generationTracker = mGenerationTrackers.get(prefix);
+                if (generationTracker != null) {
+                    if (generationTracker.isGenerationChanged()) {
                         if (DEBUG) {
-                            Log.i(TAG, "Generation changed for type:" + mUri.getPath()
+                            Log.i(TAG, "Generation changed for prefix:" + prefix
+                                    + " type:" + mUri.getPath()
                                     + " in package:" + cr.getPackageName());
                         }
-                        mValues.clear();
+                        for (int i = 0; i < mValues.size(); ++i) {
+                            String key = mValues.keyAt(i);
+                            if (key.startsWith(prefix)) {
+                                mValues.remove(key);
+                            }
+                        }
                     } else {
                         boolean prefixCached = mValues.containsKey(prefix);
                         if (prefixCached) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Cache hit for prefix:" + prefix);
+                            }
                             if (!names.isEmpty()) {
                                 for (String name : names) {
                                     if (mValues.containsKey(name)) {
@@ -3440,9 +3458,9 @@ public final class Settings {
                             return keyValues;
                         }
                     }
-                    if (mGenerationTracker != null) {
-                        currentGeneration = mGenerationTracker.getCurrentGeneration();
-                    }
+                    currentGeneration = generationTracker.getCurrentGeneration();
+                } else {
+                    needsGenerationTracker = true;
                 }
             }
 
@@ -3450,20 +3468,20 @@ public final class Settings {
                 // No list command specified, return empty map
                 return keyValues;
             }
+            if (DEBUG) {
+                Log.i(TAG, "Cache miss for prefix:" + prefix);
+            }
             IContentProvider cp = mProviderHolder.getProvider(cr);
 
             try {
                 Bundle args = new Bundle();
                 args.putString(Settings.CALL_METHOD_PREFIX_KEY, prefix);
-                boolean needsGenerationTracker = false;
-                synchronized (NameValueCache.this) {
-                    if (mGenerationTracker == null) {
-                        needsGenerationTracker = true;
-                        args.putString(CALL_METHOD_TRACK_GENERATION_KEY, null);
-                        if (DEBUG) {
-                            Log.i(TAG, "Requested generation tracker for type: "
-                                    + mUri.getPath() + " in package:" + cr.getPackageName());
-                        }
+                if (needsGenerationTracker) {
+                    args.putString(CALL_METHOD_TRACK_GENERATION_KEY, null);
+                    if (DEBUG) {
+                        Log.i(TAG, "Requested generation tracker for prefix:" + prefix
+                                + " type: " + mUri.getPath()
+                                + " in package:" + cr.getPackageName());
                     }
                 }
 
@@ -3516,32 +3534,22 @@ public final class Settings {
                             final int generation = b.getInt(
                                     CALL_METHOD_GENERATION_KEY, 0);
                             if (DEBUG) {
-                                Log.i(TAG, "Received generation tracker for type:"
-                                        + mUri.getPath() + " in package:"
-                                        + cr.getPackageName() + " with index:" + index);
+                                Log.i(TAG, "Received generation tracker for prefix:" + prefix
+                                        + " type:" + mUri.getPath()
+                                        + " in package:" + cr.getPackageName()
+                                        + " with index:" + index);
                             }
-                            if (mGenerationTracker != null) {
-                                mGenerationTracker.destroy();
-                            }
-                            mGenerationTracker = new GenerationTracker(array, index,
-                                    generation, () -> {
-                                synchronized (NameValueCache.this) {
-                                    Log.e(TAG, "Error accessing generation tracker"
-                                            + " - removing");
-                                    if (mGenerationTracker != null) {
-                                        GenerationTracker generationTracker =
-                                                mGenerationTracker;
-                                        mGenerationTracker = null;
-                                        generationTracker.destroy();
-                                        mValues.clear();
-                                    }
-                                }
-                            });
+                            mGenerationTrackers.put(prefix,
+                                    new GenerationTracker(prefix, array, index, generation,
+                                            mGenerationTrackerErrorHandler));
                             currentGeneration = generation;
                         }
                     }
-                    if (mGenerationTracker != null && currentGeneration
-                            == mGenerationTracker.getCurrentGeneration()) {
+                    if (mGenerationTrackers.get(prefix) != null && currentGeneration
+                            == mGenerationTrackers.get(prefix).getCurrentGeneration()) {
+                        if (DEBUG) {
+                            Log.i(TAG, "Updating cache for prefix:" + prefix);
+                        }
                         // cache the complete list of flags for the namespace
                         mValues.putAll(flagsToValues);
                         // Adding the prefix as a signal that the prefix is cached.
@@ -3557,11 +3565,11 @@ public final class Settings {
 
         public void clearGenerationTrackerForTest() {
             synchronized (NameValueCache.this) {
-                if (mGenerationTracker != null) {
-                    mGenerationTracker.destroy();
+                for (int i = 0; i < mGenerationTrackers.size(); i++) {
+                    mGenerationTrackers.valueAt(i).destroy();
                 }
+                mGenerationTrackers.clear();
                 mValues.clear();
-                mGenerationTracker = null;
             }
         }
     }
