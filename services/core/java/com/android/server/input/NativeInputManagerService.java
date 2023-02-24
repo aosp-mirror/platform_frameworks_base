@@ -224,6 +224,16 @@ interface NativeInputManagerService {
     /** Set whether stylus button reporting through motion events should be enabled. */
     void setStylusButtonMotionEventsEnabled(boolean enabled);
 
+    /**
+     * Get the current position of the mouse cursor.
+     *
+     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s.
+     *
+     * NOTE: This will grab the PointerController's lock, so we must be careful about calling this
+     * from the InputReader or Display threads, which may result in a deadlock.
+     */
+    float[] getMouseCursorPosition();
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -465,5 +475,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void setStylusButtonMotionEventsEnabled(boolean enabled);
+
+        @Override
+        public native float[] getMouseCursorPosition();
     }
 }

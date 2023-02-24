@@ -262,19 +262,34 @@ void PointerController::reloadPointerResources() {
 }
 
 void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
-    std::scoped_lock lock(getLock());
+    struct PointerDisplayChangeArgs {
+        int32_t displayId;
+        float x, y;
+    };
+    std::optional<PointerDisplayChangeArgs> pointerDisplayChanged;
 
-    bool getAdditionalMouseResources = false;
-    if (mLocked.presentation == PointerController::Presentation::POINTER ||
-        mLocked.presentation == PointerController::Presentation::STYLUS_HOVER) {
-        getAdditionalMouseResources = true;
-    }
-    mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
-    if (viewport.displayId != mLocked.pointerDisplayId) {
-        float xPos, yPos;
-        mCursorController.getPosition(&xPos, &yPos);
-        mContext.getPolicy()->onPointerDisplayIdChanged(viewport.displayId, xPos, yPos);
-        mLocked.pointerDisplayId = viewport.displayId;
+    { // acquire lock
+        std::scoped_lock lock(getLock());
+
+        bool getAdditionalMouseResources = false;
+        if (mLocked.presentation == PointerController::Presentation::POINTER ||
+            mLocked.presentation == PointerController::Presentation::STYLUS_HOVER) {
+            getAdditionalMouseResources = true;
+        }
+        mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
+        if (viewport.displayId != mLocked.pointerDisplayId) {
+            float xPos, yPos;
+            mCursorController.getPosition(&xPos, &yPos);
+            mLocked.pointerDisplayId = viewport.displayId;
+            pointerDisplayChanged = {viewport.displayId, xPos, yPos};
+        }
+    } // release lock
+
+    if (pointerDisplayChanged) {
+        // Notify the policy without holding the pointer controller lock.
+        mContext.getPolicy()->onPointerDisplayIdChanged(pointerDisplayChanged->displayId,
+                                                        pointerDisplayChanged->x,
+                                                        pointerDisplayChanged->y);
     }
 }
 
