@@ -98,15 +98,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
 
     // Lock to synchronize cross-thread access to device public interface
-    final Object mInterfaceLock = new Object(); // access from this class and Session only!
+    final Object mInterfaceLock;
 
     /**
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.CAMERA)
     public static CameraAdvancedExtensionSessionImpl createCameraAdvancedExtensionSession(
-            @NonNull CameraDevice cameraDevice, @NonNull Context ctx,
-            @NonNull ExtensionSessionConfiguration config, int sessionId)
+            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
+            @NonNull Context ctx, @NonNull ExtensionSessionConfiguration config, int sessionId)
             throws CameraAccessException, RemoteException {
         long clientId = CameraExtensionCharacteristics.registerClient(ctx);
         if (clientId < 0) {
@@ -183,7 +183,8 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     }
 
     private CameraAdvancedExtensionSessionImpl(long extensionClientId,
-            @NonNull IAdvancedExtenderImpl extender, @NonNull CameraDevice cameraDevice,
+            @NonNull IAdvancedExtenderImpl extender,
+            @NonNull android.hardware.camera2.impl.CameraDeviceImpl cameraDevice,
             @Nullable Surface repeatingRequestSurface, @Nullable Surface burstCaptureSurface,
             @NonNull CameraExtensionSession.StateCallback callback, @NonNull Executor executor,
             int sessionId) {
@@ -200,6 +201,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         mInitialized = false;
         mInitializeHandler = new InitializeSessionHandler();
         mSessionId = sessionId;
+        mInterfaceLock = cameraDevice.mInterfaceLock;
     }
 
     /**
@@ -511,13 +513,14 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
         public void onConfigured(@NonNull CameraCaptureSession session) {
             synchronized (mInterfaceLock) {
                 mCaptureSession = session;
-                try {
-                    CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to initialize session! Extension service does"
-                            + " not respond!");
-                    notifyConfigurationFailure();
-                }
+            }
+
+            try {
+                CameraExtensionCharacteristics.initializeSession(mInitializeHandler);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to initialize session! Extension service does"
+                        + " not respond!");
+                notifyConfigurationFailure();
             }
         }
     }
@@ -525,46 +528,56 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
         @Override
         public void onSuccess() {
-            boolean status = true;
-            synchronized (mInterfaceLock) {
-                try {
-                    if (mSessionProcessor != null) {
-                        mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
-                        mInitialized = true;
-                    } else {
-                        Log.v(TAG, "Failed to start capture session, session released before " +
-                                "extension start!");
-                        status = false;
-                        mCaptureSession.close();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    boolean status = true;
+                    synchronized (mInterfaceLock) {
+                        try {
+                            if (mSessionProcessor != null) {
+                                mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
+                                mInitialized = true;
+                            } else {
+                                Log.v(TAG, "Failed to start capture session, session " +
+                                                " released before extension start!");
+                                status = false;
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Failed to start capture session,"
+                                    + " extension service does not respond!");
+                            status = false;
+                            mInitialized = false;
+                        }
                     }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to start capture session,"
-                            + " extension service does not respond!");
-                    status = false;
-                    mCaptureSession.close();
-                }
-            }
 
-            if (status) {
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    mExecutor.execute(
-                            () -> mCallbacks.onConfigured(CameraAdvancedExtensionSessionImpl.this));
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
+                    if (status) {
+                        final long ident = Binder.clearCallingIdentity();
+                        try {
+                            mExecutor.execute(() -> mCallbacks.onConfigured(
+                                    CameraAdvancedExtensionSessionImpl.this));
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
+                    } else {
+                        onFailure();
+                    }
                 }
-            } else {
-                notifyConfigurationFailure();
-            }
+            });
         }
 
         @Override
         public void onFailure() {
-            mCaptureSession.close();
-            Log.e(TAG, "Failed to initialize proxy service session!"
-                    + " This can happen when trying to configure multiple "
-                    + "concurrent extension sessions!");
-            notifyConfigurationFailure();
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mCaptureSession.close();
+
+                    Log.e(TAG, "Failed to initialize proxy service session!"
+                            + " This can happen when trying to configure multiple "
+                            + "concurrent extension sessions!");
+                    notifyConfigurationFailure();
+                }
+            });
         }
     }
 
