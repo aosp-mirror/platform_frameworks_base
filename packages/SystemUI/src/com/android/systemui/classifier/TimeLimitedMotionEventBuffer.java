@@ -183,7 +183,7 @@ public class TimeLimitedMotionEventBuffer implements List<MotionEvent> {
 
     @Override
     public List<MotionEvent> subList(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException();
+        return mMotionEvents.subList(fromIndex, toIndex);
     }
 
     class Iter implements ListIterator<MotionEvent> {
