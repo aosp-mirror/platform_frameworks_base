@@ -2792,7 +2792,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         child.setOnHeightChangedListener(null);
         updateScrollStateForRemovedChild(child);
-        boolean animationGenerated = generateRemoveAnimation(child);
+        boolean animationGenerated = container != null && generateRemoveAnimation(child);
         if (animationGenerated) {
             if (!mSwipedOutViews.contains(child) || !isFullySwipedOut(child)) {
                 container.addTransientView(child, 0);
