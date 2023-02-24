@@ -35,7 +35,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OV
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.ACCESSIBILITY_MENU_IN_SYSTEM;
 import static com.android.providers.settings.SettingsState.FALLBACK_FILE_SUFFIX;
-import static com.android.providers.settings.SettingsState.makeKey;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -376,6 +375,10 @@ public class SettingsProvider extends ContentProvider {
     @GuardedBy("mLock")
     private boolean mSyncConfigDisabledUntilReboot;
 
+    public static int makeKey(int type, int userId) {
+        return SettingsState.makeKey(type, userId);
+    }
+
     public static int getTypeFromKey(int key) {
         return SettingsState.getTypeFromKey(key);
     }
@@ -384,6 +387,9 @@ public class SettingsProvider extends ContentProvider {
         return SettingsState.getUserIdFromKey(key);
     }
 
+    public static String keyToString(int key) {
+        return SettingsState.keyToString(key);
+    }
     @ChangeId
     @EnabledSince(targetSdkVersion=android.os.Build.VERSION_CODES.S)
     private static final long ENFORCE_READ_PERMISSION_FOR_MULTI_SIM_DATA_CALL = 172670679L;
@@ -547,7 +553,7 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_LIST_CONFIG: {
                 String prefix = getSettingPrefix(args);
-                Bundle result = packageValuesForCallResult(prefix, getAllConfigFlags(prefix),
+                Bundle result = packageValuesForCallResult(getAllConfigFlags(prefix),
                         isTrackingGeneration(args));
                 reportDeviceConfigAccess(prefix);
                 return result;
@@ -1313,7 +1319,6 @@ public class SettingsProvider extends ContentProvider {
         return false;
     }
 
-    @NonNull
     private HashMap<String, String> getAllConfigFlags(@Nullable String prefix) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
@@ -2311,8 +2316,7 @@ public class SettingsProvider extends ContentProvider {
                 "get/set setting for user", null);
     }
 
-    private Bundle packageValueForCallResult(@Nullable Setting setting,
-            boolean trackingGeneration) {
+    private Bundle packageValueForCallResult(Setting setting, boolean trackingGeneration) {
         if (!trackingGeneration) {
             if (setting == null || setting.isNull()) {
                 return NULL_SETTING_BUNDLE;
@@ -2323,26 +2327,19 @@ public class SettingsProvider extends ContentProvider {
         result.putString(Settings.NameValueTable.VALUE,
                 !setting.isNull() ? setting.getValue() : null);
 
-        if (setting != null && !setting.isNull()) {
-            // No need to track generation if the setting doesn't exist
-            synchronized (mLock) {
-                mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey(),
-                        setting.getName());
-            }
-        }
+        mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey());
         return result;
     }
 
-    private Bundle packageValuesForCallResult(String prefix,
-            @NonNull HashMap<String, String> keyValues, boolean trackingGeneration) {
+    private Bundle packageValuesForCallResult(HashMap<String, String> keyValues,
+            boolean trackingGeneration) {
         Bundle result = new Bundle();
         result.putSerializable(Settings.NameValueTable.VALUE, keyValues);
-        if (trackingGeneration && !keyValues.isEmpty()) {
-            // No need to track generation if the namespace is empty
+        if (trackingGeneration) {
             synchronized (mLock) {
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
-                        mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_CONFIG,
-                                UserHandle.USER_SYSTEM).mKey, prefix);
+                        mSettingsRegistry.getSettingsLocked(
+                                SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM).mKey);
             }
         }
 
@@ -3452,7 +3449,7 @@ public class SettingsProvider extends ContentProvider {
 
         private void notifyForSettingsChange(int key, String name) {
             // Increment the generation first, so observers always see the new value
-            mGenerationRegistry.incrementGeneration(key, name);
+            mGenerationRegistry.incrementGeneration(key);
 
             if (isGlobalSettingsKey(key) || isConfigSettingsKey(key)) {
                 final long token = Binder.clearCallingIdentity();
@@ -3490,7 +3487,7 @@ public class SettingsProvider extends ContentProvider {
                 List<String> changedSettings) {
 
             // Increment the generation first, so observers always see the new value
-            mGenerationRegistry.incrementGeneration(key, prefix);
+            mGenerationRegistry.incrementGeneration(key);
 
             StringBuilder stringBuilder = new StringBuilder(prefix);
             for (int i = 0; i < changedSettings.size(); ++i) {
@@ -3516,7 +3513,7 @@ public class SettingsProvider extends ContentProvider {
                     if (profileId != userId) {
                         final int key = makeKey(type, profileId);
                         // Increment the generation first, so observers always see the new value
-                        mGenerationRegistry.incrementGeneration(key, name);
+                        mGenerationRegistry.incrementGeneration(key);
                         mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                                 profileId, 0, uri).sendToTarget();
                     }
