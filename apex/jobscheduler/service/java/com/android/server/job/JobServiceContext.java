@@ -461,7 +461,8 @@ public final class JobServiceContext implements ServiceConnection {
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
                     job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
-                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+                    job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
+                    mExecutionStartTimeElapsed - job.enqueueTime);
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
@@ -1356,7 +1357,8 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_TIMING_DELAY),
                 completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
-                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER));
+                completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
+                0);
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
