@@ -2324,6 +2324,32 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testActivityServiceConnectionsHolder() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityServiceConnectionsHolder<Object> holder =
+                mAtm.mInternal.getServiceConnectionsHolder(activity.token);
+        assertNotNull(holder);
+        final Object connection = new Object();
+        holder.addConnection(connection);
+        assertTrue(holder.isActivityVisible());
+        final int[] count = new int[1];
+        final Consumer<Object> c = conn -> count[0]++;
+        holder.forEachConnection(c);
+        assertEquals(1, count[0]);
+
+        holder.removeConnection(connection);
+        holder.forEachConnection(c);
+        assertEquals(1, count[0]);
+
+        activity.setVisibleRequested(false);
+        activity.setState(STOPPED, "test");
+        assertFalse(holder.isActivityVisible());
+
+        activity.removeImmediately();
+        assertNull(mAtm.mInternal.getServiceConnectionsHolder(activity.token));
+    }
+
+    @Test
     public void testTransferLaunchCookieWhenFinishing() {
         final ActivityRecord activity1 = createActivityWithTask();
         final Binder launchCookie = new Binder();

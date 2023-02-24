@@ -67,7 +67,7 @@ public interface QSModule {
     static AutoTileManager provideAutoTileManager(
             Context context,
             AutoAddTracker.Builder autoAddTrackerBuilder,
-            QSTileHost host,
+            QSHost host,
             @Background Handler handler,
             SecureSettings secureSettings,
             HotspotController hotspotController,

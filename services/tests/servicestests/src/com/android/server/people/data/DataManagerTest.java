@@ -86,6 +86,7 @@ import android.service.notification.StatusBarNotification;
 import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
+import android.util.Pair;
 import android.util.Range;
 
 import com.android.internal.app.ChooserActivity;
@@ -186,6 +187,7 @@ public final class DataManagerTest {
     private ShortcutInfo mShortcutInfo;
     private TestInjector mInjector;
     private TestLooper mLooper;
+    private TestPerPackageThrottler mShortcutThrottler;
 
     @Before
     public void setUp() throws PackageManager.NameNotFoundException {
@@ -275,7 +277,9 @@ public final class DataManagerTest {
 
         mInjector = new TestInjector();
         mLooper = new TestLooper();
-        mDataManager = new DataManager(mContext, mInjector, mLooper.getLooper());
+        mShortcutThrottler = new TestPerPackageThrottler();
+        mDataManager = new DataManager(mContext, mInjector, mLooper.getLooper(),
+                mShortcutThrottler);
         mDataManager.initialize();
 
         when(mShortcutServiceInternal.isSharingShortcut(anyInt(), anyString(), anyString(),
@@ -283,10 +287,7 @@ public final class DataManagerTest {
 
         mShortcutInfo = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
-        when(mShortcutServiceInternal.getShortcuts(
-                anyInt(), anyString(), anyLong(), anyString(), anyList(), any(), any(),
-                anyInt(), anyInt(), anyInt(), anyInt()))
-                .thenReturn(Collections.singletonList(mShortcutInfo));
+        mockGetShortcuts(Collections.singletonList(mShortcutInfo));
         verify(mShortcutServiceInternal).addShortcutChangeCallback(
                 mShortcutChangeCallbackCaptor.capture());
         mShortcutChangeCallback = mShortcutChangeCallbackCaptor.getValue();
@@ -972,6 +973,7 @@ public final class DataManagerTest {
                 buildPerson());
         ShortcutInfo shortcut3 = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, "sc3",
                 buildPerson());
+        mockGetShortcuts(List.of(shortcut1, shortcut2, shortcut3));
         mShortcutChangeCallback.onShortcutsAddedOrUpdated(TEST_PKG_NAME,
                 Arrays.asList(shortcut1, shortcut2, shortcut3), UserHandle.of(USER_ID_PRIMARY));
         mShortcutChangeCallback.onShortcutsRemoved(TEST_PKG_NAME,
@@ -1223,7 +1225,6 @@ public final class DataManagerTest {
                     eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
         }
     }
-
     @Test
     public void testUncacheOldestCachedShortcut_missingNotificationEvents() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
@@ -1233,6 +1234,7 @@ public final class DataManagerTest {
             ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
                     buildPerson());
             shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            mockGetShortcuts(Collections.singletonList(shortcut));
             mShortcutChangeCallback.onShortcutsAddedOrUpdated(
                     TEST_PKG_NAME,
                     Collections.singletonList(shortcut),
@@ -1252,7 +1254,6 @@ public final class DataManagerTest {
                     eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
         }
     }
-
     @Test
     public void testUncacheOldestCachedShortcut_legacyConversation() {
         mDataManager.onUserUnlocked(USER_ID_PRIMARY);
@@ -1274,6 +1275,7 @@ public final class DataManagerTest {
             ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, shortcutId,
                     buildPerson());
             shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
+            mockGetShortcuts(Collections.singletonList(shortcut));
             mShortcutChangeCallback.onShortcutsAddedOrUpdated(
                     TEST_PKG_NAME,
                     Collections.singletonList(shortcut),
@@ -1311,7 +1313,8 @@ public final class DataManagerTest {
         mDataManager.reportShareTargetEvent(appTargetEvent, intentFilter);
         byte[] payload = mDataManager.getBackupPayload(USER_ID_PRIMARY);
 
-        DataManager dataManager = new DataManager(mContext, mInjector, mLooper.getLooper());
+        DataManager dataManager = new DataManager(
+                mContext, mInjector, mLooper.getLooper(), mShortcutThrottler);
         dataManager.onUserUnlocked(USER_ID_PRIMARY);
         dataManager.restore(USER_ID_PRIMARY, payload);
         ConversationInfo conversationInfo = dataManager.getPackage(TEST_PKG_NAME, USER_ID_PRIMARY)
@@ -1723,6 +1726,13 @@ public final class DataManagerTest {
         return (queryFlags & flag) != 0;
     }
 
+    private void mockGetShortcuts(List<ShortcutInfo> shortcutInfoList) {
+        when(mShortcutServiceInternal.getShortcuts(
+                anyInt(), anyString(), anyLong(), anyString(), any(), any(), any(),
+                anyInt(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(shortcutInfoList);
+    }
+
     // "Sends" a notification to a non-customized notification channel - the notification channel
     // is something generic like "messages" and the notification has a  shortcut id
     private void sendGenericNotification() {
@@ -1946,6 +1956,13 @@ public final class DataManagerTest {
             mUsageStatsQueryHelper =
                     new TestUsageStatsQueryHelper(userId, packageDataGetter, eventListener);
             return mUsageStatsQueryHelper;
+        }
+    }
+
+    private static class TestPerPackageThrottler implements PerPackageThrottler {
+        @Override
+        public void scheduleDebounced(Pair<String, Integer> pkgUserId, Runnable runnable) {
+            runnable.run();
         }
     }
 }

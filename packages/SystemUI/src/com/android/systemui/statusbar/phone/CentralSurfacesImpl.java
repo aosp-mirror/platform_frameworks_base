@@ -2984,16 +2984,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     /**
-     * Plays the animation when an activity that was occluding Keyguard goes away.
-     */
-    @Override
-    public void animateKeyguardUnoccluding() {
-        mNotificationPanelViewController.setExpandedFraction(0f);
-        mCommandQueueCallbacks.animateExpandNotificationsPanel();
-        mScrimController.setUnocclusionAnimationRunning(true);
-    }
-
-    /**
      * Starts the timeout when we try to start the affordances on Keyguard. We usually rely that
      * Keyguard goes away via fadeKeyguardAfterLaunchTransition, however, that might not happen
      * because the launched app crashed or something else went wrong.

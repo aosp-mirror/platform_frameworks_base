@@ -189,10 +189,6 @@ object Flags {
     @JvmField
     val REVAMPED_WALLPAPER_UI = unreleasedFlag(222, "revamped_wallpaper_ui", teamfood = true)
 
-    /** A different path for unocclusion transitions back to keyguard */
-    // TODO(b/262859270): Tracking Bug
-    @JvmField val UNOCCLUSION_TRANSITION = releasedFlag(223, "unocclusion_transition")
-
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
     val AUTO_PIN_CONFIRMATION =
@@ -247,6 +243,9 @@ object Flags {
             "qs_user_detail_shortcut"
         )
 
+    @JvmField
+    val QS_PIPELINE_NEW_HOST = unreleasedFlag(504, "qs_pipeline_new_host", teamfood = false)
+
     // TODO(b/254512383): Tracking Bug
     @JvmField
     val FULL_SCREEN_USER_SWITCHER =
@@ -297,6 +296,9 @@ object Flags {
     // TODO(b/260881289): Tracking Bug
     val NEW_STATUS_BAR_ICONS_DEBUG_COLORING =
         unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
+
+    // TODO(b/265892345): Tracking Bug
+    val PLUG_IN_STATUS_BAR_CHIP = unreleasedFlag(265892345, "plug_in_status_bar_chip")
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
