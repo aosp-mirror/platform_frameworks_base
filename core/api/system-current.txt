@@ -9116,8 +9116,7 @@ package android.media.tv.tuner.frontend {
     method public int getProtocolCapability();
   }
 
-  public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
+  public final class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @IntRange(from=0) public long getBitrate();
     method @NonNull public String getContentUrl();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
@@ -9138,6 +9137,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public static final class IptvFrontendSettings.Builder {
+    ctor public IptvFrontendSettings.Builder();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setBitrate(@IntRange(from=0) long);
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setContentUrl(@NonNull String);
@@ -9150,8 +9150,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setSrcPort(int);
   }
 
-  public class IptvFrontendSettingsFec {
-    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder builder();
+  public final class IptvFrontendSettingsFec {
     method @IntRange(from=0) public int getFecColNum();
     method @IntRange(from=0) public int getFecRowNum();
     method public int getFecType();
@@ -9162,6 +9161,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public static final class IptvFrontendSettingsFec.Builder {
+    ctor public IptvFrontendSettingsFec.Builder();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec build();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecColNum(@IntRange(from=0) int);
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecRowNum(@IntRange(from=0) int);
