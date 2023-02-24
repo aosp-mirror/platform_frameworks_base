@@ -21,11 +21,9 @@ import android.graphics.Color
 import android.graphics.Rect
 import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import android.tools.common.flicker.subject.layers.LayerSubject
-import android.tools.common.traces.surfaceflinger.LayersTrace
-import android.tools.device.traces.io.ResultWriter
-import android.tools.device.traces.monitors.surfaceflinger.LayersTraceMonitor
-import android.tools.device.traces.monitors.withSFTracing
+import com.android.server.wm.flicker.monitor.LayersTraceMonitor
+import com.android.server.wm.flicker.monitor.withSFTracing
+import com.android.server.wm.traces.common.layers.LayersTrace
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -54,7 +52,8 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     }
 
     fun withTrace(predicate: (it: MainActivity) -> Unit): LayersTrace {
-        return withSFTracing(TRACE_FLAGS) {
+        return withSFTracing(TRACE_FLAGS,
+                outputDir = instrumentation.targetContext.dataDir.toPath()) {
             scenarioRule.getScenario().onActivity {
                 predicate(it)
             }
@@ -62,7 +61,8 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     }
 
     fun withTrace(predicate: () -> Unit): LayersTrace {
-        return withSFTracing(TRACE_FLAGS) {
+        return withSFTracing(TRACE_FLAGS,
+                outputDir = instrumentation.targetContext.dataDir.toPath()) {
                 predicate()
         }
     }
@@ -84,7 +84,8 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
     }
 
     private fun stopLayerTrace() {
-        LayersTraceMonitor().stop(ResultWriter())
+        val tmpDir = instrumentation.targetContext.dataDir.toPath()
+        LayersTraceMonitor(tmpDir).stop()
     }
 
     fun checkPixels(bounds: Rect, @ColorInt color: Int) {

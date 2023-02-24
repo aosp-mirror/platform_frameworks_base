@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -90,7 +89,6 @@ public class SoundDoseHelper {
     private static final int MSG_PERSIST_SAFE_VOLUME_STATE = SAFE_MEDIA_VOLUME_MSG_START + 2;
     private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = SAFE_MEDIA_VOLUME_MSG_START + 3;
     private static final int MSG_PERSIST_CSD_VALUES = SAFE_MEDIA_VOLUME_MSG_START + 4;
-    /*package*/ static final int MSG_CSD_UPDATE_ATTENUATION = SAFE_MEDIA_VOLUME_MSG_START + 5;
 
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
 
@@ -144,13 +142,6 @@ public class SoundDoseHelper {
             Arrays.asList(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
                     AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, AudioSystem.DEVICE_OUT_USB_HEADSET));
 
-    private final Set<Integer> mSafeMediaCsdDevices = new HashSet<>(
-            Arrays.asList(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                    AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, AudioSystem.DEVICE_OUT_USB_HEADSET,
-                    AudioSystem.DEVICE_OUT_BLE_HEADSET, AudioSystem.DEVICE_OUT_BLE_BROADCAST,
-                    AudioSystem.DEVICE_OUT_HEARING_AID,
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
 
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
@@ -167,9 +158,9 @@ public class SoundDoseHelper {
 
     private final boolean mEnableCsd;
 
-    private final Object mCsdStateLock = new Object();
+    private ISoundDose mSoundDose;
 
-    private final AtomicReference<ISoundDose> mSoundDose = new AtomicReference<>();
+    private final Object mCsdStateLock = new Object();
 
     @GuardedBy("mCsdStateLock")
     private float mCurrentCsd = 0.f;
@@ -254,10 +245,8 @@ public class SoundDoseHelper {
             mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
         } else {
             mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
-                    Settings.Global.AUDIO_SAFE_VOLUME_STATE, SAFE_MEDIA_VOLUME_NOT_CONFIGURED);
+                    Settings.Global.AUDIO_SAFE_VOLUME_STATE, 0);
         }
-
-        initCsd();
 
         // The default safe volume index read here will be replaced by the actual value when
         // the mcc is read by onConfigureSafeMedia()
@@ -274,14 +263,9 @@ public class SoundDoseHelper {
             return 0.f;
         }
 
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG, "Sound dose interface not initialized");
-            return 0.f;
-        }
-
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
         try {
-            return soundDose.getOutputRs2();
+            return mSoundDose.getOutputRs2();
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while getting the RS2 exposure value", e);
             return 0.f;
@@ -293,14 +277,9 @@ public class SoundDoseHelper {
             return;
         }
 
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG, "Sound dose interface not initialized");
-            return;
-        }
-
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
         try {
-            soundDose.setOutputRs2(rs2Value);
+            mSoundDose.setOutputRs2(rs2Value);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while setting the RS2 exposure value", e);
         }
@@ -311,14 +290,9 @@ public class SoundDoseHelper {
             return -1.f;
         }
 
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG, "Sound dose interface not initialized");
-            return -1.f;
-        }
-
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
         try {
-            return soundDose.getCsd();
+            return mSoundDose.getCsd();
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while getting the CSD value", e);
             return -1.f;
@@ -330,18 +304,13 @@ public class SoundDoseHelper {
             return;
         }
 
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG, "Sound dose interface not initialized");
-            return;
-        }
-
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
         try {
             final SoundDoseRecord record = new SoundDoseRecord();
             record.timestamp = System.currentTimeMillis();
             record.value = csd;
             final SoundDoseRecord[] recordArray = new SoundDoseRecord[] { record };
-            soundDose.resetCsd(csd, recordArray);
+            mSoundDose.resetCsd(csd, recordArray);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while setting the CSD value", e);
         }
@@ -352,14 +321,9 @@ public class SoundDoseHelper {
             return;
         }
 
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG, "Sound dose interface not initialized");
-            return;
-        }
-
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
         try {
-            soundDose.forceUseFrameworkMel(useFrameworkMel);
+            mSoundDose.forceUseFrameworkMel(useFrameworkMel);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while forcing the internal MEL computation", e);
         }
@@ -370,14 +334,9 @@ public class SoundDoseHelper {
             return;
         }
 
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG, "Sound dose interface not initialized");
-            return;
-        }
-
+        Objects.requireNonNull(mSoundDose, "Sound dose interface not initialized");
         try {
-            soundDose.forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
+            mSoundDose.forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
         }
@@ -592,15 +551,6 @@ public class SoundDoseHelper {
             case MSG_PERSIST_CSD_VALUES:
                 onPersistSoundDoseRecords();
                 break;
-            case MSG_CSD_UPDATE_ATTENUATION:
-                final int device = msg.arg1;
-                final boolean isAbsoluteVolume = (msg.arg2 == 1);
-                final AudioService.VolumeStreamState streamState =
-                        (AudioService.VolumeStreamState) msg.obj;
-
-                updateDoseAttenuation(streamState.getIndex(device), device,
-                        streamState.getStreamType(), isAbsoluteVolume);
-                break;
             default:
                 Log.e(TAG, "Unexpected msg to handle: " + msg.what);
                 break;
@@ -624,18 +574,16 @@ public class SoundDoseHelper {
 
     /*package*/void reset() {
         Log.d(TAG, "Reset the sound dose helper");
-        mSoundDose.set(AudioSystem.getSoundDoseInterface(mSoundDoseCallback));
-
+        mSoundDose = AudioSystem.getSoundDoseInterface(mSoundDoseCallback);
         synchronized (mCsdStateLock) {
             try {
-                final ISoundDose soundDose = mSoundDose.get();
-                if (soundDose != null && soundDose.asBinder().isBinderAlive()) {
+                if (mSoundDose != null && mSoundDose.asBinder().isBinderAlive()) {
                     if (mCurrentCsd != 0.f) {
                         Log.d(TAG,
                                 "Resetting the saved sound dose value " + mCurrentCsd);
                         SoundDoseRecord[] records = mDoseRecords.toArray(
                                 new SoundDoseRecord[0]);
-                        soundDose.resetCsd(mCurrentCsd, records);
+                        mSoundDose.resetCsd(mCurrentCsd, records);
                     }
                 }
             } catch (RemoteException e) {
@@ -644,68 +592,34 @@ public class SoundDoseHelper {
         }
     }
 
-    private void updateDoseAttenuation(int newIndex, int device, int streamType,
-            boolean isAbsoluteVolume) {
-        if (!mEnableCsd) {
-            return;
-        }
-
-        final ISoundDose soundDose = mSoundDose.get();
-        if (soundDose == null) {
-            Log.w(TAG,  "Can not apply attenuation. ISoundDose itf is null.");
-            return;
-        }
-
-        try {
-            if (!isAbsoluteVolume) {
-                // remove any possible previous attenuation
-                soundDose.updateAttenuation(/* attenuationDB= */0.f, device);
-                return;
-            }
-
-            if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
-                    && mSafeMediaCsdDevices.contains(device)) {
-                soundDose.updateAttenuation(
-                        AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
-                                (newIndex + 5) / 10,
-                                device), device);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not apply the attenuation for MEL calculation with volume index "
-                    + newIndex, e);
-        }
-    }
-
     private void initCsd() {
-        if (!mEnableCsd) {
-            return;
-        }
+        if (mEnableCsd) {
+            Log.v(TAG, "Initializing sound dose");
 
-        Log.v(TAG, "Initializing sound dose");
+            synchronized (mCsdStateLock) {
+                if (mGlobalTimeOffsetInSecs == GLOBAL_TIME_OFFSET_UNINITIALIZED) {
+                    mGlobalTimeOffsetInSecs = System.currentTimeMillis() / 1000L;
+                }
 
-        synchronized (mCsdStateLock) {
-            if (mGlobalTimeOffsetInSecs == GLOBAL_TIME_OFFSET_UNINITIALIZED) {
-                mGlobalTimeOffsetInSecs = System.currentTimeMillis() / 1000L;
-            }
-
-            float prevCsd = mCurrentCsd;
-            // Restore persisted values
-            mCurrentCsd = parseGlobalSettingFloat(
-                    Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE, /* defaultValue= */0.f);
-            if (mCurrentCsd != prevCsd) {
-                mNextCsdWarning = parseGlobalSettingFloat(
-                        Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING, /* defaultValue= */1.f);
-                final List<SoundDoseRecord> records = persistedStringToRecordList(
-                        mSettings.getGlobalString(mAudioService.getContentResolver(),
-                                Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS),
-                        mGlobalTimeOffsetInSecs);
-                if (records != null) {
-                    mDoseRecords.addAll(records);
+                float prevCsd = mCurrentCsd;
+                // Restore persisted values
+                mCurrentCsd = parseGlobalSettingFloat(
+                        Settings.Global.AUDIO_SAFE_CSD_CURRENT_VALUE, /* defaultValue= */0.f);
+                if (mCurrentCsd != prevCsd) {
+                    mNextCsdWarning = parseGlobalSettingFloat(
+                            Settings.Global.AUDIO_SAFE_CSD_NEXT_WARNING, /* defaultValue= */1.f);
+                    final List<SoundDoseRecord> records = persistedStringToRecordList(
+                            mSettings.getGlobalString(mAudioService.getContentResolver(),
+                                    Settings.Global.AUDIO_SAFE_CSD_DOSE_RECORDS),
+                            mGlobalTimeOffsetInSecs);
+                    if (records != null) {
+                        mDoseRecords.addAll(records);
+                    }
                 }
             }
-        }
 
-        reset();
+            reset();
+        }
     }
 
     private void onConfigureSafeMedia(boolean force, String caller) {
@@ -753,6 +667,10 @@ public class SoundDoseHelper {
                                 persistedState, /*arg2=*/0,
                                 /*obj=*/null), /*delay=*/0);
             }
+        }
+
+        if (mEnableCsd) {
+            initCsd();
         }
     }
 

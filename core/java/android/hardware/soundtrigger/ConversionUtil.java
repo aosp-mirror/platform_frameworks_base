@@ -198,13 +198,13 @@ class ConversionUtil {
             int modelHandle, int captureSession, RecognitionEvent aidlEvent) {
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
-        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.audioConfig,
-                true /*isInput*/);
-        // TODO(b/265852186) propagate a timestamp from aidl interfaces
-        return new SoundTrigger.GenericRecognitionEvent(aidlEvent.status, modelHandle,
-                aidlEvent.captureAvailable, captureSession, aidlEvent.captureDelayMs,
-                aidlEvent.capturePreambleMs, aidlEvent.triggerInData, audioFormat, aidlEvent.data,
-                aidlEvent.recognitionStillActive, -1 /* halEventReceivedMillis */);
+        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(
+                aidlEvent.audioConfig, true /*isInput*/);
+        return new SoundTrigger.GenericRecognitionEvent(
+                aidlEvent.status,
+                modelHandle, aidlEvent.captureAvailable, captureSession,
+                aidlEvent.captureDelayMs, aidlEvent.capturePreambleMs, aidlEvent.triggerInData,
+                audioFormat, aidlEvent.data, aidlEvent.recognitionStillActive);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(
@@ -217,13 +217,14 @@ class ConversionUtil {
         }
         // The API recognition event doesn't allow for a null audio format, even though it doesn't
         // always make sense. We thus replace it with a default.
-        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(aidlEvent.common.audioConfig,
-                true /*isInput*/);
-        // TODO(b/265852186) propagate a timestamp from aidl interfaces
+        AudioFormat audioFormat = aidl2apiAudioFormatWithDefault(
+                aidlEvent.common.audioConfig, true /*isInput*/);
         return new SoundTrigger.KeyphraseRecognitionEvent(aidlEvent.common.status, modelHandle,
-                aidlEvent.common.captureAvailable, captureSession, aidlEvent.common.captureDelayMs,
-                aidlEvent.common.capturePreambleMs, aidlEvent.common.triggerInData, audioFormat,
-                aidlEvent.common.data, apiExtras, -1 /* halEventReceivedMillis */);
+                aidlEvent.common.captureAvailable,
+                captureSession, aidlEvent.common.captureDelayMs,
+                aidlEvent.common.capturePreambleMs, aidlEvent.common.triggerInData,
+                audioFormat, aidlEvent.common.data,
+                apiExtras);
     }
 
     // In case of a null input returns a non-null valid output.

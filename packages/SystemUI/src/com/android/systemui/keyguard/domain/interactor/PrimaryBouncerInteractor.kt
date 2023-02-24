@@ -21,10 +21,8 @@ import android.content.res.ColorStateList
 import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.Trace
-import android.os.UserHandle
-import android.os.UserManager
-import android.util.Log
 import android.view.View
+import android.util.Log
 import com.android.keyguard.KeyguardConstants
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor

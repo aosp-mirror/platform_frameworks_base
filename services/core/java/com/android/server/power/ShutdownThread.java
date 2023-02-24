@@ -28,6 +28,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
+import android.media.AudioAttributes;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -40,8 +41,6 @@ import android.os.SystemVibrator;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.VibrationAttributes;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
@@ -99,6 +98,11 @@ public final class ShutdownThread extends Thread {
 
     // static instance of this thread
     private static final ShutdownThread sInstance = new ShutdownThread();
+
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     // Metrics that will be reported to tron after reboot
     private static final ArrayMap<String, Long> TRON_METRICS = new ArrayMap<>();
@@ -696,10 +700,7 @@ public final class ShutdownThread extends Thread {
             // vibrate before shutting down
             Vibrator vibrator = new SystemVibrator(context);
             try {
-                vibrator.vibrate(
-                        VibrationEffect.createOneShot(
-                                SHUTDOWN_VIBRATE_MS, VibrationEffect.DEFAULT_AMPLITUDE),
-                        VibrationAttributes.createForUsage(VibrationAttributes.USAGE_TOUCH));
+                vibrator.vibrate(SHUTDOWN_VIBRATE_MS, VIBRATION_ATTRIBUTES);
             } catch (Exception e) {
                 // Failure to vibrate shouldn't interrupt shutdown.  Just log it.
                 Log.w(TAG, "Failed to vibrate during shutdown.", e);

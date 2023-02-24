@@ -16,8 +16,6 @@
 
 package com.android.server.security;
 
-import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
-
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.ParcelFileDescriptor;
@@ -38,25 +36,18 @@ public final class FileIntegrity {
     private FileIntegrity() {}
 
     /**
-     * Enables fs-verity, if supported by the filesystem. This operation is atomic, i.e. it's either
-     * enabled or not, even in case of power failure during or after the call.
+     * Enables fs-verity, if supported by the filesystem.
      * @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">
-     *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     public static void setUpFsVerity(@NonNull File file) throws IOException {
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, MODE_READ_ONLY);
-        setUpFsVerity(pfd);
+        VerityUtils.setUpFsverity(file.getAbsolutePath());
     }
 
     /**
-     * Enables fs-verity, if supported by the filesystem. This operation is atomic, i.e. it's either
-     * enabled or not, even in case of power failure during or after the call.
+     * Enables fs-verity, if supported by the filesystem.
      * @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html">
-     *
-     * @param parcelFileDescriptor an FD opened in {@link ParcelFileDescriptor#MODE_READ_ONLY}.
-     *
      * @hide
      */
     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)

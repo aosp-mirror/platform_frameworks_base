@@ -155,6 +155,11 @@ public final class AttributionSource implements Parcelable {
     AttributionSource(@NonNull Parcel in) {
         this(AttributionSourceState.CREATOR.createFromParcel(in));
 
+        if (!Binder.isDirectlyHandlingTransaction()) {
+            throw new SecurityException("AttributionSource should be unparceled during a binder "
+                    + "transaction for proper verification.");
+        }
+
         // Since we just unpacked this object as part of it transiting a Binder
         // call, this is the perfect time to enforce that its UID and PID can be trusted
         enforceCallingUidAndPid();

@@ -685,10 +685,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public void onTrustManagedChanged(boolean managed, int userId) {
         Assert.isMainThread();
         mUserTrustIsManaged.put(userId, managed);
-        boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userId);
-        mLogger.logTrustUsuallyManagedUpdated(userId, mUserTrustIsUsuallyManaged.get(userId),
-                trustUsuallyManaged, "onTrustManagedChanged");
-        mUserTrustIsUsuallyManaged.put(userId, trustUsuallyManaged);
+        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -2355,12 +2352,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         updateSecondaryLockscreenRequirement(user);
         List<UserInfo> allUsers = mUserManager.getUsers();
         for (UserInfo userInfo : allUsers) {
-            boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userInfo.id);
-            mLogger.logTrustUsuallyManagedUpdated(userInfo.id,
-                    mUserTrustIsUsuallyManaged.get(userInfo.id),
-                    trustUsuallyManaged, "init from constructor");
             mUserTrustIsUsuallyManaged.put(userInfo.id,
-                    trustUsuallyManaged);
+                    mTrustManager.isTrustUsuallyManaged(userInfo.id));
         }
         updateAirplaneModeState();
 
@@ -2400,11 +2393,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     private void updateFaceEnrolled(int userId) {
-        Boolean isFaceEnrolled = mFaceManager != null && !mFaceSensorProperties.isEmpty()
+        mIsFaceEnrolled = mFaceManager != null && !mFaceSensorProperties.isEmpty()
                 && mBiometricEnabledForUser.get(userId)
                 && mAuthController.isFaceAuthEnrolled(userId);
-        mIsFaceEnrolled = isFaceEnrolled;
-        mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
     }
 
     public boolean isFaceSupported() {
@@ -3069,13 +3060,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        boolean fpEnrolled = mFpm != null
+        mIsUnlockWithFingerprintPossible.put(userId, mFpm != null
                 && !mFingerprintSensorProperties.isEmpty()
-                && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId);
-        mLogger.logFpEnrolledUpdated(userId,
-                mIsUnlockWithFingerprintPossible.getOrDefault(userId, false),
-                fpEnrolled);
-        mIsUnlockWithFingerprintPossible.put(userId, fpEnrolled);
+                && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId));
         return mIsUnlockWithFingerprintPossible.get(userId);
     }
 
@@ -3191,10 +3178,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     void handleUserSwitching(int userId, IRemoteCallback reply) {
         Assert.isMainThread();
         clearBiometricRecognized();
-        boolean trustUsuallyManaged = mTrustManager.isTrustUsuallyManaged(userId);
-        mLogger.logTrustUsuallyManagedUpdated(userId, mUserTrustIsUsuallyManaged.get(userId),
-                trustUsuallyManaged, "userSwitching");
-        mUserTrustIsUsuallyManaged.put(userId, trustUsuallyManaged);
+        mUserTrustIsUsuallyManaged.put(userId, mTrustManager.isTrustUsuallyManaged(userId));
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {

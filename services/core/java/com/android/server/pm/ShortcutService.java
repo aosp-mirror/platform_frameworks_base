@@ -119,8 +119,9 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.security.FileIntegrity;
 import com.android.server.uri.UriGrantsManagerInternal;
+
+import libcore.io.IoUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -205,10 +206,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     static final String FILENAME_USER_PACKAGES = "shortcuts.xml";
-
-    @VisibleForTesting
-    static final String FILENAME_USER_PACKAGES_RESERVE_COPY =
-            FILENAME_USER_PACKAGES + ".reservecopy";
 
     static final String DIRECTORY_BITMAPS = "bitmaps";
 
@@ -1058,20 +1055,12 @@ public class ShortcutService extends IShortcutService.Stub {
         return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
     }
 
-    @VisibleForTesting
-    final File getReserveCopyUserFile(@UserIdInt int userId) {
-        return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES_RESERVE_COPY);
-    }
-
     @GuardedBy("mLock")
     private void saveUserLocked(@UserIdInt int userId) {
         final File path = getUserFile(userId);
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Saving to " + path);
         }
-
-        final File reservePath = getReserveCopyUserFile(userId);
-        reservePath.delete();
 
         path.getParentFile().mkdirs();
         final AtomicFile file = new AtomicFile(path);
@@ -1088,23 +1077,6 @@ public class ShortcutService extends IShortcutService.Stub {
         } catch (XmlPullParserException | IOException e) {
             Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
             file.failWrite(os);
-        }
-
-        // Store the reserve copy of the file.
-        try (FileInputStream in = new FileInputStream(path);
-             FileOutputStream out = new FileOutputStream(reservePath)) {
-            FileUtils.copy(in, out);
-            FileUtils.sync(out);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to write reserve copy: " + path, e);
-        }
-
-        // Protect both primary and reserve copy with fs-verity.
-        try {
-            FileIntegrity.setUpFsVerity(path);
-            FileIntegrity.setUpFsVerity(reservePath);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to verity-protect", e);
         }
 
         getUserShortcutsLocked(userId).logSharingShortcutStats(mMetricsLogger);
@@ -1145,25 +1117,26 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "Loading from " + path);
         }
+        final AtomicFile file = new AtomicFile(path);
 
-        try (FileInputStream in = new AtomicFile(path).openRead()) {
-            return loadUserInternal(userId, in, /* forBackup= */ false);
+        final FileInputStream in;
+        try {
+            in = file.openRead();
         } catch (FileNotFoundException e) {
             if (DEBUG || DEBUG_REBOOT) {
                 Slog.d(TAG, "Not found " + path);
             }
-        } catch (Exception e) {
-            final File reservePath = getReserveCopyUserFile(userId);
-            Slog.e(TAG, "Reading from reserve copy: " + reservePath, e);
-            try (FileInputStream in = new AtomicFile(reservePath).openRead()) {
-                return loadUserInternal(userId, in, /* forBackup= */ false);
-            } catch (Exception exceptionReadingReserveFile) {
-                Slog.e(TAG, "Failed to read reserve copy: " + reservePath,
-                        exceptionReadingReserveFile);
-            }
-            Slog.e(TAG, "Failed to read file " + path, e);
+            return null;
         }
-        return null;
+        try {
+            final ShortcutUser ret = loadUserInternal(userId, in, /* forBackup= */ false);
+            return ret;
+        } catch (IOException | XmlPullParserException | InvalidFileFormatException e) {
+            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
+            return null;
+        } finally {
+            IoUtils.closeQuietly(in);
+        }
     }
 
     private ShortcutUser loadUserInternal(@UserIdInt int userId, InputStream is,

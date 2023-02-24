@@ -42,8 +42,6 @@ android_test {
         "androidx.test.ext.junit",
         "flickertestapplib",
         "flickerlib",
-        "flickerlib-apphelpers",
-        "flickerlib-helpers",
         "truth-prebuilt",
         "launcher-helper-lib",
         "launcher-aosp-tapl",
@@ -67,7 +65,6 @@ java_library {
     ],
     static_libs: [
         "flickerlib",
-        "flickerlib-helpers",
         "truth-prebuilt",
         "app-helpers-core",
     ],
@@ -83,10 +80,8 @@ java_library {
         "**/helpers/*",
     ],
     static_libs: [
-        "flickertestapplib",
         "flickerlib",
-        "flickerlib-apphelpers",
-        "flickerlib-helpers",
+        "flickertestapplib",
         "truth-prebuilt",
         "app-helpers-core",
         "wm-flicker-window-extensions",

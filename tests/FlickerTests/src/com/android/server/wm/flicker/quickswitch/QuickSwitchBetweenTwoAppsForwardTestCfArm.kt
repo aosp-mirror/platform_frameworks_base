@@ -16,10 +16,11 @@
 
 package com.android.server.wm.flicker.quickswitch
 
-import android.tools.common.NavBar
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.FlickerTestFactory
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
+import com.android.server.wm.traces.common.Rect
+import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -31,11 +32,13 @@ import org.junit.runners.Parameterized
 class QuickSwitchBetweenTwoAppsForwardTestCfArm(flicker: FlickerTest) :
     QuickSwitchBetweenTwoAppsForwardTest(flicker) {
     companion object {
+        private var startDisplayBounds = Rect.EMPTY
+
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
+                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_GESTURAL)
             )
         }
     }

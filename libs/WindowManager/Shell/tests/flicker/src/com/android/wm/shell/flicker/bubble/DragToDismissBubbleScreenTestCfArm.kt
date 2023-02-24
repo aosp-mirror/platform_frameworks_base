@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.flicker.bubble
 
-import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerTest
+import com.android.server.wm.flicker.FlickerTest
+import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
