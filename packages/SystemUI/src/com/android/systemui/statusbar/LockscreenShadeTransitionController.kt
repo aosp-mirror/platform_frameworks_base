@@ -572,8 +572,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             entry.setGroupExpansionChanging(true)
             userId = entry.sbn.userId
         }
-        var fullShadeNeedsBouncer = (!lockScreenUserManager.userAllowsPrivateNotificationsInPublic(
-                lockScreenUserManager.getCurrentUserId()) ||
+        var fullShadeNeedsBouncer = (
                 !lockScreenUserManager.shouldShowLockscreenNotifications() ||
                 falsingCollector.shouldEnforceBouncer())
         if (keyguardBypassController.bypassEnabled) {
