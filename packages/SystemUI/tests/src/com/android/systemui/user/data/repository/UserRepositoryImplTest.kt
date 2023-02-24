@@ -17,10 +17,7 @@
 
 package com.android.systemui.user.data.repository
 
-import android.app.IActivityManager
-import android.app.UserSwitchObserver
 import android.content.pm.UserInfo
-import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -44,14 +41,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
@@ -60,8 +51,6 @@ import org.mockito.MockitoAnnotations
 class UserRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var manager: UserManager
-    @Mock private lateinit var activityManager: IActivityManager
-    @Captor private lateinit var userSwitchObserver: ArgumentCaptor<UserSwitchObserver>
 
     private lateinit var underTest: UserRepositoryImpl
 
@@ -229,30 +218,31 @@ class UserRepositoryImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun userSwitchingInProgress_registersOnlyOneUserSwitchObserver() = runSelfCancelingTest {
+    fun userSwitchingInProgress_registersUserTrackerCallback() = runSelfCancelingTest {
         underTest = create(this)
 
         underTest.userSwitchingInProgress.launchIn(this)
         underTest.userSwitchingInProgress.launchIn(this)
         underTest.userSwitchingInProgress.launchIn(this)
 
-        verify(activityManager, times(1)).registerUserSwitchObserver(any(), anyString())
+        // Two callbacks registered - one for observing user switching and one for observing the
+        // selected user
+        assertThat(tracker.callbacks.size).isEqualTo(2)
     }
 
     @Test
-    fun userSwitchingInProgress_propagatesStateFromActivityManager() = runSelfCancelingTest {
+    fun userSwitchingInProgress_propagatesStateFromUserTracker() = runSelfCancelingTest {
         underTest = create(this)
-        verify(activityManager)
-            .registerUserSwitchObserver(userSwitchObserver.capture(), anyString())
+        assertThat(tracker.callbacks.size).isEqualTo(2)
 
-        userSwitchObserver.value.onUserSwitching(0, mock(IRemoteCallback::class.java))
+        tracker.onUserChanging(0)
 
         var mostRecentSwitchingValue = false
         underTest.userSwitchingInProgress.onEach { mostRecentSwitchingValue = it }.launchIn(this)
 
         assertThat(mostRecentSwitchingValue).isTrue()
 
-        userSwitchObserver.value.onUserSwitchComplete(0)
+        tracker.onUserChanged(0)
         assertThat(mostRecentSwitchingValue).isFalse()
     }
 
@@ -332,7 +322,6 @@ class UserRepositoryImplTest : SysuiTestCase() {
             backgroundDispatcher = IMMEDIATE,
             globalSettings = globalSettings,
             tracker = tracker,
-            activityManager = activityManager,
             featureFlags = featureFlags,
         )
     }
