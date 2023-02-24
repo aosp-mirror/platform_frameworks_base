@@ -116,12 +116,12 @@ public class BeginGetCredentialOption implements Parcelable {
      * @param id the unique id associated with this option
      * @param type               the requested credential type
      * @param candidateQueryData the request candidateQueryData
-     * @throws IllegalArgumentException If type is empty.
+     * @throws IllegalArgumentException If id or type is empty.
      */
     public BeginGetCredentialOption(
             @NonNull String id, @NonNull String type,
             @NonNull Bundle candidateQueryData) {
-        mId = id;
+        mId = Preconditions.checkStringNotEmpty(id, "id must not be empty");
         mType = Preconditions.checkStringNotEmpty(type, "type must not be empty");
         Bundle bundle = new Bundle();
         bundle.putAll(candidateQueryData);
