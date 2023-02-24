@@ -19,6 +19,7 @@ package android.app.job;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.usage.UsageStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -102,6 +103,7 @@ public class JobParameters implements Parcelable {
      * The user stopped the job via some UI (eg. Task Manager).
      * @hide
      */
+    @TestApi
     public static final int INTERNAL_STOP_REASON_USER_UI_STOP =
             JobProtoEnums.INTERNAL_STOP_REASON_USER_UI_STOP; // 11.
     /**
