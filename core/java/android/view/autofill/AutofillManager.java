@@ -899,9 +899,10 @@ public final class AutofillManager {
 
         // 3. Get the activity names substring between the indexes
         final int activityStringStartIndex = packageInStringIndex + packageName.length() + 1;
-        if (activityStringStartIndex < firstNextSemicolonIndex) {
+        if (activityStringStartIndex >= firstNextSemicolonIndex) {
             Log.e(TAG, "Failed to get denied activity names from denylist because it's wrongly "
                     + "formatted");
+            return;
         }
         final String activitySubstring =
                 denyListString.substring(activityStringStartIndex, firstNextSemicolonIndex);
