@@ -4589,8 +4589,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     @VisibleForTesting
     SurfaceControl computeImeParent() {
-        if (!ImeTargetVisibilityPolicy.isValidToComputeImeParent(mImeLayeringTarget,
-                mImeInputTarget)) {
+        if (!ImeTargetVisibilityPolicy.canComputeImeParent(mImeLayeringTarget, mImeInputTarget)) {
             return null;
         }
         // Attach it to app if the target is part of an app and such app is covering the entire
@@ -4761,6 +4760,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void updateWindowsForAnimator() {
         forAllWindows(mUpdateWindowsForAnimator, true /* traverseTopToBottom */);
+        if (mAsyncRotationController != null) {
+            mAsyncRotationController.updateTargetWindows();
+        }
     }
 
     boolean isInputMethodClientFocus(int uid, int pid) {

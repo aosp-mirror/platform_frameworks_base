@@ -167,8 +167,8 @@ class KeyboardLayoutManagerTests {
         Mockito.`when`(context.packageManager).thenReturn(packageManager)
 
         val info = createMockReceiver()
-        Mockito.`when`(packageManager.queryBroadcastReceivers(Mockito.any(), Mockito.anyInt()))
-            .thenReturn(listOf(info))
+        Mockito.`when`(packageManager.queryBroadcastReceiversAsUser(Mockito.any(), Mockito.anyInt(),
+                Mockito.anyInt())).thenReturn(listOf(info))
         Mockito.`when`(packageManager.getReceiverInfo(Mockito.any(), Mockito.anyInt()))
             .thenReturn(info.activityInfo)
 

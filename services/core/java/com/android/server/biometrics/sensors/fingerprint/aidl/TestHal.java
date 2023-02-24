@@ -217,6 +217,16 @@ public class TestHal extends IFingerprint.Stub {
             public void onContextChanged(OperationContext context) {
                 Slog.w(TAG, "onContextChanged");
             }
+
+            @Override
+            public void onPointerCancelWithContext(PointerContext context) {
+                Slog.w(TAG, "onPointerCancelWithContext");
+            }
+
+            @Override
+            public void setIgnoreDisplayTouches(boolean shouldIgnore) {
+                Slog.w(TAG, "setIgnoreDisplayTouches");
+            }
         };
     }
 }

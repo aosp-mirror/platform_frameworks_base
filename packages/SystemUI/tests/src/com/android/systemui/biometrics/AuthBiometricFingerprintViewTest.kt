@@ -15,27 +15,49 @@
  */
 package com.android.systemui.biometrics
 
+import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
+import android.hardware.biometrics.SensorLocationInternal
+import android.hardware.biometrics.SensorProperties
+import android.hardware.display.DisplayManagerGlobal
+import android.hardware.fingerprint.FingerprintManager
+import android.hardware.fingerprint.FingerprintSensorProperties
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Bundle
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import android.view.Display
+import android.view.DisplayAdjustments
+import android.view.DisplayInfo
+import android.view.Surface
 import android.view.View
+import android.view.ViewGroup
 import androidx.test.filters.SmallTest
+import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.R
+import com.android.systemui.biometrics.AuthBiometricView.STATE_AUTHENTICATING_ANIMATING_IN
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.SysuiTestableContext
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenEver
+
+private const val DISPLAY_ID = 2
+private const val SENSOR_ID = 1
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -50,9 +72,22 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
     private lateinit var callback: AuthBiometricView.Callback
 
     @Mock
+    private lateinit var fingerprintManager: FingerprintManager
+
+    @Mock
+    private lateinit var iconView: LottieAnimationView
+
+    @Mock
+    private lateinit var iconViewOverlay: LottieAnimationView
+
+    @Mock
+    private lateinit var iconLayoutParamSize: Pair<Int, Int>
+
+    @Mock
     private lateinit var panelController: AuthPanelController
 
     private lateinit var biometricView: AuthBiometricView
+    private lateinit var iconController: AuthBiometricFingerprintIconController
 
     private fun createView(allowDeviceCredential: Boolean = false): AuthBiometricFingerprintView {
         val view: AuthBiometricFingerprintView =
@@ -275,6 +310,187 @@ class AuthBiometricFingerprintViewTest : SysuiTestCase() {
         waitForIdleSync()
 
         verify(callback).onAction(AuthBiometricView.Callback.ACTION_USE_DEVICE_CREDENTIAL)
+    }
+
+    private fun testWithSfpsDisplay(
+        isReverseDefaultRotation: Boolean = false,
+        inRearDisplayMode: Boolean = false,
+        isFolded: Boolean = false,
+        initInfo: DisplayInfo.() -> Unit = {},
+        block: () -> Unit
+    ) {
+        val displayInfo = DisplayInfo()
+        displayInfo.initInfo()
+
+        val dmGlobal = mock(DisplayManagerGlobal::class.java)
+        val display = Display(dmGlobal, DISPLAY_ID, displayInfo,
+            DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS)
+
+        whenEver(dmGlobal.getDisplayInfo(eq(DISPLAY_ID))).thenReturn(displayInfo)
+
+        val iconControllerContext = context.createDisplayContext(display) as SysuiTestableContext
+        iconControllerContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.bool.config_reverseDefaultRotation,
+            isReverseDefaultRotation
+        )
+
+        val rearDisplayDeviceStates = if (inRearDisplayMode) intArrayOf(3) else intArrayOf()
+        iconControllerContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.array.config_rearDisplayDeviceStates,
+            rearDisplayDeviceStates
+        )
+
+        val layoutParams = mock(ViewGroup.LayoutParams::class.java)
+        whenEver(iconView.layoutParams).thenReturn(layoutParams)
+        whenEver(iconViewOverlay.layoutParams).thenReturn(layoutParams)
+
+        var locations = listOf(SensorLocationInternal("", 2500, 0, 0))
+        whenEver(fingerprintManager.sensorPropertiesInternal)
+            .thenReturn(
+                listOf(
+                    FingerprintSensorPropertiesInternal(
+                        SENSOR_ID,
+                        SensorProperties.STRENGTH_STRONG,
+                        5 /* maxEnrollmentsPerUser */,
+                        listOf() /* componentInfo */,
+                        FingerprintSensorProperties.TYPE_POWER_BUTTON,
+                        true /* halControlsIllumination */,
+                        true /* resetLockoutRequiresHardwareAuthToken */,
+                        locations
+                    )
+                )
+            )
+        iconControllerContext.addMockSystemService(Context.FINGERPRINT_SERVICE, fingerprintManager)
+
+        iconController = AuthBiometricFingerprintIconController(
+            iconControllerContext,
+            iconView,
+            iconViewOverlay
+        )
+        iconController.onFoldUpdated(isFolded)
+
+        biometricView.mIconController = iconController
+        block()
+    }
+
+    @Test
+    fun sfpsRearDisplay_showsCorrectAnimationAssetsAcrossRotations() {
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = true,
+            isFolded = false,
+            { rotation = Surface.ROTATION_0 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = true,
+            isFolded = false,
+            { rotation = Surface.ROTATION_90 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = true,
+            isFolded = false,
+            { rotation = Surface.ROTATION_180 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = true,
+            isFolded = false,
+            { rotation = Surface.ROTATION_270 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        val expectedLottieAssetOrder: List<Int> = listOf(
+            R.raw.biometricprompt_rear_landscape_base,
+            R.raw.biometricprompt_rear_portrait_reverse_base,
+            R.raw.biometricprompt_rear_landscape_base,
+            R.raw.biometricprompt_rear_portrait_base,
+        )
+
+        val lottieAssetCaptor: ArgumentCaptor<Int> = ArgumentCaptor.forClass(Int::class.java)
+        verify(iconView, times(4)).setAnimation(lottieAssetCaptor.capture())
+        val observedLottieAssetOrder: List<Int> = lottieAssetCaptor.getAllValues()
+        assertThat(observedLottieAssetOrder).containsExactlyElementsIn(expectedLottieAssetOrder)
+                .inOrder()
+    }
+
+    @Test
+    fun sfpsDefaultDisplayFolded_showsAnimationsAssetsCorrectlyAcrossRotations() {
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = true,
+            { rotation = Surface.ROTATION_0 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+            testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = true,
+            { rotation = Surface.ROTATION_90 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN); }
+            testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = true,
+            { rotation = Surface.ROTATION_180 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN); }
+            testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = true,
+            { rotation = Surface.ROTATION_270 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN); }
+        val expectedLottieAssetOrder: List<Int> = listOf(
+            R.raw.biometricprompt_folded_base_default,
+            R.raw.biometricprompt_folded_base_topleft,
+            R.raw.biometricprompt_folded_base_default,
+            R.raw.biometricprompt_folded_base_bottomright,
+        )
+
+        val lottieAssetCaptor: ArgumentCaptor<Int> = ArgumentCaptor.forClass(Int::class.java)
+        verify(iconView, times(4)).setAnimation(lottieAssetCaptor.capture())
+        val observedLottieAssetOrder: List<Int> = lottieAssetCaptor.getAllValues()
+        assertThat(observedLottieAssetOrder).containsExactlyElementsIn(expectedLottieAssetOrder)
+                .inOrder()
+    }
+
+    @Test
+    fun sfpsDefaultDisplayUnfolded_showsAnimationsAssetsCorrectlyAcrossRotations() {
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = false,
+            { rotation = Surface.ROTATION_0 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = false,
+            { rotation = Surface.ROTATION_90 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = false,
+            { rotation = Surface.ROTATION_180 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        testWithSfpsDisplay(
+            isReverseDefaultRotation = false,
+            inRearDisplayMode = false,
+            isFolded = false,
+            { rotation = Surface.ROTATION_270 }
+        ) { biometricView.updateState(STATE_AUTHENTICATING_ANIMATING_IN) }
+        val expectedLottieAssetOrder: List<Int> = listOf(
+            R.raw.biometricprompt_landscape_base,
+            R.raw.biometricprompt_portrait_base_topleft,
+            R.raw.biometricprompt_landscape_base,
+            R.raw.biometricprompt_portrait_base_bottomright,
+        )
+
+        val lottieAssetCaptor: ArgumentCaptor<Int> = ArgumentCaptor.forClass(Int::class.java)
+        verify(iconView, times(4)).setAnimation(lottieAssetCaptor.capture())
+        val observedLottieAssetOrder: List<Int> = lottieAssetCaptor.getAllValues()
+        assertThat(observedLottieAssetOrder).containsExactlyElementsIn(expectedLottieAssetOrder)
+                .inOrder()
     }
 
     override fun waitForIdleSync() = TestableLooper.get(this).processAllMessages()

@@ -458,6 +458,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             case ContentCaptureEvent.TYPE_SESSION_FINISHED:
                 flushReason = FLUSH_REASON_SESSION_FINISHED;
                 break;
+            case ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING:
+                flushReason = FLUSH_REASON_VIEW_TREE_APPEARING;
+                break;
+            case ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED:
+                flushReason = FLUSH_REASON_VIEW_TREE_APPEARED;
+                break;
             default:
                 flushReason = forceFlush ? FLUSH_REASON_FORCE_FLUSH : FLUSH_REASON_FULL;
         }
@@ -774,7 +780,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /** Public because is also used by ViewRootImpl */
     public void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
-        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH));
+        final boolean disableFlush = mManager.getFlushViewTreeAppearingEventDisabled();
+
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, type),
+                disableFlush ? !started : FORCE_FLUSH));
     }
 
     void notifySessionResumed(int sessionId) {

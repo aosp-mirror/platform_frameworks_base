@@ -4370,7 +4370,8 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    private void setLeAudioVolumeOnModeUpdate(int mode, int device) {
+    private void setLeAudioVolumeOnModeUpdate(int mode, int device, int streamType, int index,
+            int maxIndex) {
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
@@ -4388,16 +4389,15 @@ public class AudioService extends IAudioService.Stub
         // (like the outgoing call) the value of 'device' is not DEVICE_OUT_BLE_*
         // even when BLE is connected.
         if (!AudioSystem.isLeAudioDeviceType(device)) {
+            Log.w(TAG, "setLeAudioVolumeOnModeUpdate got unexpected device=" + device
+                    + ", forcing to device=" + AudioSystem.DEVICE_OUT_BLE_HEADSET);
             device = AudioSystem.DEVICE_OUT_BLE_HEADSET;
         }
 
-        final int streamType = getBluetoothContextualVolumeStream(mode);
-        final int index = mStreamStates[streamType].getIndex(device);
-        final int maxIndex = mStreamStates[streamType].getMaxIndex();
-
         if (DEBUG_VOL) {
-            Log.d(TAG, "setLeAudioVolumeOnModeUpdate postSetLeAudioVolumeIndex index="
-                    + index + " maxIndex=" + maxIndex + " streamType=" + streamType);
+            Log.d(TAG, "setLeAudioVolumeOnModeUpdate postSetLeAudioVolumeIndex device="
+                    + device + ", mode=" + mode + ", index=" + index + " maxIndex=" + maxIndex
+                    + " streamType=" + streamType);
         }
         mDeviceBroker.postSetLeAudioVolumeIndex(index, maxIndex, streamType);
         mDeviceBroker.postApplyVolumeOnDevice(streamType, device, "setLeAudioVolumeOnModeUpdate");
@@ -5865,10 +5865,18 @@ public class AudioService extends IAudioService.Stub
                 mModeLogger.enqueue(new PhoneStateEvent(requesterPackage, requesterPid,
                         requestedMode, pid, mode));
 
-                int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
-                int device = getDeviceForStream(streamType);
-                int index = mStreamStates[mStreamVolumeAlias[streamType]].getIndex(device);
-                setStreamVolumeInt(mStreamVolumeAlias[streamType], index, device, true,
+                final int streamType = getActiveStreamType(AudioManager.USE_DEFAULT_STREAM_TYPE);
+                final int device = getDeviceForStream(streamType);
+                final int streamAlias = mStreamVolumeAlias[streamType];
+
+                if (DEBUG_MODE) {
+                    Log.v(TAG, "onUpdateAudioMode: streamType=" + streamType
+                            + ", streamAlias=" + streamAlias);
+                }
+
+                final int index = mStreamStates[streamAlias].getIndex(device);
+                final int maxIndex = mStreamStates[streamAlias].getMaxIndex();
+                setStreamVolumeInt(streamAlias, index, device, true,
                         requesterPackage, true /*hasModifyAudioSettings*/);
 
                 updateStreamVolumeAlias(true /*updateVolumes*/, requesterPackage);
@@ -5876,7 +5884,7 @@ public class AudioService extends IAudioService.Stub
                 // change of mode may require volume to be re-applied on some devices
                 updateAbsVolumeMultiModeDevices(previousMode, mode);
 
-                setLeAudioVolumeOnModeUpdate(mode, device);
+                setLeAudioVolumeOnModeUpdate(mode, device, streamAlias, index, maxIndex);
 
                 // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all SCO
                 // connections not started by the application changing the mode when pid changes
@@ -8350,6 +8358,7 @@ public class AudioService extends IAudioService.Stub
             synchronized (VolumeStreamState.class) {
                 // apply device specific volumes first
                 int index;
+                boolean isAbsoluteVolume = false;
                 for (int i = 0; i < mIndexMap.size(); i++) {
                     final int device = mIndexMap.keyAt(i);
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
@@ -8358,6 +8367,7 @@ public class AudioService extends IAudioService.Stub
                         } else if (isAbsoluteVolumeDevice(device)
                                 || isA2dpAbsoluteVolumeDevice(device)
                                 || AudioSystem.isLeAudioDeviceType(device)) {
+                            isAbsoluteVolume = true;
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if (isFullVolumeDevice(device)) {
                             index = (mIndexMax + 5)/10;
@@ -8366,6 +8376,11 @@ public class AudioService extends IAudioService.Stub
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
                         }
+
+                        sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION,
+                                SENDMSG_REPLACE, device,  isAbsoluteVolume ? 1 : 0, this,
+                                /*delay=*/0);
+
                         setStreamVolumeIndex(index, device);
                     }
                 }
@@ -8840,6 +8855,10 @@ public class AudioService extends IAudioService.Stub
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
 
         synchronized (VolumeStreamState.class) {
+            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION, SENDMSG_REPLACE,
+                    device, (isAbsoluteVolumeDevice(device) || isA2dpAbsoluteVolumeDevice(device)
+                            || AudioSystem.isLeAudioDeviceType(device) ? 1 : 0),
+                    streamState, /*delay=*/0);
             // Apply volume
             streamState.applyDeviceVolume_syncVSS(device);
 

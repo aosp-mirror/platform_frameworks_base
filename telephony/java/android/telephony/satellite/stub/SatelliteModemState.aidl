@@ -21,12 +21,29 @@ package android.telephony.satellite.stub;
  */
 @Backing(type="int")
 enum SatelliteModemState {
-    /* Satellite modem is in idle state. */
+    /**
+     * Satellite modem is in idle state.
+     */
     SATELLITE_MODEM_STATE_IDLE = 0,
-    /* Satellite modem is listening for incoming messages. */
+    /**
+     * Satellite modem is listening for incoming datagrams.
+     */
     SATELLITE_MODEM_STATE_LISTENING = 1,
-    /* Satellite modem is sending and/or receiving messages. */
-    SATELLITE_MODEM_STATE_MESSAGE_TRANSFERRING = 2,
-    /* Satellite modem is powered off. */
-    SATELLITE_MODEM_STATE_OFF = 3,
+    /**
+     * Satellite modem is sending and/or receiving datagrams.
+     */
+    SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING = 2,
+    /**
+     * Satellite modem is retrying to send and/or receive datagrams.
+     */
+    SATELLITE_MODEM_STATE_DATAGRAM_RETRYING = 3,
+    /**
+     * Satellite modem is powered off.
+     */
+    SATELLITE_MODEM_STATE_OFF = 4,
+    /**
+     * Satellite modem state is unknown. This generic modem state should be used only when the
+     * modem state cannot be mapped to other specific modem states.
+     */
+    SATELLITE_MODEM_STATE_UNKNOWN = -1,
 }

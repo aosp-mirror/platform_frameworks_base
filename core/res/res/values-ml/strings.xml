@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുന്നത് വരെ നിങ്ങളുടെ വ്യക്തിപരമായ ആപ്പുകൾ ബ്ലോക്കായിരിക്കും"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"വ്യക്തിപര ആപ്പുകൾ <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>-ന് ബ്ലോക്ക് ചെയ്യപ്പെടും. നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ <xliff:g id="NUMBER">%3$d</xliff:g> ദിവസത്തിൽ കൂടുതൽ ഓഫായ നിലയിൽ തുടരാൻ നിങ്ങളുടെ ഐടി അഡ്‌മിൻ അനുവദിക്കുന്നില്ല."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ഓണാക്കുക"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"കോളുകളും സന്ദേശങ്ങളും ഓഫാണ്"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"നിങ്ങൾ ഔദ്യോഗിക ആപ്പുകൾ താൽകാലികമായി നിർത്തി. നിങ്ങൾക്ക് ഫോൺ കോളുകളോ ടെക്സ്റ്റ് സന്ദേശങ്ങളോ ലഭിക്കില്ല."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"വർക്ക് ആപ്പ് ഓണാക്കൂ"</string>
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ഓപ്‌ഷനുകൾ"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ഉപകരണത്തിന്റെ ഫിംഗർപ്രിന്റ് സെൻസറിൽ ചെയ്‌ത ജെസ്‌റ്ററുകൾ ക്യാപ്‌ചർ ചെയ്യാനാകും."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"സ്ക്രീന്‍ഷോട്ട് എടുക്കുക"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ഡിസ്‌പ്ലേയുടെ സ്‌ക്രീൻഷോട്ട് എടുക്കാൻ കഴിയും."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"പ്രിവ്യൂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"സ്റ്റാറ്റസ് ബാർ പ്രവർത്തനരഹിതമാക്കുക അല്ലെങ്കിൽ പരിഷ്‌ക്കരിക്കുക"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"നില ബാർ പ്രവർത്തരഹിതമാക്കുന്നതിന് അല്ലെങ്കിൽ സിസ്‌റ്റം ഐക്കണുകൾ ചേർക്കുന്നതിനും നീക്കംചെയ്യുന്നതിനും അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"സ്റ്റാറ്റസ് ബാർ ആയിരിക്കുക"</string>

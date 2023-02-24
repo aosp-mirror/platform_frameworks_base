@@ -22,6 +22,7 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
@@ -88,15 +89,15 @@ public interface ServiceProvider extends BiometricServiceProvider<FaceSensorProp
 
     void cancelFaceDetect(int sensorId, @NonNull IBinder token, long requestId);
 
-    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
+            @NonNull FaceAuthenticateOptions options,
+            boolean restricted, int statsClient, boolean allowBackgroundAuthentication);
 
-    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication, boolean isKeyguardBypassEnabled);
+            @NonNull FaceAuthenticateOptions options, long requestId,
+            boolean restricted, int statsClient, boolean allowBackgroundAuthentication);
 
     void cancelAuthentication(int sensorId, @NonNull IBinder token, long requestId);
 

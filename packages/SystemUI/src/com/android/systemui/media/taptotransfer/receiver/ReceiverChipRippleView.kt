@@ -98,7 +98,7 @@ class ReceiverChipRippleView(context: Context?, attrs: AttributeSet?) : RippleVi
     // Calculates the actual starting percentage according to ripple shader progress set method.
     // Check calculations in [RippleShader.progress]
     fun calculateStartingPercentage(newHeight: Float): Float {
-        val ratio = rippleShader.currentHeight / newHeight
+        val ratio = rippleShader.rippleSize.currentHeight / newHeight
         val remainingPercentage = (1 - ratio).toDouble().pow(1 / 3.toDouble()).toFloat()
         return 1 - remainingPercentage
     }

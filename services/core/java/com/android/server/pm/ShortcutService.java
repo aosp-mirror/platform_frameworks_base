@@ -4350,8 +4350,14 @@ public class ShortcutService extends IShortcutService.Stub {
             @NonNull ComponentName activity, @UserIdInt int userId) {
         final long start = getStatStartTime();
         try {
-            return queryActivities(new Intent(), activity.getPackageName(), activity, userId)
-                    .size() > 0;
+            final ActivityInfo ai;
+            try {
+                ai = mContext.getPackageManager().getActivityInfoAsUser(activity,
+                        PackageManager.ComponentInfoFlags.of(PACKAGE_MATCH_FLAGS), userId);
+            } catch (NameNotFoundException e) {
+                return false;
+            }
+            return ai.enabled && ai.exported;
         } finally {
             logDurationStat(Stats.IS_ACTIVITY_ENABLED, start);
         }

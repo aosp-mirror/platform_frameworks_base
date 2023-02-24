@@ -25,10 +25,10 @@ import android.telephony.satellite.SatelliteDatagram;
  */
 oneway interface ISatelliteDatagramCallback {
     /**
-     * Called when datagrams are received from satellite.
+     * Called when there is an incoming datagram to be received from satellite.
      *
      * @param datagramId An id that uniquely identifies incoming datagram.
-     * @param datagram datagram received from satellite.
+     * @param datagram Datagram received from satellite.
      * @param pendingCount Number of datagrams yet to be received from satellite.
      * @param callback This callback will be used by datagram receiver app to send ack back to
      *                 Telephony. If the callback is not received within five minutes,

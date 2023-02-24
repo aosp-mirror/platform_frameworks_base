@@ -123,7 +123,7 @@ public final class CredentialDescription implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeString(mType);
+        dest.writeString8(mType);
         dest.writeString(mFlattenedRequestString);
         dest.writeTypedList(mCredentialEntries, flags);
     }

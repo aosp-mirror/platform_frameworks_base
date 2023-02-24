@@ -1470,7 +1470,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
             iteration = Math.min(iteration, mRepeatCount);
             lastIteration = Math.min(lastIteration, mRepeatCount);
 
-            if (iteration != lastIteration) {
+            if (notify && iteration != lastIteration) {
                 notifyListeners(AnimatorCaller.ON_REPEAT, false);
             }
         }
@@ -1669,7 +1669,9 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         for (int i = 0; i < numValues; ++i) {
             mValues[i].calculateValue(fraction);
         }
-        callOnList(mUpdateListeners, AnimatorCaller.ON_UPDATE, this, false);
+        if (mSeekFraction >= 0 || mStartListenersCalled) {
+            callOnList(mUpdateListeners, AnimatorCaller.ON_UPDATE, this, false);
+        }
     }
 
     @Override

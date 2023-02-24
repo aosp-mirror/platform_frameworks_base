@@ -619,14 +619,6 @@ public final class NotificationEntry extends ListEntry {
         return row.isMediaRow();
     }
 
-    /**
-     * We are a top level child if our parent is the list of notifications duh
-     * @return {@code true} if we're a top level notification
-     */
-    public boolean isTopLevelChild() {
-        return row != null && row.isTopLevelChild();
-    }
-
     public void resetUserExpansion() {
         if (row != null) row.resetUserExpansion();
     }

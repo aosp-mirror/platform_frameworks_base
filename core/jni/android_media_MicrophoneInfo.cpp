@@ -92,6 +92,7 @@ jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
         env->DeleteLocalRef(jFrequencyResponse);
     }
     // Create a list of Pair for channel mapping.
+    jChannelMappings = env->NewObject(gArrayListClass, gArrayListCstor);
     const auto &channelMapping = micInfo.channel_mapping;
     for (size_t i = 0; i < std::size(channelMapping); i++) {
         int channelMappingType = channelMapping[i];

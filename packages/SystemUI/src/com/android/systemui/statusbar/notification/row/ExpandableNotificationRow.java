@@ -110,7 +110,6 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.SwipeableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -3587,10 +3586,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mEntry.getSbn().getNotification().isMediaNotification();
     }
 
-    public boolean isTopLevelChild() {
-        return getParent() instanceof NotificationStackScrollLayout;
-    }
-
     public boolean isGroupNotFullyVisible() {
         return getClipTopAmount() > 0 || getTranslationY() < 0;
     }
@@ -3734,7 +3729,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
             pw.println("Roundness: " + getRoundableState().debugString());
 
-            if (mIsSummaryWithChildren) {
+            int transientViewCount = mChildrenContainer == null
+                    ? 0 : mChildrenContainer.getTransientViewCount();
+            if (mIsSummaryWithChildren || transientViewCount > 0) {
                 pw.println();
                 pw.print("ChildrenContainer");
                 pw.print(" visibility: " + mChildrenContainer.getVisibility());
@@ -3742,11 +3739,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.print(", translationY: " + mChildrenContainer.getTranslationY());
                 pw.println();
                 List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
-                pw.println("Children: " + notificationChildren.size());
-                pw.print("{");
+                pw.print("Children: " + notificationChildren.size() + " {");
                 pw.increaseIndent();
                 for (ExpandableNotificationRow child : notificationChildren) {
                     pw.println();
+                    child.dump(pw, args);
+                }
+                pw.decreaseIndent();
+                pw.println("}");
+                pw.print("Transient Views: " + transientViewCount + " {");
+                pw.increaseIndent();
+                for (int i = 0; i < transientViewCount; i++) {
+                    pw.println();
+                    ExpandableView child = (ExpandableView) mChildrenContainer.getTransientView(i);
                     child.dump(pw, args);
                 }
                 pw.decreaseIndent();

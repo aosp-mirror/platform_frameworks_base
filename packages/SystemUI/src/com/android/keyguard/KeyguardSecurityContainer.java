@@ -492,12 +492,14 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             case MotionEvent.ACTION_MOVE:
                 mVelocityTracker.addMovement(event);
                 int pointerIndex = event.findPointerIndex(mActivePointerId);
-                float y = event.getY(pointerIndex);
-                if (mLastTouchY != -1) {
-                    float dy = y - mLastTouchY;
-                    setTranslationY(getTranslationY() + dy * TOUCH_Y_MULTIPLIER);
+                if (pointerIndex != -1) {
+                    float y = event.getY(pointerIndex);
+                    if (mLastTouchY != -1) {
+                        float dy = y - mLastTouchY;
+                        setTranslationY(getTranslationY() + dy * TOUCH_Y_MULTIPLIER);
+                    }
+                    mLastTouchY = y;
                 }
-                mLastTouchY = y;
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:

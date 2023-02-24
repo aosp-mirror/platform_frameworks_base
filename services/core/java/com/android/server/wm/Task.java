@@ -2825,19 +2825,23 @@ class Task extends TaskFragment {
      * Account for specified insets to crop the animation bounds by to avoid the animation
      * occurring over "out of bounds" regions
      *
-     * For example this is used to make sure the tasks are cropped to be fully above the
+     * For example this is used to make sure the tasks are cropped to be fully above the expanded
      * taskbar when animating.
      *
-     * @param animationBounds The animations bounds to adjust to account for the custom spec insets.
+     * TEMPORARY FIELD (b/202383002)
+     * TODO: Remove once we use surfaceflinger rounded corners on tasks rather than taskbar overlays
+     *       or when shell transitions are fully enabled
+     *
+     * @param animationBounds The animation bounds to adjust to account for the custom spec insets.
      */
     void adjustAnimationBoundsForTransition(Rect animationBounds) {
         TaskTransitionSpec spec = mWmService.mTaskTransitionSpec;
         if (spec != null) {
             final InsetsState state =
                     getDisplayContent().getInsetsStateController().getRawInsetsState();
-            for (int id : spec.animationBoundInsets) {
-                final InsetsSource source = state.peekSource(id);
-                if (source != null) {
+            for (int i = state.sourceSize() - 1; i >= 0; i--) {
+                final InsetsSource source = state.sourceAt(i);
+                if (source.insetsRoundedCornerFrame()) {
                     animationBounds.inset(source.calculateVisibleInsets(animationBounds));
                 }
             }
@@ -3389,6 +3393,11 @@ class Task extends TaskFragment {
                 && top.getOrganizedTask() == this && top.isState(RESUMED);
         // Whether the direct top activity is in size compat mode on foreground.
         info.topActivityInSizeCompat = isTopActivityResumed && top.inSizeCompatMode();
+        if (info.topActivityInSizeCompat
+                && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
+            // We hide the restart button in case of transparent activities.
+            info.topActivityInSizeCompat = top.fillsParent();
+        }
         // Whether the direct top activity is eligible for letterbox education.
         info.topActivityEligibleForLetterboxEducation = isTopActivityResumed
                 && top.isEligibleForLetterboxEducation();

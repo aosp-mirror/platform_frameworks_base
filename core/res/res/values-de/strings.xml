@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Deine privaten Apps werden blockiert, bis du dein Arbeitsprofil aktivierst"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Private Apps werden am <xliff:g id="DATE">%1$s</xliff:g> um <xliff:g id="TIME">%2$s</xliff:g> blockiert. Dein IT-Administrator hat festgelegt, dass dein Arbeitsprofil nicht länger als <xliff:g id="NUMBER">%3$d</xliff:g> Tage pausiert werden darf."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivieren"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Anrufe und Nachrichten sind deaktiviert"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Du hast geschäftliche Apps pausiert. Deshalb kannst du keine Anrufe oder Nachrichten empfangen."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Geschäftl. Apps nicht pausieren"</string>
     <string name="me" msgid="6207584824693813140">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-Optionen"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-Optionen"</string>
@@ -298,7 +295,7 @@
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
-    <string name="user_owner_label" msgid="8628726904184471211">"Zum persönlichen Profil wechseln"</string>
+    <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Erfasst Touch-Gesten auf dem Fingerabdrucksensor des Geräts."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Screenshot erstellen"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Es kann ein Screenshot des Displays erstellt werden."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Vorschau – <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Statusleiste darstellen"</string>

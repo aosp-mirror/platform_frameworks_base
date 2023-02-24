@@ -930,7 +930,8 @@ public abstract class ContentResolver implements ContentInterface {
         if (provider != null) {
             try {
                 final StringResultListener resultListener = new StringResultListener();
-                provider.getTypeAsync(url, new RemoteCallback(resultListener));
+                provider.getTypeAsync(mContext.getAttributionSource(),
+                        url, new RemoteCallback(resultListener));
                 resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
                 if (resultListener.exception != null) {
                     throw resultListener.exception;
@@ -944,7 +945,11 @@ public abstract class ContentResolver implements ContentInterface {
                 Log.w(TAG, "Failed to get type for: " + url + " (" + e.getMessage() + ")");
                 return null;
             } finally {
-                releaseProvider(provider);
+                try {
+                    releaseProvider(provider);
+                } catch (java.lang.NullPointerException e) {
+                    // does nothing, Binder connection already null
+                }
             }
         }
 

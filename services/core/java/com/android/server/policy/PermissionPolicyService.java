@@ -194,27 +194,38 @@ public final class PermissionPolicyService extends SystemService {
 
         mPackageManagerInternal.getPackageList(new PackageListObserver() {
             @Override
-            public void onPackageAdded(String packageName, int uid) {
-                final int userId = UserHandle.getUserId(uid);
-                if (isStarted(userId)) {
-                    synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
+            public void onPackageAdded(String packageName, int appId) {
+                final int[] userIds = LocalServices.getService(UserManagerInternal.class)
+                        .getUserIds();
+                for (final int userId : userIds) {
+                    if (isStarted(userId)) {
+                        synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
+                    }
                 }
             }
 
             @Override
-            public void onPackageChanged(String packageName, int uid) {
-                final int userId = UserHandle.getUserId(uid);
-                if (isStarted(userId)) {
-                    synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
-                    resetAppOpPermissionsIfNotRequestedForUid(uid);
+            public void onPackageChanged(String packageName, int appId) {
+                final int[] userIds = LocalServices.getService(UserManagerInternal.class)
+                        .getUserIds();
+                for (final int userId : userIds) {
+                    if (isStarted(userId)) {
+                        synchronizePackagePermissionsAndAppOpsForUser(packageName, userId);
+                        final int uid = UserHandle.getUid(userId, appId);
+                        resetAppOpPermissionsIfNotRequestedForUid(uid);
+                    }
                 }
             }
 
             @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                final int userId = UserHandle.getUserId(uid);
-                if (isStarted(userId)) {
-                    resetAppOpPermissionsIfNotRequestedForUid(uid);
+            public void onPackageRemoved(String packageName, int appId) {
+                final int[] userIds = LocalServices.getService(UserManagerInternal.class)
+                        .getUserIds();
+                for (final int userId : userIds) {
+                    if (isStarted(userId)) {
+                        final int uid = UserHandle.getUid(userId, appId);
+                        resetAppOpPermissionsIfNotRequestedForUid(uid);
+                    }
                 }
             }
         });

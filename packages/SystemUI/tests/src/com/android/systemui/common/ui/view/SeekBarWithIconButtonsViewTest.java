@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
@@ -42,6 +43,8 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
 
     private ImageView mIconStart;
     private ImageView mIconEnd;
+    private ViewGroup mIconStartFrame;
+    private ViewGroup mIconEndFrame;
     private SeekBar mSeekbar;
     private SeekBarWithIconButtonsView mIconDiscreteSliderLinearLayout;
 
@@ -50,6 +53,8 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
         mIconDiscreteSliderLinearLayout = new SeekBarWithIconButtonsView(mContext);
         mIconStart = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_start);
         mIconEnd = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_end);
+        mIconStartFrame = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_start_frame);
+        mIconEndFrame = mIconDiscreteSliderLinearLayout.findViewById(R.id.icon_end_frame);
         mSeekbar = mIconDiscreteSliderLinearLayout.findViewById(R.id.seekbar);
     }
 
@@ -59,6 +64,8 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
 
         assertThat(mIconStart.isEnabled()).isFalse();
         assertThat(mIconEnd.isEnabled()).isTrue();
+        assertThat(mIconStartFrame.isEnabled()).isFalse();
+        assertThat(mIconEndFrame.isEnabled()).isTrue();
     }
 
     @Test
@@ -67,6 +74,8 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
 
         assertThat(mIconEnd.isEnabled()).isFalse();
         assertThat(mIconStart.isEnabled()).isTrue();
+        assertThat(mIconEndFrame.isEnabled()).isFalse();
+        assertThat(mIconStartFrame.isEnabled()).isTrue();
     }
 
     @Test
@@ -77,12 +86,15 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
 
         assertThat(mIconStart.isEnabled()).isTrue();
         assertThat(mIconEnd.isEnabled()).isTrue();
+        assertThat(mIconStartFrame.isEnabled()).isTrue();
+        assertThat(mIconEndFrame.isEnabled()).isTrue();
     }
 
     @Test
     public void clickIconEnd_currentProgressIsOneToMax_reachesMax() {
         mIconDiscreteSliderLinearLayout.setProgress(mSeekbar.getMax() - 1);
-        mIconEnd.performClick();
+
+        mIconEndFrame.performClick();
 
         assertThat(mSeekbar.getProgress()).isEqualTo(mSeekbar.getMax());
     }
@@ -90,7 +102,8 @@ public class SeekBarWithIconButtonsViewTest extends SysuiTestCase {
     @Test
     public void clickIconStart_currentProgressIsOne_reachesZero() {
         mIconDiscreteSliderLinearLayout.setProgress(1);
-        mIconStart.performClick();
+
+        mIconStartFrame.performClick();
 
         assertThat(mSeekbar.getProgress()).isEqualTo(0);
     }

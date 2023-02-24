@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Your personal apps are blocked until you turn on your work profile"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Personal apps will be blocked on <xliff:g id="DATE">%1$s</xliff:g> at <xliff:g id="TIME">%2$s</xliff:g>. Your IT admin doesn’t allow your work profile to stay off for more than <xliff:g id="NUMBER">%3$d</xliff:g> days."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Turn on"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Calls and messages are off"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"You have paused work apps. You won\'t receive phone calls or text messages."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Unpause work apps"</string>
     <string name="me" msgid="6207584824693813140">"Me"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet options"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV options"</string>

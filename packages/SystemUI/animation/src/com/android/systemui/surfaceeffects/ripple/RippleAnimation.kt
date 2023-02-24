@@ -54,7 +54,7 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
         }
         animator.addListener(
             object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator?) {
+                override fun onAnimationEnd(animation: Animator) {
                     onAnimationEnd?.run()
                 }
             }
@@ -68,7 +68,7 @@ class RippleAnimation(private val config: RippleAnimationConfig) {
     private fun applyConfigToShader() {
         with(rippleShader) {
             setCenter(config.centerX, config.centerY)
-            setMaxSize(config.maxWidth, config.maxHeight)
+            rippleSize.setMaxSize(config.maxWidth, config.maxHeight)
             pixelDensity = config.pixelDensity
             color = ColorUtils.setAlphaComponent(config.color, config.opacity)
             sparkleStrength = config.sparkleStrength

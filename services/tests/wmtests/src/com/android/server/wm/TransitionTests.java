@@ -1018,6 +1018,10 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testDisplayRotationChange() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        spyOn(displayPolicy);
+        // Simulate gesture navigation (non-movable) so it is not seamless.
+        doReturn(false).when(displayPolicy).navigationBarCanMove();
         final Task task = createActivityRecord(mDisplayContent).getTask();
         final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
         final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
@@ -1072,7 +1076,8 @@ public class TransitionTests extends WindowTestsBase {
 
         // Navigation bar finishes drawing after the start transaction, so its fade-in animation
         // can execute directly.
-        asyncRotationController.handleFinishDrawing(navBar, mMockT);
+        navBar.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        asyncRotationController.updateTargetWindows();
         assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
         assertNull(mDisplayContent.getAsyncRotationController());
     }

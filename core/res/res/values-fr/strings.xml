@@ -208,12 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applis perso sont bloquées tant que vous n\'avez pas activé votre profil pro"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Vos applis perso seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre administrateur ne permet pas que votre profil pro reste désactivé pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activer"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Les appels et messages sont désactivés"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Vous avez suspendu les applis professionnelles. Vous ne recevrez pas d\'appels ni de messages."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Activer apps pro"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Options Android TV"</string>
@@ -345,8 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Peut enregistrer des gestes effectués sur le lecteur d\'empreinte digitale de l\'appareil."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Prendre une capture d\'écran"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Peut prendre des captures d\'écran."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Aperçu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"Désactivation ou modification de la barre d\'état"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Permet à l\'application de désactiver la barre d\'état, ou d\'ajouter et de supprimer des icônes système."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"remplacer la barre d\'état"</string>

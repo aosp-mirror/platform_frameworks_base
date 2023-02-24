@@ -18,6 +18,8 @@ package com.android.test
 import android.app.Instrumentation
 import android.graphics.Point
 import android.provider.Settings
+import android.tools.common.datatypes.Size
+import android.tools.common.flicker.subject.layers.LayerSubject
 import androidx.test.InstrumentationRegistry
 import org.junit.After
 import org.junit.Before
@@ -68,6 +70,10 @@ open class SurfaceViewBufferTestBase(val useBlastAdapter: Boolean) {
 
         const val R8G8B8A8_UNORM = 1
         val defaultBufferSize = Point(640, 480)
+
+        fun LayerSubject.hasBufferSize(point: Point) = hasBufferSize(Size.from(point.x, point.y))
+
+        fun LayerSubject.hasLayerSize(point: Point) = hasLayerSize(Size.from(point.x, point.y))
 
         // system/window.h definitions
         enum class ScalingMode() {

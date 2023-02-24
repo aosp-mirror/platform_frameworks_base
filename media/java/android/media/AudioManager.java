@@ -9224,11 +9224,12 @@ public class AudioManager {
     // Preferred mixer attributes
 
     /**
-     * Returns the {@link AudioMixerAttributes} that can be used to set as preferred mixe
+     * Returns the {@link AudioMixerAttributes} that can be used to set as preferred mixer
      * attributes via {@link #setPreferredMixerAttributes(
      * AudioAttributes, AudioDeviceInfo, AudioMixerAttributes)}.
-     * <p>Note that only USB devices are guaranteed to expose configurable mixer attributes, the
-     * returned list may be empty when devices do not allow dynamic configuration.
+     * <p>Note that only USB devices are guaranteed to expose configurable mixer attributes. An
+     * empty list may be returned for all other types of devices as they may not allow dynamic
+     * configuration.
      *
      * @param device the device to query
      * @return a list of {@link AudioMixerAttributes} that can be used as preferred mixer attributes
@@ -9246,9 +9247,8 @@ public class AudioManager {
     /**
      * Configures the mixer attributes for a particular {@link AudioAttributes} over a given
      * {@link AudioDeviceInfo}.
-     * <p>When constructing an {@link AudioMixerAttributes} for setting preferred mixer attributes,
-     * the mixer format must be constructed from an {@link AudioProfile} that can be used to set
-     * preferred mixer attributes.
+     * <p>Call {@link #getSupportedMixerAttributes(AudioDeviceInfo)} to determine which mixer
+     * attributes can be used with the given device.
      * <p>The ownership of preferred mixer attributes is recognized by uid. When a playback from the
      * same uid is routed to the given audio device when calling this API, the output mixer/stream
      * will be configured with the values previously set via this API.

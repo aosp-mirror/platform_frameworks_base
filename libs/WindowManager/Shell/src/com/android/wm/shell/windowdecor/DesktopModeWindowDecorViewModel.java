@@ -505,7 +505,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     private void createInputChannel(int displayId) {
-        final InputManager inputManager = InputManager.getInstance();
+        final InputManager inputManager = mContext.getSystemService(InputManager.class);
         final InputMonitor inputMonitor =
                 mInputMonitorFactory.create(inputManager, mContext);
         final EventReceiver eventReceiver = new EventReceiver(inputMonitor,
@@ -558,7 +558,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final TaskPositioner taskPositioner =
-                new TaskPositioner(mTaskOrganizer, windowDecoration, mDragStartListener);
+                new TaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
+                        mDragStartListener);
         final DesktopModeTouchEventListener touchEventListener =
                 new DesktopModeTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);

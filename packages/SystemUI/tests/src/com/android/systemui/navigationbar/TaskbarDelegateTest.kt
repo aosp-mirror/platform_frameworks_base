@@ -13,6 +13,7 @@ import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.AutoHideController
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.LightBarTransitionsController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.wm.shell.back.BackAnimation
 import com.android.wm.shell.pip.Pip
 import org.junit.Before
@@ -66,6 +67,8 @@ class TaskbarDelegateTest : SysuiTestCase() {
     lateinit var mBackAnimation: BackAnimation
     @Mock
     lateinit var mCurrentSysUiState: NavBarHelper.CurrentSysuiState
+    @Mock
+    lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
 
     @Before
     fun setup() {
@@ -76,7 +79,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
         `when`(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState)
         mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
         mTaskbarDelegate = TaskbarDelegate(context, mEdgeBackGestureHandlerFactory,
-                mLightBarControllerFactory)
+                mLightBarControllerFactory, mStatusBarKeyguardViewManager)
         mTaskbarDelegate.setDependencies(mCommandQueue, mOverviewProxyService, mNavBarHelper,
         mNavigationModeController, mSysUiState, mDumpManager, mAutoHideController,
                 mLightBarController, mOptionalPip, mBackAnimation, mTaskStackChangeListeners)

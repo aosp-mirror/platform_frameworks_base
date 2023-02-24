@@ -3981,8 +3981,7 @@ public class PackageInstaller {
     /**
      * Details for requesting the pre-commit install approval.
      */
-    @DataClass(genParcelable = true, genHiddenConstructor = true, genBuilder = true,
-            genToString = true)
+    @DataClass(genConstructor = false, genToString = true)
     public static final class PreapprovalDetails implements Parcelable {
         /**
          * The icon representing the app to be installed.
@@ -4001,6 +4000,161 @@ public class PackageInstaller {
          */
         private final @NonNull String mPackageName;
 
+        /**
+         * Creates a new PreapprovalDetails.
+         *
+         * @param icon
+         *   The icon representing the app to be installed.
+         * @param label
+         *   The label representing the app to be installed.
+         * @param locale
+         *   The locale of the app label being used.
+         * @param packageName
+         *   The package name of the app to be installed.
+         * @hide
+         */
+        public PreapprovalDetails(
+                @Nullable Bitmap icon,
+                @NonNull CharSequence label,
+                @NonNull ULocale locale,
+                @NonNull String packageName) {
+            mIcon = icon;
+            mLabel = label;
+            Preconditions.checkArgument(!TextUtils.isEmpty(mLabel),
+                    "App label cannot be empty.");
+            mLocale = locale;
+            Preconditions.checkArgument(!Objects.isNull(mLocale),
+                    "Locale cannot be null.");
+            mPackageName = packageName;
+            Preconditions.checkArgument(!TextUtils.isEmpty(mPackageName),
+                    "Package name cannot be empty.");
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            byte flg = 0;
+            if (mIcon != null) flg |= 0x1;
+            dest.writeByte(flg);
+            if (mIcon != null) mIcon.writeToParcel(dest, flags);
+            dest.writeCharSequence(mLabel);
+            dest.writeString8(mLocale.toString());
+            dest.writeString8(mPackageName);
+        }
+
+        @Override
+        public int describeContents() { return 0; }
+
+        /** @hide */
+        /* package-private */ PreapprovalDetails(@NonNull Parcel in) {
+            byte flg = in.readByte();
+            final Bitmap icon = (flg & 0x1) == 0 ? null : Bitmap.CREATOR.createFromParcel(in);
+            final CharSequence label = in.readCharSequence();
+            final ULocale locale = new ULocale(in.readString8());
+            final String packageName = in.readString8();
+
+            mIcon = icon;
+            mLabel = label;
+            Preconditions.checkArgument(!TextUtils.isEmpty(mLabel),
+                    "App label cannot be empty.");
+            mLocale = locale;
+            Preconditions.checkArgument(!Objects.isNull(mLocale),
+                    "Locale cannot be null.");
+            mPackageName = packageName;
+            Preconditions.checkArgument(!TextUtils.isEmpty(mPackageName),
+                    "Package name cannot be empty.");
+        }
+
+        public static final @NonNull Parcelable.Creator<PreapprovalDetails> CREATOR
+                = new Parcelable.Creator<PreapprovalDetails>() {
+            @Override
+            public PreapprovalDetails[] newArray(int size) {
+                return new PreapprovalDetails[size];
+            }
+
+            @Override
+            public PreapprovalDetails createFromParcel(@NonNull Parcel in) {
+                return new PreapprovalDetails(in);
+            }
+        };
+
+        /**
+         * A builder for {@link PreapprovalDetails}
+         */
+        public static final class Builder {
+
+            private @Nullable Bitmap mIcon;
+            private @NonNull CharSequence mLabel;
+            private @NonNull ULocale mLocale;
+            private @NonNull String mPackageName;
+
+            private long mBuilderFieldsSet = 0L;
+
+            /**
+             * Creates a new Builder.
+             */
+            public Builder() {}
+
+            /**
+             * The icon representing the app to be installed.
+             */
+            public @NonNull Builder setIcon(@NonNull Bitmap value) {
+                checkNotUsed();
+                mBuilderFieldsSet |= 0x1;
+                mIcon = value;
+                return this;
+            }
+
+            /**
+             * The label representing the app to be installed.
+             */
+            public @NonNull Builder setLabel(@NonNull CharSequence value) {
+                checkNotUsed();
+                mBuilderFieldsSet |= 0x2;
+                mLabel = value;
+                return this;
+            }
+
+            /**
+             * The locale of the app label being used.
+             */
+            public @NonNull Builder setLocale(@NonNull ULocale value) {
+                checkNotUsed();
+                mBuilderFieldsSet |= 0x4;
+                mLocale = value;
+                return this;
+            }
+
+            /**
+             * The package name of the app to be installed.
+             */
+            public @NonNull Builder setPackageName(@NonNull String value) {
+                checkNotUsed();
+                mBuilderFieldsSet |= 0x8;
+                mPackageName = value;
+                return this;
+            }
+
+            /** Builds the instance. This builder should not be touched after calling this! */
+            public @NonNull PreapprovalDetails build() {
+                checkNotUsed();
+                mBuilderFieldsSet |= 0x10; // Mark builder used
+
+                PreapprovalDetails o = new PreapprovalDetails(
+                        mIcon,
+                        mLabel,
+                        mLocale,
+                        mPackageName);
+                return o;
+            }
+
+            private void checkNotUsed() {
+                if ((mBuilderFieldsSet & 0x10) != 0) {
+                    throw new IllegalStateException("This Builder should not be reused. "
+                            + "Use a new Builder instance instead");
+                }
+            }
+        }
+
 
 
 
@@ -4016,39 +4170,6 @@ public class PackageInstaller {
         //   Settings > Editor > Code Style > Formatter Control
         //@formatter:off
 
-
-        /**
-         * Creates a new PreapprovalDetails.
-         *
-         * @param icon
-         *   The icon representing the app to be installed.
-         * @param label
-         *   The label representing the app to be installed.
-         * @param locale
-         *   The locale of the app label being used.
-         * @param packageName
-         *   The package name of the app to be installed.
-         * @hide
-         */
-        @DataClass.Generated.Member
-        public PreapprovalDetails(
-                @Nullable Bitmap icon,
-                @NonNull CharSequence label,
-                @NonNull ULocale locale,
-                @NonNull String packageName) {
-            this.mIcon = icon;
-            this.mLabel = label;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mLabel);
-            this.mLocale = locale;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mLocale);
-            this.mPackageName = packageName;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mPackageName);
-
-            // onConstructed(); // You can define this method to get a callback
-        }
 
         /**
          * The icon representing the app to be installed.
@@ -4096,155 +4217,11 @@ public class PackageInstaller {
             " }";
         }
 
-        @Override
-        @DataClass.Generated.Member
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            // You can override field parcelling by defining methods like:
-            // void parcelFieldName(Parcel dest, int flags) { ... }
-
-            byte flg = 0;
-            if (mIcon != null) flg |= 0x1;
-            dest.writeByte(flg);
-            if (mIcon != null) mIcon.writeToParcel(dest, flags);
-            dest.writeCharSequence(mLabel);
-            dest.writeString8(mLocale.toString());
-            dest.writeString8(mPackageName);
-        }
-
-        @Override
-        @DataClass.Generated.Member
-        public int describeContents() { return 0; }
-
-        /** @hide */
-        @SuppressWarnings({"unchecked", "RedundantCast"})
-        @DataClass.Generated.Member
-        /* package-private */ PreapprovalDetails(@NonNull Parcel in) {
-            // You can override field unparcelling by defining methods like:
-            // static FieldType unparcelFieldName(Parcel in) { ... }
-
-            byte flg = in.readByte();
-            Bitmap icon = (flg & 0x1) == 0 ? null : Bitmap.CREATOR.createFromParcel(in);
-            CharSequence label = (CharSequence) in.readCharSequence();
-            ULocale locale = new ULocale(in.readString8());
-            String packageName = in.readString8();
-
-            this.mIcon = icon;
-            this.mLabel = label;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mLabel);
-            this.mLocale = locale;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mLocale);
-            this.mPackageName = packageName;
-            com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mPackageName);
-
-            // onConstructed(); // You can define this method to get a callback
-        }
-
-        @DataClass.Generated.Member
-        public static final @NonNull Parcelable.Creator<PreapprovalDetails> CREATOR
-                = new Parcelable.Creator<PreapprovalDetails>() {
-            @Override
-            public PreapprovalDetails[] newArray(int size) {
-                return new PreapprovalDetails[size];
-            }
-
-            @Override
-            public PreapprovalDetails createFromParcel(@NonNull Parcel in) {
-                return new PreapprovalDetails(in);
-            }
-        };
-
-        /**
-         * A builder for {@link PreapprovalDetails}
-         */
-        @SuppressWarnings("WeakerAccess")
-        @DataClass.Generated.Member
-        public static final class Builder {
-
-            private @Nullable Bitmap mIcon;
-            private @NonNull CharSequence mLabel;
-            private @NonNull ULocale mLocale;
-            private @NonNull String mPackageName;
-
-            private long mBuilderFieldsSet = 0L;
-
-            /**
-             * Creates a new Builder.
-             */
-            public Builder() {}
-
-            /**
-             * The icon representing the app to be installed.
-             */
-            @DataClass.Generated.Member
-            public @NonNull Builder setIcon(@NonNull Bitmap value) {
-                checkNotUsed();
-                mBuilderFieldsSet |= 0x1;
-                mIcon = value;
-                return this;
-            }
-
-            /**
-             * The label representing the app to be installed.
-             */
-            @DataClass.Generated.Member
-            public @NonNull Builder setLabel(@NonNull CharSequence value) {
-                checkNotUsed();
-                mBuilderFieldsSet |= 0x2;
-                mLabel = value;
-                return this;
-            }
-
-            /**
-             * The locale of the app label being used.
-             */
-            @DataClass.Generated.Member
-            public @NonNull Builder setLocale(@NonNull ULocale value) {
-                checkNotUsed();
-                mBuilderFieldsSet |= 0x4;
-                mLocale = value;
-                return this;
-            }
-
-            /**
-             * The package name of the app to be installed.
-             */
-            @DataClass.Generated.Member
-            public @NonNull Builder setPackageName(@NonNull String value) {
-                checkNotUsed();
-                mBuilderFieldsSet |= 0x8;
-                mPackageName = value;
-                return this;
-            }
-
-            /** Builds the instance. This builder should not be touched after calling this! */
-            public @NonNull PreapprovalDetails build() {
-                checkNotUsed();
-                mBuilderFieldsSet |= 0x10; // Mark builder used
-
-                PreapprovalDetails o = new PreapprovalDetails(
-                        mIcon,
-                        mLabel,
-                        mLocale,
-                        mPackageName);
-                return o;
-            }
-
-            private void checkNotUsed() {
-                if ((mBuilderFieldsSet & 0x10) != 0) {
-                    throw new IllegalStateException(
-                            "This Builder should not be reused. Use a new Builder instance instead");
-                }
-            }
-        }
-
         @DataClass.Generated(
-                time = 1666748098353L,
+                time = 1676970504308L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
-                inputSignatures = "private final @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate final @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate final @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nclass PreapprovalDetails extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genBuilder=true, genToString=true)")
+                inputSignatures = "private final @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate final @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate final @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate final @android.annotation.NonNull java.lang.String mPackageName\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.PackageInstaller.PreapprovalDetails> CREATOR\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\npublic @java.lang.Override int describeContents()\nclass PreapprovalDetails extends java.lang.Object implements [android.os.Parcelable]\nprivate @android.annotation.Nullable android.graphics.Bitmap mIcon\nprivate @android.annotation.NonNull java.lang.CharSequence mLabel\nprivate @android.annotation.NonNull android.icu.util.ULocale mLocale\nprivate @android.annotation.NonNull java.lang.String mPackageName\nprivate  long mBuilderFieldsSet\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setIcon(android.graphics.Bitmap)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLabel(java.lang.CharSequence)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setLocale(android.icu.util.ULocale)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails.Builder setPackageName(java.lang.String)\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.PreapprovalDetails build()\nprivate  void checkNotUsed()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genConstructor=false, genToString=true)")
         @Deprecated
         private void __metadata() {}
 
@@ -4347,7 +4324,7 @@ public class PackageInstaller {
         };
 
         @DataClass.Generated(
-                time = 1675135664641L,
+                time = 1676970504336L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
                 inputSignatures = "private  boolean mAllConstraintsSatisfied\npublic  boolean areAllConstraintsSatisfied()\nclass InstallConstraintsResult extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true)")
@@ -4635,7 +4612,7 @@ public class PackageInstaller {
         };
 
         @DataClass.Generated(
-                time = 1675135664653L,
+                time = 1676970504352L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/core/java/android/content/pm/PackageInstaller.java",
                 inputSignatures = "public static final @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints GENTLE_UPDATE\nprivate final  boolean mDeviceIdleRequired\nprivate final  boolean mAppNotForegroundRequired\nprivate final  boolean mAppNotInteractingRequired\nprivate final  boolean mAppNotTopVisibleRequired\nprivate final  boolean mNotInCallRequired\nclass InstallConstraints extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mDeviceIdleRequired\nprivate  boolean mAppNotForegroundRequired\nprivate  boolean mAppNotInteractingRequired\nprivate  boolean mAppNotTopVisibleRequired\nprivate  boolean mNotInCallRequired\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setDeviceIdleRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotForegroundRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotInteractingRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setAppNotTopVisibleRequired()\npublic @android.annotation.SuppressLint @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints.Builder setNotInCallRequired()\npublic @android.annotation.NonNull android.content.pm.PackageInstaller.InstallConstraints build()\nclass Builder extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genParcelable=true, genHiddenConstructor=true, genEqualsHashCode=true)")

@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.data.repository
 
 import android.app.StatusBarManager
 import android.content.Context
+import android.hardware.face.FaceAuthenticateOptions
 import android.hardware.face.FaceManager
 import android.os.CancellationSignal
 import com.android.internal.logging.InstanceId
@@ -235,8 +236,7 @@ constructor(
                 cancellationSignal,
                 faceAuthCallback,
                 null,
-                currentUserId,
-                lockscreenBypassEnabled
+                FaceAuthenticateOptions.Builder().setUserId(currentUserId).build()
             )
         }
     }
@@ -255,7 +255,11 @@ constructor(
         withContext(mainDispatcher) {
             // We always want to invoke face detect in the main thread.
             faceAuthLogger.faceDetectionStarted()
-            faceManager?.detectFace(cancellationSignal, detectionCallback, currentUserId)
+            faceManager?.detectFace(
+                cancellationSignal,
+                detectionCallback,
+                FaceAuthenticateOptions.Builder().setUserId(currentUserId).build()
+            )
         }
     }
 

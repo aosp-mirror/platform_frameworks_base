@@ -17,14 +17,14 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,7 +48,7 @@ import org.junit.runners.Parameterized
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
  *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
+ *        [android.tools.device.flicker.legacy.runner.TransitionRunner],
  *        including configuring navigation mode, initial orientation and ensuring no
  *        apps are running before setup
  * ```

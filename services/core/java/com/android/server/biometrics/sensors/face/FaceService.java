@@ -35,6 +35,7 @@ import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.FaceServiceReceiver;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
@@ -238,14 +239,15 @@ public class FaceService extends SystemService {
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
-        public long authenticate(final IBinder token, final long operationId, int userId,
-                final IFaceServiceReceiver receiver, final String opPackageName,
-                boolean isKeyguardBypassEnabled) {
+        public long authenticate(final IBinder token, final long operationId,
+                final IFaceServiceReceiver receiver, final FaceAuthenticateOptions options) {
             // TODO(b/152413782): If the sensor supports face detect and the device is encrypted or
             //  lockdown, something wrong happened. See similar path in FingerprintService.
 
             super.authenticate_enforcePermission();
 
+            final int userId = options.getUserId();
+            final String opPackageName = options.getOpPackageName();
             final boolean restricted = false; // Face APIs are private
             final int statsClient = Utils.isKeyguard(getContext(), opPackageName)
                     ? BiometricsProtoEnums.CLIENT_KEYGUARD
@@ -261,18 +263,18 @@ public class FaceService extends SystemService {
                 return -1;
             }
 
-            return provider.second.scheduleAuthenticate(provider.first, token, operationId, userId,
-                    0 /* cookie */,
-                    new ClientMonitorCallbackConverter(receiver), opPackageName, restricted,
-                    statsClient, isKeyguard, isKeyguardBypassEnabled);
+            return provider.second.scheduleAuthenticate(provider.first, token, operationId,
+                    0 /* cookie */, new ClientMonitorCallbackConverter(receiver), options,
+                    restricted, statsClient, isKeyguard);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
-        public long detectFace(final IBinder token, final int userId,
-                final IFaceServiceReceiver receiver, final String opPackageName) {
+        public long detectFace(final IBinder token,
+                final IFaceServiceReceiver receiver, final FaceAuthenticateOptions options) {
             super.detectFace_enforcePermission();
 
+            final String opPackageName = options.getOpPackageName();
             if (!Utils.isKeyguard(getContext(), opPackageName)) {
                 Slog.w(TAG, "detectFace called from non-sysui package: " + opPackageName);
                 return -1;
@@ -284,7 +286,7 @@ public class FaceService extends SystemService {
                 return -1;
             }
 
-            return provider.second.scheduleFaceDetect(provider.first, token, userId,
+            return provider.second.scheduleFaceDetect(provider.first, token, options.getUserId(),
                     new ClientMonitorCallbackConverter(receiver), opPackageName,
                     BiometricsProtoEnums.CLIENT_KEYGUARD);
         }
@@ -292,9 +294,9 @@ public class FaceService extends SystemService {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
         public void prepareForAuthentication(int sensorId, boolean requireConfirmation,
-                IBinder token, long operationId, int userId,
-                IBiometricSensorReceiver sensorReceiver, String opPackageName, long requestId,
-                int cookie, boolean allowBackgroundAuthentication) {
+                IBinder token, long operationId, IBiometricSensorReceiver sensorReceiver,
+                FaceAuthenticateOptions options, long requestId, int cookie,
+                boolean allowBackgroundAuthentication) {
             super.prepareForAuthentication_enforcePermission();
 
             final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
@@ -305,10 +307,10 @@ public class FaceService extends SystemService {
 
             final boolean isKeyguardBypassEnabled = false; // only valid for keyguard clients
             final boolean restricted = true; // BiometricPrompt is always restricted
-            provider.scheduleAuthenticate(sensorId, token, operationId, userId, cookie,
-                    new ClientMonitorCallbackConverter(sensorReceiver), opPackageName, requestId,
+            provider.scheduleAuthenticate(sensorId, token, operationId, cookie,
+                    new ClientMonitorCallbackConverter(sensorReceiver), options, requestId,
                     restricted, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    allowBackgroundAuthentication, isKeyguardBypassEnabled);
+                    allowBackgroundAuthentication);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)

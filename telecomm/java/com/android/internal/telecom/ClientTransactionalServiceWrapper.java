@@ -19,6 +19,7 @@ package com.android.internal.telecom;
 import static android.telecom.TelecomManager.TELECOM_TRANSACTION_SUCCESS;
 
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.OutcomeReceiver;
 import android.os.ResultReceiver;
 import android.telecom.CallAttributes;
@@ -27,6 +28,7 @@ import android.telecom.CallControlCallback;
 import android.telecom.CallEndpoint;
 import android.telecom.CallEventCallback;
 import android.telecom.CallException;
+import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -141,17 +143,17 @@ public class ClientTransactionalServiceWrapper {
         private static final String ON_SET_ACTIVE = "onSetActive";
         private static final String ON_SET_INACTIVE = "onSetInactive";
         private static final String ON_ANSWER = "onAnswer";
-        private static final String ON_REJECT = "onReject";
         private static final String ON_DISCONNECT = "onDisconnect";
         private static final String ON_STREAMING_STARTED = "onStreamingStarted";
         private static final String ON_REQ_ENDPOINT_CHANGE = "onRequestEndpointChange";
         private static final String ON_AVAILABLE_CALL_ENDPOINTS = "onAvailableCallEndpointsChanged";
         private static final String ON_MUTE_STATE_CHANGED = "onMuteStateChanged";
         private static final String ON_CALL_STREAMING_FAILED = "onCallStreamingFailed";
+        private static final String ON_EVENT = "onEvent";
 
-        private void handleHandshakeCallback(String action, String callId, int code,
-                ResultReceiver ackResultReceiver) {
-            Log.i(TAG, TextUtils.formatSimple("hHC: id=[%s], action=[%s]", callId, action));
+        private void handleCallEventCallback(String action, String callId,
+                ResultReceiver ackResultReceiver, Object... args) {
+            Log.i(TAG, TextUtils.formatSimple("hCEC: id=[%s], action=[%s]", callId, action));
             // lookup the callEventCallback associated with the particular call
             TransactionalCall call = mCallIdToTransactionalCall.get(callId);
 
@@ -172,16 +174,13 @@ public class ClientTransactionalServiceWrapper {
                             case ON_SET_INACTIVE:
                                 callback.onSetInactive(outcomeReceiverWrapper);
                                 break;
-                            case ON_REJECT:
-                                callback.onReject(outcomeReceiverWrapper);
-                                untrackCall(callId);
-                                break;
                             case ON_DISCONNECT:
-                                callback.onDisconnect(outcomeReceiverWrapper);
+                                callback.onDisconnect((DisconnectCause) args[0],
+                                        outcomeReceiverWrapper);
                                 untrackCall(callId);
                                 break;
                             case ON_ANSWER:
-                                callback.onAnswer(code, outcomeReceiverWrapper);
+                                callback.onAnswer((int) args[0], outcomeReceiverWrapper);
                                 break;
                             case ON_STREAMING_STARTED:
                                 callback.onCallStreamingStarted(outcomeReceiverWrapper);
@@ -229,28 +228,23 @@ public class ClientTransactionalServiceWrapper {
 
         @Override
         public void onSetActive(String callId, ResultReceiver resultReceiver) {
-            handleHandshakeCallback(ON_SET_ACTIVE, callId, 0, resultReceiver);
+            handleCallEventCallback(ON_SET_ACTIVE, callId, resultReceiver);
         }
-
 
         @Override
         public void onSetInactive(String callId, ResultReceiver resultReceiver) {
-            handleHandshakeCallback(ON_SET_INACTIVE, callId, 0, resultReceiver);
+            handleCallEventCallback(ON_SET_INACTIVE, callId, resultReceiver);
         }
 
         @Override
         public void onAnswer(String callId, int videoState, ResultReceiver resultReceiver) {
-            handleHandshakeCallback(ON_ANSWER, callId, videoState, resultReceiver);
+            handleCallEventCallback(ON_ANSWER, callId, resultReceiver, videoState);
         }
 
         @Override
-        public void onReject(String callId, ResultReceiver resultReceiver) {
-            handleHandshakeCallback(ON_REJECT, callId, 0, resultReceiver);
-        }
-
-        @Override
-        public void onDisconnect(String callId, ResultReceiver resultReceiver) {
-            handleHandshakeCallback(ON_DISCONNECT, callId, 0, resultReceiver);
+        public void onDisconnect(String callId, DisconnectCause cause,
+                ResultReceiver resultReceiver) {
+            handleCallEventCallback(ON_DISCONNECT, callId, resultReceiver, cause);
         }
 
         @Override
@@ -306,13 +300,31 @@ public class ClientTransactionalServiceWrapper {
 
         @Override
         public void onCallStreamingStarted(String callId, ResultReceiver resultReceiver) {
-            handleHandshakeCallback(ON_STREAMING_STARTED, callId, 0, resultReceiver);
+            handleCallEventCallback(ON_STREAMING_STARTED, callId, resultReceiver);
         }
 
         @Override
         public void onCallStreamingFailed(String callId, int reason) {
             Log.i(TAG, TextUtils.formatSimple("oCSF: id=[%s], reason=[%s]", callId, reason));
             handleEventCallback(callId, ON_CALL_STREAMING_FAILED, reason);
+        }
+
+        @Override
+        public void onEvent(String callId, String event, Bundle extras) {
+            // lookup the callEventCallback associated with the particular call
+            TransactionalCall call = mCallIdToTransactionalCall.get(callId);
+            if (call != null) {
+                CallEventCallback callback = call.getCallStateCallback();
+                Executor executor = call.getExecutor();
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        callback.onEvent(event, extras);
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
         }
     };
 }

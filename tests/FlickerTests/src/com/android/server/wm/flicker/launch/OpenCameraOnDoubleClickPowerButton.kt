@@ -17,16 +17,16 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.Postsubmit
+import android.tools.device.apphelpers.CameraAppHelper
+import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import android.view.KeyEvent
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.annotation.FlickerServiceCompatible
-import com.android.server.wm.flicker.helpers.CameraAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith

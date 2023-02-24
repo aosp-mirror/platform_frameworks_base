@@ -367,10 +367,10 @@ public class UninstallerActivity extends Activity {
                 int flags = mDialogInfo.allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
 
-                getPackageManager().getPackageInstaller().uninstall(
-                        new VersionedPackage(mDialogInfo.appInfo.packageName,
-                                PackageManager.VERSION_CODE_HIGHEST),
-                        flags, pendingIntent.getIntentSender());
+                createContextAsUser(mDialogInfo.user, 0).getPackageManager().getPackageInstaller()
+                        .uninstall(new VersionedPackage(mDialogInfo.appInfo.packageName,
+                                PackageManager.VERSION_CODE_HIGHEST), flags,
+                                pendingIntent.getIntentSender());
             } catch (Exception e) {
                 notificationManager.cancel(uninstallId);
 

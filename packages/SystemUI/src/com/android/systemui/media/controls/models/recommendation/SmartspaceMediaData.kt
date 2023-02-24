@@ -88,6 +88,8 @@ data class SmartspaceMediaData(
     }
 }
 
+/** Key to indicate whether this card should be used to re-show recent media */
+const val EXTRA_KEY_TRIGGER_RESUME = "SHOULD_TRIGGER_RESUME"
 /** Key for extras [SmartspaceMediaData.cardAction] indicating why the card was sent */
 const val EXTRA_KEY_TRIGGER_SOURCE = "MEDIA_RECOMMENDATION_TRIGGER_SOURCE"
 /** Value for [EXTRA_KEY_TRIGGER_SOURCE] when the card is sent on headphone connection */

@@ -26,7 +26,10 @@ public class ProcessWrapper {
     @Inject
     public ProcessWrapper() {}
 
-    public int getUserHandleIdentifier() {
-        return android.os.Process.myUserHandle().getIdentifier();
+    /**
+     * Returns {@code true} if System User is running the current process.
+     */
+    public boolean isSystemUser() {
+        return android.os.Process.myUserHandle().isSystem();
     }
 }

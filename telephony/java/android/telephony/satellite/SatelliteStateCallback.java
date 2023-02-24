@@ -38,11 +38,11 @@ public class SatelliteStateCallback {
         }
 
         @Override
-        public void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state) {
+        public void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state) {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() ->
-                        mLocalCallback.onSatelliteModemStateChange(state));
+                        mLocalCallback.onSatelliteModemStateChanged(state));
             } finally {
                 restoreCallingIdentity(callingIdentity);
             }
@@ -68,7 +68,7 @@ public class SatelliteStateCallback {
      * Called when satellite modem state changes.
      * @param state The new satellite modem state.
      */
-    public void onSatelliteModemStateChange(@SatelliteManager.SatelliteModemState int state) {
+    public void onSatelliteModemStateChanged(@SatelliteManager.SatelliteModemState int state) {
         // Base Implementation
     }
 

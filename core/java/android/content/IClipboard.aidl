@@ -48,4 +48,8 @@ interface IClipboard {
 
     String getPrimaryClipSource(String callingPackage, String attributionTag, int userId,
             int deviceId);
+
+    boolean areClipboardAccessNotificationsEnabledForUser(int userId);
+
+    void setClipboardAccessNotificationsEnabledForUser(boolean enable, int userId);
 }

@@ -207,12 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Жумуш профилиңизди күйгүзмөйүнчө жеке колдонмолоруңуз бөгөттөлгөн боюнча калат"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Жеке колдонмолор <xliff:g id="DATE">%1$s</xliff:g> саат <xliff:g id="TIME">%2$s</xliff:g> бөгөттөлөт. IT администраторуңуз жумуш профилиңизди <xliff:g id="NUMBER">%3$d</xliff:g> күндөн ашык убакытка өчүрүүгө уруксат бербейт."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Күйгүзүү"</string>
-    <!-- no translation found for work_profile_telephony_paused_title (7690804479291839519) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_text (8065762301100978221) -->
-    <skip />
-    <!-- no translation found for work_profile_telephony_paused_turn_on_button (7542632318337068821) -->
-    <skip />
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Чалуулар жана билдирүүлөр өчүк"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Жумуш колдонмолорун тындырып койдуңуз. Эми сизге эч ким телефон чала албайт жана SMS билдирүүлөрүн жөнөтө албайт."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Жумуш колдонмолорун иштетүү"</string>
     <string name="me" msgid="6207584824693813140">"Мен"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Планшет мүмкүнчүлүктөрү"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV параметрлери"</string>
@@ -344,8 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Түзмөктөгү манжа изинин сенсорунда жасалган жаңсоолорду жаздырып алат."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Скриншот тартып алуу"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Дисплейдин скриншотун тартып алсаңыз болот."</string>
-    <!-- no translation found for dream_preview_title (5570751491996100804) -->
-    <skip />
+    <string name="dream_preview_title" msgid="5570751491996100804">"Алдын ала көрүү, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"абал тилкесин өчүрүү же өзгөртүү"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Колдонмого абал тилкесин өчүрүү же тутум сүрөтчөлөрүн кошуу же алып салуу мүмкүнчүлүгүн берет."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"абал тилкесинин милдетин аткаруу"</string>

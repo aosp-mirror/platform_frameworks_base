@@ -29,6 +29,8 @@
         android:layout_marginBottom="20dp"/>
 
     <TextView
+        android:fontFamily="@*android:string/config_bodyFontFamily"
+        android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"
         android:id="@+id/letterbox_education_dialog_action_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

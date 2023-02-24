@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.annotation.IdRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -172,15 +171,11 @@ public class HandwritingInitiator {
                     if (candidateView != null) {
                         if (candidateView == getConnectedView()) {
                             startHandwriting(candidateView);
-                        } else if (candidateView.getHandwritingDelegateConfiguration() != null) {
-                            mState.mDelegatorViewId =
-                                    candidateView
-                                            .getHandwritingDelegateConfiguration()
-                                            .getDelegatorViewId();
-                            candidateView
-                                    .getHandwritingDelegateConfiguration()
-                                    .getInitiationCallback()
-                                    .run();
+                        } else if (candidateView.getHandwritingDelegatorCallback() != null) {
+                            mImm.prepareStylusHandwritingDelegation(
+                                    candidateView,
+                                    candidateView.getAllowedHandwritingDelegatePackageName());
+                            candidateView.getHandwritingDelegatorCallback().run();
                         } else {
                             if (candidateView.getRevealOnFocusHint()) {
                                 candidateView.setRevealOnFocusHint(false);
@@ -227,6 +222,9 @@ public class HandwritingInitiator {
         } else {
             mConnectedView = new WeakReference<>(view);
             mConnectionCount = 1;
+            if (view.isHandwritingDelegate() && tryAcceptStylusHandwritingDelegation(view)) {
+                return;
+            }
             if (mState != null && mState.mShouldInitHandwriting) {
                 tryStartHandwriting();
             }
@@ -279,22 +277,37 @@ public class HandwritingInitiator {
         }
 
         final Rect handwritingArea = getViewHandwritingArea(connectedView);
-        if ((mState.mDelegatorViewId != View.NO_ID
-                        && mState.mDelegatorViewId == connectedView.getId())
-                || isInHandwritingArea(
-                        handwritingArea, mState.mStylusDownX, mState.mStylusDownY, connectedView)) {
+        if (isInHandwritingArea(
+                handwritingArea, mState.mStylusDownX, mState.mStylusDownY, connectedView)) {
             startHandwriting(connectedView);
         } else {
             mState.mShouldInitHandwriting = false;
         }
     }
 
-    /** For test only. */
+    /** Starts a stylus handwriting session for the view. */
     @VisibleForTesting
     public void startHandwriting(@NonNull View view) {
         mImm.startStylusHandwriting(view);
         mState.mHasInitiatedHandwriting = true;
         mState.mShouldInitHandwriting = false;
+    }
+
+    /**
+     * Starts a stylus handwriting session for the delegate view, if {@link
+     * InputMethodManager#prepareStylusHandwritingDelegation} was previously called.
+     */
+    @VisibleForTesting
+    public boolean tryAcceptStylusHandwritingDelegation(@NonNull View view) {
+        if (mImm.acceptStylusHandwritingDelegation(
+                view, view.getAllowedHandwritingDelegatorPackageName())) {
+            if (mState != null) {
+                mState.mHasInitiatedHandwriting = true;
+                mState.mShouldInitHandwriting = false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -542,13 +555,6 @@ public class HandwritingInitiator {
          * built InputConnection.
          */
         private boolean mExceedHandwritingSlop;
-        /**
-         * If the current ongoing stylus MotionEvent sequence started over a handwriting initiation
-         * delegate view, then this is the view identifier of the corresponding delegator view. If
-         * the delegator view creates an input connection while the MotionEvent sequence is still
-         * ongoing, then handwriting mode will be initiated for the delegator view.
-         */
-        @IdRes private int mDelegatorViewId = View.NO_ID;
 
         /** The pointer id of the stylus pointer that is being tracked. */
         private final int mStylusPointerId;

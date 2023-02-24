@@ -1705,9 +1705,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         mSyncQueue.queue(wct);
-        mSyncQueue.runInSync(t -> {
-            setDividerVisibility(mainStageVisible, t);
-        });
+        setDividerVisibility(mainStageVisible, null);
     }
 
     private void setDividerVisibility(boolean visible, @Nullable SurfaceControl.Transaction t) {
@@ -1789,6 +1787,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (dividerLeash != null && dividerLeash.isValid()) {
+                        transaction.setAlpha(dividerLeash, 1);
+                        transaction.apply();
+                    }
                     mTransactionPool.release(transaction);
                     mDividerFadeInAnimator = null;
                 }

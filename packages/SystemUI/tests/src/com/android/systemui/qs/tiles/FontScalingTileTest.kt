@@ -15,7 +15,9 @@
  */
 package com.android.systemui.qs.tiles
 
+import android.content.Intent
 import android.os.Handler
+import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
@@ -112,5 +114,12 @@ class FontScalingTileTest : SysuiTestCase() {
         testableLooper.processAllMessages()
 
         verify(dialogLaunchAnimator).showFromView(any(), eq(view), nullable(), anyBoolean())
+    }
+
+    @Test
+    fun getLongClickIntent_getExpectedIntent() {
+        val intent: Intent? = fontScalingTile.getLongClickIntent()
+
+        assertThat(intent!!.action).isEqualTo(Settings.ACTION_TEXT_READING_SETTINGS)
     }
 }

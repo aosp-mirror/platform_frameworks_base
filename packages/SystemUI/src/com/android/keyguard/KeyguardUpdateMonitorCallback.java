@@ -23,7 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.fuelgauge.BatteryStatus;
-import com.android.systemui.plugins.Weather;
+import com.android.systemui.plugins.WeatherData;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 
 import java.util.TimeZone;
@@ -61,7 +61,7 @@ public class KeyguardUpdateMonitorCallback {
     /**
      * Called when receive new weather data.
      */
-    public void onWeatherDataChanged(Weather data) { }
+    public void onWeatherDataChanged(WeatherData data) { }
 
     /**
      * Called when the carrier PLMN or SPN changes.

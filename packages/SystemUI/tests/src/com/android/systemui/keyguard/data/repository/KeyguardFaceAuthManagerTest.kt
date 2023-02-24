@@ -21,6 +21,7 @@ import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_CANCELED
 import android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT
 import android.hardware.biometrics.ComponentInfoInternal
+import android.hardware.face.FaceAuthenticateOptions
 import android.hardware.face.FaceManager
 import android.hardware.face.FaceSensorProperties
 import android.hardware.face.FaceSensorPropertiesInternal
@@ -62,7 +63,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
@@ -276,7 +276,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
 
             underTest.detect()
 
-            verify(faceManager, never()).detectFace(any(), any(), anyInt())
+            verify(faceManager, never()).detectFace(any(), any(), any())
         }
 
     @Test
@@ -379,7 +379,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
             .detectFace(
                 cancellationSignal.capture(),
                 detectionCallback.capture(),
-                eq(currentUserId)
+                eq(FaceAuthenticateOptions.Builder().setUserId(currentUserId).build())
             )
     }
 
@@ -390,8 +390,7 @@ class KeyguardFaceAuthManagerTest : SysuiTestCase() {
                 cancellationSignal.capture(),
                 authenticationCallback.capture(),
                 isNull(),
-                eq(currentUserId),
-                eq(true)
+                eq(FaceAuthenticateOptions.Builder().setUserId(currentUserId).build())
             )
     }
 

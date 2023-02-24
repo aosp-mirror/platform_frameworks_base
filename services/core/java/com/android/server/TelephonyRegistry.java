@@ -2739,7 +2739,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                     .setImsCallServiceType(prev.getImsCallServiceType())
                                     .setImsCallType(prev.getImsCallType()).build());
                 } else {
-                    log("There is no active call to report CallQaulity");
+                    log("There is no active call to report CallQuality");
                     return;
                 }
 
@@ -2770,6 +2770,18 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // of the CellIdentity. This will still have the PLMN ID, which should be sufficient for
         // most purposes.
         final CellIdentity noLocationCi = cellIdentity.sanitizeLocationInfo();
+
+
+        // This shouldn't be necessary, but better to not take the chance
+        final String primaryPlmn = (cellIdentity != null) ? cellIdentity.getPlmn() : "<UNKNOWN>";
+
+        final String logStr = "Registration Failed for phoneId=" + phoneId
+                + " subId=" + subId + "primaryPlmn=" + primaryPlmn
+                + " chosenPlmn=" + chosenPlmn + " domain=" + domain
+                + " causeCode=" + causeCode + " additionalCauseCode=" + additionalCauseCode;
+
+        mLocalLog.log(logStr);
+        if (DBG) log(logStr);
 
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {

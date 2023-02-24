@@ -46,10 +46,11 @@ oneway interface ISatellite {
     void setSatelliteListener(in ISatelliteListener listener, in IIntegerConsumer errorCallback);
 
     /**
-     * Enable or disable the satellite service listening mode.
+     * Request to enable or disable the satellite service listening mode.
      * Listening mode allows the satellite service to listen for incoming pages.
      *
      * @param enable True to enable satellite listening mode and false to disable.
+     * @param isDemoMode Whether demo mode is enabled.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -62,7 +63,8 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void setSatelliteListeningEnabled(in boolean enable, in IIntegerConsumer errorCallback);
+    void requestSatelliteListeningEnabled(in boolean enable, in boolean isDemoMode,
+            in IIntegerConsumer errorCallback);
 
     /**
      * Request to enable or disable the satellite modem. If the satellite modem is enabled,
@@ -149,7 +151,7 @@ oneway interface ISatellite {
     /**
      * User started pointing to the satellite.
      * The satellite service should report the satellite pointing info via
-     * ISatelliteListener#onSatellitePointingInfoChanged as the user device/satellite moves.
+     * ISatelliteListener#onSatellitePositionChanged as the user device/satellite moves.
      *
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -275,7 +277,7 @@ oneway interface ISatellite {
     /**
      * Poll the pending datagrams to be received over satellite.
      * The satellite service should check if there are any pending datagrams to be received over
-     * satellitea and report them via ISatelliteListener#onNewDatagrams.
+     * satellite and report them via ISatelliteListener#onSatelliteDatagramsReceived.
      *
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -298,10 +300,9 @@ oneway interface ISatellite {
 
     /**
      * Send datagram over satellite.
-     * Once sent, the satellite service should report whether the operation was successful via
-     * SatelliteListener#onDatagramsDelivered.
      *
      * @param datagram Datagram to send in byte format.
+     * @param isDemoMode Whether demo mode is enabled.
      * @param isEmergency Whether this is an emergency datagram.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -321,8 +322,8 @@ oneway interface ISatellite {
      *   SatelliteError:SATELLITE_NOT_REACHABLE
      *   SatelliteError:NOT_AUTHORIZED
      */
-    void sendSatelliteDatagram(in SatelliteDatagram datagram, in boolean isEmergency,
-            in IIntegerConsumer errorCallback);
+    void sendSatelliteDatagram(in SatelliteDatagram datagram, in boolean isDemoMode,
+            in boolean isEmergency, in IIntegerConsumer errorCallback);
 
     /**
      * Request the current satellite modem state.

@@ -47,7 +47,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"Άλλοι διαχειριστές κωδικών πρόσβασης"</string>
     <string name="close_sheet" msgid="1393792015338908262">"Κλείσιμο φύλλου"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Επιστροφή στην προηγούμενη σελίδα"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"Κλείσιμο της πρότασης για ενέργεια από το Credential Manager που εμφανίζεται στο κάτω μέρος της οθόνης"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"Κλείσιμο"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Να χρησιμοποιηθεί το αποθηκευμένο κλειδί πρόσβασης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Να χρησιμοποιηθούν τα αποθηκευμένα στοιχεία σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Επιλογή αποθηκευμένων στοιχείων σύνδεσης για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
@@ -57,10 +57,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"Επιλογές σύνδεσης"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"Για τον χρήστη <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"Κλειδωμένοι διαχειριστές κωδικών πρόσβασης"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"Πατήστε για ξεκλείδωμα"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"Δεν υπάρχουν στοιχεία σύνδεσης"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"Δεν υπάρχουν στοιχεία σύνδεσης στο <xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"Διαχείριση στοιχείων σύνδεσης"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"Από άλλη συσκευή"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"Χρήση διαφορετικής συσκευής"</string>

@@ -1641,6 +1641,7 @@ public class UserManager {
             DISALLOW_ADD_WIFI_CONFIG,
             DISALLOW_CELLULAR_2G,
             DISALLOW_ULTRA_WIDEBAND_RADIO,
+            DISALLOW_GRANT_ADMIN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}

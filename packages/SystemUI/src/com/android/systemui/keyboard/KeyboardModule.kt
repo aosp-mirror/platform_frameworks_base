@@ -17,6 +17,14 @@
 
 package com.android.systemui.keyboard
 
+import com.android.systemui.keyboard.data.repository.KeyboardRepository
+import com.android.systemui.keyboard.data.repository.KeyboardRepositoryImpl
+import dagger.Binds
 import dagger.Module
 
-@Module abstract class KeyboardModule
+@Module
+abstract class KeyboardModule {
+
+    @Binds
+    abstract fun bindKeyboardRepository(repository: KeyboardRepositoryImpl): KeyboardRepository
+}

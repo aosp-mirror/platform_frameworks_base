@@ -18,17 +18,17 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
+import android.tools.common.Rotation
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
+import android.tools.device.flicker.isShellTransitionsEnabled
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.snapshotStartingWindowLayerCoversExactlyOnApp
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -64,7 +64,7 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Fl
         }
         transitions {
             // Bring the existing IME activity to the front in landscape mode device rotation.
-            setRotation(PlatformConsts.Rotation.ROTATION_90)
+            setRotation(Rotation.ROTATION_90)
             imeTestApp.launchViaIntent(wmHelper)
         }
         teardown { imeTestApp.exit(wmHelper) }
@@ -99,7 +99,7 @@ open class ShowImeOnAppStartWhenLaunchingAppFromFixedOrientationTest(flicker: Fl
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_90)
+                supportedRotations = listOf(Rotation.ROTATION_90)
             )
         }
     }

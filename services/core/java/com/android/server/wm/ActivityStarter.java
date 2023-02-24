@@ -60,7 +60,6 @@ import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TAS
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
@@ -83,6 +82,7 @@ import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_SAW_PERMISSION;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_VISIBLE_WINDOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
+import static com.android.server.wm.BackgroundActivityStartController.balCodeToString;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
@@ -150,6 +150,9 @@ import com.android.server.wm.TaskFragment.EmbeddingCheckResult;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.StringJoiner;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -1967,8 +1970,7 @@ class ActivityStarter {
 
         // ASM rules have failed. Log why
         ActivityRecord targetTopActivity = targetTask == null ? null
-                : targetTask.getActivity(ar ->
-                        !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+                : targetTask.getActivity(ar -> !ar.finishing && !ar.isAlwaysOnTop());
 
         int action = newTask || mSourceRecord == null
                 ? FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__ACTIVITY_START_NEW_TASK
@@ -1999,7 +2001,7 @@ class ActivityStarter {
                 /* action */
                 action,
                 /* version */
-                4,
+                ActivitySecurityModelFeatureFlags.ASM_VERSION,
                 /* multi_window - we have our source not in the target task, but both are visible */
                 targetTask != null && mSourceRecord != null
                         && !targetTask.equals(mSourceRecord.getTask()) && targetTask.isVisible(),
@@ -2011,27 +2013,106 @@ class ActivityStarter {
                     .shouldRestrictActivitySwitch(mCallingUid)
                 && shouldBlockActivityStart;
 
+        String launchedFromPackageName = r.launchedFromPackage;
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
+            String toastText = ActivitySecurityModelFeatureFlags.DOC_LINK
+                    + (blockActivityStartAndFeatureEnabled ? " blocked " : " would block ")
+                    + getApplicationLabel(launchedFromPackageName);
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                    "Activity start from " + r.launchedFromPackage
-                            + (blockActivityStartAndFeatureEnabled ? " " : " would be ")
-                            + "blocked by " + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                    Toast.LENGTH_SHORT).show());
+                    toastText, Toast.LENGTH_LONG).show());
+
+            logDebugInfoForActivitySecurity("Launch", r, targetTask, targetTopActivity,
+                    blockActivityStartAndFeatureEnabled, /* taskToFront */ taskToFront);
         }
 
-
         if (blockActivityStartAndFeatureEnabled) {
-            Slog.e(TAG, "Abort Launching r: " + r
+            Slog.e(TAG, "[ASM] Abort Launching r: " + r
                     + " as source: "
-                    + (mSourceRecord != null ? mSourceRecord : r.launchedFromPackage)
+                    + (mSourceRecord != null ? mSourceRecord : launchedFromPackageName)
                     + " is in background. New task: " + newTask
                     + ". Top activity: " + targetTopActivity
-                    + ". BAL Code: " + mBalCode);
+                    + ". BAL Code: " + balCodeToString(mBalCode));
 
             return false;
         }
 
         return true;
+    }
+
+    private CharSequence getApplicationLabel(String packageName) {
+        try {
+            PackageManager packageManager = mService.mContext.getPackageManager();
+            ApplicationInfo launchedFromPackageInfo = packageManager.getApplicationInfo(
+                    packageName, PackageManager.ApplicationInfoFlags.of(0));
+            return packageManager.getApplicationLabel(launchedFromPackageInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            return packageName;
+        }
+    }
+
+    /** Only called when an activity launch may be blocked, which should happen very rarely */
+    private void logDebugInfoForActivitySecurity(String action, ActivityRecord r, Task targetTask,
+            ActivityRecord targetTopActivity, boolean blockActivityStartAndFeatureEnabled,
+            boolean taskToFront) {
+        final String prefix = "[ASM] ";
+        Function<ActivityRecord, String> recordToString = (ar) -> {
+            if (ar == null) {
+                return null;
+            }
+            return (ar == mSourceRecord ? " [source]=> "
+                    : ar == targetTopActivity ? " [ top  ]=> "
+                            : ar == r ? " [target]=> "
+                                    : "         => ")
+                    + ar
+                    + " :: visible=" + ar.isVisible()
+                    + ", finishing=" + ar.isFinishing()
+                    + ", alwaysOnTop=" + ar.isAlwaysOnTop()
+                    + ", taskFragment=" + ar.getTaskFragment();
+        };
+
+        StringJoiner joiner = new StringJoiner("\n");
+        joiner.add(prefix + "------ Activity Security " + action + " Debug Logging Start ------");
+        joiner.add(prefix + "Block Enabled: " + blockActivityStartAndFeatureEnabled);
+        joiner.add(prefix + "ASM Version: " + ActivitySecurityModelFeatureFlags.ASM_VERSION);
+
+        boolean targetTaskMatchesSourceTask = targetTask != null
+                && mSourceRecord != null && mSourceRecord.getTask() == targetTask;
+
+        if (mSourceRecord == null) {
+            joiner.add(prefix + "Source Package: " + r.launchedFromPackage);
+            String realCallingPackage = mService.mContext.getPackageManager().getNameForUid(
+                    mRealCallingUid);
+            joiner.add(prefix + "Real Calling Uid Package: " + realCallingPackage);
+        } else {
+            joiner.add(prefix + "Source Record: " + recordToString.apply(mSourceRecord));
+            if (targetTaskMatchesSourceTask) {
+                joiner.add(prefix + "Source/Target Task: " + mSourceRecord.getTask());
+                joiner.add(prefix + "Source/Target Task Stack: ");
+            } else {
+                joiner.add(prefix + "Source Task: " + mSourceRecord.getTask());
+                joiner.add(prefix + "Source Task Stack: ");
+            }
+            mSourceRecord.getTask().forAllActivities((Consumer<ActivityRecord>)
+                    ar -> joiner.add(prefix + recordToString.apply(ar)));
+        }
+
+        joiner.add(prefix + "Target Task Top: " + recordToString.apply(targetTopActivity));
+        if (!targetTaskMatchesSourceTask) {
+            joiner.add(prefix + "Target Task: " + targetTask);
+            if (targetTask != null) {
+                joiner.add(prefix + "Target Task Stack: ");
+                targetTask.forAllActivities((Consumer<ActivityRecord>)
+                        ar -> joiner.add(prefix + recordToString.apply(ar)));
+            }
+        }
+
+        joiner.add(prefix + "Target Record: " + recordToString.apply(r));
+        joiner.add(prefix + "Intent: " + mIntent);
+        joiner.add(prefix + "TaskToFront: " + taskToFront);
+        joiner.add(prefix + "BalCode: " + balCodeToString(mBalCode));
+
+        joiner.add(prefix + "------ Activity Security " + action + " Debug Logging End ------");
+        Slog.i(TAG, joiner.toString());
     }
 
     /**
@@ -2165,8 +2246,8 @@ class ActivityStarter {
             return;
         }
 
-        Predicate<ActivityRecord> isLaunchingOrLaunched = ar -> !ar.finishing && (ar.isUid(
-                startingUid) || ar.isUid(callingUid) || ar.isUid(realCallingUid));
+        Predicate<ActivityRecord> isLaunchingOrLaunched = ar -> !ar.finishing
+                && (ar.isUid(startingUid) || ar.isUid(callingUid) || ar.isUid(realCallingUid));
 
         // Return early if we know for sure we won't need to clear any activities by just checking
         // the top activity.
@@ -2202,7 +2283,10 @@ class ActivityStarter {
                             ? "Top activities cleared by "
                             : "Top activities would be cleared by ")
                             + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                    Toast.LENGTH_SHORT).show());
+                    Toast.LENGTH_LONG).show());
+
+            logDebugInfoForActivitySecurity("Clear Top", mStartActivity, targetTask, targetTaskTop,
+                    shouldBlockActivityStart, /* taskToFront */ true);
         }
     }
 

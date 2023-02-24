@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -59,7 +60,7 @@ public abstract class SharedConnectivityService extends Service {
     private static final String TAG = SharedConnectivityService.class.getSimpleName();
     private static final boolean DEBUG = true;
 
-    private  Handler mHandler;
+    private Handler mHandler;
     private final List<ISharedConnectivityCallback> mCallbacks = new ArrayList<>();
     // Used to find DeathRecipient when unregistering a callback to call unlinkToDeath.
     private final Map<ISharedConnectivityCallback, DeathRecipient> mDeathRecipientMap =
@@ -90,7 +91,7 @@ public abstract class SharedConnectivityService extends Service {
     public final IBinder onBind(@NonNull Intent intent) {
         if (DEBUG) Log.i(TAG, "onBind intent=" + intent);
         mHandler = new Handler(getMainLooper());
-        return new ISharedConnectivityService.Stub() {
+        IBinder serviceStub = new ISharedConnectivityService.Stub() {
             @Override
             public void registerCallback(ISharedConnectivityCallback callback) {
                 checkPermissions();
@@ -138,7 +139,13 @@ public abstract class SharedConnectivityService extends Service {
                 }
             }
         };
+        onBind(); // For CTS testing
+        return serviceStub;
     }
+
+    /** @hide */
+    @TestApi
+    public void onBind() {}
 
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
         // Listener gets triggered on first register using cashed data

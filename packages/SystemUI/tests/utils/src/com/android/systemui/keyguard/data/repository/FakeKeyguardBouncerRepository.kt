@@ -21,6 +21,7 @@ import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.E
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
@@ -44,8 +45,6 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     override val panelExpansionAmount = _panelExpansionAmount.asStateFlow()
     private val _keyguardPosition = MutableStateFlow(0f)
     override val keyguardPosition = _keyguardPosition.asStateFlow()
-    private val _onScreenTurnedOff = MutableStateFlow(false)
-    override val onScreenTurnedOff = _onScreenTurnedOff.asStateFlow()
     private val _isBackButtonEnabled = MutableStateFlow<Boolean?>(null)
     override val isBackButtonEnabled = _isBackButtonEnabled.asStateFlow()
     private val _keyguardAuthenticated = MutableStateFlow<Boolean?>(null)
@@ -61,6 +60,8 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
     override var lastAlternateBouncerVisibleTime: Long = 0L
     private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
     override val alternateBouncerUIAvailable = _isAlternateBouncerUIAvailable.asStateFlow()
+    private val _sideFpsShowing: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val sideFpsShowing: StateFlow<Boolean> = _sideFpsShowing.asStateFlow()
 
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed
@@ -122,7 +123,7 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
         _isBackButtonEnabled.value = isBackButtonEnabled
     }
 
-    override fun setOnScreenTurnedOff(onScreenTurnedOff: Boolean) {
-        _onScreenTurnedOff.value = onScreenTurnedOff
+    override fun setSideFpsShowing(isShowing: Boolean) {
+        _sideFpsShowing.value = isShowing
     }
 }

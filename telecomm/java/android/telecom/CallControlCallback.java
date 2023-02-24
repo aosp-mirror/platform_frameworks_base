@@ -75,24 +75,17 @@ public interface CallControlCallback {
             @NonNull Consumer<Boolean> wasCompleted);
 
     /**
-     * Telecom is informing the client to reject the incoming call
-     *
-     * @param wasCompleted The {@link Consumer} to be completed. If the client can reject the
-     *                     incoming call, {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#TRUE}. Otherwise, {@link Consumer#accept(Object)}
-     *                     should  be called with {@link Boolean#FALSE}.
-     */
-    void onReject(@NonNull Consumer<Boolean> wasCompleted);
-
-    /**
      * Telecom is informing the client to disconnect the call
      *
-     * @param wasCompleted The {@link Consumer} to be completed. If the client can disconnect the
-     *                     call on their end, {@link Consumer#accept(Object)} should be called with
-     *                     {@link Boolean#TRUE}. Otherwise, {@link Consumer#accept(Object)}
-     *                     should  be called with {@link Boolean#FALSE}.
+     * @param disconnectCause represents the cause for disconnecting the call.
+     * @param wasCompleted    The {@link Consumer} to be completed. If the client can disconnect
+     *                        the call on their end, {@link Consumer#accept(Object)} should be
+     *                        called with {@link Boolean#TRUE}. Otherwise,
+     *                        {@link Consumer#accept(Object)} should  be called with
+     *                        {@link Boolean#FALSE}.
      */
-    void onDisconnect(@NonNull Consumer<Boolean> wasCompleted);
+    void onDisconnect(@NonNull DisconnectCause disconnectCause,
+            @NonNull Consumer<Boolean> wasCompleted);
 
     /**
      * Telecom is informing the client to set the call in streaming.

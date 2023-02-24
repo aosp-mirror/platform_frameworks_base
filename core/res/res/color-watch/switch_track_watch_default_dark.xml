@@ -17,6 +17,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
           android:alpha="?attr/disabledAlpha"
-          android:color="?android:colorPrimaryDark" />
-    <item android:color="?android:colorPrimaryDark" />
+          android:color="?android:colorSurface" />
+    <item android:color="?android:colorSurface" />
 </selector>

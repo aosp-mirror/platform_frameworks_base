@@ -725,6 +725,14 @@ package android.app.contentsuggestions {
 
 }
 
+package android.app.job {
+
+  public class JobParameters implements android.os.Parcelable {
+    field public static final int INTERNAL_STOP_REASON_USER_UI_STOP = 11; // 0xb
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictor {
@@ -1948,8 +1956,17 @@ package android.net {
 package android.net.wifi.sharedconnectivity.app {
 
   public class SharedConnectivityManager {
+    method @Nullable public static android.net.wifi.sharedconnectivity.app.SharedConnectivityManager create(@NonNull android.content.Context, @NonNull String, @NonNull String);
     method @Nullable public android.content.ServiceConnection getServiceConnection();
     method public void setService(@Nullable android.os.IInterface);
+  }
+
+}
+
+package android.net.wifi.sharedconnectivity.service {
+
+  public abstract class SharedConnectivityService extends android.app.Service {
+    method public void onBind();
   }
 
 }
@@ -3735,7 +3752,7 @@ package android.window {
 
   public final class TaskFragmentCreationParams implements android.os.Parcelable {
     method @NonNull public android.os.IBinder getFragmentToken();
-    method @NonNull public android.graphics.Rect getInitialBounds();
+    method @NonNull public android.graphics.Rect getInitialRelativeBounds();
     method @NonNull public android.window.TaskFragmentOrganizerToken getOrganizer();
     method @NonNull public android.os.IBinder getOwnerToken();
     method public int getWindowingMode();
@@ -3745,7 +3762,7 @@ package android.window {
   public static final class TaskFragmentCreationParams.Builder {
     ctor public TaskFragmentCreationParams.Builder(@NonNull android.window.TaskFragmentOrganizerToken, @NonNull android.os.IBinder, @NonNull android.os.IBinder);
     method @NonNull public android.window.TaskFragmentCreationParams build();
-    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialBounds(@NonNull android.graphics.Rect);
+    method @NonNull public android.window.TaskFragmentCreationParams.Builder setInitialRelativeBounds(@NonNull android.graphics.Rect);
     method @NonNull public android.window.TaskFragmentCreationParams.Builder setWindowingMode(int);
   }
 
