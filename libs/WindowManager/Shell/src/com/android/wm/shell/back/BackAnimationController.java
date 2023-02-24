@@ -29,8 +29,9 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -39,7 +40,6 @@ import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.IRemoteAnimationRunner;
-import android.view.IWindowFocusObserver;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -121,23 +121,22 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private IOnBackInvokedCallback mActiveCallback;
 
     @VisibleForTesting
-    final IWindowFocusObserver mFocusObserver = new IWindowFocusObserver.Stub() {
-        @Override
-        public void focusGained(IBinder inputToken) { }
-        @Override
-        public void focusLost(IBinder inputToken) {
-            mShellExecutor.execute(() -> {
-                if (!mBackGestureStarted || mPostCommitAnimationInProgress) {
-                    // If an uninterruptible animation is already in progress, we should ignore
-                    // this due to it may cause focus lost. (alpha = 0)
-                    return;
+    final RemoteCallback mNavigationObserver = new RemoteCallback(
+            new RemoteCallback.OnResultListener() {
+                @Override
+                public void onResult(@Nullable Bundle result) {
+                    mShellExecutor.execute(() -> {
+                        if (!mBackGestureStarted || mPostCommitAnimationInProgress) {
+                            // If an uninterruptible animation is already in progress, we should
+                            // ignore this due to it may cause focus lost. (alpha = 0)
+                            return;
+                        }
+                        ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Navigation window gone.");
+                        setTriggerBack(false);
+                        onGestureFinished(false);
+                    });
                 }
-                ProtoLog.i(WM_SHELL_BACK_PREVIEW, "Target window lost focus.");
-                setTriggerBack(false);
-                onGestureFinished(false);
             });
-        }
-    };
 
     private final BackAnimationBackground mAnimationBackground;
 
@@ -351,7 +350,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
         try {
             mBackNavigationInfo = mActivityTaskManager.startBackNavigation(
-                    mFocusObserver, mEnableAnimations.get() ? mBackAnimationAdapter : null);
+                    mNavigationObserver, mEnableAnimations.get() ? mBackAnimationAdapter : null);
             onBackNavigationInfoReceived(mBackNavigationInfo);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);
