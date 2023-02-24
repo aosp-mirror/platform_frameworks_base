@@ -94,6 +94,8 @@
   <string name="accessibility_back_arrow_button">"Go back to the previous page"</string>
   <!-- Spoken content description of the close "X" icon button. -->
   <string name="accessibility_close_button">Close</string>
+  <!-- Spoken content description of the close "X" icon button. [CHAR LIMIT=NONE] -->
+  <string name="accessibility_snackbar_dismiss">Dismiss</string>
 
   <!-- Strings for the get flow. -->
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->

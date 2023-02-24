@@ -96,6 +96,7 @@ class AuthenticationEntryInfo(
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
     val title: String,
+    val providerDisplayName: String,
     val icon: Drawable,
     // The entry had been unlocked and turned out to be empty. Used to determine whether to
     // show "Tap to unlock" or "No sign-in info" for this entry.
