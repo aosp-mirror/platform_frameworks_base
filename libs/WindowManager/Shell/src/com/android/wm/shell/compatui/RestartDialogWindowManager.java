@@ -170,10 +170,10 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
 
         final Rect taskBounds = getTaskBounds();
         final Rect taskStableBounds = getTaskStableBounds();
-
-        marginParams.topMargin = taskStableBounds.top - taskBounds.top + mDialogVerticalMargin;
-        marginParams.bottomMargin =
-                taskBounds.bottom - taskStableBounds.bottom + mDialogVerticalMargin;
+        // only update margins based on taskbar insets
+        marginParams.topMargin = mDialogVerticalMargin;
+        marginParams.bottomMargin = taskBounds.bottom - taskStableBounds.bottom
+                + mDialogVerticalMargin;
         dialogContainer.setLayoutParams(marginParams);
     }
 
