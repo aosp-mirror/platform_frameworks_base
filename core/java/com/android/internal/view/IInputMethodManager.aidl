@@ -23,11 +23,11 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
 import android.window.ImeOnBackInvokedDispatcher;
 
+import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInputMethodClient;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.inputmethod.IRemoteInputConnection;
 import com.android.internal.inputmethod.InputBindResult;
-import com.android.internal.view.IImeTracker;
 
 /**
  * Public interface to the global input method manager, used by all client
