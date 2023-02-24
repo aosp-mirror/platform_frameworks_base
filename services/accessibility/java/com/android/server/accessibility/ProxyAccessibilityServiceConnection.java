@@ -38,14 +38,18 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityDisplayProxy;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.R;
+import com.android.internal.util.DumpUtils;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -61,6 +65,8 @@ import java.util.Set;
  * TODO(241429275): Initialize this when a proxy is registered.
  */
 public class ProxyAccessibilityServiceConnection extends AccessibilityServiceConnection {
+    private static final String LOG_TAG = "ProxyAccessibilityServiceConnection";
+
     private int mDisplayId;
     private List<AccessibilityServiceInfo> mInstalledAndEnabledServices;
 
@@ -564,5 +570,26 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     @Override
     public void setAnimationScale(float scale) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("setAnimationScale is not supported");
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
+        synchronized (mLock) {
+            pw.append("Proxy[displayId=" + mDisplayId);
+            pw.append(", feedbackType"
+                    + AccessibilityServiceInfo.feedbackTypeToString(mFeedbackType));
+            pw.append(", capabilities=" + mAccessibilityServiceInfo.getCapabilities());
+            pw.append(", eventTypes="
+                    + AccessibilityEvent.eventTypeToString(mEventTypes));
+            pw.append(", notificationTimeout=" + mNotificationTimeout);
+            pw.append(", focusStrokeWidth=").append(String.valueOf(mFocusStrokeWidth));
+            pw.append(", focusColor=").append(String.valueOf(mFocusColor));
+            pw.append(", installedAndEnabledServiceCount=").append(String.valueOf(
+                    mInstalledAndEnabledServices.size()));
+            pw.append(", installedAndEnabledServices=").append(
+                    mInstalledAndEnabledServices.toString());
+            pw.append("]");
+        }
     }
 }
