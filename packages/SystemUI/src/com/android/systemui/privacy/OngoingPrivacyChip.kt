@@ -107,6 +107,6 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         val padding = context.resources
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_side_padding)
         iconsContainer.setPaddingRelative(padding, 0, padding, 0)
-        iconsContainer.background = context.getDrawable(R.drawable.privacy_chip_bg)
+        iconsContainer.background = context.getDrawable(R.drawable.statusbar_privacy_chip_bg)
     }
 }

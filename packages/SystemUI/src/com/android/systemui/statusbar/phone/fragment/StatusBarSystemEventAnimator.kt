@@ -64,14 +64,14 @@ class StatusBarSystemEventAnimator(
 
     override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
         animatedView.translationX = translationXOut.toFloat()
-        val moveIn = ValueAnimator.ofFloat(1f, 0f).setDuration(28.frames)
-        moveIn.startDelay = 2.frames
+        val moveIn = ValueAnimator.ofFloat(1f, 0f).setDuration(23.frames)
+        moveIn.startDelay = 7.frames
         moveIn.interpolator = STATUS_BAR_X_MOVE_IN
         moveIn.addUpdateListener { animation: ValueAnimator ->
             animatedView.translationX = translationXOut * animation.animatedValue as Float
         }
-        val alphaIn = ValueAnimator.ofFloat(0f, 1f).setDuration(10.frames)
-        alphaIn.startDelay = 4.frames
+        val alphaIn = ValueAnimator.ofFloat(0f, 1f).setDuration(5.frames)
+        alphaIn.startDelay = 11.frames
         alphaIn.interpolator = null
         alphaIn.addUpdateListener { animation: ValueAnimator ->
             animatedView.alpha = animation.animatedValue as Float
