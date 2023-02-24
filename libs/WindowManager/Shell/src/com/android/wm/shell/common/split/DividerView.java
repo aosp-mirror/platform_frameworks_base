@@ -59,9 +59,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
-    /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
-    private float mExpandedTaskBarHeight;
-
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
     private SplitLayout mSplitLayout;
@@ -216,17 +213,19 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
 
     void onInsetsChanged(InsetsState insetsState, boolean animate) {
         mSplitLayout.getDividerBounds(mTempRect);
-        final InsetsSource taskBarInsetsSource =
-                insetsState.peekSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
         // Only insets the divider bar with task bar when it's expanded so that the rounded corners
         // will be drawn against task bar.
         // But there is no need to do it when IME showing because there are no rounded corners at
         // the bottom. This also avoids the problem of task bar height not changing when IME
         // floating.
-        if (!insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME, WindowInsets.Type.ime())
-                && taskBarInsetsSource != null
-                && taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
-            mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
+        if (!insetsState.isSourceOrDefaultVisible(InsetsSource.ID_IME, WindowInsets.Type.ime())) {
+            for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
+                final InsetsSource source = insetsState.sourceAt(i);
+                if (source.getType() == WindowInsets.Type.navigationBars()
+                        && source.insetsRoundedCornerFrame()) {
+                    mTempRect.inset(source.calculateVisibleInsets(mTempRect));
+                }
+            }
         }
 
         if (!mTempRect.equals(mDividerBounds)) {
@@ -251,8 +250,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mDividerBar = findViewById(R.id.divider_bar);
         mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
-        mExpandedTaskBarHeight = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.taskbar_frame_height);
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());

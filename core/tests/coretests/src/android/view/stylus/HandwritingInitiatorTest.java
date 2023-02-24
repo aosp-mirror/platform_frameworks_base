@@ -32,7 +32,6 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
-import android.view.HandwritingDelegateConfiguration;
 import android.view.HandwritingInitiator;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -210,14 +209,11 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_delegate() {
-        int delegatorViewId = 234;
-        View delegatorView = new View(mContext);
-        delegatorView.setId(delegatorViewId);
+        View delegateView = new View(mContext);
+        delegateView.setIsHandwritingDelegate(true);
 
-        mTestView.setHandwritingDelegateConfiguration(
-                new HandwritingDelegateConfiguration(
-                        delegatorViewId,
-                        () -> mHandwritingInitiator.onInputConnectionCreated(delegatorView)));
+        mTestView.setHandwritingDelegatorCallback(
+                () -> mHandwritingInitiator.onInputConnectionCreated(delegateView));
 
         final int x1 = (sHwArea.left + sHwArea.right) / 2;
         final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
@@ -229,7 +225,7 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
-        verify(mHandwritingInitiator, times(1)).startHandwriting(delegatorView);
+        verify(mHandwritingInitiator, times(1)).tryAcceptStylusHandwritingDelegation(delegateView);
     }
 
     @Test

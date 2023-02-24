@@ -807,10 +807,10 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
     }
 
-    private abstract static class MimeGroupsAwareIntentResolver<F extends Pair<?
-            extends ParsedComponent, ParsedIntentInfo>, R>
-            extends IntentResolver<F, R> {
-        private final ArrayMap<String, F[]> mMimeGroupToFilter = new ArrayMap<>();
+    private abstract static class MimeGroupsAwareIntentResolver<F extends ParsedComponent>
+            extends IntentResolver<Pair<F, ParsedIntentInfo>, ResolveInfo> {
+        private final ArrayMap<String, Pair<F, ParsedIntentInfo>[]> mMimeGroupToFilter =
+                new ArrayMap<>();
         private boolean mIsUpdatingMimeGroup = false;
 
         @NonNull
@@ -822,7 +822,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         // Copy constructor used in creating snapshots
-        MimeGroupsAwareIntentResolver(MimeGroupsAwareIntentResolver<F, R> orig,
+        MimeGroupsAwareIntentResolver(MimeGroupsAwareIntentResolver<F> orig,
                 @NonNull UserManagerService userManager) {
             mUserManager = userManager;
             copyFrom(orig);
@@ -831,7 +831,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        public void addFilter(@Nullable PackageDataSnapshot snapshot, F f) {
+        public void addFilter(@Nullable PackageDataSnapshot snapshot, Pair<F, ParsedIntentInfo> f) {
             IntentFilter intentFilter = getIntentFilter(f);
             // We assume Computer is available for this class and all subclasses. Because this class
             // uses subclass method override to handle logic, the Computer parameter must be in the
@@ -846,7 +846,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected void removeFilterInternal(F f) {
+        protected void removeFilterInternal(Pair<F, ParsedIntentInfo> f) {
             IntentFilter intentFilter = getIntentFilter(f);
             if (!mIsUpdatingMimeGroup) {
                 unregister_intent_filter(f, intentFilter.mimeGroupsIterator(), mMimeGroupToFilter,
@@ -855,6 +855,86 @@ public class ComponentResolver extends ComponentResolverLocked implements
 
             super.removeFilterInternal(f);
             intentFilter.clearDynamicDataTypes();
+        }
+
+        @Override
+        public List<ResolveInfo> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
+                String resolvedType, boolean defaultOnly, int callingUid, @UserIdInt int userId) {
+            if (!mUserManager.exists(userId)) return null;
+            long flags = (defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0);
+            return super.queryIntent(snapshot, intent, resolvedType, defaultOnly, callingUid,
+                    userId, flags);
+        }
+
+        List<ResolveInfo> queryIntent(@NonNull Computer computer, Intent intent,
+                String resolvedType, long flags, int callingUid, int userId) {
+            if (!mUserManager.exists(userId)) return null;
+            return super.queryIntent(computer, intent, resolvedType,
+                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, callingUid, userId, flags);
+        }
+
+        List<ResolveInfo> queryIntentForPackage(@NonNull Computer computer, Intent intent,
+                String resolvedType, long flags, List<F> packageComponents,
+                int callingUid, int userId) {
+            if (!mUserManager.exists(userId)) {
+                return null;
+            }
+            if (packageComponents == null) {
+                return Collections.emptyList();
+            }
+            final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
+            final int componentsSize = packageComponents.size();
+            ArrayList<Pair<F, ParsedIntentInfo>[]> listCut = new ArrayList<>(componentsSize);
+
+            List<ParsedIntentInfo> intentFilters;
+            for (int i = 0; i < componentsSize; ++i) {
+                F component = packageComponents.get(i);
+                intentFilters = component.getIntents();
+                if (!intentFilters.isEmpty()) {
+                    Pair<F, ParsedIntentInfo>[] array = newArray(intentFilters.size());
+                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
+                        array[arrayIndex] = Pair.create(component, intentFilters.get(arrayIndex));
+                    }
+                    listCut.add(array);
+                }
+            }
+            return super.queryIntentFromList(computer, intent, resolvedType,
+                    defaultOnly, listCut, callingUid, userId, flags);
+        }
+
+        @Override
+        protected boolean isPackageForFilter(String packageName, Pair<F, ParsedIntentInfo> info) {
+            return packageName.equals(info.first.getPackageName());
+        }
+
+        @Override
+        protected void sortResults(List<ResolveInfo> results) {
+            results.sort(RESOLVE_PRIORITY_SORTER);
+        }
+
+        @Override
+        protected void filterResults(@NonNull Computer computer, @NonNull Intent intent,
+                List<ResolveInfo> results) {
+            if (intent.getAction() != null) return;
+            // When the resolved component is targeting U+, block null action intents
+            for (int i = results.size() - 1; i >= 0; --i) {
+                if (computer.isChangeEnabled(IntentFilter.BLOCK_NULL_ACTION_INTENTS,
+                        results.get(i).getComponentInfo().applicationInfo)) {
+                    results.remove(i);
+                }
+            }
+        }
+
+        @Override
+        protected Pair<F, ParsedIntentInfo>[] newArray(int size) {
+            //noinspection unchecked
+            return (Pair<F, ParsedIntentInfo>[]) new Pair<?, ?>[size];
+        }
+
+        @Override
+        protected IntentFilter getIntentFilter(
+                @NonNull Pair<F, ParsedIntentInfo> input) {
+            return input.second.getIntentFilter();
         }
 
         /**
@@ -867,12 +947,12 @@ public class ComponentResolver extends ComponentResolverLocked implements
          */
         public boolean updateMimeGroup(@NonNull Computer computer, String packageName,
                 String mimeGroup) {
-            F[] filters = mMimeGroupToFilter.get(mimeGroup);
+            Pair<F, ParsedIntentInfo>[] filters = mMimeGroupToFilter.get(mimeGroup);
             int n = filters != null ? filters.length : 0;
 
             mIsUpdatingMimeGroup = true;
             boolean hasChanges = false;
-            F filter;
+            Pair<F, ParsedIntentInfo> filter;
             for (int i = 0; i < n && (filter = filters[i]) != null; i++) {
                 if (isPackageForFilter(packageName, filter)) {
                     hasChanges |= updateFilter(computer, filter);
@@ -882,7 +962,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             return hasChanges;
         }
 
-        private boolean updateFilter(@NonNull Computer computer, F f) {
+        private boolean updateFilter(@NonNull Computer computer, Pair<F, ParsedIntentInfo> f) {
             IntentFilter filter = getIntentFilter(f);
             List<String> oldTypes = filter.dataTypes();
             removeFilter(f);
@@ -907,7 +987,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             return first.equals(second);
         }
 
-        private void applyMimeGroups(@NonNull Computer computer, F f) {
+        private void applyMimeGroups(@NonNull Computer computer, Pair<F, ParsedIntentInfo> f) {
             IntentFilter filter = getIntentFilter(f);
 
             for (int i = filter.countMimeGroups() - 1; i >= 0; i--) {
@@ -931,8 +1011,8 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected boolean isFilterStopped(@NonNull Computer computer, F filter,
-                @UserIdInt int userId) {
+        protected boolean isFilterStopped(@NonNull Computer computer,
+                Pair<F, ParsedIntentInfo> filter, @UserIdInt int userId) {
             if (!mUserManager.exists(userId)) {
                 return true;
             }
@@ -948,7 +1028,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
     }
 
     public static class ActivityIntentResolver
-            extends MimeGroupsAwareIntentResolver<Pair<ParsedActivity, ParsedIntentInfo>, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedActivity> {
 
         @NonNull
         private UserNeedsBadgingCache mUserNeedsBadging;
@@ -967,53 +1047,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
             super(orig, userManager);
             mActivities.putAll(orig.mActivities);
             mUserNeedsBadging = userNeedsBadgingCache;
-        }
-
-        @Override
-        public List<ResolveInfo> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-                String resolvedType, boolean defaultOnly, @UserIdInt int userId) {
-            if (!mUserManager.exists(userId)) return null;
-            long flags = (defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0);
-            return super.queryIntent(snapshot, intent, resolvedType, defaultOnly, userId, flags);
-        }
-
-        List<ResolveInfo> queryIntent(@NonNull Computer computer, Intent intent,
-                String resolvedType, long flags, int userId) {
-            if (!mUserManager.exists(userId)) {
-                return null;
-            }
-            return super.queryIntent(computer, intent, resolvedType,
-                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId, flags);
-        }
-
-        List<ResolveInfo> queryIntentForPackage(@NonNull Computer computer, Intent intent,
-                String resolvedType, long flags, List<ParsedActivity> packageActivities,
-                int userId) {
-            if (!mUserManager.exists(userId)) {
-                return null;
-            }
-            if (packageActivities == null) {
-                return Collections.emptyList();
-            }
-            final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
-            final int activitiesSize = packageActivities.size();
-            ArrayList<Pair<ParsedActivity, ParsedIntentInfo>[]> listCut =
-                    new ArrayList<>(activitiesSize);
-
-            List<ParsedIntentInfo> intentFilters;
-            for (int i = 0; i < activitiesSize; ++i) {
-                ParsedActivity activity = packageActivities.get(i);
-                intentFilters = activity.getIntents();
-                if (!intentFilters.isEmpty()) {
-                    Pair<ParsedActivity, ParsedIntentInfo>[] array = newArray(intentFilters.size());
-                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
-                        array[arrayIndex] = Pair.create(activity, intentFilters.get(arrayIndex));
-                    }
-                    listCut.add(array);
-                }
-            }
-            return super.queryIntentFromList(computer, intent, resolvedType,
-                    defaultOnly, listCut, userId, flags);
         }
 
         protected void addActivity(@NonNull Computer computer, ParsedActivity a, String type,
@@ -1070,18 +1103,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 }
             }
             return true;
-        }
-
-        @Override
-        protected Pair<ParsedActivity, ParsedIntentInfo>[] newArray(int size) {
-            //noinspection unchecked
-            return (Pair<ParsedActivity, ParsedIntentInfo>[]) new Pair<?, ?>[size];
-        }
-
-        @Override
-        protected boolean isPackageForFilter(String packageName,
-                Pair<ParsedActivity, ParsedIntentInfo> info) {
-            return packageName.equals(info.first.getPackageName());
         }
 
         private void log(String reason, ParsedIntentInfo info, int match,
@@ -1199,11 +1220,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected void sortResults(List<ResolveInfo> results) {
-            results.sort(RESOLVE_PRIORITY_SORTER);
-        }
-
-        @Override
         protected void dumpFilter(PrintWriter out, String prefix,
                 Pair<ParsedActivity, ParsedIntentInfo> pair) {
             ParsedActivity activity = pair.first;
@@ -1235,12 +1251,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 out.print(" ("); out.print(count); out.print(" filters)");
             }
             out.println();
-        }
-
-        @Override
-        protected IntentFilter getIntentFilter(
-                @NonNull Pair<ParsedActivity, ParsedIntentInfo> input) {
-            return input.second.getIntentFilter();
         }
 
         protected List<ParsedActivity> getResolveList(AndroidPackage pkg) {
@@ -1278,7 +1288,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
     }
 
     public static final class ProviderIntentResolver
-            extends MimeGroupsAwareIntentResolver<Pair<ParsedProvider, ParsedIntentInfo>, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedProvider> {
         // Default constructor
         ProviderIntentResolver(@NonNull UserManagerService userManager) {
             super(userManager);
@@ -1289,57 +1299,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 @NonNull UserManagerService userManager) {
             super(orig, userManager);
             mProviders.putAll(orig.mProviders);
-        }
-
-        @Override
-        public List<ResolveInfo> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-                String resolvedType, boolean defaultOnly, @UserIdInt int userId) {
-            if (!mUserManager.exists(userId)) {
-                return null;
-            }
-            long flags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(snapshot, intent, resolvedType, defaultOnly, userId, flags);
-        }
-
-        @Nullable
-        List<ResolveInfo> queryIntent(@NonNull Computer computer, Intent intent,
-                String resolvedType, long flags, int userId) {
-            if (!mUserManager.exists(userId)) {
-                return null;
-            }
-            return super.queryIntent(computer, intent, resolvedType,
-                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId, flags);
-        }
-
-        @Nullable
-        List<ResolveInfo> queryIntentForPackage(@NonNull Computer computer, Intent intent,
-                String resolvedType, long flags, List<ParsedProvider> packageProviders,
-                int userId) {
-            if (!mUserManager.exists(userId)) {
-                return null;
-            }
-            if (packageProviders == null) {
-                return Collections.emptyList();
-            }
-            final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
-            final int providersSize = packageProviders.size();
-            ArrayList<Pair<ParsedProvider, ParsedIntentInfo>[]> listCut =
-                    new ArrayList<>(providersSize);
-
-            List<ParsedIntentInfo> intentFilters;
-            for (int i = 0; i < providersSize; ++i) {
-                ParsedProvider provider = packageProviders.get(i);
-                intentFilters = provider.getIntents();
-                if (!intentFilters.isEmpty()) {
-                    Pair<ParsedProvider, ParsedIntentInfo>[] array = newArray(intentFilters.size());
-                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
-                        array[arrayIndex] = Pair.create(provider, intentFilters.get(arrayIndex));
-                    }
-                    listCut.add(array);
-                }
-            }
-            return super.queryIntentFromList(computer, intent, resolvedType,
-                    defaultOnly, listCut, userId, flags);
         }
 
         void addProvider(@NonNull Computer computer, ParsedProvider p) {
@@ -1399,18 +1358,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 }
             }
             return true;
-        }
-
-        @Override
-        protected Pair<ParsedProvider, ParsedIntentInfo>[] newArray(int size) {
-            //noinspection unchecked
-            return (Pair<ParsedProvider, ParsedIntentInfo>[]) new Pair<?, ?>[size];
-        }
-
-        @Override
-        protected boolean isPackageForFilter(String packageName,
-                Pair<ParsedProvider, ParsedIntentInfo> info) {
-            return packageName.equals(info.first.getPackageName());
         }
 
         @Override
@@ -1479,11 +1426,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected void sortResults(List<ResolveInfo> results) {
-            results.sort(RESOLVE_PRIORITY_SORTER);
-        }
-
-        @Override
         protected void dumpFilter(PrintWriter out, String prefix,
                 Pair<ParsedProvider, ParsedIntentInfo> pair) {
             ParsedProvider provider = pair.first;
@@ -1518,17 +1460,11 @@ public class ComponentResolver extends ComponentResolverLocked implements
             out.println();
         }
 
-        @Override
-        protected IntentFilter getIntentFilter(
-                @NonNull Pair<ParsedProvider, ParsedIntentInfo> input) {
-            return input.second.getIntentFilter();
-        }
-
         final ArrayMap<ComponentName, ParsedProvider> mProviders = new ArrayMap<>();
     }
 
     public static final class ServiceIntentResolver
-            extends MimeGroupsAwareIntentResolver<Pair<ParsedService, ParsedIntentInfo>, ResolveInfo> {
+            extends MimeGroupsAwareIntentResolver<ParsedService> {
         // Default constructor
         ServiceIntentResolver(@NonNull UserManagerService userManager) {
             super(userManager);
@@ -1539,50 +1475,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 @NonNull UserManagerService userManager) {
             super(orig, userManager);
             mServices.putAll(orig.mServices);
-        }
-
-        @Override
-        public List<ResolveInfo> queryIntent(@NonNull PackageDataSnapshot snapshot, Intent intent,
-                String resolvedType, boolean defaultOnly, @UserIdInt int userId) {
-            if (!mUserManager.exists(userId)) {
-                return null;
-            }
-            long flags = defaultOnly ? PackageManager.MATCH_DEFAULT_ONLY : 0;
-            return super.queryIntent(snapshot, intent, resolvedType, defaultOnly, userId, flags);
-        }
-
-        List<ResolveInfo> queryIntent(@NonNull Computer computer, Intent intent,
-                String resolvedType, long flags, int userId) {
-            if (!mUserManager.exists(userId)) return null;
-            return super.queryIntent(computer, intent, resolvedType,
-                    (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId, flags);
-        }
-
-        List<ResolveInfo> queryIntentForPackage(@NonNull Computer computer, Intent intent,
-                String resolvedType, long flags, List<ParsedService> packageServices, int userId) {
-            if (!mUserManager.exists(userId)) return null;
-            if (packageServices == null) {
-                return Collections.emptyList();
-            }
-            final boolean defaultOnly = (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0;
-            final int servicesSize = packageServices.size();
-            ArrayList<Pair<ParsedService, ParsedIntentInfo>[]> listCut =
-                    new ArrayList<>(servicesSize);
-
-            List<ParsedIntentInfo> intentFilters;
-            for (int i = 0; i < servicesSize; ++i) {
-                ParsedService service = packageServices.get(i);
-                intentFilters = service.getIntents();
-                if (intentFilters.size() > 0) {
-                    Pair<ParsedService, ParsedIntentInfo>[] array = newArray(intentFilters.size());
-                    for (int arrayIndex = 0; arrayIndex < intentFilters.size(); arrayIndex++) {
-                        array[arrayIndex] = Pair.create(service, intentFilters.get(arrayIndex));
-                    }
-                    listCut.add(array);
-                }
-            }
-            return super.queryIntentFromList(computer, intent, resolvedType,
-                    defaultOnly, listCut, userId, flags);
         }
 
         void addService(@NonNull Computer computer, ParsedService s) {
@@ -1637,18 +1529,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 }
             }
             return true;
-        }
-
-        @Override
-        protected Pair<ParsedService, ParsedIntentInfo>[] newArray(int size) {
-            //noinspection unchecked
-            return (Pair<ParsedService, ParsedIntentInfo>[]) new Pair<?, ?>[size];
-        }
-
-        @Override
-        protected boolean isPackageForFilter(String packageName,
-                Pair<ParsedService, ParsedIntentInfo> info) {
-            return packageName.equals(info.first.getPackageName());
         }
 
         @Override
@@ -1710,11 +1590,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected void sortResults(List<ResolveInfo> results) {
-            results.sort(RESOLVE_PRIORITY_SORTER);
-        }
-
-        @Override
         protected void dumpFilter(PrintWriter out, String prefix,
                 Pair<ParsedService, ParsedIntentInfo> pair) {
             ParsedService service = pair.first;
@@ -1750,12 +1625,6 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 out.print(" ("); out.print(count); out.print(" filters)");
             }
             out.println();
-        }
-
-        @Override
-        protected IntentFilter getIntentFilter(
-                @NonNull Pair<ParsedService, ParsedIntentInfo> input) {
-            return input.second.getIntentFilter();
         }
 
         // Keys are String (activity class name), values are Activity.
@@ -1821,7 +1690,8 @@ public class ComponentResolver extends ComponentResolverLocked implements
         }
 
         @Override
-        protected void filterResults(List<AuxiliaryResolveInfo.AuxiliaryFilter> results) {
+        protected void filterResults(@NonNull Computer computer,
+                @NonNull Intent intent, List<AuxiliaryResolveInfo.AuxiliaryFilter> results) {
             // only do work if ordering is enabled [most of the time it won't be]
             if (mOrderResult.size() == 0) {
                 return;

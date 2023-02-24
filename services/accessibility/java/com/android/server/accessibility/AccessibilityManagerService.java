@@ -3823,7 +3823,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         try {
             mProxyManager.registerProxy(client, displayId, mContext,
                     sIdCounter++, mMainHandler, mSecurityPolicy, this, getTraceManager(),
-                    mWindowManagerService, mA11yWindowManager);
+                    mWindowManagerService);
 
             synchronized (mLock) {
                 notifyClearAccessibilityCacheLocked();

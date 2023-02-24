@@ -38,7 +38,7 @@ import java.util.concurrent.Executor;
 /** Service to monitor CPU availability and usage. */
 public final class CpuMonitorService extends SystemService {
     static final String TAG = CpuMonitorService.class.getSimpleName();
-    static final boolean DEBUG = Slogf.isLoggable(TAG, Log.DEBUG);
+    static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     // TODO(b/242722241): Make this a resource overlay property.
     //  Maintain 3 monitoring intervals:
     //  * One to poll very frequently when mCpuAvailabilityCallbackInfoByCallbacks are available and

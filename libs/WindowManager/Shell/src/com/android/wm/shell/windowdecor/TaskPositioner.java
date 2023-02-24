@@ -19,9 +19,11 @@ package com.android.wm.shell.windowdecor;
 import android.annotation.IntDef;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.util.DisplayMetrics;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.DisplayController;
 
 class TaskPositioner implements DragPositioningCallback {
 
@@ -35,6 +37,7 @@ class TaskPositioner implements DragPositioningCallback {
     static final int CTRL_TYPE_BOTTOM = 8;
 
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final DisplayController mDisplayController;
     private final WindowDecoration mWindowDecoration;
 
     private final Rect mTaskBoundsAtDragStart = new Rect();
@@ -45,14 +48,16 @@ class TaskPositioner implements DragPositioningCallback {
     private int mCtrlType;
     private DragStartListener mDragStartListener;
 
-    TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration) {
-        this(taskOrganizer, windowDecoration, dragStartListener -> {});
+    TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
+            DisplayController displayController) {
+        this(taskOrganizer, windowDecoration, displayController, dragStartListener -> {});
     }
 
     TaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
-            DragStartListener dragStartListener) {
+            DisplayController displayController, DragStartListener dragStartListener) {
         mTaskOrganizer = taskOrganizer;
         mWindowDecoration = windowDecoration;
+        mDisplayController = displayController;
         mDragStartListener = dragStartListener;
     }
 
@@ -128,13 +133,42 @@ class TaskPositioner implements DragPositioningCallback {
             mRepositionTaskBounds.offset((int) deltaX, (int) deltaY);
         }
 
+        // If width or height are negative or less than the minimum width or height, revert the
+        // respective bounds to use previous bound dimensions.
+        if (mRepositionTaskBounds.width() < getMinWidth()) {
+            mRepositionTaskBounds.right = oldRight;
+            mRepositionTaskBounds.left = oldLeft;
+        }
+        if (mRepositionTaskBounds.height() < getMinHeight()) {
+            mRepositionTaskBounds.top = oldTop;
+            mRepositionTaskBounds.bottom = oldBottom;
+        }
+        // If there are no changes to the bounds after checking new bounds against minimum width
+        // and height, do not set bounds and return false
         if (oldLeft == mRepositionTaskBounds.left && oldTop == mRepositionTaskBounds.top
                 && oldRight == mRepositionTaskBounds.right
                 && oldBottom == mRepositionTaskBounds.bottom) {
             return false;
         }
+
         wct.setBounds(mWindowDecoration.mTaskInfo.token, mRepositionTaskBounds);
         return true;
+    }
+
+    private float getMinWidth() {
+        return mWindowDecoration.mTaskInfo.minWidth < 0 ? getDefaultMinSize()
+                : mWindowDecoration.mTaskInfo.minWidth;
+    }
+
+    private float getMinHeight() {
+        return mWindowDecoration.mTaskInfo.minHeight < 0 ? getDefaultMinSize()
+                : mWindowDecoration.mTaskInfo.minHeight;
+    }
+
+    private float getDefaultMinSize() {
+        float density =  mDisplayController.getDisplayLayout(mWindowDecoration.mTaskInfo.displayId)
+                .densityDpi() * DisplayMetrics.DENSITY_DEFAULT_SCALE;
+        return mWindowDecoration.mTaskInfo.defaultMinSize * density;
     }
 
     interface DragStartListener {

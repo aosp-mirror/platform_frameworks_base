@@ -108,6 +108,10 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         }
         if (!createdWindowDecor) {
             mSyncQueue.runInSync(t -> {
+                if (!leash.isValid()) {
+                    // Task vanished before sync completion
+                    return;
+                }
                 // Reset several properties back to fullscreen (PiP, for example, leaves all these
                 // properties in a bad state).
                 t.setWindowCrop(leash, null);
@@ -136,6 +140,10 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         final Point positionInParent = state.mTaskInfo.positionInParent;
         if (!oldPositionInParent.equals(state.mTaskInfo.positionInParent)) {
             mSyncQueue.runInSync(t -> {
+                if (!state.mLeash.isValid()) {
+                    // Task vanished before sync completion
+                    return;
+                }
                 t.setPosition(state.mLeash, positionInParent.x, positionInParent.y);
             });
         }

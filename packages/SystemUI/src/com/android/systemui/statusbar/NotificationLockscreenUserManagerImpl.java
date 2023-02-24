@@ -213,7 +213,8 @@ public class NotificationLockscreenUserManagerImpl implements
             DeviceProvisionedController deviceProvisionedController,
             KeyguardStateController keyguardStateController,
             SecureSettings secureSettings,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            LockPatternUtils lockPatternUtils) {
         mContext = context;
         mMainHandler = mainHandler;
         mDevicePolicyManager = devicePolicyManager;
@@ -225,7 +226,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mClickNotifier = clickNotifier;
         mOverviewProxyServiceLazy = overviewProxyServiceLazy;
         statusBarStateController.addCallback(this);
-        mLockPatternUtils = new LockPatternUtils(context);
+        mLockPatternUtils = lockPatternUtils;
         mKeyguardManager = keyguardManager;
         mBroadcastDispatcher = broadcastDispatcher;
         mDeviceProvisionedController = deviceProvisionedController;

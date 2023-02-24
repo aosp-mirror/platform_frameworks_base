@@ -23,7 +23,6 @@ import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
-import android.animation.Animator;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -43,6 +42,7 @@ import android.view.ViewStub;
 import android.widget.LinearLayout;
 
 import androidx.annotation.VisibleForTesting;
+import androidx.core.animation.Animator;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;

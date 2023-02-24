@@ -20,13 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
 
-import androidx.test.filters.SmallTest;
-
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
@@ -44,18 +44,21 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BroadcastDialogTest extends SysuiTestCase {
 
-    private static final String SWITCH_APP = "Music";
+    private static final String CURRENT_BROADCAST_APP = "Music";
+    private static final String SWITCH_APP = "Files by Google";
     private static final String TEST_PACKAGE = "com.google.android.apps.nbu.files";
     private BroadcastDialog mBroadcastDialog;
     private View mDialogView;
+    private TextView mTitle;
     private TextView mSubTitle;
+    private Button mSwitchBroadcastAppButton;
     private Button mChangeOutputButton;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mBroadcastDialog = new BroadcastDialog(mContext, mock(MediaOutputDialogFactory.class),
-                SWITCH_APP, TEST_PACKAGE, mock(UiEventLogger.class));
+                CURRENT_BROADCAST_APP, TEST_PACKAGE, mock(UiEventLogger.class));
         mBroadcastDialog.show();
         mDialogView = mBroadcastDialog.mDialogView;
     }
@@ -66,11 +69,27 @@ public class BroadcastDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void onCreate_withCurrentApp_checkSwitchAppContent() {
+    public void onCreate_withCurrentApp_titleIsCurrentAppName() {
+        mTitle = mDialogView.requireViewById(R.id.dialog_title);
+
+        assertThat(mTitle.getText().toString()).isEqualTo(mContext.getString(
+                R.string.bt_le_audio_broadcast_dialog_title, CURRENT_BROADCAST_APP));
+    }
+
+    @Test
+    public void onCreate_withCurrentApp_subTitleIsSwitchAppName() {
         mSubTitle = mDialogView.requireViewById(R.id.dialog_subtitle);
 
         assertThat(mSubTitle.getText()).isEqualTo(
                 mContext.getString(R.string.bt_le_audio_broadcast_dialog_sub_title, SWITCH_APP));
+    }
+
+    @Test
+    public void onCreate_withCurrentApp_switchBtnIsSwitchAppName() {
+        mSwitchBroadcastAppButton = mDialogView.requireViewById(R.id.switch_broadcast);
+
+        assertThat(mSwitchBroadcastAppButton.getText().toString()).isEqualTo(
+                mContext.getString(R.string.bt_le_audio_broadcast_dialog_switch_app, SWITCH_APP));
     }
 
     @Test

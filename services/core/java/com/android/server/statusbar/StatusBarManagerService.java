@@ -418,6 +418,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
+        public void toggleTaskbar() {
+            if (mBar != null) {
+                try {
+                    mBar.toggleTaskbar();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
         public void toggleRecentApps() {
             if (mBar != null) {
                 try {

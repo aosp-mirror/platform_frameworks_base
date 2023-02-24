@@ -77,6 +77,13 @@ class SoftwareHotwordDetector extends AbstractDetector {
                 DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE);
     }
 
+    void onDetectorRemoteException() {
+        Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
+                mCallback.onFailure(new HotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure.ERROR_CODE_REMOTE_EXCEPTION,
+                "Detector remote exception occurs"))));
+    }
+
     @RequiresPermission(RECORD_AUDIO)
     @Override
     public boolean startRecognition() throws IllegalDetectorStateException {

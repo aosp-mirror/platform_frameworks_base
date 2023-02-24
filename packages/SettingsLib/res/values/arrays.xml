@@ -118,9 +118,9 @@
 
     <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
     <string-array name="bt_hci_snoop_log_filters_entries">
-        <item>Headers Filtered</item>
-        <item>A2DP Media Packets Filtered</item>
-        <item>RFCOMM Channel Filtered</item>
+        <item>Leave only ACL headers</item>
+        <item>Filter A2DP media packets</item>
+        <item>Filter RFCOMM channel</item>
     </string-array>
 
         <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
@@ -132,10 +132,10 @@
 
         <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
     <string-array name="bt_hci_snoop_log_profile_filter_entries">
-        <item>Disabled</item>
-        <item>Magic</item>
-        <item>Header</item>
-        <item>Full Filter</item>
+        <item>Disable</item>
+        <item>Fill with string of characters</item>
+        <item>Leave only header</item>
+        <item>Fully remove</item>
     </string-array>
 
         <!-- Values for Bluetooth HCI Snoop Filtered Logging -->

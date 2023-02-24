@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
@@ -72,9 +73,7 @@ constructor(
     }
 
     override fun newTileState(): QSTile.State {
-        val state = QSTile.State()
-        state.handlesLongClick = false
-        return state
+        return QSTile.State()
     }
 
     override fun handleClick(view: View?) {
@@ -98,7 +97,7 @@ constructor(
     }
 
     override fun getLongClickIntent(): Intent? {
-        return null
+        return Intent(Settings.ACTION_TEXT_READING_SETTINGS)
     }
 
     override fun getTileLabel(): CharSequence {

@@ -125,6 +125,7 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
@@ -574,8 +575,7 @@ public class ComputerEngine implements Computer {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, filterCallingUid);
+                            this, list, false, intent, resolvedType, filterCallingUid);
                 }
             }
         } else {
@@ -591,7 +591,7 @@ public class ComputerEngine implements Computer {
                     String callingPkgName = getInstantAppPackageName(filterCallingUid);
                     boolean isRequesterInstantApp = isInstantApp(callingPkgName, userId);
                     lockedResult.result = maybeAddInstantAppInstaller(
-                            lockedResult.result, intent, resolvedType, flags,
+                            lockedResult.result, intent, resolvedType, flags, filterCallingUid,
                             userId, resolveForStart, isRequesterInstantApp);
                 }
                 if (lockedResult.sortResult) {
@@ -604,8 +604,7 @@ public class ComputerEngine implements Computer {
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, filterCallingUid);
+                    this, list, false, originalIntent, resolvedType, filterCallingUid);
         }
 
         return skipPostResolution ? list : applyPostResolutionFilter(
@@ -687,8 +686,7 @@ public class ComputerEngine implements Computer {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            mInjector.getCompatibility(), mComponentResolver,
-                            list, false, intent, resolvedType, callingUid);
+                            this, list, false, intent, resolvedType, callingUid);
                 }
             }
         } else {
@@ -699,8 +697,7 @@ public class ComputerEngine implements Computer {
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    mInjector.getCompatibility(), mComponentResolver,
-                    list, false, originalIntent, resolvedType, callingUid);
+                    this, list, false, originalIntent, resolvedType, callingUid);
         }
 
         return list;
@@ -713,7 +710,7 @@ public class ComputerEngine implements Computer {
         String pkgName = intent.getPackage();
         if (pkgName == null) {
             final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(this, intent,
-                    resolvedType, flags, userId);
+                    resolvedType, flags, callingUid, userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
             }
@@ -723,7 +720,7 @@ public class ComputerEngine implements Computer {
         final AndroidPackage pkg = mPackages.get(pkgName);
         if (pkg != null) {
             final List<ResolveInfo> resolveInfos = mComponentResolver.queryServices(this, intent,
-                    resolvedType, flags, pkg.getServices(),
+                    resolvedType, flags, pkg.getServices(), callingUid,
                     userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
@@ -753,7 +750,7 @@ public class ComputerEngine implements Computer {
                  {@link PackageManager.SKIP_CURRENT_PROFILE} set.
                  */
                 result.addAll(filterIfNotSystemUser(mComponentResolver.queryActivities(this,
-                        intent, resolvedType, flags, userId), userId));
+                        intent, resolvedType, flags, filterCallingUid, userId), userId));
             }
             addInstant = isInstantAppResolutionAllowed(intent, result, userId,
                     false /*skipPackageCheck*/, flags);
@@ -777,7 +774,7 @@ public class ComputerEngine implements Computer {
                     || !shouldFilterApplication(setting, filterCallingUid, userId))) {
                 result.addAll(filterIfNotSystemUser(mComponentResolver.queryActivities(this,
                         intent, resolvedType, flags, setting.getAndroidPackage().getActivities(),
-                        userId), userId));
+                        filterCallingUid, userId), userId));
             }
             if (result == null || result.size() == 0) {
                 // the caller wants to resolve for a particular package; however, there
@@ -1108,7 +1105,7 @@ public class ComputerEngine implements Computer {
             return null;
         }
         List<ResolveInfo> resultTargetUser = mComponentResolver.queryActivities(this, intent,
-                resolvedType, flags, parentUserId);
+                resolvedType, flags, Binder.getCallingUid(), parentUserId);
 
         if (resultTargetUser == null || resultTargetUser.isEmpty()) {
             return null;
@@ -1346,7 +1343,7 @@ public class ComputerEngine implements Computer {
 
     private List<ResolveInfo> maybeAddInstantAppInstaller(List<ResolveInfo> result,
             Intent intent, String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags,
-            int userId, boolean resolveForStart, boolean isRequesterInstantApp) {
+            int callingUid, int userId, boolean resolveForStart, boolean isRequesterInstantApp) {
         // first, check to see if we've got an instant app already installed
         final boolean alreadyResolvedLocally = (flags & PackageManager.MATCH_INSTANT) != 0;
         ResolveInfo localInstantApp = null;
@@ -1359,6 +1356,7 @@ public class ComputerEngine implements Computer {
                             | PackageManager.GET_RESOLVED_FILTER
                             | PackageManager.MATCH_INSTANT
                             | PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY,
+                    callingUid,
                     userId);
             for (int i = instantApps.size() - 1; i >= 0; --i) {
                 final ResolveInfo info = instantApps.get(i);
@@ -3693,10 +3691,13 @@ public class ComputerEngine implements Computer {
                 ps, callingUid, component, TYPE_ACTIVITY, userId, true /* filterUninstall */)) {
             return false;
         }
+        final boolean callerBlocksNullAction = isChangeEnabled(
+                IntentFilter.BLOCK_NULL_ACTION_INTENTS, callingUid);
         for (int i=0; i< a.getIntents().size(); i++) {
             if (a.getIntents().get(i).getIntentFilter()
                     .match(intent.getAction(), resolvedType, intent.getScheme(),
-                            intent.getData(), intent.getCategories(), TAG) >= 0) {
+                            intent.getData(), intent.getCategories(), TAG,
+                            /*supportWildcards*/ false, callerBlocksNullAction, null, null) >= 0) {
                 return true;
             }
         }
@@ -5793,5 +5794,38 @@ public class ComputerEngine implements Computer {
     @NonNull
     public UserInfo[] getUserInfos() {
         return mInjector.getUserManagerInternal().getUserInfos();
+    }
+
+    @Override
+    public boolean isChangeEnabled(long changeId, int uid) {
+        final PlatformCompat compat = mInjector.getCompatibility();
+        int appId = UserHandle.getAppId(uid);
+        SettingBase s = mSettings.getSettingBase(appId);
+        if (s instanceof PackageSetting) {
+            var ps = (PackageSetting) s;
+            if (ps.getAndroidPackage() == null) return false;
+            var info = new ApplicationInfo();
+            info.packageName = ps.getPackageName();
+            info.targetSdkVersion = ps.getAndroidPackage().getTargetSdkVersion();
+            return compat.isChangeEnabledInternal(changeId, info);
+        } else if (s instanceof SharedUserSetting) {
+            var ss = (SharedUserSetting) s;
+            List<AndroidPackage> packages = ss.getPackages();
+            for (int i = 0; i < packages.size(); ++i) {
+                var pkg = packages.get(i);
+                var info = new ApplicationInfo();
+                info.packageName = pkg.getPackageName();
+                info.targetSdkVersion = pkg.getTargetSdkVersion();
+                if (compat.isChangeEnabledInternal(changeId, info)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isChangeEnabled(long changeId, ApplicationInfo info) {
+        return mInjector.getCompatibility().isChangeEnabledInternal(changeId, info);
     }
 }

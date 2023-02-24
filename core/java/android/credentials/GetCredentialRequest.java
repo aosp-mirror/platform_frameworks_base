@@ -16,9 +16,13 @@
 
 package android.credentials;
 
+import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
+
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -49,6 +53,14 @@ public final class GetCredentialRequest implements Parcelable {
     private final Bundle mData;
 
     /**
+     * The origin of the calling app. Callers of this special API (e.g. browsers)
+     * can set this origin for an app different from their own, to be able to get credentials
+     * on behalf of that app.
+     */
+    @Nullable
+    private String mOrigin;
+
+    /**
      * True/False value to determine if the calling app info should be
      * removed from the request that is sent to the providers.
      * Developers must set this to false if they wish to remove the
@@ -76,6 +88,14 @@ public final class GetCredentialRequest implements Parcelable {
     }
 
     /**
+     * Returns the origin of the calling app if set otherwise returns null.
+     */
+    @Nullable
+    public String getOrigin() {
+        return mOrigin;
+    }
+
+    /**
      * Returns a value to determine if the calling app info should be always
      * sent to the provider in every phase (if true), or should be removed
      * from the query phase, and only sent as part of the request in the final phase,
@@ -90,6 +110,7 @@ public final class GetCredentialRequest implements Parcelable {
         dest.writeTypedList(mCredentialOptions, flags);
         dest.writeBundle(mData);
         dest.writeBoolean(mAlwaysSendAppInfoToProvider);
+        dest.writeString8(mOrigin);
     }
 
     @Override
@@ -103,11 +124,12 @@ public final class GetCredentialRequest implements Parcelable {
                 + ", data=" + mData
                 + ", alwaysSendAppInfoToProvider="
                 + mAlwaysSendAppInfoToProvider
+                + ", origin=" + mOrigin
                 + "}";
     }
 
     private GetCredentialRequest(@NonNull List<CredentialOption> credentialOptions,
-            @NonNull Bundle data, @NonNull boolean alwaysSendAppInfoToProvider) {
+            @NonNull Bundle data, @NonNull boolean alwaysSendAppInfoToProvider, String origin) {
         Preconditions.checkCollectionNotEmpty(
                 credentialOptions,
                 /*valueName=*/ "credentialOptions");
@@ -118,6 +140,7 @@ public final class GetCredentialRequest implements Parcelable {
         mData = requireNonNull(data,
                 "data must not be null");
         mAlwaysSendAppInfoToProvider = alwaysSendAppInfoToProvider;
+        mOrigin = origin;
     }
 
     private GetCredentialRequest(@NonNull Parcel in) {
@@ -132,6 +155,7 @@ public final class GetCredentialRequest implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mData);
 
         mAlwaysSendAppInfoToProvider = in.readBoolean();
+        mOrigin = in.readString8();
     }
 
     @NonNull public static final Parcelable.Creator<GetCredentialRequest> CREATOR =
@@ -158,6 +182,8 @@ public final class GetCredentialRequest implements Parcelable {
 
         @NonNull
         private boolean mAlwaysSendAppInfoToProvider = true;
+
+        private String mOrigin;
 
         /**
          * @param data the top request level data
@@ -209,6 +235,20 @@ public final class GetCredentialRequest implements Parcelable {
         }
 
         /**
+         * Sets the origin of the calling app. Callers of this special setter (e.g. browsers)
+         * can set this origin for an app different from their own, to be able to get
+         * credentials on behalf of that app. The permission check only happens later when this
+         * instance is passed and processed by the Credential Manager.
+         */
+        @SuppressLint({"MissingGetterMatchingBuilder", "AndroidFrameworkRequiresPermission"})
+        @RequiresPermission(CREDENTIAL_MANAGER_SET_ORIGIN)
+        @NonNull
+        public Builder setOrigin(@NonNull String origin) {
+            mOrigin = origin;
+            return this;
+        }
+
+        /**
          * Builds a {@link GetCredentialRequest}.
          *
          * @throws IllegalArgumentException If credentialOptions is empty.
@@ -222,7 +262,7 @@ public final class GetCredentialRequest implements Parcelable {
                     mCredentialOptions,
                     /*valueName=*/ "credentialOptions");
             return new GetCredentialRequest(mCredentialOptions, mData,
-                    mAlwaysSendAppInfoToProvider);
+                    mAlwaysSendAppInfoToProvider, mOrigin);
         }
     }
 }
