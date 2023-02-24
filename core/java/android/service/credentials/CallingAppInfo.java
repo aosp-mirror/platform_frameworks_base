@@ -17,6 +17,7 @@
 package android.service.credentials;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.pm.SigningInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +33,8 @@ import java.util.Objects;
 public final class CallingAppInfo implements Parcelable {
     @NonNull private final String mPackageName;
     @NonNull private final SigningInfo mSigningInfo;
+    @Nullable
+    private final String mOrigin;
 
     /**
      * Constructs a new instance.
@@ -41,14 +44,31 @@ public final class CallingAppInfo implements Parcelable {
      */
     public CallingAppInfo(@NonNull String packageName,
             @NonNull SigningInfo signingInfo) {
+        this(packageName, signingInfo, /*origin=*/ null);
+    }
+
+    /**
+     * Constructs a new instance.
+     *
+     * @param packageName - the package name of the calling app
+     * @param signingInfo - the signing info on the calling app
+     * @param origin - the origin that the calling app wants to use when making request on behalf of
+     *               other
+     * @throws IllegalArgumentException If {@code packageName} is null or empty.
+     * @throws NullPointerException If {@code signingInfo} is null.
+     */
+    public CallingAppInfo(@NonNull String packageName,
+            @NonNull SigningInfo signingInfo, @Nullable String origin) {
         mPackageName = Preconditions.checkStringNotEmpty(packageName, "package name"
                 + "must not be null or empty");
         mSigningInfo = Objects.requireNonNull(signingInfo);
+        mOrigin = origin;
     }
 
     private CallingAppInfo(@NonNull Parcel in) {
         mPackageName = in.readString8();
         mSigningInfo = in.readTypedObject(SigningInfo.CREATOR);
+        mOrigin = in.readString8();
     }
 
     public static final @NonNull Creator<CallingAppInfo> CREATOR = new Creator<CallingAppInfo>() {
@@ -76,6 +96,22 @@ public final class CallingAppInfo implements Parcelable {
         return mSigningInfo;
     }
 
+    /**
+     * Returns the origin of the calling app if set otherwise returns null.
+     * This value is set only if the origin is different than that of the calling app,
+     * and should be expected from privileged callers(browsers) only when making request on behalf
+     * of other applications.
+     *
+     * Android system makes sure that only applications that poses the permission
+     * {@link android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN} can set the origin on
+     * the incoming {@link android.credentials.GetCredentialRequest} or
+     * {@link android.credentials.CreateCredentialRequest}.
+     */
+    @Nullable
+    public String getOrigin() {
+        return mOrigin;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -85,6 +121,7 @@ public final class CallingAppInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mPackageName);
         dest.writeTypedObject(mSigningInfo, flags);
+        dest.writeString8(mOrigin);
     }
 
     @Override
@@ -97,6 +134,7 @@ public final class CallingAppInfo implements Parcelable {
         } else {
             builder.append(", mSigningInfo: null");
         }
+        builder.append(",mOrigin: " + mOrigin);
         builder.append(" }");
         return builder.toString();
     }
