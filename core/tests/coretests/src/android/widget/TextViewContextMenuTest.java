@@ -33,6 +33,8 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.view.ContextMenu;
 import android.view.MenuItem;
@@ -166,5 +168,76 @@ public class TextViewContextMenuTest {
 
         assertThat(idCaptor.getValue()).isEqualTo(TextView.ID_ASSIST);
         assertThat(titleCaptor.getValue().toString()).isEqualTo(ACTION_TITLE);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testAdjustIconSpaces() {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setSize(128, 256);
+
+        // Setup mocks
+        ContextMenu menu = mock(ContextMenu.class);
+
+        MenuItem mockIconMenu = newMockMenuItem();
+        when(mockIconMenu.getIcon()).thenReturn(gd);
+
+        MenuItem mockNoIconMenu = newMockMenuItem();
+        when(mockNoIconMenu.getIcon()).thenReturn(null);
+
+        MenuItem mockNoIconMenu2 = newMockMenuItem();
+        when(mockNoIconMenu2.getIcon()).thenReturn(null);
+
+        when(menu.size()).thenReturn(3);
+        when(menu.getItem(0)).thenReturn(mockIconMenu);
+        when(menu.getItem(1)).thenReturn(mockNoIconMenu);
+        when(menu.getItem(2)).thenReturn(mockNoIconMenu2);
+
+
+        // Execute the test method
+        EditText et = mActivity.findViewById(R.id.editText);
+        Editor editor = et.getEditorForTesting();
+        editor.adjustIconSpacing(menu);
+
+        // Verify
+        ArgumentCaptor<Drawable> drawableCaptor = ArgumentCaptor.forClass(Drawable.class);
+        verify(mockNoIconMenu).setIcon(drawableCaptor.capture());
+
+        Drawable paddingDrawable = drawableCaptor.getValue();
+        assertThat(paddingDrawable).isNotNull();
+        assertThat(paddingDrawable.getIntrinsicWidth()).isEqualTo(128);
+        assertThat(paddingDrawable.getIntrinsicHeight()).isEqualTo(256);
+
+        ArgumentCaptor<Drawable> drawableCaptor2 = ArgumentCaptor.forClass(Drawable.class);
+        verify(mockNoIconMenu2).setIcon(drawableCaptor2.capture());
+
+        Drawable paddingDrawable2 = drawableCaptor2.getValue();
+        assertThat(paddingDrawable2).isSameInstanceAs(paddingDrawable);
+    }
+
+    @UiThreadTest
+    @Test
+    public void testAdjustIconSpacesNoIconCase() {
+        // Setup mocks
+        ContextMenu menu = mock(ContextMenu.class);
+
+        MenuItem mockNoIconMenu = newMockMenuItem();
+        when(mockNoIconMenu.getIcon()).thenReturn(null);
+
+        MenuItem mockNoIconMenu2 = newMockMenuItem();
+        when(mockNoIconMenu2.getIcon()).thenReturn(null);
+
+        when(menu.size()).thenReturn(2);
+        when(menu.getItem(0)).thenReturn(mockNoIconMenu);
+        when(menu.getItem(1)).thenReturn(mockNoIconMenu2);
+
+        // Execute the test method
+        EditText et = mActivity.findViewById(R.id.editText);
+        Editor editor = et.getEditorForTesting();
+        editor.adjustIconSpacing(menu);
+
+        // Verify
+        verify(mockNoIconMenu, times(0)).setIcon(any());
+        verify(mockNoIconMenu2, times(0)).setIcon(any());
     }
 }
