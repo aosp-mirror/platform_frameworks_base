@@ -342,8 +342,8 @@ public abstract class ImsFeature {
     /**
      * @return The SIM slot index associated with this ImsFeature.
      *
-     * @see SubscriptionManager#getSubscriptionIds(int) for more information on getting the
-     * subscription IDs associated with this slot.
+     * @see SubscriptionManager#getSubscriptionId(int) for more information on getting the
+     * subscription ID associated with this slot.
      * @hide
      */
     @SystemApi
