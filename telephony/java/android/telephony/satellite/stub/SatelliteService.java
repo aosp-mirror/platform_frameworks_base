@@ -20,7 +20,8 @@ import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
+
+import com.android.telephony.Rlog;
 
 /**
  * Main SatelliteService implementation, which binds via the Telephony SatelliteServiceController.
@@ -44,7 +45,7 @@ import android.util.Log;
  * @hide
  */
 public class SatelliteService extends Service {
-    public static final String TAG = "SatelliteService";
+    private static final String TAG = "SatelliteService";
 
     @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE = "android.telephony.satellite.SatelliteService";
@@ -55,7 +56,7 @@ public class SatelliteService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
-            Log.e(TAG, "SatelliteService bound");
+            Rlog.d(TAG, "SatelliteService bound");
             return new SatelliteImplBase(Runnable::run).getBinder();
         }
         return null;
