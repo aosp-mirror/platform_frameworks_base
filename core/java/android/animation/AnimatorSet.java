@@ -189,11 +189,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
      */
     private long[] mChildStartAndStopTimes;
 
-    /**
-     * Tracks whether we've notified listeners of the onAnimationStart() event.
-     */
-    private boolean mStartListenersCalled;
-
     // This is to work around a bug in b/34736819. This needs to be removed once app team
     // fixes their side.
     private AnimatorListenerAdapter mAnimationEndListener = new AnimatorListenerAdapter() {
@@ -424,7 +419,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         if (Looper.myLooper() == null) {
             throw new AndroidRuntimeException("Animators may only be run on Looper threads");
         }
-        if (isStarted()) {
+        if (isStarted() || mStartListenersCalled) {
             notifyListeners(AnimatorCaller.ON_CANCEL, false);
             callOnPlayingSet(Animator::cancel);
             mPlayingSet.clear();
@@ -756,20 +751,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         }
     }
 
-    private void notifyStartListeners(boolean inReverse) {
-        if (mListeners != null && !mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_START, inReverse);
-        }
-        mStartListenersCalled = true;
-    }
-
-    private void notifyEndListeners(boolean inReverse) {
-        if (mListeners != null && mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_END, inReverse);
-        }
-        mStartListenersCalled = false;
-    }
-
     // Returns true if set is empty or contains nothing but animator sets with no start delay.
     private static boolean isEmptySet(AnimatorSet set) {
         if (set.getStartDelay() > 0) {
@@ -936,12 +917,18 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                                 lastPlayTime - node.mStartTime,
                                 notify
                         );
+                        if (notify) {
+                            mPlayingSet.remove(node);
+                        }
                     } else if (start <= currentPlayTime && currentPlayTime <= end) {
                         animator.animateSkipToEnds(
                                 currentPlayTime - node.mStartTime,
                                 lastPlayTime - node.mStartTime,
                                 notify
                         );
+                        if (notify && !mPlayingSet.contains(node)) {
+                            mPlayingSet.add(node);
+                        }
                     }
                 }
             }
@@ -969,12 +956,18 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                                 lastPlayTime - node.mStartTime,
                                 notify
                         );
+                        if (notify) {
+                            mPlayingSet.remove(node);
+                        }
                     } else if (start <= currentPlayTime && currentPlayTime <= end) {
                         animator.animateSkipToEnds(
                                 currentPlayTime - node.mStartTime,
                                 lastPlayTime - node.mStartTime,
                                 notify
                         );
+                        if (notify && !mPlayingSet.contains(node)) {
+                            mPlayingSet.add(node);
+                        }
                     }
                 }
             }
@@ -1115,8 +1108,8 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 mSeekState.setPlayTime(0, mReversing);
             }
         }
-        animateBasedOnPlayTime(playTime, lastPlayTime, mReversing, true);
         mSeekState.setPlayTime(playTime, mReversing);
+        animateBasedOnPlayTime(playTime, lastPlayTime, mReversing, true);
     }
 
     /**
@@ -1498,7 +1491,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         anim.mNodeMap = new ArrayMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>(nodeCount);
         anim.mEvents = new ArrayList<AnimationEvent>();
-        anim.mStartListenersCalled = false;
         anim.mAnimationEndListener = new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
