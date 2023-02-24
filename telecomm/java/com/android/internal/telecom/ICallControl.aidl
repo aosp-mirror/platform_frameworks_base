@@ -27,6 +27,7 @@ import android.os.ResultReceiver;
  */
 oneway interface ICallControl {
     void setActive(String callId, in ResultReceiver callback);
+    void answer(int videoState, String callId, in ResultReceiver callback);
     void setInactive(String callId, in ResultReceiver callback);
     void disconnect(String callId, in DisconnectCause disconnectCause, in ResultReceiver callback);
     void startCallStreaming(String callId, in ResultReceiver callback);
