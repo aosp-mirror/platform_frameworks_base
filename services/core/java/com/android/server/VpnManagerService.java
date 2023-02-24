@@ -22,6 +22,7 @@ import static com.android.net.module.util.PermissionUtils.enforceAnyPermissionOf
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -67,6 +68,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.connectivity.Vpn;
 import com.android.server.connectivity.VpnProfileStore;
 import com.android.server.net.LockdownVpnTracker;
+import com.android.server.pm.UserManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -93,6 +95,7 @@ public class VpnManagerService extends IVpnManager.Stub {
     private final INetworkManagementService mNMS;
     private final INetd mNetd;
     private final UserManager mUserManager;
+    private final int mMainUserId;
 
     @VisibleForTesting
     @GuardedBy("mVpns")
@@ -145,6 +148,12 @@ public class VpnManagerService extends IVpnManager.Stub {
                 Vpn vpn, VpnProfile profile) {
             return new LockdownVpnTracker(context, handler, vpn,  profile);
         }
+
+        /** Get the main user on the device. */
+        public @UserIdInt int getMainUserId() {
+            // TODO(b/265785220): Change to use UserManager method instead.
+            return LocalServices.getService(UserManagerInternal.class).getMainUserId();
+        }
     }
 
     public VpnManagerService(Context context, Dependencies deps) {
@@ -159,6 +168,7 @@ public class VpnManagerService extends IVpnManager.Stub {
         mNMS = mDeps.getINetworkManagementService();
         mNetd = mDeps.getNetd();
         mUserManager = mContext.getSystemService(UserManager.class);
+        mMainUserId = mDeps.getMainUserId();
         registerReceivers();
         log("VpnManagerService starting up");
     }
@@ -478,11 +488,12 @@ public class VpnManagerService extends IVpnManager.Stub {
 
     @Override
     public boolean updateLockdownVpn() {
-        // Allow the system UID for the system server and for Settings.
+        // Allow the system UID for the system server and for Settings (from user 0 or main user).
         // Also, for unit tests, allow the process that ConnectivityService is running in.
         if (mDeps.getCallingUid() != Process.SYSTEM_UID
+                && mDeps.getCallingUid() != UserHandle.getUid(mMainUserId, Process.SYSTEM_UID)
                 && Binder.getCallingPid() != Process.myPid()) {
-            logw("Lockdown VPN only available to system process or AID_SYSTEM");
+            logw("Lockdown VPN only available to system process or AID_SYSTEM on main user");
             return false;
         }
 
@@ -697,7 +708,7 @@ public class VpnManagerService extends IVpnManager.Stub {
                 intentFilter,
                 null /* broadcastPermission */,
                 mHandler);
-        mContext.createContextAsUser(UserHandle.SYSTEM, 0 /* flags */).registerReceiver(
+        mContext.createContextAsUser(UserHandle.of(mMainUserId), 0 /* flags */).registerReceiver(
                 mUserPresentReceiver,
                 new IntentFilter(Intent.ACTION_USER_PRESENT),
                 null /* broadcastPermission */,
@@ -735,6 +746,7 @@ public class VpnManagerService extends IVpnManager.Stub {
 
             if (LockdownVpnTracker.ACTION_LOCKDOWN_RESET.equals(action)) {
                 onVpnLockdownReset();
+                return;
             }
 
             // UserId should be filled for below intents, check the existence.
@@ -795,7 +807,7 @@ public class VpnManagerService extends IVpnManager.Stub {
             userVpn = mDeps.createVpn(mHandler.getLooper(), mContext, mNMS, mNetd, userId);
             mVpns.put(userId, userVpn);
 
-            if (user.isPrimary() && isLockdownVpnEnabled()) {
+            if (userId == mMainUserId && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
             }
         }
@@ -910,15 +922,9 @@ public class VpnManagerService extends IVpnManager.Stub {
     }
 
     private void onUserUnlocked(int userId) {
-        UserInfo user = mUserManager.getUserInfo(userId);
-        if (user == null) {
-            logw("Unlocked user doesn't exist. UserId: " + userId);
-            return;
-        }
-
         synchronized (mVpns) {
             // User present may be sent because of an unlock, which might mean an unlocked keystore.
-            if (user.isPrimary() && isLockdownVpnEnabled()) {
+            if (userId == mMainUserId && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
             } else {
                 startAlwaysOnVpn(userId);
@@ -984,7 +990,7 @@ public class VpnManagerService extends IVpnManager.Stub {
             }
 
             // Turn Always-on VPN off
-            if (mLockdownEnabled && userId == UserHandle.USER_SYSTEM) {
+            if (mLockdownEnabled && userId == mMainUserId) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     mVpnProfileStore.remove(Credentials.LOCKDOWN_VPN);

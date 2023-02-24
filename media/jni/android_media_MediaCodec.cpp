@@ -1285,7 +1285,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
     CHECK(clazz.get() != NULL);
 
     jmethodID constructID =
-        env->GetMethodID(clazz.get(), "<init>", "(ILjava/lang/String;)V");
+        env->GetMethodID(clazz.get(), "<init>", "(Ljava/lang/String;IIII)V");
     CHECK(constructID != NULL);
 
     std::string defaultMsg = "Unknown Error";
@@ -1335,14 +1335,14 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg,
             break;
     }
 
-    std::string msgStr(msg != NULL ? msg : defaultMsg.c_str());
-    if (crypto != NULL) {
-        msgStr = DrmUtils::GetExceptionMessage(err, msgStr.c_str(), crypto);
-    }
-    jstring msgObj = env->NewStringUTF(msgStr.c_str());
+    std::string originalMsg(msg != NULL ? msg : defaultMsg.c_str());
+    DrmStatus dStatus(err, originalMsg.c_str());
+    std::string detailedMsg(DrmUtils::GetExceptionMessage(dStatus, defaultMsg.c_str(), crypto));
+    jstring msgObj = env->NewStringUTF(detailedMsg.c_str());
 
     jthrowable exception =
-        (jthrowable)env->NewObject(clazz.get(), constructID, jerr, msgObj);
+        (jthrowable)env->NewObject(clazz.get(), constructID, msgObj, jerr,
+                                   dStatus.getCdmErr(), dStatus.getOemErr(), dStatus.getContext());
 
     env->Throw(exception);
 }
@@ -2432,13 +2432,12 @@ static void android_media_MediaCodec_native_queueLinearBlock(
             throwExceptionAsNecessary(env, BAD_VALUE);
             return;
         }
-        NativeCryptoInfo cryptoInfo = [env, cryptoInfoObj, size]{
-            if (cryptoInfoObj == nullptr) {
-                return NativeCryptoInfo{size};
-            } else {
-                return NativeCryptoInfo{env, cryptoInfoObj};
-            }
-        }();
+        auto cryptoInfo =
+                cryptoInfoObj ? NativeCryptoInfo{size} : NativeCryptoInfo{env, cryptoInfoObj};
+        if (env->ExceptionCheck()) {
+            // Creation of cryptoInfo failed. Let the exception bubble up.
+            return;
+        }
         err = codec->queueEncryptedLinearBlock(
                 index,
                 memory,

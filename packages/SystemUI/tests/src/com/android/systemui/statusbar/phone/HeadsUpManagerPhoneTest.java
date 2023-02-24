@@ -23,20 +23,21 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -60,23 +61,27 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
     private HeadsUpManagerPhone mHeadsUpManager;
 
     @Mock private HeadsUpManagerLogger mHeadsUpManagerLogger;
-    @Mock private NotificationGroupManagerLegacy mGroupManager;
-    @Mock private View mNotificationShadeWindowView;
+    @Mock private GroupMembershipManager mGroupManager;
     @Mock private VisualStabilityProvider mVSProvider;
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private ConfigurationControllerImpl mConfigurationController;
+    @Mock private AccessibilityManagerWrapper mAccessibilityManagerWrapper;
+    @Mock private UiEventLogger mUiEventLogger;
     private boolean mLivesPastNormalTime;
 
-    private final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
+    private static final class TestableHeadsUpManagerPhone extends HeadsUpManagerPhone {
         TestableHeadsUpManagerPhone(
                 Context context,
                 HeadsUpManagerLogger headsUpManagerLogger,
-                NotificationGroupManagerLegacy groupManager,
+                GroupMembershipManager groupManager,
                 VisualStabilityProvider visualStabilityProvider,
                 StatusBarStateController statusBarStateController,
                 KeyguardBypassController keyguardBypassController,
-                ConfigurationController configurationController
+                ConfigurationController configurationController,
+                Handler handler,
+                AccessibilityManagerWrapper accessibilityManagerWrapper,
+                UiEventLogger uiEventLogger
         ) {
             super(
                     context,
@@ -85,7 +90,10 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     keyguardBypassController,
                     groupManager,
                     visualStabilityProvider,
-                    configurationController
+                    configurationController,
+                    handler,
+                    accessibilityManagerWrapper,
+                    uiEventLogger
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
@@ -105,6 +113,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
         when(mVSProvider.isReorderingAllowed()).thenReturn(true);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
         mDependency.injectMockDependency(ConfigurationController.class);
+        super.setUp();
+
         mHeadsUpManager = new TestableHeadsUpManagerPhone(
                 mContext,
                 mHeadsUpManagerLogger,
@@ -112,11 +122,11 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mVSProvider,
                 mStatusBarStateController,
                 mBypassController,
-                mConfigurationController
+                mConfigurationController,
+                mTestHandler,
+                mAccessibilityManagerWrapper,
+                mUiEventLogger
         );
-        super.setUp();
-        mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
-        mHeadsUpManager.mHandler = mTestHandler;
     }
 
     @After

@@ -126,6 +126,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
@@ -359,8 +360,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 }
             }
             if (isKeepLppProfile) {
-                // load current properties for the carrier
-                mGnssConfiguration.loadPropertiesFromCarrierConfig();
+                // load current properties for the carrier of ddSubId
+                mGnssConfiguration.loadPropertiesFromCarrierConfig(/* inEmergency= */ false,
+                        /* activeSubId= */ -1);
                 String lpp_profile = mGnssConfiguration.getLppProfile();
                 // set the persist property LPP_PROFILE for the value
                 if (lpp_profile != null) {
@@ -431,13 +433,38 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         // this approach is just fine because events are posted to our handler anyway
         mGnssConfiguration = mGnssNative.getConfiguration();
         // Create a GPS net-initiated handler (also needed by handleInitialize)
+        GpsNetInitiatedHandler.EmergencyCallCallback emergencyCallCallback =
+                new GpsNetInitiatedHandler.EmergencyCallCallback() {
+
+                    @Override
+                    public void onEmergencyCallStart(int subId) {
+                        if (!mGnssConfiguration.isActiveSimEmergencySuplEnabled()) {
+                            return;
+                        }
+                        mHandler.post(() -> mGnssConfiguration.reloadGpsProperties(
+                                mNIHandler.getInEmergency(), subId));
+                    }
+
+                    @Override
+                    public void onEmergencyCallEnd() {
+                        if (!mGnssConfiguration.isActiveSimEmergencySuplEnabled()) {
+                            return;
+                        }
+                        mHandler.postDelayed(() -> mGnssConfiguration.reloadGpsProperties(
+                                        /* inEmergency= */ false,
+                                        SubscriptionManager.getDefaultDataSubscriptionId()),
+                                TimeUnit.SECONDS.toMillis(mGnssConfiguration.getEsExtensionSec()));
+                    }
+                };
         mNIHandler = new GpsNetInitiatedHandler(context,
                 mNetInitiatedListener,
+                emergencyCallCallback,
                 mSuplEsEnabled);
         // Trigger PSDS data download when the network comes up after booting.
         mPendingDownloadPsdsTypes.add(GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
         mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
-                GnssLocationProvider.this::onNetworkAvailable, mHandler.getLooper(), mNIHandler);
+                GnssLocationProvider.this::onNetworkAvailable,
+                mHandler.getLooper(), mNIHandler);
 
         mNtpTimeHelper = new NtpTimeHelper(mContext, mHandler.getLooper(), this);
         mGnssSatelliteBlocklistHelper =
@@ -1694,9 +1721,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         int type = AGPS_SETID_TYPE_NONE;
         String setId = null;
 
-        int ddSubId = SubscriptionManager.getDefaultDataSubscriptionId();
-        if (SubscriptionManager.isValidSubscriptionId(ddSubId)) {
-            phone = phone.createForSubscriptionId(ddSubId);
+        int subId = SubscriptionManager.getDefaultDataSubscriptionId();
+        if (mNIHandler.getInEmergency() && mNetworkConnectivityHandler.getActiveSubId() >= 0) {
+            subId = mNetworkConnectivityHandler.getActiveSubId();
+        }
+        if (SubscriptionManager.isValidSubscriptionId(subId)) {
+            phone = phone.createForSubscriptionId(subId);
         }
         if ((flags & AGPS_REQUEST_SETID_IMSI) == AGPS_REQUEST_SETID_IMSI) {
             setId = phone.getSubscriberId();

@@ -64,8 +64,8 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
     @VisibleForTesting
     final Rect mCurrentDisplayBounds = new Rect();
     // The default display cutout in natural orientation.
-    private Insets mDefaultCutoutInsets;
-    private Insets mCurrentCutoutInsets;
+    private Insets mDefaultCutoutInsets = Insets.NONE;
+    private Insets mCurrentCutoutInsets = Insets.NONE;
     private boolean mIsDefaultPortrait;
     private int mStatusBarHeight;
     @VisibleForTesting
@@ -78,26 +78,34 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
     private final DisplayController.OnDisplaysChangedListener mListener =
             new DisplayController.OnDisplaysChangedListener() {
                 @Override
+                public void onDisplayAdded(int displayId) {
+                    onDisplayChanged(displayId);
+                }
+
+                @Override
                 public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
-                    if (displayId != DEFAULT_DISPLAY) {
-                        return;
-                    }
-                    DisplayLayout displayLayout =
-                            mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
-                    if (displayLayout == null) {
-                        return;
-                    }
-                    final boolean rotationChanged = mRotation != displayLayout.rotation();
-                    mRotation = displayLayout.rotation();
-                    if (rotationChanged || isDisplayBoundsChanged()) {
-                        updateBoundsAndOffsets(true /* enabled */);
-                        final WindowContainerTransaction wct = new WindowContainerTransaction();
-                        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-                        applyAllBoundsAndOffsets(wct, t);
-                        applyTransaction(wct, t);
-                    }
+                    onDisplayChanged(displayId);
                 }
     };
+
+    private void onDisplayChanged(int displayId) {
+        if (displayId != DEFAULT_DISPLAY) {
+            return;
+        }
+        final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
+        if (displayLayout == null) {
+            return;
+        }
+        final boolean rotationChanged = mRotation != displayLayout.rotation();
+        mRotation = displayLayout.rotation();
+        if (rotationChanged || isDisplayBoundsChanged()) {
+            updateBoundsAndOffsets(true /* enabled */);
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            applyAllBoundsAndOffsets(wct, t);
+            applyTransaction(wct, t);
+        }
+    }
 
     HideDisplayCutoutOrganizer(Context context, DisplayController displayController,
             ShellExecutor mainExecutor) {
@@ -128,9 +136,10 @@ class HideDisplayCutoutOrganizer extends DisplayAreaOrganizer {
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            applyBoundsAndOffsets(
-                    displayAreaInfo.token, mDisplayAreaMap.get(displayAreaInfo.token), wct, t);
+            final SurfaceControl leash = mDisplayAreaMap.get(displayAreaInfo.token);
+            applyBoundsAndOffsets(displayAreaInfo.token, leash, wct, t);
             applyTransaction(wct, t);
+            leash.release();
             mDisplayAreaMap.remove(displayAreaInfo.token);
         }
     }

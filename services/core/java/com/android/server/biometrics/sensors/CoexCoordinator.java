@@ -92,7 +92,7 @@ public class CoexCoordinator {
         void sendHapticFeedback();
     }
 
-    private static CoexCoordinator sInstance;
+    private static final CoexCoordinator sInstance = new CoexCoordinator();
 
     @VisibleForTesting
     public static class SuccessfulAuth {
@@ -147,14 +147,9 @@ public class CoexCoordinator {
         }
     }
 
-    /**
-     * @return a singleton instance.
-     */
+    /** The singleton instance. */
     @NonNull
     public static CoexCoordinator getInstance() {
-        if (sInstance == null) {
-            sInstance = new CoexCoordinator();
-        }
         return sInstance;
     }
 
@@ -339,18 +334,8 @@ public class CoexCoordinator {
                         auth.mCallback.sendHapticFeedback();
                         auth.mCallback.sendAuthenticationResult(true /* addAuthTokenIfStrong */);
                         auth.mCallback.handleLifecycleAfterAuth();
-                    } else if (isFaceScanning()) {
-                        // UDFPS rejected but face is still scanning
-                        Slog.d(TAG, "UDFPS rejected in multi-sensor auth, face: " + face);
-                        callback.handleLifecycleAfterAuth();
-
-                        // TODO(b/193089985): Enforce/ensure that face auth finishes (whether
-                        //  accept/reject) within X amount of time. Otherwise users will be stuck
-                        //  waiting with their finger down for a long time.
                     } else {
-                        // Face not scanning, and was not found in the queue. Most likely, face
-                        // auth was too long ago.
-                        Slog.d(TAG, "UDFPS rejected in multi-sensor auth, face not scanning");
+                        Slog.d(TAG, "UDFPS rejected in multi-sensor auth");
                         callback.sendHapticFeedback();
                         callback.handleLifecycleAfterAuth();
                     }

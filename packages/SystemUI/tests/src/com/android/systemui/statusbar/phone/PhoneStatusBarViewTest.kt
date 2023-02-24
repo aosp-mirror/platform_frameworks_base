@@ -20,6 +20,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.shade.NotificationPanelViewController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +32,7 @@ import org.mockito.MockitoAnnotations
 class PhoneStatusBarViewTest : SysuiTestCase() {
 
     @Mock
-    private lateinit var panelViewController: PanelViewController
+    private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
     private lateinit var panelView: ViewGroup
 
@@ -42,7 +43,7 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         // TODO(b/197137564): Setting up a panel view and its controller feels unnecessary when
         //   testing just [PhoneStatusBarView].
-        `when`(panelViewController.view).thenReturn(panelView)
+        `when`(notificationPanelViewController.view).thenReturn(panelView)
 
         view = PhoneStatusBarView(mContext, null)
     }

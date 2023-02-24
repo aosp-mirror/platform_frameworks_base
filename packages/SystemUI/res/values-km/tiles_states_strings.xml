@@ -171,4 +171,9 @@
     <item msgid="146088982397753810">"បិទ"</item>
     <item msgid="460891964396502657">"បើក"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"មិនមានទេ"</item>
+    <item msgid="8014986104355098744">"បិទ"</item>
+    <item msgid="5966994759929723339">"បើក"</item>
+  </string-array>
 </resources>

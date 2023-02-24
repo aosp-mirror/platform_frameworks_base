@@ -2323,7 +2323,8 @@ public abstract class Context {
     @SystemApi
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable BroadcastOptions options) {
-       sendBroadcastMultiplePermissions(intent, receiverPermissions, options.toBundle());
+        sendBroadcastMultiplePermissions(intent, receiverPermissions,
+                (options == null ? null : options.toBundle()));
     }
 
     /**
@@ -5905,6 +5906,14 @@ public abstract class Context {
      * @see android.security.FileIntegrityManager
      */
     public static final String FILE_INTEGRITY_SERVICE = "file_integrity";
+
+    /**
+     * Binder service for remote key provisioning.
+     *
+     * @see android.frameworks.rkp.IRemoteProvisioning
+     * @hide
+     */
+    public static final String REMOTE_PROVISIONING_SERVICE = "remote_provisioning";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

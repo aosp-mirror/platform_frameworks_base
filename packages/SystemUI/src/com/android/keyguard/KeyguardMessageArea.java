@@ -17,9 +17,7 @@
 package com.android.keyguard;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -33,7 +31,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.internal.policy.SystemBarUtils;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 import java.lang.ref.WeakReference;
@@ -41,7 +38,7 @@ import java.lang.ref.WeakReference;
 /***
  * Manages a number of views inside of the given layout. See below for a list of widgets.
  */
-public class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
+public abstract class KeyguardMessageArea extends TextView implements SecurityMessageDisplay {
     /** Handler token posted with accessibility announcement runnables. */
     private static final Object ANNOUNCE_TOKEN = new Object();
 
@@ -50,15 +47,11 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
      * lift-to-type from interrupting itself.
      */
     private static final long ANNOUNCEMENT_DELAY = 250;
-    private static final int DEFAULT_COLOR = -1;
 
     private final Handler mHandler;
 
-    private ColorStateList mDefaultColorState;
     private CharSequence mMessage;
-    private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
-    private boolean mBouncerShowing;
-    private boolean mAltBouncerShowing;
+    private boolean mIsVisible;
     /**
      * Container that wraps the KeyguardMessageArea - may be null if current view hierarchy doesn't
      * contain {@link R.id.keyguard_message_area_container}.
@@ -96,23 +89,11 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         mContainer.setLayoutParams(lp);
     }
 
-    @Override
-    public void setNextMessageColor(ColorStateList colorState) {
-        mNextMessageColorState = colorState;
-    }
-
-    void onThemeChanged() {
-        TypedArray array = mContext.obtainStyledAttributes(new int[] {
-                android.R.attr.textColorPrimary
-        });
-        ColorStateList newTextColors = ColorStateList.valueOf(array.getColor(0, Color.RED));
-        array.recycle();
-        mDefaultColorState = newTextColors;
+    protected void onThemeChanged() {
         update();
     }
 
-    void reloadColor() {
-        mDefaultColorState = Utils.getColorAttr(getContext(), android.R.attr.textColorPrimary);
+    protected void reloadColor() {
         update();
     }
 
@@ -151,17 +132,6 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         setMessage(message);
     }
 
-    public static KeyguardMessageArea findSecurityMessageDisplay(View v) {
-        KeyguardMessageArea messageArea = v.findViewById(R.id.keyguard_message_area);
-        if (messageArea == null) {
-            messageArea = v.getRootView().findViewById(R.id.keyguard_message_area);
-        }
-        if (messageArea == null) {
-            throw new RuntimeException("Can't find keyguard_message_area in " + v.getClass());
-        }
-        return messageArea;
-    }
-
     private void securityMessageChanged(CharSequence message) {
         mMessage = message;
         update();
@@ -177,40 +147,23 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
     void update() {
         CharSequence status = mMessage;
-        setVisibility(TextUtils.isEmpty(status) || (!mBouncerShowing && !mAltBouncerShowing)
-                ? INVISIBLE : VISIBLE);
+        setVisibility(TextUtils.isEmpty(status) || (!mIsVisible) ? INVISIBLE : VISIBLE);
         setText(status);
-        ColorStateList colorState = mDefaultColorState;
-        if (mNextMessageColorState.getDefaultColor() != DEFAULT_COLOR) {
-            colorState = mNextMessageColorState;
-            mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
-        }
-        if (mAltBouncerShowing) {
-            // alt bouncer has a black scrim, so always show the text in white
-            colorState = ColorStateList.valueOf(Color.WHITE);
-        }
-        setTextColor(colorState);
+        updateTextColor();
     }
 
     /**
      * Set whether the bouncer is fully showing
      */
-    public void setBouncerShowing(boolean bouncerShowing) {
-        if (mBouncerShowing != bouncerShowing) {
-            mBouncerShowing = bouncerShowing;
+    public void setIsVisible(boolean isVisible) {
+        if (mIsVisible != isVisible) {
+            mIsVisible = isVisible;
             update();
         }
     }
 
-    /**
-     * Set whether the alt bouncer is showing
-     */
-    void setAltBouncerShowing(boolean showing) {
-        if (mAltBouncerShowing != showing) {
-            mAltBouncerShowing = showing;
-            update();
-        }
-    }
+    /** Set the text color */
+    protected abstract void updateTextColor();
 
     /**
      * Runnable used to delay accessibility announcements.

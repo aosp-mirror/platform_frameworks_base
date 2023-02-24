@@ -16,6 +16,8 @@
 
 package android.opengl;
 
+import androidx.annotation.NonNull;
+
 /**
  * Matrix math utilities. These methods operate on OpenGL ES format
  * matrices and vectors stored in float arrays.
@@ -38,13 +40,51 @@ package android.opengl;
 public class Matrix {
 
     /** Temporary memory for operations that need temporary matrix data. */
-    private final static float[] sTemp = new float[32];
+    private static final ThreadLocal<float[]> ThreadTmp = new ThreadLocal() {
+        @Override protected float[] initialValue() {
+            return new float[32];
+        }
+    };
 
     /**
      * @deprecated All methods are static, do not instantiate this class.
      */
     @Deprecated
     public Matrix() {}
+
+    private static boolean overlap(
+            float[] a, int aStart, int aLength, float[] b, int bStart, int bLength) {
+        if (a != b) {
+            return false;
+        }
+
+        if (aStart == bStart) {
+            return true;
+        }
+
+        int aEnd = aStart + aLength;
+        int bEnd = bStart + bLength;
+
+        if (aEnd == bEnd) {
+            return true;
+        }
+
+        if (aStart < bStart && bStart < aEnd) {
+            return true;
+        }
+        if (aStart < bEnd   && bEnd   < aEnd) {
+            return true;
+        }
+
+        if (bStart < aStart && aStart < bEnd) {
+            return true;
+        }
+        if (bStart < aEnd   && aEnd   < bEnd) {
+            return true;
+        }
+
+        return false;
+    }
 
     /**
      * Multiplies two 4x4 matrices together and stores the result in a third 4x4
@@ -53,9 +93,9 @@ public class Matrix {
      * effect as first multiplying by the rhs matrix, then multiplying by
      * the lhs matrix. This is the opposite of what you might expect.
      * <p>
-     * The same float array may be passed for result, lhs, and/or rhs. However,
-     * the result element values are undefined if the result elements overlap
-     * either the lhs or rhs elements.
+     * The same float array may be passed for result, lhs, and/or rhs. This
+     * operation is expected to do the correct thing if the result elements
+     * overlap with either of the lhs or rhs elements.
      *
      * @param result The float array that holds the result.
      * @param resultOffset The offset into the result array where the result is
@@ -65,20 +105,101 @@ public class Matrix {
      * @param rhs The float array that holds the right-hand-side matrix.
      * @param rhsOffset The offset into the rhs array where the rhs is stored.
      *
-     * @throws IllegalArgumentException if result, lhs, or rhs are null, or if
-     * resultOffset + 16 > result.length or lhsOffset + 16 > lhs.length or
-     * rhsOffset + 16 > rhs.length.
+     * @throws IllegalArgumentException under any of the following conditions:
+     * result, lhs, or rhs are null;
+     * resultOffset + 16 > result.length
+     * or lhsOffset + 16 > lhs.length
+     * or rhsOffset + 16 > rhs.length;
+     * resultOffset < 0 or lhsOffset < 0 or rhsOffset < 0
      */
-    public static native void multiplyMM(float[] result, int resultOffset,
-            float[] lhs, int lhsOffset, float[] rhs, int rhsOffset);
+    public static void multiplyMM(float[] result, int resultOffset,
+            float[] lhs, int lhsOffset, float[] rhs, int rhsOffset) {
+        // error checking
+        if (result == null) {
+            throw new IllegalArgumentException("result == null");
+        }
+        if (lhs == null) {
+            throw new IllegalArgumentException("lhs == null");
+        }
+        if (rhs == null) {
+            throw new IllegalArgumentException("rhs == null");
+        }
+        if (resultOffset < 0) {
+            throw new IllegalArgumentException("resultOffset < 0");
+        }
+        if (lhsOffset < 0) {
+            throw new IllegalArgumentException("lhsOffset < 0");
+        }
+        if (rhsOffset < 0) {
+            throw new IllegalArgumentException("rhsOffset < 0");
+        }
+        if (result.length < resultOffset + 16) {
+            throw new IllegalArgumentException("result.length < resultOffset + 16");
+        }
+        if (lhs.length < lhsOffset + 16) {
+            throw new IllegalArgumentException("lhs.length < lhsOffset + 16");
+        }
+        if (rhs.length < rhsOffset + 16) {
+            throw new IllegalArgumentException("rhs.length < rhsOffset + 16");
+        }
+
+        // Check for overlap between rhs and result or lhs and result
+        if ( overlap(result, resultOffset, 16, lhs, lhsOffset, 16)
+                || overlap(result, resultOffset, 16, rhs, rhsOffset, 16) ) {
+            float[] tmp = ThreadTmp.get();
+            for (int i=0; i<4; i++) {
+                final float rhs_i0 = rhs[ 4*i + 0 + rhsOffset ];
+                float ri0 = lhs[ 0 + lhsOffset ] * rhs_i0;
+                float ri1 = lhs[ 1 + lhsOffset ] * rhs_i0;
+                float ri2 = lhs[ 2 + lhsOffset ] * rhs_i0;
+                float ri3 = lhs[ 3 + lhsOffset ] * rhs_i0;
+                for (int j=1; j<4; j++) {
+                    final float rhs_ij = rhs[ 4*i + j + rhsOffset];
+                    ri0 += lhs[ 4*j + 0 + lhsOffset ] * rhs_ij;
+                    ri1 += lhs[ 4*j + 1 + lhsOffset ] * rhs_ij;
+                    ri2 += lhs[ 4*j + 2 + lhsOffset ] * rhs_ij;
+                    ri3 += lhs[ 4*j + 3 + lhsOffset ] * rhs_ij;
+                }
+                tmp[ 4*i + 0 ] = ri0;
+                tmp[ 4*i + 1 ] = ri1;
+                tmp[ 4*i + 2 ] = ri2;
+                tmp[ 4*i + 3 ] = ri3;
+            }
+
+            // copy from tmp to result
+            for (int i=0; i < 16; i++) {
+                result[ i + resultOffset ] = tmp[ i ];
+            }
+
+        } else {
+            for (int i=0; i<4; i++) {
+                final float rhs_i0 = rhs[ 4*i + 0 + rhsOffset ];
+                float ri0 = lhs[ 0 + lhsOffset ] * rhs_i0;
+                float ri1 = lhs[ 1 + lhsOffset ] * rhs_i0;
+                float ri2 = lhs[ 2 + lhsOffset ] * rhs_i0;
+                float ri3 = lhs[ 3 + lhsOffset ] * rhs_i0;
+                for (int j=1; j<4; j++) {
+                    final float rhs_ij = rhs[ 4*i + j + rhsOffset];
+                    ri0 += lhs[ 4*j + 0 + lhsOffset ] * rhs_ij;
+                    ri1 += lhs[ 4*j + 1 + lhsOffset ] * rhs_ij;
+                    ri2 += lhs[ 4*j + 2 + lhsOffset ] * rhs_ij;
+                    ri3 += lhs[ 4*j + 3 + lhsOffset ] * rhs_ij;
+                }
+                result[ 4*i + 0 + resultOffset ] = ri0;
+                result[ 4*i + 1 + resultOffset ] = ri1;
+                result[ 4*i + 2 + resultOffset ] = ri2;
+                result[ 4*i + 3 + resultOffset ] = ri3;
+            }
+        }
+    }
 
     /**
      * Multiplies a 4 element vector by a 4x4 matrix and stores the result in a
      * 4-element column vector. In matrix notation: result = lhs x rhs
      * <p>
      * The same float array may be passed for resultVec, lhsMat, and/or rhsVec.
-     * However, the resultVec element values are undefined if the resultVec
-     * elements overlap either the lhsMat or rhsVec elements.
+     * This operation is expected to do the correct thing if the result elements
+     * overlap with either of the lhs or rhs elements.
      *
      * @param resultVec The float array that holds the result vector.
      * @param resultVecOffset The offset into the result array where the result
@@ -89,14 +210,67 @@ public class Matrix {
      * @param rhsVecOffset The offset into the rhs vector where the rhs vector
      *        is stored.
      *
-     * @throws IllegalArgumentException if resultVec, lhsMat,
-     * or rhsVec are null, or if resultVecOffset + 4 > resultVec.length
-     * or lhsMatOffset + 16 > lhsMat.length or
-     * rhsVecOffset + 4 > rhsVec.length.
+     * @throws IllegalArgumentException under any of the following conditions:
+     * resultVec, lhsMat, or rhsVec are null;
+     * resultVecOffset + 4  > resultVec.length
+     * or lhsMatOffset + 16 > lhsMat.length
+     * or rhsVecOffset + 4  > rhsVec.length;
+     * resultVecOffset < 0 or lhsMatOffset < 0 or rhsVecOffset < 0
      */
-    public static native void multiplyMV(float[] resultVec,
+    public static void multiplyMV(float[] resultVec,
             int resultVecOffset, float[] lhsMat, int lhsMatOffset,
-            float[] rhsVec, int rhsVecOffset);
+            float[] rhsVec, int rhsVecOffset) {
+        // error checking
+        if (resultVec == null) {
+            throw new IllegalArgumentException("resultVec == null");
+        }
+        if (lhsMat == null) {
+            throw new IllegalArgumentException("lhsMat == null");
+        }
+        if (rhsVec == null) {
+            throw new IllegalArgumentException("rhsVec == null");
+        }
+        if (resultVecOffset < 0) {
+            throw new IllegalArgumentException("resultVecOffset < 0");
+        }
+        if (lhsMatOffset < 0) {
+            throw new IllegalArgumentException("lhsMatOffset < 0");
+        }
+        if (rhsVecOffset < 0) {
+            throw new IllegalArgumentException("rhsVecOffset < 0");
+        }
+        if (resultVec.length < resultVecOffset + 4) {
+            throw new IllegalArgumentException("resultVec.length < resultVecOffset + 4");
+        }
+        if (lhsMat.length < lhsMatOffset + 16) {
+            throw new IllegalArgumentException("lhsMat.length < lhsMatOffset + 16");
+        }
+        if (rhsVec.length < rhsVecOffset + 4) {
+            throw new IllegalArgumentException("rhsVec.length < rhsVecOffset + 4");
+        }
+
+        float tmp0 = lhsMat[0 + 4 * 0 + lhsMatOffset] * rhsVec[0 + rhsVecOffset] +
+                     lhsMat[0 + 4 * 1 + lhsMatOffset] * rhsVec[1 + rhsVecOffset] +
+                     lhsMat[0 + 4 * 2 + lhsMatOffset] * rhsVec[2 + rhsVecOffset] +
+                     lhsMat[0 + 4 * 3 + lhsMatOffset] * rhsVec[3 + rhsVecOffset];
+        float tmp1 = lhsMat[1 + 4 * 0 + lhsMatOffset] * rhsVec[0 + rhsVecOffset] +
+                     lhsMat[1 + 4 * 1 + lhsMatOffset] * rhsVec[1 + rhsVecOffset] +
+                     lhsMat[1 + 4 * 2 + lhsMatOffset] * rhsVec[2 + rhsVecOffset] +
+                     lhsMat[1 + 4 * 3 + lhsMatOffset] * rhsVec[3 + rhsVecOffset];
+        float tmp2 = lhsMat[2 + 4 * 0 + lhsMatOffset] * rhsVec[0 + rhsVecOffset] +
+                     lhsMat[2 + 4 * 1 + lhsMatOffset] * rhsVec[1 + rhsVecOffset] +
+                     lhsMat[2 + 4 * 2 + lhsMatOffset] * rhsVec[2 + rhsVecOffset] +
+                     lhsMat[2 + 4 * 3 + lhsMatOffset] * rhsVec[3 + rhsVecOffset];
+        float tmp3 = lhsMat[3 + 4 * 0 + lhsMatOffset] * rhsVec[0 + rhsVecOffset] +
+                     lhsMat[3 + 4 * 1 + lhsMatOffset] * rhsVec[1 + rhsVecOffset] +
+                     lhsMat[3 + 4 * 2 + lhsMatOffset] * rhsVec[2 + rhsVecOffset] +
+                     lhsMat[3 + 4 * 3 + lhsMatOffset] * rhsVec[3 + rhsVecOffset];
+
+        resultVec[ 0 + resultVecOffset ] = tmp0;
+        resultVec[ 1 + resultVecOffset ] = tmp1;
+        resultVec[ 2 + resultVecOffset ] = tmp2;
+        resultVec[ 3 + resultVecOffset ] = tmp3;
+    }
 
     /**
      * Transposes a 4 x 4 matrix.
@@ -537,10 +711,9 @@ public class Matrix {
     public static void rotateM(float[] rm, int rmOffset,
             float[] m, int mOffset,
             float a, float x, float y, float z) {
-        synchronized(sTemp) {
-            setRotateM(sTemp, 0, a, x, y, z);
-            multiplyMM(rm, rmOffset, m, mOffset, sTemp, 0);
-        }
+        float[] tmp = ThreadTmp.get();
+        setRotateM(tmp, 16, a, x, y, z);
+        multiplyMM(rm, rmOffset, m, mOffset, tmp, 16);
     }
 
     /**
@@ -556,11 +729,7 @@ public class Matrix {
      */
     public static void rotateM(float[] m, int mOffset,
             float a, float x, float y, float z) {
-        synchronized(sTemp) {
-            setRotateM(sTemp, 0, a, x, y, z);
-            multiplyMM(sTemp, 16, m, mOffset, sTemp, 0);
-            System.arraycopy(sTemp, 16, m, mOffset, 16);
-        }
+        rotateM(m, mOffset, m, mOffset, a, x, y, z);
     }
 
     /**
@@ -640,9 +809,14 @@ public class Matrix {
      * @param rm returns the result
      * @param rmOffset index into rm where the result matrix starts
      * @param x angle of rotation, in degrees
-     * @param y angle of rotation, in degrees
+     * @param y is broken, do not use
      * @param z angle of rotation, in degrees
+     *
+     * @deprecated This method is incorrect around the y axis. This method is
+     *             deprecated and replaced (below) by setRotateEulerM2 which
+     *             behaves correctly
      */
+    @Deprecated
     public static void setRotateEulerM(float[] rm, int rmOffset,
             float x, float y, float z) {
         x *= (float) (Math.PI / 180.0f);
@@ -669,6 +843,64 @@ public class Matrix {
 
         rm[rmOffset + 8]  = -sxsy * cz + sx * sz;
         rm[rmOffset + 9]  =  sxsy * sz + sx * cz;
+        rm[rmOffset + 10] =  cx * cy;
+        rm[rmOffset + 11] =  0.0f;
+
+        rm[rmOffset + 12] =  0.0f;
+        rm[rmOffset + 13] =  0.0f;
+        rm[rmOffset + 14] =  0.0f;
+        rm[rmOffset + 15] =  1.0f;
+    }
+
+    /**
+     * Converts Euler angles to a rotation matrix.
+     *
+     * @param rm returns the result
+     * @param rmOffset index into rm where the result matrix starts
+     * @param x angle of rotation, in degrees
+     * @param y angle of rotation, in degrees
+     * @param z angle of rotation, in degrees
+     *
+     * @throws IllegalArgumentException if rm is null;
+     * or if rmOffset + 16 > rm.length;
+     * rmOffset < 0
+     */
+    public static void setRotateEulerM2(@NonNull float[] rm, int rmOffset,
+            float x, float y, float z) {
+        if (rm == null) {
+            throw new IllegalArgumentException("rm == null");
+        }
+        if (rmOffset < 0) {
+            throw new IllegalArgumentException("rmOffset < 0");
+        }
+        if (rm.length < rmOffset + 16) {
+            throw new IllegalArgumentException("rm.length < rmOffset + 16");
+        }
+
+        x *= (float) (Math.PI / 180.0f);
+        y *= (float) (Math.PI / 180.0f);
+        z *= (float) (Math.PI / 180.0f);
+        float cx = (float) Math.cos(x);
+        float sx = (float) Math.sin(x);
+        float cy = (float) Math.cos(y);
+        float sy = (float) Math.sin(y);
+        float cz = (float) Math.cos(z);
+        float sz = (float) Math.sin(z);
+        float cxsy = cx * sy;
+        float sxsy = sx * sy;
+
+        rm[rmOffset + 0]  =  cy * cz;
+        rm[rmOffset + 1]  = -cy * sz;
+        rm[rmOffset + 2]  =  sy;
+        rm[rmOffset + 3]  =  0.0f;
+
+        rm[rmOffset + 4]  =  sxsy * cz + cx * sz;
+        rm[rmOffset + 5]  = -sxsy * sz + cx * cz;
+        rm[rmOffset + 6]  = -sx * cy;
+        rm[rmOffset + 7]  =  0.0f;
+
+        rm[rmOffset + 8]  = -cxsy * cz + sx * sz;
+        rm[rmOffset + 9]  =  cxsy * sz + sx * cz;
         rm[rmOffset + 10] =  cx * cy;
         rm[rmOffset + 11] =  0.0f;
 

@@ -111,9 +111,6 @@ public abstract class PipContentOverlay {
         private final TaskSnapshot mSnapshot;
         private final Rect mSourceRectHint;
 
-        private float mTaskSnapshotScaleX;
-        private float mTaskSnapshotScaleY;
-
         public PipSnapshotOverlay(TaskSnapshot snapshot, Rect sourceRectHint) {
             mSnapshot = snapshot;
             mSourceRectHint = new Rect(sourceRectHint);
@@ -125,16 +122,16 @@ public abstract class PipContentOverlay {
 
         @Override
         public void attach(SurfaceControl.Transaction tx, SurfaceControl parentLeash) {
-            mTaskSnapshotScaleX = (float) mSnapshot.getTaskSize().x
+            final float taskSnapshotScaleX = (float) mSnapshot.getTaskSize().x
                     / mSnapshot.getHardwareBuffer().getWidth();
-            mTaskSnapshotScaleY = (float) mSnapshot.getTaskSize().y
+            final float taskSnapshotScaleY = (float) mSnapshot.getTaskSize().y
                     / mSnapshot.getHardwareBuffer().getHeight();
             tx.show(mLeash);
             tx.setLayer(mLeash, Integer.MAX_VALUE);
             tx.setBuffer(mLeash, mSnapshot.getHardwareBuffer());
             // Relocate the content to parentLeash's coordinates.
             tx.setPosition(mLeash, -mSourceRectHint.left, -mSourceRectHint.top);
-            tx.setScale(mLeash, mTaskSnapshotScaleX, mTaskSnapshotScaleY);
+            tx.setScale(mLeash, taskSnapshotScaleX, taskSnapshotScaleY);
             tx.reparent(mLeash, parentLeash);
             tx.apply();
         }
@@ -146,20 +143,6 @@ public abstract class PipContentOverlay {
 
         @Override
         public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            // Work around to make sure the snapshot overlay is aligned with PiP window before
-            // the atomicTx is committed along with the final WindowContainerTransaction.
-            final SurfaceControl.Transaction nonAtomicTx = new SurfaceControl.Transaction();
-            final float scaleX = (float) destinationBounds.width()
-                    / mSourceRectHint.width();
-            final float scaleY = (float) destinationBounds.height()
-                    / mSourceRectHint.height();
-            final float scale = Math.max(
-                    scaleX * mTaskSnapshotScaleX, scaleY * mTaskSnapshotScaleY);
-            nonAtomicTx.setScale(mLeash, scale, scale);
-            nonAtomicTx.setPosition(mLeash,
-                    -scale * mSourceRectHint.left / mTaskSnapshotScaleX,
-                    -scale * mSourceRectHint.top / mTaskSnapshotScaleY);
-            nonAtomicTx.apply();
             atomicTx.remove(mLeash);
         }
     }

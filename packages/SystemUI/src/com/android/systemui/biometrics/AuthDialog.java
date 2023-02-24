@@ -23,13 +23,15 @@ import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.android.systemui.Dumpable;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * Interface for the biometric dialog UI.
  */
-public interface AuthDialog {
+public interface AuthDialog extends Dumpable {
 
     String KEY_CONTAINER_GOING_AWAY = "container_going_away";
     String KEY_BIOMETRIC_SHOWING = "biometric_showing";
@@ -45,6 +47,8 @@ public interface AuthDialog {
 
     String KEY_BIOMETRIC_SENSOR_TYPE = "sensor_type";
     String KEY_BIOMETRIC_SENSOR_PROPS = "sensor_props";
+
+    String KEY_BIOMETRIC_ORIENTATION_CHANGED = "orientation_changed";
 
     int SIZE_UNKNOWN = 0;
     /**

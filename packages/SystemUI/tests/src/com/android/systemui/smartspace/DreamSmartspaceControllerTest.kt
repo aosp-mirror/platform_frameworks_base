@@ -26,8 +26,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dreams.smartspace.DreamsSmartspaceController
+import com.android.systemui.dreams.smartspace.DreamSmartspaceController
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
+import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.smartspace.dagger.SmartspaceViewComponent
 import com.android.systemui.util.concurrency.Execution
@@ -35,16 +36,17 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.Optional
-import java.util.concurrent.Executor
+import org.mockito.Spy
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -74,14 +76,44 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var precondition: SmartspacePrecondition
 
-    @Mock
-    private lateinit var smartspaceView: BcSmartspaceDataPlugin.SmartspaceView
+    @Spy
+    private var smartspaceView: SmartspaceView = TestView(context)
 
     @Mock
     private lateinit var listener: BcSmartspaceDataPlugin.SmartspaceTargetListener
 
     @Mock
     private lateinit var session: SmartspaceSession
+
+    private lateinit var controller: DreamSmartspaceController
+
+    /**
+     * A class which implements SmartspaceView and extends View. This is mocked to provide the right
+     * object inheritance and interface implementation used in DreamSmartspaceController
+     */
+    private class TestView(context: Context?) : View(context), SmartspaceView {
+        override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
+
+        override fun setPrimaryTextColor(color: Int) {}
+
+        override fun setIsDreaming(isDreaming: Boolean) {}
+
+        override fun setDozeAmount(amount: Float) {}
+
+        override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {}
+
+        override fun setFalsingManager(falsingManager: FalsingManager?) {}
+
+        override fun setDnd(image: Drawable?, description: String?) {}
+
+        override fun setNextAlarm(image: Drawable?, description: String?) {}
+
+        override fun setMediaTarget(target: SmartspaceTarget?) {}
+
+        override fun getSelectedPage(): Int { return 0; }
+
+        override fun getCurrentCardTopPadding(): Int { return 0; }
+    }
 
     @Before
     fun setup() {
@@ -90,6 +122,9 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
                 .thenReturn(viewComponent)
         `when`(viewComponent.getView()).thenReturn(smartspaceView)
         `when`(smartspaceManager.createSmartspaceSession(any())).thenReturn(session)
+
+        controller = DreamSmartspaceController(context, smartspaceManager, execution, uiExecutor,
+                viewComponentFactory, precondition, Optional.of(targetFilter), Optional.of(plugin))
     }
 
     /**
@@ -97,10 +132,6 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
      */
     @Test
     fun testConnectOnListen() {
-        val controller = DreamsSmartspaceController(context,
-        smartspaceManager, execution, uiExecutor, viewComponentFactory, precondition,
-                Optional.of(targetFilter), Optional.of(plugin))
-
         `when`(precondition.conditionsMet()).thenReturn(true)
         controller.addListener(listener)
 
@@ -127,44 +158,10 @@ class DreamSmartspaceControllerTest : SysuiTestCase() {
     }
 
     /**
-     * A class which implements SmartspaceView and extends View. This is mocked to provide the right
-     * object inheritance and interface implementation used in DreamSmartspaceController
-     */
-    private class TestView(context: Context?) : View(context),
-            BcSmartspaceDataPlugin.SmartspaceView {
-        override fun registerDataProvider(plugin: BcSmartspaceDataPlugin?) {}
-
-        override fun setPrimaryTextColor(color: Int) {}
-
-        override fun setIsDreaming(isDreaming: Boolean) {}
-
-        override fun setDozeAmount(amount: Float) {}
-
-        override fun setIntentStarter(intentStarter: BcSmartspaceDataPlugin.IntentStarter?) {}
-
-        override fun setFalsingManager(falsingManager: FalsingManager?) {}
-
-        override fun setDnd(image: Drawable?, description: String?) {}
-
-        override fun setNextAlarm(image: Drawable?, description: String?) {}
-
-        override fun setMediaTarget(target: SmartspaceTarget?) {}
-
-        override fun getSelectedPage(): Int { return 0; }
-
-        override fun getCurrentCardTopPadding(): Int { return 0; }
-    }
-
-    /**
      * Ensures session begins when a view is attached.
      */
     @Test
     fun testConnectOnViewCreate() {
-        val controller = DreamsSmartspaceController(context,
-                smartspaceManager, execution, uiExecutor, viewComponentFactory, precondition,
-                Optional.of(targetFilter),
-                Optional.of(plugin))
-
         `when`(precondition.conditionsMet()).thenReturn(true)
         controller.buildAndConnectView(Mockito.mock(ViewGroup::class.java))
 

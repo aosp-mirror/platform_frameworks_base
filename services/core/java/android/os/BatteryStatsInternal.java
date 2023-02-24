@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.net.Network;
+
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
@@ -61,6 +63,15 @@ public abstract class BatteryStatsInternal {
      * @param sinceLast how long in millis has it been since a job was run
      */
     public abstract void noteJobsDeferred(int uid, int numDeferred, long sinceLast);
+
+    /**
+     * Informs battery stats of a data packet that woke up the CPU.
+     *
+     * @param network The network over which the packet arrived.
+     * @param elapsedMillis The time of the packet's arrival in elapsed timebase.
+     * @param uid The uid that received the packet.
+     */
+    public abstract void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid);
 
     /**
      * Informs battery stats of binder stats for the given work source UID.

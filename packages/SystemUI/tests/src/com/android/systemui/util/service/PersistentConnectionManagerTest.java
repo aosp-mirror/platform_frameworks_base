@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.service;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.testing.AndroidTestingRunner;
@@ -117,6 +118,24 @@ public class PersistentConnectionManagerTest extends SysuiTestCase {
             mFakeExecutor.advanceClockToNext();
             mFakeExecutor.runAllReady();
         }
+    }
+
+    /**
+     * Ensures manual unbind does not reconnect.
+     */
+    @Test
+    public void testStopDoesNotReconnect() {
+        mConnectionManager.start();
+        ArgumentCaptor<ObservableServiceConnection.Callback<Proxy>> connectionCallbackCaptor =
+                ArgumentCaptor.forClass(ObservableServiceConnection.Callback.class);
+
+        verify(mConnection).addCallback(connectionCallbackCaptor.capture());
+        verify(mConnection).bind();
+        Mockito.clearInvocations(mConnection);
+        mConnectionManager.stop();
+        mFakeExecutor.advanceClockToNext();
+        mFakeExecutor.runAllReady();
+        verify(mConnection, never()).bind();
     }
 
     /**

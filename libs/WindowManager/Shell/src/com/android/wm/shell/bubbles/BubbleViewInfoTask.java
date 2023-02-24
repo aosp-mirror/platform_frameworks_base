@@ -195,15 +195,18 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                     b.isImportantConversation());
             info.badgeBitmap = badgeBitmapInfo.icon;
             // Raw badge bitmap never includes the important conversation ring
-            info.mRawBadgeBitmap = badgeIconFactory.getBadgeBitmap(badgedIcon, false).icon;
-            info.bubbleBitmap = iconFactory.createBadgedIconBitmap(bubbleDrawable).icon;
+            info.mRawBadgeBitmap = b.isImportantConversation()
+                    ? badgeIconFactory.getBadgeBitmap(badgedIcon, false).icon
+                    : badgeBitmapInfo.icon;
+
+            float[] bubbleBitmapScale = new float[1];
+            info.bubbleBitmap = iconFactory.createIconBitmap(bubbleDrawable, bubbleBitmapScale);
 
             // Dot color & placement
             Path iconPath = PathParser.createPathFromPathData(
                     c.getResources().getString(com.android.internal.R.string.config_icon_mask));
             Matrix matrix = new Matrix();
-            float scale = iconFactory.getNormalizer().getScale(bubbleDrawable,
-                    null /* outBounds */, null /* path */, null /* outMaskShape */);
+            float scale = bubbleBitmapScale[0];
             float radius = DEFAULT_PATH_SIZE / 2f;
             matrix.setScale(scale /* x scale */, scale /* y scale */, radius /* pivot x */,
                     radius /* pivot y */);

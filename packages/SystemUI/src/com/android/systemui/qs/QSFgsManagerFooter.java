@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FGS_MANAGER_FOOTER_VIEW;
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
 import android.content.Context;
 import android.view.View;
@@ -40,6 +41,7 @@ import javax.inject.Named;
 /**
  * Footer entry point for the foreground service manager
  */
+// TODO(b/242040009): Remove this file.
 @QSScope
 public class QSFgsManagerFooter implements View.OnClickListener,
         FgsManagerController.OnDialogDismissedListener,
@@ -141,16 +143,18 @@ public class QSFgsManagerFooter implements View.OnClickListener,
 
     public void handleRefreshState() {
         mMainExecutor.execute(() -> {
-            CharSequence text = mContext.getResources().getQuantityString(
-                    R.plurals.fgs_manager_footer_label, mNumPackages, mNumPackages);
+            CharSequence text = icuMessageFormat(mContext.getResources(),
+                    R.string.fgs_manager_footer_label, mNumPackages);
             mFooterText.setText(text);
             mNumberView.setText(Integer.toString(mNumPackages));
             mNumberView.setContentDescription(text);
             if (mFgsManagerController.shouldUpdateFooterVisibility()) {
                 mRootView.setVisibility(mNumPackages > 0
-                        && mFgsManagerController.isAvailable() ? View.VISIBLE : View.GONE);
-                int dotVis = mFgsManagerController.getShowFooterDot()
-                        && mFgsManagerController.getChangesSinceDialog() ? View.VISIBLE : View.GONE;
+                        && mFgsManagerController.isAvailable().getValue() ? View.VISIBLE
+                        : View.GONE);
+                int dotVis = mFgsManagerController.getShowFooterDot().getValue()
+                        && mFgsManagerController.getNewChangesSinceDialogWasDismissed()
+                        ? View.VISIBLE : View.GONE;
                 mDotView.setVisibility(dotVis);
                 mCollapsedDotView.setVisibility(dotVis);
                 if (mVisibilityChangedListener != null) {

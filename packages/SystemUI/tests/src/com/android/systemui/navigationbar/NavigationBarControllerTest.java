@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
@@ -96,7 +97,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(AutoHideController.class),
                         mock(LightBarController.class),
                         Optional.of(mock(Pip.class)),
-                        Optional.of(mock(BackAnimation.class))));
+                        Optional.of(mock(BackAnimation.class)),
+                        mock(FeatureFlags.class)));
         initializeNavigationBars();
     }
 

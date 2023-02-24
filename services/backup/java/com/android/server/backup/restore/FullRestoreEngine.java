@@ -24,10 +24,8 @@ import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA
 import static com.android.server.backup.UserBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
-import android.annotation.NonNull;
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
-import android.app.backup.BackupAgent;
 import android.app.backup.BackupManager;
 import android.app.backup.FullBackup;
 import android.app.backup.IBackupManagerMonitor;
@@ -40,12 +38,10 @@ import android.content.pm.Signature;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
@@ -61,7 +57,6 @@ import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
 import com.android.server.backup.utils.RestoreUtils;
 import com.android.server.backup.utils.TarBackupReader;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,8 +135,6 @@ public class FullRestoreEngine extends RestoreEngine {
     private boolean mPipesClosed;
     private final BackupEligibilityRules mBackupEligibilityRules;
 
-    private FileMetadata mReadOnlyParent = null;
-
     public FullRestoreEngine(
             UserBackupManagerService backupManagerService, OperationStorage operationStorage,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
@@ -163,22 +156,6 @@ public class FullRestoreEngine extends RestoreEngine {
         mIsAdbRestore = isAdbRestore;
         mUserId = backupManagerService.getUserId();
         mBackupEligibilityRules = backupEligibilityRules;
-    }
-
-    @VisibleForTesting
-    FullRestoreEngine() {
-        mIsAdbRestore = false;
-        mAllowApks = false;
-        mEphemeralOpToken = 0;
-        mUserId = 0;
-        mBackupEligibilityRules = null;
-        mAgentTimeoutParameters = null;
-        mBuffer = null;
-        mBackupManagerService = null;
-        mOperationStorage = null;
-        mMonitor = null;
-        mMonitorTask = null;
-        mOnlyPackage = null;
     }
 
     public IBackupAgent getAgent() {
@@ -420,11 +397,6 @@ public class FullRestoreEngine extends RestoreEngine {
                         okay = false;
                     }
 
-                    if (shouldSkipReadOnlyDir(info)) {
-                        // b/194894879: We don't support restore of read-only dirs.
-                        okay = false;
-                    }
-
                     // At this point we have an agent ready to handle the full
                     // restore data as well as a pipe for sending data to
                     // that agent.  Tell the agent to start reading from the
@@ -599,45 +571,6 @@ public class FullRestoreEngine extends RestoreEngine {
             }
         }
         return (info != null);
-    }
-
-    boolean shouldSkipReadOnlyDir(FileMetadata info) {
-        if (isValidParent(mReadOnlyParent, info)) {
-            // This file has a read-only parent directory, we shouldn't
-            // restore it.
-            return true;
-        } else {
-            // We're now in a different branch of the file tree, update the parent
-            // value.
-            if (isReadOnlyDir(info)) {
-                // Current directory is read-only. Remember it so that we can skip all
-                // of its contents.
-                mReadOnlyParent = info;
-                Slog.w(TAG, "Skipping restore of " + info.path + " and its contents as "
-                        + "read-only dirs are currently not supported.");
-                return true;
-            } else {
-                mReadOnlyParent = null;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean isValidParent(FileMetadata parentDir, @NonNull FileMetadata childDir) {
-        return parentDir != null
-                && childDir.packageName.equals(parentDir.packageName)
-                && childDir.domain.equals(parentDir.domain)
-                && childDir.path.startsWith(getPathWithTrailingSeparator(parentDir.path));
-    }
-
-    private static String getPathWithTrailingSeparator(String path) {
-        return path.endsWith(File.separator) ? path : path + File.separator;
-    }
-
-    private static boolean isReadOnlyDir(FileMetadata file) {
-        // Check if owner has 'write' bit in the file's mode value (see 'man -7 inode' for details).
-        return file.type == BackupAgent.TYPE_DIRECTORY && (file.mode & OsConstants.S_IWUSR) == 0;
     }
 
     private void setUpPipes() throws IOException {

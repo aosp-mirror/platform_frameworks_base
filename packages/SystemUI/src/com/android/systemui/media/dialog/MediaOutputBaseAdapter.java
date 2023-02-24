@@ -63,8 +63,6 @@ public abstract class MediaOutputBaseAdapter extends
 
     protected final MediaOutputController mController;
 
-    private int mMargin;
-
     Context mContext;
     View mHolderView;
     boolean mIsDragging;
@@ -82,8 +80,6 @@ public abstract class MediaOutputBaseAdapter extends
     public MediaDeviceBaseViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         mContext = viewGroup.getContext();
-        mMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.media_output_dialog_list_margin);
         mHolderView = LayoutInflater.from(mContext).inflate(R.layout.media_output_list_item,
                 viewGroup, false);
 
@@ -168,16 +164,28 @@ public abstract class MediaOutputBaseAdapter extends
 
         void onBind(MediaDevice device, boolean topMargin, boolean bottomMargin, int position) {
             mDeviceId = device.getId();
+            mCheckBox.setVisibility(View.GONE);
+            mStatusIcon.setVisibility(View.GONE);
+            mEndTouchArea.setVisibility(View.GONE);
+            mEndTouchArea.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+            mContainerLayout.setOnClickListener(null);
+            mContainerLayout.setContentDescription(null);
+            mTitleText.setTextColor(mController.getColorItemContent());
+            mSubTitleText.setTextColor(mController.getColorItemContent());
+            mTwoLineTitleText.setTextColor(mController.getColorItemContent());
+            mSeekBar.getProgressDrawable().setColorFilter(
+                    new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
+                            PorterDuff.Mode.SRC_IN));
         }
 
         abstract void onBind(int customizedItem, boolean topMargin, boolean bottomMargin);
 
-        void setSingleLineLayout(CharSequence title, boolean bFocused) {
-            setSingleLineLayout(title, bFocused, false, false, false);
+        void setSingleLineLayout(CharSequence title) {
+            setSingleLineLayout(title, false, false, false, false);
         }
 
-        void setSingleLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
-                boolean showProgressBar, boolean showStatus) {
+        void setSingleLineLayout(CharSequence title, boolean showSeekBar,
+                boolean showProgressBar, boolean showCheckBox, boolean showEndTouchArea) {
             mTwoLineLayout.setVisibility(View.GONE);
             boolean isActive = showSeekBar || showProgressBar;
             if (!mCornerAnimator.isRunning()) {
@@ -188,10 +196,6 @@ public abstract class MediaOutputBaseAdapter extends
                                 .mutate() : mContext.getDrawable(
                                         R.drawable.media_output_item_background)
                                 .mutate();
-                backgroundDrawable.setColorFilter(new PorterDuffColorFilter(
-                        isActive ? mController.getColorConnectedItemBackground()
-                                : mController.getColorItemBackground(),
-                        PorterDuff.Mode.SRC_IN));
                 mItemLayout.setBackground(backgroundDrawable);
                 if (showSeekBar) {
                     final ClipDrawable clipDrawable =
@@ -201,39 +205,27 @@ public abstract class MediaOutputBaseAdapter extends
                             (GradientDrawable) clipDrawable.getDrawable();
                     progressDrawable.setCornerRadius(mController.getActiveRadius());
                 }
-            } else {
-                mItemLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
-                        isActive ? mController.getColorConnectedItemBackground()
-                                : mController.getColorItemBackground(),
-                        PorterDuff.Mode.SRC_IN));
             }
+            mItemLayout.getBackground().setColorFilter(new PorterDuffColorFilter(
+                    isActive ? mController.getColorConnectedItemBackground()
+                            : mController.getColorItemBackground(),
+                    PorterDuff.Mode.SRC_IN));
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSeekBar.setAlpha(1);
             mSeekBar.setVisibility(showSeekBar ? View.VISIBLE : View.GONE);
             if (!showSeekBar) {
                 mSeekBar.resetVolume();
             }
-            mStatusIcon.setVisibility(showStatus ? View.VISIBLE : View.GONE);
             mTitleText.setText(title);
             mTitleText.setVisibility(View.VISIBLE);
-        }
-
-        void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
-                boolean showProgressBar, boolean showSubtitle) {
-            setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
-                    false);
+            mCheckBox.setVisibility(showCheckBox ? View.VISIBLE : View.GONE);
+            mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
         }
 
         void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
                 boolean showProgressBar, boolean showSubtitle, boolean showStatus) {
             setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
                     showStatus);
-        }
-
-        void setTwoLineLayout(CharSequence title, boolean bFocused, boolean showSeekBar,
-                boolean showProgressBar, boolean showSubtitle) {
-            setTwoLineLayout(null, title, bFocused, showSeekBar, showProgressBar, showSubtitle,
-                    false);
         }
 
         private void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
@@ -254,20 +246,11 @@ public abstract class MediaOutputBaseAdapter extends
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
             mTwoLineTitleText.setTranslationY(0);
-            if (device == null) {
-                mTwoLineTitleText.setText(title);
-            } else {
-                mTwoLineTitleText.setText(getItemTitle(device));
-            }
-
-            if (bFocused) {
-                mTwoLineTitleText.setTypeface(Typeface.create(mContext.getString(
-                        com.android.internal.R.string.config_headlineFontFamilyMedium),
-                        Typeface.NORMAL));
-            } else {
-                mTwoLineTitleText.setTypeface(Typeface.create(mContext.getString(
-                        com.android.internal.R.string.config_headlineFontFamily), Typeface.NORMAL));
-            }
+            mTwoLineTitleText.setText(device == null ? title : getItemTitle(device));
+            mTwoLineTitleText.setTypeface(Typeface.create(mContext.getString(
+                            bFocused ? com.android.internal.R.string.config_headlineFontFamilyMedium
+                                    : com.android.internal.R.string.config_headlineFontFamily),
+                    Typeface.NORMAL));
         }
 
         void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
@@ -325,35 +308,6 @@ public abstract class MediaOutputBaseAdapter extends
                     new PorterDuffColorFilter(mController.getColorConnectedItemBackground(),
                             PorterDuff.Mode.SRC_IN));
             mItemLayout.setBackground(backgroundDrawable);
-        }
-
-        void initSessionSeekbar() {
-            disableSeekBar();
-            mSeekBar.setMax(mController.getSessionVolumeMax());
-            mSeekBar.setMin(0);
-            final int currentVolume = mController.getSessionVolume();
-            if (mSeekBar.getProgress() != currentVolume) {
-                mSeekBar.setProgress(currentVolume, true);
-            }
-            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (!fromUser) {
-                        return;
-                    }
-                    mController.adjustSessionVolume(progress);
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                    mIsDragging = true;
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    mIsDragging = false;
-                }
-            });
         }
 
         private void animateCornerAndVolume(int fromProgress, int toProgress) {

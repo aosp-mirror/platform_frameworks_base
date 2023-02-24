@@ -559,21 +559,18 @@ public final class DisplayManager {
      * @see #DISPLAY_CATEGORY_PRESENTATION
      */
     public Display[] getDisplays(String category) {
-        boolean includeDisabledDisplays = (category != null
-                && category.equals(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED));
-        final int[] displayIds = mGlobal.getDisplayIds(includeDisabledDisplays);
+        final int[] displayIds = mGlobal.getDisplayIds();
         synchronized (mLock) {
             try {
-                if (category != null && category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
+                if (category == null
+                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
+                    addAllDisplaysLocked(mTempDisplays, displayIds);
+                } else if (category.equals(DISPLAY_CATEGORY_PRESENTATION)) {
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                     addPresentationDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL);
-                } else if ((category == null
-                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category))) {
-                    // All displays requested.
-                    addAllDisplaysLocked(mTempDisplays, displayIds);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {
@@ -1451,5 +1448,15 @@ public final class DisplayManager {
          * @hide
          */
         String KEY_HIGH_REFRESH_RATE_BLACKLIST = "high_refresh_rate_blacklist";
+
+        /**
+         * Key for the brightness throttling data as a String formatted:
+         * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
+         * Where the latter part is repeated for each throttling level, and the entirety is repeated
+         * for each display, separated by a semicolon.
+         * For example:
+         * 123,1,critical,0.8;456,2,moderate,0.9,critical,0.7
+         */
+        String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
     }
 }

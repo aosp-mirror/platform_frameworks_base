@@ -15,6 +15,7 @@
  */
 package randomparcel;
 import android.os.IBinder;
+import android.os.Parcel;
 
 public class FuzzBinder {
     static {
@@ -33,6 +34,12 @@ public class FuzzBinder {
         fuzzServiceInternal(binder, data);
     }
 
+    // This API fills parcel object
+    public static void fillRandomParcel(Parcel parcel, byte[] data) {
+        fillParcelInternal(parcel, data);
+    }
+
     private static native void fuzzServiceInternal(IBinder binder, byte[] data);
+    private static native void fillParcelInternal(Parcel parcel, byte[] data);
     private static native int registerNatives();
 }

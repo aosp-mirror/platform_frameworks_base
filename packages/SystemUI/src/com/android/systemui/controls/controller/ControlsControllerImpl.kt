@@ -20,13 +20,11 @@ import android.app.PendingIntent
 import android.app.backup.BackupManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
-import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.database.ContentObserver
 import android.net.Uri
-import android.os.Environment
 import android.os.UserHandle
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
@@ -43,6 +41,7 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_FILE
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl.Companion.PREFS_CONTROLS_SEEDING_COMPLETED
@@ -61,6 +60,7 @@ class ControlsControllerImpl @Inject constructor (
     private val bindingController: ControlsBindingController,
     private val listingController: ControlsListingController,
     private val broadcastDispatcher: BroadcastDispatcher,
+    private val userFileManager: UserFileManager,
     optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
     dumpManager: DumpManager,
     userTracker: UserTracker
@@ -84,15 +84,12 @@ class ControlsControllerImpl @Inject constructor (
     override val currentUserId
         get() = currentUser.identifier
 
-    private val contentResolver: ContentResolver
-        get() = context.contentResolver
-
     private val persistenceWrapper: ControlsFavoritePersistenceWrapper
     @VisibleForTesting
     internal var auxiliaryPersistenceWrapper: AuxiliaryPersistenceWrapper
 
     init {
-        userStructure = UserStructure(context, currentUser)
+        userStructure = UserStructure(context, currentUser, userFileManager)
 
         persistenceWrapper = optionalWrapper.orElseGet {
             ControlsFavoritePersistenceWrapper(
@@ -111,7 +108,7 @@ class ControlsControllerImpl @Inject constructor (
     private fun setValuesForUser(newUser: UserHandle) {
         Log.d(TAG, "Changing to user: $newUser")
         currentUser = newUser
-        userStructure = UserStructure(context, currentUser)
+        userStructure = UserStructure(context, currentUser, userFileManager)
         persistenceWrapper.changeFileAndBackupManager(
                 userStructure.file,
                 BackupManager(userStructure.userContext)
@@ -187,8 +184,11 @@ class ControlsControllerImpl @Inject constructor (
 
                 // When a component is uninstalled, allow seeding to happen again if the user
                 // reinstalls the app
-                val prefs = userStructure.userContext.getSharedPreferences(
-                    PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
+                val prefs = userFileManager.getSharedPreferences(
+                    PREFS_CONTROLS_FILE,
+                    Context.MODE_PRIVATE,
+                    userTracker.userId
+                )
                 val completedSeedingPackageSet = prefs.getStringSet(
                     PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
                 val servicePackageSet = serviceInfoSet.map { it.packageName }
@@ -575,18 +575,12 @@ class ControlsControllerImpl @Inject constructor (
     }
 }
 
-class UserStructure(context: Context, user: UserHandle) {
+class UserStructure(context: Context, user: UserHandle, userFileManager: UserFileManager) {
     val userContext = context.createContextAsUser(user, 0)
-
-    val file = Environment.buildPath(
-            userContext.filesDir,
-            ControlsFavoritePersistenceWrapper.FILE_NAME
-    )
-
-    val auxiliaryFile = Environment.buildPath(
-            userContext.filesDir,
-            AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME
-    )
+    val file = userFileManager.getFile(ControlsFavoritePersistenceWrapper.FILE_NAME,
+        user.identifier)
+    val auxiliaryFile = userFileManager.getFile(AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME,
+        user.identifier)
 }
 
 /**

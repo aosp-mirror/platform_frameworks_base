@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
-import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -52,6 +49,7 @@ import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
+import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -231,14 +229,8 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     /**
-     * See:
+     * Returns {@code true} if the user switcher should be open by default on the lock screen.
      *
-     * <ul>
-     *   <li>{@link com.android.internal.R.bool.config_expandLockScreenUserSwitcher}</li>
-     *    <li>{@link UserSwitcherController.SIMPLE_USER_SWITCHER_GLOBAL_SETTING}</li>
-     * </ul>
-     *
-     * @return true if the user switcher should be open by default on the lock screen.
      * @see android.os.UserManager#isUserSwitcherEnabled()
      */
     public boolean isSimpleUserSwitcher() {
@@ -287,8 +279,8 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 }
                 KeyguardUserDetailItemView newView = (KeyguardUserDetailItemView)
                         mAdapter.getView(i, oldView, mListView);
-                UserSwitcherController.UserRecord userTag =
-                        (UserSwitcherController.UserRecord) newView.getTag();
+                UserRecord userTag =
+                        (UserRecord) newView.getTag();
                 if (userTag.isCurrent) {
                     if (i != 0) {
                         Log.w(TAG, "Current user is not the first view in the list");
@@ -435,7 +427,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     }
 
     static class KeyguardUserAdapter extends
-            UserSwitcherController.BaseUserAdapter implements View.OnClickListener {
+            BaseUserSwitcherAdapter implements View.OnClickListener {
 
         private final Context mContext;
         private final Resources mResources;
@@ -443,7 +435,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
         private View mCurrentUserView;
         // List of users where the first entry is always the current user
-        private ArrayList<UserSwitcherController.UserRecord> mUsersOrdered = new ArrayList<>();
+        private ArrayList<UserRecord> mUsersOrdered = new ArrayList<>();
 
         KeyguardUserAdapter(Context context, Resources resources, LayoutInflater layoutInflater,
                 UserSwitcherController controller,
@@ -464,10 +456,10 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         }
 
         void refreshUserOrder() {
-            ArrayList<UserSwitcherController.UserRecord> users = super.getUsers();
+            ArrayList<UserRecord> users = super.getUsers();
             mUsersOrdered = new ArrayList<>(users.size());
             for (int i = 0; i < users.size(); i++) {
-                UserSwitcherController.UserRecord record = users.get(i);
+                UserRecord record = users.get(i);
                 if (record.isCurrent) {
                     mUsersOrdered.add(0, record);
                 } else {
@@ -477,19 +469,19 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         }
 
         @Override
-        protected ArrayList<UserSwitcherController.UserRecord> getUsers() {
+        protected ArrayList<UserRecord> getUsers() {
             return mUsersOrdered;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            UserSwitcherController.UserRecord item = getItem(position);
+            UserRecord item = getItem(position);
             return createUserDetailItemView(convertView, parent, item);
         }
 
         KeyguardUserDetailItemView convertOrInflate(View convertView, ViewGroup parent) {
             if (!(convertView instanceof KeyguardUserDetailItemView)
-                    || !(convertView.getTag() instanceof UserSwitcherController.UserRecord)) {
+                    || !(convertView.getTag() instanceof UserRecord)) {
                 convertView = mLayoutInflater.inflate(
                         R.layout.keyguard_user_switcher_item, parent, false);
             }
@@ -497,7 +489,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         }
 
         KeyguardUserDetailItemView createUserDetailItemView(View convertView, ViewGroup parent,
-                UserSwitcherController.UserRecord item) {
+                UserRecord item) {
             KeyguardUserDetailItemView v = convertOrInflate(convertView, parent);
             v.setOnClickListener(this);
 
@@ -513,9 +505,9 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
-            v.setDisabledByAdmin(item.isDisabledByAdmin);
+            v.setDisabledByAdmin(getController().isDisabledByAdmin(item));
             v.setEnabled(item.isSwitchToEnabled);
-            v.setAlpha(v.isEnabled() ? USER_SWITCH_ENABLED_ALPHA : USER_SWITCH_DISABLED_ALPHA);
+            UserSwitcherController.setSelectableAlpha(v);
 
             if (item.isCurrent) {
                 mCurrentUserView = v;
@@ -524,7 +516,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             return v;
         }
 
-        private Drawable getDrawable(UserSwitcherController.UserRecord item) {
+        private Drawable getDrawable(UserRecord item) {
             Drawable drawable;
             if (item.isCurrent && item.isGuest) {
                 drawable = mContext.getDrawable(R.drawable.ic_avatar_guest_user);
@@ -547,7 +539,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
 
         @Override
         public void onClick(View v) {
-            UserSwitcherController.UserRecord user = (UserSwitcherController.UserRecord) v.getTag();
+            UserRecord user = (UserRecord) v.getTag();
 
             if (mKeyguardUserSwitcherController.isListAnimating()) {
                 return;

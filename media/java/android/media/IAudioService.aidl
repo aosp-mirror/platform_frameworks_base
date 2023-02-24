@@ -22,6 +22,7 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
 import android.media.AudioFocusInfo;
+import android.media.AudioHalVersionInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
@@ -96,6 +97,9 @@ interface IAudioService {
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
 
     void setStreamVolumeWithAttribution(int streamType, int index, int flags,
+            in String callingPackage, in String attributionTag);
+
+    void setDeviceVolume(in VolumeInfo vi, in AudioDeviceAttributes ada,
             in String callingPackage, in String attributionTag);
 
     oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
@@ -512,5 +516,17 @@ interface IAudioService {
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes,
             boolean handlesvolumeAdjustment);
 
-    String getHalVersion();
+    AudioHalVersionInfo getHalVersion();
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    boolean supportsBluetoothVariableLatency();
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    void setBluetoothVariableLatencyEnabled(boolean enabled);
+
+    @EnforcePermission("MODIFY_AUDIO_ROUTING")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
+    boolean isBluetoothVariableLatencyEnabled();
 }

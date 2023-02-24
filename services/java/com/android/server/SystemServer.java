@@ -139,6 +139,7 @@ import com.android.server.integrity.AppIntegrityManagerService;
 import com.android.server.lights.LightsService;
 import com.android.server.locales.LocaleManagerService;
 import com.android.server.location.LocationManagerService;
+import com.android.server.location.altitude.AltitudeService;
 import com.android.server.logcat.LogcatManagerService;
 import com.android.server.media.MediaRouterService;
 import com.android.server.media.metrics.MediaMetricsManagerService;
@@ -186,6 +187,7 @@ import com.android.server.security.AttestationVerificationManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
+import com.android.server.security.rkp.RemoteProvisioningService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
 import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -374,8 +376,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.searchui.SearchUiManagerService";
     private static final String SMARTSPACE_MANAGER_SERVICE_CLASS =
             "com.android.server.smartspace.SmartspaceManagerService";
-    private static final String CLOUDSEARCH_MANAGER_SERVICE_CLASS =
-            "com.android.server.cloudsearch.CloudSearchManagerService";
     private static final String DEVICE_IDLE_CONTROLLER_CLASS =
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
@@ -1392,9 +1392,14 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(BugreportManagerService.class);
         t.traceEnd();
 
-        // Serivce for GPU and GPU driver.
+        // Service for GPU and GPU driver.
         t.traceBegin("GpuService");
         mSystemServiceManager.startService(GpuService.class);
+        t.traceEnd();
+
+        // Handles system process requests for remotely provisioned keys & data.
+        t.traceBegin("StartRemoteProvisioningService");
+        mSystemServiceManager.startService(RemoteProvisioningService.class);
         t.traceEnd();
 
         t.traceEnd(); // startCoreServices
@@ -1893,12 +1898,6 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(SMARTSPACE_MANAGER_SERVICE_CLASS);
             t.traceEnd();
 
-            // CloudSearch manager service
-            // TODO: add deviceHasConfigString(context, R.string.config_defaultCloudSearchServices)
-            t.traceBegin("StartCloudSearchService");
-            mSystemServiceManager.startService(CLOUDSEARCH_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
-
             t.traceBegin("InitConnectivityModuleConnector");
             try {
                 ConnectivityModuleConnector.getInstance().init(context);
@@ -2096,6 +2095,14 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(TIME_ZONE_DETECTOR_SERVICE_CLASS);
             } catch (Throwable e) {
                 reportWtf("starting TimeZoneDetectorService service", e);
+            }
+            t.traceEnd();
+
+            t.traceBegin("StartAltitudeService");
+            try {
+                mSystemServiceManager.startService(AltitudeService.Lifecycle.class);
+            } catch (Throwable e) {
+                reportWtf("starting AltitudeService service", e);
             }
             t.traceEnd();
 

@@ -1,10 +1,10 @@
 package com.android.systemui.statusbar
 
-import org.mockito.Mockito.`when` as whenever
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
@@ -19,6 +19,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
@@ -32,6 +33,7 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
     @Mock private lateinit var qS: QS
     @Mock private lateinit var nsslController: NotificationStackScrollLayoutController
+    @Mock private lateinit var dumpManager: DumpManager
 
     private lateinit var overScroller: SplitShadeLockScreenOverScroller
 
@@ -44,11 +46,12 @@ class SplitShadeLockScreenOverScrollerTest : SysuiTestCase() {
         overScroller =
             SplitShadeLockScreenOverScroller(
                 configurationController,
+                dumpManager,
                 context,
                 scrimController,
                 statusBarStateController,
-                qS,
-                nsslController)
+                { qS },
+                { nsslController })
     }
 
     @Test

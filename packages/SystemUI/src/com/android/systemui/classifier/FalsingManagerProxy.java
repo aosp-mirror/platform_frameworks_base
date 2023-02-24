@@ -144,6 +144,11 @@ public class FalsingManagerProxy implements FalsingManager, Dumpable {
     }
 
     @Override
+    public boolean isProximityNear() {
+        return mInternalFalsingManager.isProximityNear();
+    }
+
+    @Override
     public boolean isClassifierEnabled() {
         return mInternalFalsingManager.isClassifierEnabled();
     }

@@ -510,6 +510,7 @@ public class UdfpsKeyguardViewController extends UdfpsAnimationViewController<Ud
                     mKeyguardViewManager.isBouncerInTransit() ? BouncerPanelExpansionCalculator
                             .aboutToShowBouncerProgress(fraction) : fraction;
             updateAlpha();
+            updatePauseAuth();
         }
     };
 

@@ -34,6 +34,7 @@ import androidx.annotation.BinderThread;
 
 import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener;
 import com.android.wm.shell.common.annotations.ShellMainThread;
+import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,19 +58,23 @@ public class DisplayController {
     private final SparseArray<DisplayRecord> mDisplays = new SparseArray<>();
     private final ArrayList<OnDisplaysChangedListener> mDisplayChangedListeners = new ArrayList<>();
 
-    public DisplayController(Context context, IWindowManager wmService,
+    public DisplayController(Context context, IWindowManager wmService, ShellInit shellInit,
             ShellExecutor mainExecutor) {
         mMainExecutor = mainExecutor;
         mContext = context;
         mWmService = wmService;
-        mChangeController = new DisplayChangeController(mWmService, mainExecutor);
+        // TODO: Inject this instead
+        mChangeController = new DisplayChangeController(mWmService, shellInit, mainExecutor);
         mDisplayContainerListener = new DisplayWindowListenerImpl();
+        // Note, add this after DisplaceChangeController is constructed to ensure that is
+        // initialized first
+        shellInit.addInitCallback(this::onInit, this);
     }
 
     /**
      * Initializes the window listener.
      */
-    public void initialize() {
+    public void onInit() {
         try {
             int[] displayIds = mWmService.registerDisplayWindowListener(mDisplayContainerListener);
             for (int i = 0; i < displayIds.length; i++) {
@@ -156,14 +161,14 @@ public class DisplayController {
      * Adds a display rotation controller.
      */
     public void addDisplayChangingController(OnDisplayChangingListener controller) {
-        mChangeController.addRotationListener(controller);
+        mChangeController.addDisplayChangeListener(controller);
     }
 
     /**
      * Removes a display rotation controller.
      */
     public void removeDisplayChangingController(OnDisplayChangingListener controller) {
-        mChangeController.removeRotationListener(controller);
+        mChangeController.removeDisplayChangeListener(controller);
     }
 
     private void onDisplayAdded(int displayId) {

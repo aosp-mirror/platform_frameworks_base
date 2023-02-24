@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -55,6 +56,8 @@ public class ToastPresenter {
 
     @VisibleForTesting
     public static final int TEXT_TOAST_LAYOUT = R.layout.transient_notification;
+    @VisibleForTesting
+    public static final int TEXT_TOAST_LAYOUT_WITH_ICON = R.layout.transient_notification_with_icon;
 
     /**
      * Returns the default text toast view for message {@code text}.
@@ -63,6 +66,24 @@ public class ToastPresenter {
         View view = LayoutInflater.from(context).inflate(TEXT_TOAST_LAYOUT, null);
         TextView textView = view.findViewById(com.android.internal.R.id.message);
         textView.setText(text);
+        return view;
+    }
+
+    /**
+     * Returns the default icon text toast view for message {@code text} and the icon {@code icon}.
+     */
+    public static View getTextToastViewWithIcon(Context context, CharSequence text, Drawable icon) {
+        if (icon == null) {
+            return getTextToastView(context, text);
+        }
+
+        View view = LayoutInflater.from(context).inflate(TEXT_TOAST_LAYOUT_WITH_ICON, null);
+        TextView textView = view.findViewById(com.android.internal.R.id.message);
+        textView.setText(text);
+        ImageView imageView = view.findViewById(com.android.internal.R.id.icon);
+        if (imageView != null) {
+            imageView.setImageDrawable(icon);
+        }
         return view;
     }
 

@@ -49,10 +49,10 @@ public abstract class Pluggable<This> {
      * Call this method when something has caused this pluggable's behavior to change. The pipeline
      * will be re-run.
      */
-    public final void invalidateList() {
+    public final void invalidateList(@Nullable String reason) {
         if (mListener != null) {
             Trace.beginSection("Pluggable<" + mName + ">.invalidateList");
-            mListener.onPluggableInvalidated((This) this);
+            mListener.onPluggableInvalidated((This) this, reason);
             Trace.endSection();
         }
     }
@@ -74,7 +74,7 @@ public abstract class Pluggable<This> {
      * @param <T> The type of pluggable that is being listened to.
      */
     public interface PluggableListener<T> {
-        /** Called whenever {@link #invalidateList()} is called on this pluggable. */
-        void onPluggableInvalidated(T pluggable);
+        /** Called whenever {@link #invalidateList(String)} is called on this pluggable. */
+        void onPluggableInvalidated(T pluggable, @Nullable String reason);
     }
 }

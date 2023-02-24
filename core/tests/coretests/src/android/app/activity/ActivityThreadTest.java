@@ -31,7 +31,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.annotation.Nullable;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ActivityThread.ActivityClientRecord;
 import android.app.IApplicationThread;
@@ -568,53 +567,6 @@ public class ActivityThreadTest {
             assertNotEquals("Application display size must be updated after config update",
                     newActivityMetrics, newApplicationMetrics);
         });
-    }
-
-    @Test
-    public void testHandleProcessConfigurationChanged_DependOnProcessState() {
-        final ActivityThread activityThread = ActivityThread.currentActivityThread();
-        final Configuration origConfig = activityThread.getConfiguration();
-        final int newDpi = origConfig.densityDpi + 10;
-        final Configuration newConfig = new Configuration(origConfig);
-        newConfig.seq++;
-        newConfig.densityDpi = newDpi;
-
-        activityThread.updateProcessState(ActivityManager.PROCESS_STATE_CACHED_ACTIVITY,
-                false /* fromIPC */);
-
-        applyProcessConfiguration(activityThread, newConfig);
-        try {
-            // In the cached state, the configuration is only set as pending and not applied.
-            assertEquals(origConfig.densityDpi, activityThread.getConfiguration().densityDpi);
-            assertTrue(activityThread.isCachedProcessState());
-        } finally {
-            // The foreground state is the default state of instrumentation.
-            activityThread.updateProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE,
-                    false /* fromIPC */);
-        }
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
-
-        try {
-            // The state becomes non-cached, the pending configuration should be applied.
-            assertEquals(newConfig.densityDpi, activityThread.getConfiguration().densityDpi);
-            assertFalse(activityThread.isCachedProcessState());
-        } finally {
-            // Restore to the original configuration.
-            activityThread.getConfiguration().seq = origConfig.seq - 1;
-            applyProcessConfiguration(activityThread, origConfig);
-        }
-    }
-
-    private static void applyProcessConfiguration(ActivityThread thread, Configuration config) {
-        final ClientTransaction clientTransaction = newTransaction(thread,
-                null /* activityToken */);
-        clientTransaction.addCallback(ConfigurationChangeItem.obtain(config));
-        final IApplicationThread appThread = thread.getApplicationThread();
-        try {
-            appThread.scheduleTransaction(clientTransaction);
-        } catch (Exception ignored) {
-        }
-        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
     @Test

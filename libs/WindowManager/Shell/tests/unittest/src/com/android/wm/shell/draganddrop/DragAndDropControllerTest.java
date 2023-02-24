@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -44,9 +45,12 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.sysui.ShellController;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -54,35 +58,50 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Optional;
-
 /**
  * Tests for the drag and drop controller.
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class DragAndDropControllerTest {
+public class DragAndDropControllerTest extends ShellTestCase {
 
     @Mock
     private Context mContext;
-
+    @Mock
+    private ShellInit mShellInit;
+    @Mock
+    private ShellController mShellController;
     @Mock
     private DisplayController mDisplayController;
-
     @Mock
     private UiEventLogger mUiEventLogger;
-
     @Mock
     private DragAndDropController.DragAndDropListener mDragAndDropListener;
+    @Mock
+    private IconProvider mIconProvider;
+    @Mock
+    private ShellExecutor mMainExecutor;
+    @Mock
+    private SplitScreenController mSplitScreenController;
 
     private DragAndDropController mController;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mController = new DragAndDropController(mContext, mDisplayController, mUiEventLogger,
-                mock(IconProvider.class), mock(ShellExecutor.class));
-        mController.initialize(Optional.of(mock(SplitScreenController.class)));
+        mController = new DragAndDropController(mContext, mShellInit, mShellController,
+                mDisplayController, mUiEventLogger, mIconProvider, mMainExecutor);
+        mController.onInit();
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
+    }
+
+    @Test
+    public void instantiateController_registerConfigChangeListener() {
+        verify(mShellController, times(1)).addConfigurationChangeListener(any());
     }
 
     @Test

@@ -20,12 +20,28 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
+import com.android.systemui.animation.LaunchableView;
+import com.android.systemui.animation.LaunchableViewDelegate;
+
+import kotlin.Unit;
+
 /**
  * A frame layout which does not have overlapping renderings commands and therefore does not need a
  * layer when alpha is changed.
  */
-public class AlphaOptimizedFrameLayout extends FrameLayout
+public class AlphaOptimizedFrameLayout extends FrameLayout implements LaunchableView
 {
+    private final LaunchableViewDelegate mLaunchableViewDelegate = new LaunchableViewDelegate(
+            this,
+            visibility -> {
+                super.setVisibility(visibility);
+                return Unit.INSTANCE;
+            },
+            visibility -> {
+                super.setTransitionVisibility(visibility);
+                return Unit.INSTANCE;
+            });
+
     public AlphaOptimizedFrameLayout(Context context) {
         super(context);
     }
@@ -46,5 +62,20 @@ public class AlphaOptimizedFrameLayout extends FrameLayout
     @Override
     public boolean hasOverlappingRendering() {
         return false;
+    }
+
+    @Override
+    public void setShouldBlockVisibilityChanges(boolean block) {
+        mLaunchableViewDelegate.setShouldBlockVisibilityChanges(block);
+    }
+
+    @Override
+    public void setVisibility(int visibility) {
+        mLaunchableViewDelegate.setVisibility(visibility);
+    }
+
+    @Override
+    public void setTransitionVisibility(int visibility) {
+        mLaunchableViewDelegate.setTransitionVisibility(visibility);
     }
 }

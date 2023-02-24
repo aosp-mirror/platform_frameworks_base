@@ -18,7 +18,7 @@ package com.android.systemui.statusbar
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.PowerManager
@@ -28,6 +28,7 @@ import android.util.IndentingPrintWriter
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
@@ -276,15 +277,22 @@ constructor(
         }
     }
 
-    private fun reset(child: ExpandableView) {
+    @VisibleForTesting
+    fun reset(
+            child: ExpandableView,
+            animationDuration: Long = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
+    ) {
         if (child.actualHeight == child.collapsedHeight) {
             setUserLocked(child, false)
             return
         }
-        val anim = ObjectAnimator.ofInt(child, "actualHeight",
-                child.actualHeight, child.collapsedHeight)
+        val anim = ValueAnimator.ofInt(child.actualHeight, child.collapsedHeight)
         anim.interpolator = Interpolators.FAST_OUT_SLOW_IN
-        anim.duration = SPRING_BACK_ANIMATION_LENGTH_MS.toLong()
+        anim.duration = animationDuration
+        anim.addUpdateListener { animation: ValueAnimator ->
+            // don't use reflection, because the `actualHeight` field may be obfuscated
+            child.actualHeight = animation.animatedValue as Int
+        }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator) {
                 setUserLocked(child, false)

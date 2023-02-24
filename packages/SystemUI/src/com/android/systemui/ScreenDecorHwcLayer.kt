@@ -44,7 +44,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 /**
- * When the HWC of the device supports Composition.DISPLAY_DECORATON, we use this layer to draw
+ * When the HWC of the device supports Composition.DISPLAY_DECORATION, we use this layer to draw
  * screen decorations.
  */
 class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDecorationSupport)

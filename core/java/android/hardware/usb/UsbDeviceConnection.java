@@ -108,6 +108,34 @@ public class UsbDeviceConnection {
     }
 
     /**
+     * This is meant to be called by UsbRequest's queue() in order to synchronize on
+     * UsbDeviceConnection's mLock to prevent the connection being closed while queueing.
+     */
+    /* package */ boolean queueRequest(UsbRequest request, ByteBuffer buffer, int length) {
+        synchronized (mLock) {
+            if (!isOpen()) {
+                return false;
+            }
+
+            return request.queueIfConnectionOpen(buffer, length);
+        }
+    }
+
+    /**
+     * This is meant to be called by UsbRequest's queue() in order to synchronize on
+     * UsbDeviceConnection's mLock to prevent the connection being closed while queueing.
+     */
+    /* package */ boolean queueRequest(UsbRequest request, @Nullable ByteBuffer buffer) {
+        synchronized (mLock) {
+            if (!isOpen()) {
+                return false;
+            }
+
+            return request.queueIfConnectionOpen(buffer);
+        }
+    }
+
+    /**
      * Releases all system resources related to the device.
      * Once the object is closed it cannot be used again.
      * The client must call {@link UsbManager#openDevice} again

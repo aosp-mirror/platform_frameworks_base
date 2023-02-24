@@ -25,8 +25,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.List;
 
 class CredstoreWritableIdentityCredential extends WritableIdentityCredential {
 
@@ -61,7 +62,7 @@ class CredstoreWritableIdentityCredential extends WritableIdentityCredential {
                 throw new RuntimeException("Error decoding certificates", e);
             }
 
-            LinkedList<X509Certificate> x509Certs = new LinkedList<>();
+            ArrayList<X509Certificate> x509Certs = new ArrayList<>();
             for (Certificate cert : certs) {
                 x509Certs.add((X509Certificate) cert);
             }

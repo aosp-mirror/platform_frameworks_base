@@ -59,7 +59,7 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
             }
             transitions {
                 imeTestApp.dismissDialog(wmHelper)
-                instrumentation.uiAutomation.syncInputTransactions()
+                wmHelper.waitImeGone()
             }
             teardown {
                 eachRun {
@@ -91,7 +91,7 @@ class CloseImeEditorPopupDialogTest(private val testSpec: FlickerTestParameter) 
                     .then()
                     .isVisible(FlickerComponentName.IME_SNAPSHOT)
                     .then()
-                    .isInvisible(FlickerComponentName.IME_SNAPSHOT)
+                    .isInvisible(FlickerComponentName.IME_SNAPSHOT, isOptional = true)
                     .isInvisible(FlickerComponentName.IME)
         }
     }

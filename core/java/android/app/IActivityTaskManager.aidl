@@ -69,8 +69,10 @@ import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
 import android.view.IRemoteAnimationRunner;
+import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
+import android.window.BackAnimationAdaptor;
 import android.window.IWindowOrganizerController;
 import android.window.BackNavigationInfo;
 import android.window.SplashScreenView;
@@ -157,7 +159,7 @@ interface IActivityTaskManager {
     boolean removeTask(int taskId);
     void removeAllVisibleRecentTasks();
     List<ActivityManager.RunningTaskInfo> getTasks(int maxNum, boolean filterOnlyVisibleRecents,
-            boolean keepIntentExtra);
+            boolean keepIntentExtra, int displayId);
     void moveTaskToFront(in IApplicationThread app, in String callingPackage, int task,
             int flags, in Bundle options);
     ParceledListSlice<ActivityManager.RecentTaskInfo> getRecentTasks(int maxNum, int flags,
@@ -263,9 +265,12 @@ interface IActivityTaskManager {
      * @param taskId the id of the task to retrieve the sAutoapshots for
      * @param isLowResolution if set, if the snapshot needs to be loaded from disk, this will load
      *                          a reduced resolution of it, which is much faster
+     * @param takeSnapshotIfNeeded if set, call {@link #takeTaskSnapshot} to trigger the snapshot
+                                   if no cache exists.
      * @return a graphic buffer representing a screenshot of a task
      */
-    android.window.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
+    android.window.TaskSnapshot getTaskSnapshot(
+            int taskId, boolean isLowResolution, boolean takeSnapshotIfNeeded);
 
     /**
      * @param taskId the id of the task to take a snapshot of
@@ -349,6 +354,8 @@ interface IActivityTaskManager {
      * Prepare the back navigation in the server. This setups the leashed for sysui to animate
      * the back gesture and returns the data needed for the animation.
      * @param requestAnimation true if the caller wishes to animate the back navigation
+     * @param focusObserver a remote callback to nofify shell when the focused window lost focus.
      */
-    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation);
+    android.window.BackNavigationInfo startBackNavigation(in boolean requestAnimation,
+            in IWindowFocusObserver focusObserver, in BackAnimationAdaptor adaptor);
 }

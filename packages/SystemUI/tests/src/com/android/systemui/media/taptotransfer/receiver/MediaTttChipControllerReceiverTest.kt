@@ -28,6 +28,7 @@ import android.testing.TestableLooper
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityManager
 import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
@@ -35,12 +36,11 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.common.MediaTttLogger
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.gesture.TapGestureDetector
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.util.view.ViewUtil
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -65,11 +65,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Mock
     private lateinit var logger: MediaTttLogger
     @Mock
+    private lateinit var accessibilityManager: AccessibilityManager
+    @Mock
+    private lateinit var configurationController: ConfigurationController
+    @Mock
     private lateinit var powerManager: PowerManager
     @Mock
     private lateinit var windowManager: WindowManager
-    @Mock
-    private lateinit var viewUtil: ViewUtil
     @Mock
     private lateinit var commandQueue: CommandQueue
     private lateinit var commandQueueCallback: CommandQueue.Callbacks
@@ -97,9 +99,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             context,
             logger,
             windowManager,
-            viewUtil,
             FakeExecutor(FakeSystemClock()),
-            TapGestureDetector(context),
+            accessibilityManager,
+            configurationController,
             powerManager,
             Handler.getMain(),
             receiverUiEventLogger
@@ -171,37 +173,72 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
             null
         )
 
-        verify(logger).logStateChange(any(), any())
+        verify(logger).logStateChange(any(), any(), any())
     }
 
     @Test
-    fun setIcon_isAppIcon_usesAppIconSize() {
-        controllerReceiver.displayChip(getChipReceiverInfo())
+    fun updateView_noOverrides_usesInfoFromAppIcon() {
+        controllerReceiver.displayView(
+            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride = null)
+        )
+
+        val view = getChipView()
+        assertThat(view.getAppIconView().drawable).isEqualTo(fakeAppIconDrawable)
+        assertThat(view.getAppIconView().contentDescription).isEqualTo(APP_NAME)
+    }
+
+    @Test
+    fun updateView_appIconOverride_usesOverride() {
+        val drawableOverride = context.getDrawable(R.drawable.ic_celebration)!!
+
+        controllerReceiver.displayView(
+            ChipReceiverInfo(routeInfo, drawableOverride, appNameOverride = null)
+        )
+
+        val view = getChipView()
+        assertThat(view.getAppIconView().drawable).isEqualTo(drawableOverride)
+    }
+
+    @Test
+    fun updateView_appNameOverride_usesOverride() {
+        val appNameOverride = "Sweet New App"
+
+        controllerReceiver.displayView(
+            ChipReceiverInfo(routeInfo, appIconDrawableOverride = null, appNameOverride)
+        )
+
+        val view = getChipView()
+        assertThat(view.getAppIconView().contentDescription).isEqualTo(appNameOverride)
+    }
+
+    @Test
+    fun updateView_isAppIcon_usesAppIconSize() {
+        controllerReceiver.displayView(getChipReceiverInfo(packageName = PACKAGE_NAME))
         val chipView = getChipView()
 
-        controllerReceiver.setIcon(chipView, PACKAGE_NAME)
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        val expectedSize = controllerReceiver.getIconSize(isAppIcon = true)
+        val expectedSize =
+            context.resources.getDimensionPixelSize(R.dimen.media_ttt_icon_size_receiver)
         assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
         assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
     }
 
     @Test
-    fun setIcon_notAppIcon_usesGenericIconSize() {
-        controllerReceiver.displayChip(getChipReceiverInfo())
+    fun updateView_notAppIcon_usesGenericIconSize() {
+        controllerReceiver.displayView(getChipReceiverInfo(packageName = null))
         val chipView = getChipView()
 
-        controllerReceiver.setIcon(chipView, appPackageName = null)
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         )
 
-        val expectedSize = controllerReceiver.getIconSize(isAppIcon = false)
+        val expectedSize =
+            context.resources.getDimensionPixelSize(R.dimen.media_ttt_generic_icon_size_receiver)
         assertThat(chipView.getAppIconView().measuredWidth).isEqualTo(expectedSize)
         assertThat(chipView.getAppIconView().measuredHeight).isEqualTo(expectedSize)
     }
@@ -224,8 +261,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         return viewCaptor.value as ViewGroup
     }
 
-    private fun getChipReceiverInfo(): ChipReceiverInfo =
-        ChipReceiverInfo(routeInfo, null, null)
+    private fun getChipReceiverInfo(packageName: String?): ChipReceiverInfo {
+        val routeInfo = MediaRoute2Info.Builder("id", "Test route name")
+            .addFeature("feature")
+            .setClientPackageName(packageName)
+            .build()
+        return ChipReceiverInfo(routeInfo, null, null)
+    }
 
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 }
@@ -235,5 +277,5 @@ private const val PACKAGE_NAME = "com.android.systemui"
 
 private val routeInfo = MediaRoute2Info.Builder("id", "Test route name")
     .addFeature("feature")
-    .setPackageName(PACKAGE_NAME)
+    .setClientPackageName(PACKAGE_NAME)
     .build()

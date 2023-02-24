@@ -17,5 +17,5 @@ package com.android.systemui.statusbar.phone;
 
 public interface StatusBarWindowCallback {
     void onStateChanged(boolean keyguardShowing, boolean keyguardOccluded, boolean bouncerShowing,
-            boolean isDozing);
+            boolean isDozing, boolean panelExpanded);
 }

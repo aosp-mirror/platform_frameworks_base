@@ -45,6 +45,8 @@
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
+                <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
+                            maxOccurs="1" />
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastDecrease">
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -95,12 +97,21 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Set of thresholds that dictate the change needed for screen brightness
+                adaptations while in idle mode -->
+                <xs:element type="thresholds" name="displayBrightnessChangeThresholdsIdle" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Set of thresholds that dictate the change needed for ambient brightness
+                adaptations while in idle mode -->
+                <xs:element type="thresholds" name="ambientBrightnessChangeThresholdsIdle" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <!-- Type definitions -->
-
     <xs:complexType name="displayQuirks">
         <xs:sequence>
             <xs:element name="quirk" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
@@ -318,13 +329,13 @@
     <!-- Thresholds for brightness changes. -->
     <xs:complexType name="thresholds">
         <xs:sequence>
-            <!-- Brightening thresholds. -->
+            <!-- Brightening thresholds for active screen brightness mode. -->
             <xs:element name="brighteningThresholds" type="brightnessThresholds" minOccurs="0"
                         maxOccurs="1" >
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
-            <!-- Darkening thresholds. -->
+            <!-- Darkening thresholds for active screen brightness mode. -->
             <xs:element name="darkeningThresholds" type="brightnessThresholds" minOccurs="0"
                         maxOccurs="1" >
                 <xs:annotation name="nonnull"/>
@@ -342,4 +353,73 @@
         </xs:element>
     </xs:complexType>
 
+    <xs:complexType name="autoBrightness">
+        <xs:sequence>
+            <!-- Sets the debounce for autoBrightness brightening in millis-->
+            <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the debounce for autoBrightness darkening in millis-->
+            <xs:element name="darkeningLightDebounceMillis" type="xs:nonNegativeInteger"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- Sets the brightness mapping of the desired screen brightness in nits to the
+             corresponding lux for the current display -->
+            <xs:element name="displayBrightnessMapping" type="displayBrightnessMapping"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Represents the brightness mapping of the desired screen brightness in nits to the
+             corresponding lux for the current display -->
+    <xs:complexType name="displayBrightnessMapping">
+        <xs:sequence>
+            <!-- Sets the list of display brightness points, each representing the desired screen
+            brightness in nits to the corresponding lux for the current display
+
+            The N entries of this array define N + 1 control points as follows:
+            (1-based arrays)
+
+            Point 1:            (0, nits[1]):             currentLux <= 0
+            Point 2:     (lux[1], nits[2]):       0 < currentLux <= lux[1]
+            Point 3:     (lux[2], nits[3]):  lux[2] < currentLux <= lux[3]
+            ...
+            Point N+1: (lux[N], nits[N+1]):            lux[N] < currentLux
+
+            The control points must be strictly increasing. Each control point
+            corresponds to an entry in the brightness backlight values arrays.
+            For example, if currentLux == lux[1] (first element of the levels array)
+            then the brightness will be determined by nits[2] (second element
+            of the brightness values array).
+            -->
+            <xs:element name="displayBrightnessPoint" type="displayBrightnessPoint"
+                        minOccurs="1" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Represents a point in the display brightness mapping, representing the lux level from the
+    light sensor to the desired screen brightness in nits at this level  -->
+    <xs:complexType name="displayBrightnessPoint">
+        <xs:sequence>
+            <!-- The lux level from the light sensor. This must be a non-negative integer -->
+            <xs:element name="lux" type="xs:nonNegativeInteger"
+                        minOccurs="1" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+
+            <!-- Desired screen brightness in nits corresponding to the suggested lux values.
+             The display brightness is defined as the measured brightness of an all-white image.
+             This must be a non-negative integer -->
+            <xs:element name="nits" type="nonNegativeDecimal"
+                        minOccurs="1" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>

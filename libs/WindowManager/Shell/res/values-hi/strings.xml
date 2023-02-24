@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल खारिज किया गया."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन पर देखने के लिए टैप करें."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"टैप करके ऐप्लिकेशन को रीस्टार्ट करें और बेहतर व्यू पाएं."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"क्या कैमरे से जुड़ी कोई समस्या है?\nफिर से फ़िट करने के लिए टैप करें"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"क्या समस्या ठीक नहीं हुई?\nपहले जैसा करने के लिए टैप करें"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"क्या कैमरे से जुड़ी कोई समस्या नहीं है? खारिज करने के लिए टैप करें."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"कुछ ऐप्लिकेशन, पोर्ट्रेट मोड में सबसे अच्छी तरह काम करते हैं"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"जगह का पूरा इस्तेमाल करने के लिए, इनमें से किसी एक विकल्प को आज़माएं"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"फ़ुल स्क्रीन मोड में जाने के लिए, डिवाइस को घुमाएं"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"किसी ऐप्लिकेशन की जगह बदलने के लिए, उसके बगल में दो बार टैप करें"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"पूरी जानकारी लेकर, बेहतर तरीके से काम करें"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"स्प्लिट स्क्रीन के लिए, दूसरे ऐप्लिकेशन को खींचें और छोड़ें"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"किसी ऐप्लिकेशन की जगह बदलने के लिए, उसके बाहर दो बार टैप करें"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"ठीक है"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"ज़्यादा जानकारी के लिए बड़ा करें."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"बड़ा करें"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"विंडो छोटी करें"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"बंद करें"</string>
 </resources>

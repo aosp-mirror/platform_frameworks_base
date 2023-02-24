@@ -83,7 +83,51 @@ public class ControllerActivity extends Activity implements View.OnApplyWindowIn
         final View contentView = findViewById(R.id.content);
         contentView.setOnApplyWindowInsetsListener(this);
         contentView.getWindowInsetsController().addOnControllableInsetsChangedListener(
-                (c, types) -> mTextControllableInsets.setText("ControllableInsetsTypes=" + types));
+                (c, types) -> mTextControllableInsets.setText(
+                        "ControllableInsetsTypes:\n" + insetsTypesToString(types)));
+    }
+
+    private static String insetsTypesToString(int types) {
+        if (types == 0) {
+            return "none";
+        }
+        final StringBuilder sb = new StringBuilder();
+        if ((types & Type.statusBars()) != 0) {
+            types &= ~Type.statusBars();
+            sb.append("statusBars ");
+        }
+        if ((types & Type.navigationBars()) != 0) {
+            types &= ~Type.navigationBars();
+            sb.append("navigationBars ");
+        }
+        if ((types & Type.captionBar()) != 0) {
+            types &= ~Type.captionBar();
+            sb.append("captionBar ");
+        }
+        if ((types & Type.ime()) != 0) {
+            types &= ~Type.ime();
+            sb.append("ime ");
+        }
+        if ((types & Type.systemGestures()) != 0) {
+            types &= ~Type.systemGestures();
+            sb.append("systemGestures ");
+        }
+        if ((types & Type.mandatorySystemGestures()) != 0) {
+            types &= ~Type.mandatorySystemGestures();
+            sb.append("mandatorySystemGestures ");
+        }
+        if ((types & Type.tappableElement()) != 0) {
+            types &= ~Type.tappableElement();
+            sb.append("tappableElement ");
+        }
+        if ((types & Type.displayCutout()) != 0) {
+            types &= ~Type.displayCutout();
+            sb.append("displayCutout ");
+        }
+        if (types != 0) {
+            sb.append("unknownTypes:").append(types);
+        }
+        return sb.toString();
     }
 
     @Override

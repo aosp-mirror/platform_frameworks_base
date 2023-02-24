@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -175,12 +177,14 @@ public final class PermissionHelper {
                 mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION,
                         userId, TAG);
             }
+            int flagMask = FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_USER_FIXED;
+            flagMask = userSet || !grant ? flagMask | FLAG_PERMISSION_GRANTED_BY_DEFAULT : flagMask;
             if (userSet) {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        FLAG_PERMISSION_USER_SET, FLAG_PERMISSION_USER_SET, true, userId);
+                        flagMask, FLAG_PERMISSION_USER_SET, true, userId);
             } else {
                 mPermManager.updatePermissionFlags(packageName, NOTIFICATION_PERMISSION,
-                        0, FLAG_PERMISSION_USER_SET, true, userId);
+                        flagMask, 0, true, userId);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not reach system server", e);

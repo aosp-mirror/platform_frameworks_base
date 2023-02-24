@@ -99,9 +99,11 @@ public class ImmersiveModeConfirmation {
     // Local copy of vr mode enabled state, to avoid calling into VrManager with
     // the lock held.
     private boolean mVrModeEnabled;
+    private boolean mCanSystemBarsBeShownByUser;
     private int mLockTaskState = LOCK_TASK_MODE_NONE;
 
-    ImmersiveModeConfirmation(Context context, Looper looper, boolean vrModeEnabled) {
+    ImmersiveModeConfirmation(Context context, Looper looper, boolean vrModeEnabled,
+            boolean canSystemBarsBeShownByUser) {
         final Display display = context.getDisplay();
         final Context uiContext = ActivityThread.currentActivityThread().getSystemUiContext();
         mContext = display.getDisplayId() == DEFAULT_DISPLAY
@@ -111,6 +113,7 @@ public class ImmersiveModeConfirmation {
         mPanicThresholdMs = context.getResources()
                 .getInteger(R.integer.config_immersive_mode_confirmation_panic);
         mVrModeEnabled = vrModeEnabled;
+        mCanSystemBarsBeShownByUser = canSystemBarsBeShownByUser;
     }
 
     private long getNavBarExitDuration() {
@@ -171,6 +174,7 @@ public class ImmersiveModeConfirmation {
             if ((DEBUG_SHOW_EVERY_TIME || !sConfirmed)
                     && userSetupComplete
                     && !mVrModeEnabled
+                    && mCanSystemBarsBeShownByUser
                     && !navBarEmpty
                     && !UserManager.isDeviceInDemoMode(mContext)
                     && (mLockTaskState != LOCK_TASK_MODE_LOCKED)) {

@@ -41,14 +41,11 @@ import javax.inject.Inject;
 @CoordinatorScope
 public class HideNotifsForOtherUsersCoordinator implements Coordinator {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
-    private final SharedCoordinatorLogger mLogger;
 
     @Inject
     public HideNotifsForOtherUsersCoordinator(
-            NotificationLockscreenUserManager lockscreenUserManager,
-            SharedCoordinatorLogger logger) {
+            NotificationLockscreenUserManager lockscreenUserManager) {
         mLockscreenUserManager = lockscreenUserManager;
-        mLogger = logger;
     }
 
     @Override
@@ -70,23 +67,19 @@ public class HideNotifsForOtherUsersCoordinator implements Coordinator {
         // changes
         @Override
         public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
-            mLogger.logUserOrProfileChanged(
-                    mLockscreenUserManager.getCurrentUserId(),
-                    profileIdsToStr(currentProfiles));
-            mFilter.invalidateList();
+            StringBuilder sb = new StringBuilder("onCurrentProfilesChanged:");
+            sb.append(" user=").append(mLockscreenUserManager.getCurrentUserId());
+            sb.append(" profiles=");
+            sb.append("{");
+            for (int i = 0; i < currentProfiles.size(); i++) {
+                if (i != 0) {
+                    sb.append(",");
+                }
+                sb.append(currentProfiles.keyAt(i));
+            }
+            sb.append("}");
+            mFilter.invalidateList(sb.toString());
         }
     };
 
-    private String profileIdsToStr(SparseArray<UserInfo> currentProfiles) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (int i = 0; i < currentProfiles.size(); i++) {
-            sb.append(currentProfiles.keyAt(i));
-            if (i < currentProfiles.size() - 1) {
-                sb.append(",");
-            }
-        }
-        sb.append("}");
-        return sb.toString();
-    }
 }

@@ -31,6 +31,8 @@ import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
+import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
+import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
@@ -38,6 +40,8 @@ import com.android.systemui.settings.UserTracker
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 
 data class ReceiverData(
     val receiver: BroadcastReceiver,
@@ -152,6 +156,55 @@ open class BroadcastDispatcher @Inject constructor(
                 .obtainMessage(MSG_ADD_RECEIVER, flags, 0, data)
                 .sendToTarget()
     }
+
+    /**
+     * Returns a [Flow] that, when collected, emits a new value whenever a broadcast matching
+     * [filter] is received. The value will be computed from the intent and the registered receiver
+     * using [map].
+     *
+     * @see registerReceiver
+     */
+    @JvmOverloads
+    fun <T> broadcastFlow(
+        filter: IntentFilter,
+        user: UserHandle? = null,
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null,
+        map: (Intent, BroadcastReceiver) -> T,
+    ): Flow<T> = conflatedCallbackFlow {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                trySendWithFailureLogging(map(intent, this), TAG)
+            }
+        }
+
+        registerReceiver(
+            receiver,
+            filter,
+            bgExecutor,
+            user,
+            flags,
+            permission,
+        )
+
+        awaitClose {
+            unregisterReceiver(receiver)
+        }
+    }
+
+    /**
+     * Returns a [Flow] that, when collected, emits `Unit` whenever a broadcast matching [filter] is
+     * received.
+     *
+     * @see registerReceiver
+     */
+    @JvmOverloads
+    fun broadcastFlow(
+        filter: IntentFilter,
+        user: UserHandle? = null,
+        @Context.RegisterReceiverFlags flags: Int = Context.RECEIVER_EXPORTED,
+        permission: String? = null,
+    ): Flow<Unit> = broadcastFlow(filter, user, flags, permission) { _, _ -> Unit }
 
     private fun checkFilter(filter: IntentFilter) {
         val sb = StringBuilder()

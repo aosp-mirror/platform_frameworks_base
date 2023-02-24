@@ -237,14 +237,10 @@ public class BluetoothUtils {
      * @return true if it supports advanced metadata, false otherwise.
      */
     public static boolean isAdvancedDetailsHeader(@NonNull BluetoothDevice bluetoothDevice) {
-        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SETTINGS_UI, BT_ADVANCED_HEADER_ENABLED,
-                true)) {
-            Log.d(TAG, "isAdvancedDetailsHeader: advancedEnabled is false");
+        if (!isAdvancedHeaderEnabled()) {
             return false;
         }
-        // The metadata is for Android R
-        if (getBooleanMetaData(bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)) {
-            Log.d(TAG, "isAdvancedDetailsHeader: untetheredHeadset is true");
+        if (isUntetheredHeadset(bluetoothDevice)) {
             return true;
         }
         // The metadata is for Android S
@@ -254,6 +250,59 @@ public class BluetoothUtils {
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_WATCH)
                 || TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_DEFAULT)) {
             Log.d(TAG, "isAdvancedDetailsHeader: deviceType is " + deviceType);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the Bluetooth device is supports advanced metadata and an untethered headset
+     *
+     * @param bluetoothDevice the BluetoothDevice to get metadata
+     * @return true if it supports advanced metadata and an untethered headset, false otherwise.
+     */
+    public static boolean isAdvancedUntetheredDevice(@NonNull BluetoothDevice bluetoothDevice) {
+        if (!isAdvancedHeaderEnabled()) {
+            return false;
+        }
+        if (isUntetheredHeadset(bluetoothDevice)) {
+            return true;
+        }
+        // The metadata is for Android S
+        String deviceType = getStringMetaData(bluetoothDevice,
+                BluetoothDevice.METADATA_DEVICE_TYPE);
+        if (TextUtils.equals(deviceType, BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET)) {
+            Log.d(TAG, "isAdvancedUntetheredDevice: is untethered device ");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if a device class matches with a defined BluetoothClass device.
+     *
+     * @param device Must be one of the public constants in {@link BluetoothClass.Device}
+     * @return true if device class matches, false otherwise.
+     */
+    public static boolean isDeviceClassMatched(@NonNull BluetoothDevice bluetoothDevice,
+            int device) {
+        return bluetoothDevice.getBluetoothClass() != null
+                && bluetoothDevice.getBluetoothClass().getDeviceClass() == device;
+    }
+
+    private static boolean isAdvancedHeaderEnabled() {
+        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SETTINGS_UI, BT_ADVANCED_HEADER_ENABLED,
+                true)) {
+            Log.d(TAG, "isAdvancedDetailsHeader: advancedEnabled is false");
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isUntetheredHeadset(@NonNull BluetoothDevice bluetoothDevice) {
+        // The metadata is for Android R
+        if (getBooleanMetaData(bluetoothDevice, BluetoothDevice.METADATA_IS_UNTETHERED_HEADSET)) {
+            Log.d(TAG, "isAdvancedDetailsHeader: untetheredHeadset is true");
             return true;
         }
         return false;

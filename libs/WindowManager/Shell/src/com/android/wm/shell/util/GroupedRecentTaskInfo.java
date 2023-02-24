@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.util;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.os.Parcel;
@@ -24,40 +25,143 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Simple container for recent tasks.  May contain either a single or pair of tasks.
  */
 public class GroupedRecentTaskInfo implements Parcelable {
-    public @NonNull ActivityManager.RecentTaskInfo mTaskInfo1;
-    public @Nullable ActivityManager.RecentTaskInfo mTaskInfo2;
-    public @Nullable StagedSplitBounds mStagedSplitBounds;
 
-    public GroupedRecentTaskInfo(@NonNull ActivityManager.RecentTaskInfo task1) {
-        this(task1, null, null);
+    public static final int TYPE_SINGLE = 1;
+    public static final int TYPE_SPLIT = 2;
+    public static final int TYPE_FREEFORM = 3;
+
+    @IntDef(prefix = {"TYPE_"}, value = {
+            TYPE_SINGLE,
+            TYPE_SPLIT,
+            TYPE_FREEFORM
+    })
+    public @interface GroupType {}
+
+    @NonNull
+    private final ActivityManager.RecentTaskInfo[] mTasks;
+    @Nullable
+    private final SplitBounds mSplitBounds;
+    @GroupType
+    private final int mType;
+
+    /**
+     * Create new for a single task
+     */
+    public static GroupedRecentTaskInfo forSingleTask(
+            @NonNull ActivityManager.RecentTaskInfo task) {
+        return new GroupedRecentTaskInfo(new ActivityManager.RecentTaskInfo[]{task}, null,
+                TYPE_SINGLE);
     }
 
-    public GroupedRecentTaskInfo(@NonNull ActivityManager.RecentTaskInfo task1,
-            @Nullable ActivityManager.RecentTaskInfo task2,
-            @Nullable StagedSplitBounds stagedSplitBounds) {
-        mTaskInfo1 = task1;
-        mTaskInfo2 = task2;
-        mStagedSplitBounds = stagedSplitBounds;
+    /**
+     * Create new for a pair of tasks in split screen
+     */
+    public static GroupedRecentTaskInfo forSplitTasks(@NonNull ActivityManager.RecentTaskInfo task1,
+            @NonNull ActivityManager.RecentTaskInfo task2, @Nullable SplitBounds splitBounds) {
+        return new GroupedRecentTaskInfo(new ActivityManager.RecentTaskInfo[]{task1, task2},
+                splitBounds, TYPE_SPLIT);
+    }
+
+    /**
+     * Create new for a group of freeform tasks
+     */
+    public static GroupedRecentTaskInfo forFreeformTasks(
+            @NonNull ActivityManager.RecentTaskInfo... tasks) {
+        return new GroupedRecentTaskInfo(tasks, null, TYPE_FREEFORM);
+    }
+
+    private GroupedRecentTaskInfo(@NonNull ActivityManager.RecentTaskInfo[] tasks,
+            @Nullable SplitBounds splitBounds, @GroupType int type) {
+        mTasks = tasks;
+        mSplitBounds = splitBounds;
+        mType = type;
     }
 
     GroupedRecentTaskInfo(Parcel parcel) {
-        mTaskInfo1 = parcel.readTypedObject(ActivityManager.RecentTaskInfo.CREATOR);
-        mTaskInfo2 = parcel.readTypedObject(ActivityManager.RecentTaskInfo.CREATOR);
-        mStagedSplitBounds = parcel.readTypedObject(StagedSplitBounds.CREATOR);
+        mTasks = parcel.createTypedArray(ActivityManager.RecentTaskInfo.CREATOR);
+        mSplitBounds = parcel.readTypedObject(SplitBounds.CREATOR);
+        mType = parcel.readInt();
+    }
+
+    /**
+     * Get primary {@link ActivityManager.RecentTaskInfo}
+     */
+    @NonNull
+    public ActivityManager.RecentTaskInfo getTaskInfo1() {
+        return mTasks[0];
+    }
+
+    /**
+     * Get secondary {@link ActivityManager.RecentTaskInfo}.
+     *
+     * Used in split screen.
+     */
+    @Nullable
+    public ActivityManager.RecentTaskInfo getTaskInfo2() {
+        if (mTasks.length > 1) {
+            return mTasks[1];
+        }
+        return null;
+    }
+
+    /**
+     * Get all {@link ActivityManager.RecentTaskInfo}s grouped together.
+     */
+    @NonNull
+    public List<ActivityManager.RecentTaskInfo> getTaskInfoList() {
+        return Arrays.asList(mTasks);
+    }
+
+    /**
+     * Return {@link SplitBounds} if this is a split screen entry or {@code null}
+     */
+    @Nullable
+    public SplitBounds getSplitBounds() {
+        return mSplitBounds;
+    }
+
+    /**
+     * Get type of this recents entry. One of {@link GroupType}
+     */
+    @GroupType
+    public int getType() {
+        return mType;
     }
 
     @Override
     public String toString() {
-        String taskString = "Task1: " + getTaskInfo(mTaskInfo1)
-                + ", Task2: " + getTaskInfo(mTaskInfo2);
-        if (mStagedSplitBounds != null) {
-            taskString += ", SplitBounds: " + mStagedSplitBounds.toString();
+        StringBuilder taskString = new StringBuilder();
+        for (int i = 0; i < mTasks.length; i++) {
+            if (i == 0) {
+                taskString.append("Task");
+            } else {
+                taskString.append(", Task");
+            }
+            taskString.append(i + 1).append(": ").append(getTaskInfo(mTasks[i]));
         }
-        return taskString;
+        if (mSplitBounds != null) {
+            taskString.append(", SplitBounds: ").append(mSplitBounds);
+        }
+        taskString.append(", Type=");
+        switch (mType) {
+            case TYPE_SINGLE:
+                taskString.append("TYPE_SINGLE");
+                break;
+            case TYPE_SPLIT:
+                taskString.append("TYPE_SPLIT");
+                break;
+            case TYPE_FREEFORM:
+                taskString.append("TYPE_FREEFORM");
+                break;
+        }
+        return taskString.toString();
     }
 
     private String getTaskInfo(ActivityManager.RecentTaskInfo taskInfo) {
@@ -74,9 +178,9 @@ public class GroupedRecentTaskInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeTypedObject(mTaskInfo1, flags);
-        parcel.writeTypedObject(mTaskInfo2, flags);
-        parcel.writeTypedObject(mStagedSplitBounds, flags);
+        parcel.writeTypedArray(mTasks, flags);
+        parcel.writeTypedObject(mSplitBounds, flags);
+        parcel.writeInt(mType);
     }
 
     @Override

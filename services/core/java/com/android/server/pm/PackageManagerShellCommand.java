@@ -1772,7 +1772,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int runCompile() throws RemoteException {
         final PrintWriter pw = getOutPrintWriter();
-        boolean checkProfiles = SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
+        boolean checkProfiles = true;
         boolean forceCompilation = false;
         boolean allPackages = false;
         boolean clearProfileData = false;
@@ -3183,6 +3183,10 @@ class PackageManagerShellCommand extends ShellCommand {
                     break;
                 case "--skip-verification":
                     sessionParams.installFlags |= PackageManager.INSTALL_DISABLE_VERIFICATION;
+                    break;
+                case "--bypass-low-target-sdk-block":
+                    sessionParams.installFlags |=
+                            PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);

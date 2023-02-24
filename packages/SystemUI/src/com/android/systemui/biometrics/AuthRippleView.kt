@@ -23,14 +23,13 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PointF
+import android.graphics.Point
 import android.util.AttributeSet
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.animation.Interpolators
-import com.android.systemui.statusbar.charging.DwellRippleShader
-import com.android.systemui.statusbar.charging.RippleShader
+import com.android.systemui.ripple.RippleShader
 
 private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
 
@@ -69,19 +68,19 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             dwellShader.maxRadius = value
             field = value
         }
-    private var dwellOrigin: PointF = PointF()
+    private var dwellOrigin: Point = Point()
         set(value) {
             dwellShader.origin = value
             field = value
         }
     private var radius: Float = 0f
         set(value) {
-            rippleShader.radius = value
+            rippleShader.setMaxSize(value * 2f, value * 2f)
             field = value
         }
-    private var origin: PointF = PointF()
+    private var origin: Point = Point()
         set(value) {
-            rippleShader.origin = value
+            rippleShader.setCenter(value.x.toFloat(), value.y.toFloat())
             field = value
         }
 
@@ -98,12 +97,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         visibility = GONE
     }
 
-    fun setSensorLocation(location: PointF) {
+    fun setSensorLocation(location: Point) {
         origin = location
         radius = maxOf(location.x, location.y, width - location.x, height - location.y).toFloat()
     }
 
-    fun setFingerprintSensorLocation(location: PointF, sensorRadius: Float) {
+    fun setFingerprintSensorLocation(location: Point, sensorRadius: Float) {
         origin = location
         radius = maxOf(location.x, location.y, width - location.x, height - location.y).toFloat()
         dwellOrigin = location
@@ -298,7 +297,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
                     unlockedRippleInProgress = true
-                    rippleShader.shouldFadeOutRipple = true
+                    rippleShader.rippleFill = false
                     drawRipple = true
                     visibility = VISIBLE
                 }
@@ -350,13 +349,15 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         if (drawDwell) {
             val maskRadius = (1 - (1 - dwellShader.progress) * (1 - dwellShader.progress) *
                     (1 - dwellShader.progress)) * dwellRadius * 2f
-            canvas?.drawCircle(dwellOrigin.x, dwellOrigin.y, maskRadius, dwellPaint)
+            canvas?.drawCircle(dwellOrigin.x.toFloat(), dwellOrigin.y.toFloat(),
+                    maskRadius, dwellPaint)
         }
 
         if (drawRipple) {
             val mask = (1 - (1 - rippleShader.progress) * (1 - rippleShader.progress) *
                     (1 - rippleShader.progress)) * radius * 2f
-            canvas?.drawCircle(origin.x, origin.y, mask, ripplePaint)
+            canvas?.drawCircle(origin.x.toFloat(), origin.y.toFloat(),
+                    mask, ripplePaint)
         }
     }
 }

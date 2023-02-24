@@ -67,6 +67,14 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mHandler.post(() -> {
                 Slog.d(getTag(), "[Client finished] " + clientMonitor + ", success: " + success);
+
+                // Set mStopUserClient to null when StopUserClient fails. Otherwise it's possible
+                // for that the queue will wait indefinitely until the field is cleared.
+                if (clientMonitor instanceof StopUserClient<?> && !success) {
+                    Slog.w(getTag(),
+                            "StopUserClient failed(), is the HAL stuck? Clearing mStopUserClient");
+                    mStopUserClient = null;
+                }
                 if (mCurrentOperation != null && mCurrentOperation.isFor(mOwner)) {
                     mCurrentOperation = null;
                 } else {
@@ -165,5 +173,10 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
         Slog.d(getTag(), "[OnUserStopped]: " + mStopUserClient);
         mStopUserClient.onUserStopped();
         mStopUserClient = null;
+    }
+
+    @VisibleForTesting
+    @Nullable public StopUserClient<?> getStopUserClient() {
+        return mStopUserClient;
     }
 }

@@ -72,13 +72,16 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Buborék"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kezelés"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Buborék elvetve."</string>
-    <string name="restart_button_description" msgid="5887656107651190519">"Koppintson az alkalmazás újraindításához és a teljes képernyős mód elindításához."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"A jobb nézet érdekében koppintson az alkalmazás újraindításához."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Kamerával kapcsolatos problémába ütközött?\nKoppintson a megoldáshoz."</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nem sikerült a hiba kijavítása?\nKoppintson a visszaállításhoz."</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nincsenek problémái kamerával? Koppintson az elvetéshez."</string>
-    <string name="letterbox_education_dialog_title" msgid="6688664582871779215">"Egyes alkalmazások álló tájolásban működnek a leghatékonyabban"</string>
-    <string name="letterbox_education_dialog_subtext" msgid="4853542518367719562">"Próbálja ki az alábbi beállítások egyikét, hogy a legjobban ki tudja használni képernyő területét"</string>
-    <string name="letterbox_education_screen_rotation_text" msgid="5085786687366339027">"A teljes képernyős mód elindításához forgassa el az eszközt"</string>
-    <string name="letterbox_education_reposition_text" msgid="1068293354123934727">"Koppintson duplán az alkalmazás mellett az áthelyezéséhez"</string>
+    <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Több mindent láthat és tehet"</string>
+    <string name="letterbox_education_split_screen_text" msgid="6206339484068670830">"Húzzon ide egy másik alkalmazást az osztott képernyő használatához"</string>
+    <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Koppintson duplán az alkalmazáson kívül az áthelyezéséhez"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Értem"</string>
+    <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Kibontással további információkhoz juthat."</string>
+    <string name="maximize_button_text" msgid="1650859196290301963">"Teljes méret"</string>
+    <string name="minimize_button_text" msgid="271592547935841753">"Kis méret"</string>
+    <string name="close_button_text" msgid="2913281996024033299">"Bezárás"</string>
 </resources>

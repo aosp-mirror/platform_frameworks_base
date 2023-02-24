@@ -16,16 +16,17 @@
 -->
 
 <!-- Action buttons for footer in QS/QQS, containing settings button, power off button etc -->
+<!-- TODO(b/242040009): Clean up this file. -->
 <com.android.systemui.qs.FooterActionsView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/footer_actions_height"
     android:elevation="@dimen/qs_panel_elevation"
-    android:paddingTop="8dp"
+    android:paddingTop="@dimen/qs_footer_actions_top_padding"
     android:paddingBottom="@dimen/qs_footer_actions_bottom_padding"
     android:background="@drawable/qs_footer_actions_background"
-    android:gravity="center_vertical"
+    android:gravity="center_vertical|end"
     android:layout_gravity="bottom"
 >
 

@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
-import android.view.LayoutInflater;
 
 import androidx.test.filters.SmallTest;
 
@@ -42,15 +41,16 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
-import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -58,12 +58,9 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
-import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
-import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -73,8 +70,6 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -110,27 +105,22 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
     @Mock private KeyguardBypassController mKeyguardBypassController;
-    @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private NotificationLockscreenUserManager mNotificationLockscreenUserManager;
     @Mock private MetricsLogger mMetricsLogger;
+    @Mock private DumpManager mDumpManager;
     @Mock private Resources mResources;
     @Mock(answer = Answers.RETURNS_SELF)
     private NotificationSwipeHelper.Builder mNotificationSwipeHelperBuilder;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ScrimController mScrimController;
-    @Mock private NotificationGroupManagerLegacy mLegacyGroupManager;
+    @Mock private GroupExpansionManager mGroupExpansionManager;
     @Mock private SectionHeaderController mSilentHeaderController;
-    @Mock private NotifPipelineFlags mNotifPipelineFlags;
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private NotifCollection mNotifCollection;
-    @Mock private NotificationEntryManager mEntryManager;
-    @Mock private IStatusBarService mIStatusBarService;
     @Mock private UiEventLogger mUiEventLogger;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
-    @Mock private LayoutInflater mLayoutInflater;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private ShadeController mShadeController;
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private StackStateLogger mStackLogger;
@@ -148,7 +138,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mNotificationSwipeHelperBuilder.build()).thenReturn(mNotificationSwipeHelper);
-        when(mNotifPipelineFlags.isNewPipelineEnabled()).thenReturn(false);
 
         mController = new NotificationStackScrollLayoutController(
                 true,
@@ -164,29 +153,23 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mKeyguardMediaController,
                 mKeyguardBypassController,
                 mZenModeController,
-                mColorExtractor,
                 mNotificationLockscreenUserManager,
                 mMetricsLogger,
+                mDumpManager,
                 new FalsingCollectorFake(),
                 new FalsingManagerFake(),
                 mResources,
                 mNotificationSwipeHelperBuilder,
                 mCentralSurfaces,
                 mScrimController,
-                mLegacyGroupManager,
-                mLegacyGroupManager,
+                mGroupExpansionManager,
                 mSilentHeaderController,
-                mNotifPipelineFlags,
                 mNotifPipeline,
                 mNotifCollection,
-                mEntryManager,
                 mLockscreenShadeTransitionController,
                 mShadeTransitionController,
-                mIStatusBarService,
                 mUiEventLogger,
-                mLayoutInflater,
                 mRemoteInputManager,
-                mVisualStabilityManager,
                 mShadeController,
                 mJankMonitor,
                 mStackLogger,

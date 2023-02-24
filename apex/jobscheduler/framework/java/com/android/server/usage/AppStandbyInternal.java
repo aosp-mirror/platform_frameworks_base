@@ -164,6 +164,13 @@ public interface AppStandbyInternal {
             @ElapsedRealtimeLong long elapsedRealtime);
 
     /**
+     * Puts the list of apps in the {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RARE}
+     * bucket.
+     * @param restoredApps the list of restored apps
+     */
+    void restoreAppsToRare(@NonNull Set<String> restoredApps, int userId);
+
+    /**
      * Put the specified app in the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}
      * bucket. If it has been used by the user recently, the restriction will delayed until an

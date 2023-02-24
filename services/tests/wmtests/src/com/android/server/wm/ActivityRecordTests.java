@@ -29,6 +29,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
+import static android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE;
+import static android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
 import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
@@ -181,6 +183,10 @@ import java.util.function.Consumer;
 public class ActivityRecordTests extends WindowTestsBase {
 
     private final String mPackageName = getInstrumentation().getTargetContext().getPackageName();
+
+    private static final int ORIENTATION_CONFIG_CHANGES =
+            CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT | CONFIG_SCREEN_SIZE
+                    | CONFIG_SMALLEST_SCREEN_SIZE;
 
     @Before
     public void setUp() throws Exception {
@@ -487,7 +493,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
-                .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
+                .setConfigChanges(ORIENTATION_CONFIG_CHANGES)
                 .build();
         activity.setState(RESUMED, "Testing");
 
@@ -545,8 +551,9 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = task.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = task.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
-        policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
+
+        insets.set(policy.getDecorInsetsInfo(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight).mConfigInsets);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
         final boolean isScreenPortrait = stableRect.width() <= stableRect.height();
@@ -586,8 +593,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Rect insets = new Rect();
         final DisplayInfo displayInfo = rootTask.mDisplayContent.getDisplayInfo();
         final DisplayPolicy policy = rootTask.mDisplayContent.getDisplayPolicy();
-        policy.getNonDecorInsetsLw(displayInfo.rotation, displayInfo.displayCutout, insets);
-        policy.convertNonDecorInsetsToStableInsets(insets, displayInfo.rotation);
+        insets.set(policy.getDecorInsetsInfo(displayInfo.rotation, displayInfo.logicalWidth,
+                displayInfo.logicalHeight).mConfigInsets);
         Task.intersectWithInsetsIfFits(stableRect, stableRect, insets);
 
         final boolean isScreenPortrait = stableRect.width() <= stableRect.height();
@@ -710,7 +717,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setLaunchTaskBehind(true)
-                .setConfigChanges(CONFIG_ORIENTATION | CONFIG_SCREEN_LAYOUT)
+                .setConfigChanges(ORIENTATION_CONFIG_CHANGES)
                 .build();
         final Task task = activity.getTask();
         activity.setState(STOPPED, "Testing");
@@ -1158,6 +1165,45 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity2.inTransition());
         assertEquals(lastTransition, testPlayer.mLastTransit);
         assertTrue(lastTransition.allReady());
+    }
+
+    @Test
+    public void testFinishActivityIfPossible_sendResultImmediately() {
+        // Create activity representing the source of the activity result.
+        final ComponentName sourceComponent = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME, ".SourceActivity");
+        final ComponentName targetComponent = ComponentName.createRelative(
+                sourceComponent.getPackageName(), ".TargetActivity");
+
+        final ActivityRecord sourceActivity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(sourceComponent)
+                .setLaunchMode(ActivityInfo.LAUNCH_SINGLE_INSTANCE)
+                .setCreateTask(true)
+                .build();
+        sourceActivity.finishing = false;
+        sourceActivity.setState(STOPPED, "test");
+
+        final ActivityRecord targetActivity = new ActivityBuilder(mWm.mAtmService)
+                .setComponent(targetComponent)
+                .setTargetActivity(sourceComponent.getClassName())
+                .setLaunchMode(ActivityInfo.LAUNCH_SINGLE_INSTANCE)
+                .setCreateTask(true)
+                .setOnTop(true)
+                .build();
+        targetActivity.finishing = false;
+        targetActivity.setState(RESUMED, "test");
+        targetActivity.resultTo = sourceActivity;
+        targetActivity.setForceSendResultForMediaProjection();
+
+        clearInvocations(mAtm.getLifecycleManager());
+
+        targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
+
+        try {
+            verify(mAtm.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
+                    any(ClientTransaction.class));
+        } catch (RemoteException ignored) {
+        }
     }
 
     /**
@@ -1786,13 +1832,16 @@ public class ActivityRecordTests extends WindowTestsBase {
     public void testActivityOnCancelFixedRotationTransform() {
         final ActivityRecord activity = createActivityWithTask();
         final DisplayRotation displayRotation = activity.mDisplayContent.getDisplayRotation();
+        final RemoteDisplayChangeController remoteDisplayChangeController = activity
+                .mDisplayContent.mRemoteDisplayChangeController;
         spyOn(displayRotation);
+        spyOn(remoteDisplayChangeController);
 
         final DisplayContent display = activity.mDisplayContent;
         final int originalRotation = display.getRotation();
 
         // Make {@link DisplayContent#sendNewConfiguration} not apply rotation immediately.
-        doReturn(true).when(displayRotation).isWaitingForRemoteRotation();
+        doReturn(true).when(remoteDisplayChangeController).isWaitingForRemoteDisplayChange();
         doReturn((originalRotation + 1) % 4).when(displayRotation).rotationForOrientation(
                 anyInt() /* orientation */, anyInt() /* lastRotation */);
         // Set to visible so the activity can freeze the screen.
@@ -1830,7 +1879,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Simulate the remote rotation has completed and the configuration doesn't change, then
         // the rotated activity should also be restored by clearing the transform.
         displayRotation.updateRotationUnchecked(true /* forceUpdate */);
-        doReturn(false).when(displayRotation).isWaitingForRemoteRotation();
+        doReturn(false).when(remoteDisplayChangeController).isWaitingForRemoteDisplayChange();
         clearInvocations(activity);
         display.setFixedRotationLaunchingAppUnchecked(activity);
         display.sendNewConfiguration();
@@ -1954,7 +2003,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any() /* window */,  any() /* attrs */,
                     anyInt() /* viewVisibility */, anyInt() /* displayId */,
                     any() /* requestedVisibilities */, any() /* outInputChannel */,
-                    any() /* outInsetsState */, any() /* outActiveControls */);
+                    any() /* outInsetsState */, any() /* outActiveControls */,
+                    any() /* outAttachedFrame */, any() /* outSizeCompatScale */);
             mAtm.mWindowManager.mStartingSurfaceController
                     .createTaskSnapshotSurface(activity, snapshot);
         } catch (RemoteException ignored) {
@@ -2165,39 +2215,6 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSupportsSplitScreenWindowingMode() {
-        final ActivityRecord activity = new ActivityBuilder(mAtm)
-                .setCreateTask(true)
-                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
-                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
-                .build();
-
-        // Not allow non-resizable
-        mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = -1;
-        mAtm.mDevEnableNonResizableMultiWindow = false;
-        assertFalse(activity.supportsSplitScreenWindowingMode());
-
-        // Force resizable
-        mAtm.mForceResizableActivities = true;
-        mAtm.mSupportsNonResizableMultiWindow = -1;
-        mAtm.mDevEnableNonResizableMultiWindow = false;
-        assertTrue(activity.supportsSplitScreenWindowingMode());
-
-        // Use development option to allow non-resizable
-        mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = -1;
-        mAtm.mDevEnableNonResizableMultiWindow = true;
-        assertTrue(activity.supportsSplitScreenWindowingMode());
-
-        // Always allow non-resizable
-        mAtm.mForceResizableActivities = false;
-        mAtm.mSupportsNonResizableMultiWindow = 1;
-        mAtm.mDevEnableNonResizableMultiWindow = false;
-        assertTrue(activity.supportsSplitScreenWindowingMode());
-    }
-
-    @Test
     public void testSupportsFreeform() {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -2298,6 +2315,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         assertEquals(launchCookie, activity2.mLaunchCookie);
         assertNull(activity1.mLaunchCookie);
+        activity2.makeFinishingLocked();
+        assertTrue(activity1.getTask().getTaskInfo().launchCookies.contains(launchCookie));
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,
@@ -2448,6 +2467,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.addWindow(appWindow);
         spyOn(appWindow);
         doNothing().when(appWindow).onStartFreezingScreen();
+        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
 
         // Set initial orientation and update.
         performRotation(displayRotation, Surface.ROTATION_90);
@@ -2456,8 +2476,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Update the rotation to perform 180 degree rotation and check that resize was reported.
         performRotation(displayRotation, Surface.ROTATION_270);
         assertTrue(appWindow.mResizeReported);
-
-        appWindow.removeImmediately();
     }
 
     private void performRotation(DisplayRotation spiedRotation, int rotationToReport) {
@@ -2851,6 +2869,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
         fragmentSetup.accept(taskFragment1, new Rect(0, 0, width / 2, height));
         task.addChild(taskFragment1, POSITION_TOP);
+        assertEquals(task, activity1.mStartingData.mAssociatedTask);
 
         final TaskFragment taskFragment2 = new TaskFragment(
                 mAtm, null /* fragmentToken */, false /* createdByOrganizer */);
@@ -2872,7 +2891,6 @@ public class ActivityRecordTests extends WindowTestsBase {
                 eq(task.mSurfaceControl));
         assertEquals(activity1.mStartingData, startingWindow.mStartingData);
         assertEquals(task.mSurfaceControl, startingWindow.getAnimationLeashParent());
-        assertEquals(task, activity1.mStartingData.mAssociatedTask);
         assertEquals(taskFragment1.getBounds(), activity1.getBounds());
         // The activity was resized by task fragment, but starting window must still cover the task.
         assertEquals(taskBounds, activity1.mStartingWindow.getBounds());
@@ -2880,7 +2898,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         // The starting window is only removed when all embedded activities are drawn.
         final WindowState activityWindow = mock(WindowState.class);
         activity1.onFirstWindowDrawn(activityWindow);
-        assertNotNull(activity1.mStartingWindow);
         activity2.onFirstWindowDrawn(activityWindow);
         assertNull(activity1.mStartingWindow);
     }
@@ -2969,31 +2986,29 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCloseToSquareFixedOrientationPortrait() {
+    public void testCloseToSquareFixedOrientation() {
         // create a square display
         final DisplayContent squareDisplay = new TestDisplayContent.Builder(mAtm, 2000, 2000)
                 .setSystemDecorations(true).build();
+        // Add a decor insets provider window.
+        final WindowState navbar = createNavBarWithProvidedInsets(squareDisplay);
+        assertTrue(navbar.providesNonDecorInsets()
+                && squareDisplay.getDisplayPolicy().updateDecorInsetsInfo());
+        squareDisplay.sendNewConfiguration();
         final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
 
         // create a fixed portrait activity
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
+        ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT).build();
 
-        // check that both the configuration and app bounds are portrait
+        // The available space could be landscape because of decor insets, but the configuration
+        // should still respect the requested portrait orientation.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
         assertTrue(activity.getConfiguration().windowConfiguration.getAppBounds().width()
                 <= activity.getConfiguration().windowConfiguration.getAppBounds().height());
-    }
-
-    @Test
-    public void testCloseToSquareFixedOrientationLandscape() {
-        // create a square display
-        final DisplayContent squareDisplay = new TestDisplayContent.Builder(mAtm, 2000, 2000)
-                .setSystemDecorations(true).build();
-        final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
 
         // create a fixed landscape activity
-        final ActivityRecord activity = new ActivityBuilder(mAtm).setTask(task)
+        activity = new ActivityBuilder(mAtm).setTask(task)
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE).build();
 
         // check that both the configuration and app bounds are landscape

@@ -113,7 +113,7 @@ final class InitAppsHelper {
             mScanFlags = scanFlags;
         }
         mSystemParseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
-        mSystemScanFlags = scanFlags | SCAN_AS_SYSTEM;
+        mSystemScanFlags = mScanFlags | SCAN_AS_SYSTEM;
         mExecutorService = ParallelPackageParser.makeExecutorService();
     }
 

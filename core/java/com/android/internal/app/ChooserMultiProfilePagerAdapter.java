@@ -93,6 +93,10 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         return profileDescriptor;
     }
 
+    public void setMaxTargetsPerRow(int maxTargetsPerRow) {
+        mMaxTargetsPerRow = maxTargetsPerRow;
+    }
+
     RecyclerView getListViewForIndex(int index) {
         return getItem(index).recyclerView;
     }

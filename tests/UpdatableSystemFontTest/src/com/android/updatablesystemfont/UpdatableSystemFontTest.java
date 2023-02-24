@@ -373,6 +373,10 @@ public class UpdatableSystemFontTest {
         try (InputStream is = new FileInputStream(certPath)) {
             result = runShellCommand("mini-keyctl padd asymmetric fsv_test .fs-verity", is);
         }
+        // /data/local/tmp is not readable by system server. Copy a cert file to /data/fonts
+        final String copiedCert = "/data/fonts/debug_cert.der";
+        runShellCommand("cp " + certPath + " " + copiedCert, null);
+        runShellCommand("cmd font install-debug-cert " + copiedCert, null);
         // Assert that there are no errors.
         assertThat(result.second).isEmpty();
         String keyId = result.first.trim();

@@ -376,6 +376,20 @@ aidl_interface {
     },
 }
 
+// Build Rust bindings for remote provisioning. Needed by keystore2.
+aidl_interface {
+    name: "android.security.rkp_aidl",
+    unstable: true,
+    srcs: [
+        "android/security/rkp/*.aidl",
+    ],
+    backend: {
+        rust: {
+            enabled: true,
+        },
+    },
+}
+
 aidl_interface {
     name: "android.debug_aidl",
     unstable: true,
@@ -432,6 +446,7 @@ filegroup {
         "android/os/IInterface.java",
         "android/os/Binder.java",
         "android/os/IBinder.java",
+        "android/os/Parcelable.java",
     ],
 }
 
@@ -499,5 +514,10 @@ java_library {
 // temporary placeholder until the real module is available
 java_library {
     name: "framework-configinfrastructure",
+    sdk_version: "module_current",
+}
+
+java_library {
+    name: "framework-configinfrastructure.stubs.module_lib",
     sdk_version: "module_current",
 }

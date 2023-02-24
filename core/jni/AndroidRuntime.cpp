@@ -196,7 +196,7 @@ extern int register_android_security_Scrypt(JNIEnv *env);
 extern int register_com_android_internal_content_F2fsUtils(JNIEnv* env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
-extern int register_com_android_internal_expresslog_Counter(JNIEnv* env);
+extern int register_com_android_internal_expresslog_Utils(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
@@ -640,7 +640,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char jitmaxsizeOptsBuf[sizeof("-Xjitmaxsize:")-1 + PROPERTY_VALUE_MAX];
     char jitinitialsizeOptsBuf[sizeof("-Xjitinitialsize:")-1 + PROPERTY_VALUE_MAX];
     char jitthresholdOptsBuf[sizeof("-Xjitthreshold:")-1 + PROPERTY_VALUE_MAX];
-    char useJitProfilesOptsBuf[sizeof("-Xjitsaveprofilinginfo:")-1 + PROPERTY_VALUE_MAX];
     char jitprithreadweightOptBuf[sizeof("-Xjitprithreadweight:")-1 + PROPERTY_VALUE_MAX];
     char jittransitionweightOptBuf[sizeof("-Xjittransitionweight:")-1 + PROPERTY_VALUE_MAX];
     char hotstartupsamplesOptsBuf[sizeof("-Xps-hot-startup-method-samples:")-1 + PROPERTY_VALUE_MAX];
@@ -856,10 +855,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     parseRuntimeOption("dalvik.vm.jitpthreadpriority",
                        jitpthreadpriorityOptsBuf,
                        "-Xjitpthreadpriority:");
-    property_get("dalvik.vm.usejitprofiles", useJitProfilesOptsBuf, "");
-    if (strcmp(useJitProfilesOptsBuf, "true") == 0) {
-        addOption("-Xjitsaveprofilinginfo");
-    }
+    addOption("-Xjitsaveprofilinginfo");
 
     parseRuntimeOption("dalvik.vm.jitprithreadweight",
                        jitprithreadweightOptBuf,
@@ -1595,7 +1591,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_SharedMemory),
         REG_JNI(register_android_os_incremental_IncrementalManager),
         REG_JNI(register_com_android_internal_content_om_OverlayConfig),
-        REG_JNI(register_com_android_internal_expresslog_Counter),
+        REG_JNI(register_com_android_internal_expresslog_Utils),
         REG_JNI(register_com_android_internal_net_NetworkUtilsInternal),
         REG_JNI(register_com_android_internal_os_ClassLoaderFactory),
         REG_JNI(register_com_android_internal_os_LongArrayMultiStateCounter),

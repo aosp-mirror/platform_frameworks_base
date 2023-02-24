@@ -21,5 +21,10 @@
     <dimen name="keyguard_status_view_bottom_margin">40dp</dimen>
     <dimen name="bouncer_user_switcher_y_trans">20dp</dimen>
 
+    <!-- qs_tiles_page_horizontal_margin should be margin / 2, otherwise full space between two
+         pages is margin * 2, and that makes tiles page not appear immediately after user swipes to
+         the side -->
+    <dimen name="qs_tiles_page_horizontal_margin">32dp</dimen>
+
     <dimen name="qqs_layout_padding_bottom">16dp</dimen>
 </resources>

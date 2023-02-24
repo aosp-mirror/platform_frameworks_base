@@ -90,7 +90,6 @@ filegroup {
         ":services.autofill-sources",
         ":services.backup-sources",
         ":backuplib-sources",
-        ":services.cloudsearch-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
@@ -143,7 +142,6 @@ java_library {
         "services.appwidget",
         "services.autofill",
         "services.backup",
-        "services.cloudsearch",
         "services.companion",
         "services.contentcapture",
         "services.contentsuggestions",
@@ -176,7 +174,12 @@ java_library {
         "framework-tethering.stubs.module_lib",
         "service-art.stubs.system_server",
         "service-permission.stubs.system_server",
+        "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
+    ],
+
+    vintf_fragments: [
+        "manifest_services.xml",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)

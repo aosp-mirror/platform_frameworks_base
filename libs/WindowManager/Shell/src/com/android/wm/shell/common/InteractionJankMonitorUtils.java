@@ -18,7 +18,9 @@ package com.android.wm.shell.common;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.text.TextUtils;
+import android.view.SurfaceControl;
 import android.view.View;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -37,6 +39,24 @@ public class InteractionJankMonitorUtils {
             @NonNull View view, @Nullable String tag) {
         final InteractionJankMonitor.Configuration.Builder builder =
                 InteractionJankMonitor.Configuration.Builder.withView(cujType, view);
+        if (!TextUtils.isEmpty(tag)) {
+            builder.setTag(tag);
+        }
+        InteractionJankMonitor.getInstance().begin(builder);
+    }
+
+    /**
+     * Begin a trace session.
+     *
+     * @param cujType the specific {@link InteractionJankMonitor.CujType}.
+     * @param context the context
+     * @param surface the surface to trace
+     * @param tag the tag to distinguish different flow of same type CUJ.
+     */
+    public static void beginTracing(@InteractionJankMonitor.CujType int cujType,
+            @NonNull Context context, @NonNull SurfaceControl surface, @Nullable String tag) {
+        final InteractionJankMonitor.Configuration.Builder builder =
+                InteractionJankMonitor.Configuration.Builder.withSurface(cujType, context, surface);
         if (!TextUtils.isEmpty(tag)) {
             builder.setTag(tag);
         }

@@ -30,6 +30,7 @@ import android.companion.CompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
@@ -38,8 +39,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.util.Slog;
-
-import com.android.internal.util.ArrayUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -65,15 +64,20 @@ final class PackageUtils {
 
     static void enforceUsesCompanionDeviceFeature(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
-        final boolean requested = ArrayUtils.contains(
-                getPackageInfo(context, userId, packageName).reqFeatures,
-                FEATURE_COMPANION_DEVICE_SETUP);
+        String requiredFeature = FEATURE_COMPANION_DEVICE_SETUP;
 
-        if (requested) {
-            throw new IllegalStateException("Must declare uses-feature "
-                    + FEATURE_COMPANION_DEVICE_SETUP
-                    + " in manifest to use this API");
+        FeatureInfo[] requestedFeatures = getPackageInfo(context, userId, packageName).reqFeatures;
+        if (requestedFeatures != null) {
+            for (int i = 0; i < requestedFeatures.length; i++) {
+                if (requiredFeature.equals(requestedFeatures[i].name)) {
+                    return;
+                }
+            }
         }
+
+        throw new IllegalStateException("Must declare uses-feature "
+                + requiredFeature
+                + " in manifest to use this API");
     }
 
     /**

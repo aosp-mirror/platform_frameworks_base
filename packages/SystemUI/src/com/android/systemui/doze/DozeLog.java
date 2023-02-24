@@ -332,6 +332,20 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Logs the car mode started event.
+     */
+    public void traceCarModeStarted() {
+        mLogger.logCarModeStarted();
+    }
+
+    /**
+     * Logs the car mode ended event.
+     */
+    public void traceCarModeEnded() {
+        mLogger.logCarModeEnded();
+    }
+
+    /**
      * Appends power save changes that may cause a new doze state
      * @param powerSaveActive true if power saving is active
      * @param nextState the state that we'll transition to

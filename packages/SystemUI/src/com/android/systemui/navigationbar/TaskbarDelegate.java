@@ -24,6 +24,7 @@ import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.systemui.navigationbar.NavBarHelper.transitionMode;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
@@ -35,6 +36,7 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_I
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
+import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 
 import android.app.StatusBarManager;
 import android.app.StatusBarManager.WindowVisibleState;
@@ -50,10 +52,12 @@ import android.util.Log;
 import android.view.Display;
 import android.view.InsetsVisibilities;
 import android.view.View;
+import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -114,6 +118,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             };
     private int mDisabledFlags;
     private @WindowVisibleState int mTaskBarWindowState = WINDOW_STATE_SHOWING;
+
+    private @TransitionMode int mTransitionMode;
+    private @Appearance int mAppearance;
     private @Behavior int mBehavior;
     private final Context mContext;
     private final DisplayManager mDisplayManager;
@@ -146,19 +153,12 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         }
     };
 
-    private final Consumer<Boolean> mNavbarOverlayVisibilityChangeCallback = (visible) -> {
-        if (visible) {
-            mAutoHideController.touchAutoHide();
-        }
-    };
     private BackAnimation mBackAnimation;
 
     @Inject
-    public TaskbarDelegate(
-            Context context,
+    public TaskbarDelegate(Context context,
             EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
-            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory
-    ) {
+            LightBarTransitionsController.Factory lightBarTransitionsControllerFactory) {
         mLightBarTransitionsControllerFactory = lightBarTransitionsControllerFactory;
         mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
 
@@ -358,11 +358,18 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     @Override
     public void onSystemBarAttributesChanged(int displayId, int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme, int behavior,
-            InsetsVisibilities requestedVisibilities, String packageName) {
+            InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         mOverviewProxyService.onSystemBarAttributesChanged(displayId, behavior);
-        if (mLightBarController != null && displayId == mDisplayId) {
-            mLightBarController.onNavigationBarAppearanceChanged(appearance, false/*nbModeChanged*/,
-                    BarTransitions.MODE_TRANSPARENT /*navigationBarMode*/, navbarColorManagedByIme);
+        boolean nbModeChanged = false;
+        if (mAppearance != appearance) {
+            mAppearance = appearance;
+            nbModeChanged = updateTransitionMode(
+                    transitionMode(mTaskbarTransientShowing, appearance));
+        }
+        if (displayId == mDisplayId) {
+            mLightBarController.onNavigationBarAppearanceChanged(appearance, nbModeChanged,
+                    BarTransitions.MODE_TRANSPARENT, navbarColorManagedByIme);
         }
         if (mBehavior != behavior) {
             mBehavior = behavior;
@@ -413,6 +420,22 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
 
     private void onTransientStateChanged() {
         mEdgeBackGestureHandler.onNavBarTransientStateChanged(mTaskbarTransientShowing);
+
+        final int transitionMode = transitionMode(mTaskbarTransientShowing, mAppearance);
+        if (updateTransitionMode(transitionMode)) {
+            mLightBarController.onNavigationBarModeChanged(transitionMode);
+        }
+    }
+
+    private boolean updateTransitionMode(int barMode) {
+        if (mTransitionMode != barMode) {
+            mTransitionMode = barMode;
+            if (mAutoHideController != null) {
+                mAutoHideController.touchAutoHide();
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

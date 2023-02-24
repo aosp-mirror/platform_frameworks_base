@@ -31,6 +31,7 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 
 import javax.inject.Inject;
 
@@ -55,15 +56,18 @@ public class CreateUserActivity extends Activity {
     private final UserCreator mUserCreator;
     private final EditUserInfoController mEditUserInfoController;
     private final IActivityManager mActivityManager;
+    private final ActivityStarter mActivityStarter;
 
     private Dialog mSetupUserDialog;
 
     @Inject
     public CreateUserActivity(UserCreator userCreator,
-            EditUserInfoController editUserInfoController, IActivityManager activityManager) {
+            EditUserInfoController editUserInfoController, IActivityManager activityManager,
+            ActivityStarter activityStarter) {
         mUserCreator = userCreator;
         mEditUserInfoController = editUserInfoController;
         mActivityManager = activityManager;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -104,10 +108,7 @@ public class CreateUserActivity extends Activity {
 
         return mEditUserInfoController.createDialog(
                 this,
-                (intent, requestCode) -> {
-                    mEditUserInfoController.startingActivityForResult();
-                    startActivityForResult(intent, requestCode);
-                },
+                this::startActivity,
                 null,
                 defaultUserName,
                 getString(com.android.settingslib.R.string.user_add_user),
@@ -159,5 +160,18 @@ public class CreateUserActivity extends Activity {
         } catch (RemoteException e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }
+    }
+
+    /**
+     * Lambda to start activity from an intent. Ensures that device is unlocked first.
+     * @param intent
+     * @param requestCode
+     */
+    private void startActivity(Intent intent, int requestCode) {
+        mActivityStarter.dismissKeyguardThenExecute(() -> {
+            mEditUserInfoController.startingActivityForResult();
+            startActivityForResult(intent, requestCode);
+            return true;
+        }, /* cancel= */ null, /* afterKeyguardGone= */ true);
     }
 }

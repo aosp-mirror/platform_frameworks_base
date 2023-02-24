@@ -25,28 +25,20 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
-import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
+import com.android.systemui.unfold.util.TestFoldStateProvider
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.Captor
-import org.mockito.Mock
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class FoldStateLoggingProviderTest : SysuiTestCase() {
 
-    @Captor
-    private lateinit var foldUpdatesListener: ArgumentCaptor<FoldStateProvider.FoldUpdatesListener>
-
-    @Mock private lateinit var foldStateProvider: FoldStateProvider
-
+    private val testFoldStateProvider = TestFoldStateProvider()
     private val fakeClock = FakeSystemClock()
 
     private lateinit var foldStateLoggingProvider: FoldStateLoggingProvider
@@ -65,12 +57,10 @@ class FoldStateLoggingProviderTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         foldStateLoggingProvider =
-            FoldStateLoggingProviderImpl(foldStateProvider, fakeClock).apply {
+            FoldStateLoggingProviderImpl(testFoldStateProvider, fakeClock).apply {
                 addCallback(foldStateLoggingListener)
                 init()
             }
-
-        verify(foldStateProvider).addCallback(foldUpdatesListener.capture())
     }
 
     @Test
@@ -183,10 +173,10 @@ class FoldStateLoggingProviderTest : SysuiTestCase() {
     fun uninit_removesCallback() {
         foldStateLoggingProvider.uninit()
 
-        verify(foldStateProvider).removeCallback(foldUpdatesListener.value)
+        assertThat(testFoldStateProvider.hasListeners).isFalse()
     }
 
     private fun sendFoldUpdate(@FoldUpdate foldUpdate: Int) {
-        foldUpdatesListener.value.onFoldUpdate(foldUpdate)
+        testFoldStateProvider.sendFoldUpdate(foldUpdate)
     }
 }

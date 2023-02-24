@@ -27,11 +27,14 @@ import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -52,11 +55,14 @@ import javax.inject.Inject;
 public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         implements RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "ScreenRecordTile";
+    private static final String INTERACTION_JANK_TAG = "screen_record";
+
     private final RecordingController mController;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
     private final KeyguardStateController mKeyguardStateController;
     private final Callback mCallback = new Callback();
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final FeatureFlags mFlags;
 
     private long mMillisUntilFinished = 0;
 
@@ -67,6 +73,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             @Main Handler mainHandler,
             FalsingManager falsingManager,
             MetricsLogger metricsLogger,
+            FeatureFlags flags,
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
@@ -79,6 +86,7 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
                 statusBarStateController, activityStarter, qsLogger);
         mController = controller;
         mController.observe(this, mCallback);
+        mFlags = flags;
         mKeyguardDismissUtil = keyguardDismissUtil;
         mKeyguardStateController = keyguardStateController;
         mDialogLaunchAnimator = dialogLaunchAnimator;
@@ -112,7 +120,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
         state.value = isRecording || isStarting;
         state.state = (isRecording || isStarting) ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_screen_record_label);
-        state.icon = ResourceIcon.get(R.drawable.ic_screenrecord);
+        state.icon = ResourceIcon.get(state.value
+                ? R.drawable.qs_screen_record_icon_on
+                : R.drawable.qs_screen_record_icon_off);
         // Show expand icon when clicking will open a dialog
         state.forceExpandIcon = state.state == Tile.STATE_INACTIVE;
 
@@ -160,12 +170,13 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
             mDialogLaunchAnimator.disableAllCurrentDialogsExitAnimations();
             getHost().collapsePanels();
         };
-        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext,
-                onStartRecordingClicked);
+        ScreenRecordDialog dialog = mController.createScreenRecordDialog(mContext, mFlags,
+                mDialogLaunchAnimator, mActivityStarter, onStartRecordingClicked);
 
         ActivityStarter.OnDismissAction dismissAction = () -> {
             if (shouldAnimateFromView) {
-                mDialogLaunchAnimator.showFromView(dialog, view);
+                mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG));
             } else {
                 dialog.show();
             }

@@ -34,6 +34,7 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
@@ -44,6 +45,7 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Manages global window inset state in the system represented by {@link InsetsState}.
@@ -86,8 +88,17 @@ class InsetsStateController {
         }
     };
 
+    private final Function<Integer, WindowContainerInsetsSourceProvider> mSourceProviderFunc;
+
     InsetsStateController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
+        mSourceProviderFunc = type -> {
+            final InsetsSource source = mState.getSource(type);
+            if (type == ITYPE_IME) {
+                return new ImeInsetsSourceProvider(source, this, mDisplayContent);
+            }
+            return new WindowContainerInsetsSourceProvider(source, this, mDisplayContent);
+        };
     }
 
     InsetsState getRawInsetsState() {
@@ -115,15 +126,7 @@ class InsetsStateController {
      * @return The provider of a specific type.
      */
     WindowContainerInsetsSourceProvider getSourceProvider(@InternalInsetsType int type) {
-        if (type == ITYPE_IME) {
-            return mProviders.computeIfAbsent(type,
-                    key -> new ImeInsetsSourceProvider(
-                            mState.getSource(key), this, mDisplayContent));
-        } else {
-            return mProviders.computeIfAbsent(type,
-                    key -> new WindowContainerInsetsSourceProvider(mState.getSource(key), this,
-                            mDisplayContent));
-        }
+        return mProviders.computeIfAbsent(type, mSourceProviderFunc);
     }
 
     ImeInsetsSourceProvider getImeSourceProvider() {

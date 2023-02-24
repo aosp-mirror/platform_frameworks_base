@@ -42,7 +42,6 @@ public final class EuiccRulesAuthTable implements Parcelable {
     @IntDef(flag = true, prefix = { "POLICY_RULE_FLAG_" }, value = {
             POLICY_RULE_FLAG_CONSENT_REQUIRED
     })
-    /** @hide */
     public @interface PolicyRuleFlag {}
 
     /** User consent is required to install the profile. */

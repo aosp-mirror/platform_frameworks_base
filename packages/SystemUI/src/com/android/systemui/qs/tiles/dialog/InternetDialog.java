@@ -197,6 +197,8 @@ public class InternetDialog extends SystemUIDialog implements
         mUiEventLogger.log(InternetDialogEvent.INTERNET_DIALOG_SHOW);
         mDialogView = LayoutInflater.from(mContext).inflate(R.layout.internet_connectivity_dialog,
                 null);
+        mDialogView.setAccessibilityPaneTitle(
+                mContext.getText(R.string.accessibility_desc_quick_settings));
         final Window window = getWindow();
         window.setContentView(mDialogView);
 

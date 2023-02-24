@@ -108,7 +108,8 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
                 null /* requestedVisibilities */,
-                null /* packageName */);
+                null /* packageName */,
+                null /* letterboxDetails */);
         assertTrue(mLightsOutNotifController.areLightsOut());
     }
 
@@ -121,7 +122,8 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
                 null /* requestedVisibilities */,
-                null /* packageName */);
+                null /* packageName */,
+                null /* letterboxDetails */);
         assertFalse(mLightsOutNotifController.areLightsOut());
     }
 
@@ -152,7 +154,8 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
                 null /* requestedVisibilities */,
-                null /* packageName */);
+                null /* packageName */,
+                null /* letterboxDetails */);
 
         // THEN we should show dot
         assertTrue(mLightsOutNotifController.shouldShowDot());
@@ -172,7 +175,8 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
                 null /* requestedVisibilities */,
-                null /* packageName */);
+                null /* packageName */,
+                null /* letterboxDetails */);
 
         // THEN we shouldn't show the dot
         assertFalse(mLightsOutNotifController.shouldShowDot());
@@ -192,7 +196,8 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
                 false /* navbarColorManagedByIme */,
                 BEHAVIOR_DEFAULT,
                 null /* requestedVisibilities */,
-                null /* packageName */);
+                null /* packageName */,
+                null /* letterboxDetails */);
 
         // THEN we shouldn't show the dot
         assertFalse(mLightsOutNotifController.shouldShowDot());

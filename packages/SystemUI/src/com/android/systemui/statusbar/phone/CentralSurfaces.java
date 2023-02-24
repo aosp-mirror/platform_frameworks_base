@@ -40,6 +40,8 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.RegisterStatusBarResult;
+import com.android.keyguard.AuthKeyguardMessageArea;
+import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.RemoteTransitionAdapter;
@@ -47,6 +49,9 @@ import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationShadeWindowView;
+import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -216,15 +221,21 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     ViewGroup getBouncerContainer();
 
+    /** Get the Keyguard Message Area that displays auth messages. */
+    AuthKeyguardMessageArea getKeyguardMessageArea();
+
     int getStatusBarHeight();
 
     void updateQsExpansionEnabled();
 
     boolean isShadeDisabled();
 
-    void requestNotificationUpdate(String reason);
-
-    void requestFaceAuth(boolean userInitiatedRequest);
+    /**
+     * Request face auth to initiated
+     * @param userInitiatedRequest Whether this was a user initiated request
+     * @param reason Reason why face auth was triggered.
+     */
+    void requestFaceAuth(boolean userInitiatedRequest, @FaceAuthApiRequestReason String reason);
 
     @Override
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
@@ -264,9 +275,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     ViewGroup getNotificationScrollLayout();
 
     boolean isPulsing();
-
-    @Nullable
-    View getAmbientIndicationContainer();
 
     boolean isOccluded();
 
@@ -386,8 +394,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     void fadeKeyguardAfterLaunchTransition(Runnable beforeFading,
             Runnable endRunnable, Runnable cancelRunnable);
 
-    void fadeKeyguardWhilePulsing();
-
     void animateKeyguardUnoccluding();
 
     void startLaunchTransitionTimeout();
@@ -396,8 +402,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void keyguardGoingAway();
 
-    void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration,
-            boolean isBypassFading);
+    void setKeyguardFadingAway(long startTime, long delay, long fadeoutDuration);
 
     void finishKeyguardFadingAway();
 
@@ -428,12 +433,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void onHintFinished();
 
-    void onCameraHintStarted();
-
-    void onVoiceAssistHintStarted();
-
-    void onPhoneHintStarted();
-
     void onTrackingStopped(boolean expand);
 
     // TODO: Figure out way to remove these.
@@ -448,6 +447,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     KeyguardBottomAreaView getKeyguardBottomAreaView();
 
     void setBouncerShowing(boolean bouncerShowing);
+
+  void setBouncerShowingOverDream(boolean bouncerShowingOverDream);
 
     void collapseShade();
 
@@ -564,8 +565,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     void setLaunchEmergencyActionOnFinishedGoingToSleep(boolean launch);
 
     void setLaunchEmergencyActionOnFinishedWaking(boolean launch);
-
-    void setTopHidesStatusBar(boolean hides);
 
     QSPanelController getQSPanelController();
 

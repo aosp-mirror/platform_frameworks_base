@@ -61,7 +61,8 @@ protected:
 private:
     renderthread::EglManager& mEglManager;
     EGLSurface mEglSurface = EGL_NO_SURFACE;
-    bool mBufferPreserved = false;
+    sp<ANativeWindow> mNativeWindow;
+    renderthread::SwapBehavior mSwapBehavior = renderthread::SwapBehavior::kSwap_discardBuffer;
 };
 
 } /* namespace skiapipeline */

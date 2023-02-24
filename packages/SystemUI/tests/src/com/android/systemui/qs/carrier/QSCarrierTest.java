@@ -22,13 +22,11 @@ import static org.junit.Assert.assertTrue;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.util.FeatureFlagUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -59,14 +57,14 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_first() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         assertTrue(mQSCarrier.updateState(c, false));
     }
 
     @Test
     public void testUpdateState_same() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         assertTrue(mQSCarrier.updateState(c, false));
         assertFalse(mQSCarrier.updateState(c, false));
@@ -74,7 +72,7 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_changed() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         assertTrue(mQSCarrier.updateState(c, false));
 
@@ -85,14 +83,14 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_singleCarrier_first() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         assertTrue(mQSCarrier.updateState(c, true));
     }
 
     @Test
     public void testUpdateState_singleCarrier_noShowIcon() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         mQSCarrier.updateState(c, true);
 
@@ -101,7 +99,7 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_multiCarrier_showIcon() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         mQSCarrier.updateState(c, false);
 
@@ -110,7 +108,7 @@ public class QSCarrierTest extends SysuiTestCase {
 
     @Test
     public void testUpdateState_changeSingleMultiSingle() {
-        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false, false);
+        CellSignalState c = new CellSignalState(true, mSignalIconId, "", "", false);
 
         mQSCarrier.updateState(c, true);
         assertEquals(View.GONE, mQSCarrier.getRSSIView().getVisibility());

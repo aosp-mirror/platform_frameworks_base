@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs;
 
+import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -34,6 +36,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -185,9 +188,9 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     public void testChangesSinceLastDialog() throws RemoteException {
         setUserProfiles(0);
 
-        Assert.assertFalse(mFmc.getChangesSinceDialog());
+        Assert.assertFalse(mFmc.getNewChangesSinceDialogWasDismissed());
         mIForegroundServiceObserver.onForegroundStateChanged(new Binder(), "pkg", 0, true);
-        Assert.assertTrue(mFmc.getChangesSinceDialog());
+        Assert.assertTrue(mFmc.getNewChangesSinceDialogWasDismissed());
     }
 
     @Test
@@ -222,7 +225,41 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         Assert.assertEquals(2, mFmc.getNumRunningPackages());
     }
 
+    @Test
+    public void testButtonVisibilityOnShowAllowlistButtonFlagChange() throws Exception {
+        setUserProfiles(0);
+        setBackgroundRestrictionExemptionReason("pkg", 12345, REASON_ALLOWLISTED_PACKAGE);
 
+        final Binder binder = new Binder();
+        setShowStopButtonForUserAllowlistedApps(true);
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
+        Assert.assertEquals(1, mFmc.visibleButtonsCount());
+
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, false);
+        Assert.assertEquals(0, mFmc.visibleButtonsCount());
+
+        setShowStopButtonForUserAllowlistedApps(false);
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
+        Assert.assertEquals(0, mFmc.visibleButtonsCount());
+    }
+
+    private void setShowStopButtonForUserAllowlistedApps(boolean enable) {
+        mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_STOP_BUTTON_FOR_USER_ALLOWLISTED_APPS,
+                enable ? "true" : "false", false);
+        mBackgroundExecutor.advanceClockToLast();
+        mBackgroundExecutor.runAllReady();
+    }
+
+    private void setBackgroundRestrictionExemptionReason(String pkgName, int uid, int reason)
+            throws Exception {
+        Mockito.doReturn(uid)
+                .when(mPackageManager)
+                .getPackageUidAsUser(pkgName, UserHandle.getUserId(uid));
+        Mockito.doReturn(reason)
+                .when(mIActivityManager)
+                .getBackgroundRestrictionExemptionReason(uid);
+    }
 
     FgsManagerController createFgsManagerController() throws RemoteException {
         ArgumentCaptor<IForegroundServiceObserver> iForegroundServiceObserverArgumentCaptor =
@@ -232,7 +269,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
         ArgumentCaptor<BroadcastReceiver> showFgsManagerReceiverArgumentCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
-        FgsManagerController result = new FgsManagerController(
+        FgsManagerController result = new FgsManagerControllerImpl(
                 mContext,
                 mMainExecutor,
                 mBackgroundExecutor,

@@ -83,6 +83,7 @@ public class VirtualAudioControllerTest {
                 VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED,
                 /* activityListener= */ null,
                 /* activityBlockedCallback= */ null,
+                /* secureWindowCallback= */ null,
                 /* deviceProfile= */ DEVICE_PROFILE_APP_STREAMING);
     }
 

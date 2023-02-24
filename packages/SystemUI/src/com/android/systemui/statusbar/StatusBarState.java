@@ -22,18 +22,21 @@ package com.android.systemui.statusbar;
 public class StatusBarState {
 
     /**
-     * The status bar is in the "normal" shade mode.
+     * The status bar is in the "normal", unlocked mode or the device is still locked but we're
+     * accessing camera from power button double-tap shortcut.
      */
     public static final int SHADE = 0;
 
     /**
-     * Status bar is currently the Keyguard.
+     * Status bar is currently the Keyguard. In single column mode, when you swipe from the top of
+     * the keyguard to expand QS immediately, it's still KEYGUARD state.
      */
     public static final int KEYGUARD = 1;
 
     /**
-     * Status bar is in the special mode, where it is fully interactive but still locked. So
-     * dismissing the shade will still show the bouncer.
+     * Status bar is in the special mode, where it was transitioned from lockscreen to shade.
+     * Depending on user's security settings, dismissing the shade will either show the
+     * bouncer or go directly to unlocked {@link #SHADE} mode.
      */
     public static final int SHADE_LOCKED = 2;
 

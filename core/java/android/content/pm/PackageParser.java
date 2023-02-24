@@ -713,6 +713,15 @@ public class PackageParser {
         if (!checkUseInstalledOrHidden(flags, state, p.applicationInfo) || !p.isMatch(flags)) {
             return null;
         }
+
+        final ApplicationInfo applicationInfo;
+        if ((flags & (PackageManager.GET_ACTIVITIES | PackageManager.GET_RECEIVERS
+                | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS)) != 0) {
+            applicationInfo = generateApplicationInfo(p, flags, state, userId);
+        } else {
+            applicationInfo = null;
+        }
+
         PackageInfo pi = new PackageInfo();
         pi.packageName = p.packageName;
         pi.splitNames = p.splitNames;
@@ -773,7 +782,7 @@ public class PackageParser {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(a.className)) {
                             continue;
                         }
-                        res[num++] = generateActivityInfo(a, flags, state, userId);
+                        res[num++] = generateActivityInfo(a, flags, state, userId, applicationInfo);
                     }
                 }
                 pi.activities = ArrayUtils.trimToSize(res, num);
@@ -787,7 +796,7 @@ public class PackageParser {
                 for (int i = 0; i < N; i++) {
                     final Activity a = p.receivers.get(i);
                     if (isMatch(state, a.info, flags)) {
-                        res[num++] = generateActivityInfo(a, flags, state, userId);
+                        res[num++] = generateActivityInfo(a, flags, state, userId, applicationInfo);
                     }
                 }
                 pi.receivers = ArrayUtils.trimToSize(res, num);
@@ -801,7 +810,7 @@ public class PackageParser {
                 for (int i = 0; i < N; i++) {
                     final Service s = p.services.get(i);
                     if (isMatch(state, s.info, flags)) {
-                        res[num++] = generateServiceInfo(s, flags, state, userId);
+                        res[num++] = generateServiceInfo(s, flags, state, userId, applicationInfo);
                     }
                 }
                 pi.services = ArrayUtils.trimToSize(res, num);
@@ -815,7 +824,8 @@ public class PackageParser {
                 for (int i = 0; i < N; i++) {
                     final Provider pr = p.providers.get(i);
                     if (isMatch(state, pr.info, flags)) {
-                        res[num++] = generateProviderInfo(pr, flags, state, userId);
+                        res[num++] = generateProviderInfo(pr, flags, state, userId,
+                                applicationInfo);
                     }
                 }
                 pi.providers = ArrayUtils.trimToSize(res, num);
@@ -8216,6 +8226,11 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
             FrameworkPackageUserState state, int userId) {
+        return generateActivityInfo(a, flags, state, userId, null);
+    }
+
+    private static ActivityInfo generateActivityInfo(Activity a, int flags,
+            FrameworkPackageUserState state, int userId, ApplicationInfo applicationInfo) {
         if (a == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, a.owner.applicationInfo)) {
             return null;
@@ -8227,7 +8242,12 @@ public class PackageParser {
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo(a.info);
         ai.metaData = a.metaData;
-        ai.applicationInfo = generateApplicationInfo(a.owner, flags, state, userId);
+
+        if (applicationInfo == null) {
+            applicationInfo = generateApplicationInfo(a.owner, flags, state, userId);
+        }
+        ai.applicationInfo = applicationInfo;
+
         return ai;
     }
 
@@ -8308,6 +8328,11 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
             FrameworkPackageUserState state, int userId) {
+        return generateServiceInfo(s, flags, state, userId, null);
+    }
+
+    private static ServiceInfo generateServiceInfo(Service s, int flags,
+            FrameworkPackageUserState state, int userId, ApplicationInfo applicationInfo) {
         if (s == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, s.owner.applicationInfo)) {
             return null;
@@ -8319,7 +8344,12 @@ public class PackageParser {
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo(s.info);
         si.metaData = s.metaData;
-        si.applicationInfo = generateApplicationInfo(s.owner, flags, state, userId);
+
+        if (applicationInfo == null) {
+            applicationInfo = generateApplicationInfo(s.owner, flags, state, userId);
+        }
+        si.applicationInfo = applicationInfo;
+
         return si;
     }
 
@@ -8406,13 +8436,18 @@ public class PackageParser {
     @UnsupportedAppUsage
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
             FrameworkPackageUserState state, int userId) {
+        return generateProviderInfo(p, flags, state, userId, null);
+    }
+
+    private static ProviderInfo generateProviderInfo(Provider p, int flags,
+            FrameworkPackageUserState state, int userId, ApplicationInfo applicationInfo) {
         if (p == null) return null;
         if (!checkUseInstalledOrHidden(flags, state, p.owner.applicationInfo)) {
             return null;
         }
         if (!copyNeeded(flags, p.owner, state, p.metaData, userId)
                 && ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) != 0
-                        || p.info.uriPermissionPatterns == null)) {
+                || p.info.uriPermissionPatterns == null)) {
             updateApplicationInfo(p.info.applicationInfo, flags, state);
             return p.info;
         }
@@ -8422,7 +8457,12 @@ public class PackageParser {
         if ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) == 0) {
             pi.uriPermissionPatterns = null;
         }
-        pi.applicationInfo = generateApplicationInfo(p.owner, flags, state, userId);
+
+        if (applicationInfo == null) {
+            applicationInfo = generateApplicationInfo(p.owner, flags, state, userId);
+        }
+        pi.applicationInfo = applicationInfo;
+
         return pi;
     }
 

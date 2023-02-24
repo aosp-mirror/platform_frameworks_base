@@ -34,6 +34,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;

@@ -22,7 +22,8 @@ import static com.android.systemui.classifier.Classifier.LEFT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DISMISS;
 import static com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN;
 import static com.android.systemui.classifier.Classifier.PULSE_EXPAND;
-import static com.android.systemui.classifier.Classifier.QS_SWIPE;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_NESTED;
+import static com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.RIGHT_AFFORDANCE;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
@@ -323,44 +324,86 @@ public class TypeClassifierTest extends ClassifierTest {
     }
 
     @Test
-    public void testPass_QsSwipe() {
+    public void testPass_QsSwipeSide() {
         when(mDataProvider.isVertical()).thenReturn(false);
 
         when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isFalse();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isFalse();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isFalse();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isFalse();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isFalse();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isFalse();
     }
 
     @Test
-    public void testFalse_QsSwipe() {
+    public void testFalse_QsSwipeSide() {
         when(mDataProvider.isVertical()).thenReturn(true);
 
         when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isTrue();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(false);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isTrue();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(false);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isTrue();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isTrue();
 
         when(mDataProvider.isUp()).thenReturn(true);
         when(mDataProvider.isRight()).thenReturn(true);
-        assertThat(mClassifier.classifyGesture(QS_SWIPE, 0.5, 0).isFalse()).isTrue();
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_SIDE, 0.5, 0).isFalse()).isTrue();
+    }
+
+    @Test
+    public void testPass_QsNestedSwipe() {
+        when(mDataProvider.isVertical()).thenReturn(true);
+
+        when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isFalse();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isFalse();
+
+        when(mDataProvider.isUp()).thenReturn(false);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isFalse();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isFalse();
+    }
+
+    @Test
+    public void testFalse_QsNestedSwipe() {
+        when(mDataProvider.isVertical()).thenReturn(false);
+
+        when(mDataProvider.isUp()).thenReturn(false);  // up and right should cause no effect.
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isTrue();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(false);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isTrue();
+
+        when(mDataProvider.isUp()).thenReturn(false);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isTrue();
+
+        when(mDataProvider.isUp()).thenReturn(true);
+        when(mDataProvider.isRight()).thenReturn(true);
+        assertThat(mClassifier.classifyGesture(QS_SWIPE_NESTED, 0.5, 0).isFalse()).isTrue();
     }
 }

@@ -30,7 +30,6 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.Surface;
-
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 

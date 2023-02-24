@@ -18,7 +18,6 @@ package com.android.server.notification;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -26,7 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.AlarmManager;
 import android.app.NotificationHistory;
 import android.app.NotificationHistory.HistoricalNotification;
 import android.content.Context;
@@ -60,8 +58,6 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     Handler mFileWriteHandler;
     @Mock
     Context mContext;
-    @Mock
-    AlarmManager mAlarmManager;
 
     NotificationHistoryDatabase mDataBase;
 
@@ -96,19 +92,13 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mContext.getSystemService(AlarmManager.class)).thenReturn(mAlarmManager);
         when(mContext.getUser()).thenReturn(getContext().getUser());
         when(mContext.getPackageName()).thenReturn(getContext().getPackageName());
 
         mRootDir = new File(mContext.getFilesDir(), "NotificationHistoryDatabaseTest");
 
-        mDataBase = new NotificationHistoryDatabase(mContext, mFileWriteHandler, mRootDir);
+        mDataBase = new NotificationHistoryDatabase(mFileWriteHandler, mRootDir);
         mDataBase.init();
-    }
-
-    @Test
-    public void testDeletionReceiver() {
-        verify(mContext, times(1)).registerReceiver(any(), any(), anyInt());
     }
 
     @Test
@@ -144,8 +134,6 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         mDataBase.prune(retainDays, cal.getTimeInMillis());
 
         assertThat(mDataBase.mHistoryFiles).containsExactlyElementsIn(expectedFiles);
-
-        verify(mAlarmManager, times(6)).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
     }
 
     @Test
@@ -412,15 +400,14 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         when(file.getName()).thenReturn("5");
         when(af.getBaseFile()).thenReturn(file);
 
-        wbr.run(5, af);
+        wbr.run(af);
 
         assertThat(mDataBase.mHistoryFiles.size()).isEqualTo(1);
         assertThat(mDataBase.mBuffer).isNotEqualTo(nh);
-        verify(mAlarmManager, times(1)).setExactAndAllowWhileIdle(anyInt(), anyLong(), any());
     }
 
     @Test
-    public void testRemoveFilePathFromHistory_hasMatch() throws Exception {
+    public void testRemoveFilePathFromHistory_hasMatch() {
         for (int i = 0; i < 5; i++) {
             AtomicFile af = mock(AtomicFile.class);
             when(af.getBaseFile()).thenReturn(new File(mRootDir, "af" + i));
@@ -436,7 +423,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testRemoveFilePathFromHistory_noMatch() throws Exception {
+    public void testRemoveFilePathFromHistory_noMatch() {
         for (int i = 0; i < 5; i++) {
             AtomicFile af = mock(AtomicFile.class);
             when(af.getBaseFile()).thenReturn(new File(mRootDir, "af" + i));

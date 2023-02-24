@@ -41,6 +41,7 @@ import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
+import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -200,6 +201,9 @@ public class SettingsHelper {
             } else if (Settings.Global.POWER_BUTTON_LONG_PRESS.equals(name)) {
                 setLongPressPowerBehavior(cr, value);
                 return;
+            } else if (Settings.System.ACCELEROMETER_ROTATION.equals(name)
+                    && shouldSkipAutoRotateRestore()) {
+                return;
             }
 
             // Default case: write the restored value to settings
@@ -234,6 +238,12 @@ public class SettingsHelper {
                 }
             }
         }
+    }
+
+    private boolean shouldSkipAutoRotateRestore() {
+        // When device state based auto rotation settings are available, let's skip the restoring
+        // of the standard auto rotation settings to avoid conflicting setting values.
+        return DeviceStateRotationLockSettingsManager.isDeviceStateRotationLockEnabled(mContext);
     }
 
     public String onBackupValue(String name, String value) {

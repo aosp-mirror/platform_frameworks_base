@@ -30,7 +30,7 @@ interface IVibratorManagerService {
     boolean unregisterVibratorStateListener(int vibratorId, in IVibratorStateListener listener);
     boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
             in CombinedVibration vibration, in VibrationAttributes attributes);
-    void vibrate(int uid, String opPkg, in CombinedVibration vibration,
+    void vibrate(int uid, int displayId, String opPkg, in CombinedVibration vibration,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(int usageFilter, IBinder token);
 }

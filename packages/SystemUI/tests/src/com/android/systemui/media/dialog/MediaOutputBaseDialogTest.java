@@ -24,9 +24,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSessionManager;
@@ -43,6 +43,7 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
@@ -52,7 +53,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,13 +82,13 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
             LocalBluetoothLeBroadcast.class);
     private ActivityStarter mStarter = mock(ActivityStarter.class);
     private BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
-    private NotificationEntryManager mNotificationEntryManager =
-            mock(NotificationEntryManager.class);
+    private final CommonNotifCollection mNotifCollection = mock(CommonNotifCollection.class);
     private NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private final AudioManager mAudioManager = mock(AudioManager.class);
     private PowerExemptionManager mPowerExemptionManager = mock(PowerExemptionManager.class);
+    private KeyguardManager mKeyguardManager = mock(KeyguardManager.class);
 
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private MediaOutputBaseDialogImpl mMediaOutputBaseDialogImpl;
@@ -98,10 +99,17 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     private CharSequence mHeaderSubtitle;
     private String mStopText;
     private boolean mIsBroadcasting;
+    private boolean mIsBroadcastIconVisibility;
+
 
     @Before
     public void setUp() {
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalBluetoothProfileManager);
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager = mock(
+                CachedBluetoothDeviceManager.class);
+        when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(
+                cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any())).thenReturn(null);
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
         when(mMediaController.getPlaybackState()).thenReturn(mPlaybackState);
         when(mPlaybackState.getState()).thenReturn(PlaybackState.STATE_NONE);
@@ -111,8 +119,9 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
-                mNotificationEntryManager, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager);
+                mNotifCollection, mDialogLaunchAnimator,
+                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mKeyguardManager);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);
         mMediaOutputBaseDialogImpl.onCreate(new Bundle());
@@ -150,6 +159,27 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
                 R.id.header_icon);
 
         assertThat(view.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void refresh_broadcastIconVisibilityOff_broadcastIconLayoutNotVisible() {
+        mIsBroadcastIconVisibility = false;
+
+        mMediaOutputBaseDialogImpl.refresh();
+        final ImageView view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
+                R.id.broadcast_icon);
+
+        assertThat(view.getVisibility()).isEqualTo(View.GONE);
+    }
+    @Test
+    public void refresh_broadcastIconVisibilityOn_broadcastIconLayoutVisible() {
+        mIsBroadcastIconVisibility = true;
+
+        mMediaOutputBaseDialogImpl.refresh();
+        final ImageView view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
+                R.id.broadcast_icon);
+
+        assertThat(view.getVisibility()).isEqualTo(View.VISIBLE);
     }
 
     @Test
@@ -194,6 +224,14 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     }
 
     @Test
+    public void refresh_inDragging_directSetRefreshingToFalse() {
+        when(mMediaOutputBaseAdapter.isDragging()).thenReturn(true);
+        mMediaOutputBaseDialogImpl.refresh();
+
+        assertThat(mMediaOutputController.isRefreshing()).isFalse();
+    }
+
+    @Test
     public void refresh_notInDragging_verifyUpdateAdapter() {
         when(mMediaOutputBaseAdapter.getCurrentActivePosition()).thenReturn(-1);
         when(mMediaOutputBaseAdapter.isDragging()).thenReturn(false);
@@ -203,46 +241,29 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void onStart_isBroadcasting_verifyRegisterLeBroadcastServiceCallBack() {
+    public void whenBroadcasting_verifyLeBroadcastServiceCallBackIsRegisteredAndUnregistered() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = true;
 
         mMediaOutputBaseDialogImpl.onStart();
-
         verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
-    }
-
-    @Test
-    public void onStart_notBroadcasting_noRegisterLeBroadcastServiceCallBack() {
-        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
-                mLocalBluetoothLeBroadcast);
-        mIsBroadcasting = false;
-
-        mMediaOutputBaseDialogImpl.onStart();
-
-        verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
-    }
-
-    @Test
-    public void onStart_isBroadcasting_verifyUnregisterLeBroadcastServiceCallBack() {
-        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
-                mLocalBluetoothLeBroadcast);
-        mIsBroadcasting = true;
 
         mMediaOutputBaseDialogImpl.onStop();
-
         verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
     }
 
     @Test
-    public void onStop_notBroadcasting_noUnregisterLeBroadcastServiceCallBack() {
+    public void
+            whenNotBroadcasting_verifyLeBroadcastServiceCallBackIsNotRegisteredOrUnregistered() {
         when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
                 mLocalBluetoothLeBroadcast);
         mIsBroadcasting = false;
 
+        mMediaOutputBaseDialogImpl.onStart();
         mMediaOutputBaseDialogImpl.onStop();
 
+        verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
         verify(mLocalBluetoothLeBroadcast, never()).unregisterServiceCallBack(any());
     }
 
@@ -265,7 +286,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         }
 
         @Override
-        Drawable getAppSourceIcon() {
+        IconCompat getAppSourceIcon() {
             return null;
         }
 
@@ -307,6 +328,11 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         @Override
         public CharSequence getStopButtonText() {
             return mStopText;
+        }
+
+        @Override
+        public int getBroadcastIconVisibility() {
+            return mIsBroadcastIconVisibility ? View.VISIBLE : View.GONE;
         }
     }
 }

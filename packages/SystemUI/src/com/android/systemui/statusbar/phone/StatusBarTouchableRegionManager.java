@@ -55,6 +55,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final Context mContext;
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
+    private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
     private boolean mShouldAdjustInsets = false;
@@ -72,7 +73,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
             Context context,
             NotificationShadeWindowController notificationShadeWindowController,
             ConfigurationController configurationController,
-            HeadsUpManagerPhone headsUpManager
+            HeadsUpManagerPhone headsUpManager,
+            UnlockedScreenOffAnimationController unlockedScreenOffAnimationController
     ) {
         mContext = context;
         initResources();
@@ -115,6 +117,8 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         mNotificationShadeWindowController.setForcePluginOpenListener((forceOpen) -> {
             updateTouchableRegion();
         });
+
+        mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
     }
 
     protected void setup(
@@ -136,8 +140,9 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
      * Notify that the status bar panel gets expanded or collapsed.
      *
      * @param isExpanded True to notify expanded, false to notify collapsed.
+     * TODO(b/237811427) replace with a listener
      */
-    void setPanelExpanded(boolean isExpanded) {
+    public void setPanelExpanded(boolean isExpanded) {
         if (isExpanded != mIsStatusBarExpanded) {
             mIsStatusBarExpanded = isExpanded;
             if (isExpanded) {
@@ -153,7 +158,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
      * any existing display cutouts (notch)
      * @return the heads up notification touch area
      */
-    Region calculateTouchableRegion() {
+    public Region calculateTouchableRegion() {
         // Update touchable region for HeadsUp notifications
         final Region headsUpTouchableRegion = mHeadsUpManager.getTouchableRegion();
         if (headsUpTouchableRegion != null) {
@@ -178,7 +183,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     /**
      * Set the touchable portion of the status bar based on what elements are visible.
      */
-    private void updateTouchableRegion() {
+    public void updateTouchableRegion() {
         boolean hasCutoutInset = (mNotificationShadeWindowView != null)
                 && (mNotificationShadeWindowView.getRootWindowInsets() != null)
                 && (mNotificationShadeWindowView.getRootWindowInsets().getDisplayCutout() != null);
@@ -222,7 +227,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         }
     }
 
-    void updateRegionForNotch(Region touchableRegion) {
+    public void updateRegionForNotch(Region touchableRegion) {
         WindowInsets windowInsets = mNotificationShadeWindowView.getRootWindowInsets();
         if (windowInsets == null) {
             Log.w(TAG, "StatusBarWindowView is not attached.");
@@ -241,12 +246,25 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         touchableRegion.union(bounds);
     }
 
+    /**
+     * Helper to let us know when calculating the region is not needed because we know the entire
+     * screen needs to be touchable.
+     */
+    private boolean shouldMakeEntireScreenTouchable() {
+        // The touchable region is always the full area when expanded, whether we're showing the
+        // shade or the bouncer. It's also fully touchable when the screen off animation is playing
+        // since we don't want stray touches to go through the light reveal scrim to whatever is
+        // underneath.
+        return mIsStatusBarExpanded
+                || mCentralSurfaces.isBouncerShowing()
+                || mUnlockedScreenOffAnimationController.isAnimationPlaying();
+    }
+
     private final OnComputeInternalInsetsListener mOnComputeInternalInsetsListener =
             new OnComputeInternalInsetsListener() {
         @Override
         public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (mIsStatusBarExpanded || mCentralSurfaces.isBouncerShowing()) {
-                // The touchable region is always the full area when expanded
+            if (shouldMakeEntireScreenTouchable()) {
                 return;
             }
 

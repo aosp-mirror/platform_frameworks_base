@@ -16,6 +16,7 @@
 
 package android.media.tv;
 
+import android.content.AttributionSource;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.tv.ITvInputServiceCallback;
 import android.media.tv.ITvInputSessionCallback;
@@ -30,7 +31,7 @@ interface ITvInputService {
     oneway void registerCallback(in ITvInputServiceCallback callback);
     oneway void unregisterCallback(in ITvInputServiceCallback callback);
     oneway void createSession(in InputChannel channel, in ITvInputSessionCallback callback,
-            in String inputId, in String sessionId);
+            in String inputId, in String sessionId, in AttributionSource tvAppAttributionSource);
     oneway void createRecordingSession(in ITvInputSessionCallback callback, in String inputId,
             in String sessionId);
     List<String> getAvailableExtensionInterfaceNames();

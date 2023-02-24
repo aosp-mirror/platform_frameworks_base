@@ -16,27 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.view.DragEvent.ACTION_DRAG_STARTED;
-
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
-import android.view.DragEvent;
-
-import androidx.test.filters.SmallTest;
-
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -48,6 +27,24 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableLooper.RunWithLooper;
+
+import androidx.test.filters.SmallTest;
+
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.shade.ShadeController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 
 @SmallTest

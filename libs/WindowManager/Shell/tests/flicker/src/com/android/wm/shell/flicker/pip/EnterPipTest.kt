@@ -18,7 +18,6 @@ package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
@@ -43,7 +42,7 @@ import org.junit.runners.Parameterized
  *
  * Notes:
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)
- *        are inherited [PipTransition]
+ *        are inherited from [PipTransition]
  *     2. Part of the test setup occurs automatically via
  *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
  *        including configuring navigation mode, initial orientation and ensuring no
@@ -54,7 +53,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group3
-class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
 
     /**
      * Defines the transition used to run the test
@@ -77,11 +76,6 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
             }
         }
 
-    /** {@inheritDoc}  */
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
-
     /**
      * Checks [pipApp] window remains visible throughout the animation
      */
@@ -98,7 +92,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      */
     @Presubmit
     @Test
-    fun pipAppLayerAlwaysVisible() {
+    open fun pipAppLayerAlwaysVisible() {
         testSpec.assertLayers {
             this.isVisible(pipApp.component)
         }
@@ -122,7 +116,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      */
     @Presubmit
     @Test
-    fun pipLayerRemainInsideVisibleBounds() {
+    open fun pipLayerRemainInsideVisibleBounds() {
         testSpec.assertLayersVisibleRegion(pipApp.component) {
             coversAtMost(displayBounds)
         }
@@ -133,12 +127,12 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      */
     @Presubmit
     @Test
-    fun pipLayerReduces() {
+    open fun pipLayerReduces() {
         val layerName = pipApp.component.toLayerName()
         testSpec.assertLayers {
             val pipLayerList = this.layers { it.name.contains(layerName) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
-                current.visibleRegion.coversAtMost(previous.visibleRegion.region)
+                current.visibleRegion.notBiggerThan(previous.visibleRegion.region)
             }
         }
     }
@@ -175,7 +169,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
      */
     @Presubmit
     @Test
-    fun focusChanges() {
+    open fun focusChanges() {
         testSpec.assertEventLog {
             this.focusChanges(pipApp.`package`, "NexusLauncherActivity")
         }
@@ -192,8 +186,10 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 3)
+                .getConfigNonRotationTests(
+                    supportedRotations = listOf(Surface.ROTATION_0),
+                    repetitions = 3
+                )
         }
     }
 }

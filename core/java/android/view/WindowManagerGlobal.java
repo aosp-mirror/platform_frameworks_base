@@ -83,6 +83,11 @@ public final class WindowManagerGlobal {
     public static final int RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS = 1 << 3;
 
     /**
+     * The window manager has told the window it cannot draw this frame and should retry again.
+     */
+    public static final int RELAYOUT_RES_CANCEL_AND_REDRAW = 1 << 4;
+
+    /**
      * Flag for relayout: the client will be later giving
      * internal insets; as a result, the window will not impact other window
      * layouts until the insets are given.
@@ -386,7 +391,7 @@ public final class WindowManagerGlobal {
                 root = new ViewRootImpl(view.getContext(), display);
             } else {
                 root = new ViewRootImpl(view.getContext(), display,
-                        windowlessSession);
+                        windowlessSession, new WindowlessWindowLayout());
             }
 
             view.setLayoutParams(wparams);
@@ -399,9 +404,10 @@ public final class WindowManagerGlobal {
             try {
                 root.setView(view, wparams, panelParentView, userId);
             } catch (RuntimeException e) {
+                final int viewIndex = (index >= 0) ? index : (mViews.size() - 1);
                 // BadTokenException or InvalidDisplayException, clean up.
-                if (index >= 0) {
-                    removeViewLocked(index, true);
+                if (viewIndex >= 0) {
+                    removeViewLocked(viewIndex, true);
                 }
                 throw e;
             }

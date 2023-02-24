@@ -46,11 +46,26 @@ public abstract class BiometricStateListener extends IBiometricStateListener.Stu
     public @interface State {
     }
 
+    // The sensor received a touch.
+    public static final int ACTION_SENSOR_TOUCH = 0;
+
+    @IntDef({ACTION_SENSOR_TOUCH})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Action {
+    }
+
     /**
      * Defines behavior in response to state update
      * @param newState new state of the biometric sensor
      */
     public void onStateChanged(@BiometricStateListener.State int newState) {
+    }
+
+
+    /**
+     * Invoked when a biometric action has occurred.
+     */
+    public void onBiometricAction(@BiometricStateListener.Action int action) {
     }
 
     /**

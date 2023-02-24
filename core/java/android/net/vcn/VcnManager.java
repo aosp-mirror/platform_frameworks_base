@@ -114,13 +114,28 @@ public class VcnManager {
     public static final String VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY =
             "vcn_restricted_transports";
 
+    /**
+     * Key for maximum number of parallel SAs for tunnel aggregation
+     *
+     * <p>If set to a value > 1, multiple tunnels will be set up, and inbound traffic will be
+     * aggregated over the various tunnels.
+     *
+     * <p>Defaults to 1, unless overridden by carrier config
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_TUNNEL_AGGREGATION_SA_COUNT_MAX_KEY =
+            "vcn_tunnel_aggregation_sa_count_max";
+
     /** List of Carrier Config options to extract from Carrier Config bundles. @hide */
     @NonNull
     public static final String[] VCN_RELATED_CARRIER_CONFIG_KEYS =
             new String[] {
                 VCN_NETWORK_SELECTION_WIFI_ENTRY_RSSI_THRESHOLD_KEY,
                 VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
-                VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY
+                VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
+                VCN_TUNNEL_AGGREGATION_SA_COUNT_MAX_KEY,
             };
 
     private static final Map<

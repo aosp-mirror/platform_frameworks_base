@@ -16,12 +16,12 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
@@ -134,9 +134,10 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         state.contentDescription = mContext.getString(
                 R.string.accessibility_quick_settings_bluetooth);
         state.stateDescription = "";
+
         if (enabled) {
             if (connected) {
-                state.icon = new BluetoothConnectedTileIcon();
+                state.icon = ResourceIcon.get(R.drawable.qs_bluetooth_icon_on);
                 if (!TextUtils.isEmpty(mController.getConnectedDeviceName())) {
                     state.label = mController.getConnectedDeviceName();
                 }
@@ -145,21 +146,19 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                                 + ", " + state.secondaryLabel;
             } else if (state.isTransient) {
                 state.icon = ResourceIcon.get(
-                        com.android.internal.R.drawable.ic_bluetooth_transient_animation);
+                        R.drawable.qs_bluetooth_icon_search);
                 state.stateDescription = state.secondaryLabel;
             } else {
                 state.icon =
-                        ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
+                        ResourceIcon.get(R.drawable.qs_bluetooth_icon_off);
                 state.stateDescription = mContext.getString(R.string.accessibility_not_connected);
             }
             state.state = Tile.STATE_ACTIVE;
         } else {
-            state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_bluetooth);
+            state.icon = ResourceIcon.get(R.drawable.qs_bluetooth_icon_off);
             state.state = Tile.STATE_INACTIVE;
         }
 
-        state.dualLabelContentDescription = mContext.getResources().getString(
-                R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
@@ -185,10 +184,8 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         List<CachedBluetoothDevice> connectedDevices = mController.getConnectedDevices();
         if (enabled && connected && !connectedDevices.isEmpty()) {
             if (connectedDevices.size() > 1) {
-                // TODO(b/76102598): add a new string for "X connected devices" after P
-                return mContext.getResources().getQuantityString(
-                        R.plurals.quick_settings_hotspot_secondary_label_num_devices,
-                        connectedDevices.size(),
+                return icuMessageFormat(mContext.getResources(),
+                        R.string.quick_settings_hotspot_secondary_label_num_devices,
                         connectedDevices.size());
             }
 
@@ -244,22 +241,4 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             refreshState();
         }
     };
-
-    /**
-     * Bluetooth icon wrapper (when connected with no battery indicator) for Quick Settings. This is
-     * used instead of {@link com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon} in order to
-     * use a context that reflects dark/light theme attributes.
-     */
-    private class BluetoothConnectedTileIcon extends Icon {
-
-        BluetoothConnectedTileIcon() {
-            // Do nothing. Default constructor to limit visibility.
-        }
-
-        @Override
-        public Drawable getDrawable(Context context) {
-            // This method returns Pair<Drawable, String> - the first value is the drawable.
-            return context.getDrawable(R.drawable.ic_bluetooth_connected);
-        }
-    }
 }

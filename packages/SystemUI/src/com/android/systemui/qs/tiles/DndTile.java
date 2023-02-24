@@ -39,11 +39,13 @@ import android.widget.Switch;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -70,6 +72,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private static final Intent ZEN_PRIORITY_SETTINGS =
             new Intent(Settings.ACTION_ZEN_MODE_PRIORITY_SETTINGS);
+
+    private static final String INTERACTION_JANK_TAG = "start_zen_mode";
 
     private final ZenModeController mController;
     private final SharedPreferences mSharedPreferences;
@@ -175,7 +179,10 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     mUiHandler.post(() -> {
                         Dialog dialog = makeZenModeDialog();
                         if (view != null) {
-                            mDialogLaunchAnimator.showFromView(dialog, view, false);
+                            mDialogLaunchAnimator.showFromView(dialog, view, new DialogCuj(
+                                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                            INTERACTION_JANK_TAG),
+                                    /* animateBackgroundBoundsChange= */ false);
                         } else {
                             dialog.show();
                         }
@@ -219,16 +226,15 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mController == null) return;
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
         final boolean newValue = zen != ZEN_MODE_OFF;
-        final boolean valueChanged = state.value != newValue;
-        if (state.slash == null) state.slash = new SlashState();
         state.dualTarget = true;
         state.value = newValue;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
-        state.slash.isSlashed = !state.value;
+        state.icon = ResourceIcon.get(state.value
+                ? R.drawable.qs_dnd_icon_on
+                : R.drawable.qs_dnd_icon_off);
         state.label = getTileLabel();
         state.secondaryLabel = TextUtils.emptyIfNull(ZenModeConfig.getDescription(mContext,
                 zen != Global.ZEN_MODE_OFF, mController.getConfig(), false));
-        state.icon = ResourceIcon.get(com.android.internal.R.drawable.ic_qs_dnd);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         // Keeping the secondaryLabel in contentDescription instead of stateDescription is easier
         // to understand.

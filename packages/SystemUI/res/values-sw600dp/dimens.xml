@@ -68,9 +68,28 @@
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
 
     <dimen name="qs_panel_padding_top">8dp</dimen>
+    <dimen name="qs_panel_padding_top_combined_headers">@dimen/qs_panel_padding_top</dimen>
 
     <!-- The width of large/content heavy dialogs (e.g. Internet, Media output, etc) -->
     <dimen name="large_dialog_width">472dp</dimen>
 
     <dimen name="large_screen_shade_header_height">42dp</dimen>
+
+    <!-- Lockscreen shade transition values -->
+    <dimen name="lockscreen_shade_transition_by_tap_distance">200dp</dimen>
+    <dimen name="lockscreen_shade_full_transition_distance">80dp</dimen>
+    <dimen name="lockscreen_shade_media_transition_distance">120dp</dimen>
+    <dimen name="lockscreen_shade_scrim_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_notifications_scrim_transition_delay">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
+    <dimen name="lockscreen_shade_notifications_scrim_transition_distance">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
+    <dimen name="lockscreen_shade_npvc_keyguard_content_alpha_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_notif_shelf_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_qs_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_qs_transition_delay">@dimen/lockscreen_shade_scrim_transition_distance</dimen>
+    <dimen name="lockscreen_shade_qs_squish_transition_distance">@dimen/lockscreen_shade_qs_transition_distance</dimen>
+    <dimen name="lockscreen_shade_depth_controller_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_udfps_keyguard_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_status_bar_transition_distance">@dimen/lockscreen_shade_full_transition_distance</dimen>
+    <dimen name="lockscreen_shade_keyguard_transition_distance">@dimen/lockscreen_shade_media_transition_distance</dimen>
+
 </resources>

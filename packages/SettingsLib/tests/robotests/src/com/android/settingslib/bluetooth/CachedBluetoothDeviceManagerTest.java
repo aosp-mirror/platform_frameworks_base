@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -518,7 +519,8 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void onDeviceUnpaired_unpairCsipMainDevice() {
-        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         cachedDevice1.setGroupId(1);
@@ -527,7 +529,12 @@ public class CachedBluetoothDeviceManagerTest {
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice1);
+
         verify(mDevice2).removeBond();
+        assertThat(cachedDevice1.getGroupId()).isEqualTo(
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
+        assertThat(cachedDevice2.getGroupId()).isEqualTo(
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
     }
 
     /**
@@ -536,6 +543,7 @@ public class CachedBluetoothDeviceManagerTest {
     @Test
     public void onDeviceUnpaired_unpairCsipSubDevice() {
         when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_NONE);
         CachedBluetoothDevice cachedDevice1 = mCachedDeviceManager.addDevice(mDevice1);
         CachedBluetoothDevice cachedDevice2 = mCachedDeviceManager.addDevice(mDevice2);
         cachedDevice1.setGroupId(1);
@@ -544,7 +552,10 @@ public class CachedBluetoothDeviceManagerTest {
 
         // Call onDeviceUnpaired for the one in mCachedDevices.
         mCachedDeviceManager.onDeviceUnpaired(cachedDevice2);
+
         verify(mDevice1).removeBond();
+        assertThat(cachedDevice2.getGroupId()).isEqualTo(
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
     }
 
     /**

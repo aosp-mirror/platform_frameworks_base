@@ -292,8 +292,10 @@ public final class ServiceManager {
      * If the service is not running, servicemanager will attempt to start it, and this function
      * will wait for it to be ready.
      *
-     * @return {@code null} if the service is not declared in the manifest, or if there are
-     * permission problems, or if there are fatal errors.
+     * @throws SecurityException if the process does not have the permissions to check
+     * isDeclared() for the service.
+     * @return {@code null} if the service is not declared in the manifest, or if there
+     * are fatal errors.
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)

@@ -1024,6 +1024,9 @@ public class ContextHubService extends IContextHubService.Stub {
     }
 
     /* package */ void denyClientAuthState(int contextHubId, String packageName, long nanoAppId) {
+        Log.i(TAG, "Denying " + packageName + " access to " + Long.toHexString(nanoAppId)
+                + " on context hub # " + contextHubId);
+
         mClientManager.forEachClientOfHub(contextHubId, client -> {
             if (client.getPackageName().equals(packageName)) {
                 client.updateNanoAppAuthState(
@@ -1183,11 +1186,11 @@ public class ContextHubService extends IContextHubService.Stub {
             }
         } else {
             Log.d(TAG, "BT adapter not available. Defaulting to disabled");
-            if (mIsBtMainEnabled) {
+            if (forceUpdate || mIsBtMainEnabled) {
                 mIsBtMainEnabled = false;
                 mContextHubWrapper.onBtMainSettingChanged(mIsBtMainEnabled);
             }
-            if (mIsBtScanningEnabled) {
+            if (forceUpdate || mIsBtScanningEnabled) {
                 mIsBtScanningEnabled = false;
                 mContextHubWrapper.onBtScanningSettingChanged(mIsBtScanningEnabled);
             }

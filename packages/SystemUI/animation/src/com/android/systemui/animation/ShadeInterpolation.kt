@@ -31,7 +31,7 @@ object ShadeInterpolation {
         } else {
             val oneMinusFrac = 1f - mappedFraction
             (1f - 0.5f * (1f - Math.cos((3.14159f * oneMinusFrac * oneMinusFrac).toDouble())))
-                    .toFloat()
+                .toFloat()
         }
     }
 }

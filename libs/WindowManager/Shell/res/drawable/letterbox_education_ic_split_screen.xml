@@ -15,18 +15,12 @@
   ~ limitations under the License.
   -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="@dimen/letterbox_education_dialog_icon_size"
-        android:height="@dimen/letterbox_education_dialog_icon_size"
-        android:viewportWidth="48"
-        android:viewportHeight="48">
+        android:width="@dimen/letterbox_education_dialog_icon_width"
+        android:height="@dimen/letterbox_education_dialog_icon_height"
+        android:viewportWidth="40"
+        android:viewportHeight="32">
+
     <path
         android:fillColor="@color/letterbox_education_text_secondary"
-        android:fillType="evenOdd"
-        android:pathData="M2 8C0.895431 8 0 8.89543 0 10V38C0 39.1046 0.895431 40 2 40H46C47.1046 40 48 39.1046 48 38V10C48 8.89543 47.1046 8 46 8H2ZM44 12H4V36H44V12Z" />
-    <path
-        android:fillColor="@color/letterbox_education_text_secondary"
-        android:pathData="M6 16C6 14.8954 6.89543 14 8 14H21C22.1046 14 23 14.8954 23 16V32C23 33.1046 22.1046 34 21 34H8C6.89543 34 6 33.1046 6 32V16Z" />
-    <path
-        android:fillColor="@color/letterbox_education_text_secondary"
-        android:pathData="M25 16C25 14.8954 25.8954 14 27 14H40C41.1046 14 42 14.8954 42 16V32C42 33.1046 41.1046 34 40 34H27C25.8954 34 25 33.1046 25 32V16Z" />
+        android:pathData="M40 28L40 4C40 1.8 38.2 -7.86805e-08 36 -1.74846e-07L26 -6.11959e-07C23.8 -7.08124e-07 22 1.8 22 4L22 28C22 30.2 23.8 32 26 32L36 32C38.2 32 40 30.2 40 28ZM14 28L4 28L4 4L14 4L14 28ZM18 28L18 4C18 1.8 16.2 -1.04033e-06 14 -1.1365e-06L4 -1.57361e-06C1.8 -1.66978e-06 -7.86805e-08 1.8 -1.74846e-07 4L-1.22392e-06 28C-1.32008e-06 30.2 1.8 32 4 32L14 32C16.2 32 18 30.2 18 28Z" />
 </vector>

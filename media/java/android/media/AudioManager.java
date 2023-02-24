@@ -3388,6 +3388,19 @@ public class AudioManager {
     }
 
     /**
+     * Suspends the use of LE Audio.
+     *
+     * @param enable {@code true} to suspend le audio, {@code false} to unsuspend
+     *
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
+    public void setLeAudioSuspended(boolean enable) {
+        AudioSystem.setParameters("LeAudioSuspended=" + enable);
+    }
+
+    /**
      * Gets a variable number of parameter values from audio hardware.
      *
      * @param keys list of parameters
@@ -6963,22 +6976,13 @@ public class AudioManager {
         return codecConfigList;
     }
 
-    /**
-     * Returns a list of audio formats that corresponds to encoding formats
-     * supported on offload path for Le audio playback.
-     *
-     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
-     * supported for offload Le Audio playback
-     * @hide
-     */
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @NonNull
-    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
+    private List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio(
+            @AudioSystem.BtOffloadDeviceType int deviceType) {
         ArrayList<Integer> formatsList = new ArrayList<>();
         ArrayList<BluetoothLeAudioCodecConfig> leAudioCodecConfigList = new ArrayList<>();
 
         int status = AudioSystem.getHwOffloadFormatsSupportedForBluetoothMedia(
-                AudioSystem.DEVICE_OUT_BLE_HEADSET, formatsList);
+                deviceType, formatsList);
         if (status != AudioManager.SUCCESS) {
             Log.e(TAG, "getHwOffloadEncodingFormatsSupportedForLeAudio failed:" + status);
             return leAudioCodecConfigList;
@@ -6993,6 +6997,34 @@ public class AudioManager {
             }
         }
         return leAudioCodecConfigList;
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le audio playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Audio playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio() {
+        return getHwOffloadFormatsSupportedForLeAudio(AudioSystem.DEVICE_OUT_BLE_HEADSET);
+    }
+
+    /**
+     * Returns a list of audio formats that corresponds to encoding formats
+     * supported on offload path for Le Broadcast playback.
+     *
+     * @return a list of {@link BluetoothLeAudioCodecConfig} objects containing encoding formats
+     * supported for offload Le Broadcast playback
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @NonNull
+    public List<BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeBroadcast() {
+        return getHwOffloadFormatsSupportedForLeAudio(AudioSystem.DEVICE_OUT_BLE_BROADCAST);
     }
 
     // Since we need to calculate the changes since THE LAST NOTIFICATION, and not since the
@@ -8462,17 +8494,67 @@ public class AudioManager {
     }
 
     /**
-     * Returns the audio HAL version in the form MAJOR.MINOR. If there is no audio HAL found, null
-     * will be returned.
+     * Returns an {@link AudioHalVersionInfo} indicating the Audio Hal Version. If there is no audio
+     * HAL found, null will be returned.
      *
+     * @return @see @link #AudioHalVersionInfo The version of Audio HAL.
      * @hide
      */
     @TestApi
-    public static @Nullable String getHalVersion() {
+    public static @Nullable AudioHalVersionInfo getHalVersion() {
         try {
             return getService().getHalVersion();
         } catch (RemoteException e) {
             Log.e(TAG, "Error querying getHalVersion", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Requests if the implementation supports controlling the latency modes
+     * over the Bluetooth A2DP or LE Audio links.
+     *
+     * @return true if supported, false otherwise
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean supportsBluetoothVariableLatency() {
+        try {
+            return getService().supportsBluetoothVariableLatency();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Enables or disables the variable Bluetooth latency control mechanism in the
+     * audio framework and the audio HAL. This does not apply to the latency mode control
+     * on the spatializer output as this is a built-in feature.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setBluetoothVariableLatencyEnabled(boolean enabled) {
+        try {
+            getService().setBluetoothVariableLatencyEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates if the variable Bluetooth latency control mechanism is enabled or disabled.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public boolean isBluetoothVariableLatencyEnabled() {
+        try {
+            return getService().isBluetoothVariableLatencyEnabled();
+        } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }

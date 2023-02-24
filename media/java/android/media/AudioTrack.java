@@ -266,15 +266,19 @@ public class AudioTrack extends PlayerBase
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
-    /* Enumeration of metadata types permitted for use by
+    /**
+     * Enumeration of metadata types permitted for use by
      * encapsulation mode audio streams.
+     * @hide
      */
-    /** @hide */
-    @IntDef(prefix = { "ENCAPSULATION_METADATA_TYPE_" }, value = {
-        ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
-        ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
-        ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
-    })
+    @IntDef(prefix = {"ENCAPSULATION_METADATA_TYPE_"},
+            value =
+                    {
+                            ENCAPSULATION_METADATA_TYPE_NONE, /* reserved */
+                            ENCAPSULATION_METADATA_TYPE_FRAMEWORK_TUNER,
+                            ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR,
+                            ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT,
+                    })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationMetadataType {}
 
@@ -297,6 +301,45 @@ public class AudioTrack extends PlayerBase
      * This metadata is formatted per ETSI TS 101 154 Table E.1: AD_descriptor.
      */
     public static final int ENCAPSULATION_METADATA_TYPE_DVB_AD_DESCRIPTOR = 2;
+
+    /**
+     * Encapsulation metadata type for placement of supplementary audio.
+     *
+     * A 32 bit integer constant, one of {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL}, {@link
+     * #SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT}, {@link #SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT}.
+     */
+    public static final int ENCAPSULATION_METADATA_TYPE_SUPPLEMENTARY_AUDIO_PLACEMENT = 3;
+
+    /**
+     * Enumeration of supplementary audio placement types.
+     * @hide
+     */
+    @IntDef(prefix = {"SUPPLEMENTARY_AUDIO_PLACEMENT_"},
+            value =
+                    {
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT,
+                            SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT,
+                    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SupplementaryAudioPlacement {}
+    // Important: The SUPPLEMENTARY_AUDIO_PLACEMENT values must be kept in sync with native header
+    // files.
+
+    /**
+     * Supplementary audio placement normal.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_NORMAL = 0;
+
+    /**
+     * Supplementary audio placement left.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_LEFT = 1;
+
+    /**
+     * Supplementary audio placement right.
+     */
+    public static final int SUPPLEMENTARY_AUDIO_PLACEMENT_RIGHT = 2;
 
     /* Dual Mono handling is used when a stereo audio stream
      * contains separate audio content on the left and right channels.

@@ -30,8 +30,6 @@ import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
 import android.view.RoundedCorners;
 
-import com.android.server.wm.utils.WmDisplayCutout;
-
 import java.io.PrintWriter;
 
 /**
@@ -39,8 +37,6 @@ import java.io.PrintWriter;
  * @hide
  */
 public class DisplayFrames {
-    public final int mDisplayId;
-
     public final InsetsState mInsetsState;
 
     /**
@@ -54,64 +50,70 @@ public class DisplayFrames {
      */
     public final Rect mDisplayCutoutSafe = new Rect();
 
-    public int mDisplayWidth;
-    public int mDisplayHeight;
+    public int mWidth;
+    public int mHeight;
 
     public int mRotation;
 
-    public DisplayFrames(int displayId, InsetsState insetsState, DisplayInfo info,
-            WmDisplayCutout displayCutout, RoundedCorners roundedCorners,
-            PrivacyIndicatorBounds indicatorBounds) {
-        mDisplayId = displayId;
+    public DisplayFrames(InsetsState insetsState, DisplayInfo info, DisplayCutout cutout,
+            RoundedCorners roundedCorners, PrivacyIndicatorBounds indicatorBounds) {
         mInsetsState = insetsState;
-        update(info, displayCutout, roundedCorners, indicatorBounds);
+        update(info.rotation, info.logicalWidth, info.logicalHeight, cutout, roundedCorners,
+                indicatorBounds);
+    }
+
+    DisplayFrames() {
+        mInsetsState = new InsetsState();
     }
 
     /**
-     * This is called when {@link DisplayInfo} or {@link PrivacyIndicatorBounds} is updated.
+     * This is called if the display info may be changed, e.g. rotation, size, insets.
      *
-     * @param info the updated {@link DisplayInfo}.
-     * @param displayCutout the updated {@link DisplayCutout}.
-     * @param roundedCorners the updated {@link RoundedCorners}.
-     * @param indicatorBounds the updated {@link PrivacyIndicatorBounds}.
      * @return {@code true} if anything has been changed; {@code false} otherwise.
      */
-    public boolean update(DisplayInfo info, @NonNull WmDisplayCutout displayCutout,
+    public boolean update(int rotation, int w, int h, @NonNull DisplayCutout displayCutout,
             @NonNull RoundedCorners roundedCorners,
             @NonNull PrivacyIndicatorBounds indicatorBounds) {
         final InsetsState state = mInsetsState;
         final Rect safe = mDisplayCutoutSafe;
-        final DisplayCutout cutout = displayCutout.getDisplayCutout();
-        if (mDisplayWidth == info.logicalWidth && mDisplayHeight == info.logicalHeight
-                && mRotation == info.rotation
-                && state.getDisplayCutout().equals(cutout)
+        if (mRotation == rotation && mWidth == w && mHeight == h
+                && mInsetsState.getDisplayCutout().equals(displayCutout)
                 && state.getRoundedCorners().equals(roundedCorners)
                 && state.getPrivacyIndicatorBounds().equals(indicatorBounds)) {
             return false;
         }
-        mDisplayWidth = info.logicalWidth;
-        mDisplayHeight = info.logicalHeight;
-        mRotation = info.rotation;
+        mRotation = rotation;
+        mWidth = w;
+        mHeight = h;
         final Rect unrestricted = mUnrestricted;
-        unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
+        unrestricted.set(0, 0, w, h);
         state.setDisplayFrame(unrestricted);
-        state.setDisplayCutout(cutout);
+        state.setDisplayCutout(displayCutout);
         state.setRoundedCorners(roundedCorners);
         state.setPrivacyIndicatorBounds(indicatorBounds);
         state.getDisplayCutoutSafe(safe);
-        if (!cutout.isEmpty()) {
+        if (safe.left > unrestricted.left) {
             state.getSource(ITYPE_LEFT_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, unrestricted.top, safe.left, unrestricted.bottom);
+        } else {
+            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
+        }
+        if (safe.top > unrestricted.top) {
             state.getSource(ITYPE_TOP_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, unrestricted.top, unrestricted.right, safe.top);
+        } else {
+            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
+        }
+        if (safe.right < unrestricted.right) {
             state.getSource(ITYPE_RIGHT_DISPLAY_CUTOUT).setFrame(
                     safe.right, unrestricted.top, unrestricted.right, unrestricted.bottom);
+        } else {
+            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
+        }
+        if (safe.bottom < unrestricted.bottom) {
             state.getSource(ITYPE_BOTTOM_DISPLAY_CUTOUT).setFrame(
                     unrestricted.left, safe.bottom, unrestricted.right, unrestricted.bottom);
         } else {
-            state.removeSource(ITYPE_LEFT_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_TOP_DISPLAY_CUTOUT);
-            state.removeSource(ITYPE_RIGHT_DISPLAY_CUTOUT);
             state.removeSource(ITYPE_BOTTOM_DISPLAY_CUTOUT);
         }
         return true;
@@ -123,7 +125,6 @@ public class DisplayFrames {
     }
 
     public void dump(String prefix, PrintWriter pw) {
-        pw.println(prefix + "DisplayFrames w=" + mDisplayWidth + " h=" + mDisplayHeight
-                + " r=" + mRotation);
+        pw.println(prefix + "DisplayFrames w=" + mWidth + " h=" + mHeight + " r=" + mRotation);
     }
 }

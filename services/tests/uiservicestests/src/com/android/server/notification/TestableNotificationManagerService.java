@@ -19,10 +19,12 @@ package com.android.server.notification;
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.service.notification.StatusBarNotification;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceIdSequence;
+import com.android.server.notification.ManagedServices.ManagedServiceInfo;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,12 +32,16 @@ import java.util.Set;
 public class TestableNotificationManagerService extends NotificationManagerService {
     int countSystemChecks = 0;
     boolean isSystemUid = true;
+    boolean isSystemAppId = true;
     int countLogSmartSuggestionsVisible = 0;
     Set<Integer> mChannelToastsSent = new HashSet<>();
 
     String stringArrayResourceValue;
     @Nullable
     NotificationAssistantAccessGrantedCallback mNotificationAssistantAccessGrantedCallback;
+
+    @Nullable
+    Boolean mIsVisibleToListenerReturnValue = null;
 
     TestableNotificationManagerService(Context context, NotificationRecordLogger logger,
             InstanceIdSequence notificationInstanceIdSequence) {
@@ -50,6 +56,12 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     protected boolean isCallingUidSystem() {
         countSystemChecks++;
         return isSystemUid;
+    }
+
+    @Override
+    protected boolean isCallingAppIdSystem() {
+        countSystemChecks++;
+        return isSystemUid || isSystemAppId;
     }
 
     @Override
@@ -117,6 +129,19 @@ public class TestableNotificationManagerService extends NotificationManagerServi
     // Helper method for testing behavior when turning on/off the review permissions notification.
     protected void setShowReviewPermissionsNotification(boolean setting) {
         mShowReviewPermissionsNotification = setting;
+    }
+
+    protected void setIsVisibleToListenerReturnValue(boolean value) {
+        mIsVisibleToListenerReturnValue = value;
+    }
+
+    @Override
+    boolean isVisibleToListener(StatusBarNotification sbn, int notificationType,
+            ManagedServiceInfo listener) {
+        if (mIsVisibleToListenerReturnValue != null) {
+            return mIsVisibleToListenerReturnValue;
+        }
+        return super.isVisibleToListener(sbn, notificationType, listener);
     }
 
     public class StrongAuthTrackerFake extends NotificationManagerService.StrongAuthTracker {

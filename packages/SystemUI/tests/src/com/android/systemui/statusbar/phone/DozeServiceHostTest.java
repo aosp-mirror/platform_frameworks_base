@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -41,6 +42,8 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -59,10 +62,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@RunWithLooper(setAsMainLooper = true)
 public class DozeServiceHostTest extends SysuiTestCase {
 
     private DozeServiceHost mDozeServiceHost;
@@ -90,6 +93,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
+    @Mock private DozeHost.Callback mCallback;
 
     @Before
     public void setup() {
@@ -98,7 +102,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mStatusBarStateController, mDeviceProvisionedController, mHeadsUpManager,
                 mBatteryController, mScrimController, () -> mBiometricUnlockController,
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
-                mKeyguardUpdateMonitor, mPulseExpansionHandler, Optional.empty(),
+                mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
                 mAuthController, mNotificationIconAreaController);
 
@@ -112,16 +116,19 @@ public class DozeServiceHostTest extends SysuiTestCase {
 
     @Test
     public void testStartStopDozing() {
+        mDozeServiceHost.addCallback(mCallback);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
         when(mStatusBarStateController.isKeyguardRequested()).thenReturn(true);
 
         assertFalse(mDozeServiceHost.getDozingRequested());
 
         mDozeServiceHost.startDozing();
+        verify(mCallback).onDozingChanged(eq(true));
         verify(mStatusBarStateController).setIsDozing(eq(true));
         verify(mCentralSurfaces).updateIsKeyguard();
 
         mDozeServiceHost.stopDozing();
+        verify(mCallback).onDozingChanged(eq(false));
         verify(mStatusBarStateController).setIsDozing(eq(false));
     }
 

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -39,26 +40,33 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.view.IInputMethodManager;
+import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.sysui.ShellInit;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.concurrent.Executor;
 
 @SmallTest
-public class DisplayImeControllerTest {
+public class DisplayImeControllerTest extends ShellTestCase {
 
+    @Mock
     private SurfaceControl.Transaction mT;
-    private DisplayImeController.PerDisplay mPerDisplay;
+    @Mock
     private IInputMethodManager mMock;
+    @Mock
+    private ShellInit mShellInit;
+    private DisplayImeController.PerDisplay mPerDisplay;
     private Executor mExecutor;
 
     @Before
     public void setUp() throws Exception {
-        mT = mock(SurfaceControl.Transaction.class);
-        mMock = mock(IInputMethodManager.class);
+        MockitoAnnotations.initMocks(this);
         mExecutor = spy(Runnable::run);
-        mPerDisplay = new DisplayImeController(null, null, null, mExecutor, new TransactionPool() {
+        mPerDisplay = new DisplayImeController(null, mShellInit, null, null, new TransactionPool() {
             @Override
             public SurfaceControl.Transaction acquire() {
                 return mT;
@@ -67,7 +75,7 @@ public class DisplayImeControllerTest {
             @Override
             public void release(SurfaceControl.Transaction t) {
             }
-        }) {
+        }, mExecutor) {
             @Override
             public IInputMethodManager getImms() {
                 return mMock;
@@ -75,6 +83,11 @@ public class DisplayImeControllerTest {
             @Override
             void removeImeSurface() { }
         }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
+    }
+
+    @Test
+    public void instantiateController_addInitCallback() {
+        verify(mShellInit, times(1)).addInitCallback(any(), any());
     }
 
     @Test
@@ -121,7 +134,7 @@ public class DisplayImeControllerTest {
     private InsetsSourceControl[] insetsSourceControl() {
         return new InsetsSourceControl[]{
                 new InsetsSourceControl(
-                        ITYPE_IME, mock(SurfaceControl.class), new Point(0, 0), Insets.NONE)
+                        ITYPE_IME, mock(SurfaceControl.class), false, new Point(0, 0), Insets.NONE)
         };
     }
 

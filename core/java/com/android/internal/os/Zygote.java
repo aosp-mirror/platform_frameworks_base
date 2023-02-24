@@ -178,7 +178,14 @@ public final class Zygote {
      * GWP-ASan is activated unconditionally (but still, only a small subset of
      * allocations is protected).
      */
-    public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+
+    /**
+     * GWP-ASan's `gwpAsanMode` manifest flag was unspecified. Currently, this
+     * means GWP_ASAN_LEVEL_LOTTERY for system apps, and GWP_ASAN_LEVEL_NONE for
+     * non-system apps.
+     */
+    public static final int GWP_ASAN_LEVEL_DEFAULT = 3 << 21;
 
     /** Enable automatic zero-initialization of native heap memory allocations. */
     public static final int NATIVE_HEAP_ZERO_INIT_ENABLED = 1 << 23;
@@ -1347,15 +1354,13 @@ public final class Zygote {
                     ? GWP_ASAN_LEVEL_ALWAYS
                     : GWP_ASAN_LEVEL_NEVER;
         }
-        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
-        // system apps, and disabled for user apps, unless overwritten by the compat feature.
         if (isCompatChangeEnabled(GWP_ASAN, info, platformCompat, 0)) {
             return GWP_ASAN_LEVEL_ALWAYS;
         }
         if ((info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
             return GWP_ASAN_LEVEL_LOTTERY;
         }
-        return GWP_ASAN_LEVEL_NEVER;
+        return GWP_ASAN_LEVEL_DEFAULT;
     }
 
     private static boolean enableNativeHeapZeroInit(

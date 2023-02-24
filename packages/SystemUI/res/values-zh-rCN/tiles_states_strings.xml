@@ -89,7 +89,7 @@
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"不可用"</item>
     <item msgid="1909756493418256167">"关闭"</item>
-    <item msgid="4531508423703413340">"开启"</item>
+    <item msgid="4531508423703413340">"已开启"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"不可用"</item>
@@ -170,5 +170,10 @@
     <item msgid="8189342855739930015">"不可用"</item>
     <item msgid="146088982397753810">"已关闭"</item>
     <item msgid="460891964396502657">"已开启"</item>
+  </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"不可用"</item>
+    <item msgid="8014986104355098744">"关闭"</item>
+    <item msgid="5966994759929723339">"已开启"</item>
   </string-array>
 </resources>

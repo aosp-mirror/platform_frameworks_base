@@ -171,4 +171,9 @@
     <item msgid="146088982397753810">"Vypnuté"</item>
     <item msgid="460891964396502657">"Zapnuté"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Nedostupné"</item>
+    <item msgid="8014986104355098744">"Vypnuté"</item>
+    <item msgid="5966994759929723339">"Zapnuté"</item>
+  </string-array>
 </resources>

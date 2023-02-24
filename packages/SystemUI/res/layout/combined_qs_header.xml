@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<androidx.constraintlayout.motion.widget.MotionLayout
+<com.android.systemui.util.NoRemeasureMotionLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/split_shade_status_bar"
@@ -32,9 +32,36 @@
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/center"
-        app:layout_constraintGuide_percent="0.5"
+        android:id="@+id/begin_guide"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="0dp"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/end_guide"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="0dp"
+        />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/center_left"
         android:orientation="vertical" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/center_right"
+        android:orientation="vertical" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/barrier"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="statusIcons,privacy_container" />
 
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
@@ -44,18 +71,25 @@
         android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
         android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
         android:singleLine="true"
+        android:textDirection="locale"
         android:textAppearance="@style/TextAppearance.QS.Status"
+        android:transformPivotX="0sp"
+        android:transformPivotY="20sp"
+        android:scaleX="1"
+        android:scaleY="1"
     />
 
-    <com.android.systemui.statusbar.policy.DateView
+    <com.android.systemui.statusbar.policy.VariableDateView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_gravity="start|center_vertical"
         android:gravity="center_vertical"
         android:singleLine="true"
+        android:textDirection="locale"
         android:textAppearance="@style/TextAppearance.QS.Status"
-        app:datePattern="@string/abbrev_wday_month_day_no_year_alarm"
+        app:longDatePattern="@string/abbrev_wday_month_day_no_year_alarm"
+        app:shortDatePattern="@string/abbrev_month_day_no_year"
     />
 
     <include
@@ -81,7 +115,7 @@
         app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
         android:paddingEnd="@dimen/signal_cluster_battery_padding"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/large_screen_shade_header_min_height"
         app:layout_constraintStart_toEndOf="@id/carrier_group"
         app:layout_constraintEnd_toStartOf="@id/batteryRemainingIcon"
         app:layout_constraintTop_toTopOf="@id/clock"
@@ -92,8 +126,9 @@
     <com.android.systemui.battery.BatteryMeterView
         android:id="@+id/batteryRemainingIcon"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/large_screen_shade_header_min_height"
         app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
+        app:layout_constrainedWidth="true"
         app:textAppearance="@style/TextAppearance.QS.Status"
         app:layout_constraintStart_toEndOf="@id/statusIcons"
         app:layout_constraintEnd_toEndOf="parent"
@@ -104,13 +139,18 @@
     <FrameLayout
         android:id="@+id/privacy_container"
         android:layout_width="wrap_content"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/large_screen_shade_header_min_height"
         android:gravity="center"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/end_guide"
         app:layout_constraintTop_toTopOf="@id/date"
         app:layout_constraintBottom_toBottomOf="@id/date"
         >
         <include layout="@layout/ongoing_privacy_chip"/>
     </FrameLayout>
 
-</androidx.constraintlayout.motion.widget.MotionLayout>
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:id="@+id/space"
+    />
+</com.android.systemui.util.NoRemeasureMotionLayout>

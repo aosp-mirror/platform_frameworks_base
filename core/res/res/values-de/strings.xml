@@ -80,8 +80,8 @@
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"Von deinem Mobilfunkanbieter für SIM <xliff:g id="SIMNUMBER">%d</xliff:g> vorübergehend deaktiviert"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilfunknetz nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Versuche, das bevorzugte Netzwerk zu ändern. Tippe, um ein anderes auszuwählen."</string>
-    <string name="EmergencyCallWarningTitle" msgid="9164532362414787774">"Notrufe sind eventuell nicht verfügbar"</string>
-    <string name="EmergencyCallWarningSummary" msgid="3365701131304664899">"<xliff:g id="SPN">%s</xliff:g> unterstützt keine Notrufe über WLAN. Weitere Informationen."</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Notrufe nicht möglich"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Notrufe über WLAN nicht möglich"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Warnmeldungen"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Anrufweiterleitung"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Notfallrückrufmodus"</string>
@@ -581,13 +581,14 @@
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Displaysperre verwenden"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Displaysperre eingeben, um fortzufahren"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Drücke fest auf den Sensor"</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Fingerabdruck konnte nicht verarbeitet werden. Bitte versuche es noch einmal."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingerabdruck wurde nicht erkannt. Versuch es noch einmal."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Reinige den Fingerabdrucksensor und versuch es noch einmal"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Reinige den Sensor und versuche es noch einmal"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Drücke fest auf den Sensor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Finger zu langsam bewegt. Bitte versuche es noch einmal."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Anderen Fingerabdruck verwenden"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Zu hell"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Drücken der Ein-/Aus-Taste erkannt"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Versuche, den Finger anders aufzulegen"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ändere jedes Mal leicht die Position deines Fingers"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -599,16 +600,17 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Gesicht authentifiziert, bitte bestätigen"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Fingerabdruckhardware nicht verfügbar"</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Fingerabdruck konnte nicht eingerichtet werden"</string>
-    <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Zeitüberschreitung bei Fingerabdruck. Bitte versuche es noch einmal."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Zeitüberschreitung bei Fingerabdruckeinrichtung. Versuch es noch einmal."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Fingerabdruckvorgang abgebrochen"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Vorgang der Fingerabdruckauthentifizierung vom Nutzer abgebrochen."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Zu viele Versuche, bitte später noch einmal versuchen"</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Zu viele Versuche. Der Fingerabdrucksensor wurde deaktiviert."</string>
-    <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Bitte versuche es noch einmal."</string>
+    <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="9060651300306264843">"Zu viele Versuche. Verwende stattdessen die Displaysperre."</string>
+    <string name="fingerprint_error_unable_to_process" msgid="2446280592818621224">"Fingerabdruck kann nicht verarbeitet werden. Versuch es noch einmal."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Keine Fingerabdrücke erfasst."</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"Dieses Gerät hat keinen Fingerabdrucksensor."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"Der Sensor ist vorübergehend deaktiviert."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Der Fingerabdrucksensor kann nicht verwendet werden. Suche einen Reparaturdienstleister auf."</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Ein-/Aus-Taste wurde gedrückt"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Finger <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Fingerabdruck verwenden"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Fingerabdruck oder Displaysperre verwenden"</string>
@@ -629,26 +631,33 @@
     <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Entsperrung per Fingerabdruck"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Der Fingerabdrucksensor kann nicht verwendet werden"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Suche einen Reparaturdienstleister auf."</string>
-    <string name="face_acquired_insufficient" msgid="2150805835949162453">"Gesichtsdaten nicht gut erfasst. Erneut versuchen."</string>
+    <string name="face_acquired_insufficient" msgid="6889245852748492218">"Kein Gesichtsmodell möglich. Versuche es erneut."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Zu hell. Schwächere Beleuchtung ausprobieren."</string>
-    <string name="face_acquired_too_dark" msgid="252573548464426546">"Zu dunkel. Probier eine hellere Beleuchtung aus."</string>
-    <string name="face_acquired_too_close" msgid="1628767882971469833">"Beweg das Telefon weiter weg."</string>
-    <string name="face_acquired_too_far" msgid="5098567726427173896">"Beweg das Telefon näher heran."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Halte das Smartphone höher."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Beweg das Smartphone nach unten."</string>
-    <string name="face_acquired_too_right" msgid="2513391513020932655">"Beweg das Smartphone nach links."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Beweg das Smartphone nach rechts."</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nicht genug Licht"</string>
+    <string name="face_acquired_too_close" msgid="4453646176196302462">"Bewege das Smartphone weiter weg"</string>
+    <string name="face_acquired_too_far" msgid="2922278214231064859">"Bewege das Smartphone näher heran"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Bewege das Smartphone nach oben"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Bewege das Smartphone nach unten"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="2945945257956443257">"Halte dein Gesicht direkt vor dein Smartphone."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dein Gesicht wurde nicht erkannt. Halte dein Smartphone auf Augenhöhe."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
-    <string name="face_acquired_too_different" msgid="4699657338753282542">"Gesicht wird nicht mehr erkannt. Erneut versuchen."</string>
-    <string name="face_acquired_too_similar" msgid="7684650785108399370">"Zu ähnlich. Bitte dreh deinen Kopf etwas."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Dreh den Kopf etwas weniger zur Seite."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Neig den Kopf etwas weniger stark."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Neig den Kopf etwas weniger stark."</string>
+    <string name="face_acquired_too_different" msgid="2520389515612972889">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"Ändere die Position deines Kopfes leicht"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Sieh direkt auf dein Smartphone"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Sieh direkt auf dein Smartphone"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Sieh direkt auf dein Smartphone"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Entferne alles, was dein Gesicht verdeckt."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinige den oberen Teil deines Bildschirms, einschließlich der schwarzen Leiste"</string>
+    <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
+    <skip />
+    <!-- no translation found for face_acquired_mouth_covering_detected (8219428572168642593) -->
+    <skip />
+    <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Dein Gesichtsmodell kann nicht erstellt werden. Versuche es noch einmal."</string>
+    <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dunkle Brille erkannt. Dein Gesicht muss vollständig sichtbar sein."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Dein Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -1236,10 +1245,9 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"<xliff:g id="APPNAME">%1$s</xliff:g> wird vorbereitet"</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Apps werden gestartet..."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Start wird abgeschlossen..."</string>
-    <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"Einrichtung fortsetzen?"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um deinen Fingerabdruck einzurichten."</string>
-    <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"Ausschalten"</string>
-    <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"Weiter einrichten"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Zum Beenden der Einrichtung Bildschirm deaktivieren"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Deaktivieren"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Mit der Fingerabdruckprüfung fortfahren?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Du hast die Ein-/Aus-Taste gedrückt — damit wird der Bildschirm ausgeschaltet.\n\nTippe die Taste leicht an, um mit deinem Fingerabdruck deine Identität zu bestätigen."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Ausschalten"</string>
@@ -1392,16 +1400,16 @@
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Zum Einrichten tippen"</string>
     <string name="ext_media_new_notification_message" product="tv" msgid="216863352100263668">"Zum Einrichten auswählen"</string>
     <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Eventuell musst du das Gerät neu formatieren. Zum Auswerfen tippen."</string>
-    <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Zum Übertragen von Fotos und Medien"</string>
+    <string name="ext_media_ready_notification_message" msgid="7509496364380197369">"Zum Speichern von Fotos, Videos, Musik und mehr"</string>
     <string name="ext_media_ready_notification_message" product="tv" msgid="8847134811163165935">"In Mediendateien stöbern"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem mit <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tippen, um das Problem zu beheben"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ist beschädigt. Zur Problembehebung auswählen."</string>
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Eventuell musst du das Gerät neu formatieren. Zum Auswerfen tippen."</string>
-    <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> nicht unterstützt"</string>
+    <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"„<xliff:g id="NAME">%s</xliff:g>“ erkannt"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zum Einrichten in einem unterstützten Format tippen."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Zum Einrichten tippen"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Wähle <xliff:g id="NAME">%s</xliff:g> aus, um das Medium in einem unterstützten Format einzurichten."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Eventuell musst du das Gerät neu formatieren"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> wurde unerwartet entfernt"</string>
@@ -1914,6 +1922,7 @@
     <string name="country_selection_title" msgid="5221495687299014379">"Region auswählen"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"Sprache eingeben"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Vorschläge"</string>
+    <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"Vorschläge"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Alle Sprachen"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"Alle Regionen"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Suche"</string>
@@ -1931,18 +1940,19 @@
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Kamera nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Weiter auf Smartphone"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Mikrofon nicht verfügbar"</string>
+    <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Store nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-Einstellungen nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tablet" msgid="8222710146267948647">"Tablet-Einstellungen nicht verfügbar"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="default" msgid="6895719984375299791">"Smartphone-Einstellungen nicht verfügbar"</string>
-    <string name="app_streaming_blocked_message" product="tv" msgid="5024599278277957935">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
-    <string name="app_streaming_blocked_message" product="tablet" msgid="7491114163056552686">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
-    <string name="app_streaming_blocked_message" product="default" msgid="1245180131667647277">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tv" msgid="6306583663205997979">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="tablet" msgid="6545624942642129664">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
-    <string name="app_streaming_blocked_message_for_permission_dialog" product="default" msgid="8462740631707923000">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist derzeit kein Zugriff möglich. Versuche es stattdessen auf deinem Smartphone."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv" msgid="3470977315395784567">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Diese App fordert zusätzliche Sicherheit an. Versuch es stattdessen auf deinem Smartphone."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tv" msgid="820334666354451145">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Android TV-Gerät."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="tablet" msgid="3286849551133045896">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Tablet."</string>
+    <string name="app_streaming_blocked_message_for_settings_dialog" product="default" msgid="6264287556598916295">"Auf deinem <xliff:g id="DEVICE">%1$s</xliff:g> ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Diese App wurde für eine ältere Android-Version entwickelt und funktioniert möglicherweise nicht mehr richtig. Prüfe, ob Updates verfügbar sind oder kontaktiere den Entwickler."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Auf Updates prüfen"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Du hast neue Nachrichten"</string>
@@ -2035,7 +2045,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> den Zugriff auf alle Geräteprotokolle erlauben?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Einmaligen Zugriff zulassen"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nicht zulassen"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können sie verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen, daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät. Weitere Informationen"</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können diese Protokolle verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen, daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugriff auf einige Protokolle oder Informationen auf deinem Gerät."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"In Geräteprotokollen wird aufgezeichnet, welche Aktionen auf deinem Gerät ausgeführt werden. Apps können diese Protokolle verwenden, um Probleme zu finden und zu beheben.\n\nEinige Protokolle enthalten unter Umständen vertrauliche Informationen. Daher solltest du nur vertrauenswürdigen Apps den Zugriff auf alle Geräteprotokolle erlauben. \n\nWenn du dieser App keinen Zugriff auf alle Geräteprotokolle gewährst, kann sie trotzdem auf ihre eigenen Protokolle zugreifen. Dein Gerätehersteller hat möglicherweise auch Zugang zu einigen Protokollen oder Informationen auf deinem Gerät.\n\nWeitere Informationen findest du unter g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Nicht mehr anzeigen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> möchte Teile von <xliff:g id="APP_2">%2$s</xliff:g> anzeigen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bearbeiten"</string>
@@ -2276,5 +2287,6 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Aktive Apps prüfen"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Zugriff auf die Kamera des Smartphones über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Zugriff auf die Kamera des Tablets über dein Gerät (<xliff:g id="DEVICE">%1$s</xliff:g>) nicht möglich"</string>
+    <string name="vdm_secure_window" msgid="161700398158812314">"Während des Streamings ist kein Zugriff möglich. Versuch es stattdessen auf deinem Smartphone."</string>
     <string name="system_locale_title" msgid="711882686834677268">"Standardeinstellung des Systems"</string>
 </resources>

@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A per-user UsageStatsService. All methods are meant to be called with the main lock held
@@ -1374,8 +1375,8 @@ class UserUsageStatsService {
         return mDatabase.getBackupPayload(key);
     }
 
-    void applyRestoredPayload(String key, byte[] payload){
+    Set<String> applyRestoredPayload(String key, byte[] payload) {
         checkAndGetTimeLocked();
-        mDatabase.applyRestoredPayload(key, payload);
+        return mDatabase.applyRestoredPayload(key, payload);
     }
 }

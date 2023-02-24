@@ -116,6 +116,7 @@ combined_apis {
     system_server_classpath: [
         "service-media-s",
         "service-permission",
+        "service-rkp",
         "service-sdksandbox",
     ],
 }
@@ -175,6 +176,18 @@ genrule {
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
         "$(location :frameworks-base-api-module-lib-current.txt)",
+}
+
+genrule {
+    name: "frameworks-base-api-current.srcjar",
+    tools: ["merge_zips"],
+    out: ["current.srcjar"],
+    cmd: "$(location merge_zips) $(out) $(in)",
+    srcs: [
+        ":api-stubs-docs-non-updatable",
+        ":all-modules-public-stubs-source",
+    ],
+    visibility: ["//visibility:private"], // Used by make module in //development, mind
 }
 
 // This produces the same annotations.zip as framework-doc-stubs, but by using

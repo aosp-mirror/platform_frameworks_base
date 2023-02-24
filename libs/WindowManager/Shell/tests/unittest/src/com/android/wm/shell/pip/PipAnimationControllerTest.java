@@ -21,6 +21,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.wm.shell.MockSurfaceControlHelper.createMockSurfaceControlTransaction;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 
@@ -36,7 +37,9 @@ import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.MockSurfaceControlHelper;
 import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
@@ -60,19 +63,18 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Mock
     private TaskInfo mTaskInfo;
-
     @Mock
     private PipAnimationController.PipAnimationCallback mPipAnimationCallback;
 
     @Before
     public void setUp() throws Exception {
-        mPipAnimationController = new PipAnimationController(
-                new PipSurfaceTransactionHelper());
+        MockitoAnnotations.initMocks(this);
+        mPipAnimationController = new PipAnimationController(new PipSurfaceTransactionHelper(
+                InstrumentationRegistry.getInstrumentation().getTargetContext()));
         mLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("FakeLeash")
                 .build();
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -103,7 +105,8 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final PipAnimationController.PipTransitionAnimator oldAnimator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue1, null,
                         TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
-        oldAnimator.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
+        oldAnimator.setSurfaceControlTransactionFactory(
+                MockSurfaceControlHelper::createMockSurfaceControlTransaction);
         oldAnimator.start();
 
         final PipAnimationController.PipTransitionAnimator newAnimator = mPipAnimationController
@@ -133,7 +136,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
 
     @Test
     public void pipTransitionAnimator_rotatedEndValue() {
-        final PipDummySurfaceControlTx tx = new PipDummySurfaceControlTx();
+        final SurfaceControl.Transaction tx = createMockSurfaceControlTransaction();
         final Rect startBounds = new Rect(200, 700, 400, 800);
         final Rect endBounds = new Rect(0, 0, 500, 1000);
         // Fullscreen to PiP.
@@ -183,7 +186,8 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mTaskInfo, mLeash, baseValue, startValue, endValue, null,
                         TRANSITION_DIRECTION_TO_PIP, 0, ROTATION_0);
-        animator.setSurfaceControlTransactionFactory(PipDummySurfaceControlTx::new);
+        animator.setSurfaceControlTransactionFactory(
+                MockSurfaceControlHelper::createMockSurfaceControlTransaction);
 
         animator.setPipAnimationCallback(mPipAnimationCallback);
 

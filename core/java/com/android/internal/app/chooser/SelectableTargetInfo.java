@@ -232,6 +232,7 @@ public final class SelectableTargetInfo implements ChooserTargetInfo {
         }
         intent.setComponent(mChooserTarget.getComponentName());
         intent.putExtras(mChooserTarget.getIntentExtras());
+        TargetInfo.prepareIntentForCrossProfileLaunch(intent, userId);
 
         // Important: we will ignore the target security checks in ActivityManager
         // if and only if the ChooserTarget's target package is the same package

@@ -32,7 +32,6 @@ import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.platform.test.annotations.Presubmit;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
@@ -48,6 +47,7 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -61,11 +61,10 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 
-@Presubmit
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class HideDisplayCutoutOrganizerTest {
+public class HideDisplayCutoutOrganizerTest extends ShellTestCase {
     private TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext(), null);
 

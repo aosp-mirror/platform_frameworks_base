@@ -31,7 +31,6 @@ import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -50,11 +49,10 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "KEY"
 private const val KEY_2 = "KEY_2"
@@ -109,6 +107,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     private val clock = FakeSystemClock()
     @Mock private lateinit var tunerService: TunerService
     @Captor lateinit var tunableCaptor: ArgumentCaptor<TunerService.Tunable>
+    @Captor lateinit var callbackCaptor: ArgumentCaptor<(String, PlaybackState) -> Unit>
 
     private val instanceIdSequence = InstanceIdSequenceFake(1 shl 20)
 
@@ -284,6 +283,30 @@ class MediaDataManagerTest : SysuiTestCase() {
                 MediaData.PLAYBACK_CAST_REMOTE)
         verify(logger).logActiveMediaAdded(anyInt(), eq(SYSTEM_PACKAGE_NAME),
             eq(mediaDataCaptor.value.instanceId), eq(MediaData.PLAYBACK_CAST_REMOTE))
+    }
+
+    @Test
+    fun testOnNotificationAdded_hasSubstituteName_isUsed() {
+        val subName = "Substitute Name"
+        val notif = SbnBuilder().run {
+            modifyNotification(context).also {
+                it.extras = Bundle().apply {
+                    putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, subName)
+                }
+                it.setStyle(MediaStyle().apply {
+                    setMediaSession(session.sessionToken)
+                })
+            }
+            build()
+        }
+
+        mediaDataManager.onNotificationAdded(KEY, notif)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(null), capture(mediaDataCaptor), eq(true),
+            eq(0), eq(false))
+
+        assertThat(mediaDataCaptor.value!!.app).isEqualTo(subName)
     }
 
     @Test
@@ -951,7 +974,6 @@ class MediaDataManagerTest : SysuiTestCase() {
     fun testPlaybackStateChange_keyExists_callsListener() {
         // Notification has been added
         addNotificationAndLoad()
-        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
         verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
 
         // Callback gets an updated state
@@ -969,7 +991,6 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testPlaybackStateChange_keyDoesNotExist_doesNothing() {
         val state = PlaybackState.Builder().build()
-        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
         verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
 
         // No media added with this key
@@ -990,13 +1011,89 @@ class MediaDataManagerTest : SysuiTestCase() {
 
         // And then get a state update
         val state = PlaybackState.Builder().build()
-        val callbackCaptor = argumentCaptor<(String, PlaybackState) -> Unit>()
         verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
 
         // Then no changes are made
         callbackCaptor.value.invoke(KEY, state)
         verify(listener, never()).onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(),
             anyBoolean())
+    }
+
+    @Test
+    fun testPlaybackState_PauseWhenFlagTrue_keyExists_callsListener() {
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        val state = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PAUSED, 0L, 1f)
+                .build()
+        whenever(controller.playbackState).thenReturn(state)
+
+        addNotificationAndLoad()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+        callbackCaptor.value.invoke(KEY, state)
+
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY),
+                capture(mediaDataCaptor), eq(true), eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.isPlaying).isFalse()
+        assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
+    }
+
+    @Test
+    fun testPlaybackState_PauseStateAfterAddingResumption_keyExists_callsListener() {
+        val desc = MediaDescription.Builder().run {
+            setTitle(SESSION_TITLE)
+            build()
+        }
+        val state = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PAUSED, 0L, 1f)
+                .setActions(PlaybackState.ACTION_PLAY_PAUSE)
+                .build()
+
+        // Add resumption controls in order to have semantic actions.
+        // To make sure that they are not null after changing state.
+        mediaDataManager.addResumptionControls(
+                USER_ID,
+                desc,
+                Runnable {},
+                session.sessionToken,
+                APP_NAME,
+                pendingIntent,
+                PACKAGE_NAME
+        )
+        backgroundExecutor.runAllReady()
+        foregroundExecutor.runAllReady()
+
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+        callbackCaptor.value.invoke(PACKAGE_NAME, state)
+
+        verify(listener)
+                .onMediaDataLoaded(
+                        eq(PACKAGE_NAME),
+                        eq(PACKAGE_NAME),
+                        capture(mediaDataCaptor),
+                        eq(true),
+                        eq(0),
+                        eq(false)
+                )
+        assertThat(mediaDataCaptor.value.isPlaying).isFalse()
+        assertThat(mediaDataCaptor.value.semanticActions).isNotNull()
+    }
+
+    @Test
+    fun testPlaybackStateNull_Pause_keyExists_callsListener() {
+        whenever(controller.playbackState).thenReturn(null)
+        val state = PlaybackState.Builder()
+                .setState(PlaybackState.STATE_PAUSED, 0L, 1f)
+                .setActions(PlaybackState.ACTION_PLAY_PAUSE)
+                .build()
+
+        addNotificationAndLoad()
+        verify(mediaTimeoutListener).stateCallback = capture(callbackCaptor)
+        callbackCaptor.value.invoke(KEY, state)
+
+        verify(listener).onMediaDataLoaded(eq(KEY), eq(KEY),
+                capture(mediaDataCaptor), eq(true), eq(0), eq(false))
+        assertThat(mediaDataCaptor.value.isPlaying).isFalse()
+        assertThat(mediaDataCaptor.value.semanticActions).isNull()
     }
 
     /**

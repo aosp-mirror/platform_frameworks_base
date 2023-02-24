@@ -766,12 +766,14 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill selection when an authentication was selected.
      */
-    void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState) {
+    void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState,
+            int uiType) {
         synchronized (mLock) {
             if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
-                                null, null, null, null, null, null));
+                                null, null, null, null, null, null,
+                                NO_SAVE_UI_REASON_NONE, uiType));
             }
         }
     }
@@ -780,12 +782,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill selection when an dataset authentication was selected.
      */
     void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState) {
+            @Nullable Bundle clientState, int uiType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                                clientState, null, null, null, null, null, null, null, null));
+                                clientState, null, null, null, null, null, null, null, null,
+                                NO_SAVE_UI_REASON_NONE, uiType));
             }
         }
     }
@@ -806,13 +809,13 @@ final class AutofillManagerServiceImpl
      * Updates the last fill response when a dataset was selected.
      */
     void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState,  int presentationType) {
+            @Nullable Bundle clientState,  int uiType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetSelected()", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
                                 null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                presentationType));
+                                uiType));
             }
         }
     }
@@ -820,13 +823,13 @@ final class AutofillManagerServiceImpl
     /**
      * Updates the last fill response when a dataset is shown.
      */
-    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int presentationType) {
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType) {
         synchronized (mLock) {
             if (isValidEventLocked("logDatasetShown", sessionId)) {
                 mEventHistory.addEvent(
                         new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                                 null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                presentationType));
+                                uiType));
             }
         }
     }

@@ -16,4 +16,4 @@
 
 package android.hardware;
 
-parcelable HardwareBuffer;
+@JavaOnlyStableParcelable @NdkOnlyStableParcelable parcelable HardwareBuffer ndk_header "android/hardware_buffer_aidl.h";

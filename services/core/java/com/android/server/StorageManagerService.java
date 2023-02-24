@@ -732,6 +732,7 @@ class StorageManagerService extends IStorageManager.Stub
     private static final int H_COMPLETE_UNLOCK_USER = 14;
     private static final int H_VOLUME_STATE_CHANGED = 15;
     private static final int H_CLOUD_MEDIA_PROVIDER_CHANGED = 16;
+    private static final int H_SECURE_KEYGUARD_STATE_CHANGED = 17;
 
     class StorageManagerServiceHandler extends Handler {
         public StorageManagerServiceHandler(Looper looper) {
@@ -871,6 +872,14 @@ class StorageManagerService extends IStorageManager.Stub
                     }
                     break;
                 }
+                case H_SECURE_KEYGUARD_STATE_CHANGED: {
+                    try {
+                        mVold.onSecureKeyguardStateChanged((boolean) msg.obj);
+                    } catch (Exception e) {
+                        Slog.wtf(TAG, e);
+                    }
+                    break;
+                }
             }
         }
     }
@@ -888,7 +897,15 @@ class StorageManagerService extends IStorageManager.Stub
                 if (Intent.ACTION_USER_ADDED.equals(action)) {
                     final UserManager um = mContext.getSystemService(UserManager.class);
                     final int userSerialNumber = um.getUserSerialNumber(userId);
-                    mVold.onUserAdded(userId, userSerialNumber);
+                    final UserInfo userInfo = um.getUserInfo(userId);
+                    if (userInfo.isCloneProfile()) {
+                        // Only clone profiles share storage with their parent
+                        mVold.onUserAdded(userId, userSerialNumber,
+                                userInfo.profileGroupId /* sharesStorageWithUserId */);
+                    } else {
+                        mVold.onUserAdded(userId, userSerialNumber,
+                                -1 /* shareStorageWithUserId */);
+                    }
                 } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
                     synchronized (mVolumes) {
                         final int size = mVolumes.size();
@@ -1137,7 +1154,11 @@ class StorageManagerService extends IStorageManager.Stub
 
                 // Tell vold about all existing and started users
                 for (UserInfo user : users) {
-                    mVold.onUserAdded(user.id, user.serialNumber);
+                    if (user.isCloneProfile()) {
+                        mVold.onUserAdded(user.id, user.serialNumber, user.profileGroupId);
+                    } else {
+                        mVold.onUserAdded(user.id, user.serialNumber, -1);
+                    }
                 }
                 for (int userId : systemUnlockedUsers) {
                     mVold.onUserStarted(userId);
@@ -1330,12 +1351,12 @@ class StorageManagerService extends IStorageManager.Stub
     public void onKeyguardStateChanged(boolean isShowing) {
         // Push down current secure keyguard status so that we ignore malicious
         // USB devices while locked.
-        mSecureKeyguardShowing = isShowing
+        boolean isSecureKeyguardShowing = isShowing
                 && mContext.getSystemService(KeyguardManager.class).isDeviceSecure(mCurrentUserId);
-        try {
-            mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
-        } catch (Exception e) {
-            Slog.wtf(TAG, e);
+        if (mSecureKeyguardShowing != isSecureKeyguardShowing) {
+            mSecureKeyguardShowing = isSecureKeyguardShowing;
+            mHandler.obtainMessage(H_SECURE_KEYGUARD_STATE_CHANGED, mSecureKeyguardShowing)
+                    .sendToTarget();
         }
     }
 
@@ -2800,6 +2821,8 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         try {
+            int avgWriteAmount = 0;
+            int targetDirtyRatio = mTargetDirtyRatio;
             int latestWrite = mVold.getWriteAmount();
             if (latestWrite == -1) {
                 Slog.w(TAG, "Failed to get storage write record");
@@ -2812,10 +2835,11 @@ class StorageManagerService extends IStorageManager.Stub
             // (first boot after OTA), We skip the smart idle maintenance
             if (!needsCheckpoint() || !supportsBlockCheckpoint()) {
                 if (!refreshLifetimeConstraint() || !checkChargeStatus()) {
-                    return;
+                    Slog.i(TAG, "Turn off gc_urgent based on checking lifetime and charge status");
+                    targetDirtyRatio = 100;
+                } else {
+                    avgWriteAmount = getAverageWriteAmount();
                 }
-
-                int avgWriteAmount = getAverageWriteAmount();
 
                 Slog.i(TAG, "Set smart idle maintenance: " + "latest write amount: " +
                             latestWrite + ", average write amount: " + avgWriteAmount +
@@ -2824,10 +2848,10 @@ class StorageManagerService extends IStorageManager.Stub
                             ", segment reclaim weight: " + mSegmentReclaimWeight +
                             ", period(min): " + sSmartIdleMaintPeriod +
                             ", min gc sleep time(ms): " + mMinGCSleepTime +
-                            ", target dirty ratio: " + mTargetDirtyRatio);
+                            ", target dirty ratio: " + targetDirtyRatio);
                 mVold.setGCUrgentPace(avgWriteAmount, mMinSegmentsThreshold, mDirtyReclaimRate,
                                       mSegmentReclaimWeight, sSmartIdleMaintPeriod,
-                                      mMinGCSleepTime, mTargetDirtyRatio);
+                                      mMinGCSleepTime, targetDirtyRatio);
             } else {
                 Slog.i(TAG, "Skipping smart idle maintenance - block based checkpoint in progress");
             }
@@ -3830,8 +3854,12 @@ class StorageManagerService extends IStorageManager.Stub
                     // Return both read only and write only volumes. When includeSharedProfile is
                     // true, all the volumes of userIdSharingMedia should be returned when queried
                     // from the user it shares media with
+                    // Public Volumes will be also be returned if visible to the
+                    // userIdSharingMedia with.
                     match = vol.isVisibleForUser(userId)
                             || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
+                            || (vol.getType() == VolumeInfo.TYPE_PUBLIC
+                                    && vol.isVisibleForUser(userIdSharingMedia))
                             || (includeSharedProfile && vol.isVisibleForUser(userIdSharingMedia));
                 }
                 if (!match) continue;

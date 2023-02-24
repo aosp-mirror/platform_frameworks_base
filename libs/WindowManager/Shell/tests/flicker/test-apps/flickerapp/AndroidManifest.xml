@@ -92,6 +92,17 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".SendNotificationActivity"
+                  android:taskAffinity="com.android.wm.shell.flicker.testapp.SendNotificationActivity"
+                  android:theme="@style/CutoutShortEdges"
+                  android:label="SendNotificationApp"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name=".NonResizeableActivity"
                   android:resizeableActivity="false"
                   android:taskAffinity="com.android.wm.shell.flicker.testapp.NonResizeableActivity"

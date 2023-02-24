@@ -223,6 +223,10 @@ public class ImsMmTelManager implements RegistrationManager {
     private final int mSubId;
     private final BinderCacheManager<ITelephony> mBinderCache;
 
+    // Cache Telephony Binder interfaces, one cache per process.
+    private static final BinderCacheManager<ITelephony> sTelephonyCache =
+            new BinderCacheManager<>(ImsMmTelManager::getITelephonyInterface);
+
     /**
      * Create an instance of {@link ImsMmTelManager} for the subscription id specified.
      *
@@ -251,8 +255,7 @@ public class ImsMmTelManager implements RegistrationManager {
             throw new IllegalArgumentException("Invalid subscription ID");
         }
 
-        return new ImsMmTelManager(subId, new BinderCacheManager<>(
-                ImsMmTelManager::getITelephonyInterface));
+        return new ImsMmTelManager(subId, sTelephonyCache);
     }
 
     /**

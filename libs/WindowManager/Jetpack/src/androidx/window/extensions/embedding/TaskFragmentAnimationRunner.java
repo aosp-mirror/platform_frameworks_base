@@ -112,6 +112,7 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
     }
 
     /** Creates the animator given the transition type and windows. */
+    @NonNull
     private Animator createAnimator(@WindowManager.TransitionOldType int transit,
             @NonNull RemoteAnimationTarget[] targets,
             @NonNull IRemoteAnimationFinishedCallback finishedCallback) {
@@ -161,6 +162,7 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
     }
 
     /** List of {@link TaskFragmentAnimationAdapter} to handle animations on all window targets. */
+    @NonNull
     private List<TaskFragmentAnimationAdapter> createAnimationAdapters(
             @WindowManager.TransitionOldType int transit,
             @NonNull RemoteAnimationTarget[] targets) {
@@ -180,12 +182,14 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
         }
     }
 
+    @NonNull
     private List<TaskFragmentAnimationAdapter> createOpenAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
         return createOpenCloseAnimationAdapters(targets, true /* isOpening */,
                 mAnimationSpec::loadOpenAnimation);
     }
 
+    @NonNull
     private List<TaskFragmentAnimationAdapter> createCloseAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
         return createOpenCloseAnimationAdapters(targets, false /* isOpening */,
@@ -196,6 +200,7 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
      * Creates {@link TaskFragmentAnimationAdapter} for OPEN and CLOSE types of transition.
      * @param isOpening {@code true} for OPEN type, {@code false} for CLOSE type.
      */
+    @NonNull
     private List<TaskFragmentAnimationAdapter> createOpenCloseAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets, boolean isOpening,
             @NonNull BiFunction<RemoteAnimationTarget, Rect, Animation> animationProvider) {
@@ -208,10 +213,10 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
         for (RemoteAnimationTarget target : targets) {
             if (target.mode != MODE_CLOSING) {
                 openingTargets.add(target);
-                openingWholeScreenBounds.union(target.localBounds);
+                openingWholeScreenBounds.union(target.screenSpaceBounds);
             } else {
                 closingTargets.add(target);
-                closingWholeScreenBounds.union(target.localBounds);
+                closingWholeScreenBounds.union(target.screenSpaceBounds);
             }
         }
 
@@ -238,27 +243,17 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
         return adapters;
     }
 
+    @NonNull
     private TaskFragmentAnimationAdapter createOpenCloseAnimationAdapter(
             @NonNull RemoteAnimationTarget target,
             @NonNull BiFunction<RemoteAnimationTarget, Rect, Animation> animationProvider,
             @NonNull Rect wholeAnimationBounds) {
         final Animation animation = animationProvider.apply(target, wholeAnimationBounds);
-        final Rect targetBounds = target.localBounds;
-        if (targetBounds.left == wholeAnimationBounds.left
-                && targetBounds.right != wholeAnimationBounds.right) {
-            // This is the left split of the whole animation window.
-            return new TaskFragmentAnimationAdapter.SplitAdapter(animation, target,
-                    true /* isLeftHalf */, wholeAnimationBounds.width());
-        } else if (targetBounds.left != wholeAnimationBounds.left
-                && targetBounds.right == wholeAnimationBounds.right) {
-            // This is the right split of the whole animation window.
-            return new TaskFragmentAnimationAdapter.SplitAdapter(animation, target,
-                    false /* isLeftHalf */, wholeAnimationBounds.width());
-        }
-        // Open/close window that fills the whole animation.
-        return new TaskFragmentAnimationAdapter(animation, target);
+        return new TaskFragmentAnimationAdapter(animation, target, target.leash,
+                wholeAnimationBounds);
     }
 
+    @NonNull
     private List<TaskFragmentAnimationAdapter> createChangeAnimationAdapters(
             @NonNull RemoteAnimationTarget[] targets) {
         final List<TaskFragmentAnimationAdapter> adapters = new ArrayList<>();

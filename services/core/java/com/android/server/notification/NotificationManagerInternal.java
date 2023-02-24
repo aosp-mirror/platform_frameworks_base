@@ -45,4 +45,6 @@ public interface NotificationManagerInternal {
 
     /** Send a notification to the user prompting them to review their notification permissions. */
     void sendReviewPermissionsNotification();
+
+    void cleanupHistoryFiles();
 }

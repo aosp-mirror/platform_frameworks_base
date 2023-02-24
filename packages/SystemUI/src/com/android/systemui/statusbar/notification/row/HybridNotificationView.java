@@ -16,12 +16,17 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.COLOR_INVALID;
+
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
+
+import androidx.annotation.ColorInt;
 
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
@@ -40,6 +45,8 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     protected final ViewTransformationHelper mTransformationHelper = new ViewTransformationHelper();
     protected TextView mTitleView;
     protected TextView mTextView;
+    protected int mPrimaryTextColor = COLOR_INVALID;
+    protected int mSecondaryTextColor = COLOR_INVALID;
 
     public HybridNotificationView(Context context) {
         this(context, null);
@@ -69,40 +76,35 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        resolveThemeTextColors();
         mTitleView = findViewById(R.id.notification_title);
         mTextView = findViewById(R.id.notification_text);
+        applyTextColor(mTitleView, mPrimaryTextColor);
+        applyTextColor(mTextView, mSecondaryTextColor);
         mTransformationHelper.setCustomTransformation(
-                new ViewTransformationHelper.CustomTransformation() {
-                    @Override
-                    public boolean transformTo(TransformState ownState, TransformableView notification,
-                            float transformationAmount) {
-                        // We want to transform to the same y location as the title
-                        TransformState otherState = notification.getCurrentState(
-                                TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeOut(mTextView, transformationAmount);
-                        if (otherState != null) {
-                            ownState.transformViewVerticalTo(otherState, transformationAmount);
-                            otherState.recycle();
-                        }
-                        return true;
-                    }
-
-                    @Override
-                    public boolean transformFrom(TransformState ownState,
-                            TransformableView notification, float transformationAmount) {
-                        // We want to transform from the same y location as the title
-                        TransformState otherState = notification.getCurrentState(
-                                TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeIn(mTextView, transformationAmount, true /* remap */);
-                        if (otherState != null) {
-                            ownState.transformViewVerticalFrom(otherState, transformationAmount);
-                            otherState.recycle();
-                        }
-                        return true;
-                    }
-                }, TRANSFORMING_VIEW_TEXT);
+                new FadeOutAndDownWithTitleTransformation(mTextView),
+                TRANSFORMING_VIEW_TEXT);
         mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TITLE, mTitleView);
         mTransformationHelper.addTransformedView(TRANSFORMING_VIEW_TEXT, mTextView);
+    }
+
+    protected void applyTextColor(TextView textView, @ColorInt int textColor) {
+        if (textColor != COLOR_INVALID) {
+            textView.setTextColor(textColor);
+        }
+    }
+
+    private void resolveThemeTextColors() {
+        try (TypedArray ta = mContext.getTheme().obtainStyledAttributes(
+                android.R.style.Theme_DeviceDefault_DayNight, new int[]{
+                        android.R.attr.textColorPrimary,
+                        android.R.attr.textColorSecondary
+                })) {
+            if (ta != null) {
+                mPrimaryTextColor = ta.getColor(0, mPrimaryTextColor);
+                mSecondaryTextColor = ta.getColor(1, mSecondaryTextColor);
+            }
+        }
     }
 
     public void bind(@Nullable CharSequence title, @Nullable CharSequence text,
@@ -152,4 +154,40 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
 
     @Override
     public void setNotificationFaded(boolean faded) {}
+
+    protected static class FadeOutAndDownWithTitleTransformation extends
+            ViewTransformationHelper.CustomTransformation {
+
+        private final View mView;
+
+        public FadeOutAndDownWithTitleTransformation(View view) {
+            mView = view;
+        }
+
+        @Override
+        public boolean transformTo(TransformState ownState, TransformableView notification,
+                float transformationAmount) {
+            // We want to transform to the same y location as the title
+            TransformState otherState = notification.getCurrentState(TRANSFORMING_VIEW_TITLE);
+            CrossFadeHelper.fadeOut(mView, transformationAmount);
+            if (otherState != null) {
+                ownState.transformViewVerticalTo(otherState, transformationAmount);
+                otherState.recycle();
+            }
+            return true;
+        }
+
+        @Override
+        public boolean transformFrom(TransformState ownState,
+                TransformableView notification, float transformationAmount) {
+            // We want to transform from the same y location as the title
+            TransformState otherState = notification.getCurrentState(TRANSFORMING_VIEW_TITLE);
+            CrossFadeHelper.fadeIn(mView, transformationAmount, true /* remap */);
+            if (otherState != null) {
+                ownState.transformViewVerticalFrom(otherState, transformationAmount);
+                otherState.recycle();
+            }
+            return true;
+        }
+    }
 }

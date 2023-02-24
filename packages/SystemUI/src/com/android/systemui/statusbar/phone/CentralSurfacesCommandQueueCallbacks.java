@@ -45,6 +45,7 @@ import android.view.WindowInsetsController.Behavior;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
@@ -54,9 +55,10 @@ import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.qs.QSPanelController;
+import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DisableFlagsLogger;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
@@ -74,7 +76,7 @@ import javax.inject.Inject;
 public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callbacks {
     private final CentralSurfaces mCentralSurfaces;
     private final Context mContext;
-    private final ShadeController mShadeController;
+    private final com.android.systemui.shade.ShadeController mShadeController;
     private final CommandQueue mCommandQueue;
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
@@ -87,19 +89,16 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final AssistManager mAssistManager;
     private final DozeServiceHost mDozeServiceHost;
-    private final SysuiStatusBarStateController mStatusBarStateController;
-    private final NotificationShadeWindowView mNotificationShadeWindowView;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final PowerManager mPowerManager;
     private final VibratorHelper mVibratorHelper;
     private final Optional<Vibrator> mVibratorOptional;
-    private final LightBarController mLightBarController;
     private final DisableFlagsLogger mDisableFlagsLogger;
     private final int mDisplayId;
     private final boolean mVibrateOnOpening;
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
-
+    private final SystemBarAttributesListener mSystemBarAttributesListener;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
@@ -122,16 +121,14 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             AssistManager assistManager,
             DozeServiceHost dozeServiceHost,
-            SysuiStatusBarStateController statusBarStateController,
-            NotificationShadeWindowView notificationShadeWindowView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             PowerManager powerManager,
             VibratorHelper vibratorHelper,
             Optional<Vibrator> vibratorOptional,
-            LightBarController lightBarController,
             DisableFlagsLogger disableFlagsLogger,
-            @DisplayId int displayId) {
+            @DisplayId int displayId,
+            SystemBarAttributesListener systemBarAttributesListener) {
 
         mCentralSurfaces = centralSurfaces;
         mContext = context;
@@ -148,20 +145,18 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mAssistManager = assistManager;
         mDozeServiceHost = dozeServiceHost;
-        mStatusBarStateController = statusBarStateController;
-        mNotificationShadeWindowView = notificationShadeWindowView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mPowerManager = powerManager;
         mVibratorHelper = vibratorHelper;
         mVibratorOptional = vibratorOptional;
-        mLightBarController = lightBarController;
         mDisableFlagsLogger = disableFlagsLogger;
         mDisplayId = displayId;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
                 mVibratorOptional, resources);
+        mSystemBarAttributesListener = systemBarAttributesListener;
     }
 
     @Override
@@ -330,12 +325,12 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mNotificationPanelViewController.expand(true /* animate */);
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
-                mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN, 1);
+                mMetricsLogger.count("panel_open", 1);
             } else if (!mNotificationPanelViewController.isInSettings()
                     && !mNotificationPanelViewController.isExpanding()) {
                 mNotificationPanelViewController.flingSettings(0 /* velocity */,
-                        NotificationPanelView.FLING_EXPAND);
-                mMetricsLogger.count(NotificationPanelView.COUNTER_PANEL_OPEN_QS, 1);
+                        NotificationPanelViewController.FLING_EXPAND);
+                mMetricsLogger.count("panel_open_qs", 1);
             }
         }
 
@@ -388,8 +383,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
                     mStatusBarKeyguardViewManager.reset(true /* hide */);
                 }
-                mNotificationPanelViewController.launchCamera(
-                        mCentralSurfaces.isDeviceInteractive() /* animate */, source);
+                mNotificationPanelViewController.launchCamera(source);
                 mCentralSurfaces.updateScrimController();
             } else {
                 // We need to defer the camera launch until the screen comes on, since otherwise
@@ -464,18 +458,23 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Override
     public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
             AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
-            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName) {
+            @Behavior int behavior, InsetsVisibilities requestedVisibilities, String packageName,
+            LetterboxDetails[] letterboxDetails) {
         if (displayId != mDisplayId) {
             return;
         }
-        boolean barModeChanged = mCentralSurfaces.setAppearance(appearance);
-
-        mLightBarController.onStatusBarAppearanceChanged(appearanceRegions, barModeChanged,
-                mCentralSurfaces.getBarMode(), navbarColorManagedByIme);
-
-        mCentralSurfaces.updateBubblesVisibility();
-        mStatusBarStateController.setSystemBarAttributes(
-                appearance, behavior, requestedVisibilities, packageName);
+        // SystemBarAttributesListener should __always__ be the top-level listener for system bar
+        // attributes changed.
+        mSystemBarAttributesListener.onSystemBarAttributesChanged(
+                displayId,
+                appearance,
+                appearanceRegions,
+                navbarColorManagedByIme,
+                behavior,
+                requestedVisibilities,
+                packageName,
+                letterboxDetails
+        );
     }
 
     @Override

@@ -18,15 +18,12 @@ package com.android.server.display;
 
 import android.util.Slog;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 /**
  * A helper class for handling access to illuminance hysteresis level values.
  */
-@VisibleForTesting
 public class HysteresisLevels {
     private static final String TAG = "HysteresisLevels";
 
@@ -154,7 +151,7 @@ public class HysteresisLevels {
     }
 
     private boolean isAllInRange(float[] configArray, float minValueInclusive,
-                                 float maxValueInclusive) {
+            float maxValueInclusive) {
         int configArraySize = configArray.length;
         for (int index = 0; configArraySize > index; ++index) {
             if (configArray[index] < minValueInclusive || configArray[index] > maxValueInclusive) {

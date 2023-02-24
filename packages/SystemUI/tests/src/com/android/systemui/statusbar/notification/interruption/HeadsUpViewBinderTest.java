@@ -72,32 +72,32 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryBoundSuccessfully(eq("key"));
+        verify(mLogger).entryBoundSuccessfully(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryBoundSuccessfully(eq("key"));
+        verify(mLogger).entryBoundSuccessfully(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         mViewBinder.unbindHeadsUpView(mEntry);
-        verify(mLogger).entryContentViewMarkedFreeable(eq("key"));
+        verify(mLogger).entryContentViewMarkedFreeable(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryUnbound(eq("key"));
+        verify(mLogger).entryUnbound(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
     }
@@ -111,12 +111,12 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         mViewBinder.abortBindCallback(mEntry);
-        verify(mLogger).currentOngoingBindingAborted(eq("key"));
+        verify(mLogger).currentOngoingBindingAborted(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
@@ -135,18 +135,18 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger).startBindingHun(eq("key"));
+        verify(mLogger).startBindingHun(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         mViewBinder.unbindHeadsUpView(mEntry);
-        verify(mLogger).currentOngoingBindingAborted(eq("key"));
-        verify(mLogger).entryContentViewMarkedFreeable(eq("key"));
+        verify(mLogger).currentOngoingBindingAborted(eq(mEntry));
+        verify(mLogger).entryContentViewMarkedFreeable(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
-        verify(mLogger).entryUnbound(eq("key"));
+        verify(mLogger).entryUnbound(eq(mEntry));
         verifyNoMoreInteractions(mLogger);
         clearInvocations(mLogger);
     }

@@ -25,11 +25,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowInsets.Type
-
+import androidx.activity.ComponentActivity
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
-import com.android.systemui.util.LifecycleActivity
 import javax.inject.Inject
 
 /**
@@ -42,7 +41,7 @@ import javax.inject.Inject
 class ControlsActivity @Inject constructor(
     private val uiController: ControlsUiController,
     private val broadcastDispatcher: BroadcastDispatcher
-) : LifecycleActivity() {
+) : ComponentActivity() {
 
     private lateinit var parent: ViewGroup
     private lateinit var broadcastReceiver: BroadcastReceiver

@@ -179,6 +179,11 @@ public class UserControllerTest {
             doNothing().when(mInjector).taskSupervisorRemoveUser(anyInt());
             // All UserController params are set to default.
             mUserController = new UserController(mInjector);
+
+            // TODO(b/232452368): need to explicitly call setAllowUserUnlocking(), otherwise most
+            // tests would fail. But we might need to disable it for the onBootComplete() test (i.e,
+            // to make sure the users are unlocked at the right time)
+            mUserController.setAllowUserUnlocking(true);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
             setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated=*/ true, null);
         });
@@ -597,6 +602,16 @@ public class UserControllerTest {
         setUpAndStartUserInBackground(TEST_USER_ID3);
         assertUserLockedOrUnlockedAfterStopping(TEST_USER_ID3, /* delayedLocking= */ false,
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
+    }
+
+    @Test
+    public void testUserNotUnlockedBeforeAllowed() throws Exception {
+        mUserController.setAllowUserUnlocking(false);
+
+        mUserController.startUser(TEST_USER_ID, /* foreground= */ false);
+
+        verify(mInjector.mStorageManagerMock, never())
+                .unlockUserKey(eq(TEST_USER_ID), anyInt(), any());
     }
 
     @Test

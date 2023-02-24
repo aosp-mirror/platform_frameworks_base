@@ -25,7 +25,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.touch.BouncerSwipeTouchHandler;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
-import com.android.systemui.statusbar.phone.PanelViewController;
+import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import javax.inject.Named;
@@ -77,8 +77,9 @@ public class BouncerSwipeModule {
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilderProvider) {
         return flingAnimationUtilsBuilderProvider.get()
                 .reset()
-                .setMaxLengthSeconds(PanelViewController.FLING_CLOSING_MAX_LENGTH_SECONDS)
-                .setSpeedUpFactor(PanelViewController.FLING_SPEED_UP_FACTOR)
+                .setMaxLengthSeconds(
+                        NotificationPanelViewController.FLING_CLOSING_MAX_LENGTH_SECONDS)
+                .setSpeedUpFactor(NotificationPanelViewController.FLING_SPEED_UP_FACTOR)
                 .build();
     }
 
@@ -91,8 +92,8 @@ public class BouncerSwipeModule {
             Provider<FlingAnimationUtils.Builder> flingAnimationUtilsBuilderProvider) {
         return flingAnimationUtilsBuilderProvider.get()
                 .reset()
-                .setMaxLengthSeconds(PanelViewController.FLING_MAX_LENGTH_SECONDS)
-                .setSpeedUpFactor(PanelViewController.FLING_SPEED_UP_FACTOR)
+                .setMaxLengthSeconds(NotificationPanelViewController.FLING_MAX_LENGTH_SECONDS)
+                .setSpeedUpFactor(NotificationPanelViewController.FLING_SPEED_UP_FACTOR)
                 .build();
     }
 

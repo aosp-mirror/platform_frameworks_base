@@ -99,14 +99,6 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     boolean setIsDozing(boolean isDozing);
 
     /**
-     * Changes the current doze amount.
-     *
-     * @param dozeAmount New doze/dark amount.
-     * @param animated If change should be animated or not. This will cancel current animations.
-     */
-    void setDozeAmount(float dozeAmount, boolean animated);
-
-    /**
      * Changes the current doze amount, also starts the
      * {@link com.android.internal.jank.InteractionJankMonitor InteractionJankMonitor} as possible.
      *

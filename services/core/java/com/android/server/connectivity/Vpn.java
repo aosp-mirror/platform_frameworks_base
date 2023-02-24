@@ -25,6 +25,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.RouteInfo.RTN_THROW;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.net.VpnManager.NOTIFICATION_CHANNEL_VPN;
+import static android.net.ipsec.ike.IkeSessionParams.ESP_ENCAP_TYPE_AUTO;
+import static android.net.ipsec.ike.IkeSessionParams.ESP_IP_VERSION_AUTO;
 import static android.os.PowerWhitelistManager.REASON_VPN;
 import static android.os.UserHandle.PER_USER_RANGE;
 
@@ -140,6 +142,7 @@ import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.modules.utils.build.SdkLevel;
+import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.NetworkStackConstants;
 import com.android.server.DeviceIdleInternal;
@@ -249,6 +252,14 @@ public class Vpn {
      * The initial token value of IKE session.
      */
     private static final int STARTING_TOKEN = -1;
+
+    // TODO : read this from carrier config instead of a constant
+    @VisibleForTesting
+    public static final int AUTOMATIC_KEEPALIVE_DELAY_SECONDS = 30;
+
+    // Default keepalive timeout for carrier config is 5 minutes. Mimic this.
+    @VisibleForTesting
+    static final int DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT = 5 * 60;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -646,7 +657,10 @@ public class Vpn {
                 .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED)
                 .setTransportInfo(new VpnTransportInfo(
-                        VpnManager.TYPE_VPN_NONE, null /* sessionId */, false /* bypassable */))
+                        VpnManager.TYPE_VPN_NONE,
+                        null /* sessionId */,
+                        false /* bypassable */,
+                        false /* longLivedTcpConnectionsExpensive */))
                 .build();
 
         loadAlwaysOnPackage();
@@ -711,7 +725,10 @@ public class Vpn {
         mNetworkCapabilities = new NetworkCapabilities.Builder(mNetworkCapabilities)
                 .setUids(null)
                 .setTransportInfo(new VpnTransportInfo(
-                        VpnManager.TYPE_VPN_NONE, null /* sessionId */, false /* bypassable */))
+                        VpnManager.TYPE_VPN_NONE,
+                        null /* sessionId */,
+                        false /* bypassable */,
+                        false /* longLivedTcpConnectionsExpensive */))
                 .build();
     }
 
@@ -1570,7 +1587,8 @@ public class Vpn {
                 mConfig.allowedApplications, mConfig.disallowedApplications));
 
         capsBuilder.setTransportInfo(
-                new VpnTransportInfo(getActiveVpnType(), mConfig.session, mConfig.allowBypass));
+                new VpnTransportInfo(getActiveVpnType(), mConfig.session, mConfig.allowBypass,
+                        false /* longLivedTcpConnectionsExpensive */));
 
         // Only apps targeting Q and above can explicitly declare themselves as metered.
         // These VPNs are assumed metered unless they state otherwise.
@@ -2776,6 +2794,16 @@ public class Vpn {
         return hasIPV6 && !hasIPV4;
     }
 
+    private void setVpnNetworkPreference(String session, Set<Range<Integer>> ranges) {
+        BinderUtils.withCleanCallingIdentity(
+                () -> mConnectivityManager.setVpnDefaultForUids(session, ranges));
+    }
+
+    private void clearVpnNetworkPreference(String session) {
+        BinderUtils.withCleanCallingIdentity(
+                () -> mConnectivityManager.setVpnDefaultForUids(session, Collections.EMPTY_LIST));
+    }
+
     /**
      * Internal class managing IKEv2/IPsec VPN connectivity
      *
@@ -2887,6 +2915,9 @@ public class Vpn {
                     (r, exe) -> {
                         Log.d(TAG, "Runnable " + r + " rejected by the mExecutor");
                     });
+            setVpnNetworkPreference(mSessionKey,
+                    createUserAndRestrictedProfilesRanges(mUserId,
+                            mConfig.allowedApplications, mConfig.disallowedApplications));
         }
 
         @Override
@@ -3040,7 +3071,6 @@ public class Vpn {
                     mConfig.dnsServers.addAll(dnsAddrStrings);
 
                     mConfig.underlyingNetworks = new Network[] {network};
-                    mConfig.disallowedApplications = getAppExclusionList(mPackage);
 
                     networkAgent = mNetworkAgent;
 
@@ -3051,6 +3081,7 @@ public class Vpn {
                             prepareStatusIntent();
                         }
                         agentConnect(this::onValidationStatus);
+                        mSession.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
                         return; // Link properties are already sent.
                     } else {
                         // Underlying networks also set in agentConnect()
@@ -3159,6 +3190,7 @@ public class Vpn {
                     if (!removedAddrs.isEmpty()) {
                         startNewNetworkAgent(
                                 mNetworkAgent, "MTU too low for IPv6; restarting network agent");
+                        mSession.setUnderpinnedNetwork(mNetworkAgent.getNetwork());
 
                         for (LinkAddress removed : removedAddrs) {
                             mTunnelIface.removeAddress(
@@ -3222,6 +3254,8 @@ public class Vpn {
             }
 
             mActiveNetwork = network;
+            mUnderlyingLinkProperties = null;
+            mUnderlyingNetworkCapabilities = null;
             mRetryCount = 0;
 
             startOrMigrateIkeSession(network);
@@ -3231,14 +3265,22 @@ public class Vpn {
         private IkeSessionParams getIkeSessionParams(@NonNull Network underlyingNetwork) {
             final IkeTunnelConnectionParams ikeTunConnParams =
                     mProfile.getIkeTunnelConnectionParams();
+            final IkeSessionParams.Builder builder;
             if (ikeTunConnParams != null) {
-                final IkeSessionParams.Builder builder =
-                        new IkeSessionParams.Builder(ikeTunConnParams.getIkeSessionParams())
-                                .setNetwork(underlyingNetwork);
-                return builder.build();
+                builder = new IkeSessionParams.Builder(ikeTunConnParams.getIkeSessionParams())
+                        .setNetwork(underlyingNetwork);
             } else {
-                return VpnIkev2Utils.buildIkeSessionParams(mContext, mProfile, underlyingNetwork);
+                builder = VpnIkev2Utils.makeIkeSessionParamsBuilder(mContext, mProfile,
+                        underlyingNetwork);
             }
+            if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
+                builder.setNattKeepAliveDelaySeconds(guessNattKeepaliveTimerForNetwork());
+            }
+            if (mProfile.isAutomaticIpVersionSelectionEnabled()) {
+                builder.setIpVersion(guessEspIpVersionForNetwork());
+                builder.setEncapType(guessEspEncapTypeForNetwork());
+            }
+            return builder.build();
         }
 
         @NonNull
@@ -3302,6 +3344,23 @@ public class Vpn {
             startIkeSession(underlyingNetwork);
         }
 
+        private int guessEspIpVersionForNetwork() {
+            // TODO : guess the IP version based on carrier if auto IP version selection is enabled
+            return ESP_IP_VERSION_AUTO;
+        }
+
+        private int guessEspEncapTypeForNetwork() {
+            // TODO : guess the ESP encap type based on carrier if auto IP version selection is
+            // enabled
+            return ESP_ENCAP_TYPE_AUTO;
+        }
+
+        private int guessNattKeepaliveTimerForNetwork() {
+            // TODO : guess the keepalive delay based on carrier if auto keepalive timer is
+            // enabled
+            return AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
+        }
+
         boolean maybeMigrateIkeSession(@NonNull Network underlyingNetwork) {
             if (mSession == null || !mMobikeEnabled) return false;
 
@@ -3311,7 +3370,20 @@ public class Vpn {
                     + mCurrentToken
                     + " to network "
                     + underlyingNetwork);
-            mSession.setNetwork(underlyingNetwork);
+            final int ipVersion = mProfile.isAutomaticIpVersionSelectionEnabled()
+                    ? guessEspIpVersionForNetwork() : ESP_IP_VERSION_AUTO;
+            final int encapType = mProfile.isAutomaticIpVersionSelectionEnabled()
+                    ? guessEspEncapTypeForNetwork() : ESP_ENCAP_TYPE_AUTO;
+            final int keepaliveDelaySeconds;
+            if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
+                keepaliveDelaySeconds = guessNattKeepaliveTimerForNetwork();
+            } else if (mProfile.getIkeTunnelConnectionParams() != null) {
+                keepaliveDelaySeconds = mProfile.getIkeTunnelConnectionParams()
+                        .getIkeSessionParams().getNattKeepAliveDelaySeconds();
+            } else {
+                keepaliveDelaySeconds = DEFAULT_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT;
+            }
+            mSession.setNetwork(underlyingNetwork, ipVersion, encapType, keepaliveDelaySeconds);
             return true;
         }
 
@@ -3475,6 +3547,8 @@ public class Vpn {
                 return;
             } else {
                 mActiveNetwork = null;
+                mUnderlyingNetworkCapabilities = null;
+                mUnderlyingLinkProperties = null;
             }
 
             if (mScheduledHandleNetworkLostFuture != null) {
@@ -3664,9 +3738,6 @@ public class Vpn {
                 scheduleRetryNewIkeSession();
             }
 
-            mUnderlyingNetworkCapabilities = null;
-            mUnderlyingLinkProperties = null;
-
             // Close all obsolete state, but keep VPN alive incase a usable network comes up.
             // (Mirrors VpnService behavior)
             Log.d(TAG, "Resetting state for token: " + mCurrentToken);
@@ -3744,6 +3815,7 @@ public class Vpn {
             mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
             mConnectivityDiagnosticsManager.unregisterConnectivityDiagnosticsCallback(
                     mDiagnosticsCallback);
+            clearVpnNetworkPreference(mSessionKey);
 
             mExecutor.shutdown();
         }
@@ -4304,6 +4376,7 @@ public class Vpn {
             mConfig.requiresInternetValidation = profile.requiresInternetValidation;
             mConfig.excludeLocalRoutes = profile.excludeLocalRoutes;
             mConfig.allowBypass = profile.isBypassable;
+            mConfig.disallowedApplications = getAppExclusionList(mPackage);
 
             switch (profile.type) {
                 case VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS:
@@ -4456,6 +4529,9 @@ public class Vpn {
                         .setUids(createUserAndRestrictedProfilesRanges(
                                 mUserId, null /* allowedApplications */, excludedApps))
                         .build();
+                setVpnNetworkPreference(getSessionKeyLocked(),
+                        createUserAndRestrictedProfilesRanges(mUserId,
+                                mConfig.allowedApplications, mConfig.disallowedApplications));
                 doSendNetworkCapabilities(mNetworkAgent, mNetworkCapabilities);
             }
         }
@@ -4637,8 +4713,14 @@ public class Vpn {
         }
 
         /** Update the underlying network of the IKE Session */
-        public void setNetwork(@NonNull Network network) {
-            mImpl.setNetwork(network);
+        public void setNetwork(@NonNull Network network, int ipVersion, int encapType,
+                int keepaliveDelaySeconds) {
+            mImpl.setNetwork(network, ipVersion, encapType, keepaliveDelaySeconds);
+        }
+
+        /** Set the underpinned network */
+        public void setUnderpinnedNetwork(@NonNull Network underpinnedNetwork) {
+            mImpl.setUnderpinnedNetwork(underpinnedNetwork);
         }
 
         /** Forcibly terminate the IKE Session */

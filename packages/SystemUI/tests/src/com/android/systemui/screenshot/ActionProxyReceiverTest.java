@@ -32,7 +32,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.testing.AndroidTestingRunner;
@@ -115,7 +114,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockScreenshotSmartActions, never())
-                .notifyScreenshotAction(any(Context.class), anyString(), anyString(), anyBoolean(),
+                .notifyScreenshotAction(anyString(), anyString(), anyBoolean(),
                         any(Intent.class));
     }
 
@@ -129,7 +128,7 @@ public class ActionProxyReceiverTest extends SysuiTestCase {
         actionProxyReceiver.onReceive(mContext, mIntent);
 
         verify(mMockScreenshotSmartActions).notifyScreenshotAction(
-                mContext, testId, ACTION_TYPE_SHARE, false, null);
+                testId, ACTION_TYPE_SHARE, false, null);
     }
 
     private ActionProxyReceiver constructActionProxyReceiver(boolean withStatusBar) {

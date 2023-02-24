@@ -22,7 +22,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -162,15 +161,14 @@ final class RemoteSelectionToolbar {
     private final Rect mTempContentRectForRoot = new Rect();
     private final int[] mTempCoords = new int[2];
 
-    RemoteSelectionToolbar(Context context, long selectionToolbarToken, IBinder hostInputToken,
+    RemoteSelectionToolbar(Context context, long selectionToolbarToken, ShowInfo showInfo,
             SelectionToolbarRenderService.RemoteCallbackWrapper callbackWrapper,
             SelectionToolbarRenderService.TransferTouchListener transferTouchListener) {
-        mContext = applyDefaultTheme(context);
+        mContext = applyDefaultTheme(context, showInfo.isIsLightTheme());
         mSelectionToolbarToken = selectionToolbarToken;
         mCallbackWrapper = callbackWrapper;
         mTransferTouchListener = transferTouchListener;
-        mHostInputToken = hostInputToken;
-
+        mHostInputToken = showInfo.getHostInputToken();
         mContentContainer = createContentContainer(mContext);
         mMarginHorizontal = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
@@ -1319,7 +1317,6 @@ final class RemoteSelectionToolbar {
         contentContainer.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         contentContainer.setTag(FloatingToolbar.FLOATING_TOOLBAR_TAG);
-        contentContainer.setContentDescription(FloatingToolbar.FLOATING_TOOLBAR_TAG);
         contentContainer.setClipToOutline(true);
         return contentContainer;
     }
@@ -1359,12 +1356,9 @@ final class RemoteSelectionToolbar {
     /**
      * Returns a re-themed context with controlled look and feel for views.
      */
-    private static Context applyDefaultTheme(Context originalContext) {
-        TypedArray a = originalContext.obtainStyledAttributes(new int[]{R.attr.isLightTheme});
-        boolean isLightTheme = a.getBoolean(0, true);
+    private static Context applyDefaultTheme(Context originalContext, boolean isLightTheme) {
         int themeId =
                 isLightTheme ? R.style.Theme_DeviceDefault_Light : R.style.Theme_DeviceDefault;
-        a.recycle();
         return new ContextThemeWrapper(originalContext, themeId);
     }
 

@@ -151,6 +151,29 @@ public abstract class PackageManager {
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying the XML resource ID containing the declaration of the self-certified network
+     * capabilities used by the application.
+     *
+     * <p> Starting from Android 14, usage of some network capabilities in
+     * {@link android.net.ConnectivityManager#requestNetwork} require the application to
+     * declare its usage of that particular capability in this resource. Only some capabilities
+     * require a declaration. Please look up the specific capability you want to use in
+     * {@link android.net.NetworkCapabilities} to see if it needs declaration in this property.
+     *
+     * For example:
+     * &lt;application&gt;
+     *   &lt;property android:name="android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES"
+     *     android:resource="@xml/self_certified_network_capabilities"&gt;
+     * &lt;application&gt;
+     *
+     * <p> The detail format of self_certified_network_capabilities.xml is described in
+     * {@link android.net.NetworkRequest}
+     */
+    public static final String PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES =
+            "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
+
+    /**
      * Application level property that an app can specify to opt-out from having private data
      * directories both on the internal and external storages.
      *
@@ -1529,6 +1552,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_DISABLE_ALLOWED_APEX_UPDATE_CHECK = 0x00400000;
+
+    /**
+     * Flag parameter for {@link #installPackage} to bypass the low target sdk version block
+     * for this install.
+     *
+     * @hide
+     */
+    public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
 
     /** @hide */
     @IntDef(flag = true, value = {
@@ -4056,6 +4087,17 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * the requisite kernel support for migrating IPsec tunnels to new source/destination addresses.
+     *
+     * <p>This feature implies that the device supports XFRM Migration (CONFIG_XFRM_MIGRATE) and has
+     * the kernel fixes to support cross-address-family IPsec tunnel migration
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IPSEC_TUNNEL_MIGRATION =
+            "android.software.ipsec_tunnel_migration";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
@@ -8075,7 +8117,7 @@ public abstract class PackageManager {
             }
 
             PackageParser.Package pkg = parser.parsePackage(apkFile, 0, false);
-            if ((flagsBits & GET_SIGNATURES) != 0) {
+            if ((flagsBits & GET_SIGNATURES) != 0 || (flagsBits & GET_SIGNING_CERTIFICATES) != 0) {
                 PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
             return PackageParser.generatePackageInfo(pkg, null, (int) flagsBits, 0, 0, null,

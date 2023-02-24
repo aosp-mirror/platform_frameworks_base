@@ -6,6 +6,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.media.MediaHost
 import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.FalsingManager
@@ -27,8 +28,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.any
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -52,6 +53,7 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var tile: QSTile
     @Mock private lateinit var otherTile: QSTile
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
+    @Mock private lateinit var featureFlags: FeatureFlags
 
     private lateinit var controller: QSPanelController
 
@@ -82,7 +84,8 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessControllerFactory,
             brightnessSliderFactory,
             falsingManager,
-            statusBarKeyguardViewManager
+            statusBarKeyguardViewManager,
+            featureFlags
         )
     }
 

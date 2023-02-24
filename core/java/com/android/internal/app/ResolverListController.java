@@ -110,17 +110,19 @@ public class ResolverListController {
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntent(
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
+            boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents) {
         return getResolversForIntentAsUser(shouldGetResolvedFilter, shouldGetActivityMetadata,
-                intents, mUserHandle);
+                shouldGetOnlyDefaultActivities, intents, mUserHandle);
     }
 
     public List<ResolverActivity.ResolvedComponentInfo> getResolversForIntentAsUser(
             boolean shouldGetResolvedFilter,
             boolean shouldGetActivityMetadata,
+            boolean shouldGetOnlyDefaultActivities,
             List<Intent> intents,
             UserHandle userHandle) {
-        int baseFlags = PackageManager.MATCH_DEFAULT_ONLY
+        int baseFlags = (shouldGetOnlyDefaultActivities ? PackageManager.MATCH_DEFAULT_ONLY : 0)
                 | PackageManager.MATCH_DIRECT_BOOT_AWARE
                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                 | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
@@ -134,12 +136,15 @@ public class ResolverListController {
             int baseFlags) {
         List<ResolverActivity.ResolvedComponentInfo> resolvedComponents = null;
         for (int i = 0, N = intents.size(); i < N; i++) {
-            final Intent intent = intents.get(i);
+            Intent intent = intents.get(i);
             int flags = baseFlags;
             if (intent.isWebIntent()
                         || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                 flags |= PackageManager.MATCH_INSTANT;
             }
+            // Because of AIDL bug, queryIntentActivitiesAsUser can't accept subclasses of Intent.
+            intent = (intent.getClass() == Intent.class) ? intent : new Intent(
+                    intent);
             final List<ResolveInfo> infos = mpm.queryIntentActivitiesAsUser(intent, flags,
                     userHandle);
             if (infos != null) {

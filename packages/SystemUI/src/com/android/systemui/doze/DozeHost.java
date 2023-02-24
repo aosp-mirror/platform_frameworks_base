@@ -101,6 +101,11 @@ public interface DozeHost {
          * Called when the always on suppression state changes. See {@link #isAlwaysOnSuppressed()}.
          */
         default void onAlwaysOnSuppressedChanged(boolean suppressed) {}
+
+        /**
+         * Called when the dozing state may have been updated.
+         */
+        default void onDozingChanged(boolean isDozing) {}
     }
 
     interface PulseCallback {

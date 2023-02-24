@@ -24,7 +24,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.hardware.biometrics.BiometricStateListener;
+import android.hardware.biometrics.IBiometricStateListener;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -45,36 +46,46 @@ public class BiometricStateCallbackTest {
     private BiometricStateCallback mCallback;
 
     @Mock
-    BiometricStateListener mBiometricStateListener;
+    private IBiometricStateListener.Stub mBiometricStateListener;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        when(mBiometricStateListener.asBinder()).thenReturn(mBiometricStateListener);
 
         mCallback = new BiometricStateCallback();
         mCallback.registerBiometricStateListener(mBiometricStateListener);
     }
 
     @Test
-    public void testNoEnrollmentsToEnrollments_callbackNotified() {
+    public void testNoEnrollmentsToEnrollments_callbackNotified() throws RemoteException {
         testEnrollmentCallback(true /* changed */, true /* isNowEnrolled */,
                 true /* expectCallback */, true /* expectedCallbackValue */);
     }
 
     @Test
-    public void testEnrollmentsToNoEnrollments_callbackNotified() {
+    public void testEnrollmentsToNoEnrollments_callbackNotified() throws RemoteException {
         testEnrollmentCallback(true /* changed */, false /* isNowEnrolled */,
                 true /* expectCallback */, false /* expectedCallbackValue */);
     }
 
     @Test
-    public void testEnrollmentsToEnrollments_callbackNotNotified() {
+    public void testEnrollmentsToEnrollments_callbackNotNotified() throws RemoteException {
         testEnrollmentCallback(false /* changed */, true /* isNowEnrolled */,
                 false /* expectCallback */, false /* expectedCallbackValue */);
     }
 
+    @Test
+    public void testBinderDeath() throws RemoteException {
+        mCallback.binderDied(mBiometricStateListener.asBinder());
+
+        testEnrollmentCallback(true /* changed */, false /* isNowEnrolled */,
+                false /* expectCallback */, false /* expectedCallbackValue */);
+    }
+
     private void testEnrollmentCallback(boolean changed, boolean isNowEnrolled,
-            boolean expectCallback, boolean expectedCallbackValue) {
+            boolean expectCallback, boolean expectedCallbackValue) throws RemoteException {
         EnrollClient<?> client = mock(EnrollClient.class);
 
         final int userId = 10;
@@ -96,7 +107,7 @@ public class BiometricStateCallbackTest {
     }
 
     @Test
-    public void testAuthentication_enrollmentCallbackNeverNotified() {
+    public void testAuthentication_enrollmentCallbackNeverNotified() throws RemoteException {
         AuthenticationClient<?> client = mock(AuthenticationClient.class);
         mCallback.onClientFinished(client, true /* success */);
         verify(mBiometricStateListener, never()).onEnrollmentsChanged(anyInt(), anyInt(),

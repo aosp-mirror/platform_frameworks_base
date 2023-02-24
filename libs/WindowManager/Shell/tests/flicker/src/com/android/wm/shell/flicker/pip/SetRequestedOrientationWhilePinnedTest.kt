@@ -25,9 +25,9 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule.Companion.removeAllTasksButHome
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import com.android.wm.shell.flicker.testapp.Components
@@ -112,10 +112,6 @@ open class SetRequestedOrientationWhilePinnedTest(
     @FlakyTest
     @Test
     override fun navBarLayerRotatesAndScales() = super.navBarLayerRotatesAndScales()
-
-    @FlakyTest(bugId = 206753786)
-    @Test
-    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

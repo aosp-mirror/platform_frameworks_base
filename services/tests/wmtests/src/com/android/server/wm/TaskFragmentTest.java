@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.os.Process.FIRST_APPLICATION_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -31,6 +32,10 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
+import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION;
+import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT;
+import static com.android.server.wm.TaskFragment.EMBEDDING_DISALLOWED_UNTRUSTED_HOST;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
@@ -129,6 +134,23 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
+    public void testStartChangeTransition_doNotFreezeWhenOnlyMoved() {
+        final Rect startBounds = new Rect(0, 0, 1000, 1000);
+        final Rect endBounds = new Rect(startBounds);
+        endBounds.offset(500, 0);
+        mTaskFragment.setBounds(startBounds);
+        doReturn(true).when(mTaskFragment).isVisible();
+        doReturn(true).when(mTaskFragment).isVisibleRequested();
+
+        clearInvocations(mTransaction);
+        mTaskFragment.setBounds(endBounds);
+
+        // No change transition, but update the organized surface position.
+        verify(mTaskFragment, never()).initializeChangeTransition(any(), any());
+        verify(mTransaction).setPosition(mLeash, endBounds.left, endBounds.top);
+    }
+
+    @Test
     public void testNotOkToAnimate_doNotStartChangeTransition() {
         mockSurfaceFreezerSnapshot(mTaskFragment.mSurfaceFreezer);
         final Rect startBounds = new Rect(0, 0, 1000, 1000);
@@ -202,7 +224,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         doReturn(true).when(primaryActivity).supportsPictureInPicture();
         doReturn(false).when(secondaryActivity).supportsPictureInPicture();
 
-        primaryTf.setAdjacentTaskFragment(secondaryTf, false /* moveAdjacentTogether */);
+        primaryTf.setAdjacentTaskFragment(secondaryTf);
         primaryActivity.setState(RESUMED, "test");
         secondaryActivity.setState(RESUMED, "test");
 
@@ -318,7 +340,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         activity.reparent(task, POSITION_TOP);
 
         // Notify the organizer about the reparent.
-        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentToTask(activity);
+        verify(mAtm.mTaskFragmentOrganizerController).onActivityReparentedToTask(activity);
         assertNull(activity.mLastTaskFragmentOrganizerBeforePip);
     }
 
@@ -433,6 +455,44 @@ public class TaskFragmentTest extends WindowTestsBase {
     }
 
     @Test
+    public void testIsAllowedToEmbedActivity() {
+        final TaskFragment taskFragment = new TaskFragmentBuilder(mAtm)
+                .setCreateParentTask()
+                .createActivityCount(1)
+                .build();
+        final ActivityRecord activity = taskFragment.getTopMostActivity();
+
+        // Not allow embedding activity if not a trusted host.
+        doReturn(false).when(taskFragment).isAllowedToEmbedActivityInUntrustedMode(any());
+        doReturn(false).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(any(), anyInt());
+        assertEquals(EMBEDDING_DISALLOWED_UNTRUSTED_HOST,
+                taskFragment.isAllowedToEmbedActivity(activity));
+
+        // Not allow embedding activity if the TaskFragment is smaller than activity min dimension.
+        doReturn(true).when(taskFragment).isAllowedToEmbedActivityInTrustedMode(any(), anyInt());
+        doReturn(true).when(taskFragment).smallerThanMinDimension(any());
+        assertEquals(EMBEDDING_DISALLOWED_MIN_DIMENSION_VIOLATION,
+                taskFragment.isAllowedToEmbedActivity(activity));
+
+        // Not allow to start activity across TaskFragments for result.
+        final TaskFragment newTaskFragment = new TaskFragmentBuilder(mAtm)
+                .setParentTask(taskFragment.getTask())
+                .build();
+        final ActivityRecord newActivity = new ActivityBuilder(mAtm)
+                .setUid(FIRST_APPLICATION_UID)
+                .build();
+        doReturn(true).when(newTaskFragment).isAllowedToEmbedActivityInTrustedMode(any(), anyInt());
+        doReturn(false).when(newTaskFragment).smallerThanMinDimension(any());
+        newActivity.resultTo = activity;
+        assertEquals(EMBEDDING_DISALLOWED_NEW_TASK_FRAGMENT,
+                newTaskFragment.isAllowedToEmbedActivity(newActivity));
+
+        // Allow embedding if the resultTo activity is finishing.
+        activity.finishing = true;
+        assertEquals(EMBEDDING_ALLOWED, newTaskFragment.isAllowedToEmbedActivity(newActivity));
+    }
+
+    @Test
     public void testIgnoreRequestedOrientationForActivityEmbeddingSplit() {
         // Setup two activities in ActivityEmbedding split.
         final Task task = createTask(mDisplayContent);
@@ -448,7 +508,7 @@ public class TaskFragmentTest extends WindowTestsBase {
                 .setOrganizer(mOrganizer)
                 .setFragmentToken(new Binder())
                 .build();
-        tf0.setAdjacentTaskFragment(tf1, false /* moveAdjacentTogether */);
+        tf0.setAdjacentTaskFragment(tf1);
         tf0.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         tf1.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         task.setBounds(0, 0, 1200, 1000);
@@ -475,5 +535,13 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertFalse(activity0.isLetterboxedForFixedOrientationAndAspectRatio());
         assertFalse(activity1.isLetterboxedForFixedOrientationAndAspectRatio());
         assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
+
+        tf0.setResumedActivity(activity0, "test");
+        tf1.setResumedActivity(activity1, "test");
+        mDisplayContent.mFocusedApp = activity1;
+
+        // Making the activity0 be the focused activity and ensure the focused app is updated.
+        activity0.moveFocusableActivityToTop("test");
+        assertEquals(activity0, mDisplayContent.mFocusedApp);
     }
 }

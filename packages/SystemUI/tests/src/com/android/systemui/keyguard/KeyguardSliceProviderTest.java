@@ -45,6 +45,7 @@ import androidx.slice.core.SliceQuery;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.SystemUIInitializerImpl;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -100,7 +101,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mIsZenMode = false;
         mProvider = new TestableKeyguardSliceProvider();
-        mProvider.setContextAvailableCallback(context -> { });
+        mProvider.setContextAvailableCallback(context -> new SystemUIInitializerImpl(mContext));
         mProvider.attachInfo(getContext(), null);
         reset(mContentResolver);
         SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));

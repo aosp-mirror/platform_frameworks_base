@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -29,14 +31,13 @@ import android.widget.LinearLayout;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.R;
 import com.android.systemui.demomode.DemoMode;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusBarMobileView;
 import com.android.systemui.statusbar.StatusBarWifiView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
@@ -50,7 +51,6 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     private final LinearLayout mStatusIcons;
     private final ArrayList<StatusBarMobileView> mMobileViews = new ArrayList<>();
     private final int mIconSize;
-    private final FeatureFlags mFeatureFlags;
 
     private StatusBarWifiView mWifiView;
     private boolean mDemoMode;
@@ -58,14 +58,12 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public DemoStatusIcons(
             LinearLayout statusIcons,
-            int iconSize,
-            FeatureFlags featureFlags
+            int iconSize
     ) {
         super(statusIcons.getContext());
         mStatusIcons = statusIcons;
         mIconSize = iconSize;
         mColor = DarkIconDispatcher.DEFAULT_ICON_TINT;
-        mFeatureFlags = featureFlags;
 
         if (statusIcons instanceof StatusIconContainer) {
             setShouldRestrictIcons(((StatusIconContainer) statusIcons).isRestrictingIcons());
@@ -226,6 +224,7 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
 
     public void addDemoWifiView(WifiIconState state) {
         Log.d(TAG, "addDemoWifiView: ");
+        // TODO(b/238425913): Migrate this view to {@code ModernStatusBarWifiView}.
         StatusBarWifiView view = StatusBarWifiView.fromContext(mContext, state.slot);
 
         int viewIndex = getChildCount();
@@ -253,11 +252,13 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         }
     }
 
-    public void addMobileView(MobileIconState state) {
+    /**
+     * Add a new mobile icon view
+     */
+    public void addMobileView(MobileIconState state, Context mobileContext) {
         Log.d(TAG, "addMobileView: ");
-        StatusBarMobileView view = StatusBarMobileView.fromContext(
-                mContext, state.slot,
-                mFeatureFlags.isEnabled(Flags.COMBINED_STATUS_BAR_SIGNAL_ICONS));
+        StatusBarMobileView view = StatusBarMobileView
+                .fromContext(mobileContext, state.slot);
 
         view.applyMobileState(state);
         view.setStaticDrawableColor(mColor);
@@ -267,19 +268,24 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
         addView(view, getChildCount(), createLayoutParams());
     }
 
-    public void updateMobileState(MobileIconState state) {
-        Log.d(TAG, "updateMobileState: ");
-        // If the view for this subId exists already, use it
+    /**
+     * Apply an update to a mobile icon view for the given {@link MobileIconState}. For
+     * compatibility with {@link MobileContextProvider}, we have to recreate the view every time we
+     * update it, since the context (and thus the {@link Configuration}) may have changed
+     */
+    public void updateMobileState(MobileIconState state, Context mobileContext) {
+        Log.d(TAG, "updateMobileState: " + state);
+
+        // The mobile config provided by MobileContextProvider could have changed; always recreate
         for (int i = 0; i < mMobileViews.size(); i++) {
             StatusBarMobileView view = mMobileViews.get(i);
             if (view.getState().subId == state.subId) {
-                view.applyMobileState(state);
-                return;
+                removeView(view);
             }
         }
 
-        // Else we have to add it
-        addMobileView(state);
+        // Add the replacement or new icon
+        addMobileView(state, mobileContext);
     }
 
     public void onRemoveIcon(StatusIconDisplayable view) {

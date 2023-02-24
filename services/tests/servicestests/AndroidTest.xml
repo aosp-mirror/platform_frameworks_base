@@ -50,5 +50,6 @@
         <option name="package" value="com.android.frameworks.servicestests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false"/>
+        <option name="exclude-annotation" value="androidx.test.filters.FlakyTest" />
     </test>
 </configuration>

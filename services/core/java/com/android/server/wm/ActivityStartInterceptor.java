@@ -49,6 +49,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -64,7 +65,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.wm.ActivityInterceptorCallback.ActivityInterceptResult;
 
 /**
- * A class that contains activity intercepting logic for {@link ActivityStarter#startActivityLocked}
+ * A class that contains activity intercepting logic for {@link ActivityStarter#execute()}
  * It's initialized via setStates and interception occurs via the intercept method.
  *
  * Note that this class is instantiated when {@link ActivityManagerService} gets created so there
@@ -104,6 +105,7 @@ class ActivityStartInterceptor {
     ActivityInfo mAInfo;
     String mResolvedType;
     Task mInTask;
+    TaskFragment mInTaskFragment;
     ActivityOptions mActivityOptions;
 
     ActivityStartInterceptor(
@@ -135,13 +137,44 @@ class ActivityStartInterceptor {
     }
 
     private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
-        Bundle activityOptions = deferCrossProfileAppsAnimationIfNecessary();
+        Bundle bOptions = deferCrossProfileAppsAnimationIfNecessary();
+        final TaskFragment taskFragment = getLaunchTaskFragment();
+        // If the original intent is going to be embedded, try to forward the embedding TaskFragment
+        // and its task id to embed back the original intent.
+        if (taskFragment != null) {
+            ActivityOptions activityOptions = bOptions != null
+                    ? ActivityOptions.fromBundle(bOptions)
+                    : ActivityOptions.makeBasic();
+            activityOptions.setLaunchTaskFragmentToken(taskFragment.getFragmentToken());
+            bOptions = activityOptions.toBundle();
+        }
         final IIntentSender target = mService.getIntentSenderLocked(
                 INTENT_SENDER_ACTIVITY, mCallingPackage, mCallingFeatureId, callingUid, mUserId,
                 null /*token*/, null /*resultCode*/, 0 /*requestCode*/,
                 new Intent[] { mIntent }, new String[] { mResolvedType },
-                flags, activityOptions);
+                flags, bOptions);
         return new IntentSender(target);
+    }
+
+
+    /**
+     * A helper function to obtain the targeted {@link TaskFragment} during
+     * {@link #intercept(Intent, ResolveInfo, ActivityInfo, String, Task, TaskFragment, int, int,
+     * ActivityOptions)} if any.
+     */
+    @Nullable
+    private TaskFragment getLaunchTaskFragment() {
+        if (mInTaskFragment != null) {
+            return mInTaskFragment;
+        }
+        if (mActivityOptions == null) {
+            return null;
+        }
+        final IBinder taskFragToken = mActivityOptions.getLaunchTaskFragmentToken();
+        if (taskFragToken == null) {
+            return null;
+        }
+        return TaskFragment.fromTaskFragmentToken(taskFragToken, mService);
     }
 
     /**
@@ -151,7 +184,8 @@ class ActivityStartInterceptor {
      * @return true if an interception occurred
      */
     boolean intercept(Intent intent, ResolveInfo rInfo, ActivityInfo aInfo, String resolvedType,
-            Task inTask, int callingPid, int callingUid, ActivityOptions activityOptions) {
+            Task inTask, TaskFragment inTaskFragment, int callingPid, int callingUid,
+            ActivityOptions activityOptions) {
         mUserManager = UserManager.get(mServiceContext);
 
         mIntent = intent;
@@ -161,6 +195,7 @@ class ActivityStartInterceptor {
         mAInfo = aInfo;
         mResolvedType = resolvedType;
         mInTask = inTask;
+        mInTaskFragment = inTaskFragment;
         mActivityOptions = activityOptions;
 
         if (interceptQuietProfileIfNeeded()) {
@@ -332,12 +367,21 @@ class ActivityStartInterceptor {
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
+        final TaskFragment taskFragment = getLaunchTaskFragment();
         // If we are intercepting and there was a task, convert it into an extra for the
         // ConfirmCredentials intent and unassign it, as otherwise the task will move to
         // front even if ConfirmCredentials is cancelled.
         if (mInTask != null) {
             mIntent.putExtra(EXTRA_TASK_ID, mInTask.mTaskId);
             mInTask = null;
+        } else if (taskFragment != null) {
+            // If the original intent is started to an embedded TaskFragment, append its parent task
+            // id to extra. It is to embed back the original intent to the TaskFragment with the
+            // same task.
+            final Task parentTask = taskFragment.getTask();
+            if (parentTask != null) {
+                mIntent.putExtra(EXTRA_TASK_ID, parentTask.mTaskId);
+            }
         }
         if (mActivityOptions == null) {
             mActivityOptions = ActivityOptions.makeBasic();

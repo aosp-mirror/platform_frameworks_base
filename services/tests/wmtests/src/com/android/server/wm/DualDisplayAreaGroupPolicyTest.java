@@ -168,7 +168,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         mSecondRoot.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
-        prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_PORTRAIT);
+        prepareLimitedBounds(mFirstActivity, SCREEN_ORIENTATION_PORTRAIT,
+                false /* isUnresizable */);
         final Rect dagBounds = new Rect(mFirstRoot.getBounds());
         final Rect taskBounds = new Rect(mFirstTask.getBounds());
         final Rect activityBounds = new Rect(mFirstActivity.getBounds());
