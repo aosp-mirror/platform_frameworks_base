@@ -28,6 +28,8 @@ import android.widget.FrameLayout;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
@@ -68,6 +70,7 @@ public class SmartSpaceComplication implements Complication {
         private final DreamSmartspaceController mSmartSpaceController;
         private final DreamOverlayStateController mDreamOverlayStateController;
         private final SmartSpaceComplication mComplication;
+        private final FeatureFlags mFeatureFlags;
 
         private final BcSmartspaceDataPlugin.SmartspaceTargetListener mSmartspaceListener =
                 new BcSmartspaceDataPlugin.SmartspaceTargetListener() {
@@ -85,15 +88,21 @@ public class SmartSpaceComplication implements Complication {
                 DreamOverlayStateController dreamOverlayStateController,
                 SmartSpaceComplication smartSpaceComplication,
                 DreamSmartspaceController smartSpaceController,
-                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
+                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor,
+                FeatureFlags featureFlags) {
             super(monitor);
             mDreamOverlayStateController = dreamOverlayStateController;
             mComplication = smartSpaceComplication;
             mSmartSpaceController = smartSpaceController;
+            mFeatureFlags = featureFlags;
         }
 
         @Override
         public void onStart() {
+            if (mFeatureFlags.isEnabled(Flags.HIDE_SMARTSPACE_ON_DREAM_OVERLAY)) {
+                return;
+            }
+
             mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
                 @Override
                 public void onStateChanged() {
