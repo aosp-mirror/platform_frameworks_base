@@ -422,8 +422,7 @@ public final class CredentialManagerService
                 GetRequestSession session) {
             List<ProviderSession> providerSessions;
 
-            // TODO(b/268143699): temporarily disable the flag due to bug.
-            if (false) {
+            if (isCredentialDescriptionApiEnabled()) {
                 List<CredentialOption> optionsThatRequireActiveCredentials =
                         request.getCredentialOptions().stream()
                         .filter(
@@ -776,6 +775,10 @@ public final class CredentialManagerService
                 throws IllegalArgumentException, NonCredentialProviderCallerException {
             Log.i(TAG, "registerCredentialDescription");
 
+            if (!isCredentialDescriptionApiEnabled()) {
+                throw new UnsupportedOperationException();
+            }
+
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
             List<CredentialProviderInfo> services =
@@ -827,6 +830,10 @@ public final class CredentialManagerService
                 UnregisterCredentialDescriptionRequest request, String callingPackage)
                 throws IllegalArgumentException {
             Log.i(TAG, "registerCredentialDescription");
+
+            if (!isCredentialDescriptionApiEnabled()) {
+                throw new UnsupportedOperationException();
+            }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
