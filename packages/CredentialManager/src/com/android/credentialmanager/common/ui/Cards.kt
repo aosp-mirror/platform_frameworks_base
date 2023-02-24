@@ -16,33 +16,73 @@
 
 package com.android.credentialmanager.common.ui
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 /**
- * By default the card is filled with surfaceVariant color. This container card instead fills the
- * background color with surface corlor.
+ * Container card for the whole sheet.
+ *
+ * Surface 1 color. No vertical padding. 24dp horizontal padding. 24dp bottom padding. 24dp top
+ * padding if [topAppBar] is not present, and none otherwise.
  */
 @Composable
-fun ContainerCard(
+fun SheetContainerCard(
+    topAppBar: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
-    shape: Shape = CardDefaults.shape,
-    border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = shape,
-        border = border,
+        modifier = modifier.fillMaxWidth().wrapContentHeight(),
+        border = null,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+                ElevationTokens.Level1
+            ),
+        ),
+    ) {
+        if (topAppBar != null) {
+            topAppBar()
+        }
+        Column(
+            modifier = Modifier.padding(
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 18.dp,
+                top = if (topAppBar == null) 24.dp else 0.dp
+            ).fillMaxWidth().wrapContentHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = content,
+        )
+    }
+}
+
+/**
+ * Container card for the entries.
+ *
+ * Surface 3 color. No padding. Four rounded corner shape.
+ */
+@Composable
+fun CredentialContainerCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth().wrapContentHeight(),
+        shape = MaterialTheme.shapes.medium,
+        border = null,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent,
         ),
         content = content,
     )
