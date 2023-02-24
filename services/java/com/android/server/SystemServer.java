@@ -173,6 +173,8 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.OdsignStatsLogger;
+import com.android.server.pm.permission.PermissionMigrationHelper;
+import com.android.server.pm.permission.PermissionMigrationHelperImpl;
 import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.policy.AppOpsPolicy;
 import com.android.server.policy.PermissionPolicyService;
@@ -1132,6 +1134,8 @@ public final class SystemServer implements Dumpable {
 
         // Start AccessCheckingService which provides new implementation for permission and app op.
         t.traceBegin("StartAccessCheckingService");
+        LocalServices.addService(PermissionMigrationHelper.class,
+                new PermissionMigrationHelperImpl());
         mSystemServiceManager.startService(AccessCheckingService.class);
         t.traceEnd();
 

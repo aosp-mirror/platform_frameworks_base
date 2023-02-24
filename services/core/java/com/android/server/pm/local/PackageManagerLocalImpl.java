@@ -28,6 +28,7 @@ import com.android.server.pm.Computer;
 import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 
 import java.io.IOException;
@@ -105,6 +106,9 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
         private Map<String, PackageState> mCachedUnmodifiablePackageStates;
 
         @Nullable
+        private Map<String, SharedUserApi> mCachedUnmodifiableSharedUsers;
+
+        @Nullable
         private Map<String, PackageState> mCachedUnmodifiableDisabledSystemPackageStates;
 
         private UnfilteredSnapshotImpl(@NonNull PackageDataSnapshot snapshot) {
@@ -127,6 +131,19 @@ public class PackageManagerLocalImpl implements PackageManagerLocal {
                         Collections.unmodifiableMap(mSnapshot.getPackageStates());
             }
             return mCachedUnmodifiablePackageStates;
+        }
+
+        @SuppressWarnings("RedundantSuppression")
+        @NonNull
+        @Override
+        public Map<String, SharedUserApi> getSharedUsers() {
+            checkClosed();
+
+            if (mCachedUnmodifiableSharedUsers == null) {
+                mCachedUnmodifiableSharedUsers =
+                        Collections.unmodifiableMap(mSnapshot.getSharedUsers());
+            }
+            return mCachedUnmodifiableSharedUsers;
         }
 
         @SuppressWarnings("RedundantSuppression")

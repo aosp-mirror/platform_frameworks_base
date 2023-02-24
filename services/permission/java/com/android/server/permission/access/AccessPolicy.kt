@@ -262,6 +262,19 @@ class AccessPolicy private constructor(
         }
     }
 
+    fun migrateSystemState(state: AccessState) {
+        forEachSchemePolicy {
+            with(it) { migrateSystemState(state) }
+        }
+    }
+
+    fun migrateUserState(state: AccessState, userId: Int) {
+        forEachSchemePolicy {
+            with(it) { migrateUserState(state, userId) }
+        }
+    }
+
+
     fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
         forEachTag {
             when (tagName) {
@@ -370,6 +383,10 @@ abstract class SchemePolicy {
     open fun MutateStateScope.onPackageUninstalled(packageName: String, appId: Int, userId: Int) {}
 
     open fun MutateStateScope.onSystemReady() {}
+
+    open fun migrateSystemState(state: AccessState) {}
+
+    open fun migrateUserState(state: AccessState, userId: Int) {}
 
     open fun BinaryXmlPullParser.parseSystemState(state: AccessState) {}
 

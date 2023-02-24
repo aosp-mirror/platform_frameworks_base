@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.UserHandle;
 
 import com.android.server.pm.pkg.PackageState;
+import com.android.server.pm.pkg.SharedUserApi;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -148,6 +149,16 @@ public interface PackageManagerLocal {
          */
         @NonNull
         Map<String, PackageState> getPackageStates();
+
+        /**
+         * Returns a map of all {@link SharedUserApi SharedUsers} on the device.
+         *
+         * @return Mapping of shared user name to {@link SharedUserApi}.
+         *
+         * @hide Pending API
+         */
+        @NonNull
+        Map<String, SharedUserApi> getSharedUsers();
 
         /**
          * Returns a map of all disabled system {@link PackageState PackageStates} on the device.

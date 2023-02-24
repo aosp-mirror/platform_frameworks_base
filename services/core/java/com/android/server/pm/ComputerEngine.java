@@ -302,8 +302,8 @@ public class ComputerEngine implements Computer {
         }
 
         @NonNull
-        public Collection<SharedUserSetting> getAllSharedUsers() {
-            return mSettings.getAllSharedUsersLPw();
+        ArrayMap<String, ? extends SharedUserApi> getSharedUsers() {
+            return mSettings.getSharedUsersLocked().untrackedStorage();
         }
 
         @Nullable
@@ -5485,8 +5485,8 @@ public class ComputerEngine implements Computer {
     @Override
     public SparseArray<String> getAppsWithSharedUserIds() {
         final SparseArray<String> sharedUserIds = new SparseArray<>();
-        for (SharedUserSetting setting : mSettings.getAllSharedUsers()) {
-            sharedUserIds.put(UserHandle.getAppId(setting.mAppId), setting.name);
+        for (SharedUserApi sharedUser : mSettings.getSharedUsers().values()) {
+            sharedUserIds.put(UserHandle.getAppId(sharedUser.getAppId()), sharedUser.getName());
         }
         return sharedUserIds;
     }
@@ -5786,8 +5786,8 @@ public class ComputerEngine implements Computer {
 
     @Override
     @NonNull
-    public Collection<SharedUserSetting> getAllSharedUsers() {
-        return mSettings.getAllSharedUsers();
+    public ArrayMap<String, ? extends SharedUserApi> getSharedUsers() {
+        return mSettings.getSharedUsers();
     }
 
     @Override

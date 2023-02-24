@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.permission.PermissionManager
 import com.android.server.permission.access.util.andInv
+import com.android.server.permission.access.util.flagsToString
 import com.android.server.permission.access.util.hasAnyBit
 import com.android.server.permission.access.util.hasBits
 
@@ -477,4 +478,38 @@ object PermissionFlags {
         }
         return flags
     }
+
+    fun flagToString(flag: Int): String =
+        when (flag) {
+            INSTALL_GRANTED -> "INSTALL_GRANTED"
+            INSTALL_REVOKED -> "INSTALL_REVOKED"
+            PROTECTION_GRANTED -> "PROTECTION_GRANTED"
+            ROLE -> "ROLE"
+            RUNTIME_GRANTED -> "RUNTIME_GRANTED"
+            USER_SET -> "USER_SET"
+            USER_FIXED -> "USER_FIXED"
+            POLICY_FIXED -> "POLICY_FIXED"
+            SYSTEM_FIXED -> "SYSTEM_FIXED"
+            PREGRANT -> "PREGRANT"
+            LEGACY_GRANTED -> "LEGACY_GRANTED"
+            IMPLICIT_GRANTED -> "IMPLICIT_GRANTED"
+            IMPLICIT -> "IMPLICIT"
+            USER_SENSITIVE_WHEN_GRANTED -> "USER_SENSITIVE_WHEN_GRANTED"
+            USER_SENSITIVE_WHEN_REVOKED -> "USER_SENSITIVE_WHEN_REVOKED"
+            INSTALLER_EXEMPT -> "INSTALLER_EXEMPT"
+            SYSTEM_EXEMPT -> "SYSTEM_EXEMPT"
+            UPGRADE_EXEMPT -> "UPGRADE_EXEMPT"
+            RESTRICTION_REVOKED -> "RESTRICTION_REVOKED"
+            SOFT_RESTRICTED -> "SOFT_RESTRICTED"
+            APP_OP_REVOKED -> "APP_OP_REVOKED"
+            ONE_TIME -> "ONE_TIME"
+            HIBERNATION -> "HIBERNATION"
+            USER_SELECTED -> "USER_SELECTED"
+            else -> "0x${flag.toUInt().toString(16).uppercase()}"
+        }
+
+    fun toString(flags: Int): String = flags.flagsToString { flagToString(it) }
+
+    fun apiFlagsToString(apiFlags: Int): String =
+        apiFlags.flagsToString { PackageManager.permissionFlagToString(it) }
 }
