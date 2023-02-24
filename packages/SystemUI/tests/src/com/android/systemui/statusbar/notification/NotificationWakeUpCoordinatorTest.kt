@@ -58,6 +58,8 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
     private var bypassEnabled: Boolean = false
     private var statusBarState: Int = StatusBarState.KEYGUARD
     private var dozeAmount: Float = 0f
+    private val easedDozeAmount: Float
+        get() = notificationWakeUpCoordinator.dozeAmountInterpolator.getInterpolation(dozeAmount)
 
     private fun setBypassEnabled(enabled: Boolean) {
         bypassEnabled = enabled
@@ -121,7 +123,11 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
     @Test
     fun setDozeToHalfWillHalfShowNotifications() {
         setDozeAmount(0.5f)
-        verifyStackScrollerDozeAndHideAmount(dozeAmount = 0.5f, hideAmount = 0.5f)
+        verifyStackScrollerDozeAndHideAmount(
+            dozeAmount = easedDozeAmount,
+            hideAmount = 0.5f,
+            hideAmountEased = easedDozeAmount,
+        )
         assertThat(notificationWakeUpCoordinator.notificationsFullyHidden).isFalse()
     }
 
@@ -152,10 +158,14 @@ class NotificationWakeUpCoordinatorTest : SysuiTestCase() {
         assertThat(notificationWakeUpCoordinator.statusBarState).isEqualTo(StatusBarState.SHADE)
     }
 
-    private fun verifyStackScrollerDozeAndHideAmount(dozeAmount: Float, hideAmount: Float) {
+    private fun verifyStackScrollerDozeAndHideAmount(
+        dozeAmount: Float,
+        hideAmount: Float,
+        hideAmountEased: Float? = null,
+    ) {
         // First verify that we did in-fact receive the correct values
         verify(stackScrollerController).setDozeAmount(dozeAmount)
-        verify(stackScrollerController).setHideAmount(hideAmount, hideAmount)
+        verify(stackScrollerController).setHideAmount(hideAmount, hideAmountEased ?: hideAmount)
         // Now verify that there was just this ONE call to each of these methods
         verify(stackScrollerController).setDozeAmount(anyFloat())
         verify(stackScrollerController).setHideAmount(anyFloat(), anyFloat())

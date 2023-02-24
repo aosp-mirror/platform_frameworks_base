@@ -45,47 +45,51 @@ class NotificationWakeUpCoordinatorLoggerTest : SysuiTestCase() {
     }
 
     @Test
-    fun setDozeAmountWillThrottleFractionalUpdates() {
-        logger.logSetDozeAmount(0f, 0f, "source1", StatusBarState.SHADE, changed = false)
+    fun updateDozeAmountWillThrottleFractionalInputUpdates() {
+        logger.logUpdateDozeAmount(0f, null, 0f, StatusBarState.SHADE, changed = false)
         verifyDidLog(1)
-        logger.logSetDozeAmount(0.1f, 0.1f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.1f, null, 0.1f, StatusBarState.SHADE, changed = true)
         verifyDidLog(1)
-        logger.logSetDozeAmount(0.2f, 0.2f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.3f, 0.3f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.4f, 0.4f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.5f, 0.5f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.2f, null, 0.2f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.3f, null, 0.3f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.4f, null, 0.4f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.5f, null, 0.5f, StatusBarState.SHADE, changed = true)
         verifyDidLog(0)
-        logger.logSetDozeAmount(1f, 1f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(1f, null, 1f, StatusBarState.SHADE, changed = true)
         verifyDidLog(1)
     }
 
     @Test
-    fun setDozeAmountWillIncludeFractionalUpdatesWhenStateChanges() {
-        logger.logSetDozeAmount(0f, 0f, "source1", StatusBarState.SHADE, changed = false)
+    fun updateDozeAmountWillIncludeFractionalUpdatesWhenStateChanges() {
+        logger.logUpdateDozeAmount(0f, null, 0f, StatusBarState.SHADE, changed = false)
         verifyDidLog(1)
-        logger.logSetDozeAmount(0.1f, 0.1f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.1f, null, 0.1f, StatusBarState.SHADE, changed = true)
         verifyDidLog(1)
-        logger.logSetDozeAmount(0.2f, 0.2f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.3f, 0.3f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.4f, 0.4f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.5f, 0.5f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.2f, null, 0.2f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.3f, null, 0.3f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.4f, null, 0.4f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.5f, null, 0.5f, StatusBarState.SHADE, changed = true)
         verifyDidLog(0)
-        logger.logSetDozeAmount(0.5f, 0.5f, "source1", StatusBarState.KEYGUARD, changed = false)
+        logger.logUpdateDozeAmount(0.5f, null, 0.5f, StatusBarState.KEYGUARD, changed = false)
         verifyDidLog(1)
     }
 
     @Test
-    fun setDozeAmountWillIncludeFractionalUpdatesWhenSourceChanges() {
-        logger.logSetDozeAmount(0f, 0f, "source1", StatusBarState.SHADE, changed = false)
+    fun updateDozeAmountWillIncludeFractionalUpdatesWhenHardOverrideChanges() {
+        logger.logUpdateDozeAmount(0f, null, 0f, StatusBarState.SHADE, changed = false)
         verifyDidLog(1)
-        logger.logSetDozeAmount(0.1f, 0.1f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.1f, null, 0.1f, StatusBarState.SHADE, changed = true)
         verifyDidLog(1)
-        logger.logSetDozeAmount(0.2f, 0.2f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.3f, 0.3f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.4f, 0.4f, "source1", StatusBarState.SHADE, changed = true)
-        logger.logSetDozeAmount(0.5f, 0.5f, "source1", StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.2f, null, 0.2f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.3f, null, 0.3f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.4f, null, 0.4f, StatusBarState.SHADE, changed = true)
+        logger.logUpdateDozeAmount(0.5f, null, 0.5f, StatusBarState.SHADE, changed = true)
         verifyDidLog(0)
-        logger.logSetDozeAmount(0.5f, 0.5f, "source2", StatusBarState.SHADE, changed = false)
+        logger.logUpdateDozeAmount(0.5f, 1f, 1f, StatusBarState.SHADE, changed = true)
+        verifyDidLog(1)
+        logger.logUpdateDozeAmount(0.5f, 0f, 0f, StatusBarState.SHADE, changed = true)
+        verifyDidLog(1)
+        logger.logUpdateDozeAmount(0.5f, null, 0.5f, StatusBarState.SHADE, changed = true)
         verifyDidLog(1)
     }
 
