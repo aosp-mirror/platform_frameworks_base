@@ -3345,6 +3345,11 @@
     <!-- The duration in which a recent task is considered in session and should be visible. -->
     <integer name="config_activeTaskDurationHours">6</integer>
 
+    <!-- Whether this device prefers to show snapshot or splash screen on back predict target.
+         When set true, there will create windowless starting surface for the preview target, so it
+         won't affect activity's lifecycle. This should only be disabled on low-ram device. -->
+    <bool name="config_predictShowStartingSurface">true</bool>
+
     <!-- default window ShowCircularMask property -->
     <bool name="config_windowShowCircularMask">false</bool>
 
