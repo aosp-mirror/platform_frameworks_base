@@ -17,19 +17,19 @@
 package com.android.providers.settings;
 
 import android.os.Bundle;
+import android.os.UserManager;
 import android.provider.Settings;
-import android.util.ArrayMap;
 import android.util.MemoryIntArray;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.IOException;
 
 /**
  * This class tracks changes for config/global/secure/system tables
- * on a per user basis and updates shared memory regions which
+ * on a per user basis and updates a shared memory region which
  * client processes can read to determine if their local caches are
  * stale.
  */
@@ -40,187 +40,138 @@ final class GenerationRegistry {
 
     private final Object mLock;
 
-    // Key -> backingStore mapping
     @GuardedBy("mLock")
-    private final ArrayMap<Integer, MemoryIntArray> mKeyToBackingStoreMap = new ArrayMap();
-
-    // Key -> (String->Index map) mapping
-    @GuardedBy("mLock")
-    private final ArrayMap<Integer, ArrayMap<String, Integer>> mKeyToIndexMapMap = new ArrayMap<>();
-
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    // Maximum number of backing stores allowed
-    static final int NUM_MAX_BACKING_STORE = 8;
+    private final SparseIntArray mKeyToIndexMap = new SparseIntArray();
 
     @GuardedBy("mLock")
-    private int mNumBackingStore = 0;
-
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
-    // Maximum size of an individual backing store
-    static final int MAX_BACKING_STORE_SIZE = MemoryIntArray.getMaxSize();
+    private MemoryIntArray mBackingStore;
 
     public GenerationRegistry(Object lock) {
         mLock = lock;
     }
 
-    /**
-     *  Increment the generation number if the setting is already cached in the backing stores.
-     *  Otherwise, do nothing.
-     */
-    public void incrementGeneration(int key, String name) {
-        final boolean isConfig =
-                (SettingsState.getTypeFromKey(key) == SettingsState.SETTINGS_TYPE_CONFIG);
-        // Only store the prefix if the mutated setting is a config
-        final String indexMapKey = isConfig ? (name.split("/")[0] + "/") : name;
+    public void incrementGeneration(int key) {
         synchronized (mLock) {
-            final MemoryIntArray backingStore = getBackingStoreLocked(key,
-                    /* createIfNotExist= */ false);
-            if (backingStore == null) {
-                return;
-            }
-            try {
-                final int index = getKeyIndexLocked(key, indexMapKey, mKeyToIndexMapMap,
-                        backingStore, /* createIfNotExist= */ false);
-                if (index < 0) {
-                    return;
+            MemoryIntArray backingStore = getBackingStoreLocked();
+            if (backingStore != null) {
+                try {
+                    final int index = getKeyIndexLocked(key, mKeyToIndexMap, backingStore);
+                    if (index >= 0) {
+                        final int generation = backingStore.get(index) + 1;
+                        backingStore.set(index, generation);
+                    }
+                } catch (IOException e) {
+                    Slog.e(LOG_TAG, "Error updating generation id", e);
+                    destroyBackingStore();
                 }
-                final int generation = backingStore.get(index) + 1;
-                backingStore.set(index, generation);
-                if (DEBUG) {
-                    Slog.i(LOG_TAG, "Incremented generation for setting:" + indexMapKey
-                            + " key:" + SettingsState.keyToString(key)
-                            + " at index:" + index);
-                }
-            } catch (IOException e) {
-                Slog.e(LOG_TAG, "Error updating generation id", e);
-                destroyBackingStoreLocked(key);
             }
         }
     }
 
-    /**
-     *  Return the backing store's reference, the index and the current generation number
-     *  of a cached setting. If it was not in the backing store, first create the entry in it before
-     *  returning the result.
-     */
-    public void addGenerationData(Bundle bundle, int key, String indexMapKey) {
+    public void addGenerationData(Bundle bundle, int key) {
         synchronized (mLock) {
-            final MemoryIntArray backingStore = getBackingStoreLocked(key,
-                    /* createIfNotExist= */ true);
-            if (backingStore == null) {
-                // Error accessing existing backing store or no new backing store is available
-                return;
-            }
+            MemoryIntArray backingStore = getBackingStoreLocked();
             try {
-                final int index = getKeyIndexLocked(key, indexMapKey, mKeyToIndexMapMap,
-                        backingStore, /* createIfNotExist= */ true);
-                if (index < 0) {
-                    // Should not happen unless having error accessing the backing store
-                    return;
-                }
-                bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
-                        backingStore);
-                bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
-                bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY,
-                        backingStore.get(index));
-                if (DEBUG) {
-                    Slog.i(LOG_TAG, "Exported index:" + index
-                            + " for setting:" + indexMapKey
-                            + " key:" + SettingsState.keyToString(key));
+                if (backingStore != null) {
+                    final int index = getKeyIndexLocked(key, mKeyToIndexMap, backingStore);
+                    if (index >= 0) {
+                        bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
+                                backingStore);
+                        bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
+                        bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY,
+                                backingStore.get(index));
+                        if (DEBUG) {
+                            Slog.i(LOG_TAG, "Exported index:" + index + " for key:"
+                                    + SettingsProvider.keyToString(key));
+                        }
+                    }
                 }
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "Error adding generation data", e);
-                destroyBackingStoreLocked(key);
+                destroyBackingStore();
             }
         }
     }
 
     public void onUserRemoved(int userId) {
-        final int secureKey = SettingsState.makeKey(
-                SettingsState.SETTINGS_TYPE_SECURE, userId);
-        final int systemKey = SettingsState.makeKey(
-                SettingsState.SETTINGS_TYPE_SYSTEM, userId);
         synchronized (mLock) {
-            if (mKeyToIndexMapMap.containsKey(secureKey)) {
-                destroyBackingStoreLocked(secureKey);
-                mKeyToIndexMapMap.remove(secureKey);
-                mNumBackingStore = mNumBackingStore - 1;
-            }
-            if (mKeyToIndexMapMap.containsKey(systemKey)) {
-                destroyBackingStoreLocked(systemKey);
-                mKeyToIndexMapMap.remove(systemKey);
-                mNumBackingStore = mNumBackingStore - 1;
+            MemoryIntArray backingStore = getBackingStoreLocked();
+            if (backingStore != null && mKeyToIndexMap.size() > 0) {
+                try {
+                    final int secureKey = SettingsProvider.makeKey(
+                            SettingsProvider.SETTINGS_TYPE_SECURE, userId);
+                    resetSlotForKeyLocked(secureKey, mKeyToIndexMap, backingStore);
+
+                    final int systemKey = SettingsProvider.makeKey(
+                            SettingsProvider.SETTINGS_TYPE_SYSTEM, userId);
+                    resetSlotForKeyLocked(systemKey, mKeyToIndexMap, backingStore);
+                } catch (IOException e) {
+                    Slog.e(LOG_TAG, "Error cleaning up for user", e);
+                    destroyBackingStore();
+                }
             }
         }
     }
 
     @GuardedBy("mLock")
-    private MemoryIntArray getBackingStoreLocked(int key, boolean createIfNotExist) {
-        MemoryIntArray backingStore = mKeyToBackingStoreMap.get(key);
-        if (!createIfNotExist) {
-            return backingStore;
-        }
-        if (backingStore == null) {
+    private MemoryIntArray getBackingStoreLocked() {
+        if (mBackingStore == null) {
+            // One for the config table, one for the global table, two for system
+            // and secure tables for a managed profile (managed profile is not
+            // included in the max user count), ten for partially deleted users if
+            // users are quickly removed, and twice max user count for system and
+            // secure.
+            final int size = 1 + 1 + 2 + 10 + 2 * UserManager.getMaxSupportedUsers();
             try {
-                if (mNumBackingStore >= NUM_MAX_BACKING_STORE) {
-                    Slog.e(LOG_TAG, "Error creating backing store - at capacity");
-                    return null;
-                }
-                backingStore = new MemoryIntArray(MAX_BACKING_STORE_SIZE);
-                mKeyToBackingStoreMap.put(key, backingStore);
-                mNumBackingStore += 1;
+                mBackingStore = new MemoryIntArray(size);
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Created backing store for "
-                            + SettingsState.keyToString(key) + " on user: "
-                            + SettingsState.getUserIdFromKey(key));
+                    Slog.e(LOG_TAG, "Created backing store " + mBackingStore);
                 }
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "Error creating generation tracker", e);
             }
         }
-        return backingStore;
+        return mBackingStore;
     }
 
-    @GuardedBy("mLock")
-    private void destroyBackingStoreLocked(int key) {
-        MemoryIntArray backingStore = mKeyToBackingStoreMap.get(key);
-        if (backingStore != null) {
+    private void destroyBackingStore() {
+        if (mBackingStore != null) {
             try {
-                backingStore.close();
+                mBackingStore.close();
                 if (DEBUG) {
-                    Slog.e(LOG_TAG, "Destroyed backing store " + backingStore);
+                    Slog.e(LOG_TAG, "Destroyed backing store " + mBackingStore);
                 }
             } catch (IOException e) {
                 Slog.e(LOG_TAG, "Cannot close generation memory array", e);
             }
-            mKeyToBackingStoreMap.remove(key);
+            mBackingStore = null;
         }
     }
 
-    private static int getKeyIndexLocked(int key, String indexMapKey,
-            ArrayMap<Integer, ArrayMap<String, Integer>> keyToIndexMapMap,
-            MemoryIntArray backingStore, boolean createIfNotExist) throws IOException {
-        ArrayMap<String, Integer> nameToIndexMap = keyToIndexMapMap.get(key);
-        if (nameToIndexMap == null) {
-            if (!createIfNotExist) {
-                return -1;
+    private static void resetSlotForKeyLocked(int key, SparseIntArray keyToIndexMap,
+            MemoryIntArray backingStore) throws IOException {
+        final int index = keyToIndexMap.get(key, -1);
+        if (index >= 0) {
+            keyToIndexMap.delete(key);
+            backingStore.set(index, 0);
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "Freed index:" + index + " for key:"
+                        + SettingsProvider.keyToString(key));
             }
-            nameToIndexMap = new ArrayMap<>();
-            keyToIndexMapMap.put(key, nameToIndexMap);
         }
-        int index = nameToIndexMap.getOrDefault(indexMapKey, -1);
+    }
+
+    private static int getKeyIndexLocked(int key, SparseIntArray keyToIndexMap,
+            MemoryIntArray backingStore) throws IOException {
+        int index = keyToIndexMap.get(key, -1);
         if (index < 0) {
-            if (!createIfNotExist) {
-                return -1;
-            }
             index = findNextEmptyIndex(backingStore);
             if (index >= 0) {
                 backingStore.set(index, 1);
-                nameToIndexMap.put(indexMapKey, index);
+                keyToIndexMap.append(key, index);
                 if (DEBUG) {
-                    Slog.i(LOG_TAG, "Allocated index:" + index + " for setting:" + indexMapKey
-                            + " of type:" + SettingsState.keyToString(key)
-                            + " on user:" + SettingsState.getUserIdFromKey(key));
+                    Slog.i(LOG_TAG, "Allocated index:" + index + " for key:"
+                            + SettingsProvider.keyToString(key));
                 }
             } else {
                 Slog.e(LOG_TAG, "Could not allocate generation index");
