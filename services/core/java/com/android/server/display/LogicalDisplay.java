@@ -494,7 +494,7 @@ final class LogicalDisplay {
             DisplayDevice device,
             boolean isBlanked) {
         // Set the layer stack.
-        device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack);
+        device.setLayerStackLocked(t, isBlanked ? BLANK_LAYER_STACK : mLayerStack, mDisplayId);
         // Also inform whether the device is the same one sent to inputflinger for its layerstack.
         // Prevent displays that are disabled from receiving input.
         // TODO(b/188914255): Remove once input can dispatch against device vs layerstack.
