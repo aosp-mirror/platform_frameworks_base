@@ -255,6 +255,24 @@ public class ProxyAccessibilityServiceConnection extends AccessibilityServiceCon
     }
 
     @Override
+    int resolveAccessibilityWindowIdForFindFocusLocked(int windowId, int focusType) {
+        if (windowId == AccessibilityWindowInfo.ANY_WINDOW_ID) {
+            final int focusedWindowId = mA11yWindowManager.getFocusedWindowId(focusType,
+                    mDisplayId);
+            // If the caller is a proxy and the found window doesn't belong to a proxy display
+            // (or vice versa), then return null. This doesn't work if there are multiple active
+            // proxys, but in the future this code shouldn't be needed if input focus
+            // properly split. (so we will deal with the issues if we see them).
+            //TODO(254545943): Remove this when there is user and proxy separation of input
+            if (!mA11yWindowManager.windowIdBelongsToDisplayType(focusedWindowId, mDisplayTypes)) {
+                return AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
+            }
+            return focusedWindowId;
+        }
+        return windowId;
+    }
+
+    @Override
     public void binderDied() {
     }
 
