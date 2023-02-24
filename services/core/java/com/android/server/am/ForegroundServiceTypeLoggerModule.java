@@ -316,6 +316,10 @@ public class ForegroundServiceTypeLoggerModule {
         // then we should care, otherwise we assume
         // it's not related to any FGS
         UidState uidState = mUids.get(uid);
+        if (uidState == null) {
+            Log.w(TAG, "API event end called before start!");
+            return -1;
+        }
         if (uidState.mOpenWithFgsCount.contains(apiType)) {
             // are there any calls that started with an FGS?
             if (uidState.mOpenWithFgsCount.get(apiType) != 0) {
