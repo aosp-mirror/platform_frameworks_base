@@ -50,6 +50,7 @@ import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
@@ -103,6 +104,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final SystemBarAttributesListener mSystemBarAttributesListener;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
     private final QuickSettingsController mQsController;
+    private final QSHost mQSHost;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
@@ -135,7 +137,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             @DisplayId int displayId,
             SystemBarAttributesListener systemBarAttributesListener,
             Lazy<CameraLauncher> cameraLauncherLazy,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            QSHost qsHost) {
         mCentralSurfaces = centralSurfaces;
         mQsController = quickSettingsController;
         mContext = context;
@@ -161,6 +164,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
         mUserTracker = userTracker;
+        mQSHost = qsHost;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
@@ -181,22 +185,17 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void addQsTile(ComponentName tile) {
-        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
-        if (qsPanelController != null && qsPanelController.getHost() != null) {
-            qsPanelController.getHost().addTile(tile);
-        }
+        mQSHost.addTile(tile);
     }
 
     @Override
     public void remQsTile(ComponentName tile) {
-        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
-        if (qsPanelController != null && qsPanelController.getHost() != null) {
-            qsPanelController.getHost().removeTileByUser(tile);
-        }
+        mQSHost.removeTileByUser(tile);
     }
 
     @Override
     public void clickTile(ComponentName tile) {
+        // Can't inject this because it changes with the QS fragment
         QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
         if (qsPanelController != null) {
             qsPanelController.clickTile(tile);

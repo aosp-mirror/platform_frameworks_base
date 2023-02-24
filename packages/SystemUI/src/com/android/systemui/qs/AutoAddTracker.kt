@@ -183,7 +183,7 @@ class AutoAddTracker @VisibleForTesting constructor(
     }
 
     fun getRestoredTilePosition(tile: String): Int =
-        restoredTiles?.get(tile)?.index ?: QSTileHost.POSITION_AT_END
+        restoredTiles?.get(tile)?.index ?: QSHost.POSITION_AT_END
 
     /**
      * Returns `true` if the tile has been auto-added before
