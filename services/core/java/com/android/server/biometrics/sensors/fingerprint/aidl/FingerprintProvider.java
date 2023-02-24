@@ -37,6 +37,7 @@ import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.biometrics.fingerprint.SensorProps;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -422,15 +423,17 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
-            @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
+    public long scheduleFingerDetect(@NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FingerprintAuthenticateOptions options,
             int statsClient) {
         final long id = mRequestCounter.incrementAndGet();
         mHandler.post(() -> {
+            final int sensorId = options.getSensorId();
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FingerprintDetectClient client = new FingerprintDetectClient(mContext,
-                    mSensors.get(sensorId).getLazySession(), token, id, callback, userId,
-                    opPackageName, sensorId,
+                    mSensors.get(sensorId).getLazySession(), token, id, callback,
+                    options,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext,
                     mUdfpsOverlayController, mUdfpsOverlay, isStrongBiometric);
@@ -441,16 +444,19 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
-            int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+    public void scheduleAuthenticate(@NonNull IBinder token, long operationId,
+            int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FingerprintAuthenticateOptions options,
+            long requestId, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
+            final int userId = options.getUserId();
+            final int sensorId = options.getSensorId();
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FingerprintAuthenticationClient client = new FingerprintAuthenticationClient(
                     mContext, mSensors.get(sensorId).getLazySession(), token, requestId, callback,
-                    userId, operationId, restricted, opPackageName, cookie,
-                    false /* requireConfirmation */, sensorId,
+                    operationId, restricted, options, cookie,
+                    false /* requireConfirmation */,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric,
                     mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
@@ -485,14 +491,14 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     @Override
-    public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
-            int userId, int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
+    public long scheduleAuthenticate(@NonNull IBinder token, long operationId,
+            int cookie, @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FingerprintAuthenticateOptions options, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication) {
         final long id = mRequestCounter.incrementAndGet();
 
-        scheduleAuthenticate(sensorId, token, operationId, userId, cookie, callback,
-                opPackageName, id, restricted, statsClient, allowBackgroundAuthentication);
+        scheduleAuthenticate(token, operationId, cookie, callback,
+                options, id, restricted, statsClient, allowBackgroundAuthentication);
 
         return id;
     }
