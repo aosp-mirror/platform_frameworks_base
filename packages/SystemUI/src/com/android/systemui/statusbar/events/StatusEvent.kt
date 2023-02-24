@@ -30,7 +30,7 @@ typealias ViewCreator = (context: Context) -> BackgroundAnimatableView
 interface StatusEvent {
     val priority: Int
     // Whether or not to force the status bar open and show a dot
-    val forceVisible: Boolean
+    var forceVisible: Boolean
     // Whether or not to show an animation for this event
     val showAnimation: Boolean
     val viewCreator: ViewCreator
@@ -72,7 +72,7 @@ class BGImageView(
 
 class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : StatusEvent {
     override val priority = 50
-    override val forceVisible = false
+    override var forceVisible = false
     override val showAnimation = true
     override var contentDescription: String? = ""
 
@@ -90,7 +90,7 @@ class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : Status
 class PrivacyEvent(override val showAnimation: Boolean = true) : StatusEvent {
     override var contentDescription: String? = null
     override val priority = 100
-    override val forceVisible = true
+    override var forceVisible = true
     var privacyItems: List<PrivacyItem> = listOf()
     private var privacyChip: OngoingPrivacyChip? = null
 

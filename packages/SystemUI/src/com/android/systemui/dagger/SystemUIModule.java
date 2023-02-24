@@ -256,6 +256,11 @@ public abstract class SystemUIModule {
     @BindsOptionalOf
     abstract FingerprintInteractiveToAuthProvider optionalFingerprintInteractiveToAuthProvider();
 
+    @BindsOptionalOf
+    //TODO(b/269430792 remove full qualifier. Full qualifier is used to avoid merge conflict.)
+    abstract com.android.systemui.statusbar.events.SystemStatusAnimationScheduler
+    optionalSystemStatusAnimationScheduler();
+
     @SysUISingleton
     @Binds
     abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
