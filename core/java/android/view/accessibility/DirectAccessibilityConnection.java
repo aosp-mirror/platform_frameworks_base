@@ -50,13 +50,13 @@ import android.os.RemoteException;
 class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Default {
     private final IAccessibilityInteractionConnection mAccessibilityInteractionConnection;
     private final AccessibilityManager mAccessibilityManager;
+    private final int mMyProcessId;
 
     // Fetch all views, but do not use prefetching/cache since this "connection" does not
     // receive cache invalidation events (as it is not linked to an AccessibilityService).
     private static final int FETCH_FLAGS =
             AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_REPORT_VIEW_IDS
                     | AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS;
-    private static final int PID = Process.myPid();
     private static final Region INTERACTIVE_REGION = null;
 
     DirectAccessibilityConnection(
@@ -64,6 +64,7 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
             AccessibilityManager accessibilityManager) {
         mAccessibilityInteractionConnection = accessibilityInteractionConnection;
         mAccessibilityManager = accessibilityManager;
+        mMyProcessId = Process.myPid();
     }
 
     @Override
@@ -74,8 +75,9 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
         IAccessibilityManager.WindowTransformationSpec spec =
                 mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findAccessibilityNodeInfoByAccessibilityId(
-                accessibilityNodeId, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID,
-                threadId, spec.magnificationSpec, spec.transformationMatrix, arguments);
+                accessibilityNodeId, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS,
+                mMyProcessId, threadId, spec.magnificationSpec, spec.transformationMatrix,
+                arguments);
         return new String[0];
     }
 
@@ -87,8 +89,8 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
         IAccessibilityManager.WindowTransformationSpec spec =
                 mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findAccessibilityNodeInfosByText(accessibilityNodeId,
-                text, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
-                spec.magnificationSpec, spec.transformationMatrix);
+                text, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, mMyProcessId,
+                threadId, spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
 
@@ -100,8 +102,8 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
         IAccessibilityManager.WindowTransformationSpec spec =
                 mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findAccessibilityNodeInfosByViewId(accessibilityNodeId,
-                viewId, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
-                spec.magnificationSpec, spec.transformationMatrix);
+                viewId, INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, mMyProcessId,
+                threadId, spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
 
@@ -112,7 +114,7 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
         IAccessibilityManager.WindowTransformationSpec spec =
                 mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.findFocus(accessibilityNodeId, focusType,
-                INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
+                INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, mMyProcessId, threadId,
                 spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
@@ -124,7 +126,7 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
         IAccessibilityManager.WindowTransformationSpec spec =
                 mAccessibilityManager.getWindowTransformationSpec(accessibilityWindowId);
         mAccessibilityInteractionConnection.focusSearch(accessibilityNodeId, direction,
-                INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, PID, threadId,
+                INTERACTIVE_REGION, interactionId, callback, FETCH_FLAGS, mMyProcessId, threadId,
                 spec.magnificationSpec, spec.transformationMatrix);
         return new String[0];
     }
@@ -135,7 +137,7 @@ class DirectAccessibilityConnection extends IAccessibilityServiceConnection.Defa
             IAccessibilityInteractionConnectionCallback callback, long threadId)
             throws RemoteException {
         mAccessibilityInteractionConnection.performAccessibilityAction(accessibilityNodeId, action,
-                arguments, interactionId, callback, FETCH_FLAGS, PID, threadId);
+                arguments, interactionId, callback, FETCH_FLAGS, mMyProcessId, threadId);
         return true;
     }
 }
