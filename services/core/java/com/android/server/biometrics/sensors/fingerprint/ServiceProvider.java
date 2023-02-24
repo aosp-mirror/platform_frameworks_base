@@ -23,6 +23,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -78,19 +79,21 @@ public interface ServiceProvider extends
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token, long requestId);
 
-    long scheduleFingerDetect(int sensorId, @NonNull IBinder token, int userId,
-            @NonNull ClientMonitorCallbackConverter callback, @NonNull String opPackageName,
+    long scheduleFingerDetect(@NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FingerprintAuthenticateOptions options,
             int statsClient);
 
-    void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    void scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, long requestId, boolean restricted, int statsClient,
+            @NonNull FingerprintAuthenticateOptions options,
+            long requestId, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication);
 
-    long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId, int userId,
+    long scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, boolean restricted, int statsClient,
-            boolean allowBackgroundAuthentication);
+            @NonNull FingerprintAuthenticateOptions options,
+            boolean restricted, int statsClient, boolean allowBackgroundAuthentication);
 
     void startPreparedClient(int sensorId, int cookie);
 

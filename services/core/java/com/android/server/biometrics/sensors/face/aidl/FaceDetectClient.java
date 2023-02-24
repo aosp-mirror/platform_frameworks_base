@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -51,11 +52,11 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
 
     FaceDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener,
+            @NonNull FaceAuthenticateOptions options,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric) {
-        this(context, lazyDaemon, token, requestId, listener, userId, owner, sensorId,
+        this(context, lazyDaemon, token, requestId, listener, options,
                 logger, biometricContext, isStrongBiometric,
                 context.getSystemService(SensorPrivacyManager.class));
     }
@@ -63,11 +64,12 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
     @VisibleForTesting
     FaceDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener,
+            @NonNull FaceAuthenticateOptions options,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, SensorPrivacyManager sensorPrivacyManager) {
-        super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
+        super(context, lazyDaemon, token, listener, options.getUserId(),
+                options.getOpPackageName(), 0 /* cookie */, options.getSensorId(),
                 true /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;

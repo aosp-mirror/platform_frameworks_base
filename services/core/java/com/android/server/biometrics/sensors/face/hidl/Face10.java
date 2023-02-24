@@ -651,9 +651,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public long scheduleFaceDetect(int sensorId, @NonNull IBinder token,
-            int userId, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, int statsClient) {
+    public long scheduleFaceDetect(@NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FaceAuthenticateOptions options, int statsClient) {
         throw new IllegalStateException("Face detect not supported by IBiometricsFace@1.0. Did you"
                 + "forget to check the supportsFaceDetection flag?");
     }
@@ -665,7 +665,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+    public void scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter receiver,
             @NonNull FaceAuthenticateOptions options, long requestId, boolean restricted,
             int statsClient, boolean allowBackgroundAuthentication) {
@@ -675,8 +675,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final boolean isStrongBiometric = Utils.isStrongBiometric(mSensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
-                    mLazyDaemon, token, requestId, receiver, userId, operationId, restricted,
-                    options.getOpPackageName(), cookie, false /* requireConfirmation */, mSensorId,
+                    mLazyDaemon, token, requestId, receiver, operationId, restricted,
+                    options, cookie, false /* requireConfirmation */,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric, mLockoutTracker,
                     mUsageStats, allowBackgroundAuthentication,
@@ -686,13 +686,13 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+    public long scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter receiver,
             @NonNull FaceAuthenticateOptions options, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication) {
         final long id = mRequestCounter.incrementAndGet();
 
-        scheduleAuthenticate(sensorId, token, operationId, cookie, receiver,
+        scheduleAuthenticate(token, operationId, cookie, receiver,
                 options, id, restricted, statsClient, allowBackgroundAuthentication);
 
         return id;

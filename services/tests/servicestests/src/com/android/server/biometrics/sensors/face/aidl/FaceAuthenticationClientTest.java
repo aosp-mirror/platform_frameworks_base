@@ -33,6 +33,7 @@ import android.content.ComponentName;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
@@ -153,14 +154,18 @@ public class FaceAuthenticationClientTest {
         when(mHal.getInterfaceVersion()).thenReturn(version);
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
+        final FaceAuthenticateOptions options = new FaceAuthenticateOptions.Builder()
+                .setOpPackageName("test-owner")
+                .setUserId(5)
+                .setSensorId(9)
+                .build();
         return new FaceAuthenticationClient(mContext, () -> aidl, mToken,
-                2 /* requestId */, mClientMonitorCallbackConverter, 5 /* targetUserId */, OP_ID,
-                false /* restricted */, "test-owner", 4 /* cookie */,
-                false /* requireConfirmation */, 9 /* sensorId */,
+                2 /* requestId */, mClientMonitorCallbackConverter, OP_ID,
+                false /* restricted */, options, 4 /* cookie */,
+                false /* requireConfirmation */,
                 mBiometricLogger, mBiometricContext, true /* isStrongBiometric */,
                 mUsageStats, null /* mLockoutCache */, false /* allowBackgroundAuthentication */,
-                null /* sensorPrivacyManager */,
-                0 /* biometricStrength */) {
+                null /* sensorPrivacyManager */, 0 /* biometricStrength */) {
             @Override
             protected ActivityTaskManager getActivityTaskManager() {
                 return mActivityTaskManager;
