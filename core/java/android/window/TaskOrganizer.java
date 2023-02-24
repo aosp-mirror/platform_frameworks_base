@@ -92,10 +92,13 @@ public class TaskOrganizer extends WindowOrganizer {
      * has create a starting window for the Task.
      *
      * @param info The information about the Task that's available
+     * @param appToken Token of the application being started.
+     *        context to for resources
      * @hide
      */
     @BinderThread
-    public void addStartingWindow(@NonNull StartingWindowInfo info) {}
+    public void addStartingWindow(@NonNull StartingWindowInfo info,
+            @NonNull IBinder appToken) {}
 
     /**
      * Called when the Task want to remove the starting window.
@@ -294,8 +297,9 @@ public class TaskOrganizer extends WindowOrganizer {
 
     private final ITaskOrganizer mInterface = new ITaskOrganizer.Stub() {
         @Override
-        public void addStartingWindow(StartingWindowInfo windowInfo) {
-            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo));
+        public void addStartingWindow(StartingWindowInfo windowInfo,
+                IBinder appToken) {
+            mExecutor.execute(() -> TaskOrganizer.this.addStartingWindow(windowInfo, appToken));
         }
 
         @Override
