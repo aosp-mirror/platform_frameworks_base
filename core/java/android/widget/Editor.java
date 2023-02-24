@@ -52,6 +52,7 @@ import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -3238,6 +3239,44 @@ public class Editor {
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
         mPreserveSelection = true;
+
+        // No-op for the old context menu because it doesn't have icons.
+        adjustIconSpacing(menu);
+    }
+
+    /**
+     * Adjust icon spacing to align the texts.
+     * @hide
+     */
+    @VisibleForTesting
+    public void adjustIconSpacing(ContextMenu menu) {
+        int width = -1;
+        int height = -1;
+        for (int i = 0; i < menu.size(); ++i) {
+            final MenuItem item = menu.getItem(i);
+            final Drawable d = item.getIcon();
+            if (d == null) {
+                continue;
+            }
+
+            width = Math.max(width, d.getIntrinsicWidth());
+            height = Math.max(height, d.getIntrinsicHeight());
+        }
+
+        if (width < 0 || height < 0) {
+            return;  // No menu has icon drawable.
+        }
+
+        GradientDrawable paddingDrawable = new GradientDrawable();
+        paddingDrawable.setSize(width, height);
+
+        for (int i = 0; i < menu.size(); ++i) {
+            final MenuItem item = menu.getItem(i);
+            final Drawable d = item.getIcon();
+            if (d == null) {
+                item.setIcon(paddingDrawable);
+            }
+        }
     }
 
     @Nullable
