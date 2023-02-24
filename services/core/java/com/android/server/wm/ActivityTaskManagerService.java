@@ -202,6 +202,7 @@ import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -228,7 +229,6 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
-import android.view.IWindowFocusObserver;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -1853,11 +1853,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public BackNavigationInfo startBackNavigation(
-            IWindowFocusObserver observer, BackAnimationAdapter adapter) {
+            RemoteCallback navigationObserver, BackAnimationAdapter adapter) {
         mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
                 "startBackNavigation()");
 
-        return mBackNavigationController.startBackNavigation(observer, adapter);
+        return mBackNavigationController.startBackNavigation(navigationObserver, adapter);
     }
 
     /**
