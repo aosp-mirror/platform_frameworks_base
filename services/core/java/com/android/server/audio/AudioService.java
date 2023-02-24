@@ -3928,8 +3928,10 @@ public class AudioService extends IAudioService.Stub
     }
 
     @Override
-    @android.annotation.EnforcePermission(anyOf =
-            {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
+    })
     /** @see AudioDeviceVolumeManager#setDeviceVolume(VolumeInfo, AudioDeviceAttributes)
      * Part of service interface, check permissions and parameters here
      * Note calling package is for logging purposes only, not to be trusted
@@ -4945,8 +4947,10 @@ public class AudioService extends IAudioService.Stub
     }
 
     @Override
-    @android.annotation.EnforcePermission(anyOf =
-            {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
+    })
     /**
      * @see AudioDeviceVolumeManager#getDeviceVolume(VolumeInfo, AudioDeviceAttributes)
      */
@@ -7214,8 +7218,10 @@ public class AudioService extends IAudioService.Stub
      * @param device the audio device to be affected
      * @param deviceVolumeBehavior one of the device behaviors
      */
-    @android.annotation.EnforcePermission(anyOf =
-            {"MODIFY_AUDIO_ROUTING", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
+    })
     public void setDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device,
             @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior, @Nullable String pkgName) {
         // verify permissions
@@ -7295,8 +7301,11 @@ public class AudioService extends IAudioService.Stub
      * @param device the audio output device type
      * @return the volume behavior for the device
      */
-    @android.annotation.EnforcePermission(anyOf =
-            {"MODIFY_AUDIO_ROUTING", "QUERY_AUDIO_STATE", "MODIFY_AUDIO_SETTINGS_PRIVILEGED"})
+    @android.annotation.EnforcePermission(anyOf = {
+            android.Manifest.permission.MODIFY_AUDIO_ROUTING,
+            android.Manifest.permission.QUERY_AUDIO_STATE,
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED
+    })
     public @AudioManager.DeviceVolumeBehavior
     int getDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device) {
         // verify permissions
