@@ -3245,7 +3245,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 notifyInputMethodSubtypeChangedLocked(userId, info, null);
                 return;
             }
-            if (newSubtype != oldSubtype) {
+            if (!newSubtype.equals(oldSubtype)) {
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
                 IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
