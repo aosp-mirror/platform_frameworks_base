@@ -237,5 +237,6 @@ public class SecureSettings {
         Settings.Secure.HEARING_AID_CALL_ROUTING,
         Settings.Secure.HEARING_AID_MEDIA_ROUTING,
         Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+        Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED
     };
 }
