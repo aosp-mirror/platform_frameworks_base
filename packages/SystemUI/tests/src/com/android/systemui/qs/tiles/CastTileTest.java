@@ -42,7 +42,7 @@ import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.qs.QSTileHost;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.statusbar.connectivity.IconState;
 import com.android.systemui.statusbar.connectivity.NetworkController;
@@ -78,7 +78,7 @@ public class CastTileTest extends SysuiTestCase {
     @Mock
     private NetworkController mNetworkController;
     @Mock
-    private QSTileHost mHost;
+    private QSHost mHost;
     @Mock
     SignalCallback mSignalCallback;
     @Mock

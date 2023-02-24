@@ -215,6 +215,7 @@ import android.app.PendingIntent;
 import android.app.PendingIntentStats;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
+import android.app.ServiceStartNotAllowedException;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.assist.ActivityId;
@@ -1124,6 +1125,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return super.newResult(computer, filter, match, userId, customFlags);
             }
             return null;
+        }
+
+        @Override
+        protected void filterResults(@NonNull Computer computer,
+                @NonNull Intent intent, List<BroadcastFilter> results) {
+            if (intent.getAction() != null) return;
+            // When the resolved component is targeting U+, block null action intents
+            for (int i = results.size() - 1; i >= 0; --i) {
+                if (computer.isChangeEnabled(
+                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, results.get(i).owningUid)) {
+                    results.remove(i);
+                }
+            }
         }
 
         @Override
@@ -13156,6 +13170,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             String resolvedType, boolean requireForeground, String callingPackage,
             String callingFeatureId, int userId)
             throws TransactionTooLargeException {
+        return startService(caller, service, resolvedType, requireForeground, callingPackage,
+                callingFeatureId, userId, false /* isSdkSandboxService */, INVALID_UID, null, null);
+    }
+
+    private ComponentName startService(IApplicationThread caller, Intent service,
+            String resolvedType, boolean requireForeground, String callingPackage,
+            String callingFeatureId, int userId, boolean isSdkSandboxService,
+            int sdkSandboxClientAppUid, String sdkSandboxClientAppPackage, String instanceName)
+            throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
         // Refuse possible leaked file descriptors
@@ -13166,6 +13189,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (callingPackage == null) {
             throw new IllegalArgumentException("callingPackage cannot be null");
         }
+
+        if (isSdkSandboxService && instanceName == null) {
+            throw new IllegalArgumentException("No instance name provided for SDK sandbox process");
+        }
+        validateServiceInstanceName(instanceName);
 
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE,
                 "*** startService: " + service + " type=" + resolvedType + " fg=" + requireForeground);
@@ -13182,7 +13210,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 res = mServices.startServiceLocked(caller, service,
                         resolvedType, callingPid, callingUid,
-                        requireForeground, callingPackage, callingFeatureId, userId);
+                        requireForeground, callingPackage, callingFeatureId, userId,
+                        isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
+                        instanceName);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -13191,9 +13221,26 @@ public class ActivityManagerService extends IActivityManager.Stub
         return res;
     }
 
+    private void validateServiceInstanceName(String instanceName) {
+        // Ensure that instanceName, which is caller provided, does not contain
+        // unusual characters.
+        if (instanceName != null) {
+            if (!instanceName.matches("[a-zA-Z0-9_.]+")) {
+                throw new IllegalArgumentException("Illegal instanceName");
+            }
+        }
+    }
+
     @Override
     public int stopService(IApplicationThread caller, Intent service,
             String resolvedType, int userId) {
+        return stopService(caller, service, resolvedType, userId, false /* isSdkSandboxService */,
+                INVALID_UID, null, null);
+    }
+
+    private int stopService(IApplicationThread caller, Intent service, String resolvedType,
+            int userId, boolean isSdkSandboxService,
+            int sdkSandboxClientAppUid, String sdkSandboxClientAppPackage, String instanceName) {
         enforceNotIsolatedCaller("stopService");
         // Refuse possible leaked file descriptors
         if (service != null && service.hasFileDescriptors() == true) {
@@ -13205,7 +13252,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "stopService: " + service);
             }
             synchronized (this) {
-                return mServices.stopServiceLocked(caller, service, resolvedType, userId);
+                return mServices.stopServiceLocked(caller, service, resolvedType, userId,
+                        isSdkSandboxService, sdkSandboxClientAppUid, sdkSandboxClientAppPackage,
+                        instanceName);
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -13364,17 +13413,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new IllegalArgumentException("No instance name provided for isolated process");
         }
 
-        // Ensure that instanceName, which is caller provided, does not contain
-        // unusual characters.
-        if (instanceName != null) {
-            for (int i = 0; i < instanceName.length(); ++i) {
-                char c = instanceName.charAt(i);
-                if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
-                            || (c >= '0' && c <= '9') || c == '_' || c == '.')) {
-                    throw new IllegalArgumentException("Illegal instanceName");
-                }
-            }
-        }
+        validateServiceInstanceName(instanceName);
 
         try {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
@@ -13939,11 +13978,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                         (intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) == 0) {
                     continue;
                 }
+
+                final boolean blockNullAction = mPlatformCompat.isChangeEnabledInternal(
+                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, callerApp.info);
                 // If intent has scheme "content", it will need to access
                 // provider that needs to lock mProviderMap in ActivityThread
                 // and also it may need to wait application response, so we
                 // cannot lock ActivityManagerService here.
-                if (filter.match(resolver, intent, true, TAG) >= 0) {
+                if (filter.match(intent.getAction(), intent.resolveType(resolver),
+                        intent.getScheme(), intent.getData(), intent.getCategories(), TAG,
+                        false /* supportWildcards */,
+                        blockNullAction,
+                        null /* ignoreActions */,
+                        intent.getExtras()) >= 0) {
                     if (allSticky == null) {
                         allSticky = new ArrayList<Intent>();
                     }
@@ -14962,7 +15009,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     List<BroadcastFilter> registeredReceiversForUser =
                             mReceiverResolver.queryIntent(snapshot, intent,
-                                    resolvedType, false /*defaultOnly*/, users[i]);
+                                    resolvedType, false /*defaultOnly*/, callingUid, users[i]);
                     if (registeredReceivers == null) {
                         registeredReceivers = registeredReceiversForUser;
                     } else if (registeredReceiversForUser != null) {
@@ -14971,7 +15018,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else {
                 registeredReceivers = mReceiverResolver.queryIntent(snapshot, intent,
-                        resolvedType, false /*defaultOnly*/, userId);
+                        resolvedType, false /*defaultOnly*/, callingUid, userId);
             }
         }
         BroadcastQueue.traceEnd(cookie);
@@ -17271,6 +17318,53 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public ComponentName startSdkSandboxService(Intent service, int clientAppUid,
+                String clientAppPackage, String processName) throws RemoteException {
+            validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
+            // TODO(b/269598719): Is passing the application thread of the system_server alright?
+            // e.g. the sandbox getting privileged access due to this.
+            ComponentName cn = ActivityManagerService.this.startService(
+                    mContext.getIApplicationThread(), service,
+                    service.resolveTypeIfNeeded(mContext.getContentResolver()), false,
+                    mContext.getOpPackageName(), mContext.getAttributionTag(),
+                    UserHandle.getUserId(clientAppUid), true, clientAppUid, clientAppPackage,
+                    processName);
+            if (cn != null) {
+                if (cn.getPackageName().equals("!")) {
+                    throw new SecurityException(
+                            "Not allowed to start service " + service
+                                    + " without permission " + cn.getClassName());
+                } else if (cn.getPackageName().equals("!!")) {
+                    throw new SecurityException(
+                            "Unable to start service " + service
+                                    + ": " + cn.getClassName());
+                } else if (cn.getPackageName().equals("?")) {
+                    throw ServiceStartNotAllowedException.newInstance(false,
+                            "Not allowed to start service " + service + ": "
+                                    + cn.getClassName());
+                }
+            }
+
+            return cn;
+        }
+
+        @Override
+        public boolean stopSdkSandboxService(Intent service, int clientAppUid,
+                String clientAppPackage, String processName) {
+            validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
+            int res = ActivityManagerService.this.stopService(
+                    mContext.getIApplicationThread(), service,
+                    service.resolveTypeIfNeeded(mContext.getContentResolver()),
+                    UserHandle.getUserId(clientAppUid), true, clientAppUid, clientAppPackage,
+                    processName);
+            if (res < 0) {
+                throw new SecurityException(
+                        "Not allowed to stop service " + service);
+            }
+            return res != 0;
+        }
+
+        @Override
         public boolean bindSdkSandboxService(Intent service, ServiceConnection conn,
                 int clientAppUid, IBinder clientApplicationThread, String clientAppPackage,
                 String processName, int flags)
@@ -17292,26 +17386,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int clientAppUid, IBinder clientApplicationThread, String clientAppPackage,
                 String processName, long flags)
                 throws RemoteException {
-            if (service == null) {
-                throw new IllegalArgumentException("intent is null");
-            }
+            validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
             if (conn == null) {
                 throw new IllegalArgumentException("connection is null");
-            }
-            if (clientAppPackage == null) {
-                throw new IllegalArgumentException("clientAppPackage is null");
-            }
-            if (processName == null) {
-                throw new IllegalArgumentException("processName is null");
-            }
-            if (service.getComponent() == null) {
-                throw new IllegalArgumentException("service must specify explicit component");
-            }
-            if (!UserHandle.isApp(clientAppUid)) {
-                throw new IllegalArgumentException("uid is not within application range");
-            }
-            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
-                throw new IllegalArgumentException("uid does not belong to provided package");
             }
 
             Handler handler = mContext.getMainThreadHandler();
@@ -17343,6 +17420,28 @@ public class ActivityManagerService extends IActivityManager.Stub
                     processName, /*isSdkSandboxService*/ true, clientAppUid, clientAppPackage,
                     clientApplicationThreadVerified, mContext.getOpPackageName(),
                     UserHandle.getUserId(clientAppUid)) != 0;
+        }
+
+        private void validateSdkSandboxParams(Intent service, int clientAppUid,
+                String clientAppPackage, String processName) {
+            if (service == null) {
+                throw new IllegalArgumentException("intent is null");
+            }
+            if (clientAppPackage == null) {
+                throw new IllegalArgumentException("clientAppPackage is null");
+            }
+            if (processName == null) {
+                throw new IllegalArgumentException("processName is null");
+            }
+            if (service.getComponent() == null) {
+                throw new IllegalArgumentException("service must specify explicit component");
+            }
+            if (!UserHandle.isApp(clientAppUid)) {
+                throw new IllegalArgumentException("uid is not within application range");
+            }
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+                throw new IllegalArgumentException("uid does not belong to provided package");
+            }
         }
 
         @Override

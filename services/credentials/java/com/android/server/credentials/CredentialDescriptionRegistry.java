@@ -49,11 +49,14 @@ public final class CredentialDescriptionRegistry {
     /** Represents the results of a given query into the registry. */
     public static final class FilterResult {
         final String mPackageName;
+        final String mFlattenedRequest;
         final List<CredentialEntry> mCredentialEntries;
 
         private FilterResult(String packageName,
+                String flattenedRequest,
                 List<CredentialEntry> credentialEntries) {
             mPackageName = packageName;
+            mFlattenedRequest = flattenedRequest;
             mCredentialEntries = credentialEntries;
         }
     }
@@ -133,12 +136,13 @@ public final class CredentialDescriptionRegistry {
     /** Returns package names and entries of a CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
     public Set<FilterResult> getFilteredResultForProvider(String packageName,
-            List<String> flatRequestStrings) {
+            String flatRequestStrings) {
         Set<FilterResult> result = new HashSet<>();
         Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
         for (CredentialDescription containedDescription: currentSet) {
-            if (flatRequestStrings.contains(containedDescription.getFlattenedRequestString())) {
-                result.add(new FilterResult(packageName, containedDescription
+            if (flatRequestStrings.equals(containedDescription.getFlattenedRequestString())) {
+                result.add(new FilterResult(packageName,
+                        containedDescription.getFlattenedRequestString(), containedDescription
                         .getCredentialEntries()));
             }
         }
@@ -147,13 +151,15 @@ public final class CredentialDescriptionRegistry {
 
     /** Returns package names of CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
-    public Set<String> getMatchingProviders(Set<String> flatRequestString) {
-        Set<String> result = new HashSet<>();
+    public Set<FilterResult> getMatchingProviders(Set<String> flatRequestString) {
+        Set<FilterResult> result = new HashSet<>();
         for (String packageName: mCredentialDescriptions.keySet()) {
             Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
             for (CredentialDescription containedDescription : currentSet) {
                 if (flatRequestString.contains(containedDescription.getFlattenedRequestString())) {
-                    result.add(packageName);
+                    result.add(new FilterResult(packageName,
+                            containedDescription.getFlattenedRequestString(), containedDescription
+                            .getCredentialEntries()));
                 }
             }
         }

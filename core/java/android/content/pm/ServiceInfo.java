@@ -361,7 +361,7 @@ public class ServiceInfo extends ComponentInfo
     /**
      * Constant corresponding to {@code systemExempted} in
      * the {@link android.R.attr#foregroundServiceType} attribute.
-     * The system exmpted foreground service use cases.
+     * The system exempted foreground service use cases.
      *
      * <p class="note">Note, apps are allowed to use this type only in the following cases:
      * <ul>

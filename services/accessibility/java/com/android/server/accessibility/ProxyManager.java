@@ -78,8 +78,7 @@ public class ProxyManager {
             AccessibilitySecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             AccessibilityTrace trace,
-            WindowManagerInternal windowManagerInternal,
-            AccessibilityWindowManager awm) throws RemoteException {
+            WindowManagerInternal windowManagerInternal) throws RemoteException {
 
         // Set a default AccessibilityServiceInfo that is used before the proxy's info is
         // populated. A proxy has the touch exploration and window capabilities.
@@ -93,7 +92,7 @@ public class ProxyManager {
                 new ProxyAccessibilityServiceConnection(context, info.getComponentName(), info,
                         id, mainHandler, mLock, securityPolicy, systemSupport, trace,
                         windowManagerInternal,
-                        awm, displayId);
+                        mA11yWindowManager, displayId);
 
         synchronized (mLock) {
             mProxyA11yServiceConnections.put(displayId, connection);

@@ -71,7 +71,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
 
     @Inject
     QSPanelController(QSPanel view, TunerService tunerService,
-            QSTileHost qstileHost, QSCustomizerController qsCustomizerController,
+            QSHost qsHost, QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             @Named(QS_PANEL) MediaHost mediaHost,
             QSTileRevealController.Factory qsTileRevealControllerFactory,
@@ -80,7 +80,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             BrightnessSliderController.Factory brightnessSliderFactory,
             FalsingManager falsingManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
-        super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
+        super(view, qsHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mTunerService = tunerService;
         mQsCustomizerController = qsCustomizerController;
@@ -171,12 +171,6 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
     public void setBrightnessMirror(BrightnessMirrorController brightnessMirrorController) {
         mBrightnessMirrorHandler.setController(brightnessMirrorController);
     }
-
-    /** Get the QSTileHost this panel uses. */
-    public QSTileHost getHost() {
-        return mHost;
-    }
-
 
     /** Update appearance of QSPanel. */
     public void updateResources() {

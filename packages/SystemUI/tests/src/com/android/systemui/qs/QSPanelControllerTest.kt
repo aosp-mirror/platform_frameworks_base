@@ -40,7 +40,7 @@ class QSPanelControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var qsPanel: QSPanel
     @Mock private lateinit var tunerService: TunerService
-    @Mock private lateinit var qsTileHost: QSTileHost
+    @Mock private lateinit var qsHost: QSHost
     @Mock private lateinit var qsCustomizerController: QSCustomizerController
     @Mock private lateinit var qsTileRevealControllerFactory: QSTileRevealController.Factory
     @Mock private lateinit var dumpManager: DumpManager
@@ -79,7 +79,7 @@ class QSPanelControllerTest : SysuiTestCase() {
         controller = QSPanelController(
             qsPanel,
             tunerService,
-            qsTileHost,
+            qsHost,
             qsCustomizerController,
             /* usingMediaPlayer= */ true,
             mediaHost,
@@ -109,7 +109,7 @@ class QSPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun testSetListeningDoesntRefreshListeningTiles() {
-        whenever(qsTileHost.getTiles()).thenReturn(listOf(tile, otherTile))
+        whenever(qsHost.getTiles()).thenReturn(listOf(tile, otherTile))
         controller.setTiles()
         whenever(tile.isListening()).thenReturn(false)
         whenever(otherTile.isListening()).thenReturn(true)

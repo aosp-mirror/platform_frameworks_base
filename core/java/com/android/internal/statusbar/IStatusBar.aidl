@@ -56,6 +56,7 @@ oneway interface IStatusBar
     void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
+    void toggleTaskbar();
     void toggleSplitScreen();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
