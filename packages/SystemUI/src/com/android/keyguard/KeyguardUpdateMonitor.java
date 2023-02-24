@@ -2825,7 +2825,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean supportsDetect = !mFaceSensorProperties.isEmpty()
                 && mFaceSensorProperties.get(0).supportsFaceDetection
                 && canBypass && !mPrimaryBouncerIsOrWillBeShowing
-                && !isUserInLockdown(user);
+                && !isUserInLockdown(user)
+                && !isFingerprintLockedOut();
         final boolean faceAuthAllowedOrDetectionIsNeeded = faceAuthAllowed || supportsDetect;
 
         // If the face or fp has recently been authenticated do not attempt to authenticate again.
