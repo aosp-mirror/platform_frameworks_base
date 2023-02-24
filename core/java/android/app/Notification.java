@@ -7475,10 +7475,10 @@ public class Notification implements Parcelable
             Resources resources = context.getResources();
             boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
             if (mPictureIcon != null) {
-                int maxPictureWidth = resources.getDimensionPixelSize(isLowRam
+                int maxPictureHeight = resources.getDimensionPixelSize(isLowRam
                         ? R.dimen.notification_big_picture_max_height_low_ram
                         : R.dimen.notification_big_picture_max_height);
-                int maxPictureHeight = resources.getDimensionPixelSize(isLowRam
+                int maxPictureWidth = resources.getDimensionPixelSize(isLowRam
                         ? R.dimen.notification_big_picture_max_width_low_ram
                         : R.dimen.notification_big_picture_max_width);
                 mPictureIcon.scaleDownIfNecessary(maxPictureWidth, maxPictureHeight);
