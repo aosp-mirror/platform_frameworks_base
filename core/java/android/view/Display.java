@@ -1261,20 +1261,17 @@ public final class Display {
 
     /**
      * @hide
-     * Returns the display's HDR supported types.
+     * Returns the current mode's supported HDR types.
      *
      * @see #isHdr()
-     * @see HdrCapabilities#getSupportedHdrTypes()
+     * @see Mode#getSupportedHdrTypes()
      */
     @TestApi
     @NonNull
     public int[] getReportedHdrTypes() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
-                return new int[0];
-            }
-            return mDisplayInfo.hdrCapabilities.getSupportedHdrTypes();
+            return mDisplayInfo.getMode().getSupportedHdrTypes();
         }
     }
 
