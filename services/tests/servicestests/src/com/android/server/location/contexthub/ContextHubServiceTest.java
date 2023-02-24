@@ -40,6 +40,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,7 +52,8 @@ public class ContextHubServiceTest {
     private static final int CONTEXT_HUB_ID = 3;
     private static final String CONTEXT_HUB_STRING = "Context Hub Info Test";
 
-    private Context mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+    private final Context mContext =
+            InstrumentationRegistry.getInstrumentation().getTargetContext();
     @Mock private IContextHubWrapper mMockContextHubWrapper;
     @Mock private ContextHubInfo mMockContextHubInfo;
     @Rule public final MockitoRule mockito = MockitoJUnit.rule();
@@ -62,20 +66,29 @@ public class ContextHubServiceTest {
         when(mMockContextHubInfo.toString()).thenReturn(CONTEXT_HUB_STRING);
         when(mMockContextHubWrapper.getHubs()).thenReturn(hubInfo);
 
-        when(mMockContextHubWrapper.supportsLocationSettingNotifications())
-                .thenReturn(true);
+        when(mMockContextHubWrapper.supportsLocationSettingNotifications()).thenReturn(true);
         when(mMockContextHubWrapper.supportsWifiSettingNotifications()).thenReturn(true);
-        when(mMockContextHubWrapper.supportsAirplaneModeSettingNotifications())
-                .thenReturn(true);
-        when(mMockContextHubWrapper.supportsMicrophoneSettingNotifications())
-                .thenReturn(true);
+        when(mMockContextHubWrapper.supportsAirplaneModeSettingNotifications()).thenReturn(true);
+        when(mMockContextHubWrapper.supportsMicrophoneSettingNotifications()).thenReturn(true);
         when(mMockContextHubWrapper.supportsBtSettingNotifications()).thenReturn(true);
     }
 
-// TODO (b/254290317): These existing tests are to setup the testing infra for the ContextHub
-//                     service and verify the constructor correctly registers a context hub.
-//                     We need to augment these tests to cover the full behavior of the
-//                     ContextHub service
+    @Test
+    public void testDump_emptyPreloadedNanoappList() {
+        when(mMockContextHubWrapper.getPreloadedNanoappIds()).thenReturn(null);
+        StringWriter stringWriter = new StringWriter();
+
+        ContextHubService service = new ContextHubService(mContext, mMockContextHubWrapper);
+        service.dump(
+                new FileDescriptor(), new PrintWriter(stringWriter), /* args= */ new String[0]);
+
+        assertThat(stringWriter.toString()).isNotEmpty();
+    }
+
+    // TODO (b/254290317): These existing tests are to setup the testing infra for the ContextHub
+    //                     service and verify the constructor correctly registers a context hub.
+    //                     We need to augment these tests to cover the full behavior of the
+    //                     ContextHub service
 
     @Test
     public void testConstructorRegistersContextHub() throws RemoteException {
