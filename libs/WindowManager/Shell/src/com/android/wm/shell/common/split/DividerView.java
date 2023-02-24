@@ -374,7 +374,14 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mViewHost.relayout(lp);
     }
 
-    void setInteractive(boolean interactive, String from) {
+    /**
+     * Set divider should interactive to user or not.
+     *
+     * @param interactive divider interactive.
+     * @param hideHandle divider handle hidden or not, only work when interactive is false.
+     * @param from caller from where.
+     */
+    void setInteractive(boolean interactive, boolean hideHandle, String from) {
         if (interactive == mInteractive) return;
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                 "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
@@ -390,7 +397,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             mMoving = false;
         }
         releaseTouching();
-        mHandle.setVisibility(mInteractive ? View.VISIBLE : View.INVISIBLE);
+        mHandle.setVisibility(!mInteractive && hideHandle ? View.INVISIBLE : View.VISIBLE);
     }
 
     private boolean isLandscape() {
