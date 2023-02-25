@@ -166,8 +166,8 @@ public class SatelliteManager {
     public static final String KEY_SATELLITE_NEXT_VISIBILITY = "satellite_next_visibility";
 
     /**
-     * Bundle key to get the respoonse from
-     * {@link #sendSatelliteDatagram(long, int, SatelliteDatagram, Executor, OutcomeReceiver)}.
+     * Bundle key to get the respoonse from {@link
+     * #sendSatelliteDatagram(long, int, SatelliteDatagram, boolean, Executor, OutcomeReceiver)}.
      * @hide
      */
     public static final String KEY_SEND_SATELLITE_DATAGRAM = "send_satellite_datagram";
@@ -685,6 +685,10 @@ public class SatelliteManager {
      */
     public static final int SATELLITE_MODEM_STATE_OFF = 4;
     /**
+     * Satellite modem is unavailable.
+     */
+    public static final int SATELLITE_MODEM_STATE_UNAVAILABLE = 5;
+    /**
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.
      */
@@ -697,6 +701,7 @@ public class SatelliteManager {
             SATELLITE_MODEM_STATE_DATAGRAM_TRANSFERRING,
             SATELLITE_MODEM_STATE_DATAGRAM_RETRYING,
             SATELLITE_MODEM_STATE_OFF,
+            SATELLITE_MODEM_STATE_UNAVAILABLE,
             SATELLITE_MODEM_STATE_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
