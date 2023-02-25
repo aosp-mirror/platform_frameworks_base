@@ -47,6 +47,7 @@ cc_defaults {
         "-Wno-missing-field-initializers",
         "-fno-exceptions",
         "-fno-rtti",
+        "-Wno-deprecated-declarations",
     ],
     target: {
         windows: {
