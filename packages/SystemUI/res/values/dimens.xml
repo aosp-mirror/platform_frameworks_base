@@ -1153,11 +1153,13 @@
 
     <!-- Home Controls -->
     <dimen name="controls_header_menu_size">48dp</dimen>
+    <dimen name="controls_header_menu_button_size">48dp</dimen>
     <dimen name="controls_header_bottom_margin">16dp</dimen>
+    <dimen name="controls_header_horizontal_padding">12dp</dimen>
     <dimen name="controls_header_app_icon_size">24dp</dimen>
     <dimen name="controls_top_margin">48dp</dimen>
-    <dimen name="controls_padding_horizontal">0dp</dimen>
-    <dimen name="control_header_text_size">20sp</dimen>
+    <dimen name="controls_content_margin_horizontal">0dp</dimen>
+    <dimen name="control_header_text_size">24sp</dimen>
     <dimen name="control_item_text_size">16sp</dimen>
     <dimen name="control_menu_item_text_size">16sp</dimen>
     <dimen name="control_menu_item_min_height">56dp</dimen>
@@ -1187,6 +1189,8 @@
     <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
     <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">1.0</item>
     <dimen name="controls_task_view_right_margin">0dp</dimen>
+
+    <dimen name="controls_panel_corner_radius">42dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>

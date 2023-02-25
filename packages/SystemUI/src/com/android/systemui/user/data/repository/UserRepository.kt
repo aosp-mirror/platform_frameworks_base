@@ -17,11 +17,8 @@
 
 package com.android.systemui.user.data.repository
 
-import android.app.IActivityManager
-import android.app.UserSwitchObserver
 import android.content.Context
 import android.content.pm.UserInfo
-import android.os.IRemoteCallback
 import android.os.UserHandle
 import android.os.UserManager
 import android.provider.Settings
@@ -118,7 +115,6 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val globalSettings: GlobalSettings,
     private val tracker: UserTracker,
-    private val activityManager: IActivityManager,
     featureFlags: FeatureFlags,
 ) : UserRepository {
 
@@ -203,18 +199,18 @@ constructor(
     private fun observeUserSwitching() {
         conflatedCallbackFlow {
                 val callback =
-                    object : UserSwitchObserver() {
-                        override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback) {
+                    object : UserTracker.Callback {
+                        override fun onUserChanging(newUser: Int, userContext: Context) {
                             trySendWithFailureLogging(true, TAG, "userSwitching started")
                         }
 
-                        override fun onUserSwitchComplete(newUserId: Int) {
+                        override fun onUserChanged(newUserId: Int, userContext: Context) {
                             trySendWithFailureLogging(false, TAG, "userSwitching completed")
                         }
                     }
-                activityManager.registerUserSwitchObserver(callback, TAG)
+                tracker.addCallback(callback, mainDispatcher.asExecutor())
                 trySendWithFailureLogging(false, TAG, "initial value defaulting to false")
-                awaitClose { activityManager.unregisterUserSwitchObserver(callback) }
+                awaitClose { tracker.removeCallback(callback) }
             }
             .onEach { _isUserSwitchingInProgress.value = it }
             // TODO (b/262838215), Make this stateIn and initialize directly in field declaration

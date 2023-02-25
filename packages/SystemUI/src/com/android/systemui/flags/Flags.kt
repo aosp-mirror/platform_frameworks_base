@@ -231,6 +231,10 @@ object Flags {
     val SMARTSPACE_DATE_WEATHER_DECOUPLED =
         sysPropBooleanFlag(403, "persist.sysui.ss.dw_decoupled", default = false)
 
+    // TODO(b/270223352): Tracking Bug
+    @JvmField
+    val HIDE_SMARTSPACE_ON_DREAM_OVERLAY = unreleasedFlag(404, "hide_smartspace_on_dream_overlay")
+
     // 500 - quick settings
 
     val PEOPLE_TILE = resourceBooleanFlag(502, R.bool.flag_conversations, "people_tile")
@@ -372,6 +376,9 @@ object Flags {
 
     // TODO(b/267166152) : Tracking Bug
     val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
+
+    // TODO(b/270437894): Tracking Bug
+    val MEDIA_REMOTE_RESUME = unreleasedFlag(917, "media_remote_resume")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")

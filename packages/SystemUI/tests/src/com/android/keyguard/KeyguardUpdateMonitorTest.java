@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_TIMED;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
@@ -56,8 +57,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
@@ -90,7 +89,6 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
-import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -148,6 +146,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -231,8 +230,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
     @Mock
-    private IActivityManager mActivityService;
-    @Mock
     private SessionTracker mSessionTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -269,8 +266,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        when(mActivityService.getCurrentUser()).thenReturn(mCurrentUserInfo);
-        when(mActivityService.getCurrentUserId()).thenReturn(mCurrentUserId);
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
@@ -310,13 +305,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class)
-                .spyStatic(ActivityManager.class)
                 .startMocking();
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(SubscriptionManager::getDefaultSubscriptionId);
         KeyguardUpdateMonitor.setCurrentUser(mCurrentUserId);
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
-        ExtendedMockito.doReturn(mActivityService).when(ActivityManager::getService);
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.systemui.R.integer.config_face_auth_supported_posture,
@@ -826,6 +819,39 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void noFaceRun_whenFpLockout() {
+        // GIVEN bypass is enabled, face detection is supported and strong auth is required
+        lockscreenBypassIsAllowed();
+        supportsFaceDetection();
+        strongAuthRequiredEncrypted();
+        keyguardIsVisible();
+        // fingerprint is NOT running, UDFPS is NOT supported
+
+        // GIVEN fp is locked out
+        when(mFingerprintManager.getLockoutModeForUser(eq(FINGERPRINT_SENSOR_ID), anyInt()))
+                .thenReturn(BIOMETRIC_LOCKOUT_TIMED);
+        mKeyguardUpdateMonitor.handleUserSwitchComplete(0);
+        assertThat(mKeyguardUpdateMonitor.isFingerprintLockedOut()).isEqualTo(true);
+
+        // WHEN the device wakes up
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+
+        // FACE detect is NOT triggered and face authenticate is NOT triggered
+        verifyFaceDetectNeverCalled();
+        verifyFaceAuthenticateNeverCalled();
+
+        // WHEN bouncer becomes visible
+        setKeyguardBouncerVisibility(true);
+        clearInvocations(mFaceManager);
+
+        // THEN face scanning is not run
+        mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+        verifyFaceAuthenticateNeverCalled();
+        verifyFaceDetectNeverCalled();
+    }
+
+    @Test
     public void noFaceDetect_whenStrongAuthRequiredAndBypass_faceDetectionUnsupported() {
         // GIVEN bypass is enabled, face detection is NOT supported and strong auth is required
         lockscreenBypassIsAllowed();
@@ -1057,11 +1083,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testBiometricsCleared_whenUserSwitches() throws Exception {
-        final IRemoteCallback reply = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) {
-            } // do nothing
-        };
         final BiometricAuthenticated dummyAuthentication =
                 new BiometricAuthenticated(true /* authenticated */, true /* strong */);
         mKeyguardUpdateMonitor.mUserFaceAuthenticated.put(0 /* user */, dummyAuthentication);
@@ -1069,18 +1090,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.mUserFingerprintAuthenticated.size()).isEqualTo(1);
         assertThat(mKeyguardUpdateMonitor.mUserFaceAuthenticated.size()).isEqualTo(1);
 
-        mKeyguardUpdateMonitor.handleUserSwitching(10 /* user */, reply);
+        mKeyguardUpdateMonitor.handleUserSwitching(10 /* user */, new CountDownLatch(0));
         assertThat(mKeyguardUpdateMonitor.mUserFingerprintAuthenticated.size()).isEqualTo(0);
         assertThat(mKeyguardUpdateMonitor.mUserFaceAuthenticated.size()).isEqualTo(0);
     }
 
     @Test
     public void testMultiUserJankMonitor_whenUserSwitches() throws Exception {
-        final IRemoteCallback reply = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) {
-            } // do nothing
-        };
         mKeyguardUpdateMonitor.handleUserSwitchComplete(10 /* user */);
         verify(mInteractionJankMonitor).end(InteractionJankMonitor.CUJ_USER_SWITCH);
         verify(mLatencyTracker).onActionEnd(LatencyTracker.ACTION_USER_SWITCH);
