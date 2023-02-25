@@ -54,6 +54,7 @@ import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.TransitionUtil;
 
 /** The helper class that provides methods for adding styles to transition animations. */
 public class TransitionAnimationHelper {
@@ -66,7 +67,7 @@ public class TransitionAnimationHelper {
         final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
-        final boolean enter = Transitions.isOpeningType(changeMode);
+        final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;

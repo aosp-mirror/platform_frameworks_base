@@ -43,7 +43,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.common.ScreenshotUtils;
-import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -184,7 +184,7 @@ class ActivityEmbeddingAnimationRunner {
         if (isChangeTransition) {
             return createChangeAnimationAdapters(info, startTransaction);
         }
-        if (Transitions.isClosingType(info.getType())) {
+        if (TransitionUtil.isClosingType(info.getType())) {
             return createCloseAnimationAdapters(info);
         }
         return createOpenAnimationAdapters(info);
@@ -219,7 +219,7 @@ class ActivityEmbeddingAnimationRunner {
         final Rect openingWholeScreenBounds = new Rect();
         final Rect closingWholeScreenBounds = new Rect();
         for (TransitionInfo.Change change : info.getChanges()) {
-            if (Transitions.isOpeningType(change.getMode())) {
+            if (TransitionUtil.isOpeningType(change.getMode())) {
                 openingChanges.add(change);
                 openingWholeScreenBounds.union(change.getEndAbsBounds());
             } else {
@@ -271,7 +271,7 @@ class ActivityEmbeddingAnimationRunner {
                 continue;
             }
             final TransitionInfo.Change change = adapter.mChange;
-            if (Transitions.isOpeningType(adapter.mChange.getMode())) {
+            if (TransitionUtil.isOpeningType(adapter.mChange.getMode())) {
                 // Need to screenshot after startTransaction is applied otherwise activity
                 // may not be visible or ready yet.
                 postStartTransactionCallbacks.add(
@@ -343,7 +343,7 @@ class ActivityEmbeddingAnimationRunner {
                 // When the parent window is also included in the transition as an opening window,
                 // we would like to animate the parent window instead.
                 final TransitionInfo.Change parentChange = info.getChange(parentToken);
-                if (parentChange != null && Transitions.isOpeningType(parentChange.getMode())) {
+                if (parentChange != null && TransitionUtil.isOpeningType(parentChange.getMode())) {
                     // We won't create a separate animation for the parent, but to animate the
                     // parent for the child resizing.
                     handledChanges.add(parentChange);
@@ -404,7 +404,7 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window, or it is a changing
                 // window without bounds change.
                 animation = ActivityEmbeddingAnimationSpec.createNoopAnimation(change);
-            } else if (Transitions.isClosingType(change.getMode())) {
+            } else if (TransitionUtil.isClosingType(change.getMode())) {
                 animation = mAnimationSpec.createChangeBoundsCloseAnimation(change, parentBounds);
                 shouldShouldBackgroundColor = false;
             } else {
@@ -469,7 +469,7 @@ class ActivityEmbeddingAnimationRunner {
                 // When the parent window is also included in the transition as an opening window,
                 // we would like to animate the parent window instead.
                 final TransitionInfo.Change parentChange = info.getChange(parentToken);
-                if (parentChange != null && Transitions.isOpeningType(parentChange.getMode())) {
+                if (parentChange != null && TransitionUtil.isOpeningType(parentChange.getMode())) {
                     changingChanges.add(parentChange);
                 }
             }
@@ -491,8 +491,8 @@ class ActivityEmbeddingAnimationRunner {
                 // No-op if it will be covered by the changing parent window.
                 continue;
             }
-            hasOpeningWindow |= Transitions.isOpeningType(change.getMode());
-            hasClosingWindow |= Transitions.isClosingType(change.getMode());
+            hasOpeningWindow |= TransitionUtil.isOpeningType(change.getMode());
+            hasClosingWindow |= TransitionUtil.isClosingType(change.getMode());
         }
         return hasOpeningWindow && hasClosingWindow;
     }
