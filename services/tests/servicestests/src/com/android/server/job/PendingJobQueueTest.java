@@ -16,6 +16,9 @@
 
 package com.android.server.job;
 
+import static android.app.job.JobInfo.NETWORK_TYPE_ANY;
+import static android.app.job.JobInfo.NETWORK_TYPE_NONE;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -525,7 +528,9 @@ public class PendingJobQueueTest {
             final boolean ui = random.nextBoolean();
             final boolean ej = !ui && random.nextBoolean();
             JobStatus job = createJobStatus("testPendingJobSorting_Random",
-                    createJobInfo(i).setExpedited(ej).setUserInitiated(ui), random.nextInt(250));
+                    createJobInfo(i).setExpedited(ej).setUserInitiated(ui)
+                            .setRequiredNetworkType(ui ? NETWORK_TYPE_ANY : NETWORK_TYPE_NONE),
+                    random.nextInt(250));
             job.enqueueTime = random.nextInt(1_000_000);
             jobQueue.add(job);
         }
@@ -562,7 +567,9 @@ public class PendingJobQueueTest {
                 final boolean ui = random.nextBoolean();
                 final boolean ej = !ui && random.nextBoolean();
                 JobStatus job = createJobStatus("testPendingJobSortingTransitivity",
-                        createJobInfo(i).setExpedited(ej).setUserInitiated(ui), random.nextInt(50));
+                        createJobInfo(i).setExpedited(ej).setUserInitiated(ui)
+                                .setRequiredNetworkType(ui ? NETWORK_TYPE_ANY : NETWORK_TYPE_NONE),
+                        random.nextInt(50));
                 job.enqueueTime = random.nextInt(1_000_000);
                 job.overrideState = random.nextInt(4);
                 jobQueue.add(job);
@@ -586,7 +593,8 @@ public class PendingJobQueueTest {
                 final boolean ui = random.nextFloat() < .02;
                 final boolean ej = !ui && random.nextFloat() < .03;
                 JobStatus job = createJobStatus("testPendingJobSortingTransitivity_Concentrated",
-                        createJobInfo(i).setExpedited(ej).setUserInitiated(ui),
+                        createJobInfo(i).setExpedited(ej).setUserInitiated(ui)
+                                .setRequiredNetworkType(ui ? NETWORK_TYPE_ANY : NETWORK_TYPE_NONE),
                         random.nextInt(20));
                 job.enqueueTime = random.nextInt(250);
                 job.overrideState = random.nextFloat() < .01
