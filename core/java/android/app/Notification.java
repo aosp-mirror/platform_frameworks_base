@@ -5758,7 +5758,7 @@ public class Notification implements Parcelable
             List<Notification.Action> nonContextualActions = getNonContextualActions();
 
             int numActions = Math.min(nonContextualActions.size(), MAX_ACTION_BUTTONS);
-            boolean emphazisedMode = mN.fullScreenIntent != null
+            boolean emphasizedMode = mN.fullScreenIntent != null
                     || p.mCallStyleActions
                     || ((mN.flags & FLAG_FSI_REQUESTED_BUT_DENIED) != 0);
 
@@ -5771,7 +5771,7 @@ public class Notification implements Parcelable
                 big.setInt(R.id.actions, "setCollapsibleIndentDimen",
                         R.dimen.call_notification_collapsible_indent);
             }
-            big.setBoolean(R.id.actions, "setEmphasizedMode", emphazisedMode);
+            big.setBoolean(R.id.actions, "setEmphasizedMode", emphasizedMode);
             if (numActions > 0 && !p.mHideActions) {
                 big.setViewVisibility(R.id.actions_container, View.VISIBLE);
                 big.setViewVisibility(R.id.actions, View.VISIBLE);
@@ -5783,12 +5783,12 @@ public class Notification implements Parcelable
                     boolean actionHasValidInput = hasValidRemoteInput(action);
                     validRemoteInput |= actionHasValidInput;
 
-                    final RemoteViews button = generateActionButton(action, emphazisedMode, p);
-                    if (actionHasValidInput && !emphazisedMode) {
+                    final RemoteViews button = generateActionButton(action, emphasizedMode, p);
+                    if (actionHasValidInput && !emphasizedMode) {
                         // Clear the drawable
                         button.setInt(R.id.action0, "setBackgroundResource", 0);
                     }
-                    if (emphazisedMode && i > 0) {
+                    if (emphasizedMode && i > 0) {
                         // Clear start margin from non-first buttons to reduce the gap between them.
                         //  (8dp remaining gap is from all buttons' standard 4dp inset).
                         button.setViewLayoutMarginDimen(R.id.action0, RemoteViews.MARGIN_START, 0);
@@ -7475,10 +7475,10 @@ public class Notification implements Parcelable
             Resources resources = context.getResources();
             boolean isLowRam = ActivityManager.isLowRamDeviceStatic();
             if (mPictureIcon != null) {
-                int maxPictureWidth = resources.getDimensionPixelSize(isLowRam
+                int maxPictureHeight = resources.getDimensionPixelSize(isLowRam
                         ? R.dimen.notification_big_picture_max_height_low_ram
                         : R.dimen.notification_big_picture_max_height);
-                int maxPictureHeight = resources.getDimensionPixelSize(isLowRam
+                int maxPictureWidth = resources.getDimensionPixelSize(isLowRam
                         ? R.dimen.notification_big_picture_max_width_low_ram
                         : R.dimen.notification_big_picture_max_width);
                 mPictureIcon.scaleDownIfNecessary(maxPictureWidth, maxPictureHeight);

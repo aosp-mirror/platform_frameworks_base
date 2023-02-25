@@ -4410,10 +4410,9 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("            " + PackageManagerServiceCompilerMapping.REASON_STRINGS[i]);
         }
         pw.println("      --reset: restore package to its post-install state");
-        pw.println("      --check-prof (true | false): look at profiles when doing dexopt?");
+        pw.println("      --check-prof (true | false): ignored - this is always true");
         pw.println("      --secondary-dex: compile app secondary dex files");
         pw.println("      --split SPLIT: compile only the given split name");
-        pw.println("      --compile-layouts: compile layout resources for faster inflation");
         pw.println("");
         pw.println("  force-dex-opt PACKAGE");
         pw.println("    Force immediate execution of dex opt for the given PACKAGE.");

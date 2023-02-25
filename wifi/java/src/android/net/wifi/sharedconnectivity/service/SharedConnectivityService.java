@@ -33,6 +33,7 @@ import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
 import android.net.wifi.sharedconnectivity.app.TetherNetwork;
 import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -68,9 +69,17 @@ public abstract class SharedConnectivityService extends Service {
 
     private List<TetherNetwork> mTetherNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
-    private SharedConnectivitySettingsState mSettingsState;
-    private TetherNetworkConnectionStatus mTetherNetworkConnectionStatus;
-    private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus;
+    private SharedConnectivitySettingsState mSettingsState =
+            new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(false)
+                    .setExtras(Bundle.EMPTY).build();
+    private TetherNetworkConnectionStatus mTetherNetworkConnectionStatus =
+            new TetherNetworkConnectionStatus.Builder()
+                    .setStatus(TetherNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
+                    .setExtras(Bundle.EMPTY).build();
+    private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus =
+            new KnownNetworkConnectionStatus.Builder()
+                    .setStatus(KnownNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
+                    .setExtras(Bundle.EMPTY).build();
 
     private final class DeathRecipient implements IBinder.DeathRecipient {
         ISharedConnectivityCallback mCallback;
@@ -128,12 +137,49 @@ public abstract class SharedConnectivityService extends Service {
                 mHandler.post(() -> onForgetKnownNetwork(network));
             }
 
+            @Override
+            public List<TetherNetwork> getTetherNetworks() {
+                checkPermissions();
+                return mTetherNetworks;
+            }
+
+            @Override
+            public List<KnownNetwork> getKnownNetworks() {
+                checkPermissions();
+                return mKnownNetworks;
+            }
+
+            @Override
+            public SharedConnectivitySettingsState getSettingsState() {
+                checkPermissions();
+                return mSettingsState;
+            }
+
+            @Override
+            public TetherNetworkConnectionStatus getTetherNetworkConnectionStatus() {
+                checkPermissions();
+                return mTetherNetworkConnectionStatus;
+            }
+
+            @Override
+            public KnownNetworkConnectionStatus getKnownNetworkConnectionStatus() {
+                checkPermissions();
+                return mKnownNetworkConnectionStatus;
+            }
+
             @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
                     android.Manifest.permission.NETWORK_SETUP_WIZARD})
+            /**
+             * checkPermissions is using checkCallingOrSelfPermission to support CTS testing of this
+             * service. This does allow a process to bind to itself if it holds the proper
+             * permission. We do not consider this to be an issue given that the process can already
+             * access the service data since they are in the same process.
+             */
             private void checkPermissions() {
-                if (checkCallingPermission(NETWORK_SETTINGS) != PackageManager.PERMISSION_GRANTED
-                        && checkCallingPermission(NETWORK_SETUP_WIZARD)
-                                != PackageManager.PERMISSION_GRANTED) {
+                if (checkCallingOrSelfPermission(NETWORK_SETTINGS)
+                        != PackageManager.PERMISSION_GRANTED
+                        && checkCallingOrSelfPermission(NETWORK_SETUP_WIZARD)
+                        != PackageManager.PERMISSION_GRANTED) {
                     throw new SecurityException("Calling process must have NETWORK_SETTINGS or"
                             + " NETWORK_SETUP_WIZARD permission");
                 }
@@ -148,15 +194,6 @@ public abstract class SharedConnectivityService extends Service {
     public void onBind() {}
 
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
-        // Listener gets triggered on first register using cashed data
-        if (!notifyTetherNetworkUpdate(callback) || !notifyKnownNetworkUpdate(callback)
-                || !notifySettingsStateUpdate(callback)
-                || !notifyTetherNetworkConnectionStatusChanged(callback)
-                || !notifyKnownNetworkConnectionStatusChanged(callback)) {
-            if (DEBUG) Log.w(TAG, "Failed to notify client");
-            return;
-        }
-
         DeathRecipient deathRecipient = new DeathRecipient(callback);
         try {
             callback.asBinder().linkToDeath(deathRecipient, 0);

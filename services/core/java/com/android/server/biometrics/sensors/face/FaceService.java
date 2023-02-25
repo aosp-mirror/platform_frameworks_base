@@ -246,7 +246,6 @@ public class FaceService extends SystemService {
 
             super.authenticate_enforcePermission();
 
-            final int userId = options.getUserId();
             final String opPackageName = options.getOpPackageName();
             final boolean restricted = false; // Face APIs are private
             final int statsClient = Utils.isKeyguard(getContext(), opPackageName)
@@ -261,9 +260,11 @@ public class FaceService extends SystemService {
             if (provider == null) {
                 Slog.w(TAG, "Null provider for authenticate");
                 return -1;
+            } else {
+                options.setSensorId(provider.first);
             }
 
-            return provider.second.scheduleAuthenticate(provider.first, token, operationId,
+            return provider.second.scheduleAuthenticate(token, operationId,
                     0 /* cookie */, new ClientMonitorCallbackConverter(receiver), options,
                     restricted, statsClient, isKeyguard);
         }
@@ -286,28 +287,27 @@ public class FaceService extends SystemService {
                 return -1;
             }
 
-            return provider.second.scheduleFaceDetect(provider.first, token, options.getUserId(),
-                    new ClientMonitorCallbackConverter(receiver), opPackageName,
+            return provider.second.scheduleFaceDetect(token,
+                    new ClientMonitorCallbackConverter(receiver), options,
                     BiometricsProtoEnums.CLIENT_KEYGUARD);
         }
 
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override // Binder call
-        public void prepareForAuthentication(int sensorId, boolean requireConfirmation,
+        public void prepareForAuthentication(boolean requireConfirmation,
                 IBinder token, long operationId, IBiometricSensorReceiver sensorReceiver,
                 FaceAuthenticateOptions options, long requestId, int cookie,
                 boolean allowBackgroundAuthentication) {
             super.prepareForAuthentication_enforcePermission();
 
-            final ServiceProvider provider = mRegistry.getProviderForSensor(sensorId);
+            final ServiceProvider provider = mRegistry.getProviderForSensor(options.getSensorId());
             if (provider == null) {
                 Slog.w(TAG, "Null provider for prepareForAuthentication");
                 return;
             }
 
-            final boolean isKeyguardBypassEnabled = false; // only valid for keyguard clients
             final boolean restricted = true; // BiometricPrompt is always restricted
-            provider.scheduleAuthenticate(sensorId, token, operationId, cookie,
+            provider.scheduleAuthenticate(token, operationId, cookie,
                     new ClientMonitorCallbackConverter(sensorReceiver), options, requestId,
                     restricted, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     allowBackgroundAuthentication);

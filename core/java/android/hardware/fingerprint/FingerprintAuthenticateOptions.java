@@ -46,7 +46,7 @@ public final class FingerprintAuthenticateOptions implements AuthenticateOptions
     }
 
     /** The sensor id for this operation. */
-    private final int mSensorId;
+    private int mSensorId;
     private static int defaultSensorId() {
         return SENSOR_ID_ANY;
     }
@@ -173,6 +173,15 @@ public final class FingerprintAuthenticateOptions implements AuthenticateOptions
     @DataClass.Generated.Member
     public @Nullable String getAttributionTag() {
         return mAttributionTag;
+    }
+
+    /**
+     * The sensor id for this operation.
+     */
+    @DataClass.Generated.Member
+    public @NonNull FingerprintAuthenticateOptions setSensorId( int value) {
+        mSensorId = value;
+        return this;
     }
 
     /**
@@ -433,10 +442,10 @@ public final class FingerprintAuthenticateOptions implements AuthenticateOptions
     }
 
     @DataClass.Generated(
-            time = 1676508212083L,
+            time = 1677119626721L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/hardware/fingerprint/FingerprintAuthenticateOptions.java",
-            inputSignatures = "private final  int mUserId\nprivate final  int mSensorId\nprivate final  boolean mIgnoreEnrollmentState\nprivate final @android.hardware.biometrics.AuthenticateOptions.DisplayState int mDisplayState\nprivate @android.annotation.NonNull java.lang.String mOpPackageName\nprivate @android.annotation.Nullable java.lang.String mAttributionTag\nprivate static  int defaultUserId()\nprivate static  int defaultSensorId()\nprivate static  boolean defaultIgnoreEnrollmentState()\nprivate static  int defaultDisplayState()\nprivate static  java.lang.String defaultOpPackageName()\nprivate static  java.lang.String defaultAttributionTag()\nclass FingerprintAuthenticateOptions extends java.lang.Object implements [android.hardware.biometrics.AuthenticateOptions, android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true, genSetters=true, genEqualsHashCode=true)")
+            inputSignatures = "private final  int mUserId\nprivate  int mSensorId\nprivate final  boolean mIgnoreEnrollmentState\nprivate final @android.hardware.biometrics.AuthenticateOptions.DisplayState int mDisplayState\nprivate @android.annotation.NonNull java.lang.String mOpPackageName\nprivate @android.annotation.Nullable java.lang.String mAttributionTag\nprivate static  int defaultUserId()\nprivate static  int defaultSensorId()\nprivate static  boolean defaultIgnoreEnrollmentState()\nprivate static  int defaultDisplayState()\nprivate static  java.lang.String defaultOpPackageName()\nprivate static  java.lang.String defaultAttributionTag()\nclass FingerprintAuthenticateOptions extends java.lang.Object implements [android.hardware.biometrics.AuthenticateOptions, android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true, genSetters=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 
