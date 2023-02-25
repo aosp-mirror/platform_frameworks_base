@@ -2039,7 +2039,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"제거"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 전체 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"일회성 액세스 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도, 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다. 자세히 알아보세요."</string>

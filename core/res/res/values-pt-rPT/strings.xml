@@ -1227,7 +1227,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar sempre"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> foi concebida para uma versão incompatível do SO Android e pode ter um comportamento inesperado. Pode estar disponível uma versão atualizada da app."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar sempre"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Verificar atualizações"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Rever atualizações"</string>
     <string name="smv_application" msgid="3775183542777792638">"A app <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) violou a política StrictMode auto-imposta."</string>
     <string name="smv_process" msgid="1398801497130695446">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> violou a política StrictMode auto-imposta."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"O telemóvel está a atualizar…"</string>
@@ -1952,7 +1952,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Esta app está a solicitar segurança adicional. Em alternativa, experimente no tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Esta app está a solicitar segurança adicional. Em alternativa, experimente no telemóvel."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Esta app foi concebida para uma versão mais antiga do Android e pode não funcionar corretamente. Experimente verificar se existem atualizações ou contacte o programador."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Verificar atualizações"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Rever atualizações"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Tem mensagens novas"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Abra a app de SMS para ver"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Algumas funcionalidades limitadas"</string>
@@ -2281,7 +2281,7 @@
     <string name="notification_title_long_running_fgs" msgid="8170284286477131587">"Uma app ainda está ativa"</string>
     <string name="notification_content_abusive_bg_apps" msgid="5296898075922695259">"A app <xliff:g id="APP">%1$s</xliff:g> está a ser executada em segundo plano Toque para gerir a utilização da bateria."</string>
     <string name="notification_content_long_running_fgs" msgid="8258193410039977101">"A app <xliff:g id="APP">%1$s</xliff:g> pode afetar a autonomia da bateria. Toque para rever as apps ativas."</string>
-    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificar apps ativas"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Rever apps ativas"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Não é possível aceder à câmara do telemóvel a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Não é possível aceder à câmara do tablet a partir do dispositivo <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="system_locale_title" msgid="711882686834677268">"Predefinição do sistema"</string>
