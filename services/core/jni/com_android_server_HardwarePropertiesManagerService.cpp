@@ -16,27 +16,28 @@
 
 #define LOG_TAG "HardwarePropertiesManagerService-JNI"
 
-#include <nativehelper/JNIHelp.h>
-#include "jni.h"
-
-#include <math.h>
-#include <stdlib.h>
-
+#include <aidl/android/hardware/thermal/IThermal.h>
+#include <android/binder_manager.h>
 #include <android/hardware/thermal/1.0/IThermal.h>
+#include <math.h>
+#include <nativehelper/JNIHelp.h>
 #include <utils/Log.h>
 #include <utils/String8.h>
 
 #include "core_jni_helpers.h"
+#include "jni.h"
 
 namespace android {
 
+using ::aidl::android::hardware::thermal::CoolingDevice;
+using ::aidl::android::hardware::thermal::IThermal;
+using ::aidl::android::hardware::thermal::Temperature;
+using ::aidl::android::hardware::thermal::TemperatureThreshold;
+using ::aidl::android::hardware::thermal::TemperatureType;
+using ::aidl::android::hardware::thermal::ThrottlingSeverity;
 using android::hidl::base::V1_0::IBase;
 using hardware::hidl_death_recipient;
 using hardware::hidl_vec;
-using hardware::thermal::V1_0::CoolingDevice;
-using hardware::thermal::V1_0::CpuUsage;
-using hardware::thermal::V1_0::IThermal;
-using hardware::thermal::V1_0::Temperature;
 using hardware::thermal::V1_0::ThermalStatus;
 using hardware::thermal::V1_0::ThermalStatusCode;
 template<typename T>
@@ -62,20 +63,28 @@ jfloat gUndefinedTemperature;
 
 static void getThermalHalLocked();
 static std::mutex gThermalHalMutex;
-static sp<IThermal> gThermalHal = nullptr;
+static sp<hardware::thermal::V1_0::IThermal> gThermalHidlHal = nullptr;
+static std::shared_ptr<IThermal> gThermalAidlHal = nullptr;
 
-// struct ThermalHalDeathRecipient;
-struct ThermalHalDeathRecipient : virtual public hidl_death_recipient {
-      // hidl_death_recipient interface
-      virtual void serviceDied(uint64_t cookie, const wp<IBase>& who) override {
-          std::lock_guard<std::mutex> lock(gThermalHalMutex);
-          ALOGE("ThermalHAL just died");
-          gThermalHal = nullptr;
-          getThermalHalLocked();
-      }
+struct ThermalHidlHalDeathRecipient : virtual public hidl_death_recipient {
+    // hidl_death_recipient interface
+    virtual void serviceDied(uint64_t cookie, const wp<IBase> &who) override {
+        std::lock_guard<std::mutex> lock(gThermalHalMutex);
+        ALOGE("Thermal HAL just died");
+        gThermalHidlHal = nullptr;
+        getThermalHalLocked();
+    }
 };
 
-sp<ThermalHalDeathRecipient> gThermalHalDeathRecipient = nullptr;
+static void onThermalAidlBinderDied(void *cookie) {
+    std::lock_guard<std::mutex> lock(gThermalHalMutex);
+    ALOGE("Thermal AIDL HAL just died");
+    gThermalAidlHal = nullptr;
+    getThermalHalLocked();
+}
+
+sp<ThermalHidlHalDeathRecipient> gThermalHidlHalDeathRecipient = nullptr;
+ndk::ScopedAIBinder_DeathRecipient gThermalAidlDeathRecipient;
 
 // ----------------------------------------------------------------------------
 
@@ -85,27 +94,49 @@ float finalizeTemperature(float temperature) {
 
 // The caller must be holding gThermalHalMutex.
 static void getThermalHalLocked() {
-    if (gThermalHal != nullptr) {
+    if (gThermalAidlHal || gThermalHidlHal) {
+        return;
+    }
+    const std::string thermalInstanceName = std::string(IThermal::descriptor) + "/default";
+    if (AServiceManager_isDeclared(thermalInstanceName.c_str())) {
+        auto binder = AServiceManager_waitForService(thermalInstanceName.c_str());
+        auto thermalAidlService = IThermal::fromBinder(ndk::SpAIBinder(binder));
+        if (thermalAidlService) {
+            gThermalAidlHal = thermalAidlService;
+            if (gThermalAidlDeathRecipient.get() == nullptr) {
+                gThermalAidlDeathRecipient = ndk::ScopedAIBinder_DeathRecipient(
+                        AIBinder_DeathRecipient_new(onThermalAidlBinderDied));
+            }
+            auto linked = AIBinder_linkToDeath(thermalAidlService->asBinder().get(),
+                                               gThermalAidlDeathRecipient.get(), nullptr);
+            if (linked != STATUS_OK) {
+                ALOGW("Failed to link to death (AIDL): %d", linked);
+                gThermalAidlHal = nullptr;
+            }
+        } else {
+            ALOGE("Unable to get Thermal AIDL service");
+        }
         return;
     }
 
-    gThermalHal = IThermal::getService();
+    ALOGI("Thermal AIDL service is not declared, trying HIDL");
+    gThermalHidlHal = hardware::thermal::V1_0::IThermal::getService();
 
-    if (gThermalHal == nullptr) {
+    if (gThermalHidlHal == nullptr) {
         ALOGE("Unable to get Thermal service.");
     } else {
-        if (gThermalHalDeathRecipient == nullptr) {
-            gThermalHalDeathRecipient = new ThermalHalDeathRecipient();
+        if (gThermalHidlHalDeathRecipient == nullptr) {
+            gThermalHidlHalDeathRecipient = new ThermalHidlHalDeathRecipient();
         }
-        hardware::Return<bool> linked = gThermalHal->linkToDeath(
-            gThermalHalDeathRecipient, 0x451F /* cookie */);
+        hardware::Return<bool> linked =
+                gThermalHidlHal->linkToDeath(gThermalHidlHalDeathRecipient, 0x451F /* cookie */);
         if (!linked.isOk()) {
             ALOGE("Transaction error in linking to ThermalHAL death: %s",
-            linked.description().c_str());
-            gThermalHal = nullptr;
+                  linked.description().c_str());
+            gThermalHidlHal = nullptr;
         } else if (!linked) {
             ALOGW("Unable to link to ThermalHal death notifications");
-            gThermalHal = nullptr;
+            gThermalHidlHal = nullptr;
         } else {
             ALOGD("Link to death notification successful");
         }
@@ -117,17 +148,27 @@ static void nativeInit(JNIEnv* env, jobject obj) {
     getThermalHalLocked();
 }
 
-static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
-    std::lock_guard<std::mutex> lock(gThermalHalMutex);
-    getThermalHalLocked();
-    if (gThermalHal == nullptr) {
-        ALOGE("Couldn't get fan speeds because of HAL error.");
+static jfloatArray getFanSpeedsAidl(JNIEnv *env) {
+    std::vector<CoolingDevice> list;
+    auto status = gThermalAidlHal->getCoolingDevices(&list);
+    if (!status.isOk()) {
+        ALOGE("getFanSpeeds failed status: %s", status.getMessage());
         return env->NewFloatArray(0);
     }
+    float values[list.size()];
+    for (size_t i = 0; i < list.size(); ++i) {
+        values[i] = list[i].value;
+    }
+    jfloatArray fanSpeeds = env->NewFloatArray(list.size());
+    env->SetFloatArrayRegion(fanSpeeds, 0, list.size(), values);
+    return fanSpeeds;
+}
 
-    hidl_vec<CoolingDevice> list;
-    Return<void> ret = gThermalHal->getCoolingDevices(
-            [&list](ThermalStatus status, hidl_vec<CoolingDevice> devices) {
+static jfloatArray getFanSpeedsHidl(JNIEnv *env) {
+    hidl_vec<hardware::thermal::V1_0::CoolingDevice> list;
+    Return<void> ret = gThermalHidlHal->getCoolingDevices(
+            [&list](ThermalStatus status,
+                    hidl_vec<hardware::thermal::V1_0::CoolingDevice> devices) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(devices);
                 } else {
@@ -137,9 +178,9 @@ static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
             });
 
     if (!ret.isOk()) {
-        ALOGE("getCoolingDevices failed status: %s", ret.description().c_str());
+        ALOGE("getFanSpeeds failed status: %s", ret.description().c_str());
+        return env->NewFloatArray(0);
     }
-
     float values[list.size()];
     for (size_t i = 0; i < list.size(); ++i) {
         values[i] = list[i].currentValue;
@@ -149,17 +190,79 @@ static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
     return fanSpeeds;
 }
 
-static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type,
-                                               int source) {
+static jfloatArray nativeGetFanSpeeds(JNIEnv *env, jclass /* clazz */) {
     std::lock_guard<std::mutex> lock(gThermalHalMutex);
     getThermalHalLocked();
-    if (gThermalHal == nullptr) {
-        ALOGE("Couldn't get device temperatures because of HAL error.");
+    if (!gThermalHidlHal && !gThermalAidlHal) {
+        ALOGE("Couldn't get fan speeds because of HAL error.");
         return env->NewFloatArray(0);
     }
-    hidl_vec<Temperature> list;
-    Return<void> ret = gThermalHal->getTemperatures(
-            [&list](ThermalStatus status, hidl_vec<Temperature> temperatures) {
+    if (gThermalAidlHal) {
+        return getFanSpeedsAidl(env);
+    }
+    return getFanSpeedsHidl(env);
+}
+
+static jfloatArray getDeviceTemperaturesAidl(JNIEnv *env, int type, int source) {
+    jfloat *values;
+    size_t length = 0;
+    if (source == TEMPERATURE_CURRENT) {
+        std::vector<Temperature> list;
+        auto status =
+                gThermalAidlHal->getTemperaturesWithType(static_cast<TemperatureType>(type), &list);
+
+        if (!status.isOk()) {
+            ALOGE("getDeviceTemperatures failed status: %s", status.getMessage());
+            return env->NewFloatArray(0);
+        }
+        values = new jfloat[list.size()];
+        for (const auto &temp : list) {
+            if (static_cast<int>(temp.type) == type) {
+                values[length++] = finalizeTemperature(temp.value);
+            }
+        }
+    } else if (source == TEMPERATURE_THROTTLING_BELOW_VR_MIN) {
+        values = new jfloat[1];
+        values[length++] = gUndefinedTemperature;
+    } else {
+        std::vector<TemperatureThreshold> list;
+        auto status =
+                gThermalAidlHal->getTemperatureThresholdsWithType(static_cast<TemperatureType>(
+                                                                          type),
+                                                                  &list);
+
+        if (!status.isOk()) {
+            ALOGE("getDeviceTemperatures failed status: %s", status.getMessage());
+            return env->NewFloatArray(0);
+        }
+        values = new jfloat[list.size()];
+        for (auto &t : list) {
+            if (static_cast<int>(t.type) == type) {
+                switch (source) {
+                    case TEMPERATURE_THROTTLING:
+                        values[length++] =
+                                finalizeTemperature(t.hotThrottlingThresholds[static_cast<int>(
+                                        ThrottlingSeverity::SEVERE)]);
+                        break;
+                    case TEMPERATURE_SHUTDOWN:
+                        values[length++] =
+                                finalizeTemperature(t.hotThrottlingThresholds[static_cast<int>(
+                                        ThrottlingSeverity::SHUTDOWN)]);
+                        break;
+                }
+            }
+        }
+    }
+    jfloatArray deviceTemps = env->NewFloatArray(length);
+    env->SetFloatArrayRegion(deviceTemps, 0, length, values);
+    return deviceTemps;
+}
+
+static jfloatArray getDeviceTemperaturesHidl(JNIEnv *env, int type, int source) {
+    hidl_vec<hardware::thermal::V1_0::Temperature> list;
+    Return<void> ret = gThermalHidlHal->getTemperatures(
+            [&list](ThermalStatus status,
+                    hidl_vec<hardware::thermal::V1_0::Temperature> temperatures) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(temperatures);
                 } else {
@@ -170,9 +273,9 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
 
     if (!ret.isOk()) {
         ALOGE("getDeviceTemperatures failed status: %s", ret.description().c_str());
+        return env->NewFloatArray(0);
     }
-
-    jfloat values[list.size()];
+    float values[list.size()];
     size_t length = 0;
     for (size_t i = 0; i < list.size(); ++i) {
         if (static_cast<int>(list[i].type) == type) {
@@ -197,16 +300,34 @@ static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, 
     return deviceTemps;
 }
 
+static jfloatArray nativeGetDeviceTemperatures(JNIEnv *env, jclass /* clazz */, int type,
+                                               int source) {
+    std::lock_guard<std::mutex> lock(gThermalHalMutex);
+    getThermalHalLocked();
+    if (!gThermalHidlHal && !gThermalAidlHal) {
+        ALOGE("Couldn't get device temperatures because of HAL error.");
+        return env->NewFloatArray(0);
+    }
+    if (gThermalAidlHal) {
+        return getDeviceTemperaturesAidl(env, type, source);
+    }
+    return getDeviceTemperaturesHidl(env, type, source);
+}
+
 static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
     std::lock_guard<std::mutex> lock(gThermalHalMutex);
     getThermalHalLocked();
-    if (gThermalHal == nullptr || !gCpuUsageInfoClassInfo.initMethod) {
+    if (gThermalAidlHal) {
+        ALOGW("getCpuUsages is not supported");
+        return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
+    }
+    if (gThermalHidlHal == nullptr || !gCpuUsageInfoClassInfo.initMethod) {
         ALOGE("Couldn't get CPU usages because of HAL error.");
         return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
     }
-    hidl_vec<CpuUsage> list;
-    Return<void> ret = gThermalHal->getCpuUsages(
-            [&list](ThermalStatus status, hidl_vec<CpuUsage> cpuUsages) {
+    hidl_vec<hardware::thermal::V1_0::CpuUsage> list;
+    Return<void> ret = gThermalHidlHal->getCpuUsages(
+            [&list](ThermalStatus status, hidl_vec<hardware::thermal::V1_0::CpuUsage> cpuUsages) {
                 if (status.code == ThermalStatusCode::SUCCESS) {
                     list = std::move(cpuUsages);
                 } else {
@@ -217,6 +338,7 @@ static jobjectArray nativeGetCpuUsages(JNIEnv *env, jclass /* clazz */) {
 
     if (!ret.isOk()) {
         ALOGE("getCpuUsages failed status: %s", ret.description().c_str());
+        return env->NewObjectArray(0, gCpuUsageInfoClassInfo.clazz, nullptr);
     }
 
     jobjectArray cpuUsages = env->NewObjectArray(list.size(), gCpuUsageInfoClassInfo.clazz,
