@@ -1227,6 +1227,12 @@ public final class PhoneAccount implements Parcelable {
         if (hasCapabilities(CAPABILITY_VOICE_CALLING_AVAILABLE)) {
             sb.append("Voice ");
         }
+        if (hasCapabilities(CAPABILITY_SUPPORTS_TRANSACTIONAL_OPERATIONS)) {
+            sb.append("TransactOps ");
+        }
+        if (hasCapabilities(CAPABILITY_SUPPORTS_CALL_STREAMING)) {
+            sb.append("Stream ");
+        }
         return sb.toString();
     }
 

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.fingerprint.FingerprintAuthenticateOptions;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -117,8 +118,13 @@ public class FingerprintDetectClientTest {
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
         return new FingerprintDetectClient(mContext, () -> aidl, mToken,
-                6 /* requestId */, mClientMonitorCallbackConverter, 2 /* userId */,
-                "a-test", 1 /* sensorId */, mBiometricLogger, mBiometricContext,
+                6 /* requestId */, mClientMonitorCallbackConverter,
+                new FingerprintAuthenticateOptions.Builder()
+                        .setUserId(2)
+                        .setSensorId(1)
+                        .setOpPackageName("a-test")
+                        .build(),
+                mBiometricLogger, mBiometricContext,
                 mUdfpsOverlayController, null, true /* isStrongBiometric */);
     }
 }

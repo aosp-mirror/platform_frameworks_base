@@ -78,7 +78,7 @@ public class IntentFactory {
                         Resources.getSystem()
                                 .getString(
                                         com.android.internal.R.string
-                                                .config_credentialManagerDialogComponent));
+                                                .config_credentialManagerReceiverComponent));
         intent.setComponent(componentName);
         intent.setAction(Constants.CREDMAN_ENABLED_PROVIDERS_UPDATED);
         return intent;
