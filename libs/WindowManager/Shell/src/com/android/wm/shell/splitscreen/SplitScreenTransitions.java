@@ -53,6 +53,7 @@ import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.OneShotRemoteHandler;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -339,12 +340,6 @@ class SplitScreenTransitions {
     IBinder startResizeTransition(WindowContainerTransaction wct,
             Transitions.TransitionHandler handler,
             @Nullable TransitionFinishedCallback finishCallback) {
-        if (mPendingResize != null) {
-            mPendingResize.cancel(null);
-            mAnimations.clear();
-            onFinish(null /* wct */, null /* wctCB */);
-        }
-
         IBinder transition = mTransitions.startTransition(TRANSIT_CHANGE, wct, handler);
         setResizeTransition(transition, finishCallback);
         return transition;
@@ -537,7 +532,7 @@ class SplitScreenTransitions {
     }
 
     private boolean isOpeningTransition(TransitionInfo info) {
-        return Transitions.isOpeningType(info.getType())
+        return TransitionUtil.isOpeningType(info.getType())
                 || info.getType() == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE
                 || info.getType() == TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
     }

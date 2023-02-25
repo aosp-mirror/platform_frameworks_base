@@ -25,6 +25,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -50,7 +51,8 @@ import java.util.function.Supplier;
  * Face-specific authentication client supporting the {@link android.hardware.biometrics.face.V1_0}
  * HIDL interface.
  */
-class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
+class FaceAuthenticationClient
+        extends AuthenticationClient<IBiometricsFace, FaceAuthenticateOptions> {
 
     private static final String TAG = "FaceAuthenticationClient";
 
@@ -67,17 +69,18 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener, long operationId,
+            boolean restricted, @NonNull FaceAuthenticateOptions options, int cookie,
+            boolean requireConfirmation,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull LockoutTracker lockoutTracker,
             @NonNull UsageStats usageStats, boolean allowBackgroundAuthentication,
             @Authenticators.Types int sensorStrength) {
-        super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
-                owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
+        super(context, lazyDaemon, token, listener, operationId, restricted,
+                options, cookie, requireConfirmation, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */,
                 lockoutTracker, allowBackgroundAuthentication, false /* shouldVibrate */,
-                 sensorStrength);
+                sensorStrength);
         setRequestId(requestId);
         mUsageStats = usageStats;
         mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);

@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricService;
@@ -681,7 +682,37 @@ public class BiometricSchedulerTest {
         TestableLooper.get(this).processAllMessages();
     }
 
-    private static class TestAuthenticationClient extends AuthenticationClient<Object> {
+    private static class TestAuthenticateOptions implements AuthenticateOptions {
+        @Override
+        public int getUserId() {
+            return 0;
+        }
+
+        @Override
+        public int getSensorId() {
+            return TEST_SENSOR_ID;
+        }
+
+        @Override
+        public int getDisplayState() {
+            return DISPLAY_STATE_UNKNOWN;
+        }
+
+        @NonNull
+        @Override
+        public String getOpPackageName() {
+            return "some.test.name";
+        }
+
+        @Nullable
+        @Override
+        public String getAttributionTag() {
+            return null;
+        }
+    }
+
+    private static class TestAuthenticationClient
+            extends AuthenticationClient<Object, TestAuthenticateOptions> {
         boolean mStartedHal = false;
         boolean mStoppedHal = false;
         boolean mDestroyed = false;
@@ -700,9 +731,10 @@ public class BiometricSchedulerTest {
                 @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
                 @NonNull ClientMonitorCallbackConverter listener, int cookie,
                 @NonNull BiometricContext biometricContext) {
-            super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
-                    false /* restricted */, TAG, cookie, false /* requireConfirmation */,
-                    TEST_SENSOR_ID, mock(BiometricLogger.class), biometricContext,
+            super(context, lazyDaemon, token, listener, 0 /* operationId */,
+                    false /* restricted */, new TestAuthenticateOptions(), cookie,
+                    false /* requireConfirmation */,
+                    mock(BiometricLogger.class), biometricContext,
                     true /* isStrongBiometric */, null /* taskStackListener */,
                     null /* lockoutTracker */, false /* isKeyguard */,
                     true /* shouldVibrate */,

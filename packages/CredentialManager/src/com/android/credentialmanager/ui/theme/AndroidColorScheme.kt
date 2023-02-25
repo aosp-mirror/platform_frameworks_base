@@ -22,12 +22,14 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.android.internal.R
 
+/** File copied from PlatformComposeCore. */
+
 /** CompositionLocal used to pass [AndroidColorScheme] down the tree. */
 val LocalAndroidColorScheme =
     staticCompositionLocalOf<AndroidColorScheme> {
         throw IllegalStateException(
             "No AndroidColorScheme configured. Make sure to use LocalAndroidColorScheme in a " +
-                    "Composable surrounded by a CredentialSelectorTheme {}."
+                "Composable surrounded by a PlatformTheme {}."
         )
     }
 
@@ -38,7 +40,6 @@ val LocalAndroidColorScheme =
  * most of the colors in this class will be removed in favor of their M3 counterpart.
  */
 class AndroidColorScheme internal constructor(context: Context) {
-
     val colorPrimary = getColor(context, R.attr.colorPrimary)
     val colorPrimaryDark = getColor(context, R.attr.colorPrimaryDark)
     val colorAccent = getColor(context, R.attr.colorAccent)
@@ -66,10 +67,12 @@ class AndroidColorScheme internal constructor(context: Context) {
     val colorForeground = getColor(context, R.attr.colorForeground)
     val colorForegroundInverse = getColor(context, R.attr.colorForegroundInverse)
 
-    private fun getColor(context: Context, attr: Int): Color {
-        val ta = context.obtainStyledAttributes(intArrayOf(attr))
-        @ColorInt val color = ta.getColor(0, 0)
-        ta.recycle()
-        return Color(color)
+    companion object {
+        fun getColor(context: Context, attr: Int): Color {
+            val ta = context.obtainStyledAttributes(intArrayOf(attr))
+            @ColorInt val color = ta.getColor(0, 0)
+            ta.recycle()
+            return Color(color)
+        }
     }
 }

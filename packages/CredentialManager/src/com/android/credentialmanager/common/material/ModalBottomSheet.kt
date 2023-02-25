@@ -451,7 +451,7 @@ private fun Modifier.bottomSheetSwipeable(
 }
 
 @Composable
-private fun Scrim(
+internal fun Scrim(
     color: Color,
     onDismiss: () -> Unit,
     visible: Boolean
