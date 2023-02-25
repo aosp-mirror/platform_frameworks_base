@@ -258,7 +258,9 @@ public class SharedConnectivityManager {
     }
 
     /**
-     * Registers a callback for receiving updates to the list of Tether Networks and Known Networks.
+     * Registers a callback for receiving updates to the list of Tether Networks, Known Networks,
+     * shared connectivity settings state, tether network connection status and known network
+     * connection status.
      * The {@link SharedConnectivityClientCallback#onRegisterCallbackFailed} will be called if the
      * registration failed.
      *

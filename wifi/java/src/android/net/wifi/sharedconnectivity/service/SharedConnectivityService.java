@@ -36,14 +36,12 @@ import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -62,11 +60,8 @@ public abstract class SharedConnectivityService extends Service {
     private static final boolean DEBUG = true;
 
     private Handler mHandler;
-    private final List<ISharedConnectivityCallback> mCallbacks = new ArrayList<>();
-    // Used to find DeathRecipient when unregistering a callback to call unlinkToDeath.
-    private final Map<ISharedConnectivityCallback, DeathRecipient> mDeathRecipientMap =
-            new HashMap<>();
-
+    private final RemoteCallbackList<ISharedConnectivityCallback> mRemoteCallbackList =
+            new RemoteCallbackList<>();
     private List<TetherNetwork> mTetherNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
     private SharedConnectivitySettingsState mSettingsState =
@@ -80,20 +75,6 @@ public abstract class SharedConnectivityService extends Service {
             new KnownNetworkConnectionStatus.Builder()
                     .setStatus(KnownNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
                     .setExtras(Bundle.EMPTY).build();
-
-    private final class DeathRecipient implements IBinder.DeathRecipient {
-        ISharedConnectivityCallback mCallback;
-
-        DeathRecipient(ISharedConnectivityCallback callback) {
-            mCallback = callback;
-        }
-
-        @Override
-        public void binderDied() {
-            mCallbacks.remove(mCallback);
-            mDeathRecipientMap.remove(mCallback);
-        }
-    }
 
     @Override
     @Nullable
@@ -194,76 +175,13 @@ public abstract class SharedConnectivityService extends Service {
     public void onBind() {}
 
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
-        DeathRecipient deathRecipient = new DeathRecipient(callback);
-        try {
-            callback.asBinder().linkToDeath(deathRecipient, 0);
-            mCallbacks.add(callback);
-            mDeathRecipientMap.put(callback, deathRecipient);
-        } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Exception in registerCallback", e);
-        }
+        mRemoteCallbackList.register(callback);
     }
 
     private void onUnregisterCallback(ISharedConnectivityCallback callback) {
-        DeathRecipient deathRecipient = mDeathRecipientMap.get(callback);
-        if (deathRecipient != null) {
-            callback.asBinder().unlinkToDeath(deathRecipient, 0);
-            mDeathRecipientMap.remove(callback);
-        }
-        mCallbacks.remove(callback);
+        mRemoteCallbackList.unregister(callback);
     }
 
-    private boolean notifyTetherNetworkUpdate(ISharedConnectivityCallback callback) {
-        try {
-            callback.onTetherNetworksUpdated(mTetherNetworks);
-        } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Exception in notifyTetherNetworkUpdate", e);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean notifyKnownNetworkUpdate(ISharedConnectivityCallback callback) {
-        try {
-            callback.onKnownNetworksUpdated(mKnownNetworks);
-        } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Exception in notifyKnownNetworkUpdate", e);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean notifySettingsStateUpdate(ISharedConnectivityCallback callback) {
-        try {
-            callback.onSharedConnectivitySettingsChanged(mSettingsState);
-        } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Exception in notifySettingsStateUpdate", e);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean notifyTetherNetworkConnectionStatusChanged(
-            ISharedConnectivityCallback callback) {
-        try {
-            callback.onTetherNetworkConnectionStatusChanged(mTetherNetworkConnectionStatus);
-        } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Exception in notifyTetherNetworkConnectionStatusChanged", e);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean notifyKnownNetworkConnectionStatusChanged(
-            ISharedConnectivityCallback callback) {
-        try {
-            callback.onKnownNetworkConnectionStatusChanged(mKnownNetworkConnectionStatus);
-        } catch (RemoteException e) {
-            if (DEBUG) Log.w(TAG, "Exception in notifyKnownNetworkConnectionStatusChanged", e);
-            return false;
-        }
-        return true;
-    }
     /**
      * Implementing application should call this method to provide an up-to-date list of Tether
      * Networks to be displayed to the user.
@@ -276,9 +194,15 @@ public abstract class SharedConnectivityService extends Service {
     public final void setTetherNetworks(@NonNull List<TetherNetwork> networks) {
         mTetherNetworks = networks;
 
-        for (ISharedConnectivityCallback callback:mCallbacks) {
-            notifyTetherNetworkUpdate(callback);
+        int count = mRemoteCallbackList.beginBroadcast();
+        for (int i = 0; i < count; i++) {
+            try {
+                mRemoteCallbackList.getBroadcastItem(i).onTetherNetworksUpdated(mTetherNetworks);
+            } catch (RemoteException e) {
+                if (DEBUG) Log.w(TAG, "Exception in setTetherNetworks", e);
+            }
         }
+        mRemoteCallbackList.finishBroadcast();
     }
 
     /**
@@ -293,9 +217,15 @@ public abstract class SharedConnectivityService extends Service {
     public final void setKnownNetworks(@NonNull List<KnownNetwork> networks) {
         mKnownNetworks = networks;
 
-        for (ISharedConnectivityCallback callback:mCallbacks) {
-            notifyKnownNetworkUpdate(callback);
+        int count = mRemoteCallbackList.beginBroadcast();
+        for (int i = 0; i < count; i++) {
+            try {
+                mRemoteCallbackList.getBroadcastItem(i).onKnownNetworksUpdated(mKnownNetworks);
+            } catch (RemoteException e) {
+                if (DEBUG) Log.w(TAG, "Exception in setKnownNetworks", e);
+            }
         }
+        mRemoteCallbackList.finishBroadcast();
     }
 
     /**
@@ -311,9 +241,16 @@ public abstract class SharedConnectivityService extends Service {
     public final void setSettingsState(@NonNull SharedConnectivitySettingsState settingsState) {
         mSettingsState = settingsState;
 
-        for (ISharedConnectivityCallback callback:mCallbacks) {
-            notifySettingsStateUpdate(callback);
+        int count = mRemoteCallbackList.beginBroadcast();
+        for (int i = 0; i < count; i++) {
+            try {
+                mRemoteCallbackList.getBroadcastItem(i).onSharedConnectivitySettingsChanged(
+                        mSettingsState);
+            } catch (RemoteException e) {
+                if (DEBUG) Log.w(TAG, "Exception in setSettingsState", e);
+            }
         }
+        mRemoteCallbackList.finishBroadcast();
     }
 
     /**
@@ -326,9 +263,18 @@ public abstract class SharedConnectivityService extends Service {
     public final void updateTetherNetworkConnectionStatus(
             @NonNull TetherNetworkConnectionStatus status) {
         mTetherNetworkConnectionStatus = status;
-        for (ISharedConnectivityCallback callback:mCallbacks) {
-            notifyTetherNetworkConnectionStatusChanged(callback);
+
+        int count = mRemoteCallbackList.beginBroadcast();
+        for (int i = 0; i < count; i++) {
+            try {
+                mRemoteCallbackList
+                        .getBroadcastItem(i).onTetherNetworkConnectionStatusChanged(
+                                mTetherNetworkConnectionStatus);
+            } catch (RemoteException e) {
+                if (DEBUG) Log.w(TAG, "Exception in updateTetherNetworkConnectionStatus", e);
+            }
         }
+        mRemoteCallbackList.finishBroadcast();
     }
 
     /**
@@ -342,9 +288,17 @@ public abstract class SharedConnectivityService extends Service {
             @NonNull KnownNetworkConnectionStatus status) {
         mKnownNetworkConnectionStatus = status;
 
-        for (ISharedConnectivityCallback callback:mCallbacks) {
-            notifyKnownNetworkConnectionStatusChanged(callback);
+        int count = mRemoteCallbackList.beginBroadcast();
+        for (int i = 0; i < count; i++) {
+            try {
+                mRemoteCallbackList
+                        .getBroadcastItem(i).onKnownNetworkConnectionStatusChanged(
+                                mKnownNetworkConnectionStatus);
+            } catch (RemoteException e) {
+                if (DEBUG) Log.w(TAG, "Exception in updateKnownNetworkConnectionStatus", e);
+            }
         }
+        mRemoteCallbackList.finishBroadcast();
     }
 
     /**
