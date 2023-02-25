@@ -849,7 +849,6 @@ final class AutofillManagerServiceImpl
         }
     }
 
-
     /**
      * Updates the last fill response when a view was entered.
      */

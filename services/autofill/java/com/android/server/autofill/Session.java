@@ -276,6 +276,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private DeathRecipient mClientVulture;
 
+    @GuardedBy("mLock")
+    private boolean mLoggedInlineDatasetShown;
+
     /**
      * Reference to the remote service.
      *
@@ -1979,6 +1982,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         mHandler.sendMessage(obtainMessage(
                 Session::removeFromService, this));
+    }
+
+    // AutofillUiCallback
+    @Override
+    public void onShown(int uiType) {
+        synchronized (mLock) {
+            if (uiType == UI_TYPE_INLINE) {
+                if (mLoggedInlineDatasetShown) {
+                    // Chip inflation already logged, do not log again.
+                    // This is needed because every chip inflation will call this.
+                    return;
+                }
+                mLoggedInlineDatasetShown = true;
+            }
+            mService.logDatasetShown(this.id, mClientState, uiType);
+        }
     }
 
     // AutoFillUiCallback
@@ -3861,8 +3880,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 synchronized (mLock) {
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_FILL_DIALOG_SHOWN);
-                    mService.logDatasetShown(id, mClientState, UI_TYPE_DIALOG);
-
                     mPresentationStatsEventLogger.maybeSetCountShown(
                             response.getDatasets(), mCurrentViewId);
                     mPresentationStatsEventLogger.maybeSetDisplayPresentationType(UI_TYPE_DIALOG);
@@ -3892,10 +3909,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // back a response via callback.
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_INLINE_SHOWN);
-                    // TODO(b/248378401): Fix it to log showed only when IME asks for inflation,
-                    // rather than here where framework sends back the response.
-                    mService.logDatasetShown(id, mClientState, UI_TYPE_INLINE);
-
                     // TODO(b/234475358): Log more accurate value of number of inline suggestions
                     // shown, inflated, and filtered.
                     mPresentationStatsEventLogger.maybeSetCountShown(
@@ -3912,7 +3925,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 targetLabel, targetIcon, this, id, mCompatMode);
 
         synchronized (mLock) {
-            mService.logDatasetShown(id, mClientState, UI_TYPE_MENU);
             mPresentationStatsEventLogger.maybeSetCountShown(
                     response.getDatasets(), mCurrentViewId);
             mPresentationStatsEventLogger.maybeSetDisplayPresentationType(UI_TYPE_MENU);
@@ -4124,6 +4136,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
+        // Set this to false - we are requesting a new inline request and haven't shown
+        // anything yet
+        synchronized (mLock) {
+            mLoggedInlineDatasetShown = false;
+        }
+
         final InlineFillUi.InlineFillUiInfo inlineFillUiInfo =
                 new InlineFillUi.InlineFillUiInfo(request, focusedId,
                         filterText, remoteRenderService, userId, id);
@@ -4152,6 +4170,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             mInlineSessionController.setInlineFillUiLocked(
                                     InlineFillUi.emptyUi(focusedId));
                         }
+                    }
+
+                    @Override
+                    public void onInflate() {
+                        Session.this.onShown(UI_TYPE_INLINE);
                     }
                 });
         return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
