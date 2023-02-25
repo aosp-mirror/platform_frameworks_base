@@ -44,7 +44,6 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
         IGetCredentialCallback>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";
-
     public GetRequestSession(Context context, int userId, int callingUid,
             IGetCredentialCallback callback, GetCredentialRequest request,
             CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal) {
@@ -173,6 +172,12 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName) {
         Log.i(TAG, "in onStatusChanged with status: " + status);
+        // Auth entry was selected, and it did not have any underlying credentials
+        if (status == ProviderSession.Status.NO_CREDENTIALS_FROM_AUTH_ENTRY) {
+            handleEmptyAuthenticationSelection(componentName);
+            return;
+        }
+        // For any other status, we check if all providers are done and then invoke UI if needed
         if (!isAnyProviderPending()) {
             // If all provider responses have been received, we can either need the UI,
             // or we need to respond with error. The only other case is the entry being
@@ -185,5 +190,35 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
                         "No credentials available");
             }
         }
+    }
+
+    private void handleEmptyAuthenticationSelection(ComponentName componentName) {
+        // Update auth entry statuses across different provider sessions
+        mProviders.keySet().forEach(key -> {
+            ProviderGetSession session = (ProviderGetSession) mProviders.get(key);
+            if (!session.mComponentName.equals(componentName)) {
+                session.updateAuthEntriesStatusFromAnotherSession();
+            }
+        });
+
+        // Invoke UI since it needs to show a snackbar if last auth entry, or a status on each
+        // auth entries along with other valid entries
+        getProviderDataAndInitiateUi();
+
+        // Respond to client if all auth entries are empty and nothing else to show on the UI
+        if (providerDataContainsEmptyAuthEntriesOnly()) {
+            respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
+                    "No credentials available");
+        }
+    }
+
+    private boolean providerDataContainsEmptyAuthEntriesOnly() {
+        for (String key : mProviders.keySet()) {
+            ProviderGetSession session = (ProviderGetSession) mProviders.get(key);
+            if (!session.containsEmptyAuthEntriesOnly()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

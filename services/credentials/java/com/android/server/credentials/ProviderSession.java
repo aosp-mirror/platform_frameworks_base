@@ -66,7 +66,8 @@ public abstract class ProviderSession<T, R>
      * on the credMan UI.
      */
     public static boolean isUiInvokingStatus(Status status) {
-        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED;
+        return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED
+                || status == Status.NO_CREDENTIALS_FROM_AUTH_ENTRY;
     }
 
     /**
@@ -140,7 +141,7 @@ public abstract class ProviderSession<T, R>
         PENDING_INTENT_INVOKED,
         CREDENTIAL_RECEIVED_FROM_SELECTION,
         SAVE_ENTRIES_RECEIVED, CANCELED,
-        NO_CREDENTIALS, EMPTY_RESPONSE, COMPLETE
+        NO_CREDENTIALS, EMPTY_RESPONSE, NO_CREDENTIALS_FROM_AUTH_ENTRY, COMPLETE
     }
 
     /** Converts exception to a provider session status. */
