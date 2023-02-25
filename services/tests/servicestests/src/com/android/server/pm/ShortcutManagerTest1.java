@@ -118,10 +118,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -3953,6 +3955,156 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Restore.
         mService.saveDirtyInfo();
+        initService();
+
+        // Before the load, the map should be empty.
+        assertEquals(0, mService.getShortcutsForTest().size());
+
+        // this will pre-load the per-user info.
+        mService.handleUnlockUser(UserHandle.USER_SYSTEM);
+
+        // Now it's loaded.
+        assertEquals(1, mService.getShortcutsForTest().size());
+
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            assertShortcutIds(assertAllDynamic(assertAllHaveIntents(assertAllHaveIcon(
+                    mManager.getDynamicShortcuts()))), "s1", "s2");
+            assertEquals(2, mManager.getRemainingCallCount());
+
+            assertEquals("title1-1", getCallerShortcut("s1").getTitle());
+            assertEquals("title1-2", getCallerShortcut("s2").getTitle());
+        });
+        runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
+            assertShortcutIds(assertAllDynamic(assertAllHaveIntents(assertAllHaveIcon(
+                    mManager.getDynamicShortcuts()))), "s1", "s2");
+            assertEquals(2, mManager.getRemainingCallCount());
+
+            assertEquals("title2-1", getCallerShortcut("s1").getTitle());
+            assertEquals("title2-2", getCallerShortcut("s2").getTitle());
+        });
+
+        // Start another user
+        mService.handleUnlockUser(USER_10);
+
+        // Now the size is 2.
+        assertEquals(2, mService.getShortcutsForTest().size());
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertShortcutIds(assertAllDynamic(assertAllHaveIntents(assertAllHaveIcon(
+                    mManager.getDynamicShortcuts()))), "s1", "s2");
+            assertEquals(2, mManager.getRemainingCallCount());
+
+            assertEquals("title10-1-1", getCallerShortcut("s1").getTitle());
+            assertEquals("title10-1-2", getCallerShortcut("s2").getTitle());
+        });
+
+        // Try stopping the user
+        mService.handleStopUser(USER_10);
+
+        // Now it's unloaded.
+        assertEquals(1, mService.getShortcutsForTest().size());
+
+        // TODO Check all other fields
+    }
+
+    public void testSaveCorruptAndLoadUser() throws Exception {
+        // First, create some shortcuts and save.
+        runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
+            final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_64x16);
+            final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                    getTestContext().getResources(), R.drawable.icon2));
+
+            final ShortcutInfo si1 = makeShortcut(
+                    "s1",
+                    "title1-1",
+                    makeComponent(ShortcutActivity.class),
+                    icon1,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                    /* weight */ 10);
+
+            final ShortcutInfo si2 = makeShortcut(
+                    "s2",
+                    "title1-2",
+                    /* activity */ null,
+                    icon2,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                    /* weight */ 12);
+
+            assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
+
+            assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
+        runWithCaller(CALLING_PACKAGE_2, UserHandle.USER_SYSTEM, () -> {
+            final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_16x64);
+            final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                    getTestContext().getResources(), R.drawable.icon2));
+
+            final ShortcutInfo si1 = makeShortcut(
+                    "s1",
+                    "title2-1",
+                    makeComponent(ShortcutActivity.class),
+                    icon1,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                    /* weight */ 10);
+
+            final ShortcutInfo si2 = makeShortcut(
+                    "s2",
+                    "title2-2",
+                    /* activity */ null,
+                    icon2,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                    /* weight */ 12);
+
+            assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
+
+            assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
+
+        mRunningUsers.put(USER_10, true);
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_64x64);
+            final Icon icon2 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                    getTestContext().getResources(), R.drawable.icon2));
+
+            final ShortcutInfo si1 = makeShortcut(
+                    "s1",
+                    "title10-1-1",
+                    makeComponent(ShortcutActivity.class),
+                    icon1,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity2.class,
+                            "key1", "val1", "nest", makeBundle("key", 123)),
+                    /* weight */ 10);
+
+            final ShortcutInfo si2 = makeShortcut(
+                    "s2",
+                    "title10-1-2",
+                    /* activity */ null,
+                    icon2,
+                    makeIntent(Intent.ACTION_ASSIST, ShortcutActivity3.class),
+                    /* weight */ 12);
+
+            assertTrue(mManager.setDynamicShortcuts(list(si1, si2)));
+
+            assertEquals(START_TIME + INTERVAL, mManager.getRateLimitResetTime());
+            assertEquals(2, mManager.getRemainingCallCount());
+        });
+
+        // Save and corrupt the primary files.
+        mService.saveDirtyInfo();
+        try (Writer os = new FileWriter(mService.getUserFile(UserHandle.USER_SYSTEM))) {
+            os.write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                    + "<user locales=\"en\" last-app-scan-time2=\"14400000");
+        }
+        try (Writer os = new FileWriter(mService.getUserFile(USER_10))) {
+            os.write("<?xml version='1.0' encoding='utf");
+        }
+
+        // Restore.
         initService();
 
         // Before the load, the map should be empty.
