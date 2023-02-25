@@ -250,7 +250,6 @@ public class ContentProviderHelper {
                 if (r != null && cpr.canRunHere(r)) {
                     checkAssociationAndPermissionLocked(r, cpi, callingUid, userId, checkCrossUser,
                             cpr.name.flattenToShortString(), startTime);
-                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
 
                     // This provider has been published or is in the process
                     // of being published...  but it is also allowed to run
@@ -445,7 +444,6 @@ public class ContentProviderHelper {
                     // info and allow the caller to instantiate it.  Only do
                     // this if the provider is the same user as the caller's
                     // process, or can run as root (so can be in any process).
-                    enforceContentProviderRestrictionsForSdkSandbox(cpi);
                     return cpr.newHolder(null, true);
                 }
 
@@ -594,8 +592,6 @@ public class ContentProviderHelper {
                 // Return a holder instance even if we are waiting for the publishing of the
                 // provider, client will check for the holder.provider to see if it needs to wait
                 // for it.
-                //todo(b/265965249) Need to perform cleanup before calling enforce method here
-                enforceContentProviderRestrictionsForSdkSandbox(cpi);
                 return cpr.newHolder(conn, false);
             }
         }
@@ -657,7 +653,6 @@ public class ContentProviderHelper {
                     + " caller=" + callerName + "/" + Binder.getCallingUid());
             return null;
         }
-        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return cpr.newHolder(conn, false);
     }
 
@@ -1252,7 +1247,6 @@ public class ContentProviderHelper {
             appName = r.toString();
         }
 
-        enforceContentProviderRestrictionsForSdkSandbox(cpi);
         return checkContentProviderPermission(cpi, callingPid, Binder.getCallingUid(),
                 userId, checkUser, appName);
     }
@@ -1627,11 +1621,17 @@ public class ContentProviderHelper {
 
     /**
      * Check if {@link ProcessRecord} has a possible chance at accessing the
-     * given {@link ProviderInfo}. Final permission checking is always done
+     * given {@link ProviderInfo}. First permission checking is for enforcing
+     * ContentProvider Restrictions from SdkSandboxManager.
+     * Final permission checking is always done
      * in {@link ContentProvider}.
      */
     private String checkContentProviderPermission(ProviderInfo cpi, int callingPid, int callingUid,
             int userId, boolean checkUser, String appName) {
+        if (!canAccessContentProviderFromSdkSandbox(cpi, callingUid)) {
+            return "ContentProvider access not allowed from sdk sandbox UID. "
+                    + "ProviderInfo: " + cpi.toString();
+        }
         boolean checkedGrants = false;
         if (checkUser) {
             // Looking for cross-user grants before enforcing the typical cross-users permissions
@@ -2021,11 +2021,10 @@ public class ContentProviderHelper {
         }
     }
 
-    // Binder.clearCallingIdentity() shouldn't be called before this method
-    // as Binder should have its original callingUid for the check
-    private void enforceContentProviderRestrictionsForSdkSandbox(ProviderInfo cpi) {
-        if (!Process.isSdkSandboxUid(Binder.getCallingUid())) {
-            return;
+    private boolean canAccessContentProviderFromSdkSandbox(ProviderInfo cpi,
+                                                                    int callingUid) {
+        if (!Process.isSdkSandboxUid(callingUid)) {
+            return true;
         }
         final SdkSandboxManagerLocal sdkSandboxManagerLocal =
                 LocalManagerRegistry.getManager(SdkSandboxManagerLocal.class);
@@ -2034,11 +2033,7 @@ public class ContentProviderHelper {
                     + "when checking whether SDK sandbox uid may "
                     + "access the contentprovider.");
         }
-        if (!sdkSandboxManagerLocal
-                .canAccessContentProviderFromSdkSandbox(cpi)) {
-            throw new SecurityException(
-                    "SDK sandbox uid may not access contentprovider " + cpi.name);
-        }
+        return sdkSandboxManagerLocal.canAccessContentProviderFromSdkSandbox(cpi);
     }
 
     /**
