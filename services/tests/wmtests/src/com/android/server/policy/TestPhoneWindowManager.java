@@ -322,12 +322,12 @@ class TestPhoneWindowManager {
         doReturn(true).when(mTelecomManager).endCall();
     }
 
-    void overrideExpandNotificationsPanel() {
+    void overrideTogglePanel() {
         // Can't directly mock on IStatusbarService, use spyOn and override the specific api.
         mPhoneWindowManager.getStatusBarService();
         spyOn(mPhoneWindowManager.mStatusBarService);
         try {
-            doNothing().when(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+            doNothing().when(mPhoneWindowManager.mStatusBarService).togglePanel();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -428,9 +428,9 @@ class TestPhoneWindowManager {
         Assert.assertTrue(intentCaptor.getValue().getAction() == Intent.ACTION_BUG_REPORT);
     }
 
-    void assertExpandNotification() throws RemoteException {
+    void assertTogglePanel() throws RemoteException {
         waitForIdle();
-        verify(mPhoneWindowManager.mStatusBarService).expandNotificationsPanel();
+        verify(mPhoneWindowManager.mStatusBarService).togglePanel();
     }
 
     void assertToggleShortcutsMenu() {

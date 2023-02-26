@@ -584,6 +584,7 @@ public class ImsCallSession {
      * Gets the call ID of the session.
      *
      * @return the call ID
+     * If null is returned for getCallId, then that means that the call ID has not been set yet.
      */
     public String getCallId() {
         if (mClosed) {
@@ -1779,7 +1780,7 @@ public class ImsCallSession {
         sb.append("[ImsCallSession objId:");
         sb.append(System.identityHashCode(this));
         sb.append(" callId:");
-        sb.append(getCallId());
+        sb.append(mCallId != null ? mCallId : "[UNINITIALIZED]");
         sb.append("]");
         return sb.toString();
     }
