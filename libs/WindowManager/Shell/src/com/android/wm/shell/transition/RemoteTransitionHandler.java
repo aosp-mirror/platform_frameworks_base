@@ -39,6 +39,7 @@ import androidx.annotation.BinderThread;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -93,7 +94,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        if (!Transitions.SHELL_TRANSITIONS_ROTATION && Transitions.hasDisplayChange(info)) {
+        if (!Transitions.SHELL_TRANSITIONS_ROTATION && TransitionUtil.hasDisplayChange(info)) {
             // Note that if the remote doesn't have permission ACCESS_SURFACE_FLINGER, some
             // operations of the start transaction may be ignored.
             return false;

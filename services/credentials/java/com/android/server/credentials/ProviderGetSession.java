@@ -241,13 +241,14 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 if (additionalContentReceived) {
                     Log.i(TAG, "Additional content received - removing authentication entry");
                     mProviderResponseDataHandler.removeAuthenticationAction(entryKey);
+                    if (!mProviderResponseDataHandler.isEmptyResponse()) {
+                        updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+                    }
                 } else {
                     Log.i(TAG, "Additional content not received");
                     mProviderResponseDataHandler
                             .updateAuthEntryWithNoCredentialsReceived(entryKey);
-                }
-                if (!mProviderResponseDataHandler.isEmptyResponse()) {
-                    updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED);
+                    updateStatusAndInvokeCallback(Status.NO_CREDENTIALS_FROM_AUTH_ENTRY);
                 }
                 break;
             case REMOTE_ENTRY_KEY:
@@ -456,6 +457,27 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 GetCredentialException.TYPE_UNKNOWN, null);
     }
 
+    /** Update auth entries status based on an auth entry selected from a different session. */
+    public void updateAuthEntriesStatusFromAnotherSession() {
+        // Pass null for entryKey if the auth entry selected belongs to a different session
+        mProviderResponseDataHandler.updateAuthEntryWithNoCredentialsReceived(/*entryKey=*/null);
+    }
+
+    /** Returns true if the provider response contains empty auth entries only, false otherwise. **/
+    public boolean containsEmptyAuthEntriesOnly() {
+        // We do not consider action entries here because if actions are the only entries,
+        // we don't show the UI
+        return mProviderResponseDataHandler.mUiCredentialEntries.isEmpty()
+                && mProviderResponseDataHandler.mUiRemoteEntry == null
+                && mProviderResponseDataHandler.mUiAuthenticationEntries
+                .values().stream().allMatch(
+                        e -> e.second.getStatus() == AuthenticationEntry
+                                .STATUS_UNLOCKED_BUT_EMPTY_LESS_RECENT
+                                || e.second.getStatus()
+                                == AuthenticationEntry.STATUS_UNLOCKED_BUT_EMPTY_MOST_RECENT
+        );
+    }
+
     private class ProviderResponseDataHandler {
         private final ComponentName mExpectedRemoteEntryProviderService;
         @NonNull
@@ -610,7 +632,12 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     ? null : mUiCredentialEntries.get(entryKey).first;
         }
 
-        public void updateAuthEntryWithNoCredentialsReceived(String entryKey) {
+        public void updateAuthEntryWithNoCredentialsReceived(@Nullable String entryKey) {
+            if (entryKey == null) {
+                // Auth entry from a different provider was selected by the user.
+                updatePreviousMostRecentAuthEntry();
+                return;
+            }
             updatePreviousMostRecentAuthEntry();
             updateMostRecentAuthEntry(entryKey);
         }

@@ -22,10 +22,7 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -45,6 +42,8 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.Change;
+
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
@@ -75,7 +74,7 @@ public class RemoteAnimationTargetCompat {
     private static void setupLeash(@NonNull SurfaceControl leash,
             @NonNull TransitionInfo.Change change, int layer,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction t) {
-        boolean isOpening = info.getType() == TRANSIT_OPEN || info.getType() == TRANSIT_TO_FRONT;
+        final boolean isOpening = TransitionUtil.isOpeningType(info.getType());
         // Put animating stuff above this line and put static stuff below it.
         int zSplitLine = info.getChanges().size();
         // changes should be ordered top-to-bottom in z
@@ -88,7 +87,7 @@ public class RemoteAnimationTargetCompat {
                 absBounds.top - info.getRootOffset().y);
 
         // Put all the OPEN/SHOW on top
-        if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+        if (TransitionUtil.isOpeningType(mode)) {
             if (isOpening) {
                 t.setLayer(leash, zSplitLine + info.getChanges().size() - layer);
                 if ((change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
@@ -99,7 +98,7 @@ public class RemoteAnimationTargetCompat {
                 // put on bottom and leave it visible
                 t.setLayer(leash, zSplitLine - layer);
             }
-        } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
+        } else if (TransitionUtil.isClosingType(mode)) {
             if (isOpening) {
                 // put on bottom and leave visible
                 t.setLayer(leash, zSplitLine - layer);

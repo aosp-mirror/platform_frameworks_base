@@ -145,7 +145,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.DUMP) public void waitForBroadcastIdle();
     field public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L; // 0xa692aadL
     field public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = 6; // 0x6
-    field public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
+    field @Deprecated public static final int PROCESS_CAPABILITY_NETWORK = 8; // 0x8
+    field public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 8; // 0x8
     field public static final int PROCESS_STATE_FOREGROUND_SERVICE = 4; // 0x4
     field public static final int PROCESS_STATE_TOP = 2; // 0x2
     field public static final int STOP_USER_ON_SWITCH_DEFAULT = -1; // 0xffffffff
@@ -930,7 +931,7 @@ package android.content.pm {
     method @Nullable public String getDefaultTextClassifierPackageName();
     method @RequiresPermission(android.Manifest.permission.INJECT_EVENTS) public android.os.IBinder getHoldLockToken();
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
-    method @Deprecated @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
+    method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @NonNull public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(@NonNull android.content.pm.PackageManager.ApplicationInfoFlags, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
     method @NonNull public String getPermissionControllerPackageName();

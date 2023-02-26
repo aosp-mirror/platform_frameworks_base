@@ -39,7 +39,7 @@ import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
 import com.android.credentialmanager.getflow.hasContentToDisplay
-import com.android.credentialmanager.ui.theme.CredentialSelectorTheme
+import com.android.credentialmanager.ui.theme.PlatformTheme
 
 @ExperimentalMaterialApi
 class CredentialSelectorActivity : ComponentActivity() {
@@ -50,7 +50,7 @@ class CredentialSelectorActivity : ComponentActivity() {
             val userConfigRepo = UserConfigRepo(this)
             val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
             setContent {
-                CredentialSelectorTheme {
+                PlatformTheme {
                     CredentialManagerBottomSheet(
                         credManRepo,
                         userConfigRepo
