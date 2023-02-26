@@ -30,7 +30,7 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.Disabled;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
 import android.content.Context;
@@ -41,7 +41,6 @@ import android.media.AudioFormat;
 import android.media.AudioManagerInternal;
 import android.media.permission.Identity;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
@@ -89,8 +88,7 @@ final class HotwordDetectionConnection {
     static final boolean DEBUG = false;
 
     /**
-     * For apps targeting Android API Build.VERSION_CODES#UPSIDE_DOWN_CAKE and above,
-     * implementors of the HotwordDetectionService must not augment the phrase IDs which are
+     * Implementors of the HotwordDetectionService must not augment the phrase IDs which are
      * supplied via HotwordDetectionService
      * #onDetect(AlwaysOnHotwordDetector.EventPayload, long, HotwordDetectionService.Callback).
      *
@@ -104,7 +102,7 @@ final class HotwordDetectionConnection {
      * </p>
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Disabled
     public static final long ENFORCE_HOTWORD_PHRASE_ID = 215066299L;
 
     private static final String KEY_RESTART_PERIOD_IN_SECONDS = "restart_period_in_seconds";

@@ -216,7 +216,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
      * Returns true if at least one provider is ready for UI invocation, and no
      * provider is pending a response.
      */
-    boolean isUiInvocationNeeded() {
+    protected boolean isUiInvocationNeeded() {
         for (ProviderSession session : mProviders.values()) {
             if (ProviderSession.isUiInvokingStatus(session.getStatus())) {
                 return true;

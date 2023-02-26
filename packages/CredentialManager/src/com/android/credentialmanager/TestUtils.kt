@@ -29,6 +29,8 @@ import android.provider.Settings
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
+import androidx.credentials.provider.RemoteCreateEntry
+import androidx.credentials.provider.RemoteCredentialEntry
 
 import java.time.Instant
 
@@ -66,6 +68,21 @@ class GetTestUtils {
                 subkey,
                 slice.build(),
                 status
+            )
+        }
+
+        internal fun newRemoteCredentialEntry(
+            context: Context,
+            key: String,
+            subkey: String,
+        ): Entry {
+            val intent = Intent(Settings.ACTION_SYNC_SETTINGS)
+            val pendingIntent =
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            return Entry(
+                key,
+                subkey,
+                RemoteCredentialEntry(pendingIntent).slice
             )
         }
 
@@ -201,6 +218,21 @@ class CreateTestUtils {
                     pendingIntent
                 ),
                 Intent()
+            )
+        }
+
+        internal fun newRemoteCreateEntry(
+            context: Context,
+            key: String,
+            subkey: String,
+        ): Entry {
+            val intent = Intent(Settings.ACTION_SYNC_SETTINGS)
+            val pendingIntent =
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            return Entry(
+                key,
+                subkey,
+                RemoteCreateEntry(pendingIntent).slice
             )
         }
     }

@@ -615,9 +615,7 @@ public class SatelliteManager {
 
     /**
      * The default state indicating that datagram transfer is idle.
-     * This should be sent immediately after either
-     * {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_SUCCESS} or
-     * {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED}.
+     * This should be sent if there are no message transfer activity happening.
      */
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE = 0;
     /**
@@ -625,25 +623,41 @@ public class SatelliteManager {
      */
     public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SENDING = 1;
     /**
+     * An end state indicating that datagram sending completed successfully.
+     * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
+     * will be sent if no more messages are pending.
+     */
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS = 2;
+    /**
+     * An end state indicating that datagram sending completed with a failure.
+     * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
+     * must be sent before reporting any additional datagram transfer state changes. All pending
+     * messages will be reported as failed, to the corresponding applications.
+     */
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED = 3;
+    /**
      * A transition state indicating that a datagram is being received.
      */
-    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING = 2;
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING = 4;
     /**
-     * A transition state indicating that datagram transfer is being retried.
-     */
-    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RETRYING = 3;
-    /**
-     * An end state indicating that datagram transfer completed successfully.
+     * An end state indicating that datagram receiving completed successfully.
      * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
-     * must be sent before reporting any additional datagram transfer state changes.
+     * will be sent if no more messages are pending.
      */
-    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_SUCCESS = 4;
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_SUCCESS = 5;
     /**
-     * An end state indicating that datagram transfer completed with a failure.
+     * An end state indicating that datagram receive operation found that there are no
+     * messages to be retrieved from the satellite.
      * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
-     * must be sent before reporting any additional datagram transfer state changes.
+     * will be sent if no more messages are pending.
      */
-    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED = 5;
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE = 6;
+    /**
+     * An end state indicating that datagram receive completed with a failure.
+     * After datagram transfer completes, {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE}
+     * will be sent if no more messages are pending.
+     */
+    public static final int SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED = 7;
     /**
      * The datagram transfer state is unknown. This generic datagram transfer state should be used
      * only when the datagram transfer state cannot be mapped to other specific datagram transfer
@@ -655,10 +669,12 @@ public class SatelliteManager {
     @IntDef(prefix = {"SATELLITE_DATAGRAM_TRANSFER_STATE_"}, value = {
             SATELLITE_DATAGRAM_TRANSFER_STATE_IDLE,
             SATELLITE_DATAGRAM_TRANSFER_STATE_SENDING,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_SUCCESS,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_SEND_FAILED,
             SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVING,
-            SATELLITE_DATAGRAM_TRANSFER_STATE_RETRYING,
-            SATELLITE_DATAGRAM_TRANSFER_STATE_SUCCESS,
-            SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_SUCCESS,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_NONE,
+            SATELLITE_DATAGRAM_TRANSFER_STATE_RECEIVE_FAILED,
             SATELLITE_DATAGRAM_TRANSFER_STATE_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -733,9 +749,6 @@ public class SatelliteManager {
      * All other results indicate that this operation failed.
      * Once satellite position updates begin, datagram transfer state updates will be sent
      * through {@link SatellitePositionUpdateCallback}.
-     * Modem should report any changes in datagram transfer state and indicate success or failure
-     * by reporting {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_SUCCESS} or
-     * {@link #SATELLITE_DATAGRAM_TRANSFER_STATE_FAILED}.
      *
      * @param executor The executor on which the callback and error code listener will be called.
      * @param errorCodeListener Listener for the {@link SatelliteError} result of the operation.

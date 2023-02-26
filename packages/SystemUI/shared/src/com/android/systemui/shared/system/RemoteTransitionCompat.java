@@ -19,11 +19,7 @@ package com.android.systemui.shared.system;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
-import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
-import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.newTarget;
 
@@ -50,6 +46,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.shared.recents.model.ThumbnailData;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -183,7 +180,7 @@ public class RemoteTransitionCompat {
                     final RemoteAnimationTarget target = newTarget(change,
                             info.getChanges().size() - i, info, t, mLeashMap);
                     apps.add(target);
-                    if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
+                    if (TransitionUtil.isClosingType(change.getMode())) {
                         // raise closing (pausing) task to "above" layer so it isn't covered
                         t.setLayer(target.leash, info.getChanges().size() * 3 - i);
                         mPausingTasks.add(new TaskState(change, target.leash));
@@ -200,8 +197,7 @@ public class RemoteTransitionCompat {
                     } else if (taskInfo != null && taskInfo.topActivityType == ACTIVITY_TYPE_HOME) {
                         mRecentsTask = taskInfo.token;
                         mRecentsTaskId = taskInfo.taskId;
-                    } else if (change.getMode() == TRANSIT_OPEN
-                            || change.getMode() == TRANSIT_TO_FRONT) {
+                    } else if (TransitionUtil.isOpeningType(change.getMode())) {
                         mOpeningTasks.add(new TaskState(change, target.leash));
                     }
                 }
@@ -227,7 +223,7 @@ public class RemoteTransitionCompat {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                 final boolean isLeafTask = leafTaskFilter.test(change);
-                if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
+                if (TransitionUtil.isOpeningType(change.getMode())) {
                     if (mRecentsTask.equals(change.getContainer())) {
                         recentsOpening = change;
                     } else if (isLeafTask) {
@@ -240,8 +236,7 @@ public class RemoteTransitionCompat {
                         }
                         openingTasks.add(change);
                     }
-                } else if (change.getMode() == TRANSIT_CLOSE
-                        || change.getMode() == TRANSIT_TO_BACK) {
+                } else if (TransitionUtil.isClosingType(change.getMode())) {
                     if (mRecentsTask.equals(change.getContainer())) {
                         foundRecentsClosing = true;
                     } else if (isLeafTask) {

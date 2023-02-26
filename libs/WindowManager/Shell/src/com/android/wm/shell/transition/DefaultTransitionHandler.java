@@ -112,6 +112,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -445,7 +446,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         backgroundColorForTransition);
 
                 if (!isTask && a.hasExtension()) {
-                    if (!Transitions.isOpeningType(change.getMode())) {
+                    if (!TransitionUtil.isOpeningType(change.getMode())) {
                         // Can screenshot now (before startTransaction is applied)
                         edgeExtendWindow(change, a, startTransaction, finishTransaction);
                     } else {
@@ -456,7 +457,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     }
                 }
 
-                final Rect clipRect = Transitions.isClosingType(change.getMode())
+                final Rect clipRect = TransitionUtil.isClosingType(change.getMode())
                         ? new Rect(mRotator.getEndBoundsInStartRotation(change))
                         : new Rect(change.getEndAbsBounds());
                 clipRect.offsetTo(0, 0);
@@ -562,12 +563,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final int flags = info.getFlags();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
-        final boolean isOpeningType = Transitions.isOpeningType(type);
-        final boolean enter = Transitions.isOpeningType(changeMode);
+        final boolean isOpeningType = TransitionUtil.isOpeningType(type);
+        final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final Rect endBounds = Transitions.isClosingType(changeMode)
+        final Rect endBounds = TransitionUtil.isClosingType(changeMode)
                 ? mRotator.getEndBoundsInStartRotation(change)
                 : change.getEndAbsBounds();
 
@@ -689,8 +690,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private void attachThumbnail(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change,
             TransitionInfo.AnimationOptions options, float cornerRadius) {
-        final boolean isOpen = Transitions.isOpeningType(change.getMode());
-        final boolean isClose = Transitions.isClosingType(change.getMode());
+        final boolean isOpen = TransitionUtil.isOpeningType(change.getMode());
+        final boolean isClose = TransitionUtil.isClosingType(change.getMode());
         if (isOpen) {
             if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
                 attachCrossProfileThumbnailAnimation(animations, finishCallback, change,
@@ -772,16 +773,16 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if ((change.getFlags() & FLAG_SHOW_WALLPAPER) != 0) {
-                if (Transitions.isOpeningType(change.getMode())) {
+                if (TransitionUtil.isOpeningType(change.getMode())) {
                     hasOpenWallpaper = true;
-                } else if (Transitions.isClosingType(change.getMode())) {
+                } else if (TransitionUtil.isClosingType(change.getMode())) {
                     hasCloseWallpaper = true;
                 }
             }
         }
 
         if (hasOpenWallpaper && hasCloseWallpaper) {
-            return Transitions.isOpeningType(info.getType())
+            return TransitionUtil.isOpeningType(info.getType())
                     ? WALLPAPER_TRANSITION_INTRA_OPEN : WALLPAPER_TRANSITION_INTRA_CLOSE;
         } else if (hasOpenWallpaper) {
             return WALLPAPER_TRANSITION_OPEN;

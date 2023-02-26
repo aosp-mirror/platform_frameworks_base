@@ -18,6 +18,9 @@ package android.net.wifi.sharedconnectivity.service;
 
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
 import android.net.wifi.sharedconnectivity.app.TetherNetwork;
+import android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus;
+import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
+import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.service.ISharedConnectivityCallback;
 
 /*
@@ -30,4 +33,9 @@ interface ISharedConnectivityService {
     void disconnectTetherNetwork(in TetherNetwork network);
     void connectKnownNetwork(in KnownNetwork network);
     void forgetKnownNetwork(in KnownNetwork network);
+    List<TetherNetwork> getTetherNetworks();
+    List<KnownNetwork> getKnownNetworks();
+    SharedConnectivitySettingsState getSettingsState();
+    TetherNetworkConnectionStatus getTetherNetworkConnectionStatus();
+    KnownNetworkConnectionStatus getKnownNetworkConnectionStatus();
 }

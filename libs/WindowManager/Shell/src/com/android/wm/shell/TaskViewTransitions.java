@@ -32,6 +32,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -115,7 +116,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             boolean latest) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
             if (mPending.get(i).mTaskView != taskView) continue;
-            if (Transitions.isClosingType(mPending.get(i).mType) == closing) {
+            if (TransitionUtil.isClosingType(mPending.get(i).mType) == closing) {
                 return mPending.get(i);
             }
             if (latest) {
@@ -148,7 +149,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         final TaskViewTaskController taskView = findTaskView(triggerTask);
         if (taskView == null) return null;
         // Opening types should all be initiated by shell
-        if (!Transitions.isClosingType(request.getType())) return null;
+        if (!TransitionUtil.isClosingType(request.getType())) return null;
         PendingTransition pending = findPending(taskView, true /* closing */, false /* latest */);
         if (pending == null) {
             pending = new PendingTransition(request.getType(), null, taskView, null /* cookie */);
@@ -238,7 +239,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         for (int i = 0; i < info.getChanges().size(); ++i) {
             final TransitionInfo.Change chg = info.getChanges().get(i);
             if (chg.getTaskInfo() == null) continue;
-            if (Transitions.isClosingType(chg.getMode())) {
+            if (TransitionUtil.isClosingType(chg.getMode())) {
                 final boolean isHide = chg.getMode() == TRANSIT_TO_BACK;
                 TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
                 if (tv == null) {
@@ -255,7 +256,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     tv.prepareCloseAnimation();
                 }
                 changesHandled++;
-            } else if (Transitions.isOpeningType(chg.getMode())) {
+            } else if (TransitionUtil.isOpeningType(chg.getMode())) {
                 final boolean taskIsNew = chg.getMode() == TRANSIT_OPEN;
                 final TaskViewTaskController tv;
                 if (taskIsNew) {
