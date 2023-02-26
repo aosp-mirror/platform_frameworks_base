@@ -260,11 +260,17 @@ public final class CreateCredentialRequest implements Parcelable {
         private String mOrigin;
 
         /**
+         * @param type the type of the credential to be stored
          * @param credentialData the full credential creation request data
          * @param candidateQueryData the partial request data that will be sent to the provider
          *                           during the initial creation candidate query stage
          */
-        public Builder(@NonNull Bundle credentialData, @NonNull Bundle candidateQueryData) {
+        public Builder(
+                @NonNull String type,
+                @NonNull Bundle credentialData,
+                @NonNull Bundle candidateQueryData) {
+            mType = Preconditions.checkStringNotEmpty(type,
+                    "type must not be null or empty");
             mCredentialData = requireNonNull(credentialData,
                     "credentialData must not be null");
             mCandidateQueryData = requireNonNull(candidateQueryData,
@@ -287,16 +293,6 @@ public final class CreateCredentialRequest implements Parcelable {
         @NonNull
         public CreateCredentialRequest.Builder setAlwaysSendAppInfoToProvider(boolean value) {
             mAlwaysSendAppInfoToProvider = value;
-            return this;
-        }
-
-        /**
-         * Sets the requested credential type.
-         */
-        @SuppressLint("MissingGetterMatchingBuilder")
-        @NonNull
-        public CreateCredentialRequest.Builder setType(@NonNull String type) {
-            mType = type;
             return this;
         }
 
