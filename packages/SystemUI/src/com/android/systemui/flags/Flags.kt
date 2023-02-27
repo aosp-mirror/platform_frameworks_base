@@ -464,7 +464,7 @@ object Flags {
     @Keep
     @JvmField
     val ENABLE_PIP_APP_ICON_OVERLAY =
-        sysPropBooleanFlag(1115, "persist.wm.debug.enable_pip_app_icon_overlay", default = false)
+        sysPropBooleanFlag(1115, "persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
     // 1200 - predictive back
     @Keep
