@@ -10329,6 +10329,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         policy.mSecondaryLockscreenEnabled = false;
         policy.mUserProvisioningState = DevicePolicyManager.STATE_USER_UNMANAGED;
         policy.mAffiliationIds.clear();
+        resetAffiliationCacheLocked();
         policy.mLockTaskPackages.clear();
         if (!isPolicyEngineForFinanceFlagEnabled()) {
             updateLockTaskPackagesLocked(mContext, policy.mLockTaskPackages, userId);
@@ -18022,10 +18023,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             getUserData(callingUserId).mAffiliationIds = affiliationIds;
             saveSettingsLocked(callingUserId);
-            if (callingUserId != UserHandle.USER_SYSTEM && isDeviceOwner(admin, callingUserId)) {
+            mStateCache.setHasAffiliationWithDevice(callingUserId,
+                    isUserAffiliatedWithDeviceLocked(callingUserId));
+            if (callingUserId == UserHandle.USER_SYSTEM) {
+                resetAffiliationCacheLocked();
+            } else if (callingUserId != UserHandle.USER_SYSTEM && isDeviceOwner(admin,
+                    callingUserId)) {
                 // Affiliation ids specified by the device owner are additionally stored in
                 // UserHandle.USER_SYSTEM's DevicePolicyData.
                 getUserData(UserHandle.USER_SYSTEM).mAffiliationIds = affiliationIds;
+                mStateCache.setHasAffiliationWithDevice(UserHandle.USER_SYSTEM, true);
                 saveSettingsLocked(UserHandle.USER_SYSTEM);
             }
 
@@ -18037,6 +18044,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             maybeClearLockTaskPolicyLocked();
             updateAdminCanGrantSensorsPermissionCache(callingUserId);
         }
+    }
+
+    private void resetAffiliationCacheLocked() {
+        mInjector.binderWithCleanCallingIdentity(() -> {
+            for (UserInfo user : mUserManager.getUsers()) {
+                mStateCache.setHasAffiliationWithDevice(user.id,
+                        isUserAffiliatedWithDeviceLocked(user.id));
+            }
+        });
     }
 
     @Override
