@@ -163,9 +163,24 @@ public final class HotspotNetworkConnectionStatus implements Parcelable {
         }
     }
 
+    private static void validate(@ConnectionStatus int status) {
+        if (status != CONNECTION_STATUS_UNKNOWN
+                && status != CONNECTION_STATUS_ENABLING_HOTSPOT
+                && status != CONNECTION_STATUS_UNKNOWN_ERROR
+                && status != CONNECTION_STATUS_PROVISIONING_FAILED
+                && status != CONNECTION_STATUS_TETHERING_TIMEOUT
+                && status != CONNECTION_STATUS_TETHERING_UNSUPPORTED
+                && status != CONNECTION_STATUS_NO_CELL_DATA
+                && status != CONNECTION_STATUS_ENABLING_HOTSPOT_FAILED
+                && status != CONNECTION_STATUS_ENABLING_HOTSPOT_TIMEOUT
+                && status != CONNECTION_STATUS_CONNECT_TO_HOTSPOT_FAILED) {
+            throw new IllegalArgumentException("Illegal connection status");
+        }
+    }
+
     private HotspotNetworkConnectionStatus(@ConnectionStatus int status,
-            HotspotNetwork hotspotNetwork,
-            Bundle extras) {
+            HotspotNetwork hotspotNetwork, Bundle extras) {
+        validate(status);
         mStatus = status;
         mHotspotNetwork = hotspotNetwork;
         mExtras = extras;
