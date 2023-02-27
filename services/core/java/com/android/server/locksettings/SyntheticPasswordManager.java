@@ -1176,8 +1176,9 @@ class SyntheticPasswordManager {
             storedType = pwd.credentialType;
         }
         if (!credential.checkAgainstStoredType(storedType)) {
-            Slog.e(TAG, TextUtils.formatSimple("Credential type mismatch: expected %d actual %d",
-                    storedType, credential.getType()));
+            Slogf.e(TAG, "Credential type mismatch: stored type is %s but provided type is %s",
+                    LockPatternUtils.credentialTypeToString(storedType),
+                    LockPatternUtils.credentialTypeToString(credential.getType()));
             result.gkResponse = VerifyCredentialResponse.ERROR;
             return result;
         }
