@@ -830,6 +830,9 @@
 
     <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
 
+    <!-- Permission required for CTS test - CtsPackageInstallTestCases -->
+    <uses-permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
