@@ -4276,7 +4276,7 @@ public abstract class Context {
      * <p>Note: When implementing this method, keep in mind that new services can be added on newer
      * Android releases, so if you're looking for just the explicit names mentioned above, make sure
      * to return {@code null} when you don't recognize the name &mdash; if you throw a
-     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
+     * {@link RuntimeException} exception instead, your app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
