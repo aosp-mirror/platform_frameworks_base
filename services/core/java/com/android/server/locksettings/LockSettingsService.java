@@ -1267,7 +1267,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void unlockKeystore(byte[] password, int userHandle) {
-        if (DEBUG) Slog.v(TAG, "Unlock keystore for user: " + userHandle);
         Authorization.onLockScreenEvent(false, userHandle, password, null);
     }
 
@@ -1277,7 +1276,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
             CertificateException, IOException {
-        if (DEBUG) Slog.v(TAG, "Get child profile decrypted key");
+        Slogf.d(TAG, "Decrypting password for tied profile %d", userId);
         byte[] storedData = mStorage.readChildProfileLock(userId);
         if (storedData == null) {
             throw new FileNotFoundException("Child profile lock file not found");
@@ -1326,7 +1325,6 @@ public class LockSettingsService extends ILockSettings.Stub {
      * {@link com.android.server.SystemServiceManager#unlockUser} </em>
      */
     private void unlockUser(@UserIdInt int userId) {
-        Slogf.i(TAG, "Unlocking user %d", userId);
         // TODO: make this method fully async so we can update UI with progress strings
         final boolean alreadyUnlocked = mUserManager.isUserUnlockingOrUnlocked(userId);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -2130,7 +2128,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "FRP credential can only be verified prior to provisioning.");
             return VerifyCredentialResponse.ERROR;
         }
-        Slog.d(TAG, "doVerifyCredential: user=" + userId);
+        Slogf.i(TAG, "Verifying lockscreen credential for user %d", userId);
 
         final AuthenticationResult authResult;
         VerifyCredentialResponse response;
@@ -2153,6 +2151,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            Slogf.i(TAG, "Successfully verified lockscreen credential for user %d", userId);
             onCredentialVerified(authResult.syntheticPassword,
                     PasswordMetrics.computeForCredential(credential), userId);
             if ((flags & VERIFY_FLAG_REQUEST_GK_PW_HANDLE) != 0) {
@@ -2897,6 +2896,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public byte[] getHashFactor(LockscreenCredential currentCredential, int userId) {
         checkPasswordReadPermission();
         try {
+            Slogf.d(TAG, "Getting password history hash factor for user %d", userId);
             if (isProfileWithUnifiedLock(userId)) {
                 try {
                     currentCredential = getDecryptedPasswordForTiedProfile(userId);
@@ -3460,6 +3460,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             synchronized (mSpManager) {
                 mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
             }
+            Slogf.i(TAG, "Restored synthetic password for user %d using reboot escrow", userId);
             onCredentialVerified(sp, loadPasswordMetrics(sp, userId), userId);
         }
     }
