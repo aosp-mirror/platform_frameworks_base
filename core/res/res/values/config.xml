@@ -2780,8 +2780,10 @@
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
     <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
-     it can't be deleted or downgraded to non-admin status. -->
-    <bool name="config_isMainUserPermanentAdmin">false</bool>
+     it can't be deleted or downgraded to non-admin status.
+     This is generally only relevant on headless system user mode devices; on other devices, the
+     main user is the system user which is always a permanent admin anyway. -->
+    <bool name="config_isMainUserPermanentAdmin">true</bool>
 
     <!-- Whether switch to headless system user is allowed. If allowed,
     headless system user can run in the foreground even though it is not a full user. -->
