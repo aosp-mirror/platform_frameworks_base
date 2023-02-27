@@ -2041,6 +2041,7 @@
   <java-symbol type="integer" name="config_notificationsBatteryFullARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOff" />
   <java-symbol type="integer" name="config_notificationsBatteryLedOn" />
+  <java-symbol type="integer" name="config_notificationsBatteryLowBehavior" />
   <java-symbol type="integer" name="config_notificationsBatteryLowARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryMediumARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryNearlyFullLevel" />

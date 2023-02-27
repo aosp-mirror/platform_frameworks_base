@@ -1242,6 +1242,13 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">2000</integer>
 
+    <!-- LED behavior when battery is low.
+         Color for solid is taken from config_notificationsBatteryLowARGB
+          0 - default, solid when charging, flashing when not charging
+          1 - always solid when battery is low
+          2 - always flashing when battery is low -->
+    <integer name="config_notificationsBatteryLowBehavior">0</integer>
+
     <!-- Default value for led color when battery is low on charge -->
     <integer name="config_notificationsBatteryLowARGB">0xFFFF0000</integer>
 
