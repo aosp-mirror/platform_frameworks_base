@@ -209,7 +209,11 @@ public class NotificationStackScrollLayoutController {
                 public void onViewAttachedToWindow(View v) {
                     mConfigurationController.addCallback(mConfigurationListener);
                     mZenModeController.addCallback(mZenModeControllerCallback);
-                    mBarState = mStatusBarStateController.getState();
+                    final int newBarState = mStatusBarStateController.getState();
+                    if (newBarState != mBarState) {
+                        mStateListener.onStateChanged(newBarState);
+                        mStateListener.onStatePostChange();
+                    }
                     mStatusBarStateController.addCallback(
                             mStateListener, SysuiStatusBarStateController.RANK_STACK_SCROLLER);
                 }

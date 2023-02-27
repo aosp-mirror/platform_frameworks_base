@@ -413,6 +413,37 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(anyBoolean(), anyBoolean());
     }
 
+    @Test
+    public void testAttach_updatesViewStatusBarState() {
+        // GIVEN: Controller is attached
+        mController.attach(mNotificationStackScrollLayout);
+        ArgumentCaptor<StatusBarStateController.StateListener> captor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mSysuiStatusBarStateController).addCallback(captor.capture(), anyInt());
+        StatusBarStateController.StateListener stateListener = captor.getValue();
+
+        // WHEN: StatusBarState changes to SHADE
+        when(mSysuiStatusBarStateController.getState()).thenReturn(SHADE);
+        stateListener.onStateChanged(SHADE);
+
+        // THEN: NSSL is updated with the current state
+        verify(mNotificationStackScrollLayout).setStatusBarState(SHADE);
+
+        // WHEN: Controller is detached
+        mController.mOnAttachStateChangeListener
+                .onViewDetachedFromWindow(mNotificationStackScrollLayout);
+
+        // WHEN: StatusBarState changes to KEYGUARD
+        when(mSysuiStatusBarStateController.getState()).thenReturn(KEYGUARD);
+
+        // WHEN: Controller is re-attached
+        mController.mOnAttachStateChangeListener
+                .onViewAttachedToWindow(mNotificationStackScrollLayout);
+
+        // THEN: NSSL is updated with the current state
+        verify(mNotificationStackScrollLayout).setStatusBarState(KEYGUARD);
+    }
+
     private LogMaker logMatcher(int category, int type) {
         return argThat(new LogMatcher(category, type));
     }
