@@ -2561,7 +2561,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             String action = intent.getAction();
             String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                if (mIsShortcutListSearchEnabled && Utilities.isTablet(mContext)) {
+                if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(mContext)) {
                     KeyboardShortcutListSearch.dismiss();
                 } else {
                     KeyboardShortcuts.dismiss();
@@ -3912,7 +3912,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected void toggleKeyboardShortcuts(int deviceId) {
-        if (mIsShortcutListSearchEnabled && Utilities.isTablet(mContext)) {
+        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(mContext)) {
             KeyboardShortcutListSearch.toggle(mContext, deviceId);
         } else {
             KeyboardShortcuts.toggle(mContext, deviceId);
@@ -3920,7 +3920,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected void dismissKeyboardShortcuts() {
-        if (mIsShortcutListSearchEnabled && Utilities.isTablet(mContext)) {
+        if (mIsShortcutListSearchEnabled && Utilities.isLargeScreen(mContext)) {
             KeyboardShortcutListSearch.dismiss();
         } else {
             KeyboardShortcuts.dismiss();
