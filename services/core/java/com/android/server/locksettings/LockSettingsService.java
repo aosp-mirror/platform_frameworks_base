@@ -380,7 +380,6 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
-        if (DEBUG) Slog.v(TAG, "Check child profile lock for user: " + profileUserId);
         // Only for profiles that shares credential with parent
         if (!isCredentialSharableWithParent(profileUserId)) {
             return;
@@ -398,8 +397,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // as its parent.
         final int parentId = mUserManager.getProfileParent(profileUserId).id;
         if (!isUserSecure(parentId) && !profileUserPassword.isNone()) {
-            if (DEBUG) Slog.v(TAG, "Parent does not have a screen lock but profile has one");
-
+            Slogf.i(TAG, "Clearing password for profile user %d to match parent", profileUserId);
             setLockCredentialInternal(LockscreenCredential.createNone(), profileUserPassword,
                     profileUserId, /* isLockTiedToParent= */ true);
             return;
@@ -415,7 +413,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "Failed to talk to GateKeeper service", e);
             return;
         }
-        if (DEBUG) Slog.v(TAG, "Tie profile to parent now!");
         try (LockscreenCredential unifiedProfilePassword = generateRandomProfilePassword()) {
             setLockCredentialInternal(unifiedProfilePassword, profileUserPassword, profileUserId,
                     /* isLockTiedToParent= */ true);
@@ -1634,7 +1631,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             LockscreenCredential savedCredential, int userId, boolean isLockTiedToParent) {
         Objects.requireNonNull(credential);
         Objects.requireNonNull(savedCredential);
-        if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
         synchronized (mSpManager) {
             if (savedCredential.isNone() && isProfileWithUnifiedLock(userId)) {
                 // get credential from keystore when profile has unified lock
@@ -1871,7 +1867,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected void tieProfileLockToParent(int profileUserId, int parentUserId,
             LockscreenCredential password) {
-        if (DEBUG) Slog.v(TAG, "tieProfileLockToParent for user: " + profileUserId);
+        Slogf.i(TAG, "Tying lock for profile user %d to parent user %d", profileUserId,
+                parentUserId);
         final byte[] iv;
         final byte[] ciphertext;
         final long parentSid;
@@ -2669,7 +2666,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting
     SyntheticPassword initializeSyntheticPassword(int userId) {
         synchronized (mSpManager) {
-            Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
+            Slogf.i(TAG, "Initializing synthetic password for user %d", userId);
             Preconditions.checkState(getCurrentLskfBasedProtectorId(userId) ==
                     SyntheticPasswordManager.NULL_PROTECTOR_ID,
                     "Cannot reinitialize SP");
@@ -2680,6 +2677,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setCurrentLskfBasedProtectorId(protectorId, userId);
             setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
             onSyntheticPasswordCreated(userId, sp);
+            Slogf.i(TAG, "Successfully initialized synthetic password for user %d", userId);
             return sp;
         }
     }
@@ -2769,7 +2767,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mSpManager")
     private long setLockCredentialWithSpLocked(LockscreenCredential credential,
             SyntheticPassword sp, int userId) {
-        if (DEBUG) Slog.d(TAG, "setLockCredentialWithSpLocked: user=" + userId);
+        Slogf.i(TAG, "Changing lockscreen credential of user %d; newCredentialType=%s\n",
+                userId, LockPatternUtils.credentialTypeToString(credential.getType()));
         final int savedCredentialType = getCredentialTypeInternal(userId);
         final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
         final long newProtectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
@@ -2812,6 +2811,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
+        Slogf.i(TAG, "Successfully changed lockscreen credential of user %d", userId);
         return newProtectorId;
     }
 
