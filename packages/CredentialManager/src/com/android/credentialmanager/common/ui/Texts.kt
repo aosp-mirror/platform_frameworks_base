@@ -16,7 +16,7 @@
 
 package com.android.credentialmanager.common.ui
 
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 @Composable
 fun HeadlineText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center,
@@ -46,7 +46,7 @@ fun HeadlineText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium,
@@ -59,7 +59,7 @@ fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun BodySmallText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
@@ -72,7 +72,7 @@ fun BodySmallText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleLarge,
@@ -85,7 +85,7 @@ fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun SmallTitleText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleSmall,
@@ -98,7 +98,7 @@ fun SmallTitleText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun SectionHeaderText(text: String, modifier: Modifier = Modifier, color: Color) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = color,
         style = MaterialTheme.typography.titleSmall,
@@ -111,7 +111,7 @@ fun SectionHeaderText(text: String, modifier: Modifier = Modifier, color: Color)
 @Composable
 fun SnackbarContentText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.inverseOnSurface,
         style = MaterialTheme.typography.bodyMedium,
@@ -124,7 +124,7 @@ fun SnackbarContentText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun SnackbarActionText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.inversePrimary,
         style = MaterialTheme.typography.labelLarge,
@@ -137,7 +137,7 @@ fun SnackbarActionText(text: String, modifier: Modifier = Modifier) {
 @Composable
 fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -151,7 +151,7 @@ fun LargeLabelTextOnSurfaceVariant(text: String, modifier: Modifier = Modifier) 
 @Composable
 fun LargeLabelText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.wrapContentHeight(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.labelLarge,
