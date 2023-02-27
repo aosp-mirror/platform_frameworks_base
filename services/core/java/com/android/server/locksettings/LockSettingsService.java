@@ -2919,7 +2919,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private long addEscrowToken(@NonNull byte[] token, @TokenType int type, int userId,
             @NonNull EscrowTokenStateChangeCallback callback) {
-        if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId + ", type=" + type);
+        Slogf.i(TAG, "Adding escrow token for user %d", userId);
         synchronized (mSpManager) {
             // If the user has no LSKF, then the token can be activated immediately.  Otherwise, the
             // token can't be activated until the SP is unlocked by another protector (normally the
@@ -2937,18 +2937,20 @@ public class LockSettingsService extends ILockSettings.Stub {
             long handle = mSpManager.addPendingToken(token, type, userId, callback);
             if (sp != null) {
                 // Activate the token immediately
+                Slogf.i(TAG, "Immediately activating escrow token %016x", handle);
                 mSpManager.createTokenBasedProtector(handle, sp, userId);
+            } else {
+                Slogf.i(TAG, "Escrow token %016x will be activated when user is unlocked", handle);
             }
             return handle;
         }
     }
 
     private void activateEscrowTokens(SyntheticPassword sp, int userId) {
-        if (DEBUG) Slog.d(TAG, "activateEscrowTokens: user=" + userId);
         synchronized (mSpManager) {
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             for (long handle : mSpManager.getPendingTokensForUser(userId)) {
-                Slogf.i(TAG, "activateEscrowTokens: %016x %d", handle, userId);
+                Slogf.i(TAG, "Activating escrow token %016x for user %d", handle, userId);
                 mSpManager.createTokenBasedProtector(handle, sp, userId);
             }
         }
@@ -3019,6 +3021,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mSpManager")
     private boolean setLockCredentialWithTokenInternalLocked(LockscreenCredential credential,
             long tokenHandle, byte[] token, int userId) {
+        Slogf.i(TAG, "Resetting lockscreen credential of user %d using escrow token %016x",
+                userId, tokenHandle);
         final AuthenticationResult result;
         result = mSpManager.unlockTokenBasedProtector(getGateKeeperService(), tokenHandle, token,
                     userId);
@@ -3041,8 +3045,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId) {
         AuthenticationResult authResult;
         synchronized (mSpManager) {
+            Slogf.i(TAG, "Unlocking user %d using escrow token %016x", userId, tokenHandle);
             if (!mSpManager.hasEscrowData(userId)) {
-                Slog.w(TAG, "Escrow token is disabled on the current user");
+                Slogf.w(TAG, "Escrow token support is disabled on user %d", userId);
                 return false;
             }
             authResult = mSpManager.unlockTokenBasedProtector(getGateKeeperService(), tokenHandle,
@@ -3053,6 +3058,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
+        Slogf.i(TAG, "Unlocked synthetic password for user %d using escrow token", userId);
         onCredentialVerified(authResult.syntheticPassword,
                 loadPasswordMetrics(authResult.syntheticPassword, userId), userId);
         return true;
@@ -3170,6 +3176,11 @@ public class LockSettingsService extends ILockSettings.Stub {
      * if we are running an automotive build.
      */
     private void disableEscrowTokenOnNonManagedDevicesIfNeeded(int userId) {
+
+        if (!mSpManager.hasAnyEscrowData(userId)) {
+            return;
+        }
+
         // TODO(b/258213147): Remove
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -3214,7 +3225,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // Disable escrow token permanently on all other device/user types.
-        Slog.i(TAG, "Disabling escrow token on user " + userId);
+        Slogf.i(TAG, "Permanently disabling support for escrow tokens on user %d", userId);
         mSpManager.destroyEscrowData(userId);
     }
 

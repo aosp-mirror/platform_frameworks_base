@@ -744,6 +744,11 @@ class SyntheticPasswordManager {
                 && hasState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
     }
 
+    public boolean hasAnyEscrowData(int userId) {
+        return hasState(SP_E0_NAME, NULL_PROTECTOR_ID, userId)
+                || hasState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
+    }
+
     public void destroyEscrowData(int userId) {
         destroyState(SP_E0_NAME, NULL_PROTECTOR_ID, userId);
         destroyState(SP_P1_NAME, NULL_PROTECTOR_ID, userId);
