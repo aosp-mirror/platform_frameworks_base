@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.notetask
 
-package com.android.systemui.notetask.quickaffordance
+import android.content.Context
+import com.android.wm.shell.bubbles.Bubbles
 
-import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
+/**
+ * Supported ways for launching a note taking experience.
+ *
+ * @see [NoteTaskController.showNoteTask]
+ */
+sealed class NoteTaskLaunchMode {
 
-@Module
-interface NoteTaskQuickAffordanceModule {
+    /** @see Bubbles.showOrHideAppBubble */
+    object AppBubble : NoteTaskLaunchMode()
 
-    @[Binds IntoSet]
-    fun NoteTaskQuickAffordanceConfig.bindNoteTaskQuickAffordance(): KeyguardQuickAffordanceConfig
+    /** @see Context.startActivity */
+    object Activity : NoteTaskLaunchMode()
 }
