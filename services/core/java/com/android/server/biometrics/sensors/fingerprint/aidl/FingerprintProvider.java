@@ -562,7 +562,6 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     public void scheduleInternalCleanup(int sensorId, int userId,
             @Nullable ClientMonitorCallback callback, boolean favorHalEnrollments) {
         mHandler.post(() -> {
-            final List<Fingerprint> enrolledList = getEnrolledFingerprints(sensorId, userId);
             final FingerprintInternalCleanupClient client =
                     new FingerprintInternalCleanupClient(mContext,
                             mSensors.get(sensorId).getLazySession(), userId,
@@ -570,7 +569,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
                                     BiometricsProtoEnums.CLIENT_UNKNOWN),
                             mBiometricContext,
-                            enrolledList, FingerprintUtils.getInstance(sensorId),
+                            FingerprintUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
             if (favorHalEnrollments) {
                 client.setFavorHalEnrollments();
