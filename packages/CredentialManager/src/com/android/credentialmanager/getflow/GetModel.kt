@@ -141,7 +141,7 @@ class ActionEntryInfo(
     entrySubkey,
     pendingIntent,
     fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = false,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
 )
 
 data class RequestDisplayInfo(
