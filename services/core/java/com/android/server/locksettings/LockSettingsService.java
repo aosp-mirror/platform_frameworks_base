@@ -887,7 +887,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 && !getBoolean("migrated_frp", false, 0)) {
             migrateFrpCredential();
             setBoolean("migrated_frp", true, 0);
-            Slog.i(TAG, "Migrated migrated_frp.");
         }
     }
 
