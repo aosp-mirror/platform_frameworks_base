@@ -164,10 +164,9 @@ public class FingerprintInternalCleanupClientTest {
     }
 
     protected FingerprintInternalCleanupClient createClient() {
-        final List<Fingerprint> enrollments = new ArrayList<>();
         final Map<Integer, Long> authenticatorIds = new HashMap<>();
         return new FingerprintInternalCleanupClient(mContext, () -> mAidlSession, 2 /* userId */,
-                "the.test.owner", SENSOR_ID, mLogger, mBiometricContext, enrollments,
+                "the.test.owner", SENSOR_ID, mLogger, mBiometricContext,
                 mFingerprintUtils, authenticatorIds) {
             @Override
             protected void onAddUnknownTemplate(int userId,

@@ -45,10 +45,9 @@ class FingerprintInternalCleanupClient extends InternalCleanupClient<Fingerprint
             @NonNull Supplier<AidlSession> lazyDaemon,
             int userId, @NonNull String owner, int sensorId,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
-            @NonNull List<Fingerprint> enrolledList,
             @NonNull FingerprintUtils utils, @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, logger, biometricContext,
-                enrolledList, utils, authenticatorIds);
+                utils, authenticatorIds);
     }
 
     @Override
