@@ -853,6 +853,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
+     * @see NotificationChildrenContainer#setNotificationGroupWhen(long)
+     */
+    public void setNotificationGroupWhen(long whenMillis) {
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.setNotificationGroupWhen(whenMillis);
+        } else {
+            Log.w(TAG, "setNotificationGroupWhen( whenMillis: " + whenMillis + ")"
+                    + " mIsSummaryWithChildren: false"
+                    + " mChildrenContainer has not been inflated yet.");
+        }
+    }
+
+    /**
      * Called after children have been attached to set the expansion states
      */
     public void resetChildSystemExpandedStates() {
