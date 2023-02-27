@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"همه‌فرستی انجام نشد"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ذخیره نشد. دوباره امتحان کنید."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ذخیره نشد."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"حداقل از ۴ نویسه استفاده کنید"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"از کمتر از ۱۶ نویسه استفاده کنید"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"شماره ساخت"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"شماره ساخت در بریده‌دان کپی شد."</string>
     <string name="basic_status" msgid="2315371112182658176">"باز کردن مکالمه"</string>
@@ -906,7 +908,7 @@
     <string name="preference_summary_default_combination" msgid="8453246369903749670">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="NETWORKMODE">%2$s</xliff:g>"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"متصل است"</string>
     <string name="mobile_data_off_summary" msgid="3663995422004150567">"داده تلفن همراه به‌طور خودکار متصل نخواهد شد"</string>
-    <string name="mobile_data_no_connection" msgid="1713872434869947377">"اتصال برقرار نیست"</string>
+    <string name="mobile_data_no_connection" msgid="1713872434869947377">"اتصال اینترنت موجود نیست"</string>
     <string name="non_carrier_network_unavailable" msgid="770049357024492372">"شبکه دیگری وجود ندارد"</string>
     <string name="all_network_unavailable" msgid="4112774339909373349">"شبکه‌ای در دسترس نیست"</string>
     <string name="turn_on_wifi" msgid="1308379840799281023">"Wi-Fi"</string>
