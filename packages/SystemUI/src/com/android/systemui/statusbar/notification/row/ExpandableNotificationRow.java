@@ -47,7 +47,6 @@ import android.util.FloatProperty;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.Property;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -336,8 +335,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     };
     private boolean mKeepInParentForDismissAnimation;
     private boolean mRemoved;
-    private static final Property<ExpandableNotificationRow, Float> TRANSLATE_CONTENT =
-            new FloatProperty<ExpandableNotificationRow>("translate") {
+    public static final FloatProperty<ExpandableNotificationRow> TRANSLATE_CONTENT =
+            new FloatProperty<>("translate") {
                 @Override
                 public void setValue(ExpandableNotificationRow object, float value) {
                     object.setTranslation(value);
@@ -348,6 +347,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     return object.getTranslation();
                 }
             };
+
     private OnClickListener mOnClickListener;
     private OnDragSuccessListener mOnDragSuccessListener;
     private boolean mHeadsupDisappearRunning;
@@ -2175,6 +2175,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         });
         mTranslateAnim = translateAnim;
         return translateAnim;
+    }
+
+    /** Cancels the ongoing translate animation if there is any. */
+    public void cancelTranslateAnimation() {
+        if (mTranslateAnim != null) {
+            mTranslateAnim.cancel();
+        }
     }
 
     void ensureGutsInflated() {
