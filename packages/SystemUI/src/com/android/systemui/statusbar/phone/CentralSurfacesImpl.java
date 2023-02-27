@@ -164,6 +164,7 @@ import com.android.systemui.keyguard.ui.binder.LightRevealScrimViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.LightRevealScrimViewModel;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
+import com.android.systemui.notetask.NoteTaskController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.OverlayPlugin;
@@ -642,7 +643,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private NotificationActivityStarter mNotificationActivityStarter;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private final Optional<Bubbles> mBubblesOptional;
-    private final Bubbles.BubbleExpandListener mBubbleExpandListener;
+    private final Lazy<NoteTaskController> mNoteTaskControllerLazy;
     private final Optional<StartingSurface> mStartingSurfaceOptional;
 
     private final ActivityIntentHelper mActivityIntentHelper;
@@ -705,6 +706,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             WakefulnessLifecycle wakefulnessLifecycle,
             SysuiStatusBarStateController statusBarStateController,
             Optional<Bubbles> bubblesOptional,
+            Lazy<NoteTaskController> noteTaskControllerLazy,
             DeviceProvisionedController deviceProvisionedController,
             NavigationBarController navigationBarController,
             AccessibilityFloatingMenuController accessibilityFloatingMenuController,
@@ -795,6 +797,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mBubblesOptional = bubblesOptional;
+        mNoteTaskControllerLazy = noteTaskControllerLazy;
         mDeviceProvisionedController = deviceProvisionedController;
         mNavigationBarController = navigationBarController;
         mAccessibilityFloatingMenuController = accessibilityFloatingMenuController;
@@ -852,9 +855,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mShadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged);
         mShadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
-        mBubbleExpandListener = (isExpanding, key) ->
-                mContext.getMainExecutor().execute(this::updateScrimController);
-
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mActivityLaunchAnimator = activityLaunchAnimator;
 
@@ -884,14 +884,21 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
+    private void initBubbles(Bubbles bubbles) {
+        final Bubbles.BubbleExpandListener listener = (isExpanding, key) ->
+                mContext.getMainExecutor().execute(() -> {
+                    updateScrimController();
+                    mNoteTaskControllerLazy.get().onBubbleExpandChanged(isExpanding, key);
+                });
+        bubbles.setExpandListener(listener);
+    }
+
     @Override
     public void start() {
         mScreenLifecycle.addObserver(mScreenObserver);
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
-        if (mBubblesOptional.isPresent()) {
-            mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
-        }
+        mBubblesOptional.ifPresent(this::initBubbles);
 
         // Do not restart System UI when the bugreport flag changes.
         mFeatureFlags.addListener(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, event -> {
