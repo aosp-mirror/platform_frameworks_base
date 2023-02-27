@@ -6676,15 +6676,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Deprecated
         public void legacyDumpProfiles(String packageName, boolean dumpClassesAndMethods)
                 throws LegacyDexoptDisabledException {
-            /* Only the shell, root, or the app user should be able to dump profiles. */
-            final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
-            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (!PackageManagerServiceUtils.isRootOrShell(callingUid)
-                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
-                throw new SecurityException("dumpProfiles");
-            }
-
             AndroidPackage pkg = snapshot.getPackage(packageName);
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
