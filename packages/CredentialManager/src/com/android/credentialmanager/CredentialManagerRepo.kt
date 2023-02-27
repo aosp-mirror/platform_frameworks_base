@@ -23,6 +23,7 @@ import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.CredentialOption
 import android.credentials.GetCredentialRequest
 import android.credentials.ui.AuthenticationEntry
+import android.credentials.ui.CancelUiRequest
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.CreateCredentialProviderData
@@ -222,6 +223,14 @@ class CredentialManagerRepo(
                 BaseDialogResult.addToBundle(BaseDialogResult(requestToken), resultData)
                 resultReceiver.send(cancelCode, resultData)
             }
+        }
+
+        /** Return the request token whose UI should be cancelled, or null otherwise. */
+        fun getCancelUiRequestToken(intent: Intent): IBinder? {
+            return intent.extras?.getParcelable(
+                CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
+                CancelUiRequest::class.java
+            )?.token
         }
     }
 
