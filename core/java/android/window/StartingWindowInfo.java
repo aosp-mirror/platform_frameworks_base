@@ -22,12 +22,9 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.pm.ActivityInfo;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.view.InsetsState;
-import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager;
@@ -62,8 +59,6 @@ public final class StartingWindowInfo implements Parcelable {
     /** @hide **/
     public static final int STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN = 4;
 
-    public static final int STARTING_WINDOW_TYPE_WINDOWLESS = 5;
-
     /**
      * @hide
      */
@@ -72,8 +67,7 @@ public final class StartingWindowInfo implements Parcelable {
             STARTING_WINDOW_TYPE_SPLASH_SCREEN,
             STARTING_WINDOW_TYPE_SNAPSHOT,
             STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN,
-            STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN,
-            STARTING_WINDOW_TYPE_WINDOWLESS
+            STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingWindowType {}
 
@@ -124,7 +118,6 @@ public final class StartingWindowInfo implements Parcelable {
             TYPE_PARAMETER_ACTIVITY_CREATED,
             TYPE_PARAMETER_USE_SOLID_COLOR_SPLASH_SCREEN,
             TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN,
-            TYPE_PARAMETER_WINDOWLESS,
             TYPE_PARAMETER_LEGACY_SPLASH_SCREEN
     })
     public @interface StartingTypeParams {}
@@ -158,12 +151,6 @@ public final class StartingWindowInfo implements Parcelable {
      * @hide
      */
     public static final int TYPE_PARAMETER_ALLOW_HANDLE_SOLID_COLOR_SCREEN = 0x00000080;
-
-    /**
-     * Windowless surface
-     */
-    public static final int TYPE_PARAMETER_WINDOWLESS = 0x00000100;
-
     /**
      * Application is allowed to use the legacy splash screen
      * @hide
@@ -195,33 +182,7 @@ public final class StartingWindowInfo implements Parcelable {
      */
     public TaskSnapshot taskSnapshot;
 
-    @InsetsType public int requestedVisibleTypes = WindowInsets.Type.defaultVisible();
-
-    /**
-     * App token where the starting window should add to.
-     */
-    public IBinder appToken;
-
-    public IWindowlessStartingSurfaceCallback windowlessStartingSurfaceCallback;
-
-    /**
-     * The root surface where windowless surface should attach on.
-     */
-    public SurfaceControl rootSurface;
-
-    /**
-     * Notify windowless surface is created.
-     * @param addedSurface Created surface.
-     */
-    public void notifyAddComplete(SurfaceControl addedSurface) {
-        if (windowlessStartingSurfaceCallback != null) {
-            try {
-                windowlessStartingSurfaceCallback.onSurfaceAdded(addedSurface);
-            } catch (RemoteException e) {
-                //
-            }
-        }
-    }
+    public @InsetsType int requestedVisibleTypes = WindowInsets.Type.defaultVisible();
 
     public StartingWindowInfo() {
 
@@ -255,9 +216,6 @@ public final class StartingWindowInfo implements Parcelable {
         dest.writeBoolean(isKeyguardOccluded);
         dest.writeTypedObject(taskSnapshot, flags);
         dest.writeInt(requestedVisibleTypes);
-        dest.writeStrongBinder(appToken);
-        dest.writeStrongInterface(windowlessStartingSurfaceCallback);
-        dest.writeTypedObject(rootSurface, flags);
     }
 
     void readFromParcel(@NonNull Parcel source) {
@@ -272,10 +230,6 @@ public final class StartingWindowInfo implements Parcelable {
         isKeyguardOccluded = source.readBoolean();
         taskSnapshot = source.readTypedObject(TaskSnapshot.CREATOR);
         requestedVisibleTypes = source.readInt();
-        appToken = source.readStrongBinder();
-        windowlessStartingSurfaceCallback = IWindowlessStartingSurfaceCallback.Stub
-                .asInterface(source.readStrongBinder());
-        rootSurface = source.readTypedObject(SurfaceControl.CREATOR);
     }
 
     @Override
