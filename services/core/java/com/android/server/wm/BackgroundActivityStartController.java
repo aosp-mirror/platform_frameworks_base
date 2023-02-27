@@ -114,6 +114,35 @@ public class BackgroundActivityStartController {
     /** Process belongs to a SDK sandbox */
     static final int BAL_ALLOW_SDK_SANDBOX = 10;
 
+    static String balCodeToString(@BalCode int balCode) {
+        switch (balCode) {
+            case BAL_ALLOW_ALLOWLISTED_COMPONENT:
+                return "BAL_ALLOW_ALLOWLISTED_COMPONENT";
+            case BAL_ALLOW_ALLOWLISTED_UID:
+                return "BAL_ALLOW_ALLOWLISTED_UID";
+            case BAL_ALLOW_DEFAULT:
+                return "BAL_ALLOW_DEFAULT";
+            case BAL_ALLOW_FOREGROUND:
+                return "BAL_ALLOW_FOREGROUND";
+            case BAL_ALLOW_GRACE_PERIOD:
+                return "BAL_ALLOW_GRACE_PERIOD";
+            case BAL_ALLOW_PENDING_INTENT:
+                return "BAL_ALLOW_PENDING_INTENT";
+            case BAL_ALLOW_PERMISSION:
+                return "BAL_ALLOW_PERMISSION";
+            case BAL_ALLOW_SAW_PERMISSION:
+                return "BAL_ALLOW_SAW_PERMISSION";
+            case BAL_ALLOW_SDK_SANDBOX:
+                return "BAL_ALLOW_SDK_SANDBOX";
+            case BAL_ALLOW_VISIBLE_WINDOW:
+                return "BAL_ALLOW_VISIBLE_WINDOW";
+            case BAL_BLOCK:
+                return "BAL_BLOCK";
+            default:
+                throw new IllegalArgumentException("Unexpected value: " + balCode);
+        }
+    }
+
     BackgroundActivityStartController(
             final ActivityTaskManagerService service, final ActivityTaskSupervisor supervisor) {
         mService = service;
