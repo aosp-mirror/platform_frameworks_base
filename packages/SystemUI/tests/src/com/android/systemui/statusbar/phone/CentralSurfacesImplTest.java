@@ -1025,6 +1025,17 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetDozingNotUnlocking_transitionToAuthScrimmed_cancelKeyguardFadingAway() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+        verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 

@@ -3747,6 +3747,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             } else {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
             }
+            // This will cancel the keyguardFadingAway animation if it is running. We need to do
+            // this as otherwise it can remain pending and leave keyguard in a weird state.
+            mUnlockScrimCallback.onCancelled();
         } else if (mBouncerShowing && !unlocking) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
