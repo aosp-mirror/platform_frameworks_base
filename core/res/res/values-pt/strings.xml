@@ -42,12 +42,12 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Os PINs digitados não correspondem."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Digite um PIN com 4 a 8 números."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Digite um PUK com oito números ou mais."</string>
-    <string name="needPuk" msgid="7321876090152422918">"O seu chip está bloqueado por um PUK. Digite o código PUK para desbloqueá-lo."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Digite o PUK2 para desbloquear o chip."</string>
+    <string name="needPuk" msgid="3503414069503752211">"O chip está bloqueado por uma PUK. Digite o código PUK para desbloquear."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"Digite a PUK2 para desbloquear o chip."</string>
     <string name="enablePin" msgid="2543771964137091212">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
       <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
@@ -891,7 +891,7 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"Amigo(a)"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Gerente"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Mãe"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"Pai/Mãe"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"familiar responsável"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"Parceiro"</string>
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"Indicado por"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Parente"</string>
@@ -924,14 +924,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Tente novamente"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Desbloqueio para todos os recursos e dados"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"O número máximo de tentativas de desbloqueio por reconhecimento facial foi excedido"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Sem chip"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Não há um chip no tablet."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Nenhum chip no seu dispositivo Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Não há um chip no telefone."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Insera um chip."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"O chip não foi inserido ou não é possível lê-lo. Insira um chip."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Chip inutilizável."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"O chip foi desativado permanentemente.\nEntre em contato com seu provedor de serviços sem fio para obter outro chip."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Sem chip"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Nenhum chip no tablet."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Nenhum chip no seu dispositivo Android TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Nenhum chip no smartphone."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Adicione um chip."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"O chip não foi inserido ou não pode ser lido. Adicione um chip."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Chip inutilizável."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Seu chip foi desativado permanentemente.\n Entre em contato com seu provedor de serviços sem fio para receber outro chip."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Faixa anterior"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Próxima faixa"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pausar"</string>
@@ -941,10 +941,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Avançar"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Só chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Rede bloqueada"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"O chip está bloqueado pelo PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"O chip está bloqueado pela PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulte o Guia do usuário ou entre em contato com o Serviço de atendimento ao cliente."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"O chip está bloqueado."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Desbloqueando o chip…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"O chip está bloqueado."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Desbloqueando chip…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Você desenhou seu padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Você digitou sua senha incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. \n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Você digitou seu PIN incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes.\n\nTente novamente em <xliff:g id="NUMBER_1">%2$d</xliff:g> segundos."</string>
@@ -1327,10 +1327,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"P/ alterar: Configurações &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Sempre permitir"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nunca permitir"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"Chip removido"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"A rede móvel ficará indisponível até que você reinicie com um chip válido inserido."</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"Chip removido"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"A rede móvel ficará indisponível até que você reinicie com um chip válido."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Concluído"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Chip adicionado"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"Chip adicionado"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Reinicie o dispositivo para acessar a rede móvel."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reiniciar"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Ativar serviço móvel"</string>
@@ -1528,7 +1528,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Diminuir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e mantenha pressionado."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e pressione."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Deslize para cima para aumentar e para baixo para diminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Aumentar minuto"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Diminuir minuto"</string>
@@ -1642,7 +1642,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"O chip foi desativado. Insira o código PUK para continuar. Entre em contato com a operadora para obter mais detalhes."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Digite o código PIN desejado"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Confirme o código PIN desejado"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Desbloqueando o chip…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Desbloqueando chip…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Código PIN incorreto."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Digite um PIN com quatro a oito números."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"O código PUK deve ter oito números."</string>
