@@ -3079,7 +3079,7 @@ public class SubscriptionManager {
     @SystemApi
     public boolean canManageSubscription(@NonNull SubscriptionInfo info,
             @NonNull String packageName) {
-        if (info == null || info.getAllAccessRules() == null || packageName == null) {
+        if (info == null || info.getAccessRules() == null || packageName == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
@@ -3091,7 +3091,7 @@ public class SubscriptionManager {
             logd("Unknown package: " + packageName);
             return false;
         }
-        for (UiccAccessRule rule : info.getAllAccessRules()) {
+        for (UiccAccessRule rule : info.getAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 return true;
