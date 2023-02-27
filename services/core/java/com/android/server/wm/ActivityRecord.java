@@ -557,6 +557,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     Drawable mEnterpriseThumbnailDrawable;
 
+    boolean mPauseSchedulePendingForPip = false;
+
     private void updateEnterpriseThumbnailDrawable(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         mEnterpriseThumbnailDrawable = dpm.getResources().getDrawable(
