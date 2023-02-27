@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
@@ -50,7 +51,8 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
                 .padding(
                     horizontal = SettingsDimension.itemPaddingStart,
                     vertical = SettingsDimension.itemPaddingVertical,
-                ),
+                )
+                .semantics(mergeDescendants = true) {},
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             val app = packageInfo.applicationInfo
@@ -93,8 +95,8 @@ internal fun AppIcon(app: ApplicationInfo, size: Dp) {
     val appRepository = rememberAppRepository()
     Image(
         painter = rememberDrawablePainter(appRepository.produceIcon(app).value),
-        contentDescription = null,
-        modifier = Modifier.size(size)
+        contentDescription = appRepository.produceIconContentDescription(app).value,
+        modifier = Modifier.size(size),
     )
 }
 
