@@ -17,10 +17,10 @@
 package com.android.wm.shell.flicker.pip
 
 import android.platform.test.annotations.Presubmit
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -38,14 +38,6 @@ import org.junit.runners.Parameterized
  *     Launch an app in full screen
  *     Select "Via code behind" radio button
  *     Press Home button or swipe up to go Home and put [pipApp] in pip mode
- * ```
- * Notes:
- * ```
- *     1. All assertions are inherited from [EnterPipTest]
- *     2. Part of the test setup occurs automatically via
- *        [com.android.server.wm.flicker.TransitionRunnerWithRules],
- *        including configuring navigation mode, initial orientation and ensuring no
- *        apps are running before setup
  * ```
  */
 @RequiresDevice
