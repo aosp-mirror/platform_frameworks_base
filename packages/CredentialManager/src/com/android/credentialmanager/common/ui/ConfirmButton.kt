@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager.common.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -33,11 +34,9 @@ fun ConfirmButton(text: String, onClick: () -> Unit) {
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-        )
+        ),
+        contentPadding = PaddingValues(start = 24.dp, top = 10.dp, end = 24.dp, bottom = 10.dp),
     ) {
-        LargeLabelText(
-            text = text,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
-        )
+        LargeLabelText(text = text)
     }
 }
