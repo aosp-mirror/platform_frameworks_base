@@ -197,8 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"تنظیمات سریع."</string>
-    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
-    <skip />
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"تنظیمات فوری و کشوی اعلانات."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"صفحه قفل."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"صفحه قفل کاری"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"بستن"</string>

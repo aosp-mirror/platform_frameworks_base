@@ -197,8 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"বিজ্ঞপ্তি শেড৷"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"দ্রুত সেটিংস৷"</string>
-    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
-    <skip />
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"দ্রুত সেটিংস এবং বিজ্ঞপ্তি শেড।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"লক স্ক্রিন।"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"কর্মস্থলের স্ক্রিন লক"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"বন্ধ করুন"</string>
@@ -1044,14 +1043,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"অফিস প্রোফাইলে পাল্টে নিন"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"বন্ধ করুন"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"লক স্ক্রিন সেটিংস"</string>
-    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
-    <skip />
-    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
-    <skip />
-    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
-    <skip />
-    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
-    <skip />
-    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
-    <skip />
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ওয়াই-ফাই উপলভ্য নয়"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ক্যামেরার অ্যাক্সেস ব্লক করা আছে"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ক্যামেরা এবং মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\'প্রায়োরিটি\' মোড চালু করা আছে"</string>
 </resources>
