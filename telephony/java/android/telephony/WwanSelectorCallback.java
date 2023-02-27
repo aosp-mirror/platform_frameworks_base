@@ -46,6 +46,7 @@ public interface WwanSelectorCallback {
      * this interface can be discarded.
      *
      * @param domain The selected domain.
+     * @param useEmergencyPdn Indicates whether emergency services use emergency PDN or not.
      */
-    void onDomainSelected(@NetworkRegistrationInfo.Domain int domain);
+    void onDomainSelected(@NetworkRegistrationInfo.Domain int domain, boolean useEmergencyPdn);
 }
