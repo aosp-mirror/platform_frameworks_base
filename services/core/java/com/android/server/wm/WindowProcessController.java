@@ -54,7 +54,6 @@ import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
-import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -211,7 +210,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether {@link #mLastReportedConfiguration} is deferred by the cached state. */
     private volatile boolean mHasCachedConfiguration;
 
-    private int mTopActivityDeviceId = VirtualDeviceManager.DEVICE_ID_DEFAULT;
+    private int mTopActivityDeviceId = Context.DEVICE_ID_DEFAULT;
     /**
      * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
      * registered.
@@ -1435,7 +1434,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // TODO(b/263402938): Add tests that capture the deviceId dispatch to the client.
         mTopActivityDeviceId = deviceId;
         dispatchConfiguration(config, topActivityDeviceChanged ? mTopActivityDeviceId
-                : VirtualDeviceManager.DEVICE_ID_INVALID);
+                : Context.DEVICE_ID_INVALID);
     }
 
     private int getTopActivityDeviceId() {
@@ -1520,7 +1519,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
         // By default send invalid deviceId as no-op signal so it's not updated on the client side.
-        scheduleConfigurationChange(thread, config, VirtualDeviceManager.DEVICE_ID_INVALID);
+        scheduleConfigurationChange(thread, config, Context.DEVICE_ID_INVALID);
     }
 
     private void scheduleConfigurationChange(IApplicationThread thread, Configuration config,

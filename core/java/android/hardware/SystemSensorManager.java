@@ -17,10 +17,10 @@
 package android.hardware;
 
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.companion.virtual.VirtualDeviceManager;
