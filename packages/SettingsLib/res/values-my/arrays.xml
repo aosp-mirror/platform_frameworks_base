@@ -63,17 +63,13 @@
     <item msgid="6336372935919715515">"စစ်ထုတ်ထားသည်များကို ဖွင့်ထားသည်"</item>
     <item msgid="2779123106632690576">"ဖွင့်ထားသည်"</item>
   </string-array>
-  <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"စစ်ထုတ်ထားသော ခေါင်းစီးများ"</item>
-    <item msgid="4818549483446395865">"စစ်ထုတ်ထားသော A2DP မီဒီယာအတွဲများ"</item>
-    <item msgid="8207123990453243311">"စစ်ထုတ်ထားသော RFCOMM ချန်နယ်"</item>
-  </string-array>
-  <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"ပိတ်ထားသည်"</item>
-    <item msgid="5884245882825346396">"ပဉ္စလက်"</item>
-    <item msgid="6569400572915342949">"ခေါင်းစီး"</item>
-    <item msgid="1239386221416967664">"စစ်ထုတ်မှုအပြည့်"</item>
-  </string-array>
+    <!-- no translation found for bt_hci_snoop_log_filters_entries:0 (195768089203590086) -->
+    <!-- no translation found for bt_hci_snoop_log_filters_entries:1 (2776218217644557831) -->
+    <!-- no translation found for bt_hci_snoop_log_filters_entries:2 (8163235976612675092) -->
+    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:0 (3961868665260627524) -->
+    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:1 (2505973306504851132) -->
+    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:2 (5883011000629613855) -->
+    <!-- no translation found for bt_hci_snoop_log_profile_filter_entries:3 (1051534112762023603) -->
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (မူလ)"</item>
     <item msgid="1637054408779685086">"AVRCP 1.3"</item>
