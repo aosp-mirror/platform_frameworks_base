@@ -33,7 +33,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
@@ -3077,21 +3076,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(timestamp));
     }
 
-    private static String credentialTypeToString(int credentialType) {
-        switch (credentialType) {
-            case CREDENTIAL_TYPE_NONE:
-                return "None";
-            case CREDENTIAL_TYPE_PATTERN:
-                return "Pattern";
-            case CREDENTIAL_TYPE_PIN:
-                return "Pin";
-            case CREDENTIAL_TYPE_PASSWORD:
-                return "Password";
-            default:
-                return "Unknown " + credentialType;
-        }
-    }
-
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, printWriter)) return;
@@ -3121,10 +3105,10 @@ public class LockSettingsService extends ILockSettings.Stub {
             } catch (RemoteException e) {
                 // ignore.
             }
-            // It's OK to dump the password type since anyone with physical access can just
+            // It's OK to dump the credential type since anyone with physical access can just
             // observe it from the keyguard directly.
             pw.println("Quality: " + getKeyguardStoredQuality(userId));
-            pw.println("CredentialType: " + credentialTypeToString(
+            pw.println("CredentialType: " + LockPatternUtils.credentialTypeToString(
                     getCredentialTypeInternal(userId)));
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
             pw.println(TextUtils.formatSimple("Metrics: %s",
