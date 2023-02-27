@@ -171,4 +171,9 @@
     <item msgid="146088982397753810">"Désactivé"</item>
     <item msgid="460891964396502657">"Activé"</item>
   </string-array>
+  <string-array name="tile_states_dream">
+    <item msgid="6184819793571079513">"Indisponible"</item>
+    <item msgid="8014986104355098744">"Désactivé"</item>
+    <item msgid="5966994759929723339">"Activé"</item>
+  </string-array>
 </resources>
