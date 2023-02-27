@@ -103,9 +103,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
     // region handleSystemKey
     @Test
     fun handleSystemKey_receiveValidSystemKey_shouldShowNoteTask() {
-        createNoteTaskInitializer()
-            .callbacks
-            .handleSystemKey(NoteTaskController.NOTE_TASK_KEY_EVENT)
+        createNoteTaskInitializer().callbacks.handleSystemKey(KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL)
 
         verify(noteTaskController).showNoteTask(entryPoint = NoteTaskEntryPoint.TAIL_BUTTON)
     }
