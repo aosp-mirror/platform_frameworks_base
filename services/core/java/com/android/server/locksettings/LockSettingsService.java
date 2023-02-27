@@ -2945,7 +2945,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         synchronized (mSpManager) {
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             for (long handle : mSpManager.getPendingTokensForUser(userId)) {
-                Slog.i(TAG, TextUtils.formatSimple("activateEscrowTokens: %x %d ", handle, userId));
+                Slogf.i(TAG, "activateEscrowTokens: %016x %d", handle, userId);
                 mSpManager.createTokenBasedProtector(handle, sp, userId);
             }
         }
@@ -3108,14 +3108,15 @@ public class LockSettingsService extends ILockSettings.Stub {
             pw.println("User " + userId);
             pw.increaseIndent();
             synchronized (mSpManager) {
-                pw.println(TextUtils.formatSimple("LSKF-based SP protector ID: %x",
+                pw.println(TextUtils.formatSimple("LSKF-based SP protector ID: %016x",
                         getCurrentLskfBasedProtectorId(userId)));
-                pw.println(TextUtils.formatSimple("LSKF last changed: %s (previous protector: %x)",
-                        timestampToString(getLong(LSKF_LAST_CHANGED_TIME_KEY, 0, userId)),
-                        getLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId)));
+                pw.println(TextUtils.formatSimple(
+                            "LSKF last changed: %s (previous protector: %016x)",
+                            timestampToString(getLong(LSKF_LAST_CHANGED_TIME_KEY, 0, userId)),
+                            getLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId)));
             }
             try {
-                pw.println(TextUtils.formatSimple("SID: %x",
+                pw.println(TextUtils.formatSimple("SID: %016x",
                         getGateKeeperService().getSecureUserId(userId)));
             } catch (RemoteException e) {
                 // ignore.

@@ -1654,6 +1654,9 @@ class SyntheticPasswordManager {
     }
 
     private String getProtectorKeyAlias(long protectorId) {
+        // Note, this arguably has a bug: %x should be %016x so that the protector ID is left-padded
+        // with zeroes, like how the synthetic password state files are named.  It's too late to fix
+        // this, though, and it doesn't actually matter.
         return TextUtils.formatSimple("%s%x", PROTECTOR_KEY_ALIAS_PREFIX, protectorId);
     }
 
