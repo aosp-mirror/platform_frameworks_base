@@ -170,9 +170,11 @@ class GetFlowUtils {
         fun toRequestDisplayInfo(
             requestInfo: RequestInfo,
             context: Context,
+            originName: String?,
         ): com.android.credentialmanager.getflow.RequestDisplayInfo? {
             return com.android.credentialmanager.getflow.RequestDisplayInfo(
-                appName = getAppLabel(context.packageManager, requestInfo.appPackageName)
+                appName = originName
+                    ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                     ?: return null
             )
         }
@@ -395,8 +397,10 @@ class CreateFlowUtils {
         fun toRequestDisplayInfo(
             requestInfo: RequestInfo,
             context: Context,
+            originName: String?,
         ): RequestDisplayInfo? {
-            val appLabel = getAppLabel(context.packageManager, requestInfo.appPackageName)
+            val appLabel = originName
+                ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                 ?: return null
             val createCredentialRequest = requestInfo.createCredentialRequest ?: return null
             val createCredentialRequestJetpack = CreateCredentialRequest.createFrom(
