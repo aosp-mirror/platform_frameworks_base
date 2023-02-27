@@ -2736,7 +2736,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
                 && shouldListenBouncerState && shouldListenUdfpsState
-                && shouldListenSideFpsState;
+                && shouldListenSideFpsState
+                && !isFingerprintLockedOut();
         logListenerModelData(
                 new KeyguardFingerprintListenModel(
                     System.currentTimeMillis(),
