@@ -37,6 +37,7 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.dagger.SysUISingleton
@@ -55,16 +56,17 @@ import javax.inject.Inject
 
 @SysUISingleton
 class ControlsControllerImpl @Inject constructor (
-    private val context: Context,
-    @Background private val executor: DelayableExecutor,
-    private val uiController: ControlsUiController,
-    private val bindingController: ControlsBindingController,
-    private val listingController: ControlsListingController,
-    private val userFileManager: UserFileManager,
-    private val userTracker: UserTracker,
-    private val authorizedPanelsRepository: AuthorizedPanelsRepository,
-    optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
-    dumpManager: DumpManager,
+        private val context: Context,
+        @Background private val executor: DelayableExecutor,
+        private val uiController: ControlsUiController,
+        private val selectedComponentRepository: SelectedComponentRepository,
+        private val bindingController: ControlsBindingController,
+        private val listingController: ControlsListingController,
+        private val userFileManager: UserFileManager,
+        private val userTracker: UserTracker,
+        private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+        optionalWrapper: Optional<ControlsFavoritePersistenceWrapper>,
+        dumpManager: DumpManager,
 ) : Dumpable, ControlsController {
 
     companion object {
@@ -497,17 +499,14 @@ class ControlsControllerImpl @Inject constructor (
         }
     }
 
-    override fun canRemoveFavorites(componentName: ComponentName): Boolean =
-            !authorizedPanelsRepository.getPreferredPackages().contains(componentName.packageName)
-
     override fun removeFavorites(componentName: ComponentName): Boolean {
         if (!confirmAvailability()) return false
-        if (!canRemoveFavorites(componentName)) return false
 
         executor.execute {
-            Favorites.removeStructures(componentName)
+            if (Favorites.removeStructures(componentName)) {
+                persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+            }
             authorizedPanelsRepository.removeAuthorizedPanels(setOf(componentName.packageName))
-            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
         }
         return true
     }
@@ -574,7 +573,9 @@ class ControlsControllerImpl @Inject constructor (
     }
 
     override fun setPreferredSelection(selectedItem: SelectedItem) {
-        uiController.updatePreferences(selectedItem)
+        selectedComponentRepository.setSelectedComponent(
+                SelectedComponentRepository.SelectedComponent(selectedItem)
+        )
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
