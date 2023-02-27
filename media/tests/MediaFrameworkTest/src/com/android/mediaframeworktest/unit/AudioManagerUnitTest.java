@@ -17,10 +17,10 @@
 package com.android.mediaframeworktest.unit;
 
 
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
+import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.AudioManager.FX_KEY_CLICK;
 
 import static org.mockito.ArgumentMatchers.anyInt;

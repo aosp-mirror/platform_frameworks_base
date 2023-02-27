@@ -16,11 +16,11 @@
 
 package com.android.server.companion.virtual;
 
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
+import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 import static android.content.Intent.ACTION_VIEW;
 import static android.content.pm.ActivityInfo.FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES;
 
