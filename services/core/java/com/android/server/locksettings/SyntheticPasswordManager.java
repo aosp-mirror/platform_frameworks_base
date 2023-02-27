@@ -960,6 +960,7 @@ class SyntheticPasswordManager {
                 && LockPatternUtils.userOwnsFrpCredential(mContext, userInfo)
                 && getCredentialType(protectorId, userInfo.id) !=
                         LockPatternUtils.CREDENTIAL_TYPE_NONE) {
+            Slog.i(TAG, "Migrating FRP credential to persistent data block");
             PasswordData pwd = PasswordData.fromBytes(loadState(PASSWORD_DATA_NAME, protectorId,
                     userInfo.id));
             int weaverSlot = loadWeaverSlot(protectorId, userInfo.id);
