@@ -46,10 +46,16 @@ public:
 
     static void setJavaVM(JavaVM* javaVM);
 
-    /** returns a pointer to the JavaVM provided when we initialized the module */
+    /**
+     * returns a pointer to the JavaVM provided when we initialized the module
+     * DEPRECATED: Objects should know the JavaVM that created them
+     */
     static JavaVM* getJavaVM() { return mJavaVM; }
 
-    /** return a pointer to the JNIEnv for this thread */
+    /**
+     * return a pointer to the JNIEnv for this thread
+     * DEPRECATED: Objects should know the JavaVM that created them
+     */
     static JNIEnv* getJNIEnv();
 
     /** create a JNIEnv* for this thread or assert if one already exists */
@@ -337,12 +343,20 @@ public:
     JGlobalRefHolder(JavaVM* vm, jobject object) : mVm(vm), mObject(object) {}
 
     virtual ~JGlobalRefHolder() {
-        GraphicsJNI::getJNIEnv()->DeleteGlobalRef(mObject);
+        env()->DeleteGlobalRef(mObject);
         mObject = nullptr;
     }
 
     jobject object() { return mObject; }
     JavaVM* vm() { return mVm; }
+
+    JNIEnv* env() {
+        JNIEnv* env;
+        if (mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", mVm);
+        }
+        return env;
+    }
 
 private:
     JGlobalRefHolder(const JGlobalRefHolder&) = delete;
