@@ -80,6 +80,12 @@
         <item name="android:textColor">@color/tv_pip_edu_text</item>
     </style>
 
+    <style name="LetterboxDialog" parent="@android:style/Theme.Holo">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/letterbox_dialog_background</item>
+    </style>
+
     <style name="RestartDialogTitleText">
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>

@@ -41,6 +41,9 @@
     <color name="letterbox_education_accent_primary">@android:color/system_accent1_100</color>
     <color name="letterbox_education_text_secondary">@android:color/system_neutral2_200</color>
 
+    <!-- Letterbox Dialog -->
+    <color name="letterbox_dialog_background">@android:color/system_neutral1_900</color>
+
     <!-- GM2 colors -->
     <color name="GM2_grey_200">#E8EAED</color>
     <color name="GM2_grey_700">#5F6368</color>
