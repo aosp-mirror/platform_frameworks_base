@@ -165,10 +165,11 @@ public class LockSettingsServiceTestable extends LockSettingsService {
     }
 
     @Override
-    protected void tieProfileLockToParent(int userId, LockscreenCredential password) {
+    protected void tieProfileLockToParent(int profileUserId, int parentUserId,
+            LockscreenCredential password) {
         Parcel parcel = Parcel.obtain();
         parcel.writeParcelable(password, 0);
-        mStorage.writeChildProfileLock(userId, parcel.marshall());
+        mStorage.writeChildProfileLock(profileUserId, parcel.marshall());
         parcel.recycle();
     }
 
