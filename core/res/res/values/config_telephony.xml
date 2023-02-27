@@ -113,4 +113,8 @@
          new network. -->
     <bool name="config_enhanced_iwlan_handover_check">true</bool>
     <java-symbol type="bool" name="config_enhanced_iwlan_handover_check" />
+
+    <!-- Whether using the new SubscriptionManagerService or the old SubscriptionController -->
+    <bool name="config_using_subscription_manager_service">false</bool>
+    <java-symbol type="bool" name="config_using_subscription_manager_service" />
 </resources>
