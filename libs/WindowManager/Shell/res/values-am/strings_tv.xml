@@ -17,7 +17,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="2576686079160402435">"ስዕል-ላይ-ስዕል"</string>
+    <string name="notification_channel_tv_pip" msgid="2576686079160402435">"ሥዕል-ላይ-ሥዕል"</string>
     <string name="pip_notification_unknown_title" msgid="2729870284350772311">"(ርዕስ የሌለው ፕሮግራም)"</string>
     <string name="pip_close" msgid="2955969519031223530">"ዝጋ"</string>
     <string name="pip_fullscreen" msgid="7278047353591302554">"ሙሉ ማያ ገጽ"</string>
@@ -25,7 +25,7 @@
     <string name="pip_expand" msgid="1051966011679297308">"ዘርጋ"</string>
     <string name="pip_collapse" msgid="3903295106641385962">"ሰብስብ"</string>
     <string name="pip_edu_text" msgid="3672999496647508701">" ለመቆጣጠሪያዎች "<annotation icon="home_icon">"መነሻ"</annotation>"ን ሁለቴ ይጫኑ"</string>
-    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"የስዕል-ላይ-ስዕል ምናሌ።"</string>
+    <string name="a11y_pip_menu_entered" msgid="5106343214776801614">"የሥዕል-ላይ-ሥዕል ምናሌ።"</string>
     <string name="a11y_action_pip_move_left" msgid="6612980937817141583">"ወደ ግራ ውሰድ"</string>
     <string name="a11y_action_pip_move_right" msgid="1119409122645529936">"ወደ ቀኝ ውሰድ"</string>
     <string name="a11y_action_pip_move_up" msgid="98502616918621959">"ወደ ላይ ውሰድ"</string>
