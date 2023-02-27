@@ -75,7 +75,7 @@ fun Snackbar(
                         action()
                     }
                     IconButton(onClick = onDismiss, modifier = Modifier.padding(
-                        top = 18.dp, bottom = 18.dp, start = 16.dp, end = 24.dp,
+                        top = 4.dp, bottom = 4.dp, start = 2.dp, end = 10.dp,
                     )) {
                         Icon(
                             Icons.Filled.Close,
