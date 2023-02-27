@@ -46,8 +46,9 @@ public final class FileIntegrity {
      */
     @SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
     public static void setUpFsVerity(@NonNull File file) throws IOException {
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, MODE_READ_ONLY);
-        setUpFsVerity(pfd);
+        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, MODE_READ_ONLY)) {
+            setUpFsVerity(pfd);
+        }
     }
 
     /**
