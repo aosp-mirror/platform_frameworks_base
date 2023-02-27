@@ -30,7 +30,10 @@ public:
     JvmErrorReporter(JNIEnv* env) { env->GetJavaVM(&mVm); }
 
     virtual void onError(const std::string& message) override {
-        JNIEnv* env = GraphicsJNI::getJNIEnv();
+        JNIEnv* env;
+        if (mVm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+            LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", mVm);
+        }
         jniThrowException(env, "java/lang/IllegalStateException", message.c_str());
     }
 
