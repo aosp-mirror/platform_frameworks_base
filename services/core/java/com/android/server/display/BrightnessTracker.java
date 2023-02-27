@@ -320,7 +320,7 @@ public class BrightnessTracker {
      * Notify the BrightnessTracker that the user has changed the brightness of the display.
      */
     public void notifyBrightnessChanged(float brightness, boolean userInitiated,
-            float powerBrightnessFactor, boolean isUserSetBrightness,
+            float powerBrightnessFactor, boolean wasShortTermModelActive,
             boolean isDefaultBrightnessConfig, String uniqueDisplayId, float[] luxValues,
             long[] luxTimestamps) {
         if (DEBUG) {
@@ -329,7 +329,7 @@ public class BrightnessTracker {
         }
         Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
                 userInitiated ? 1 : 0, 0 /*unused*/, new BrightnessChangeValues(brightness,
-                        powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig,
+                        powerBrightnessFactor, wasShortTermModelActive, isDefaultBrightnessConfig,
                         mInjector.currentTimeMillis(), uniqueDisplayId, luxValues, luxTimestamps));
         m.sendToTarget();
     }
@@ -343,7 +343,7 @@ public class BrightnessTracker {
     }
 
     private void handleBrightnessChanged(float brightness, boolean userInitiated,
-            float powerBrightnessFactor, boolean isUserSetBrightness,
+            float powerBrightnessFactor, boolean wasShortTermModelActive,
             boolean isDefaultBrightnessConfig, long timestamp, String uniqueDisplayId,
             float[] luxValues, long[] luxTimestamps) {
         BrightnessChangeEvent.Builder builder;
@@ -368,7 +368,7 @@ public class BrightnessTracker {
             builder.setBrightness(brightness);
             builder.setTimeStamp(timestamp);
             builder.setPowerBrightnessFactor(powerBrightnessFactor);
-            builder.setUserBrightnessPoint(isUserSetBrightness);
+            builder.setUserBrightnessPoint(wasShortTermModelActive);
             builder.setIsDefaultBrightnessConfig(isDefaultBrightnessConfig);
             builder.setUniqueDisplayId(uniqueDisplayId);
 
@@ -997,7 +997,7 @@ public class BrightnessTracker {
                     BrightnessChangeValues values = (BrightnessChangeValues) msg.obj;
                     boolean userInitiatedChange = (msg.arg1 == 1);
                     handleBrightnessChanged(values.brightness, userInitiatedChange,
-                            values.powerBrightnessFactor, values.isUserSetBrightness,
+                            values.powerBrightnessFactor, values.wasShortTermModelActive,
                             values.isDefaultBrightnessConfig, values.timestamp,
                             values.uniqueDisplayId, values.luxValues, values.luxTimestamps);
                     break;
@@ -1031,7 +1031,7 @@ public class BrightnessTracker {
     private static class BrightnessChangeValues {
         public final float brightness;
         public final float powerBrightnessFactor;
-        public final boolean isUserSetBrightness;
+        public final boolean wasShortTermModelActive;
         public final boolean isDefaultBrightnessConfig;
         public final long timestamp;
         public final String uniqueDisplayId;
@@ -1039,11 +1039,11 @@ public class BrightnessTracker {
         public final long[] luxTimestamps;
 
         BrightnessChangeValues(float brightness, float powerBrightnessFactor,
-                boolean isUserSetBrightness, boolean isDefaultBrightnessConfig,
+                boolean wasShortTermModelActive, boolean isDefaultBrightnessConfig,
                 long timestamp, String uniqueDisplayId, float[] luxValues, long[] luxTimestamps) {
             this.brightness = brightness;
             this.powerBrightnessFactor = powerBrightnessFactor;
-            this.isUserSetBrightness = isUserSetBrightness;
+            this.wasShortTermModelActive = wasShortTermModelActive;
             this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
             this.timestamp = timestamp;
             this.uniqueDisplayId = uniqueDisplayId;
