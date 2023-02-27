@@ -6691,9 +6691,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
 
             synchronized (mInstallLock) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "dump profiles");
                 mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
             }
         }
 

@@ -386,7 +386,7 @@ public class PackageDexOptimizer {
                             options.getCompilationReason());
                     // OTAPreopt doesn't have stats so don't report in that case.
                     if (packageStats != null) {
-                        Trace.traceBegin(Trace.TRACE_TAG_PACKAGE_MANAGER, "dex2oat-metrics");
+                        Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "dex2oat-metrics");
                         try {
                             long sessionId = sRandom.nextLong();
                             ArtStatsLogUtils.writeStatsLog(
@@ -403,7 +403,7 @@ public class PackageDexOptimizer {
                                     dexCodeIsa,
                                     path);
                         } finally {
-                            Trace.traceEnd(Trace.TRACE_TAG_PACKAGE_MANAGER);
+                            Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
                         }
                     }
 
