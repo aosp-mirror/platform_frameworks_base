@@ -2311,13 +2311,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void removeKeystoreProfileKey(int targetUserId) {
-        Slog.i(TAG, "Remove keystore profile key for user: " + targetUserId);
+        final String encryptAlias = PROFILE_KEY_NAME_ENCRYPT + targetUserId;
+        final String decryptAlias = PROFILE_KEY_NAME_DECRYPT + targetUserId;
         try {
-            mJavaKeyStore.deleteEntry(PROFILE_KEY_NAME_ENCRYPT + targetUserId);
-            mJavaKeyStore.deleteEntry(PROFILE_KEY_NAME_DECRYPT + targetUserId);
+            if (mJavaKeyStore.containsAlias(encryptAlias) ||
+                    mJavaKeyStore.containsAlias(decryptAlias)) {
+                Slogf.i(TAG, "Removing keystore profile key for user %d", targetUserId);
+                mJavaKeyStore.deleteEntry(encryptAlias);
+                mJavaKeyStore.deleteEntry(decryptAlias);
+            }
         } catch (KeyStoreException e) {
-            // We have tried our best to remove all keys
-            Slog.e(TAG, "Unable to remove keystore profile key for user:" + targetUserId, e);
+            // We have tried our best to remove the key.
+            Slogf.e(TAG, e, "Error removing keystore profile key for user %d", targetUserId);
         }
     }
 
