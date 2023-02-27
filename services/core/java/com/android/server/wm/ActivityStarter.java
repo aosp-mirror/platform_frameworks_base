@@ -74,6 +74,7 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_COMPONENT;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_ALLOWLISTED_UID;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_DEFAULT;
@@ -2017,7 +2018,8 @@ class ActivityStarter {
         if (ActivitySecurityModelFeatureFlags.shouldShowToast(mCallingUid)) {
             String toastText = ActivitySecurityModelFeatureFlags.DOC_LINK
                     + (blockActivityStartAndFeatureEnabled ? " blocked " : " would block ")
-                    + getApplicationLabel(launchedFromPackageName);
+                    + getApplicationLabel(mService.mContext.getPackageManager(),
+                        launchedFromPackageName);
             UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
                     toastText, Toast.LENGTH_LONG).show());
 
@@ -2037,17 +2039,6 @@ class ActivityStarter {
         }
 
         return true;
-    }
-
-    private CharSequence getApplicationLabel(String packageName) {
-        try {
-            PackageManager packageManager = mService.mContext.getPackageManager();
-            ApplicationInfo launchedFromPackageInfo = packageManager.getApplicationInfo(
-                    packageName, PackageManager.ApplicationInfoFlags.of(0));
-            return packageManager.getApplicationLabel(launchedFromPackageInfo);
-        } catch (PackageManager.NameNotFoundException e) {
-            return packageName;
-        }
     }
 
     /** Only called when an activity launch may be blocked, which should happen very rarely */
