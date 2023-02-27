@@ -22,15 +22,18 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.UserManager
 import android.util.Log
-import com.android.internal.logging.UiEvent
-import com.android.internal.logging.UiEventLogger
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.util.kotlin.getOrNull
+import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
+import com.android.wm.shell.bubbles.Bubbles.BubbleExpandListener
 import java.util.Optional
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 /**
@@ -41,17 +44,39 @@ import javax.inject.Inject
  * Currently, we only support a single task per time.
  */
 @SysUISingleton
-internal class NoteTaskController
+class NoteTaskController
 @Inject
 constructor(
     private val context: Context,
     private val resolver: NoteTaskInfoResolver,
+    private val eventLogger: NoteTaskEventLogger,
     private val optionalBubbles: Optional<Bubbles>,
-    private val optionalKeyguardManager: Optional<KeyguardManager>,
     private val optionalUserManager: Optional<UserManager>,
+    private val optionalKeyguardManager: Optional<KeyguardManager>,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
-    private val uiEventLogger: UiEventLogger,
 ) {
+
+    @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
+
+    /** @see BubbleExpandListener */
+    fun onBubbleExpandChanged(isExpanding: Boolean, key: String?) {
+        if (!isEnabled) return
+
+        if (key != Bubble.KEY_APP_BUBBLE) return
+
+        val info = infoReference.getAndSet(null)
+
+        // Safe guard mechanism, this callback should only be called for app bubbles.
+        if (info?.launchMode != NoteTaskLaunchMode.AppBubble) return
+
+        if (isExpanding) {
+            logDebug { "onBubbleExpandChanged - expanding: $info" }
+            eventLogger.logNoteTaskOpened(info)
+        } else {
+            logDebug { "onBubbleExpandChanged - collapsing: $info" }
+            eventLogger.logNoteTaskClosed(info)
+        }
+    }
 
     /**
      * Shows a note task. How the task is shown will depend on when the method is invoked.
@@ -69,32 +94,50 @@ constructor(
      * That will let users open other apps in full screen, and take contextual notes.
      */
     @JvmOverloads
-    fun showNoteTask(isInMultiWindowMode: Boolean = false, uiEvent: ShowNoteTaskUiEvent? = null) {
-
+    fun showNoteTask(
+        entryPoint: NoteTaskEntryPoint,
+        isInMultiWindowMode: Boolean = false,
+    ) {
         if (!isEnabled) return
 
         val bubbles = optionalBubbles.getOrNull() ?: return
-        val keyguardManager = optionalKeyguardManager.getOrNull() ?: return
         val userManager = optionalUserManager.getOrNull() ?: return
+        val keyguardManager = optionalKeyguardManager.getOrNull() ?: return
 
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
 
-        val noteTaskInfo = resolver.resolveInfo() ?: return
+        val info =
+            resolver.resolveInfo(
+                entryPoint = entryPoint,
+                isInMultiWindowMode = isInMultiWindowMode,
+                isKeyguardLocked = keyguardManager.isKeyguardLocked,
+            )
+                ?: return
 
-        uiEvent?.let { uiEventLogger.log(it, noteTaskInfo.uid, noteTaskInfo.packageName) }
+        infoReference.set(info)
 
         // TODO(b/266686199): We should handle when app not available. For now, we log.
-        val intent = noteTaskInfo.toCreateNoteIntent()
+        val intent = createNoteIntent(info)
         try {
-            if (isInMultiWindowMode || keyguardManager.isKeyguardLocked) {
-                context.startActivity(intent)
-            } else {
-                bubbles.showOrHideAppBubble(intent)
+            logDebug { "onShowNoteTask - start: $info" }
+            when (info.launchMode) {
+                is NoteTaskLaunchMode.AppBubble -> {
+                    bubbles.showOrHideAppBubble(intent)
+                    // App bubble logging happens on `onBubbleExpandChanged`.
+                    logDebug { "onShowNoteTask - opened as app bubble: $info" }
+                }
+                is NoteTaskLaunchMode.Activity -> {
+                    context.startActivity(intent)
+                    eventLogger.logNoteTaskOpened(info)
+                    logDebug { "onShowNoteTask - opened as activity: $info" }
+                }
             }
+            logDebug { "onShowNoteTask - success: $info" }
         } catch (e: ActivityNotFoundException) {
-            Log.e(TAG, "Activity not found for action: $ACTION_CREATE_NOTE.", e)
+            logDebug { "onShowNoteTask - failed: $info" }
         }
+        logDebug { "onShowNoteTask - compoleted: $info" }
     }
 
     /**
@@ -119,41 +162,12 @@ constructor(
             enabledState,
             PackageManager.DONT_KILL_APP,
         )
-    }
 
-    /** IDs of UI events accepted by [showNoteTask]. */
-    enum class ShowNoteTaskUiEvent(private val _id: Int) : UiEventLogger.UiEventEnum {
-        @UiEvent(doc = "User opened a note by tapping on the lockscreen shortcut.")
-        NOTE_OPENED_VIA_KEYGUARD_QUICK_AFFORDANCE(1294),
-
-        /* ktlint-disable max-line-length */
-        @UiEvent(
-            doc =
-                "User opened a note by pressing the stylus tail button while the screen was unlocked."
-        )
-        NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON(1295),
-        @UiEvent(
-            doc =
-                "User opened a note by pressing the stylus tail button while the screen was locked."
-        )
-        NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED(1296),
-        @UiEvent(doc = "User opened a note by tapping on an app shortcut.")
-        NOTE_OPENED_VIA_SHORTCUT(1297);
-
-        override fun getId() = _id
+        logDebug { "setNoteTaskShortcutEnabled - completed: $isEnabled" }
     }
 
     companion object {
-        private val TAG = NoteTaskController::class.simpleName.orEmpty()
-
-        private fun NoteTaskInfoResolver.NoteTaskInfo.toCreateNoteIntent(): Intent {
-            return Intent(ACTION_CREATE_NOTE)
-                .setPackage(packageName)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // EXTRA_USE_STYLUS_MODE does not mean a stylus is in-use, but a stylus entrypoint
-                // was used to start it.
-                .putExtra(INTENT_EXTRA_USE_STYLUS_MODE, true)
-        }
+        val TAG = NoteTaskController::class.simpleName.orEmpty()
 
         // TODO(b/254604589): Use final KeyEvent.KEYCODE_* instead.
         const val NOTE_TASK_KEY_EVENT = 311
@@ -163,5 +177,19 @@ constructor(
 
         // TODO(b/265912743): Use Intent.INTENT_EXTRA_USE_STYLUS_MODE instead.
         const val INTENT_EXTRA_USE_STYLUS_MODE = "android.intent.extra.USE_STYLUS_MODE"
+    }
+}
+
+private fun createNoteIntent(info: NoteTaskInfo): Intent =
+    Intent(NoteTaskController.ACTION_CREATE_NOTE)
+        .setPackage(info.packageName)
+        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // EXTRA_USE_STYLUS_MODE does not mean a stylus is in-use, but a stylus entrypoint
+        // was used to start it.
+        .putExtra(NoteTaskController.INTENT_EXTRA_USE_STYLUS_MODE, true)
+
+private inline fun logDebug(message: () -> String) {
+    if (Build.IS_DEBUGGABLE) {
+        Log.d(NoteTaskController.TAG, message())
     }
 }
