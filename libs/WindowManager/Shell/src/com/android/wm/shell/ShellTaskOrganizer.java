@@ -428,9 +428,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     @Override
-    public void addStartingWindow(StartingWindowInfo info) {
+    public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
         if (mStartingWindow != null) {
-            mStartingWindow.addStartingWindow(info);
+            mStartingWindow.addStartingWindow(info, appToken);
         }
     }
 

@@ -24,8 +24,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.wm.shell.startingsurface.SplashscreenContentDrawer.MAX_ANIMATION_DURATION;
-import static com.android.wm.shell.startingsurface.SplashscreenContentDrawer.MINIMAL_ANIMATION_DURATION;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
+import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MINIMAL_ANIMATION_DURATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -56,9 +56,11 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.testing.TestableContext;
+import android.view.Display;
 import android.view.IWindowSession;
 import android.view.InsetsState;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.WindowMetrics;
@@ -104,7 +106,36 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
     private ShellExecutor mTestExecutor;
     private final TestableContext mTestContext = new TestContext(
             InstrumentationRegistry.getInstrumentation().getTargetContext());
-    StartingSurfaceDrawer mStartingSurfaceDrawer;
+    TestStartingSurfaceDrawer mStartingSurfaceDrawer;
+
+    static final class TestStartingSurfaceDrawer extends StartingSurfaceDrawer{
+        int mAddWindowForTask = 0;
+
+        TestStartingSurfaceDrawer(Context context, ShellExecutor splashScreenExecutor,
+                IconProvider iconProvider, TransactionPool pool) {
+            super(context, splashScreenExecutor, iconProvider, pool);
+        }
+
+        @Override
+        protected boolean addWindow(int taskId, IBinder appToken, View view, Display display,
+                WindowManager.LayoutParams params, int suggestType) {
+            // listen for addView
+            mAddWindowForTask = taskId;
+            saveSplashScreenRecord(appToken, taskId, view, suggestType);
+            // Do not wait for background color
+            return false;
+        }
+
+        @Override
+        protected void removeWindowSynced(StartingWindowRemovalInfo removalInfo,
+                boolean immediately) {
+            // listen for removeView
+            if (mAddWindowForTask == removalInfo.taskId) {
+                mAddWindowForTask = 0;
+            }
+            mStartingWindowRecords.remove(removalInfo.taskId);
+        }
+    }
 
     private static class TestContext extends TestableContext {
         TestContext(Context context) {
@@ -134,51 +165,44 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
         doReturn(metrics).when(mMockWindowManager).getMaximumWindowMetrics();
         doNothing().when(mMockWindowManager).addView(any(), any());
         mTestExecutor = new HandlerExecutor(mTestHandler);
-        mStartingSurfaceDrawer = new StartingSurfaceDrawer(mTestContext, mTestExecutor,
-                mIconProvider, mTransactionPool);
         mStartingSurfaceDrawer = spy(
-                new StartingSurfaceDrawer(mTestContext, mTestExecutor, mIconProvider,
+                new TestStartingSurfaceDrawer(mTestContext, mTestExecutor, mIconProvider,
                         mTransactionPool));
-        spyOn(mStartingSurfaceDrawer.mSplashscreenWindowCreator);
-        spyOn(mStartingSurfaceDrawer.mWindowRecords);
-        spyOn(mStartingSurfaceDrawer.mWindowlessRecords);
     }
 
     @Test
     public void testAddSplashScreenSurface() {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
-                createWindowInfo(taskId, android.R.style.Theme, mBinder);
-        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo,
+                createWindowInfo(taskId, android.R.style.Theme);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
                 STARTING_WINDOW_TYPE_SPLASH_SCREEN);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer.mSplashscreenWindowCreator).addWindow(
-                eq(taskId), eq(mBinder), any(), any(), any(),
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
                 eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
+        assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
         StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
         removalInfo.taskId = windowInfo.taskInfo.taskId;
         mStartingSurfaceDrawer.removeStartingWindow(removalInfo);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer.mWindowRecords).removeWindow(any(), eq(false));
-        assertEquals(mStartingSurfaceDrawer.mWindowRecords.recordSize(), 0);
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(false));
+        assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, 0);
     }
 
     @Test
     public void testFallbackDefaultTheme() {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
-                createWindowInfo(taskId, 0, mBinder);
+                createWindowInfo(taskId, 0);
         final int[] theme = new int[1];
         doAnswer(invocation -> theme[0] = (Integer) invocation.callRealMethod())
-                .when(mStartingSurfaceDrawer.mSplashscreenWindowCreator)
-                .getSplashScreenTheme(eq(0), any());
+                .when(mStartingSurfaceDrawer).getSplashScreenTheme(eq(0), any());
 
-        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo,
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
                 STARTING_WINDOW_TYPE_SPLASH_SCREEN);
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer.mSplashscreenWindowCreator)
-                .getSplashScreenTheme(eq(0), any());
+        verify(mStartingSurfaceDrawer).getSplashScreenTheme(eq(0), any());
         assertNotEquals(theme[0], 0);
     }
 
@@ -217,7 +241,7 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
     public void testRemoveTaskSnapshotWithImeSurfaceWhenOnImeDrawn() throws Exception {
         final int taskId = 1;
         final StartingWindowInfo windowInfo =
-                createWindowInfo(taskId, android.R.style.Theme, mBinder);
+                createWindowInfo(taskId, android.R.style.Theme);
         TaskSnapshot snapshot = createTaskSnapshot(100, 100, new Point(100, 100),
                 new Rect(0, 0, 0, 50), true /* hasImeSurface */);
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
@@ -246,7 +270,7 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
             when(TaskSnapshotWindow.create(eq(windowInfo), eq(mBinder), eq(snapshot), any(),
                     any())).thenReturn(mockSnapshotWindow);
             // Simulate a task snapshot window created with IME snapshot shown.
-            mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, snapshot);
+            mStartingSurfaceDrawer.makeTaskSnapshotWindow(windowInfo, mBinder, snapshot);
             waitHandlerIdle(mTestHandler);
 
             // Verify the task snapshot with IME snapshot will be removed when received the real IME
@@ -254,36 +278,27 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
             // makeTaskSnapshotWindow shall call removeWindowSynced before there add a new
             // StartingWindowRecord for the task.
             mStartingSurfaceDrawer.onImeDrawnOnTask(1);
-            verify(mStartingSurfaceDrawer.mWindowRecords, times(2))
-                    .removeWindow(any(), eq(true));
+            verify(mStartingSurfaceDrawer, times(2))
+                    .removeWindowSynced(any(), eq(true));
         }
     }
 
     @Test
     public void testClearAllWindows() {
         final int taskId = 1;
-        mStartingSurfaceDrawer.mWindowRecords.addRecord(taskId,
-                new StartingSurfaceDrawer.StartingWindowRecord() {
-                    @Override
-                    public void removeIfPossible(StartingWindowRemovalInfo info,
-                            boolean immediately) {
+        final StartingWindowInfo windowInfo =
+                createWindowInfo(taskId, android.R.style.Theme);
+        mStartingSurfaceDrawer.addSplashScreenStartingWindow(windowInfo, mBinder,
+                STARTING_WINDOW_TYPE_SPLASH_SCREEN);
+        waitHandlerIdle(mTestHandler);
+        verify(mStartingSurfaceDrawer).addWindow(eq(taskId), eq(mBinder), any(), any(), any(),
+                eq(STARTING_WINDOW_TYPE_SPLASH_SCREEN));
+        assertEquals(mStartingSurfaceDrawer.mAddWindowForTask, taskId);
 
-                    }
-                });
-        mStartingSurfaceDrawer.mWindowlessRecords.addRecord(taskId,
-                new StartingSurfaceDrawer.StartingWindowRecord() {
-                    @Override
-                    public void removeIfPossible(StartingWindowRemovalInfo info,
-                            boolean immediately) {
-
-                    }
-                });
         mStartingSurfaceDrawer.clearAllWindows();
         waitHandlerIdle(mTestHandler);
-        verify(mStartingSurfaceDrawer.mWindowRecords).removeWindow(any(), eq(true));
-        assertEquals(mStartingSurfaceDrawer.mWindowRecords.recordSize(), 0);
-        verify(mStartingSurfaceDrawer.mWindowlessRecords).removeWindow(any(), eq(true));
-        assertEquals(mStartingSurfaceDrawer.mWindowlessRecords.recordSize(), 0);
+        verify(mStartingSurfaceDrawer).removeWindowSynced(any(), eq(true));
+        assertEquals(mStartingSurfaceDrawer.mStartingWindowRecords.size(), 0);
     }
 
     @Test
@@ -336,7 +351,7 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
                 longAppDuration, longAppDuration));
     }
 
-    private StartingWindowInfo createWindowInfo(int taskId, int themeResId, IBinder appToken) {
+    private StartingWindowInfo createWindowInfo(int taskId, int themeResId) {
         StartingWindowInfo windowInfo = new StartingWindowInfo();
         final ActivityInfo info = new ActivityInfo();
         info.applicationInfo = new ApplicationInfo();
@@ -345,7 +360,6 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.topActivityInfo = info;
         taskInfo.taskId = taskId;
-        windowInfo.appToken = appToken;
         windowInfo.targetActivityInfo = info;
         windowInfo.taskInfo = taskInfo;
         windowInfo.topOpaqueWindowInsetsState = new InsetsState();
