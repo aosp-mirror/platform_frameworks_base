@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -49,7 +48,6 @@ public class KeyguardVisibilityHelper {
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
-    private boolean mIsUnoccludeTransitionFlagEnabled = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
     private final LogBuffer mLogBuffer;
 
@@ -75,10 +73,6 @@ public class KeyguardVisibilityHelper {
 
     public boolean isVisibilityAnimating() {
         return mKeyguardViewVisibilityAnimating;
-    }
-
-    public void setOcclusionTransitionFlagEnabled(boolean enabled) {
-        mIsUnoccludeTransitionFlagEnabled = enabled;
     }
 
     /**
@@ -156,24 +150,9 @@ public class KeyguardVisibilityHelper {
                 // since it may need to be cancelled due to keyguard lifecycle events.
                 mScreenOffAnimationController.animateInKeyguard(
                         mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
-            } else if (!mIsUnoccludeTransitionFlagEnabled && mLastOccludedState && !isOccluded) {
-                // An activity was displayed over the lock screen, and has now gone away
-                log("Unoccluded transition");
-                mView.setVisibility(View.VISIBLE);
-                mView.setAlpha(0f);
-
-                mView.animate()
-                        .setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP)
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                        .alpha(1f)
-                        .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
-                        .start();
             } else {
                 log("Direct set Visibility to VISIBLE");
                 mView.setVisibility(View.VISIBLE);
-                if (!mIsUnoccludeTransitionFlagEnabled) {
-                    mView.setAlpha(1f);
-                }
             }
         } else {
             log("Direct set Visibility to GONE");
