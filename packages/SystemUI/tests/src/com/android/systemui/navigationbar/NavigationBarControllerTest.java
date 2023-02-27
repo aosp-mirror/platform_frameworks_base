@@ -141,8 +141,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
 
     @Test
     public void testCreateNavigationBarsIncludeDefaultTrue() {
-        // Tablets may be using taskbar and the logic is different
-        mNavigationBarController.mIsTablet = false;
+        // Large screens may be using taskbar and the logic is different
+        mNavigationBarController.mIsLargeScreen = false;
         doNothing().when(mNavigationBarController).createNavigationBar(any(), any(), any());
 
         mNavigationBarController.createNavigationBars(true, null);
@@ -290,7 +290,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testConfigurationChange_taskbarNotInitialized() {
         Configuration configuration = mContext.getResources().getConfiguration();
-        when(Utilities.isTablet(any())).thenReturn(true);
+        when(Utilities.isLargeScreen(any())).thenReturn(true);
         mNavigationBarController.onConfigChanged(configuration);
         verify(mTaskbarDelegate, never()).onConfigurationChanged(configuration);
     }
@@ -298,7 +298,7 @@ public class NavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testConfigurationChange_taskbarInitialized() {
         Configuration configuration = mContext.getResources().getConfiguration();
-        when(Utilities.isTablet(any())).thenReturn(true);
+        when(Utilities.isLargeScreen(any())).thenReturn(true);
         when(mTaskbarDelegate.isInitialized()).thenReturn(true);
         mNavigationBarController.onConfigChanged(configuration);
         verify(mTaskbarDelegate, times(1)).onConfigurationChanged(configuration);
