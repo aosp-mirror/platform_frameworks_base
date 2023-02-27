@@ -52,7 +52,7 @@ public class FaceAuthenticateOptions implements AuthenticateOptions, Parcelable 
     }
 
     /** The sensor id for this operation. */
-    private final int mSensorId;
+    private int mSensorId;
     private static int defaultSensorId() {
         return -1;
     }
@@ -296,6 +296,15 @@ public class FaceAuthenticateOptions implements AuthenticateOptions, Parcelable 
     @DataClass.Generated.Member
     public @Nullable String getAttributionTag() {
         return mAttributionTag;
+    }
+
+    /**
+     * The sensor id for this operation.
+     */
+    @DataClass.Generated.Member
+    public @NonNull FaceAuthenticateOptions setSensorId( int value) {
+        mSensorId = value;
+        return this;
     }
 
     /**
@@ -610,10 +619,10 @@ public class FaceAuthenticateOptions implements AuthenticateOptions, Parcelable 
     }
 
     @DataClass.Generated(
-            time = 1676508211385L,
+            time = 1677119626034L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/hardware/face/FaceAuthenticateOptions.java",
-            inputSignatures = "private final  int mUserId\nprivate final  int mSensorId\nprivate final @android.hardware.biometrics.AuthenticateOptions.DisplayState int mDisplayState\npublic static final  int AUTHENTICATE_REASON_UNKNOWN\npublic static final  int AUTHENTICATE_REASON_STARTED_WAKING_UP\npublic static final  int AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN\npublic static final  int AUTHENTICATE_REASON_ASSISTANT_VISIBLE\npublic static final  int AUTHENTICATE_REASON_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN\npublic static final  int AUTHENTICATE_REASON_NOTIFICATION_PANEL_CLICKED\npublic static final  int AUTHENTICATE_REASON_OCCLUDING_APP_REQUESTED\npublic static final  int AUTHENTICATE_REASON_PICK_UP_GESTURE_TRIGGERED\npublic static final  int AUTHENTICATE_REASON_QS_EXPANDED\npublic static final  int AUTHENTICATE_REASON_SWIPE_UP_ON_BOUNCER\npublic static final  int AUTHENTICATE_REASON_UDFPS_POINTER_DOWN\nprivate final @android.hardware.face.FaceAuthenticateOptions.AuthenticateReason int mAuthenticateReason\nprivate final @android.os.PowerManager.WakeReason int mWakeReason\nprivate @android.annotation.NonNull java.lang.String mOpPackageName\nprivate @android.annotation.Nullable java.lang.String mAttributionTag\nprivate static  int defaultUserId()\nprivate static  int defaultSensorId()\nprivate static  int defaultDisplayState()\nprivate static  int defaultAuthenticateReason()\nprivate static  int defaultWakeReason()\nprivate static  java.lang.String defaultOpPackageName()\nprivate static  java.lang.String defaultAttributionTag()\nclass FaceAuthenticateOptions extends java.lang.Object implements [android.hardware.biometrics.AuthenticateOptions, android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true, genSetters=true, genEqualsHashCode=true)")
+            inputSignatures = "private final  int mUserId\nprivate  int mSensorId\nprivate final @android.hardware.biometrics.AuthenticateOptions.DisplayState int mDisplayState\npublic static final  int AUTHENTICATE_REASON_UNKNOWN\npublic static final  int AUTHENTICATE_REASON_STARTED_WAKING_UP\npublic static final  int AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN\npublic static final  int AUTHENTICATE_REASON_ASSISTANT_VISIBLE\npublic static final  int AUTHENTICATE_REASON_ALTERNATE_BIOMETRIC_BOUNCER_SHOWN\npublic static final  int AUTHENTICATE_REASON_NOTIFICATION_PANEL_CLICKED\npublic static final  int AUTHENTICATE_REASON_OCCLUDING_APP_REQUESTED\npublic static final  int AUTHENTICATE_REASON_PICK_UP_GESTURE_TRIGGERED\npublic static final  int AUTHENTICATE_REASON_QS_EXPANDED\npublic static final  int AUTHENTICATE_REASON_SWIPE_UP_ON_BOUNCER\npublic static final  int AUTHENTICATE_REASON_UDFPS_POINTER_DOWN\nprivate final @android.hardware.face.FaceAuthenticateOptions.AuthenticateReason int mAuthenticateReason\nprivate final @android.os.PowerManager.WakeReason int mWakeReason\nprivate @android.annotation.NonNull java.lang.String mOpPackageName\nprivate @android.annotation.Nullable java.lang.String mAttributionTag\nprivate static  int defaultUserId()\nprivate static  int defaultSensorId()\nprivate static  int defaultDisplayState()\nprivate static  int defaultAuthenticateReason()\nprivate static  int defaultWakeReason()\nprivate static  java.lang.String defaultOpPackageName()\nprivate static  java.lang.String defaultAttributionTag()\nclass FaceAuthenticateOptions extends java.lang.Object implements [android.hardware.biometrics.AuthenticateOptions, android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true, genSetters=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

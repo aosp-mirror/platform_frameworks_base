@@ -410,16 +410,17 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public long scheduleFaceDetect(int sensorId, @NonNull IBinder token,
-            int userId, @NonNull ClientMonitorCallbackConverter callback,
-            @NonNull String opPackageName, int statsClient) {
+    public long scheduleFaceDetect(@NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter callback,
+            @NonNull FaceAuthenticateOptions options, int statsClient) {
         final long id = mRequestCounter.incrementAndGet();
+        final int sensorId = options.getSensorId();
 
         mHandler.post(() -> {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FaceDetectClient client = new FaceDetectClient(mContext,
                     mSensors.get(sensorId).getLazySession(),
-                    token, id, callback, userId, opPackageName, sensorId,
+                    token, id, callback, options,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric);
             scheduleForSensor(sensorId, client, mBiometricStateCallback);
@@ -435,18 +436,19 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+    public void scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull FaceAuthenticateOptions options,
             long requestId, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication) {
         mHandler.post(() -> {
             final int userId = options.getUserId();
+            final int sensorId = options.getSensorId();
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FaceAuthenticationClient client = new FaceAuthenticationClient(
                     mContext, mSensors.get(sensorId).getLazySession(), token, requestId, callback,
-                    userId, operationId, restricted, options.getOpPackageName(), cookie,
-                    false /* requireConfirmation */, sensorId,
+                    operationId, restricted, options, cookie,
+                    false /* requireConfirmation */,
                     createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
                     mBiometricContext, isStrongBiometric,
                     mUsageStats, mSensors.get(sensorId).getLockoutCache(),
@@ -470,13 +472,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public long scheduleAuthenticate(int sensorId, @NonNull IBinder token, long operationId,
+    public long scheduleAuthenticate(@NonNull IBinder token, long operationId,
             int cookie, @NonNull ClientMonitorCallbackConverter callback,
             @NonNull FaceAuthenticateOptions options, boolean restricted, int statsClient,
             boolean allowBackgroundAuthentication) {
         final long id = mRequestCounter.incrementAndGet();
 
-        scheduleAuthenticate(sensorId, token, operationId, cookie, callback,
+        scheduleAuthenticate(token, operationId, cookie, callback,
                 options, id, restricted, statsClient, allowBackgroundAuthentication);
 
         return id;

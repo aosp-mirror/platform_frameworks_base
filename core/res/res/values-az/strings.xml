@@ -207,6 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi aktiv edənədək şəxsi tətbiqləriniz bloklanır"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Şəxsi tətbiqlər bu tarixdə bloklanacaq: <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. İT admini iş profilinizin <xliff:g id="NUMBER">%3$d</xliff:g> gündən çox deaktiv qalmasına icazə vermir."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktiv edin"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Zəng və mesajlar deaktivdir"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"İş tətbiqlərinə pauza vermisiniz. Telefon zəngləri, yaxud mətn mesajları qəbul etməyəcəksiniz."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Pauzanı bitirin"</string>
     <string name="me" msgid="6207584824693813140">"Mən"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planşet seçimləri"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV seçimləri"</string>
@@ -338,6 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Cihazların barmaq izi sensorunda olan işarələri əldə edə bilər."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ekran şəkli çəkin"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Ekran şəkli çəkilə bilər."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Önizləmə, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"status panelini deaktivləşdir və ya dəyişdir"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tətbiqə status panelini deaktiv etməyə və ya sistem ikonalarını əlavə etmək və ya silmək imkanı verir."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"status paneli edin"</string>
@@ -1358,8 +1362,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB vasitəsilə PTP aktiv edildi"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-modem aktivdir"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB vasitəsilə MIDI aktiv edildi"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Cihaz Veb-kamera kimi qoşulub"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB aksesuarı qoşulub"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Əlavə seçimlər üçün tıklayın."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Qoşulmuş cihaza enerji doldurulur. Əlavə seçimlər üçün klikləyin."</string>
@@ -1708,8 +1711,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hazırdır"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Qısayolu Deaktiv edin"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Qısayol İstifadə edin"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Rəng inversiyası"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Rəng korreksiyası"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Birəlli rejim"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Əlavə tündləşmə"</string>

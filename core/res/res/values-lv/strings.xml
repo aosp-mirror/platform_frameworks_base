@@ -208,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Jūsu personīgās lietotnes būs bloķētas, līdz ieslēgsiet savu darba profilu."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Personīgās lietotnes tiks bloķētas šādā datumā: <xliff:g id="DATE">%1$s</xliff:g>, plkst. <xliff:g id="TIME">%2$s</xliff:g>. Jūsu IT administrators neatļauj atspējot darba profilu ilgāk par <xliff:g id="NUMBER">%3$d</xliff:g> dienām."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ieslēgt"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Zvani un īsziņas ir izslēgtas"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Jūs pārtraucāt darba lietotņu darbību. Nesaņemsiet tālruņa zvanus un īsziņas."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Atsākt darbību"</string>
     <string name="me" msgid="6207584824693813140">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV opcijas"</string>
@@ -339,6 +342,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Var uztvert žestus ierīces pirksta nospieduma sensorā."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ekrānuzņēmuma izveide"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Var izveidot displeja ekrānuzņēmumu."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"<xliff:g id="DREAM_NAME">%1$s</xliff:g> (priekšskatījums)"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"atspējot vai pārveidot statusa joslu"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Ļauj lietotnei atspējot statusa joslu vai pievienot un noņemt sistēmas ikonas."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"Būt par statusa joslu"</string>
@@ -1359,8 +1363,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Ieslēgts PTP režīms, izmantojot USB savienojumu"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ieslēgta USB piesaiste"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Ieslēgts MIDI režīms, izmantojot USB savienojumu"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Ierīce pievienota kā tīmekļa kamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB piederums ir pievienots"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Pieskarieties, lai skatītu citas opcijas."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pievienotā ierīce tiek uzlādēta. Pieskarieties, lai skatītu citas opcijas."</string>
@@ -1709,8 +1712,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Izslēgt saīsni"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Izmantot saīsni"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Krāsu inversija"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Krāsu korekcija"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienas rokas režīms"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Papildu aptumšošana"</string>

@@ -49,14 +49,10 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"शीर्ष 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"शीर्ष 10"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"तळाशी फुल स्क्रीन"</string>
-    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
-    <skip />
-    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
-    <skip />
-    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
-    <skip />
-    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
-    <skip />
+    <string name="accessibility_split_left" msgid="1713683765575562458">"डावीकडे स्प्लिट करा"</string>
+    <string name="accessibility_split_right" msgid="8441001008181296837">"उजवीकडे स्प्लिट करा"</string>
+    <string name="accessibility_split_top" msgid="2789329702027147146">"सर्वात वरती स्प्लिट करा"</string>
+    <string name="accessibility_split_bottom" msgid="8694551025220868191">"खालती स्प्लिट करा"</string>
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"एकहाती मोड वापरणे"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"बाहेर पडण्यासाठी स्क्रीनच्या खालून वरच्या दिशेने स्वाइप करा किंवा ॲपवर कोठेही टॅप करा"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"एकहाती मोड सुरू करा"</string>
@@ -102,9 +98,14 @@
     <string name="close_button_text" msgid="2913281996024033299">"बंद करा"</string>
     <string name="back_button_text" msgid="1469718707134137085">"मागे जा"</string>
     <string name="handle_text" msgid="1766582106752184456">"हँडल"</string>
+    <string name="app_icon_text" msgid="2823268023931811747">"अ‍ॅप आयकन"</string>
     <string name="fullscreen_text" msgid="1162316685217676079">"फुलस्‍क्रीन"</string>
     <string name="desktop_text" msgid="1077633567027630454">"डेस्कटॉप मोड"</string>
     <string name="split_screen_text" msgid="1396336058129570886">"स्प्लिट स्क्रीन"</string>
     <string name="more_button_text" msgid="3655388105592893530">"आणखी"</string>
     <string name="float_button_text" msgid="9221657008391364581">"फ्लोट"</string>
+    <string name="select_text" msgid="5139083974039906583">"निवडा"</string>
+    <string name="screenshot_text" msgid="1477704010087786671">"स्क्रीनशॉट"</string>
+    <string name="close_text" msgid="4986518933445178928">"बंद करा"</string>
+    <string name="collapse_menu_text" msgid="7515008122450342029">"मेनू बंद करा"</string>
 </resources>

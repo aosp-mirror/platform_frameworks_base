@@ -21,11 +21,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import com.android.systemui.notetask.NoteTaskController
-import com.android.systemui.notetask.NoteTaskController.ShowNoteTaskUiEvent
+import com.android.systemui.notetask.NoteTaskEntryPoint
 import javax.inject.Inject
 
 /** Activity responsible for launching the note experience, and finish. */
-internal class LaunchNoteTaskActivity
+class LaunchNoteTaskActivity
 @Inject
 constructor(
     private val noteTaskController: NoteTaskController,
@@ -35,8 +35,8 @@ constructor(
         super.onCreate(savedInstanceState)
 
         noteTaskController.showNoteTask(
+            entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT,
             isInMultiWindowMode = isInMultiWindowMode,
-            uiEvent = ShowNoteTaskUiEvent.NOTE_OPENED_VIA_SHORTCUT,
         )
 
         finish()

@@ -145,6 +145,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IImeTracker;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
@@ -168,7 +169,6 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.view.IImeTracker;
 import com.android.internal.view.IInputMethodManager;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
@@ -532,6 +532,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * The client that is currently bound to an input method.
      */
+    @Nullable
     private ClientState mCurClient;
 
     /**
@@ -557,9 +558,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurFocusedWindowSoftInputMode;
 
     /**
-     * The client by which {@link #mCurFocusedWindow} was reported.
+     * The client by which {@link #mCurFocusedWindow} was reported. This gets updated whenever an
+     * IME-focusable window gained focus (without necessarily starting an input connection),
+     * while {@link #mCurClient} only gets updated when we actually start an input connection.
+     *
+     * @see #mCurFocusedWindow
      */
+    @Nullable
     ClientState mCurFocusedWindowClient;
+
+    /**
+     * The editor info by which {@link #mCurFocusedWindow} was reported. This differs from
+     * {@link #mCurEditorInfo} the same way {@link #mCurFocusedWindowClient} differs
+     * from {@link #mCurClient}.
+     *
+     * @see #mCurFocusedWindow
+     */
+    @Nullable
+    EditorInfo mCurFocusedWindowEditorInfo;
 
     /**
      * The {@link IRemoteInputConnection} last provided by the current client.
@@ -580,6 +596,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * The {@link EditorInfo} last provided by the current client.
      */
+    @Nullable
     EditorInfo mCurEditorInfo;
 
     /**
@@ -2062,7 +2079,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList, directBootAwareness);
+                    methodList, directBootAwareness, mSettings.getEnabledInputMethodNames());
             settings = new InputMethodSettings(mContext, methodMap, userId, true /* copyOnWrite */);
         }
         // filter caller's access to input methods
@@ -2265,6 +2282,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 if (mCurFocusedWindowClient == cs) {
                     mCurFocusedWindowClient = null;
+                    mCurFocusedWindowEditorInfo = null;
                 }
             }
         }
@@ -3453,10 +3471,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
-            // TODO(b/261565259): to avoid using null, add package name in ClientState
-            final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
-            final int uid = mCurClient != null ? mCurClient.mUid : -1;
-            statsToken = ImeTracker.forLogging().onRequestShow(packageName, uid,
+            statsToken = createStatsTokenForFocusedClient(true /* show */,
                     ImeTracker.ORIGIN_SERVER_START_INPUT, reason);
         }
 
@@ -3530,17 +3545,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             int flags, ResultReceiver resultReceiver, @SoftInputShowHideReason int reason) {
         // Create statsToken is none exists.
         if (statsToken == null) {
-            // TODO(b/261565259): to avoid using null, add package name in ClientState
-            final String packageName = (mCurEditorInfo != null) ? mCurEditorInfo.packageName : null;
-            final int uid;
-            if (mCurClient != null) {
-                uid = mCurClient.mUid;
-            } else if (mCurFocusedWindowClient != null) {
-                uid = mCurFocusedWindowClient.mUid;
-            } else {
-                uid = -1;
-            }
-            statsToken = ImeTracker.forLogging().onRequestHide(packageName, uid,
+            statsToken = createStatsTokenForFocusedClient(false /* show */,
                     ImeTracker.ORIGIN_SERVER_HIDE_INPUT, reason);
         }
 
@@ -3775,6 +3780,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mCurFocusedWindow = windowToken;
         mCurFocusedWindowSoftInputMode = softInputMode;
         mCurFocusedWindowClient = cs;
+        mCurFocusedWindowEditorInfo = editorInfo;
         mCurPerceptible = true;
 
         // We want to start input before showing the IME, but after closing
@@ -4130,7 +4136,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList, DirectBootAwareness.AUTO);
+                    methodList, DirectBootAwareness.AUTO, mSettings.getEnabledInputMethodNames());
             final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
                     userId, false);
             settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
@@ -4703,13 +4709,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 mWindowManagerInternal.onToggleImeRequested(
                         show, mCurFocusedWindow, requestToken, mCurTokenDisplayId);
         mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
-                mCurFocusedWindowClient, mCurEditorInfo, info.focusedWindowName,
+                mCurFocusedWindowClient, mCurFocusedWindowEditorInfo, info.focusedWindowName,
                 mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                 info.requestWindowName, info.imeControlTargetName, info.imeLayerTargetName,
                 info.imeSurfaceParentName));
 
         if (statsToken != null) {
-            mImeTrackerService.onImmsUpdate(statsToken.mBinder, info.requestWindowName);
+            mImeTrackerService.onImmsUpdate(statsToken, info.requestWindowName);
         }
     }
 
@@ -5027,7 +5033,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     static void queryInputMethodServicesInternal(Context context,
             @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
             ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-            @DirectBootAwareness int directBootAwareness) {
+            @DirectBootAwareness int directBootAwareness, List<String> enabledInputMethodList) {
         final Context userAwareContext = context.getUserId() == userId
                 ? context
                 : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
@@ -5060,6 +5066,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         methodList.ensureCapacity(services.size());
         methodMap.ensureCapacity(services.size());
 
+        filterInputMethodServices(additionalSubtypeMap, methodMap, methodList,
+                enabledInputMethodList, userAwareContext, services);
+    }
+
+    static void filterInputMethodServices(
+            ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
+            List<String> enabledInputMethodList, Context userAwareContext,
+            List<ResolveInfo> services) {
+        final ArrayMap<String, Integer> imiPackageCount = new ArrayMap<>();
+
         for (int i = 0; i < services.size(); ++i) {
             ResolveInfo ri = services.get(i);
             ServiceInfo si = ri.serviceInfo;
@@ -5079,10 +5096,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (imi.isVrOnly()) {
                     continue;  // Skip VR-only IME, which isn't supported for now.
                 }
-                methodList.add(imi);
-                methodMap.put(imi.getId(), imi);
-                if (DEBUG) {
-                    Slog.d(TAG, "Found an input method " + imi);
+                final String packageName = si.packageName;
+                // only include IMEs which are from the system, enabled, or below the threshold
+                if (si.applicationInfo.isSystemApp() || enabledInputMethodList.contains(imi.getId())
+                        || imiPackageCount.getOrDefault(packageName, 0)
+                        < InputMethodInfo.MAX_IMES_PER_PACKAGE) {
+                    imiPackageCount.put(packageName,
+                            1 + imiPackageCount.getOrDefault(packageName, 0));
+
+                    methodList.add(imi);
+                    methodMap.put(imi.getId(), imi);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Found an input method " + imi);
+                    }
+                } else if (DEBUG) {
+                    Slog.d(TAG, "Found an input method, but ignored due threshold: " + imi);
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Unable to load input method " + imeId, e);
@@ -5104,7 +5132,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
 
         queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
-                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO);
+                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO,
+                mSettings.getEnabledInputMethodNames());
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -5163,7 +5192,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             reenableMinimumNonAuxSystemImes);
             final int numImes = defaultEnabledIme.size();
             for (int i = 0; i < numImes; ++i) {
-                final InputMethodInfo imi =  defaultEnabledIme.get(i);
+                final InputMethodInfo imi = defaultEnabledIme.get(i);
                 if (DEBUG) {
                     Slog.d(TAG, "--- enable ime = " + imi);
                 }
@@ -5463,7 +5492,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 new ArrayMap<>();
         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                methodMap, methodList, DirectBootAwareness.AUTO);
+                methodMap, methodList, DirectBootAwareness.AUTO,
+                mSettings.getEnabledInputMethodNames());
         return methodMap;
     }
 
@@ -5751,9 +5781,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // We cannot simply distinguish a bad IME that reports an arbitrary package name from
             // an unfortunate IME whose internal state is already obsolete due to the asynchronous
             // nature of our system.  Let's compare it with our internal record.
-            if (!TextUtils.equals(mCurEditorInfo.packageName, packageName)) {
+            final var curPackageName = mCurEditorInfo != null
+                    ? mCurEditorInfo.packageName : null;
+            if (!TextUtils.equals(curPackageName, packageName)) {
                 Slog.e(TAG, "Ignoring createInputContentUriToken mCurEditorInfo.packageName="
-                        + mCurEditorInfo.packageName + " packageName=" + packageName);
+                        + curPackageName + " packageName=" + packageName);
                 return null;
             }
             // This user ID can never bee spoofed.
@@ -6421,7 +6453,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 new ArrayMap<>();
                         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
                         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                                methodMap, methodList, DirectBootAwareness.AUTO);
+                                methodMap, methodList, DirectBootAwareness.AUTO,
+                                mSettings.getEnabledInputMethodNames());
                         final InputMethodSettings settings = new InputMethodSettings(mContext,
                                 methodMap, userId, false);
 
@@ -6512,6 +6545,30 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public IImeTracker getImeTrackerService() {
         return mImeTrackerService;
+    }
+
+    /**
+     * Creates an IME request tracking token for the current focused client.
+     *
+     * @param show whether this is a show or a hide request.
+     * @param origin the origin of the IME request.
+     * @param reason the reason why the IME request was created.
+     */
+    @NonNull
+    private ImeTracker.Token createStatsTokenForFocusedClient(boolean show,
+            @ImeTracker.Origin int origin, @SoftInputShowHideReason int reason) {
+        final int uid = mCurFocusedWindowClient != null
+                ? mCurFocusedWindowClient.mUid
+                : -1;
+        final var packageName = mCurFocusedWindowEditorInfo != null
+                ? mCurFocusedWindowEditorInfo.packageName
+                : "uid(" + uid + ")";
+
+        if (show) {
+            return ImeTracker.forLogging().onRequestShow(packageName, uid, origin, reason);
+        } else {
+            return ImeTracker.forLogging().onRequestHide(packageName, uid, origin, reason);
+        }
     }
 
     private static final class InputMethodPrivilegedOperationsImpl

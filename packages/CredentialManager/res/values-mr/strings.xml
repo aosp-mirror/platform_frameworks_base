@@ -6,10 +6,8 @@
     <string name="string_continue" msgid="1346732695941131882">"पुढे सुरू ठेवा"</string>
     <string name="string_more_options" msgid="7990658711962795124">"आणखी पर्याय"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"अधिक जाणून घ्या"</string>
-    <!-- no translation found for content_description_show_password (3283502010388521607) -->
-    <skip />
-    <!-- no translation found for content_description_hide_password (6841375971631767996) -->
-    <skip />
+    <string name="content_description_show_password" msgid="3283502010388521607">"पासवर्ड दाखवा"</string>
+    <string name="content_description_hide_password" msgid="6841375971631767996">"पासवर्ड लपवा"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"पासकीसह आणखी सुरक्षित"</string>
     <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"पासकीसोबत, तुम्हाला क्लिष्ट पासवर्ड तयार करण्याची किंवा लक्षात ठेवण्याची आवश्यकता नाही"</string>
     <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"पासकी या तुम्ही तुमचे फिंगरप्रिंट, फेस किंवा स्क्रीन लॉक वापरून तयार करता अशा एंक्रिप्ट केलेल्या डिजिटल की आहेत"</string>
@@ -49,7 +47,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"इतर पासवर्ड व्यवस्थापक"</string>
     <string name="close_sheet" msgid="1393792015338908262">"शीट बंद करा"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"मागील पेजवर परत जा"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"स्क्रीनच्या तळाशी दिसणाऱ्या क्रेडेंशियल व्यवस्थापक कृती सूचना बंद करा"</string>
+    <!-- no translation found for accessibility_close_button (1163435587545377687) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी तुमची सेव्ह केलेली पासकी वापरायची का?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी तुमचे सेव्ह केलेले साइन-इन वापरायचे का?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सेव्ह केलेले साइन-इन निवडा"</string>
@@ -59,9 +58,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"साइन इन पर्याय"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> साठी"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"लॉक केलेले पासवर्ड व्यवस्थापक"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"अनलॉक करण्यासाठी टॅप करा"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"साइन-इन माहिती नाही"</string>
+    <!-- no translation found for no_sign_in_info_in (2641118151920288356) -->
     <skip />
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"साइन-इन व्यवस्थापित करा"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"दुसऱ्या डिव्हाइस वरून"</string>

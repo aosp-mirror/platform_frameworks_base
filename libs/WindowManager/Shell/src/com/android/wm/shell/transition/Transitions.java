@@ -19,13 +19,11 @@ package com.android.wm.shell.transition;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
-import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.fixScale;
-import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_OCCLUDED;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_NO_ANIMATION;
@@ -33,6 +31,8 @@ import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPI
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
+import static com.android.wm.shell.util.TransitionUtil.isClosingType;
+import static com.android.wm.shell.util.TransitionUtil.isOpeningType;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -317,29 +317,6 @@ public class Transitions implements RemoteCallable<Transitions> {
         } else {
             mRunWhenIdleQueue.add(runnable);
         }
-    }
-
-    /** @return true if the transition was triggered by opening something vs closing something */
-    public static boolean isOpeningType(@WindowManager.TransitionType int type) {
-        return type == TRANSIT_OPEN
-                || type == TRANSIT_TO_FRONT
-                || type == TRANSIT_KEYGUARD_GOING_AWAY;
-    }
-
-    /** @return true if the transition was triggered by closing something vs opening something */
-    public static boolean isClosingType(@WindowManager.TransitionType int type) {
-        return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
-    }
-
-    /** Returns {@code true} if the transition has a display change. */
-    public static boolean hasDisplayChange(@NonNull TransitionInfo info) {
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (change.getMode() == TRANSIT_CHANGE && change.hasFlags(FLAG_IS_DISPLAY)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

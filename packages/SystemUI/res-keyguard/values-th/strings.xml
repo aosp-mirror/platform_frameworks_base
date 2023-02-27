@@ -31,6 +31,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างเร็ว"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • กำลังชาร์จอย่างช้าๆ"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ปรับการชาร์จให้เหมาะสมเพื่อถนอมแบตเตอรี่"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="5712938022567388098">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ที่ชาร์จใช้ร่วมกันไม่ได้"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"กด \"เมนู\" เพื่อปลดล็อก"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"เครือข่ายถูกล็อก"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ไม่มี SIM"</string>

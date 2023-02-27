@@ -477,7 +477,14 @@ public abstract class NtpTrustedTime implements TrustedTime {
         return mTimeResult;
     }
 
-    /** Clears the last received NTP. Intended for use during tests. */
+    /** Sets the last received NTP time. Intended for use during tests. */
+    public void setCachedTimeResult(TimeResult timeResult) {
+        synchronized (this) {
+            mTimeResult = timeResult;
+        }
+    }
+
+    /** Clears the last received NTP time. Intended for use during tests. */
     public void clearCachedTimeResult() {
         synchronized (this) {
             mTimeResult = null;

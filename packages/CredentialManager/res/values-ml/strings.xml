@@ -47,7 +47,7 @@
     <string name="other_password_manager" msgid="565790221427004141">"മറ്റ് പാസ്‌വേഡ് മാനേജർമാർ"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ഷീറ്റ് അടയ്ക്കുക"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"മുമ്പത്തെ പേജിലേക്ക് മടങ്ങുക"</string>
-    <string name="accessibility_close_button" msgid="2953807735590034688">"സ്ക്രീന്റെ ചുവടെ ദൃശ്യമാകുന്ന ക്രെഡൻഷ്യൽ മാനേജർ പ്രവർത്തന നിർദ്ദേശം അടയ്ക്കുക"</string>
+    <string name="accessibility_close_button" msgid="1163435587545377687">"അടയ്ക്കുക"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി നിങ്ങൾ സംരക്ഷിച്ച പാസ്‌കീ ഉപയോഗിക്കണോ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി നിങ്ങൾ സംരക്ഷിച്ച സൈൻ ഇൻ ഉപയോഗിക്കണോ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിനായി ഒരു സംരക്ഷിച്ച സൈൻ ഇൻ തിരഞ്ഞെടുക്കുക"</string>
@@ -57,10 +57,9 @@
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"സൈൻ ഇൻ ഓപ്ഷനുകൾ"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> എന്നയാൾക്ക്"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"ലോക്ക് ചെയ്‌ത പാസ്‌വേഡ് സൈൻ ഇൻ മാനേജർമാർ"</string>
-    <!-- no translation found for locked_credential_entry_label_subtext_tap_to_unlock (6390367581393605009) -->
-    <skip />
-    <!-- no translation found for locked_credential_entry_label_subtext_no_sign_in (8131725029983174901) -->
-    <skip />
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"അൺലോക്ക് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"സൈൻ ഇൻ ചെയ്യാനുള്ള വിവരങ്ങളൊന്നുമില്ല"</string>
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> എന്നതിൽ സൈൻ ഇൻ വിവരങ്ങളില്ല"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"സൈൻ ഇന്നുകൾ മാനേജ് ചെയ്യുക"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"മറ്റൊരു ഉപകരണത്തിൽ നിന്ന്"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"മറ്റൊരു ഉപകരണം ഉപയോഗിക്കുക"</string>

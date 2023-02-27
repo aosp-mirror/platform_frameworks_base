@@ -40,7 +40,6 @@ import static com.android.wm.shell.pip.PipTransitionState.ENTERED_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP_TO_SPLIT;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
-import static com.android.wm.shell.transition.Transitions.isOpeningType;
 
 import android.animation.Animator;
 import android.app.ActivityManager;
@@ -72,6 +71,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.CounterRotatorHelper;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.Optional;
 
@@ -702,7 +702,7 @@ public class PipTransition extends PipTransitionController {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change == enterPip) continue;
-            if (isOpeningType(change.getMode())) {
+            if (TransitionUtil.isOpeningType(change.getMode())) {
                 final SurfaceControl leash = change.getLeash();
                 startTransaction.show(leash).setAlpha(leash, 1.f);
             }
@@ -873,7 +873,7 @@ public class PipTransition extends PipTransitionController {
                 continue;
             }
 
-            if (isOpeningType(mode) && change.getParent() == null) {
+            if (TransitionUtil.isOpeningType(mode) && change.getParent() == null) {
                 final SurfaceControl leash = change.getLeash();
                 final Rect endBounds = change.getEndAbsBounds();
                 startTransaction

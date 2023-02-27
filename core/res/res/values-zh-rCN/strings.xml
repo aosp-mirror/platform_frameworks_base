@@ -207,6 +207,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系统已屏蔽您的个人应用。您需要开启工作资料，系统才会取消屏蔽这些应用"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"系统将于 <xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g> 屏蔽个人应用。IT 管理员不允许您的工作资料保持关闭状态超过 <xliff:g id="NUMBER">%3$d</xliff:g> 天。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"开启"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"通话和短信已关闭"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"您已暂停工作应用。您将不会收到来电或短信。"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"恢复工作应用"</string>
     <string name="me" msgid="6207584824693813140">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板电脑选项"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 选项"</string>
@@ -338,6 +341,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以捕捉在设备指纹传感器上执行的手势。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"截取屏幕截图"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可截取显示画面的屏幕截图。"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"预览，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或修改状态栏"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允许应用停用状态栏或者增删系统图标。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"用作状态栏"</string>
@@ -1358,8 +1362,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已开启 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已开启 USB 网络共享模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已开启 USB MIDI 模式"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"设备已连接为摄像头"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB 配件已连接"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"点按即可查看更多选项。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在为连接的设备充电。点按即可查看更多选项。"</string>
@@ -1708,8 +1711,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"关闭快捷方式"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"颜色反转"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"单手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"极暗"</string>

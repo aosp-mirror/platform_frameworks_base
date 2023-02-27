@@ -16,21 +16,28 @@
 
 package com.android.credentialmanager.common.ui
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 
+/**  Primary container color; label-large button text; on-primary button text color. */
 @Composable
 fun ConfirmButton(text: String, onClick: () -> Unit) {
     FilledTonalButton(
+        modifier = Modifier.padding(vertical = 4.dp),
         onClick = onClick,
         colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         )
     ) {
-        Text(text = text)
+        LargeLabelText(
+            text = text,
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 24.dp),
+        )
     }
 }
