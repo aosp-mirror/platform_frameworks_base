@@ -19,6 +19,12 @@ package com.android.wm.shell.flicker.splitscreen
 import android.app.Instrumentation
 import android.graphics.Point
 import android.os.SystemClock
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.datatypes.component.IComponentMatcher
+import android.tools.common.datatypes.component.IComponentNameMatcher
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.ViewConfiguration
@@ -32,16 +38,9 @@ import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.NotificationAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.testapp.ActivityOptions
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.component.matchers.IComponentMatcher
-import com.android.server.wm.traces.common.component.matchers.IComponentNameMatcher
-import com.android.server.wm.traces.parser.toFlickerComponent
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.LAUNCHER_UI_PACKAGE_NAME
 import com.android.wm.shell.flicker.SYSTEM_UI_PACKAGE_NAME
-import java.util.Collections
 import org.junit.Assert.assertNotNull
 
 internal object SplitScreenUtils {
@@ -129,18 +128,12 @@ internal object SplitScreenUtils {
 
             // Find the second task in the upper right corner in split select mode by sorting
             // 'left' in descending order and 'top' in ascending order.
-            Collections.sort(
-                snapshots,
-                { t1: UiObject2, t2: UiObject2 ->
-                    t2.getVisibleBounds().left - t1.getVisibleBounds().left
-                }
-            )
-            Collections.sort(
-                snapshots,
-                { t1: UiObject2, t2: UiObject2 ->
-                    t1.getVisibleBounds().top - t2.getVisibleBounds().top
-                }
-            )
+            snapshots.sortWith { t1: UiObject2, t2: UiObject2 ->
+                t2.getVisibleBounds().left - t1.getVisibleBounds().left
+            }
+            snapshots.sortWith { t1: UiObject2, t2: UiObject2 ->
+                t1.getVisibleBounds().top - t2.getVisibleBounds().top
+            }
             snapshots[0].click()
         } else {
             tapl.workspace

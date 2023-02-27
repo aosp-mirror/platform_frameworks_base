@@ -17,19 +17,19 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.ConditionsFactory
+import android.tools.device.flicker.isShellTransitionsEnabled
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.statusBarLayerIsVisibleAtStartAndEnd
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import org.junit.Assume
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -82,7 +82,7 @@ open class ShowImeWhileEnteringOverviewTest(flicker: FlickerTest) : BaseTest(fli
     private fun waitNavStatusBarVisibility(stateSync: WindowManagerStateHelper.StateSyncBuilder) {
         when {
             flicker.scenario.isLandscapeOrSeascapeAtStart && !flicker.scenario.isTablet ->
-                stateSync.add(WindowManagerConditionsFactory.isStatusBarVisible().negate())
+                stateSync.add(ConditionsFactory.isStatusBarVisible().negate())
             else -> stateSync.withNavOrTaskBarVisible().withStatusBarVisible()
         }
     }
