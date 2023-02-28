@@ -1653,6 +1653,19 @@
     <dimen name="media_output_broadcast_info_summary_height">20dp</dimen>
     <dimen name="media_output_broadcast_info_edit">18dp</dimen>
 
+    <!-- Keyboard backlight indicator-->
+    <dimen name="backlight_indicator_root_corner_radius">48dp</dimen>
+    <dimen name="backlight_indicator_root_vertical_padding">8dp</dimen>
+    <dimen name="backlight_indicator_root_horizontal_padding">4dp</dimen>
+    <dimen name="backlight_indicator_icon_width">22dp</dimen>
+    <dimen name="backlight_indicator_icon_height">11dp</dimen>
+    <dimen name="backlight_indicator_icon_left_margin">2dp</dimen>
+    <dimen name="backlight_indicator_step_width">52dp</dimen>
+    <dimen name="backlight_indicator_step_height">40dp</dimen>
+    <dimen name="backlight_indicator_step_horizontal_margin">4dp</dimen>
+    <dimen name="backlight_indicator_step_small_radius">4dp</dimen>
+    <dimen name="backlight_indicator_step_large_radius">48dp</dimen>
+
     <!-- Broadcast dialog -->
     <dimen name="broadcast_dialog_title_img_margin_top">18dp</dimen>
     <dimen name="broadcast_dialog_title_text_size">24sp</dimen>
