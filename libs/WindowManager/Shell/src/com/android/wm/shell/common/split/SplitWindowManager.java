@@ -168,9 +168,16 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         }
     }
 
-    void setInteractive(boolean interactive, String from) {
+    /**
+     * Set divider should interactive to user or not.
+     *
+     * @param interactive divider interactive.
+     * @param hideHandle divider handle hidden or not, only work when interactive is false.
+     * @param from caller from where.
+     */
+    void setInteractive(boolean interactive, boolean hideHandle, String from) {
         if (mDividerView == null) return;
-        mDividerView.setInteractive(interactive, from);
+        mDividerView.setInteractive(interactive, hideHandle, from);
     }
 
     View getDividerView() {
