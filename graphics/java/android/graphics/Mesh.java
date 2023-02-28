@@ -341,7 +341,6 @@ public class Mesh {
      * @hide so only calls from module can utilize it
      */
     long getNativeWrapperInstance() {
-        nativeUpdateMesh(mNativeMeshWrapper, mIsIndexed);
         return mNativeMeshWrapper;
     }
 
@@ -383,5 +382,4 @@ public class Mesh {
 
     private static native void nativeUpdateUniforms(long builder, String uniformName, int[] values);
 
-    private static native void nativeUpdateMesh(long nativeMeshWrapper, boolean mIsIndexed);
 }
