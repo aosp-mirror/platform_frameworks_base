@@ -537,9 +537,9 @@ public class DomainSelectionService extends Service {
         }
 
         @Override
-        public void onWlanSelected() {
+        public void onWlanSelected(boolean useEmergencyPdn) {
             try {
-                mCallback.onWlanSelected();
+                mCallback.onWlanSelected(useEmergencyPdn);
             } catch (Exception e) {
                 Rlog.e(TAG, "onWlanSelected e=" + e);
             }
@@ -702,9 +702,10 @@ public class DomainSelectionService extends Service {
         }
 
         @Override
-        public void onDomainSelected(@NetworkRegistrationInfo.Domain int domain) {
+        public void onDomainSelected(@NetworkRegistrationInfo.Domain int domain,
+                boolean useEmergencyPdn) {
             try {
-                mCallback.onDomainSelected(domain);
+                mCallback.onDomainSelected(domain, useEmergencyPdn);
             } catch (Exception e) {
                 Rlog.e(TAG, "onDomainSelected e=" + e);
             }

@@ -1356,33 +1356,10 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void notificationAlpha_unnocclusionAnimating_bouncerActive_usesKeyguardNotifAlpha() {
-        when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(true);
-        mScrimController.setClipsQsScrim(true);
-
-        mScrimController.transitionTo(ScrimState.KEYGUARD);
-        mScrimController.setUnocclusionAnimationRunning(true);
-
-        assertAlphaAfterExpansion(
-                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0f);
-        assertAlphaAfterExpansion(
-                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0.4f);
-        assertAlphaAfterExpansion(
-                mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 1.0f);
-
-        // Verify normal behavior after
-        mScrimController.setUnocclusionAnimationRunning(false);
-        float expansion = 0.4f;
-        float alpha = 1 - BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion);
-        assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
-    }
-
-    @Test
     public void notificationAlpha_unnocclusionAnimating_bouncerNotActive_usesKeyguardNotifAlpha() {
         when(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()).thenReturn(false);
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
-        mScrimController.setUnocclusionAnimationRunning(true);
 
         assertAlphaAfterExpansion(
                 mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 0f);
@@ -1392,7 +1369,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mNotificationsScrim, ScrimState.KEYGUARD.getNotifAlpha(), /* expansion */ 1.0f);
 
         // Verify normal behavior after
-        mScrimController.setUnocclusionAnimationRunning(false);
         float expansion = 0.4f;
         float alpha = 1 - ShadeInterpolation.getNotificationScrimAlpha(expansion);
         assertAlphaAfterExpansion(mNotificationsScrim, alpha, expansion);
@@ -1598,7 +1574,6 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void setUnOccludingAnimationKeyguard() {
-        mScrimController.setUnocclusionAnimationRunning(true);
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         finishAnimationsImmediately();
         assertThat(mNotificationsScrim.getViewAlpha())

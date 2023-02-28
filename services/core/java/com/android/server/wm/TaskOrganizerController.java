@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.TaskInfo.cameraCompatControlStateToString;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
@@ -43,6 +44,7 @@ import android.view.Display;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
+import android.window.IWindowlessStartingSurfaceCallback;
 import android.window.SplashScreenView;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
@@ -656,9 +658,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             info.splashScreenThemeResId = launchTheme;
         }
         info.taskSnapshot = taskSnapshot;
+        info.appToken = activity.token;
         // make this happen prior than prepare surface
         try {
-            lastOrganizer.addStartingWindow(info, activity.token);
+            lastOrganizer.addStartingWindow(info);
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception sending onTaskStart callback", e);
             return false;
@@ -701,6 +704,55 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             lastOrganizer.removeStartingWindow(removalInfo);
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception sending onStartTaskFinished callback", e);
+        }
+    }
+
+    /**
+     * Create a starting surface which attach on a given surface.
+     * @param activity Target activity, this isn't necessary to be the top activity.
+     * @param root The root surface which the created surface will attach on.
+     * @param taskSnapshot Whether to draw snapshot.
+     * @param callback Called when surface is drawn and attached to the root surface.
+     * @return The taskId, this is a token and should be used to remove the surface, even if
+     *         the task was removed from hierarchy.
+     */
+    int addWindowlessStartingSurface(Task task, ActivityRecord activity, SurfaceControl root,
+            TaskSnapshot taskSnapshot, IWindowlessStartingSurfaceCallback callback) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null) {
+            return INVALID_TASK_ID;
+        }
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null) {
+            return INVALID_TASK_ID;
+        }
+        final StartingWindowInfo info = task.getStartingWindowInfo(activity);
+        info.taskInfo.taskDescription = activity.taskDescription;
+        info.taskSnapshot = taskSnapshot;
+        info.windowlessStartingSurfaceCallback = callback;
+        info.rootSurface = root;
+        try {
+            lastOrganizer.addStartingWindow(info);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception sending addWindowlessStartingSurface ", e);
+            return INVALID_TASK_ID;
+        }
+        return task.mTaskId;
+    }
+
+    void removeWindowlessStartingSurface(int taskId, boolean immediately) {
+        final ITaskOrganizer lastOrganizer = mTaskOrganizers.peekLast();
+        if (lastOrganizer == null || taskId == 0) {
+            return;
+        }
+        final StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
+        removalInfo.taskId = taskId;
+        removalInfo.windowlessSurface = true;
+        removalInfo.removeImmediately = immediately;
+        try {
+            lastOrganizer.removeStartingWindow(removalInfo);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Exception sending removeWindowlessStartingSurface ", e);
         }
     }
 

@@ -2079,7 +2079,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList, directBootAwareness);
+                    methodList, directBootAwareness, mSettings.getEnabledInputMethodNames());
             settings = new InputMethodSettings(mContext, methodMap, userId, true /* copyOnWrite */);
         }
         // filter caller's access to input methods
@@ -4050,15 +4050,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!calledWithValidTokenLocked(token)) {
                 return false;
             }
-            final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
-                    onlyCurrentIme, mMethodMap.get(getSelectedMethodIdLocked()), mCurrentSubtype);
-            if (nextSubtype == null) {
-                return false;
-            }
-            setInputMethodWithSubtypeIdLocked(token, nextSubtype.mImi.getId(),
-                    nextSubtype.mSubtypeId);
-            return true;
+            return switchToNextInputMethodLocked(token, onlyCurrentIme);
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    private boolean switchToNextInputMethodLocked(@Nullable IBinder token, boolean onlyCurrentIme) {
+        final ImeSubtypeListItem nextSubtype = mSwitchingController.getNextInputMethodLocked(
+                onlyCurrentIme, mMethodMap.get(getSelectedMethodIdLocked()), mCurrentSubtype);
+        if (nextSubtype == null) {
+            return false;
+        }
+        setInputMethodWithSubtypeIdLocked(token, nextSubtype.mImi.getId(),
+                nextSubtype.mSubtypeId);
+        return true;
     }
 
     @BinderThread
@@ -4136,7 +4141,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList, DirectBootAwareness.AUTO);
+                    methodList, DirectBootAwareness.AUTO, mSettings.getEnabledInputMethodNames());
             final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
                     userId, false);
             settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
@@ -5033,7 +5038,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     static void queryInputMethodServicesInternal(Context context,
             @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
             ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-            @DirectBootAwareness int directBootAwareness) {
+            @DirectBootAwareness int directBootAwareness, List<String> enabledInputMethodList) {
         final Context userAwareContext = context.getUserId() == userId
                 ? context
                 : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
@@ -5066,6 +5071,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         methodList.ensureCapacity(services.size());
         methodMap.ensureCapacity(services.size());
 
+        filterInputMethodServices(additionalSubtypeMap, methodMap, methodList,
+                enabledInputMethodList, userAwareContext, services);
+    }
+
+    static void filterInputMethodServices(
+            ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
+            ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
+            List<String> enabledInputMethodList, Context userAwareContext,
+            List<ResolveInfo> services) {
+        final ArrayMap<String, Integer> imiPackageCount = new ArrayMap<>();
+
         for (int i = 0; i < services.size(); ++i) {
             ResolveInfo ri = services.get(i);
             ServiceInfo si = ri.serviceInfo;
@@ -5085,10 +5101,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (imi.isVrOnly()) {
                     continue;  // Skip VR-only IME, which isn't supported for now.
                 }
-                methodList.add(imi);
-                methodMap.put(imi.getId(), imi);
-                if (DEBUG) {
-                    Slog.d(TAG, "Found an input method " + imi);
+                final String packageName = si.packageName;
+                // only include IMEs which are from the system, enabled, or below the threshold
+                if (si.applicationInfo.isSystemApp() || enabledInputMethodList.contains(imi.getId())
+                        || imiPackageCount.getOrDefault(packageName, 0)
+                        < InputMethodInfo.MAX_IMES_PER_PACKAGE) {
+                    imiPackageCount.put(packageName,
+                            1 + imiPackageCount.getOrDefault(packageName, 0));
+
+                    methodList.add(imi);
+                    methodMap.put(imi.getId(), imi);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Found an input method " + imi);
+                    }
+                } else if (DEBUG) {
+                    Slog.d(TAG, "Found an input method, but ignored due threshold: " + imi);
                 }
             } catch (Exception e) {
                 Slog.wtf(TAG, "Unable to load input method " + imeId, e);
@@ -5110,7 +5137,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
 
         queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
-                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO);
+                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO,
+                mSettings.getEnabledInputMethodNames());
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -5169,7 +5197,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             reenableMinimumNonAuxSystemImes);
             final int numImes = defaultEnabledIme.size();
             for (int i = 0; i < numImes; ++i) {
-                final InputMethodInfo imi =  defaultEnabledIme.get(i);
+                final InputMethodInfo imi = defaultEnabledIme.get(i);
                 if (DEBUG) {
                     Slog.d(TAG, "--- enable ime = " + imi);
                 }
@@ -5469,7 +5497,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 new ArrayMap<>();
         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                methodMap, methodList, DirectBootAwareness.AUTO);
+                methodMap, methodList, DirectBootAwareness.AUTO,
+                mSettings.getEnabledInputMethodNames());
         return methodMap;
     }
 
@@ -5724,6 +5753,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         public void maybeFinishStylusHandwriting() {
             mHandler.removeMessages(MSG_FINISH_HANDWRITING);
             mHandler.obtainMessage(MSG_FINISH_HANDWRITING).sendToTarget();
+        }
+
+        @Override
+        public void switchKeyboardLayout(int direction) {
+            synchronized (ImfLock.class) {
+                if (direction > 0) {
+                    switchToNextInputMethodLocked(null /* token */, true /* onlyCurrentIme */);
+                } else {
+                    // TODO(b/258853866): Support backwards switching.
+                }
+            }
         }
     }
 
@@ -6429,7 +6469,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 new ArrayMap<>();
                         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
                         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                                methodMap, methodList, DirectBootAwareness.AUTO);
+                                methodMap, methodList, DirectBootAwareness.AUTO,
+                                mSettings.getEnabledInputMethodNames());
                         final InputMethodSettings settings = new InputMethodSettings(mContext,
                                 methodMap, userId, false);
 

@@ -22,7 +22,9 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -454,13 +456,13 @@ fun RemoteCredentialSnackBarScreen(
     Snackbar(
         action = {
             TextButton(
-                modifier = Modifier.padding(top = 12.dp, bottom = 12.dp, start = 16.dp),
+                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp, start = 16.dp)
+                    .heightIn(min = 32.dp),
                 onClick = { onClick(true) },
+                contentPadding =
+                PaddingValues(start = 0.dp, top = 6.dp, end = 0.dp, bottom = 6.dp),
             ) {
-                SnackbarActionText(
-                    text = stringResource(R.string.snackbar_action),
-                    Modifier.padding(vertical = 6.dp)
-                )
+                SnackbarActionText(text = stringResource(R.string.snackbar_action))
             }
         },
         onDismiss = onCancel,

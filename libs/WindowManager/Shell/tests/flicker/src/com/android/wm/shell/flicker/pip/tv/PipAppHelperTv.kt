@@ -17,12 +17,12 @@
 package com.android.wm.shell.flicker.pip.tv
 
 import android.app.Instrumentation
+import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.PipAppHelper
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 
 /** Helper class for PIP app on AndroidTV */
 open class PipAppHelperTv(instrumentation: Instrumentation) : PipAppHelper(instrumentation) {

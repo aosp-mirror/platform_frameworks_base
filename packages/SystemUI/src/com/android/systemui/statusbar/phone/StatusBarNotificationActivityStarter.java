@@ -561,10 +561,6 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             mLogger.logFullScreenIntentSuppressedByVR(entry);
             return;
         }
-        if (mFeatureFlags.isEnabled(Flags.FSI_CHROME)) {
-            // FsiChromeRepo runs its own implementation of launchFullScreenIntent
-            return;
-        }
         // Stop screensaver if the notification has a fullscreen intent.
         // (like an incoming phone call)
         mUiBgExecutor.execute(() -> {

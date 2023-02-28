@@ -8358,6 +8358,7 @@ public class AudioService extends IAudioService.Stub
             synchronized (VolumeStreamState.class) {
                 // apply device specific volumes first
                 int index;
+                boolean isAbsoluteVolume = false;
                 for (int i = 0; i < mIndexMap.size(); i++) {
                     final int device = mIndexMap.keyAt(i);
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
@@ -8366,6 +8367,7 @@ public class AudioService extends IAudioService.Stub
                         } else if (isAbsoluteVolumeDevice(device)
                                 || isA2dpAbsoluteVolumeDevice(device)
                                 || AudioSystem.isLeAudioDeviceType(device)) {
+                            isAbsoluteVolume = true;
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if (isFullVolumeDevice(device)) {
                             index = (mIndexMax + 5)/10;
@@ -8374,6 +8376,11 @@ public class AudioService extends IAudioService.Stub
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
                         }
+
+                        sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION,
+                                SENDMSG_REPLACE, device,  isAbsoluteVolume ? 1 : 0, this,
+                                /*delay=*/0);
+
                         setStreamVolumeIndex(index, device);
                     }
                 }
@@ -8848,6 +8855,10 @@ public class AudioService extends IAudioService.Stub
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
 
         synchronized (VolumeStreamState.class) {
+            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION, SENDMSG_REPLACE,
+                    device, (isAbsoluteVolumeDevice(device) || isA2dpAbsoluteVolumeDevice(device)
+                            || AudioSystem.isLeAudioDeviceType(device) ? 1 : 0),
+                    streamState, /*delay=*/0);
             // Apply volume
             streamState.applyDeviceVolume_syncVSS(device);
 

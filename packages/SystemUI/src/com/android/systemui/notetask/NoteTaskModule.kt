@@ -36,7 +36,7 @@ import java.util.Optional
 
 /** Compose all dependencies required by Note Task feature. */
 @Module(includes = [NoteTaskQuickAffordanceModule::class])
-internal interface NoteTaskModule {
+interface NoteTaskModule {
 
     @[Binds IntoMap ClassKey(LaunchNoteTaskActivity::class)]
     fun LaunchNoteTaskActivity.bindNoteTaskLauncherActivity(): Activity

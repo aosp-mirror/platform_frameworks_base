@@ -910,6 +910,10 @@ public class AccessibilityWindowManager {
             pw.println("     Top Focused Window Id = " + mTopFocusedWindowId);
             pw.println("     Accessibility Focused Window Id = " + mAccessibilityFocusedWindowId
                     + " ]");
+            if (mIsProxy) {
+                pw.println("Proxy accessibility focused window = "
+                        + mProxyDisplayAccessibilityFocusedWindow);
+            }
             pw.println();
             if (mWindows != null) {
                 final int windowCount = mWindows.size();

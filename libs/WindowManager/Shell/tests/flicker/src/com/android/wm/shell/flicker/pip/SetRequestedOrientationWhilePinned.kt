@@ -20,15 +20,15 @@ import android.app.Activity
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.flicker.testapp.ActivityOptions.PortraitOnlyActivity.EXTRA_FIXED_ORIENTATION
-import com.android.server.wm.traces.common.service.PlatformConsts
 import com.android.wm.shell.flicker.pip.PipTransition.BroadcastActionTrigger.Companion.ORIENTATION_LANDSCAPE
 import org.junit.Assume
 import org.junit.Before
@@ -47,8 +47,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransition(flicker) {
-    private val startingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_0)
-    private val endingBounds = WindowUtils.getDisplayBounds(PlatformConsts.Rotation.ROTATION_90)
+    private val startingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_0)
+    private val endingBounds = WindowUtils.getDisplayBounds(Rotation.ROTATION_90)
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -66,7 +66,7 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
                 wmHelper
                     .StateSyncBuilder()
                     .withPipShown()
-                    .withRotation(PlatformConsts.Rotation.ROTATION_0)
+                    .withRotation(Rotation.ROTATION_0)
                     .withNavOrTaskBarVisible()
                     .withStatusBarVisible()
                     .waitForAndVerify()
@@ -79,7 +79,7 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
                 wmHelper
                     .StateSyncBuilder()
                     .withFullScreenApp(pipApp)
-                    .withRotation(PlatformConsts.Rotation.ROTATION_90)
+                    .withRotation(Rotation.ROTATION_90)
                     .withNavOrTaskBarVisible()
                     .withStatusBarVisible()
                     .waitForAndVerify()
@@ -98,7 +98,7 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
     @Presubmit
     @Test
     fun displayEndsAt90Degrees() {
-        flicker.assertWmEnd { hasRotation(PlatformConsts.Rotation.ROTATION_90) }
+        flicker.assertWmEnd { hasRotation(Rotation.ROTATION_90) }
     }
 
     @Presubmit
@@ -151,7 +151,7 @@ open class SetRequestedOrientationWhilePinned(flicker: FlickerTest) : PipTransit
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return FlickerTestFactory.nonRotationTests(
-                supportedRotations = listOf(PlatformConsts.Rotation.ROTATION_0)
+                supportedRotations = listOf(Rotation.ROTATION_0)
             )
         }
     }

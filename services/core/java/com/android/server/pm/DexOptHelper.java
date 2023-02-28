@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.os.Trace.TRACE_TAG_DALVIK;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.ApexManager.ActiveApexInfo;
@@ -470,11 +470,11 @@ public final class DexOptHelper {
 
     @DexOptResult
     private int performDexOptTraced(DexoptOptions options) {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_DALVIK, "dexopt");
         try {
             return performDexOptInternal(options);
         } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            Trace.traceEnd(TRACE_TAG_DALVIK);
         }
     }
 
@@ -605,7 +605,7 @@ public final class DexOptHelper {
             throw new IllegalArgumentException("Can't dexopt APEX package: " + packageName);
         }
 
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_DALVIK, "dexopt");
 
         // Whoever is calling forceDexOpt wants a compiled package.
         // Don't use profiles since that may cause compilation to be skipped.
@@ -615,7 +615,7 @@ public final class DexOptHelper {
 
         @DexOptResult int res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
 
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        Trace.traceEnd(TRACE_TAG_DALVIK);
         if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
             throw new IllegalStateException("Failed to dexopt: " + res);
         }
