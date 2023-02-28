@@ -27,6 +27,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
@@ -78,6 +79,8 @@ import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -214,6 +217,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var recSubtitleMock2: TextView
     @Mock private lateinit var recSubtitleMock3: TextView
     @Mock private lateinit var coverItem: ImageView
+    @Mock private lateinit var matrix: Matrix
     private lateinit var coverItem1: ImageView
     private lateinit var coverItem2: ImageView
     private lateinit var coverItem3: ImageView
@@ -697,6 +701,33 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
         verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
+    fun addTwoPlayerGradients_differentStates() {
+        // Setup redArtwork and its color scheme.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redCanvas = Canvas(redBmp)
+        redCanvas.drawColor(Color.RED)
+        val redArt = Icon.createWithBitmap(redBmp)
+        val redWallpaperColor = player.getWallpaperColor(redArt)
+        val redColorScheme = ColorScheme(redWallpaperColor, true, Style.CONTENT)
+
+        // Setup greenArt and its color scheme.
+        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val greenCanvas = Canvas(greenBmp)
+        greenCanvas.drawColor(Color.GREEN)
+        val greenArt = Icon.createWithBitmap(greenBmp)
+        val greenWallpaperColor = player.getWallpaperColor(greenArt)
+        val greenColorScheme = ColorScheme(greenWallpaperColor, true, Style.CONTENT)
+
+        // Add gradient to both icons.
+        val redArtwork = player.addGradientToPlayerAlbum(redArt, redColorScheme, 10, 10)
+        val greenArtwork = player.addGradientToPlayerAlbum(greenArt, greenColorScheme, 10, 10)
+
+        // They should have different constant states as they have different gradient color.
+        assertThat(redArtwork.getDrawable(1).constantState)
+            .isNotEqualTo(greenArtwork.getDrawable(1).constantState)
     }
 
     @Test
@@ -2092,6 +2123,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
             .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
         whenever(recommendationViewHolder.mediaSubtitles)
             .thenReturn(listOf(recSubtitleMock1, recSubtitleMock2, recSubtitleMock3))
+        whenever(coverItem.imageMatrix).thenReturn(matrix)
 
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
@@ -2127,6 +2159,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(recCardTitle).setTextColor(any<Int>())
         verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
         verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(coverItem, times(3)).imageMatrix = any()
     }
 
     @Test
@@ -2186,6 +2219,34 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(recSubtitleMock1).visibility = View.GONE
         verify(recSubtitleMock2).visibility = View.VISIBLE
         verify(recSubtitleMock3).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun addTwoRecommendationGradients_differentStates() {
+        // Setup redArtwork and its color scheme.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redCanvas = Canvas(redBmp)
+        redCanvas.drawColor(Color.RED)
+        val redArt = Icon.createWithBitmap(redBmp)
+        val redWallpaperColor = player.getWallpaperColor(redArt)
+        val redColorScheme = ColorScheme(redWallpaperColor, true, Style.CONTENT)
+
+        // Setup greenArt and its color scheme.
+        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val greenCanvas = Canvas(greenBmp)
+        greenCanvas.drawColor(Color.GREEN)
+        val greenArt = Icon.createWithBitmap(greenBmp)
+        val greenWallpaperColor = player.getWallpaperColor(greenArt)
+        val greenColorScheme = ColorScheme(greenWallpaperColor, true, Style.CONTENT)
+
+        // Add gradient to both icons.
+        val redArtwork = player.addGradientToRecommendationAlbum(redArt, redColorScheme, 10, 10)
+        val greenArtwork =
+            player.addGradientToRecommendationAlbum(greenArt, greenColorScheme, 10, 10)
+
+        // They should have different constant states as they have different gradient color.
+        assertThat(redArtwork.getDrawable(1).constantState)
+            .isNotEqualTo(greenArtwork.getDrawable(1).constantState)
     }
 
     @Test

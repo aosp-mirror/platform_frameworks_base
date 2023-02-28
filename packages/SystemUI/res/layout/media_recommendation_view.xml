@@ -22,9 +22,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:translationZ="0dp"
-        android:scaleType="centerCrop"
+        android:scaleType="matrix"
         android:adjustViewBounds="true"
         android:clipToOutline="true"
+        android:layerType="hardware"
         android:background="@drawable/bg_smartspace_media_item"/>
 
     <!-- App icon -->
