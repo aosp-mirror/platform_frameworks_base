@@ -660,7 +660,7 @@ public final class ApduServiceInfo implements Parcelable {
      * @param proto the ProtoOutputStream to write to
      */
     public void dumpDebug(ProtoOutputStream proto) {
-        getComponent().dumpDebug(proto, ApduServiceInfoProto.COMPONENT_NAME);
+        Utils.dumpDebugComponentName(getComponent(), proto, ApduServiceInfoProto.COMPONENT_NAME);
         proto.write(ApduServiceInfoProto.DESCRIPTION, getDescription());
         proto.write(ApduServiceInfoProto.ON_HOST, mOnHost);
         if (!mOnHost) {
