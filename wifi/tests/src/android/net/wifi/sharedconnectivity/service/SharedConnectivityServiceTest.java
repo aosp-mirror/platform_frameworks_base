@@ -24,9 +24,8 @@ import static android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStat
 import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
 import static android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -52,11 +51,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.List;
 
 /**
- * Unit tests for {@link android.net.wifi.sharedconnectivity.service.SharedConnectivityService}.
+ * Unit tests for {@link SharedConnectivityService}.
  */
 @SmallTest
 public class SharedConnectivityServiceTest {
-    private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP, SECURITY_TYPE_EAP};
     private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
             .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
             .setConnectionStrength(2).setBatteryPercentage(50).build();
@@ -64,12 +62,13 @@ public class SharedConnectivityServiceTest {
             new TetherNetwork.Builder().setDeviceId(1).setDeviceInfo(DEVICE_INFO)
                     .setNetworkType(NETWORK_TYPE_CELLULAR).setNetworkName("TEST_NETWORK")
                     .setHotspotSsid("TEST_SSID").setHotspotBssid("TEST_BSSID")
-                    .setHotspotSecurityTypes(SECURITY_TYPES).build();
+                    .addHotspotSecurityType(SECURITY_TYPE_WEP)
+                    .addHotspotSecurityType(SECURITY_TYPE_EAP).build();
     private static final List<TetherNetwork> TETHER_NETWORKS = List.of(TETHER_NETWORK);
     private static final KnownNetwork KNOWN_NETWORK =
             new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE_NEARBY_SELF)
-                    .setSsid("TEST_SSID").setSecurityTypes(SECURITY_TYPES)
-                    .setDeviceInfo(DEVICE_INFO).build();
+                    .setSsid("TEST_SSID").addSecurityType(SECURITY_TYPE_WEP)
+                    .addSecurityType(SECURITY_TYPE_EAP).setDeviceInfo(DEVICE_INFO).build();
     private static final List<KnownNetwork> KNOWN_NETWORKS = List.of(KNOWN_NETWORK);
     private static final SharedConnectivitySettingsState SETTINGS_STATE =
             new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(true)
@@ -111,7 +110,8 @@ public class SharedConnectivityServiceTest {
     @Test
     public void onBind_isNotNull() {
         SharedConnectivityService service = createService();
-        assertNotNull(service.onBind(new Intent()));
+
+        assertThat(service.onBind(new Intent())).isNotNull();
     }
 
     @Test
@@ -121,7 +121,9 @@ public class SharedConnectivityServiceTest {
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
         service.setTetherNetworks(TETHER_NETWORKS);
-        assertArrayEquals(TETHER_NETWORKS.toArray(), binder.getTetherNetworks().toArray());
+
+        assertThat(binder.getTetherNetworks())
+                .containsExactlyElementsIn(List.copyOf(TETHER_NETWORKS));
     }
 
     @Test
@@ -131,7 +133,9 @@ public class SharedConnectivityServiceTest {
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
         service.setKnownNetworks(KNOWN_NETWORKS);
-        assertArrayEquals(KNOWN_NETWORKS.toArray(), binder.getKnownNetworks().toArray());
+
+        assertThat(binder.getKnownNetworks())
+                .containsExactlyElementsIn(List.copyOf(KNOWN_NETWORKS));
     }
 
     @Test
@@ -141,7 +145,8 @@ public class SharedConnectivityServiceTest {
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
         service.setSettingsState(SETTINGS_STATE);
-        assertEquals(SETTINGS_STATE, binder.getSettingsState());
+
+        assertThat(binder.getSettingsState()).isEqualTo(SETTINGS_STATE);
     }
 
     @Test
@@ -151,7 +156,9 @@ public class SharedConnectivityServiceTest {
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
         service.updateTetherNetworkConnectionStatus(TETHER_NETWORK_CONNECTION_STATUS);
-        assertEquals(TETHER_NETWORK_CONNECTION_STATUS, binder.getTetherNetworkConnectionStatus());
+
+        assertThat(binder.getTetherNetworkConnectionStatus())
+                .isEqualTo(TETHER_NETWORK_CONNECTION_STATUS);
     }
 
     @Test
@@ -161,7 +168,9 @@ public class SharedConnectivityServiceTest {
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
         service.updateKnownNetworkConnectionStatus(KNOWN_NETWORK_CONNECTION_STATUS);
-        assertEquals(KNOWN_NETWORK_CONNECTION_STATUS, binder.getKnownNetworkConnectionStatus());
+
+        assertThat(binder.getKnownNetworkConnectionStatus())
+                .isEqualTo(KNOWN_NETWORK_CONNECTION_STATUS);
     }
 
     private SharedConnectivityService createService() {
