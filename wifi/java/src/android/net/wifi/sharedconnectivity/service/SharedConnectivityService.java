@@ -27,12 +27,12 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.wifi.sharedconnectivity.app.HotspotNetwork;
+import android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
 import android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivityManager;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
-import android.net.wifi.sharedconnectivity.app.TetherNetwork;
-import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -62,14 +62,14 @@ public abstract class SharedConnectivityService extends Service {
     private Handler mHandler;
     private final RemoteCallbackList<ISharedConnectivityCallback> mRemoteCallbackList =
             new RemoteCallbackList<>();
-    private List<TetherNetwork> mTetherNetworks = Collections.emptyList();
+    private List<HotspotNetwork> mHotspotNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
     private SharedConnectivitySettingsState mSettingsState =
             new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(false)
                     .setExtras(Bundle.EMPTY).build();
-    private TetherNetworkConnectionStatus mTetherNetworkConnectionStatus =
-            new TetherNetworkConnectionStatus.Builder()
-                    .setStatus(TetherNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
+    private HotspotNetworkConnectionStatus mHotspotNetworkConnectionStatus =
+            new HotspotNetworkConnectionStatus.Builder()
+                    .setStatus(HotspotNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
                     .setExtras(Bundle.EMPTY).build();
     private KnownNetworkConnectionStatus mKnownNetworkConnectionStatus =
             new KnownNetworkConnectionStatus.Builder()
@@ -84,8 +84,8 @@ public abstract class SharedConnectivityService extends Service {
         IBinder serviceStub = new ISharedConnectivityService.Stub() {
 
             /**
-             * Registers a callback for receiving updates to the list of Tether Networks, Known
-             * Networks, shared connectivity settings state, tether network connection status and
+             * Registers a callback for receiving updates to the list of Hotspot Networks, Known
+             * Networks, shared connectivity settings state, hotspot network connection status and
              * known network connection status.
              *
              * @param callback The callback of type {@link ISharedConnectivityCallback} to be called
@@ -113,29 +113,28 @@ public abstract class SharedConnectivityService extends Service {
             }
 
             /**
-             * Connects to a tether network.
+             * Connects to a hotspot network.
              *
              * @param network The network to connect to.
              */
             @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
                     android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
-            public void connectTetherNetwork(TetherNetwork network) {
+            public void connectHotspotNetwork(HotspotNetwork network) {
                 checkPermissions();
-                mHandler.post(() -> onConnectTetherNetwork(network));
+                mHandler.post(() -> onConnectHotspotNetwork(network));
             }
 
             /**
-             * Disconnects from a previously connected tether network.
+             * Disconnects from a previously connected hotspot network.
              *
              * @param network The network to disconnect from.
              */
             @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
                     android.Manifest.permission.NETWORK_SETUP_WIZARD})
-            @Override
-            public void disconnectTetherNetwork(TetherNetwork network) {
+            public void disconnectHotspotNetwork(HotspotNetwork network) {
                 checkPermissions();
-                mHandler.post(() -> onDisconnectTetherNetwork(network));
+                mHandler.post(() -> onDisconnectHotspotNetwork(network));
             }
 
             /**
@@ -164,16 +163,16 @@ public abstract class SharedConnectivityService extends Service {
             }
 
             /**
-             * Gets the list of tether networks the user can select to connect to.
+             * Gets the list of hotspot networks the user can select to connect to.
              *
-             * @return Returns a {@link List} of {@link TetherNetwork} objects
+             * @return Returns a {@link List} of {@link HotspotNetwork} objects
              */
             @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
                     android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
-            public List<TetherNetwork> getTetherNetworks() {
+            public List<HotspotNetwork> getHotspotNetworks() {
                 checkPermissions();
-                return mTetherNetworks;
+                return mHotspotNetworks;
             }
 
             /**
@@ -203,17 +202,17 @@ public abstract class SharedConnectivityService extends Service {
             }
 
             /**
-             * Gets the connection status of the tether network the user selected to connect to.
+             * Gets the connection status of the hotspot network the user selected to connect to.
              *
-             * @return Returns a {@link TetherNetworkConnectionStatus} object with the connection
+             * @return Returns a {@link HotspotNetworkConnectionStatus} object with the connection
              * status.
              */
             @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
                     android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
-            public TetherNetworkConnectionStatus getTetherNetworkConnectionStatus() {
+            public HotspotNetworkConnectionStatus getHotspotNetworkConnectionStatus() {
                 checkPermissions();
-                return mTetherNetworkConnectionStatus;
+                return mHotspotNetworkConnectionStatus;
             }
 
             /**
@@ -254,7 +253,8 @@ public abstract class SharedConnectivityService extends Service {
 
     /** @hide */
     @TestApi
-    public void onBind() {}
+    public void onBind() {
+    }
 
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
         mRemoteCallbackList.register(callback);
@@ -265,23 +265,23 @@ public abstract class SharedConnectivityService extends Service {
     }
 
     /**
-     * Implementing application should call this method to provide an up-to-date list of Tether
+     * Implementing application should call this method to provide an up-to-date list of Hotspot
      * Networks to be displayed to the user.
      *
      * This method updates the cached list and notifies all registered callbacks. Any callbacks that
      * are inaccessible will be unregistered.
      *
-     * @param networks The updated list of {@link TetherNetwork} objects.
+     * @param networks The updated list of {@link HotspotNetwork} objects.
      */
-    public final void setTetherNetworks(@NonNull List<TetherNetwork> networks) {
-        mTetherNetworks = networks;
+    public final void setHotspotNetworks(@NonNull List<HotspotNetwork> networks) {
+        mHotspotNetworks = networks;
 
         int count = mRemoteCallbackList.beginBroadcast();
         for (int i = 0; i < count; i++) {
             try {
-                mRemoteCallbackList.getBroadcastItem(i).onTetherNetworksUpdated(mTetherNetworks);
+                mRemoteCallbackList.getBroadcastItem(i).onHotspotNetworksUpdated(mHotspotNetworks);
             } catch (RemoteException e) {
-                if (DEBUG) Log.w(TAG, "Exception in setTetherNetworks", e);
+                if (DEBUG) Log.w(TAG, "Exception in setHotspotNetworks", e);
             }
         }
         mRemoteCallbackList.finishBroadcast();
@@ -318,7 +318,7 @@ public abstract class SharedConnectivityService extends Service {
      * that are inaccessible will be unregistered.
      *
      * @param settingsState The updated state {@link SharedConnectivitySettingsState}
-     *                 objects.
+     *                      objects.
      */
     public final void setSettingsState(@NonNull SharedConnectivitySettingsState settingsState) {
         mSettingsState = settingsState;
@@ -337,23 +337,22 @@ public abstract class SharedConnectivityService extends Service {
 
     /**
      * Implementing application should call this method to provide an up-to-date status of enabling
-     * and connecting to the tether network.
+     * and connecting to the hotspot network.
      *
-     * @param status The updated status {@link TetherNetworkConnectionStatus} of the connection.
-     *
+     * @param status The updated status {@link HotspotNetworkConnectionStatus} of the connection.
      */
-    public final void updateTetherNetworkConnectionStatus(
-            @NonNull TetherNetworkConnectionStatus status) {
-        mTetherNetworkConnectionStatus = status;
+    public final void updateHotspotNetworkConnectionStatus(
+            @NonNull HotspotNetworkConnectionStatus status) {
+        mHotspotNetworkConnectionStatus = status;
 
         int count = mRemoteCallbackList.beginBroadcast();
         for (int i = 0; i < count; i++) {
             try {
                 mRemoteCallbackList
-                        .getBroadcastItem(i).onTetherNetworkConnectionStatusChanged(
-                                mTetherNetworkConnectionStatus);
+                        .getBroadcastItem(i).onHotspotNetworkConnectionStatusChanged(
+                                mHotspotNetworkConnectionStatus);
             } catch (RemoteException e) {
-                if (DEBUG) Log.w(TAG, "Exception in updateTetherNetworkConnectionStatus", e);
+                if (DEBUG) Log.w(TAG, "Exception in updateHotspotNetworkConnectionStatus", e);
             }
         }
         mRemoteCallbackList.finishBroadcast();
@@ -364,7 +363,6 @@ public abstract class SharedConnectivityService extends Service {
      * connecting to a known network.
      *
      * @param status The updated status {@link KnownNetworkConnectionStatus} of the connection.
-     *
      */
     public final void updateKnownNetworkConnectionStatus(
             @NonNull KnownNetworkConnectionStatus status) {
@@ -386,20 +384,20 @@ public abstract class SharedConnectivityService extends Service {
     /**
      * Implementing application should implement this method.
      *
-     * Implementation should initiate a connection to the Tether Network indicated.
+     * Implementation should initiate a connection to the Hotspot Network indicated.
      *
-     * @param network Object identifying the Tether Network the user has requested a connection to.
+     * @param network Object identifying the Hotspot Network the user has requested a connection to.
      */
-    public abstract void onConnectTetherNetwork(@NonNull TetherNetwork network);
+    public abstract void onConnectHotspotNetwork(@NonNull HotspotNetwork network);
 
     /**
      * Implementing application should implement this method.
      *
-     * Implementation should initiate a disconnection from the active Tether Network.
+     * Implementation should initiate a disconnection from the active Hotspot Network.
      *
-     * @param network Object identifying the Tether Network the user has requested to disconnect.
+     * @param network Object identifying the Hotspot Network the user has requested to disconnect.
      */
-    public abstract void onDisconnectTetherNetwork(@NonNull TetherNetwork network);
+    public abstract void onDisconnectHotspotNetwork(@NonNull HotspotNetwork network);
 
     /**
      * Implementing application should implement this method.
