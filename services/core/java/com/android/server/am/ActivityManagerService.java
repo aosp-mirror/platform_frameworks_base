@@ -1128,19 +1128,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        protected void filterResults(@NonNull Computer computer,
-                @NonNull Intent intent, List<BroadcastFilter> results) {
-            if (intent.getAction() != null) return;
-            // When the resolved component is targeting U+, block null action intents
-            for (int i = results.size() - 1; i >= 0; --i) {
-                if (computer.isChangeEnabled(
-                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, results.get(i).owningUid)) {
-                    results.remove(i);
-                }
-            }
-        }
-
-        @Override
         protected IntentFilter getIntentFilter(@NonNull BroadcastFilter input) {
             return input;
         }
@@ -13978,19 +13965,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         (intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) == 0) {
                     continue;
                 }
-
-                final boolean blockNullAction = mPlatformCompat.isChangeEnabledInternal(
-                        IntentFilter.BLOCK_NULL_ACTION_INTENTS, callerApp.info);
                 // If intent has scheme "content", it will need to access
                 // provider that needs to lock mProviderMap in ActivityThread
                 // and also it may need to wait application response, so we
                 // cannot lock ActivityManagerService here.
-                if (filter.match(intent.getAction(), intent.resolveType(resolver),
-                        intent.getScheme(), intent.getData(), intent.getCategories(), TAG,
-                        false /* supportWildcards */,
-                        blockNullAction,
-                        null /* ignoreActions */,
-                        intent.getExtras()) >= 0) {
+                if (filter.match(resolver, intent, true, TAG) >= 0) {
                     if (allSticky == null) {
                         allSticky = new ArrayList<Intent>();
                     }
@@ -15009,7 +14988,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     List<BroadcastFilter> registeredReceiversForUser =
                             mReceiverResolver.queryIntent(snapshot, intent,
-                                    resolvedType, false /*defaultOnly*/, callingUid, users[i]);
+                                    resolvedType, false /*defaultOnly*/, users[i]);
                     if (registeredReceivers == null) {
                         registeredReceivers = registeredReceiversForUser;
                     } else if (registeredReceiversForUser != null) {
@@ -15018,7 +14997,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else {
                 registeredReceivers = mReceiverResolver.queryIntent(snapshot, intent,
-                        resolvedType, false /*defaultOnly*/, callingUid, userId);
+                        resolvedType, false /*defaultOnly*/, userId);
             }
         }
         BroadcastQueue.traceEnd(cookie);

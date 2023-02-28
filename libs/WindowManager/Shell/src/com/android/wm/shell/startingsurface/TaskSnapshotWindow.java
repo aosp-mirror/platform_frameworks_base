@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.graphics.Color.WHITE;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -62,14 +63,24 @@ public class TaskSnapshotWindow {
     private static final String TAG = StartingWindowController.TAG;
     private static final String TITLE_FORMAT = "SnapshotStartingWindow for taskId=";
 
+    private static final long DELAY_REMOVAL_TIME_GENERAL = 100;
+    /**
+     * The max delay time in milliseconds for removing the task snapshot window with IME visible.
+     * Ideally the delay time will be shorter when receiving
+     * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
+     */
+    private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 600;
+
     private final Window mWindow;
     private final Runnable mClearWindowHandler;
     private final ShellExecutor mSplashScreenExecutor;
     private final IWindowSession mSession;
     private boolean mHasDrawn;
     private final Paint mBackgroundPaint = new Paint();
+    private final int mActivityType;
     private final int mOrientationOnCreation;
 
+    private final Runnable mScheduledRunnable = this::removeImmediately;
     private final boolean mHasImeSurface;
 
     static TaskSnapshotWindow create(StartingWindowInfo info, IBinder appToken,
@@ -93,6 +104,7 @@ public class TaskSnapshotWindow {
         final Point taskSize = snapshot.getTaskSize();
         final Rect taskBounds = new Rect(0, 0, taskSize.x, taskSize.y);
         final int orientation = snapshot.getOrientation();
+        final int activityType = runningTaskInfo.topActivityType;
         final int displayId = runningTaskInfo.displayId;
 
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
@@ -102,11 +114,16 @@ public class TaskSnapshotWindow {
         final InsetsSourceControl.Array tmpControls = new InsetsSourceControl.Array();
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
 
-        final TaskDescription taskDescription =
-                SnapshotDrawerUtils.getOrCreateTaskDescription(runningTaskInfo);
+        final TaskDescription taskDescription;
+        if (runningTaskInfo.taskDescription != null) {
+            taskDescription = runningTaskInfo.taskDescription;
+        } else {
+            taskDescription = new TaskDescription();
+            taskDescription.setBackgroundColor(WHITE);
+        }
 
         final TaskSnapshotWindow snapshotSurface = new TaskSnapshotWindow(
-                snapshot, taskDescription, orientation,
+                snapshot, taskDescription, orientation, activityType,
                 clearWindowHandler, splashScreenExecutor);
         final Window window = snapshotSurface.mWindow;
 
@@ -136,8 +153,6 @@ public class TaskSnapshotWindow {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();
-            Slog.w(TAG, "Failed to relayout snapshot starting window");
-            return null;
         }
 
         SnapshotDrawerUtils.drawSnapshotOnSurface(info, layoutParams, surfaceControl, snapshot,
@@ -149,7 +164,7 @@ public class TaskSnapshotWindow {
     }
 
     public TaskSnapshotWindow(TaskSnapshot snapshot, TaskDescription taskDescription,
-            int currentOrientation, Runnable clearWindowHandler,
+            int currentOrientation, int activityType, Runnable clearWindowHandler,
             ShellExecutor splashScreenExecutor) {
         mSplashScreenExecutor = splashScreenExecutor;
         mSession = WindowManagerGlobal.getWindowSession();
@@ -158,6 +173,7 @@ public class TaskSnapshotWindow {
         int backgroundColor = taskDescription.getBackgroundColor();
         mBackgroundPaint.setColor(backgroundColor != 0 ? backgroundColor : WHITE);
         mOrientationOnCreation = currentOrientation;
+        mActivityType = activityType;
         mClearWindowHandler = clearWindowHandler;
         mHasImeSurface = snapshot.hasImeSurface();
     }
@@ -170,7 +186,23 @@ public class TaskSnapshotWindow {
 	return mHasImeSurface;
     }
 
+    void scheduleRemove(boolean deferRemoveForIme) {
+        // Show the latest content as soon as possible for unlocking to home.
+        if (mActivityType == ACTIVITY_TYPE_HOME) {
+            removeImmediately();
+            return;
+        }
+        mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
+        final long delayRemovalTime = mHasImeSurface && deferRemoveForIme
+                ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
+                : DELAY_REMOVAL_TIME_GENERAL;
+        mSplashScreenExecutor.executeDelayed(mScheduledRunnable, delayRemovalTime);
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
+                "Defer removing snapshot surface in %d", delayRemovalTime);
+    }
+
     void removeImmediately() {
+        mSplashScreenExecutor.removeCallbacks(mScheduledRunnable);
         try {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                     "Removing taskSnapshot surface, mHasDrawn=%b", mHasDrawn);
