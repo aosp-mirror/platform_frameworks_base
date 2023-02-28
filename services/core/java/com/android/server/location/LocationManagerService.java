@@ -296,6 +296,8 @@ public class LocationManagerService extends ILocationManager.Stub implements
                 refreshAppOpsRestrictions(userId);
             }
         });
+        mInjector.getEmergencyHelper().addOnEmergencyStateChangedListener(
+                this::onEmergencyStateChanged);
 
         // set up passive provider first since it will be required for all other location providers,
         // which are loaded later once the system is ready.
@@ -565,6 +567,11 @@ public class LocationManagerService extends ILocationManager.Stub implements
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
 
         refreshAppOpsRestrictions(userId);
+    }
+
+    private void onEmergencyStateChanged() {
+        boolean isInEmergency = mInjector.getEmergencyHelper().isInEmergency(Long.MIN_VALUE);
+        mInjector.getLocationUsageLogger().logEmergencyStateChanged(isInEmergency);
     }
 
     private void logLocationEnabledState() {
