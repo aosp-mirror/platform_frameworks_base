@@ -21,7 +21,6 @@ import static android.text.TextUtils.formatSimple;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -34,7 +33,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
@@ -105,10 +103,10 @@ public class SubscriptionInfo implements Parcelable {
     private final int mCarrierId;
 
     /**
-     * The source of the {@link #mCarrierName}.
+     * The source of the {@link #mDisplayName}.
      */
     @SimDisplayNameSource
-    private final int mNameSource;
+    private final int mDisplayNameSource;
 
     /**
      * The color to be used for tinting the icon when displaying to the user.
@@ -319,14 +317,14 @@ public class SubscriptionInfo implements Parcelable {
     // TODO: Clean up after external usages moved to builder model.
     @Deprecated
     public SubscriptionInfo(int id, String iccId, int simSlotIndex, CharSequence displayName,
-            CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
-            Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
+            CharSequence carrierName, int displayNameSource, int iconTint, String number,
+            int roaming, Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] nativeAccessRules, String cardString, int cardId,
             boolean isOpportunistic, @Nullable String groupUUID, boolean isGroupDisabled,
             int carrierId, int profileClass, int subType, @Nullable String groupOwner,
             @Nullable UiccAccessRule[] carrierConfigAccessRules,
             boolean areUiccApplicationsEnabled, int portIndex) {
-        this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
+        this(id, iccId, simSlotIndex, displayName, carrierName, displayNameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, nativeAccessRules, cardString,
                 cardId, isOpportunistic, groupUUID, isGroupDisabled, carrierId, profileClass,
                 subType, groupOwner, carrierConfigAccessRules, areUiccApplicationsEnabled,
@@ -353,7 +351,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mSimSlotIndex = simSlotIndex;
         this.mDisplayName =  displayName;
         this.mCarrierName = carrierName;
-        this.mNameSource = nameSource;
+        this.mDisplayNameSource = nameSource;
         this.mIconTint = iconTint;
         this.mNumber = number;
         this.mDataRoaming = roaming;
@@ -391,7 +389,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mSimSlotIndex = builder.mSimSlotIndex;
         this.mDisplayName = builder.mDisplayName;
         this.mCarrierName = builder.mCarrierName;
-        this.mNameSource = builder.mNameSource;
+        this.mDisplayNameSource = builder.mDisplayNameSource;
         this.mIconTint = builder.mIconTint;
         this.mNumber = builder.mNumber;
         this.mDataRoaming = builder.mDataRoaming;
@@ -481,14 +479,13 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return The source of the {@link #getCarrierName()}.
+     * @return The source of the {@link #getDisplayName()}.
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SimDisplayNameSource
-    public int getNameSource() {
-        return mNameSource;
+    public int getDisplayNameSource() {
+        return mDisplayNameSource;
     }
 
     /**
@@ -863,7 +860,7 @@ public class SubscriptionInfo implements Parcelable {
                     .setSimSlotIndex(source.readInt())
                     .setDisplayName(TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source))
                     .setCarrierName(TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source))
-                    .setNameSource(source.readInt())
+                    .setDisplayNameSource(source.readInt())
                     .setIconTint(source.readInt())
                     .setNumber(source.readString())
                     .setDataRoaming(source.readInt())
@@ -904,7 +901,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeInt(mSimSlotIndex);
         TextUtils.writeToParcel(mDisplayName, dest, 0);
         TextUtils.writeToParcel(mCarrierName, dest, 0);
-        dest.writeInt(mNameSource);
+        dest.writeInt(mDisplayNameSource);
         dest.writeInt(mIconTint);
         dest.writeString(mNumber);
         dest.writeInt(mDataRoaming);
@@ -962,7 +959,7 @@ public class SubscriptionInfo implements Parcelable {
         String cardStringToPrint = givePrintableIccid(mCardString);
         return "{id=" + mId + " iccId=" + iccIdToPrint + " simSlotIndex=" + mSimSlotIndex
                 + " carrierId=" + mCarrierId + " displayName=" + mDisplayName
-                + " carrierName=" + mCarrierName + " nameSource=" + mNameSource
+                + " carrierName=" + mCarrierName + " nameSource=" + mDisplayNameSource
                 + " iconTint=" + mIconTint
                 + " number=" + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mNumber)
                 + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc=" + mMcc
@@ -984,11 +981,11 @@ public class SubscriptionInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
-                mIsOpportunistic, mGroupUuid, mIccId, mNumber, mMcc, mMnc, mCountryIso, mCardString,
-                mCardId, mDisplayName, mCarrierName, Arrays.hashCode(mNativeAccessRules),
-                mIsGroupDisabled, mCarrierId, mProfileClass, mGroupOwner,
-                mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting);
+        return Objects.hash(mId, mSimSlotIndex, mDisplayNameSource, mIconTint, mDataRoaming,
+                mIsEmbedded, mIsOpportunistic, mGroupUuid, mIccId, mNumber, mMcc, mMnc, mCountryIso,
+                mCardString, mCardId, mDisplayName, mCarrierName,
+                Arrays.hashCode(mNativeAccessRules), mIsGroupDisabled, mCarrierId, mProfileClass,
+                mGroupOwner, mAreUiccApplicationsEnabled, mPortIndex, mUsageSetting);
     }
 
     @Override
@@ -998,7 +995,7 @@ public class SubscriptionInfo implements Parcelable {
         SubscriptionInfo toCompare = (SubscriptionInfo) obj;
         return mId == toCompare.mId
                 && mSimSlotIndex == toCompare.mSimSlotIndex
-                && mNameSource == toCompare.mNameSource
+                && mDisplayNameSource == toCompare.mDisplayNameSource
                 && mIconTint == toCompare.mIconTint
                 && mDataRoaming == toCompare.mDataRoaming
                 && mIsEmbedded == toCompare.mIsEmbedded
@@ -1064,10 +1061,10 @@ public class SubscriptionInfo implements Parcelable {
         private CharSequence mCarrierName = "";
 
         /**
-         * The source of the carrier name.
+         * The source of the display name.
          */
         @SimDisplayNameSource
-        private int mNameSource = SubscriptionManager.NAME_SOURCE_CARRIER_ID;
+        private int mDisplayNameSource = SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
         /**
          * The color to be used for tinting the icon when displaying to the user.
@@ -1233,7 +1230,7 @@ public class SubscriptionInfo implements Parcelable {
             mSimSlotIndex = info.mSimSlotIndex;
             mDisplayName = info.mDisplayName;
             mCarrierName = info.mCarrierName;
-            mNameSource = info.mNameSource;
+            mDisplayNameSource = info.mDisplayNameSource;
             mIconTint = info.mIconTint;
             mNumber = info.mNumber;
             mDataRoaming = info.mDataRoaming;
@@ -1324,14 +1321,16 @@ public class SubscriptionInfo implements Parcelable {
         }
 
         /**
-         * Set the source of the carrier name.
+         * Set the source of the display name.
          *
-         * @param nameSource The source of the carrier name.
+         * @param displayNameSource The source of the display name.
          * @return The builder.
+         *
+         * @see SubscriptionInfo#getDisplayName()
          */
         @NonNull
-        public Builder setNameSource(@SimDisplayNameSource int nameSource) {
-            mNameSource = nameSource;
+        public Builder setDisplayNameSource(@SimDisplayNameSource int displayNameSource) {
+            mDisplayNameSource = displayNameSource;
             return this;
         }
 
