@@ -27,6 +27,8 @@ import android.view.DisplayAddress;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import com.android.server.display.mode.DisplayModeDirector;
+
 import java.io.PrintWriter;
 
 /**

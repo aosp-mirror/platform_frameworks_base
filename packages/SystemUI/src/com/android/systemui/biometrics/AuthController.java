@@ -85,6 +85,8 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,8 +99,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlin.Unit;
 
 /**
  * Receives messages sent from {@link com.android.server.biometrics.BiometricService} and shows the
@@ -872,7 +872,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     }
 
     /**
-     * Stores the callback received from {@link com.android.server.display.DisplayModeDirector}.
+     * Stores the callback received from
+     * {@link com.android.server.display.mode.DisplayModeDirector}.
      *
      * DisplayModeDirector implements {@link IUdfpsRefreshRateRequestCallback}
      * and registers it with this class by calling
