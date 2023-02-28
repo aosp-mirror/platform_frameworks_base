@@ -10023,7 +10023,7 @@ package android.net.wifi.sharedconnectivity.app {
     method public int describeContents();
     method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
     method public int getNetworkSource();
-    method @NonNull public int[] getSecurityTypes();
+    method @NonNull public java.util.Set<java.lang.Integer> getSecurityTypes();
     method @NonNull public String getSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.KnownNetwork> CREATOR;
@@ -10033,10 +10033,10 @@ package android.net.wifi.sharedconnectivity.app {
 
   public static final class KnownNetwork.Builder {
     ctor public KnownNetwork.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder addSecurityType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setDeviceInfo(@NonNull android.net.wifi.sharedconnectivity.app.DeviceInfo);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setNetworkSource(int);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setSecurityTypes(@NonNull int[]);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setSsid(@NonNull String);
   }
 
@@ -10105,7 +10105,7 @@ package android.net.wifi.sharedconnectivity.app {
     method public long getDeviceId();
     method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
     method @Nullable public String getHotspotBssid();
-    method @Nullable public int[] getHotspotSecurityTypes();
+    method @NonNull public java.util.Set<java.lang.Integer> getHotspotSecurityTypes();
     method @Nullable public String getHotspotSsid();
     method @NonNull public String getNetworkName();
     method public int getNetworkType();
@@ -10119,11 +10119,11 @@ package android.net.wifi.sharedconnectivity.app {
 
   public static final class TetherNetwork.Builder {
     ctor public TetherNetwork.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder addHotspotSecurityType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setDeviceId(long);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setDeviceInfo(@NonNull android.net.wifi.sharedconnectivity.app.DeviceInfo);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setHotspotBssid(@NonNull String);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setHotspotSecurityTypes(@NonNull int[]);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setHotspotSsid(@NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setNetworkName(@NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setNetworkType(int);

@@ -16,8 +16,7 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
 
@@ -26,7 +25,7 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState}.
+ * Unit tests for {@link SharedConnectivitySettingsState}.
  */
 @SmallTest
 public class SharedConnectivitySettingsStateTest {
@@ -51,8 +50,8 @@ public class SharedConnectivitySettingsStateTest {
         SharedConnectivitySettingsState fromParcel =
                 SharedConnectivitySettingsState.CREATOR.createFromParcel(parcelR);
 
-        assertEquals(state, fromParcel);
-        assertEquals(state.hashCode(), fromParcel.hashCode());
+        assertThat(fromParcel).isEqualTo(state);
+        assertThat(fromParcel.hashCode()).isEqualTo(state.hashCode());
     }
 
     /**
@@ -62,11 +61,11 @@ public class SharedConnectivitySettingsStateTest {
     public void testEqualsOperation() {
         SharedConnectivitySettingsState state1 = buildSettingsStateBuilder().build();
         SharedConnectivitySettingsState state2 = buildSettingsStateBuilder().build();
-        assertEquals(state1, state2);
+        assertThat(state1).isEqualTo(state2);
 
         SharedConnectivitySettingsState.Builder builder = buildSettingsStateBuilder()
                 .setInstantTetherEnabled(INSTANT_TETHER_STATE_1);
-        assertNotEquals(state1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(state1);
     }
 
     /**
@@ -75,7 +74,15 @@ public class SharedConnectivitySettingsStateTest {
     @Test
     public void testGetMethods() {
         SharedConnectivitySettingsState state = buildSettingsStateBuilder().build();
-        assertEquals(state.isInstantTetherEnabled(), INSTANT_TETHER_STATE);
+        assertThat(state.isInstantTetherEnabled()).isEqualTo(INSTANT_TETHER_STATE);
+    }
+
+    @Test
+    public void testHashCode() {
+        SharedConnectivitySettingsState state1 = buildSettingsStateBuilder().build();
+        SharedConnectivitySettingsState state2 = buildSettingsStateBuilder().build();
+
+        assertThat(state1.hashCode()).isEqualTo(state2.hashCode());
     }
 
     private SharedConnectivitySettingsState.Builder buildSettingsStateBuilder() {
