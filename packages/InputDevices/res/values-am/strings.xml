@@ -5,7 +5,7 @@
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"የAndroid የቁልፍ ሰሌዳ"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"እንግሊዝኛ (ዩኬ)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"እንግሊዘኛ (ዩ.ኤስ.)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"እንግሊዘኛ (ዩ. ኤስ.)፣ አለም አቀፍ ቅጥ"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"እንግሊዘኛ (ዩ. ኤስ.)፣ ዓለም አቀፍ ቅጥ"</string>
     <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"እንግሊዘኛ (ዩ. ኤስ.)፣ የኮልማርክ ቅጥ"</string>
     <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"እንግሊዘኛ (ዩ. ኤስ.)፣ የድቮራክ ቅጥ"</string>
     <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"እንግሊዝኛ (አሜሪካ)፣ የሥራሰው ቅጥ"</string>
