@@ -909,6 +909,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         final IApplicationThread thread = app.getOnewayThread();
         if (thread != null) {
             try {
+                if (r.shareIdentity) {
+                    mService.mPackageManagerInt.grantImplicitAccess(r.userId, r.intent,
+                            UserHandle.getAppId(app.uid), r.callingUid, true);
+                }
                 if (receiver instanceof BroadcastFilter) {
                     notifyScheduleRegisteredReceiver(app, r, (BroadcastFilter) receiver);
                     thread.scheduleRegisteredReceiver(
