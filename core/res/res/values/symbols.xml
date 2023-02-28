@@ -451,6 +451,8 @@
   <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_triplePressOnStemPrimaryBehavior" />
   <java-symbol type="string" name="config_doublePressOnPowerTargetActivity" />
+  <java-symbol type="integer" name="config_searchKeyBehavior" />
+  <java-symbol type="string" name="config_searchKeyTargetActivity" />
   <java-symbol type="integer" name="config_windowOutsetBottom" />
   <java-symbol type="integer" name="db_connection_pool_size" />
   <java-symbol type="integer" name="db_journal_size_limit" />
