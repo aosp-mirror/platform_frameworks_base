@@ -99,7 +99,6 @@ import android.widget.Editor;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.ILockSettings;
 
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -6184,9 +6183,6 @@ public final class Settings {
                 sProviderHolder,
                 Secure.class);
 
-        private static ILockSettings sLockSettings = null;
-
-        private static boolean sIsSystemProcess;
         @UnsupportedAppUsage
         private static final HashSet<String> MOVED_TO_LOCK_SETTINGS;
         @UnsupportedAppUsage
@@ -6350,35 +6346,25 @@ public final class Settings {
                 return Global.getStringForUser(resolver, name, userHandle);
             }
 
-            if (MOVED_TO_LOCK_SETTINGS.contains(name)) {
-                synchronized (Secure.class) {
-                    if (sLockSettings == null) {
-                        sLockSettings = ILockSettings.Stub.asInterface(
-                                (IBinder) ServiceManager.getService("lock_settings"));
-                        sIsSystemProcess = Process.myUid() == Process.SYSTEM_UID;
-                    }
-                }
-                if (sLockSettings != null && !sIsSystemProcess) {
-                    // No context; use the ActivityThread's context as an approximation for
-                    // determining the target API level.
-                    Application application = ActivityThread.currentApplication();
+            if (MOVED_TO_LOCK_SETTINGS.contains(name) && Process.myUid() != Process.SYSTEM_UID) {
+                // No context; use the ActivityThread's context as an approximation for
+                // determining the target API level.
+                Application application = ActivityThread.currentApplication();
 
-                    boolean isPreMnc = application != null
-                            && application.getApplicationInfo() != null
-                            && application.getApplicationInfo().targetSdkVersion
-                            <= VERSION_CODES.LOLLIPOP_MR1;
-                    if (isPreMnc) {
-                        try {
-                            return sLockSettings.getString(name, "0", userHandle);
-                        } catch (RemoteException re) {
-                            // Fall through
-                        }
-                    } else {
-                        throw new SecurityException("Settings.Secure." + name
-                                + " is deprecated and no longer accessible."
-                                + " See API documentation for potential replacements.");
-                    }
+                boolean isPreMnc = application != null
+                    && application.getApplicationInfo() != null
+                    && application.getApplicationInfo().targetSdkVersion
+                    <= VERSION_CODES.LOLLIPOP_MR1;
+                if (isPreMnc) {
+                    // Old apps used to get the three deprecated LOCK_PATTERN_* settings from
+                    // ILockSettings.getString().  For security reasons, we now just return a
+                    // stubbed-out value.  Note: the only one of these three settings actually known
+                    // to have been used was LOCK_PATTERN_ENABLED, and ILockSettings.getString()
+                    // already always returned "0" for that starting in Android 11.
+                    return "0";
                 }
+                throw new SecurityException("Settings.Secure." + name + " is deprecated and no" +
+                        " longer accessible. See API documentation for potential replacements.");
             }
 
             return sNameValueCache.getStringForUser(resolver, name, userHandle);
