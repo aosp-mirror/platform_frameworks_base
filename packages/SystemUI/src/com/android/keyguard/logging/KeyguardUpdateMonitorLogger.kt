@@ -196,6 +196,20 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
+    fun logFaceDetected(userId: Int, isStrongBiometric: Boolean) {
+        logBuffer.log(TAG, DEBUG, {
+            int1 = userId
+            bool1 = isStrongBiometric
+        }, {"Face detected: userId: $int1, isStrongBiometric: $bool1"})
+    }
+
+    fun logFingerprintDetected(userId: Int, isStrongBiometric: Boolean) {
+        logBuffer.log(TAG, DEBUG, {
+            int1 = userId
+            bool1 = isStrongBiometric
+        }, {"Fingerprint detected: userId: $int1, isStrongBiometric: $bool1"})
+    }
+
     fun logFingerprintError(msgId: Int, originalErrMsg: String) {
         logBuffer.log(
             TAG,
