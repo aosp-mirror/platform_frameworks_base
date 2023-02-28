@@ -97,6 +97,8 @@ public final class NotificationTest {
         assumeFalse(pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE));
         // Do not run on TV. Direct Reply isn't supported on TV.
         assumeFalse(pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK_ONLY));
+        // Do not run on Wear. Direct Reply isn't supported on Wear.
+        assumeFalse(pm.hasSystemFeature(PackageManager.FEATURE_WATCH));
     }
 
     @After
