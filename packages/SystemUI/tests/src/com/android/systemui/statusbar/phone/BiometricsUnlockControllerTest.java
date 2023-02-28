@@ -537,6 +537,26 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         verify(mVibratorHelper).vibrateAuthError(anyString());
     }
 
+    @Test
+    public void onFingerprintDetect_showBouncer() {
+        // WHEN fingerprint detect occurs
+        mBiometricUnlockController.onBiometricDetected(UserHandle.USER_CURRENT,
+                BiometricSourceType.FINGERPRINT, true /* isStrongBiometric */);
+
+        // THEN shows primary bouncer
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(anyBoolean());
+    }
+
+    @Test
+    public void onFaceDetect_showBouncer() {
+        // WHEN face detect occurs
+        mBiometricUnlockController.onBiometricDetected(UserHandle.USER_CURRENT,
+                BiometricSourceType.FACE, false /* isStrongBiometric */);
+
+        // THEN shows primary bouncer
+        verify(mStatusBarKeyguardViewManager).showPrimaryBouncer(anyBoolean());
+    }
+
     private void givenFingerprintModeUnlockCollapsing() {
         when(mUpdateMonitor.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
