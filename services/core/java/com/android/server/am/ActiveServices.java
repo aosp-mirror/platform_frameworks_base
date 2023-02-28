@@ -7822,7 +7822,7 @@ public final class ActiveServices {
         final int callerTargetSdkVersion = r.mRecentCallerApplicationInfo != null
                 ? r.mRecentCallerApplicationInfo.targetSdkVersion : 0;
 
-        // TODO(short-service): Log BFSL too.
+        // TODO(short-service): Log the UID capabilities (for BFSL) too, and also the procstate?
         FrameworkStatsLog.write(FrameworkStatsLog.FOREGROUND_SERVICE_STATE_CHANGED,
                 r.appInfo.uid,
                 r.shortInstanceName,
@@ -7872,7 +7872,8 @@ public final class ActiveServices {
                 r.mFgsNotificationShown ? 1 : 0,
                 durationMs,
                 r.mStartForegroundCount,
-                fgsStopReasonToString(fgsStopReason));
+                fgsStopReasonToString(fgsStopReason),
+                r.foregroundServiceType);
     }
 
     private void updateNumForegroundServicesLocked() {
