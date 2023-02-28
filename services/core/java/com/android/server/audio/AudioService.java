@@ -1315,7 +1315,7 @@ public class AudioService extends IAudioService.Stub
         // persistent data
         initVolumeGroupStates();
 
-        mSoundDoseHelper.initSafeUsbMediaVolumeIndex();
+        mSoundDoseHelper.initSafeMediaVolumeIndex();
         // Link VGS on VSS
         initVolumeStreamStates();
 
@@ -8837,7 +8837,7 @@ public class AudioService extends IAudioService.Stub
         final VolumeStreamState streamState = mStreamStates[update.mStreamType];
         if (update.hasVolumeIndex()) {
             int index = update.getVolumeIndex();
-            if (!mSoundDoseHelper.checkSafeMediaVolume(update.mStreamType, index, update.mDevice)) {
+            if (mSoundDoseHelper.checkSafeMediaVolume(update.mStreamType, index, update.mDevice)) {
                 index = mSoundDoseHelper.safeMediaVolumeIndex(update.mDevice);
             }
             streamState.setIndex(index, update.mDevice, update.mCaller,

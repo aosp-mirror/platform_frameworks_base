@@ -52,10 +52,9 @@ import com.android.server.utils.EventLogger;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -80,7 +79,6 @@ public class SoundDoseHelper {
     // SAFE_MEDIA_VOLUME_DISABLED according to country option. If not SAFE_MEDIA_VOLUME_DISABLED, it
     // can be set to SAFE_MEDIA_VOLUME_INACTIVE by calling AudioService.disableSafeMediaVolume()
     // (when user opts out).
-    // Note: when CSD calculation is enabled the state is set to SAFE_MEDIA_VOLUME_DISABLED
     private static final int SAFE_MEDIA_VOLUME_NOT_CONFIGURED = 0;
     private static final int SAFE_MEDIA_VOLUME_DISABLED = 1;
     private static final int SAFE_MEDIA_VOLUME_INACTIVE = 2;  // confirmed
@@ -127,30 +125,50 @@ public class SoundDoseHelper {
 
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property
     private int mSafeMediaVolumeIndex;
-    // mSafeUsbMediaVolumeDbfs is the cached value of the config_safe_media_volume_usb_mB
+    // mSafeMediaVolumeDbfs is the cached value of the config_safe_media_volume_usb_mB
     // property, divided by 100.0.
-    private float mSafeUsbMediaVolumeDbfs;
+    // For now using the same value for CSD supported devices
+    private float mSafeMediaVolumeDbfs;
 
-    // mSafeUsbMediaVolumeIndex is used for USB Headsets and is the music volume UI index
-    // corresponding to a gain of mSafeUsbMediaVolumeDbfs (defaulting to -37dB) in audio
-    // flinger mixer.
-    // We remove -22 dBs from the theoretical -15dB to account for the EQ + bass boost
-    // amplification when both effects are on with all band gains at maximum.
-    // This level corresponds to a loudness of 85 dB SPL for the warning to be displayed when
-    // the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
-    private int mSafeUsbMediaVolumeIndex;
-    // mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced,
-    private final Set<Integer> mSafeMediaVolumeDevices = new HashSet<>(
-            Arrays.asList(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                    AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, AudioSystem.DEVICE_OUT_USB_HEADSET));
+    private static class SafeDeviceVolumeInfo {
+        int mDeviceType;
+        int mSafeVolumeIndex = -1;
 
-    private final Set<Integer> mSafeMediaCsdDevices = new HashSet<>(
-            Arrays.asList(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
-                    AudioSystem.DEVICE_OUT_WIRED_HEADPHONE, AudioSystem.DEVICE_OUT_USB_HEADSET,
-                    AudioSystem.DEVICE_OUT_BLE_HEADSET, AudioSystem.DEVICE_OUT_BLE_BROADCAST,
-                    AudioSystem.DEVICE_OUT_HEARING_AID,
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,
-                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+        SafeDeviceVolumeInfo(int deviceType) {
+            mDeviceType = deviceType;
+        }
+    }
+
+    /**
+     * mSafeMediaVolumeDevices lists the devices for which safe media volume is enforced.
+     * Contains a safe volume index for a given device type.
+     * Indexes are used for headsets and is the music volume UI index
+     * corresponding to a gain of mSafeMediaVolumeDbfs (defaulting to -37dB) in audio
+     * flinger mixer.
+     * We remove -22 dBs from the theoretical -15dB to account for the EQ + bass boost
+     * amplification when both effects are on with all band gains at maximum.
+     * This level corresponds to a loudness of 85 dB SPL for the warning to be displayed when
+     * the headset is compliant to EN 60950 with a max loudness of 100dB SPL.
+     */
+    private final HashMap<Integer, SafeDeviceVolumeInfo> mSafeMediaVolumeDevices =
+            new HashMap<>() {{
+                put(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_WIRED_HEADSET));
+                put(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE));
+                put(AudioSystem.DEVICE_OUT_USB_HEADSET,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_USB_HEADSET));
+                put(AudioSystem.DEVICE_OUT_BLE_HEADSET,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_BLE_HEADSET));
+                put(AudioSystem.DEVICE_OUT_BLE_BROADCAST,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_BLE_BROADCAST));
+                put(AudioSystem.DEVICE_OUT_HEARING_AID,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_HEARING_AID));
+                put(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES));
+                put(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                        new SafeDeviceVolumeInfo(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+            }};
 
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
@@ -250,14 +268,10 @@ public class SoundDoseHelper {
         mContext = context;
 
         mEnableCsd = mContext.getResources().getBoolean(R.bool.config_audio_csd_enabled_default);
-        if (mEnableCsd) {
-            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
-        } else {
-            mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
-                    Settings.Global.AUDIO_SAFE_VOLUME_STATE, SAFE_MEDIA_VOLUME_NOT_CONFIGURED);
-        }
-
         initCsd();
+
+        mSafeMediaVolumeState = mSettings.getGlobalInt(audioService.getContentResolver(),
+                Settings.Global.AUDIO_SAFE_VOLUME_STATE, SAFE_MEDIA_VOLUME_NOT_CONFIGURED);
 
         // The default safe volume index read here will be replaced by the actual value when
         // the mcc is read by onConfigureSafeMedia()
@@ -388,14 +402,12 @@ public class SoundDoseHelper {
     }
 
     /*package*/ int safeMediaVolumeIndex(int device) {
-        if (!mSafeMediaVolumeDevices.contains(device)) {
+        final SafeDeviceVolumeInfo vi = mSafeMediaVolumeDevices.get(device);
+        if (vi == null) {
             return MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
         }
-        if (device == AudioSystem.DEVICE_OUT_USB_HEADSET) {
-            return mSafeUsbMediaVolumeIndex;
-        } else {
-            return mSafeMediaVolumeIndex;
-        }
+
+        return vi.mSafeVolumeIndex;
     }
 
     /*package*/ void restoreMusicActiveMs() {
@@ -419,20 +431,24 @@ public class SoundDoseHelper {
     /*package*/ void enforceSafeMediaVolume(String caller) {
         AudioService.VolumeStreamState streamState = mAudioService.getVssVolumeForStream(
                 AudioSystem.STREAM_MUSIC);
-        Set<Integer> devices = mSafeMediaVolumeDevices;
 
-        for (int device : devices) {
-            int index = streamState.getIndex(device);
-            int safeIndex = safeMediaVolumeIndex(device);
+        for (SafeDeviceVolumeInfo vi : mSafeMediaVolumeDevices.values()) {
+            int index = streamState.getIndex(vi.mDeviceType);
+            int safeIndex = safeMediaVolumeIndex(vi.mDeviceType);
             if (index > safeIndex) {
-                streamState.setIndex(safeIndex, device, caller, true /*hasModifyAudioSettings*/);
+                streamState.setIndex(safeIndex, vi.mDeviceType, caller,
+                        true /*hasModifyAudioSettings*/);
                 mAudioHandler.sendMessageAtTime(
-                        mAudioHandler.obtainMessage(MSG_SET_DEVICE_VOLUME, device, /*arg2=*/0,
-                                streamState), /*delay=*/0);
+                        mAudioHandler.obtainMessage(MSG_SET_DEVICE_VOLUME, vi.mDeviceType,
+                                /*arg2=*/0, streamState), /*delay=*/0);
             }
         }
     }
 
+    /**
+     * Returns {@code true} if the safe media actions can be applied for the given stream type,
+     * volume index and device.
+     **/
     /*package*/ boolean checkSafeMediaVolume(int streamType, int index, int device) {
         boolean result;
         synchronized (mSafeMediaVolumeStateLock) {
@@ -443,17 +459,16 @@ public class SoundDoseHelper {
 
     @GuardedBy("mSafeMediaVolumeStateLock")
     private boolean checkSafeMediaVolume_l(int streamType, int index, int device) {
-        return (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_ACTIVE)
-                    || (AudioService.mStreamVolumeAlias[streamType] != AudioSystem.STREAM_MUSIC)
-                    || (!mSafeMediaVolumeDevices.contains(device))
-                    || (index <= safeMediaVolumeIndex(device))
-                    || mEnableCsd;
+        return (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)
+                    && (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC)
+                    && (mSafeMediaVolumeDevices.containsKey(device))
+                    && (index > safeMediaVolumeIndex(device));
     }
 
     /*package*/ boolean willDisplayWarningAfterCheckVolume(int streamType, int index, int device,
             int flags) {
         synchronized (mSafeMediaVolumeStateLock) {
-            if (!checkSafeMediaVolume_l(streamType, index, device)) {
+            if (checkSafeMediaVolume_l(streamType, index, device)) {
                 mVolumeController.postDisplaySafeVolumeWarning(flags);
                 mPendingVolumeCommand = new StreamVolumeCommand(
                         streamType, index, flags, device);
@@ -484,15 +499,13 @@ public class SoundDoseHelper {
     /*package*/ void scheduleMusicActiveCheck() {
         synchronized (mSafeMediaVolumeStateLock) {
             cancelMusicActiveCheck();
-            if (!mEnableCsd) {
-                mMusicActiveIntent = PendingIntent.getBroadcast(mContext,
-                        REQUEST_CODE_CHECK_MUSIC_ACTIVE,
-                        new Intent(ACTION_CHECK_MUSIC_ACTIVE),
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        SystemClock.elapsedRealtime()
-                                + MUSIC_ACTIVE_POLL_PERIOD_MS, mMusicActiveIntent);
-            }
+            mMusicActiveIntent = PendingIntent.getBroadcast(mContext,
+                    REQUEST_CODE_CHECK_MUSIC_ACTIVE,
+                    new Intent(ACTION_CHECK_MUSIC_ACTIVE),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            mAlarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    SystemClock.elapsedRealtime()
+                            + MUSIC_ACTIVE_POLL_PERIOD_MS, mMusicActiveIntent);
         }
     }
 
@@ -500,7 +513,7 @@ public class SoundDoseHelper {
         synchronized (mSafeMediaVolumeStateLock) {
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE) {
                 int device = mAudioService.getDeviceForStream(AudioSystem.STREAM_MUSIC);
-                if (mSafeMediaVolumeDevices.contains(device) && isStreamActive) {
+                if (mSafeMediaVolumeDevices.containsKey(device) && isStreamActive) {
                     scheduleMusicActiveCheck();
                     int index = mAudioService.getVssVolumeForDevice(AudioSystem.STREAM_MUSIC,
                             device);
@@ -528,27 +541,31 @@ public class SoundDoseHelper {
 
     /*package*/ void configureSafeMedia(boolean forced, String caller) {
         int msg = MSG_CONFIGURE_SAFE_MEDIA;
-        mAudioHandler.removeMessages(msg);
+        if (forced) {
+            // unforced should not cancel forced configure messages
+            mAudioHandler.removeMessages(msg);
+        }
 
         long time = 0;
         if (forced) {
             time = (SystemClock.uptimeMillis() + (SystemProperties.getBoolean(
                     "audio.safemedia.bypass", false) ? 0 : SAFE_VOLUME_CONFIGURE_TIMEOUT_MS));
         }
+
         mAudioHandler.sendMessageAtTime(
                 mAudioHandler.obtainMessage(msg, /*arg1=*/forced ? 1 : 0, /*arg2=*/0, caller),
                 time);
     }
 
-    /*package*/ void initSafeUsbMediaVolumeIndex() {
-        // mSafeUsbMediaVolumeIndex must be initialized after createStreamStates() because it
-        // relies on audio policy having correct ranges for volume indexes.
-        mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
+    /*package*/ void initSafeMediaVolumeIndex() {
+        for (SafeDeviceVolumeInfo vi : mSafeMediaVolumeDevices.values()) {
+            vi.mSafeVolumeIndex = getSafeDeviceMediaVolumeIndex(vi.mDeviceType);
+        }
     }
 
     /*package*/ int getSafeMediaVolumeIndex(int device) {
-        if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE && mSafeMediaVolumeDevices.contains(
-                device)) {
+        if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE
+                && mSafeMediaVolumeDevices.containsKey(device)) {
             return safeMediaVolumeIndex(device);
         } else {
             return -1;
@@ -557,7 +574,7 @@ public class SoundDoseHelper {
 
     /*package*/ boolean raiseVolumeDisplaySafeMediaVolume(int streamType, int index, int device,
             int flags) {
-        if (checkSafeMediaVolume(streamType, index, device)) {
+        if (!checkSafeMediaVolume(streamType, index, device)) {
             return false;
         }
 
@@ -566,7 +583,7 @@ public class SoundDoseHelper {
     }
 
     /*package*/ boolean safeDevicesContains(int device) {
-        return mSafeMediaVolumeDevices.contains(device);
+        return mSafeMediaVolumeDevices.containsKey(device);
     }
 
     /*package*/ void invalidatPendingVolumeCommand() {
@@ -612,8 +629,11 @@ public class SoundDoseHelper {
         pw.print("  mSafeMediaVolumeState=");
         pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);
-        pw.print("  mSafeUsbMediaVolumeIndex="); pw.println(mSafeUsbMediaVolumeIndex);
-        pw.print("  mSafeUsbMediaVolumeDbfs="); pw.println(mSafeUsbMediaVolumeDbfs);
+        for (SafeDeviceVolumeInfo vi : mSafeMediaVolumeDevices.values()) {
+            pw.print("  mSafeMediaVolumeIndex["); pw.print(vi.mDeviceType);
+            pw.print("]="); pw.println(vi.mSafeVolumeIndex);
+        }
+        pw.print("  mSafeMediaVolumeDbfs="); pw.println(mSafeMediaVolumeDbfs);
         pw.print("  mMusicActiveMs="); pw.println(mMusicActiveMs);
         pw.print("  mMcc="); pw.println(mMcc);
         pw.print("  mPendingVolumeCommand="); pw.println(mPendingVolumeCommand);
@@ -660,11 +680,12 @@ public class SoundDoseHelper {
             if (!isAbsoluteVolume) {
                 // remove any possible previous attenuation
                 soundDose.updateAttenuation(/* attenuationDB= */0.f, device);
+
                 return;
             }
 
             if (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC
-                    && mSafeMediaCsdDevices.contains(device)) {
+                    && mSafeMediaVolumeDevices.containsKey(device)) {
                 soundDose.updateAttenuation(
                         AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC,
                                 (newIndex + 5) / 10,
@@ -715,7 +736,7 @@ public class SoundDoseHelper {
                 mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                         com.android.internal.R.integer.config_safe_media_volume_index) * 10;
 
-                mSafeUsbMediaVolumeIndex = getSafeUsbMediaVolumeIndex();
+                initSafeMediaVolumeIndex();
 
                 boolean safeMediaVolumeEnabled =
                         SystemProperties.getBoolean("audio.safemedia.force", false)
@@ -728,7 +749,7 @@ public class SoundDoseHelper {
                 // The persisted state is either "disabled" or "active": this is the state applied
                 // next time we boot and cannot be "inactive"
                 int persistedState;
-                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass && !mEnableCsd) {
+                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass) {
                     persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
                     // The state can already be "inactive" here if the user has forced it before
                     // the 30 seconds timeout for forced configuration. In this case we don't reset
@@ -801,25 +822,32 @@ public class SoundDoseHelper {
         mAudioHandler.obtainMessage(MSG_PERSIST_MUSIC_ACTIVE_MS, mMusicActiveMs, 0).sendToTarget();
     }
 
-    private int getSafeUsbMediaVolumeIndex() {
+    private int getSafeDeviceMediaVolumeIndex(int deviceType) {
+        // legacy implementation uses mSafeMediaVolumeIndex for wired HS/HP
+        // instead of computing it from the volume curves
+        if ((deviceType == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE
+                || deviceType == AudioSystem.DEVICE_OUT_WIRED_HEADSET) && !mEnableCsd) {
+            return mSafeMediaVolumeIndex;
+        }
+
         // determine UI volume index corresponding to the wanted safe gain in dBFS
         int min = MIN_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
         int max = MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC];
 
-        mSafeUsbMediaVolumeDbfs = mContext.getResources().getInteger(
+        mSafeMediaVolumeDbfs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_safe_media_volume_usb_mB) / 100.0f;
 
         while (Math.abs(max - min) > 1) {
             int index = (max + min) / 2;
-            float gainDB = AudioSystem.getStreamVolumeDB(
-                    AudioSystem.STREAM_MUSIC, index, AudioSystem.DEVICE_OUT_USB_HEADSET);
+            float gainDB = AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC, index,
+                    deviceType);
             if (Float.isNaN(gainDB)) {
                 //keep last min in case of read error
                 break;
-            } else if (gainDB == mSafeUsbMediaVolumeDbfs) {
+            } else if (gainDB == mSafeMediaVolumeDbfs) {
                 min = index;
                 break;
-            } else if (gainDB < mSafeUsbMediaVolumeDbfs) {
+            } else if (gainDB < mSafeMediaVolumeDbfs) {
                 min = index;
             } else {
                 max = index;
