@@ -37,7 +37,8 @@ data class GetCredentialUiState(
 internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
     return state.providerDisplayInfo.sortedUserNameToCredentialEntryList.isNotEmpty() ||
         state.providerDisplayInfo.authenticationEntryList.isNotEmpty() ||
-        state.providerDisplayInfo.remoteEntry != null
+        (state.providerDisplayInfo.remoteEntry != null &&
+            !state.requestDisplayInfo.preferImmediatelyAvailableCredentials)
 }
 
 data class ProviderInfo(
@@ -146,6 +147,7 @@ class ActionEntryInfo(
 
 data class RequestDisplayInfo(
     val appName: String,
+    val preferImmediatelyAvailableCredentials: Boolean,
 )
 
 /**
@@ -246,7 +248,6 @@ private fun toActiveEntry(
 private fun toGetScreenState(
     providerDisplayInfo: ProviderDisplayInfo
 ): GetScreenState {
-
     return if (providerDisplayInfo.sortedUserNameToCredentialEntryList.isEmpty() &&
         providerDisplayInfo.remoteEntry == null &&
         providerDisplayInfo.authenticationEntryList.all { it.isUnlockedAndEmpty })
