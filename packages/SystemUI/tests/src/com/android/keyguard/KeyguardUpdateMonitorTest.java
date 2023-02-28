@@ -17,6 +17,7 @@
 package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
+import static android.hardware.biometrics.BiometricConstants.BIOMETRIC_LOCKOUT_TIMED;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
@@ -813,6 +814,39 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // FACE detect is triggered, not authenticate
         verifyFaceDetectCall();
+        verifyFaceAuthenticateNeverCalled();
+
+        // WHEN bouncer becomes visible
+        setKeyguardBouncerVisibility(true);
+        clearInvocations(mFaceManager);
+
+        // THEN face scanning is not run
+        mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
+        verifyFaceAuthenticateNeverCalled();
+        verifyFaceDetectNeverCalled();
+    }
+
+    @Test
+    public void noFaceRun_whenFpLockout() {
+        // GIVEN bypass is enabled, face detection is supported and strong auth is required
+        lockscreenBypassIsAllowed();
+        supportsFaceDetection();
+        strongAuthRequiredEncrypted();
+        keyguardIsVisible();
+        // fingerprint is NOT running, UDFPS is NOT supported
+
+        // GIVEN fp is locked out
+        when(mFingerprintManager.getLockoutModeForUser(eq(FINGERPRINT_SENSOR_ID), anyInt()))
+                .thenReturn(BIOMETRIC_LOCKOUT_TIMED);
+        mKeyguardUpdateMonitor.handleUserSwitchComplete(0);
+        assertThat(mKeyguardUpdateMonitor.isFingerprintLockedOut()).isEqualTo(true);
+
+        // WHEN the device wakes up
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+
+        // FACE detect is NOT triggered and face authenticate is NOT triggered
+        verifyFaceDetectNeverCalled();
         verifyFaceAuthenticateNeverCalled();
 
         // WHEN bouncer becomes visible
