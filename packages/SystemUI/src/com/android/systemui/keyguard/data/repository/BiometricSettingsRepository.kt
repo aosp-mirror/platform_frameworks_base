@@ -24,8 +24,10 @@ import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback
 import android.os.Looper
 import android.os.UserHandle
+import android.util.Log
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.Dumpable
+import com.android.systemui.R
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -35,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.user.data.repository.UserRepository
 import java.io.PrintWriter
 import javax.inject.Inject
@@ -47,8 +50,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
@@ -82,6 +87,12 @@ interface BiometricSettingsRepository {
 
     /** Whether fingerprint feature is enabled for the current user by the DevicePolicy */
     val isFingerprintEnabledByDevicePolicy: StateFlow<Boolean>
+
+    /**
+     * Whether face authentication is supported for the current device posture. Face auth can be
+     * restricted to specific postures using [R.integer.config_face_auth_supported_posture]
+     */
+    val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
 }
 
 @SysUISingleton
@@ -98,11 +109,27 @@ constructor(
     @Background backgroundDispatcher: CoroutineDispatcher,
     biometricManager: BiometricManager?,
     @Main looper: Looper,
+    devicePostureRepository: DevicePostureRepository,
     dumpManager: DumpManager,
 ) : BiometricSettingsRepository, Dumpable {
 
+    override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
+
     init {
         dumpManager.registerDumpable(this)
+        val configFaceAuthSupportedPosture =
+            DevicePosture.toPosture(
+                context.resources.getInteger(R.integer.config_face_auth_supported_posture)
+            )
+        isFaceAuthSupportedInCurrentPosture =
+            if (configFaceAuthSupportedPosture == DevicePosture.UNKNOWN) {
+                    flowOf(true)
+                } else {
+                    devicePostureRepository.currentDevicePosture.map {
+                        it == configFaceAuthSupportedPosture
+                    }
+                }
+                .onEach { Log.d(TAG, "isFaceAuthSupportedInCurrentPosture value changed to: $it") }
     }
 
     override fun dump(pw: PrintWriter, args: Array<String?>) {
