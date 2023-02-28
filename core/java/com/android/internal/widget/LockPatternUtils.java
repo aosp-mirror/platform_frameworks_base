@@ -133,6 +133,21 @@ public class LockPatternUtils {
     })
     public @interface CredentialType {}
 
+    public static String credentialTypeToString(int credentialType) {
+        switch (credentialType) {
+            case CREDENTIAL_TYPE_NONE:
+                return "NONE";
+            case CREDENTIAL_TYPE_PATTERN:
+                return "PATTERN";
+            case CREDENTIAL_TYPE_PIN:
+                return "PIN";
+            case CREDENTIAL_TYPE_PASSWORD:
+                return "PASSWORD";
+            default:
+                return "UNKNOWN_" + credentialType;
+        }
+    }
+
     /**
      * Flag provided to {@link #verifyCredential(LockscreenCredential, int, int)} . If set, the
      * method will return a handle to the Gatekeeper Password in the
