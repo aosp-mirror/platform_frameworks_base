@@ -114,16 +114,15 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 PointerController::~PointerController() {
     mDisplayInfoListener->onPointerControllerDestroyed();
     mUnregisterWindowInfosListener(mDisplayInfoListener);
-    mContext.getPolicy()->onPointerDisplayIdChanged(ADISPLAY_ID_NONE, 0, 0);
+    mContext.getPolicy()->onPointerDisplayIdChanged(ADISPLAY_ID_NONE, FloatPoint{0, 0});
 }
 
 std::mutex& PointerController::getLock() const {
     return mDisplayInfoListener->mLock;
 }
 
-bool PointerController::getBounds(float* outMinX, float* outMinY, float* outMaxX,
-                                  float* outMaxY) const {
-    return mCursorController.getBounds(outMinX, outMinY, outMaxX, outMaxY);
+std::optional<FloatRect> PointerController::getBounds() const {
+    return mCursorController.getBounds();
 }
 
 void PointerController::move(float deltaX, float deltaY) {
@@ -156,15 +155,13 @@ void PointerController::setPosition(float x, float y) {
     mCursorController.setPosition(transformed.x, transformed.y);
 }
 
-void PointerController::getPosition(float* outX, float* outY) const {
+FloatPoint PointerController::getPosition() const {
     const int32_t displayId = mCursorController.getDisplayId();
-    mCursorController.getPosition(outX, outY);
+    const auto p = mCursorController.getPosition();
     {
         std::scoped_lock lock(getLock());
         const auto& transform = getTransformForDisplayLocked(displayId);
-        const auto xy = transform.inverse().transform(*outX, *outY);
-        *outX = xy.x;
-        *outY = xy.y;
+        return FloatPoint{transform.inverse().transform(p.x, p.y)};
     }
 }
 
@@ -264,7 +261,7 @@ void PointerController::reloadPointerResources() {
 void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
     struct PointerDisplayChangeArgs {
         int32_t displayId;
-        float x, y;
+        FloatPoint cursorPosition;
     };
     std::optional<PointerDisplayChangeArgs> pointerDisplayChanged;
 
@@ -278,18 +275,15 @@ void PointerController::setDisplayViewport(const DisplayViewport& viewport) {
         }
         mCursorController.setDisplayViewport(viewport, getAdditionalMouseResources);
         if (viewport.displayId != mLocked.pointerDisplayId) {
-            float xPos, yPos;
-            mCursorController.getPosition(&xPos, &yPos);
             mLocked.pointerDisplayId = viewport.displayId;
-            pointerDisplayChanged = {viewport.displayId, xPos, yPos};
+            pointerDisplayChanged = {viewport.displayId, mCursorController.getPosition()};
         }
     } // release lock
 
     if (pointerDisplayChanged) {
         // Notify the policy without holding the pointer controller lock.
         mContext.getPolicy()->onPointerDisplayIdChanged(pointerDisplayChanged->displayId,
-                                                        pointerDisplayChanged->x,
-                                                        pointerDisplayChanged->y);
+                                                        pointerDisplayChanged->cursorPosition);
     }
 }
 
