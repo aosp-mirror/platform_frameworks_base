@@ -3512,10 +3512,7 @@ class Task extends TaskFragment {
         info.isKeyguardOccluded =
             mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
 
-        info.startingWindowTypeParameter = activity.mStartingData != null
-                ? activity.mStartingData.mTypeParams
-                : (StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED
-                        | StartingWindowInfo.TYPE_PARAMETER_WINDOWLESS);
+        info.startingWindowTypeParameter = activity.mStartingData.mTypeParams;
         if ((info.startingWindowTypeParameter
                 & StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED) != 0) {
             final WindowState topMainWin = getWindow(w -> w.mAttrs.type == TYPE_BASE_APPLICATION);
