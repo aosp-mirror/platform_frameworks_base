@@ -1339,10 +1339,13 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key) ?: return
-
+        val isEligibleForResume =
+            removed.isLocalSession() ||
+                (mediaFlags.isRemoteResumeAllowed() &&
+                    removed.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE)
         if (keyguardUpdateMonitor.isUserInLockdown(removed.userId)) {
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
-        } else if (useMediaResumption && removed.resumeAction != null && removed.isLocalSession()) {
+        } else if (useMediaResumption && removed.resumeAction != null && isEligibleForResume) {
             convertToResumePlayer(key, removed)
         } else if (mediaFlags.isRetainingPlayersEnabled()) {
             handlePossibleRemoval(key, removed, notificationRemoved = true)
