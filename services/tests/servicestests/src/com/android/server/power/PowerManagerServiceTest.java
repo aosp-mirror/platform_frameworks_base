@@ -763,7 +763,7 @@ public class PowerManagerServiceTest {
                 ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
         verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
                 dreamManagerStateListener.capture());
-        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(false);
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUnpluggingChanged(false);
 
         when(mBatteryManagerInternalMock.getPlugType())
                 .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
@@ -793,7 +793,7 @@ public class PowerManagerServiceTest {
                 ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
         verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
                 dreamManagerStateListener.capture());
-        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(true);
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUnpluggingChanged(true);
 
         when(mBatteryManagerInternalMock.getPlugType())
                 .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
@@ -823,7 +823,7 @@ public class PowerManagerServiceTest {
                 ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
         verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
                 dreamManagerStateListener.capture());
-        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(true);
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUnpluggingChanged(true);
 
         when(mBatteryManagerInternalMock.getPlugType())
                 .thenReturn(BatteryManager.BATTERY_PLUGGED_DOCK);
@@ -831,12 +831,40 @@ public class PowerManagerServiceTest {
 
         forceAwake();  // Needs to be awake first before it can dream.
         forceDream();
-        dreamManagerStateListener.getValue().onKeepDreamingWhenUndockedChanged(false);
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUnpluggingChanged(false);
         when(mBatteryManagerInternalMock.getPlugType()).thenReturn(0);
         setPluggedIn(false);
 
         assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
+
+    @Test
+    public void testWakefulnessDream_shouldStopDreamingWhenUnplugging_whenDreamPrevents() {
+        // Make sure "unplug turns on screen" is configured to true.
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_unplugTurnsOnScreen))
+                .thenReturn(true);
+
+        createService();
+        startSystem();
+
+        ArgumentCaptor<DreamManagerInternal.DreamManagerStateListener> dreamManagerStateListener =
+                ArgumentCaptor.forClass(DreamManagerInternal.DreamManagerStateListener.class);
+        verify(mDreamManagerInternalMock).registerDreamManagerStateListener(
+                dreamManagerStateListener.capture());
+
+        when(mBatteryManagerInternalMock.getPlugType())
+                .thenReturn(BatteryManager.BATTERY_PLUGGED_AC);
+        setPluggedIn(true);
+
+        forceAwake();  // Needs to be awake first before it can dream.
+        forceDream();
+        dreamManagerStateListener.getValue().onKeepDreamingWhenUnpluggingChanged(false);
+        when(mBatteryManagerInternalMock.getPlugType()).thenReturn(0);
+        setPluggedIn(false);
+
+        assertThat(mService.getGlobalWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+    }
+
 
     @Test
     public void testWakefulnessDoze_goToSleep() {

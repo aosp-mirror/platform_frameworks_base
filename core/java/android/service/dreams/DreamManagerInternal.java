@@ -80,10 +80,10 @@ public abstract class DreamManagerInternal {
      */
     public interface DreamManagerStateListener {
         /**
-         * Called when keep dreaming when undocked has changed.
+         * Called when keep dreaming when plug has changed.
          *
          * @param keepDreaming True if the current dream should continue when undocking.
          */
-        void onKeepDreamingWhenUndockedChanged(boolean keepDreaming);
+        void onKeepDreamingWhenUnpluggingChanged(boolean keepDreaming);
     }
 }
