@@ -30,11 +30,14 @@ import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.os.BatteryStatsInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.util.LatencyTracker;
+import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -291,6 +294,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
                     throws RemoteException {
                 try {
+                    BatteryStatsHolder.INSTANCE.noteWakingSoundTrigger(
+                            SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
                     mCallbackDelegate.onRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onRecognition", modelHandle, event);
                 } catch (Exception e) {
@@ -304,6 +309,8 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                     int captureSession)
                     throws RemoteException {
                 try {
+                    BatteryStatsHolder.INSTANCE.noteWakingSoundTrigger(
+                            SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
                     startKeyphraseEventLatencyTracking(event);
                     mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
                     logVoidReturn("onPhraseRecognition", modelHandle, event);
@@ -386,6 +393,12 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             }
         }
     }
+
+    private static class BatteryStatsHolder {
+        private static final BatteryStatsInternal INSTANCE =
+                LocalServices.getService(BatteryStatsInternal.class);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Actual logging logic below.
