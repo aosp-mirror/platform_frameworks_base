@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.mode;
 
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_BRIGHTNESS_THROTTLING_DATA;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_FIXED_REFRESH_RATE_HIGH_AMBIENT_BRIGHTNESS_THRESHOLDS;
@@ -27,8 +27,7 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_R
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
-import static com.android.server.display.DisplayModeDirector.Vote.INVALID_SIZE;
-import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
+import static com.android.server.display.mode.DisplayModeDirector.Vote.INVALID_SIZE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -88,9 +87,11 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.LocalServices;
-import com.android.server.display.DisplayModeDirector.BrightnessObserver;
-import com.android.server.display.DisplayModeDirector.DesiredDisplayModeSpecs;
-import com.android.server.display.DisplayModeDirector.Vote;
+import com.android.server.display.DisplayDeviceConfig;
+import com.android.server.display.TestUtils;
+import com.android.server.display.mode.DisplayModeDirector.BrightnessObserver;
+import com.android.server.display.mode.DisplayModeDirector.DesiredDisplayModeSpecs;
+import com.android.server.display.mode.DisplayModeDirector.Vote;
 import com.android.server.sensors.SensorManagerInternal;
 import com.android.server.sensors.SensorManagerInternal.ProximityActiveListener;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -125,6 +126,8 @@ public class DisplayModeDirectorTest {
     private static final float FLOAT_TOLERANCE = 0.01f;
     private static final int DISPLAY_ID = 0;
     private static final float TRANSITION_POINT = 0.763f;
+
+    private static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
 
     private Context mContext;
     private FakesInjector mInjector;
@@ -2234,7 +2237,7 @@ public class DisplayModeDirectorTest {
                 ArgumentCaptor.forClass(IThermalEventListener.class);
 
         verify(mThermalServiceMock).registerThermalEventListenerWithType(
-            thermalEventListener.capture(), eq(Temperature.TYPE_SKIN));
+                thermalEventListener.capture(), eq(Temperature.TYPE_SKIN));
         final IThermalEventListener listener = thermalEventListener.getValue();
 
         // Verify that there is no skin temperature vote initially.
@@ -2548,7 +2551,7 @@ public class DisplayModeDirectorTest {
                     KEY_REFRESH_RATE_IN_HBM_HDR, String.valueOf(fps));
         }
 
-        void setBrightnessThrottlingData(String brightnessThrottlingData) {
+        public void setBrightnessThrottlingData(String brightnessThrottlingData) {
             putPropertyAndNotify(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     KEY_BRIGHTNESS_THROTTLING_DATA, brightnessThrottlingData);
         }
