@@ -1731,7 +1731,7 @@ final class AutofillManagerServiceImpl
     }
 
     /**
-     * Called when the {@link AutofillManagerService#mAugmentedAutofillResolver}
+     * Called when the {@link AutofillManagerService#mFieldClassificationResolver}
      * changed (among other places).
      */
     void updateRemoteFieldClassificationService() {
@@ -1742,7 +1742,6 @@ final class AutofillManagerServiceImpl
                             + "destroying old remote service");
                 }
                 mRemoteFieldClassificationService.unbind();
-
                 mRemoteFieldClassificationService = null;
                 mRemoteFieldClassificationServiceInfo = null;
             }
