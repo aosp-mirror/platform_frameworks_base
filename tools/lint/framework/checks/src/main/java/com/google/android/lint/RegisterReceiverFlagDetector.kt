@@ -111,7 +111,7 @@ class RegisterReceiverFlagDetector : Detector(), SourceCodeScanner {
 
         if (!isProtected) {
             val actionsList = unprotectedActionsList.joinToString(", ", "", "", -1, "")
-            val message = "$receiverArg is missing 'RECEIVED_EXPORTED` or 'RECEIVE_NOT_EXPORTED' " +
+            val message = "$receiverArg is missing 'RECEIVER_EXPORTED` or 'RECEIVER_NOT_EXPORTED' " +
                             "flag for unprotected broadcast(s) registered for $actionsList."
             if (flagsArg == null) {
                 context.report(
