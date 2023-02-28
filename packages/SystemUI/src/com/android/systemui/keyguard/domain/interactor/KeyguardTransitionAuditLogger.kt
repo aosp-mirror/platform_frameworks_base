@@ -61,7 +61,15 @@ constructor(
         }
 
         scope.launch {
-            keyguardInteractor.isDreaming.collect { logger.log(TAG, VERBOSE, "isDreaming", it) }
+            keyguardInteractor.isAbleToDream.collect {
+                logger.log(TAG, VERBOSE, "isAbleToDream", it)
+            }
+        }
+
+        scope.launch {
+            keyguardInteractor.isKeyguardOccluded.collect {
+                logger.log(TAG, VERBOSE, "isOccluded", it)
+            }
         }
 
         scope.launch {
