@@ -36,10 +36,10 @@ oneway interface ISatelliteListener {
     /**
      * Indicates that new datagrams have been received on the device.
      *
-     * @param datagrams Array of new datagrams received.
-     * @param pendingCount The number of datagrams that are pending.
+     * @param datagram New datagram that was received.
+     * @param pendingCount Number of additional datagrams yet to be received.
      */
-    void onSatelliteDatagramsReceived(in SatelliteDatagram[] datagrams, in int pendingCount);
+    void onSatelliteDatagramReceived(in SatelliteDatagram datagram, in int pendingCount);
 
     /**
      * Indicates that the satellite has pending datagrams for the device to be pulled.

@@ -63,19 +63,19 @@ public class SatelliteImplBase extends SatelliteService {
 
     private final IBinder mBinder = new ISatellite.Stub() {
         @Override
-        public void setSatelliteListener(ISatelliteListener listener,
-                IIntegerConsumer errorCallback) throws RemoteException {
+        public void setSatelliteListener(ISatelliteListener listener) throws RemoteException {
             executeMethodAsync(
-                    () -> SatelliteImplBase.this.setSatelliteListener(listener, errorCallback),
+                    () -> SatelliteImplBase.this.setSatelliteListener(listener),
                     "setSatelliteListener");
         }
 
         @Override
         public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode,
-                IIntegerConsumer errorCallback) throws RemoteException {
+                int timeout, IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .requestSatelliteListeningEnabled(enable, isDemoMode, errorCallback),
+                            .requestSatelliteListeningEnabled(
+                                    enable, isDemoMode, timeout, errorCallback),
                     "requestSatelliteListeningEnabled");
         }
 
@@ -229,7 +229,6 @@ public class SatelliteImplBase extends SatelliteService {
      * Register the callback interface with satellite service.
      *
      * @param listener The callback interface to handle satellite service indications.
-     * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -241,8 +240,7 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    public void setSatelliteListener(@NonNull ISatelliteListener listener,
-            @NonNull IIntegerConsumer errorCallback) {
+    public void setSatelliteListener(@NonNull ISatelliteListener listener) {
         // stub implementation
     }
 
@@ -252,6 +250,8 @@ public class SatelliteImplBase extends SatelliteService {
      *
      * @param enable True to enable satellite listening mode and false to disable.
      * @param isDemoMode Whether demo mode is enabled.
+     * @param timeout How long the satellite modem should wait for the next incoming page before
+     *                disabling listening mode.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -264,7 +264,7 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode,
+    public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode, int timeout,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
