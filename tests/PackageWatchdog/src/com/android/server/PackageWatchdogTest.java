@@ -417,9 +417,9 @@ public class PackageWatchdogTest {
                         int failureReason, int mitigationCount) {
                     if (versionedPackage.getVersionCode() == VERSION_CODE) {
                         // Only rollback for specific versionCode
-                        return PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
+                        return PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
                     }
-                    return PackageHealthObserverImpact.USER_IMPACT_NONE;
+                    return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
                 }
             };
 
@@ -442,13 +442,13 @@ public class PackageWatchdogTest {
     public void testPackageFailureNotifyAllDifferentImpacts() throws Exception {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observerNone = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_NONE);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
         TestObserver observerHigh = new TestObserver(OBSERVER_NAME_2,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
         TestObserver observerMid = new TestObserver(OBSERVER_NAME_3,
-                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
         TestObserver observerLow = new TestObserver(OBSERVER_NAME_4,
-                PackageHealthObserverImpact.USER_IMPACT_LOW);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
 
         // Start observing for all impact observers
         watchdog.startObservingHealth(observerNone, Arrays.asList(APP_A, APP_B, APP_C, APP_D),
@@ -499,9 +499,9 @@ public class PackageWatchdogTest {
     public void testPackageFailureNotifyLeastImpactSuccessively() throws Exception {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observerFirst = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_LOW);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
         TestObserver observerSecond = new TestObserver(OBSERVER_NAME_2,
-                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
 
         // Start observing for observerFirst and observerSecond with failure handling
         watchdog.startObservingHealth(observerFirst, Arrays.asList(APP_A), LONG_DURATION);
@@ -517,7 +517,7 @@ public class PackageWatchdogTest {
         assertThat(observerSecond.mMitigatedPackages).isEmpty();
 
         // After observerFirst handles failure, next action it has is high impact
-        observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_HIGH;
+        observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
         observerFirst.mMitigatedPackages.clear();
         observerSecond.mMitigatedPackages.clear();
 
@@ -531,7 +531,7 @@ public class PackageWatchdogTest {
         assertThat(observerFirst.mMitigatedPackages).isEmpty();
 
         // After observerSecond handles failure, it has no further actions
-        observerSecond.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
+        observerSecond.mImpact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
         observerFirst.mMitigatedPackages.clear();
         observerSecond.mMitigatedPackages.clear();
 
@@ -545,7 +545,7 @@ public class PackageWatchdogTest {
         assertThat(observerSecond.mMitigatedPackages).isEmpty();
 
         // After observerFirst handles failure, it too has no further actions
-        observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_NONE;
+        observerFirst.mImpact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
         observerFirst.mMitigatedPackages.clear();
         observerSecond.mMitigatedPackages.clear();
 
@@ -566,9 +566,9 @@ public class PackageWatchdogTest {
     public void testPackageFailureNotifyOneSameImpact() throws Exception {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
 
         // Start observing for observer1 and observer2 with failure handling
         watchdog.startObservingHealth(observer2, Arrays.asList(APP_A), SHORT_DURATION);
@@ -592,11 +592,11 @@ public class PackageWatchdogTest {
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer1 = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
         TestObserver observer2 = new TestObserver(OBSERVER_NAME_2,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
         TestObserver observer3 = new TestObserver(OBSERVER_NAME_3,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
 
 
         // Start observing with explicit health checks for APP_A and APP_B respectively
@@ -645,7 +645,7 @@ public class PackageWatchdogTest {
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
 
         // Start observing with explicit health checks for APP_A and APP_B
         controller.setSupportedPackages(Arrays.asList(APP_A, APP_B, APP_C));
@@ -711,7 +711,7 @@ public class PackageWatchdogTest {
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
 
         // Start observing with explicit health checks for APP_A and
         // package observation duration == LONG_DURATION
@@ -742,7 +742,7 @@ public class PackageWatchdogTest {
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
 
         // Start observing with explicit health checks for APP_A and
         // package observation duration == SHORT_DURATION / 2
@@ -818,7 +818,7 @@ public class PackageWatchdogTest {
 
         // Start observing with failure handling
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
         wd.startObservingHealth(observer, Collections.singletonList(APP_A), SHORT_DURATION);
 
         // Notify of NetworkStack failure
@@ -1073,9 +1073,9 @@ public class PackageWatchdogTest {
     public void testBootLoopMitigationDoneForLowestUserImpact() {
         PackageWatchdog watchdog = createWatchdog();
         TestObserver bootObserver1 = new TestObserver(OBSERVER_NAME_1);
-        bootObserver1.setImpact(PackageHealthObserverImpact.USER_IMPACT_LOW);
+        bootObserver1.setImpact(PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
         TestObserver bootObserver2 = new TestObserver(OBSERVER_NAME_2);
-        bootObserver2.setImpact(PackageHealthObserverImpact.USER_IMPACT_MEDIUM);
+        bootObserver2.setImpact(PackageHealthObserverImpact.USER_IMPACT_LEVEL_30);
         watchdog.registerHealthObserver(bootObserver1);
         watchdog.registerHealthObserver(bootObserver2);
         for (int i = 0; i < PackageWatchdog.DEFAULT_BOOT_LOOP_TRIGGER_COUNT; i++) {
@@ -1446,7 +1446,7 @@ public class PackageWatchdogTest {
 
         TestObserver(String name) {
             mName = name;
-            mImpact = PackageHealthObserverImpact.USER_IMPACT_MEDIUM;
+            mImpact = PackageHealthObserverImpact.USER_IMPACT_LEVEL_30;
         }
 
         TestObserver(String name, int impact) {

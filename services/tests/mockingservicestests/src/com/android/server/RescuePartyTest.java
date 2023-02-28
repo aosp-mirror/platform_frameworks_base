@@ -567,36 +567,36 @@ public class RescuePartyTest {
 
         // Ensure that no action is taken for cases where the failure reason is unknown
         assertEquals(observer.onHealthCheckFailed(null, PackageWatchdog.FAILURE_REASON_UNKNOWN, 1),
-                PackageHealthObserverImpact.USER_IMPACT_NONE);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
 
         // Ensure the correct user impact is returned for each mitigation count.
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 1),
-                PackageHealthObserverImpact.USER_IMPACT_LOW);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
 
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 2),
-                PackageHealthObserverImpact.USER_IMPACT_LOW);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
 
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 3),
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
 
         assertEquals(observer.onHealthCheckFailed(null,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING, 4),
-                PackageHealthObserverImpact.USER_IMPACT_HIGH);
+                PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
     }
 
     @Test
     public void testBootLoopLevels() {
         RescuePartyObserver observer = RescuePartyObserver.getInstance(mMockContext);
 
-        assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_NONE);
-        assertEquals(observer.onBootLoop(1), PackageHealthObserverImpact.USER_IMPACT_LOW);
-        assertEquals(observer.onBootLoop(2), PackageHealthObserverImpact.USER_IMPACT_LOW);
-        assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_HIGH);
-        assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_HIGH);
-        assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_HIGH);
+        assertEquals(observer.onBootLoop(0), PackageHealthObserverImpact.USER_IMPACT_LEVEL_0);
+        assertEquals(observer.onBootLoop(1), PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
+        assertEquals(observer.onBootLoop(2), PackageHealthObserverImpact.USER_IMPACT_LEVEL_10);
+        assertEquals(observer.onBootLoop(3), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
+        assertEquals(observer.onBootLoop(4), PackageHealthObserverImpact.USER_IMPACT_LEVEL_50);
+        assertEquals(observer.onBootLoop(5), PackageHealthObserverImpact.USER_IMPACT_LEVEL_100);
     }
 
     @Test
