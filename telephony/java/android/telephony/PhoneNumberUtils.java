@@ -1526,7 +1526,7 @@ public class PhoneNumberUtils {
      * Formats the specified {@code phoneNumber} to the E.164 representation.
      *
      * @param phoneNumber the phone number to format.
-     * @param defaultCountryIso the ISO 3166-1 two letters country code.
+     * @param defaultCountryIso the ISO 3166-1 two letters country code in UPPER CASE.
      * @return the E.164 representation, or null if the given phone number is not valid.
      */
     public static String formatNumberToE164(String phoneNumber, String defaultCountryIso) {
@@ -1537,7 +1537,7 @@ public class PhoneNumberUtils {
      * Formats the specified {@code phoneNumber} to the RFC3966 representation.
      *
      * @param phoneNumber the phone number to format.
-     * @param defaultCountryIso the ISO 3166-1 two letters country code.
+     * @param defaultCountryIso the ISO 3166-1 two letters country code in UPPER CASE.
      * @return the RFC3966 representation, or null if the given phone number is not valid.
      */
     public static String formatNumberToRFC3966(String phoneNumber, String defaultCountryIso) {
