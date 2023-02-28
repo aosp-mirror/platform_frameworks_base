@@ -70,8 +70,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context,
                 appPackageName = null,
                 isReceiver = false,
-            ) {
-            }
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription.loadContentDescription(context))
@@ -86,8 +85,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context,
                 appPackageName = null,
                 isReceiver = true,
-            ) {
-            }
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription.loadContentDescription(context))
@@ -119,8 +117,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context,
                 appPackageName = "fakePackageName",
                 isReceiver = false,
-            ) {
-            }
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription.loadContentDescription(context))
@@ -135,8 +132,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context,
                 appPackageName = "fakePackageName",
                 isReceiver = true,
-            ) {
-            }
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isFalse()
         assertThat(iconInfo.contentDescription.loadContentDescription(context))
@@ -154,7 +150,9 @@ class MediaTttUtilsTest : SysuiTestCase() {
             context,
             appPackageName = "fakePackageName",
             isReceiver = false
-        ) { exceptionTriggered = true }
+        ) {
+            exceptionTriggered = true
+        }
 
         assertThat(exceptionTriggered).isTrue()
     }
@@ -167,7 +165,9 @@ class MediaTttUtilsTest : SysuiTestCase() {
             context,
             appPackageName = "fakePackageName",
             isReceiver = true
-        ) { exceptionTriggered = true }
+        ) {
+            exceptionTriggered = true
+        }
 
         assertThat(exceptionTriggered).isTrue()
     }
@@ -179,8 +179,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context,
                 PACKAGE_NAME,
                 isReceiver = false,
-            ) {
-            }
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isTrue()
         assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))
@@ -194,8 +193,7 @@ class MediaTttUtilsTest : SysuiTestCase() {
                 context,
                 PACKAGE_NAME,
                 isReceiver = true,
-            ) {
-            }
+            ) {}
 
         assertThat(iconInfo.isAppIcon).isTrue()
         assertThat(iconInfo.icon).isEqualTo(MediaTttIcon.Loaded(appIconFromPackageName))

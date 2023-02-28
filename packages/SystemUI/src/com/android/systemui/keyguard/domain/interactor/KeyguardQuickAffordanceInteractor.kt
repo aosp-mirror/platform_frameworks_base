@@ -119,7 +119,7 @@ constructor(
      * Notifies that a quick affordance has been "triggered" (clicked) by the user.
      *
      * @param configKey The configuration key corresponding to the [KeyguardQuickAffordanceModel] of
-     * the affordance that was clicked
+     *   the affordance that was clicked
      * @param expandable An optional [Expandable] for the activity- or dialog-launch animation
      */
     fun onQuickAffordanceTriggered(
@@ -198,9 +198,9 @@ constructor(
      *
      * @param slotId The ID of the slot.
      * @param affordanceId The ID of the affordance to remove; if `null`, removes all affordances
-     * from the slot.
+     *   from the slot.
      * @return `true` if the affordance was successfully removed; `false` otherwise (for example, if
-     * the affordance was not on the slot to begin with).
+     *   the affordance was not on the slot to begin with).
      */
     suspend fun unselect(slotId: String, affordanceId: String?): Boolean {
         check(isUsingRepository)

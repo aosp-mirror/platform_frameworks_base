@@ -43,7 +43,7 @@ class MediaTttUtils {
          *
          * @param appPackageName the package name of the app playing the media.
          * @param onPackageNotFoundException a function run if a
-         * [PackageManager.NameNotFoundException] occurs.
+         *   [PackageManager.NameNotFoundException] occurs.
          * @param isReceiver indicates whether the icon is displayed in a receiver view.
          */
         fun getIconInfoFromPackageName(

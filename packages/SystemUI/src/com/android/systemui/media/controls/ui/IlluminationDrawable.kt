@@ -159,6 +159,7 @@ class IlluminationDrawable : Drawable() {
 
     /**
      * Cross fade background.
+     *
      * @see setTintList
      * @see backgroundColor
      */

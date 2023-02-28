@@ -30,7 +30,7 @@ import kotlin.math.max
  *
  * @param maxSize The maximum size the buffer can grow to before it begins functioning as a ring.
  * @param factory A function that creates a fresh instance of T. Used by the buffer while it's
- * growing to [maxSize].
+ *   growing to [maxSize].
  */
 class RingBuffer<T>(private val maxSize: Int, private val factory: () -> T) : Iterable<T> {
 

@@ -104,7 +104,9 @@ class ControlsSettingsDialogManagerImplTest : SysuiTestCase() {
                 controlsSettingsRepository,
                 userTracker,
                 activityStarter
-            ) { context, _ -> TestableAlertDialog(context).also { dialog = it } }
+            ) { context, _ ->
+                TestableAlertDialog(context).also { dialog = it }
+            }
     }
 
     @After
