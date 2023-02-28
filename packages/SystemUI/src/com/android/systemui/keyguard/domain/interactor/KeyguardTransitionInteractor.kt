@@ -78,6 +78,10 @@ constructor(
     val occludedToLockscreenTransition: Flow<TransitionStep> =
         repository.transition(OCCLUDED, LOCKSCREEN)
 
+    /** PRIMARY_BOUNCER->GONE transition information. */
+    val primaryBouncerToGoneTransition: Flow<TransitionStep> =
+        repository.transition(PRIMARY_BOUNCER, GONE)
+
     /**
      * AOD<->LOCKSCREEN transition information, mapped to dozeAmount range of AOD (1f) <->
      * Lockscreen (0f).
