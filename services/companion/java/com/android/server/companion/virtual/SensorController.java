@@ -22,8 +22,11 @@ import android.companion.virtual.sensor.IVirtualSensorCallback;
 import android.companion.virtual.sensor.VirtualSensor;
 import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
+import android.hardware.SensorDirectChannel;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SharedMemory;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -36,6 +39,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** Controls virtual sensors, including their lifecycle and sensor event dispatch. */
 public class SensorController {
@@ -47,6 +51,8 @@ public class SensorController {
     private static final int UNKNOWN_ERROR = (-2147483647 - 1); // INT32_MIN value
     private static final int BAD_VALUE = -22;
 
+    private static AtomicInteger sNextDirectChannelHandle = new AtomicInteger(1);
+
     private final Object mLock;
     private final int mVirtualDeviceId;
     @GuardedBy("mLock")
@@ -56,8 +62,6 @@ public class SensorController {
     private final SensorManagerInternal.RuntimeSensorCallback mRuntimeSensorCallback;
     private final SensorManagerInternal mSensorManagerInternal;
     private final VirtualDeviceManagerInternal mVdmInternal;
-
-
 
     public SensorController(@NonNull Object lock, int virtualDeviceId,
             @Nullable IVirtualSensorCallback virtualSensorCallback) {
@@ -97,7 +101,7 @@ public class SensorController {
             throws SensorCreationException {
         final int handle = mSensorManagerInternal.createRuntimeSensor(mVirtualDeviceId,
                 config.getType(), config.getName(),
-                config.getVendor() == null ? "" : config.getVendor(),
+                config.getVendor() == null ? "" : config.getVendor(), config.getFlags(),
                 mRuntimeSensorCallback);
         if (handle <= 0) {
             throw new SensorCreationException("Received an invalid virtual sensor handle.");
@@ -211,6 +215,66 @@ public class SensorController {
                 return UNKNOWN_ERROR;
             }
             return OK;
+        }
+
+        @Override
+        public int onDirectChannelCreated(ParcelFileDescriptor fd) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No sensor callback for virtual deviceId " + mVirtualDeviceId);
+                return BAD_VALUE;
+            } else if (fd == null) {
+                Slog.e(TAG, "Received invalid ParcelFileDescriptor");
+                return BAD_VALUE;
+            }
+            final int channelHandle = sNextDirectChannelHandle.getAndIncrement();
+            SharedMemory sharedMemory = SharedMemory.fromFileDescriptor(fd);
+            try {
+                mCallback.onDirectChannelCreated(channelHandle, sharedMemory);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+                return UNKNOWN_ERROR;
+            }
+            return channelHandle;
+        }
+
+        @Override
+        public void onDirectChannelDestroyed(int channelHandle) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No sensor callback for virtual deviceId " + mVirtualDeviceId);
+                return;
+            }
+            try {
+                mCallback.onDirectChannelDestroyed(channelHandle);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+            }
+        }
+
+        @Override
+        public int onDirectChannelConfigured(int channelHandle, int sensorHandle,
+                @SensorDirectChannel.RateLevel int rateLevel) {
+            if (mCallback == null) {
+                Slog.e(TAG, "No runtime sensor callback configured.");
+                return BAD_VALUE;
+            }
+            VirtualSensor sensor = mVdmInternal.getVirtualSensor(mVirtualDeviceId, sensorHandle);
+            if (sensor == null) {
+                Slog.e(TAG, "No sensor found for deviceId=" + mVirtualDeviceId
+                        + " and sensor handle=" + sensorHandle);
+                return BAD_VALUE;
+            }
+            try {
+                mCallback.onDirectChannelConfigured(channelHandle, sensor, rateLevel, sensorHandle);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call sensor callback: " + e);
+                return UNKNOWN_ERROR;
+            }
+            if (rateLevel == SensorDirectChannel.RATE_STOP) {
+                return OK;
+            } else {
+                // Use the sensor handle as a report token, i.e. a unique identifier of the sensor.
+                return sensorHandle;
+            }
         }
     }
 
