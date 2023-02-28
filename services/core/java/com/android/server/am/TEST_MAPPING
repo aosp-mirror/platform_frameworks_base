@@ -61,9 +61,7 @@
         { "include-filter": "com.android.server.am.MeasuredEnergySnapshotTest" },
         { "include-filter": "com.android.server.am.BatteryExternalStatsWorkerTest" }
       ]
-    }
-  ],
-  "presubmit-large": [
+    },
     {
       "name": "CtsUsageStatsTestCases",
       "file_patterns": [
