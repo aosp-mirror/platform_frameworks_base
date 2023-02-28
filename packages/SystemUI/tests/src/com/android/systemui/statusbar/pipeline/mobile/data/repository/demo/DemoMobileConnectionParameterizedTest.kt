@@ -239,6 +239,7 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
          *    list2 = [false, true]
          *    list3 = [a, b, c]
          * ```
+         *
          * We'll generate test cases for:
          *
          * Test (1, false, a) Test (2, false, a) Test (3, false, a) Test (1, true, a) Test (1,

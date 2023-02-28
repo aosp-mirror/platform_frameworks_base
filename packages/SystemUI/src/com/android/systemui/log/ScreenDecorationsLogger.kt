@@ -33,7 +33,6 @@ private const val TAG = "ScreenDecorationsLog"
  * Helper class for logging for [com.android.systemui.ScreenDecorations]
  *
  * To enable logcat echoing for an entire buffer:
- *
  * ```
  *   adb shell settings put global systemui/buffer/ScreenDecorationsLog <logLevel>
  *

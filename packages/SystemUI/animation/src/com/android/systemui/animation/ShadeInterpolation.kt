@@ -6,6 +6,7 @@ object ShadeInterpolation {
 
     /**
      * Interpolate alpha for notification background scrim during shade expansion.
+     *
      * @param fraction Shade expansion fraction
      */
     @JvmStatic
@@ -16,6 +17,7 @@ object ShadeInterpolation {
 
     /**
      * Interpolate alpha for shade content during shade expansion.
+     *
      * @param fraction Shade expansion fraction
      */
     @JvmStatic

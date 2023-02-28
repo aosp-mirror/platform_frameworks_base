@@ -76,5 +76,6 @@ data class NormalizedTouchData(
         |          time: $time
         |  gestureStart: $gestureStart
         |}
-        """.trimMargin()
+        """
+            .trimMargin()
 }
