@@ -828,6 +828,10 @@ public final class JobStatus {
         }
     }
 
+    /**
+     * Returns {@code true} if the JobWorkItem queue was updated,
+     * and {@code false} if nothing changed.
+     */
     public boolean completeWorkLocked(int workId) {
         if (executingWork != null) {
             final int N = executingWork.size();
