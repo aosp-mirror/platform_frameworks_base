@@ -3292,6 +3292,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 mPackages, mSharedUsers, getUserRuntimePermissionsFile(userId));
     }
 
+    RuntimePermissionsState getLegacyPermissionsState(@UserIdInt int userId) {
+        return mRuntimePermissionsPersistence.getLegacyPermissionsState(
+                userId, mPackages, mSharedUsers);
+    }
+
     void applyDefaultPreferredAppsLPw(int userId) {
         // First pull data from any pre-installed apps.
         final PackageManagerInternal pmInternal =
@@ -5726,44 +5731,16 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             Runnable writer = () -> {
                 boolean isLegacyPermissionStateStale = mIsLegacyPermissionStateStale.getAndSet(
                         false);
+                Map<String, List<RuntimePermissionsState.PermissionState>> packagePermissions;
+                Map<String, List<RuntimePermissionsState.PermissionState>> sharedUserPermissions;
 
-                final Map<String, List<RuntimePermissionsState.PermissionState>>
-                        packagePermissions = new ArrayMap<>();
-                final Map<String, List<RuntimePermissionsState.PermissionState>>
-                        sharedUserPermissions = new ArrayMap<>();
                 synchronized (pmLock) {
                     if (sync || isLegacyPermissionStateStale) {
                         legacyPermissionDataProvider.writeLegacyPermissionStateTEMP();
                     }
 
-                    int packagesSize = packageStates.size();
-                    for (int i = 0; i < packagesSize; i++) {
-                        String packageName = packageStates.keyAt(i);
-                        PackageStateInternal packageState = packageStates.valueAt(i);
-                        if (!packageState.hasSharedUser()) {
-                            List<RuntimePermissionsState.PermissionState> permissions =
-                                    getPermissionsFromPermissionsState(
-                                            packageState.getLegacyPermissionState(), userId);
-                            if (permissions.isEmpty()
-                                    && !packageState.isInstallPermissionsFixed()) {
-                                // Storing an empty state means the package is known to the
-                                // system and its install permissions have been granted and fixed.
-                                // If this is not the case, we should not store anything.
-                                continue;
-                            }
-                            packagePermissions.put(packageName, permissions);
-                        }
-                    }
-
-                    final int sharedUsersSize = sharedUsers.size();
-                    for (int i = 0; i < sharedUsersSize; i++) {
-                        String sharedUserName = sharedUsers.keyAt(i);
-                        SharedUserSetting sharedUserSetting = sharedUsers.valueAt(i);
-                        List<RuntimePermissionsState.PermissionState> permissions =
-                                getPermissionsFromPermissionsState(
-                                        sharedUserSetting.getLegacyPermissionState(), userId);
-                        sharedUserPermissions.put(sharedUserName, permissions);
-                    }
+                    packagePermissions = getPackagePermissions(userId, packageStates);
+                    sharedUserPermissions = getShareUsersPermissions(userId, sharedUsers);
                 }
                 synchronized (mLock) {
                     int version = mVersions.get(userId, INITIAL_VERSION);
@@ -5789,6 +5766,68 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 // Sync version, use caller's thread.
                 writer.run();
             }
+        }
+
+        @NonNull
+        RuntimePermissionsState getLegacyPermissionsState(int userId,
+                @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates,
+                @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers) {
+            int version;
+            String fingerprint;
+            synchronized (mLock) {
+                version = mVersions.get(userId, INITIAL_VERSION);
+                fingerprint = mFingerprints.get(userId);
+            }
+
+            return new RuntimePermissionsState(
+                    version, fingerprint, getPackagePermissions(userId, packageStates),
+                    getShareUsersPermissions(userId, sharedUsers));
+        }
+
+        @NonNull
+        private Map<String, List<RuntimePermissionsState.PermissionState>> getPackagePermissions(
+                int userId,
+                @NonNull WatchedArrayMap<String, ? extends PackageStateInternal> packageStates) {
+            final Map<String, List<RuntimePermissionsState.PermissionState>>
+                    packagePermissions = new ArrayMap<>();
+
+            final int packagesSize = packageStates.size();
+            for (int i = 0; i < packagesSize; i++) {
+                String packageName = packageStates.keyAt(i);
+                PackageStateInternal packageState = packageStates.valueAt(i);
+                if (!packageState.hasSharedUser()) {
+                    List<RuntimePermissionsState.PermissionState> permissions =
+                            getPermissionsFromPermissionsState(
+                                    packageState.getLegacyPermissionState(), userId);
+                    if (permissions.isEmpty()
+                            && !packageState.isInstallPermissionsFixed()) {
+                        // Storing an empty state means the package is known to the
+                        // system and its install permissions have been granted and fixed.
+                        // If this is not the case, we should not store anything.
+                        continue;
+                    }
+                    packagePermissions.put(packageName, permissions);
+                }
+            }
+            return packagePermissions;
+        }
+
+        @NonNull
+        private Map<String, List<RuntimePermissionsState.PermissionState>> getShareUsersPermissions(
+                int userId, @NonNull WatchedArrayMap<String, SharedUserSetting> sharedUsers) {
+            final Map<String, List<RuntimePermissionsState.PermissionState>>
+                    sharedUserPermissions = new ArrayMap<>();
+
+            final int sharedUsersSize = sharedUsers.size();
+            for (int i = 0; i < sharedUsersSize; i++) {
+                String sharedUserName = sharedUsers.keyAt(i);
+                SharedUserSetting sharedUserSetting = sharedUsers.valueAt(i);
+                List<RuntimePermissionsState.PermissionState> permissions =
+                        getPermissionsFromPermissionsState(
+                                sharedUserSetting.getLegacyPermissionState(), userId);
+                sharedUserPermissions.put(sharedUserName, permissions);
+            }
+            return sharedUserPermissions;
         }
 
         private void writePendingStates() {
