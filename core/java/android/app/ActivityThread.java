@@ -36,6 +36,7 @@ import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -49,6 +50,7 @@ import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupAnnotations.OperationType;
+import android.app.compat.CompatChanges;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -206,6 +208,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
+import com.android.internal.os.SafeZipPathValidatorCallback;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.policy.DecorView;
 import com.android.internal.util.ArrayUtils;
@@ -219,6 +222,7 @@ import dalvik.system.AppSpecializationHooks;
 import dalvik.system.CloseGuard;
 import dalvik.system.VMDebug;
 import dalvik.system.VMRuntime;
+import dalvik.system.ZipPathValidator;
 
 import libcore.io.ForwardingOs;
 import libcore.io.IoUtils;
@@ -6703,6 +6707,11 @@ public final class ActivityThread extends ClientTransactionHandler
         // Let libcore handle any compat changes after installing the list of compat changes.
         AppSpecializationHooks.handleCompatChangesBeforeBindingApplication();
 
+        // Initialize the zip path validator callback depending on the targetSdk.
+        // This has to be after AppCompatCallbacks#install() so that the Compat
+        // checks work accordingly.
+        initZipPathValidatorCallback();
+
         mBoundApplication = data;
         mConfigurationController.setConfiguration(data.config);
         mConfigurationController.setCompatConfiguration(data.config);
@@ -7070,6 +7079,18 @@ public final class ActivityThread extends ClientTransactionHandler
         }
     }
 
+    /**
+     * If targetSDK >= U: set the safe zip path validator callback which disallows dangerous zip
+     * entry names.
+     * Otherwise: clear the callback to the default validation.
+     */
+    private void initZipPathValidatorCallback() {
+        if (CompatChanges.isChangeEnabled(VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL)) {
+            ZipPathValidator.setCallback(new SafeZipPathValidatorCallback());
+        } else {
+            ZipPathValidator.clearCallback();
+        }
+    }
 
     private void handleSetContentCaptureOptionsCallback(String packageName) {
         if (mContentCaptureOptionsCallback != null) {
