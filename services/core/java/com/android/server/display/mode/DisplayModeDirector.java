@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.server.display.mode;
 
 import static android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED;
 import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE;
@@ -67,6 +67,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
+import com.android.server.display.DisplayDeviceConfig;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterFactory;
 import com.android.server.display.utils.SensorUtils;
@@ -214,6 +215,9 @@ public class DisplayModeDirector {
         mUdfpsObserver.observe();
     }
 
+    /**
+    * Enables or disables component logging
+    */
     public void setLoggingEnabled(boolean loggingEnabled) {
         if (mLoggingEnabled == loggingEnabled) {
             return;
@@ -1574,7 +1578,10 @@ public class DisplayModeDirector {
         }
     }
 
-    final class AppRequestObserver {
+    /**
+     *  Responsible for keeping track of app requested refresh rates per display
+     */
+    public final class AppRequestObserver {
         private final SparseArray<Display.Mode> mAppRequestedModeByDisplay;
         private final SparseArray<RefreshRateRange> mAppPreferredRefreshRateRangeByDisplay;
 
@@ -1583,6 +1590,9 @@ public class DisplayModeDirector {
             mAppPreferredRefreshRateRangeByDisplay = new SparseArray<>();
         }
 
+        /**
+         * Sets refresh rates from app request
+         */
         public void setAppRequest(int displayId, int modeId, float requestedMinRefreshRateRange,
                 float requestedMaxRefreshRateRange) {
             synchronized (mLock) {
@@ -1665,7 +1675,7 @@ public class DisplayModeDirector {
             return null;
         }
 
-        public void dumpLocked(PrintWriter pw) {
+        private void dumpLocked(PrintWriter pw) {
             pw.println("  AppRequestObserver");
             pw.println("    mAppRequestedModeByDisplay:");
             for (int i = 0; i < mAppRequestedModeByDisplay.size(); i++) {
@@ -1794,7 +1804,7 @@ public class DisplayModeDirector {
      */
     @VisibleForTesting
     public class BrightnessObserver implements DisplayManager.DisplayListener {
-        private final static int LIGHT_SENSOR_RATE_MS = 250;
+        private static final int LIGHT_SENSOR_RATE_MS = 250;
         private int[] mLowDisplayBrightnessThresholds;
         private int[] mLowAmbientBrightnessThresholds;
         private int[] mHighDisplayBrightnessThresholds;
@@ -2019,7 +2029,7 @@ public class DisplayModeDirector {
             return mLowAmbientBrightnessThresholds;
         }
 
-        public void observe(SensorManager sensorManager) {
+        private void observe(SensorManager sensorManager) {
             mSensorManager = sensorManager;
             mBrightness = getBrightness(Display.DEFAULT_DISPLAY);
 
@@ -2064,11 +2074,11 @@ public class DisplayModeDirector {
             mDeviceConfigDisplaySettings.startListening();
 
             mInjector.registerDisplayListener(this, mHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED |
-                    DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
+                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                            | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
         }
 
-        public void setLoggingEnabled(boolean loggingEnabled) {
+        private void setLoggingEnabled(boolean loggingEnabled) {
             if (mLoggingEnabled == loggingEnabled) {
                 return;
             }
@@ -2076,7 +2086,8 @@ public class DisplayModeDirector {
             mLightSensorListener.setLoggingEnabled(loggingEnabled);
         }
 
-        public void onRefreshRateSettingChangedLocked(float min, float max) {
+        @VisibleForTesting
+        void onRefreshRateSettingChangedLocked(float min, float max) {
             boolean changeable = (max - min > 1f && max > 60f);
             if (mRefreshRateChangeable != changeable) {
                 mRefreshRateChangeable = changeable;
@@ -2089,14 +2100,14 @@ public class DisplayModeDirector {
             }
         }
 
-        public void onLowPowerModeEnabledLocked(boolean b) {
+        private void onLowPowerModeEnabledLocked(boolean b) {
             if (mLowPowerModeEnabled != b) {
                 mLowPowerModeEnabled = b;
                 updateSensorStatus();
             }
         }
 
-        public void onDeviceConfigLowBrightnessThresholdsChanged(int[] displayThresholds,
+        private void onDeviceConfigLowBrightnessThresholdsChanged(int[] displayThresholds,
                 int[] ambientThresholds) {
             if (displayThresholds != null && ambientThresholds != null
                     && displayThresholds.length == ambientThresholds.length) {
@@ -2123,7 +2134,7 @@ public class DisplayModeDirector {
             }
         }
 
-        public void onDeviceConfigHighBrightnessThresholdsChanged(int[] displayThresholds,
+        private void onDeviceConfigHighBrightnessThresholdsChanged(int[] displayThresholds,
                 int[] ambientThresholds) {
             if (displayThresholds != null && ambientThresholds != null
                     && displayThresholds.length == ambientThresholds.length) {
@@ -2150,7 +2161,7 @@ public class DisplayModeDirector {
             }
         }
 
-        public void dumpLocked(PrintWriter pw) {
+        void dumpLocked(PrintWriter pw) {
             pw.println("  BrightnessObserver");
             pw.println("    mAmbientLux: " + mAmbientLux);
             pw.println("    mBrightness: " + mBrightness);
@@ -2400,7 +2411,7 @@ public class DisplayModeDirector {
         }
 
         @VisibleForTesting
-        public void setDefaultDisplayState(int state) {
+        void setDefaultDisplayState(int state) {
             if (mLoggingEnabled) {
                 Slog.d(TAG, "setDefaultDisplayState: mDefaultDisplayState = "
                         + mDefaultDisplayState + ", state = " + state);
@@ -2475,7 +2486,7 @@ public class DisplayModeDirector {
         }
 
         private final class LightSensorEventListener implements SensorEventListener {
-            final private static int INJECT_EVENTS_INTERVAL_MS = LIGHT_SENSOR_RATE_MS;
+            private static final int INJECT_EVENTS_INTERVAL_MS = LIGHT_SENSOR_RATE_MS;
             private float mLastSensorData;
             private long mTimestamp;
             private boolean mLoggingEnabled;
@@ -2876,10 +2887,10 @@ public class DisplayModeDirector {
             }
 
             final int hbmMode = info.highBrightnessMode;
-            final boolean isHbmActive = hbmMode != BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF &&
-                info.adjustedBrightness > info.highBrightnessTransitionPoint;
-            if (hbmMode == mHbmMode.get(displayId) &&
-                isHbmActive == mHbmActive.get(displayId)) {
+            final boolean isHbmActive = hbmMode != BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF
+                    && info.adjustedBrightness > info.highBrightnessTransitionPoint;
+            if (hbmMode == mHbmMode.get(displayId)
+                    && isHbmActive == mHbmActive.get(displayId)) {
                 // no change, ignore.
                 return;
             }
@@ -2901,7 +2912,7 @@ public class DisplayModeDirector {
             Vote vote = null;
             if (mHbmActive.get(displayId, false)) {
                 final int hbmMode =
-                    mHbmMode.get(displayId, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF);
+                        mHbmMode.get(displayId, BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF);
                 if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT) {
                     // Device resource properties take priority over DisplayDeviceConfig
                     if (mRefreshRateInHbmSunlight > 0) {
@@ -2909,7 +2920,7 @@ public class DisplayModeDirector {
                                 mRefreshRateInHbmSunlight);
                     } else {
                         final List<RefreshRateLimitation> limits =
-                            mDisplayManagerInternal.getRefreshRateLimitations(displayId);
+                                mDisplayManagerInternal.getRefreshRateLimitations(displayId);
                         for (int i = 0; limits != null && i < limits.size(); i++) {
                             final RefreshRateLimitation limitation = limits.get(i);
                             if (limitation.type == REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE) {
@@ -2919,8 +2930,8 @@ public class DisplayModeDirector {
                             }
                         }
                     }
-                } else if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR &&
-                        mRefreshRateInHbmHdr > 0) {
+                } else if (hbmMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
+                        && mRefreshRateInHbmHdr > 0) {
                     // HBM for HDR vote isn't supported through DisplayDeviceConfig yet, so look for
                     // a vote from Device properties
                     vote = Vote.forPhysicalRefreshRates(mRefreshRateInHbmHdr, mRefreshRateInHbmHdr);
@@ -2988,9 +2999,6 @@ public class DisplayModeDirector {
     }
 
     private class DeviceConfigDisplaySettings implements DeviceConfig.OnPropertiesChangedListener {
-        public DeviceConfigDisplaySettings() {
-        }
-
         public void startListening() {
             mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
                     BackgroundThread.getExecutor(), this);
@@ -3001,8 +3009,8 @@ public class DisplayModeDirector {
          */
         public int[] getLowDisplayBrightnessThresholds() {
             return getIntArrayProperty(
-                    DisplayManager.DeviceConfig.
-                            KEY_FIXED_REFRESH_RATE_LOW_DISPLAY_BRIGHTNESS_THRESHOLDS);
+                    DisplayManager.DeviceConfig
+                            .KEY_FIXED_REFRESH_RATE_LOW_DISPLAY_BRIGHTNESS_THRESHOLDS);
         }
 
         /*
@@ -3010,8 +3018,8 @@ public class DisplayModeDirector {
          */
         public int[] getLowAmbientBrightnessThresholds() {
             return getIntArrayProperty(
-                    DisplayManager.DeviceConfig.
-                            KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS);
+                    DisplayManager.DeviceConfig
+                            .KEY_FIXED_REFRESH_RATE_LOW_AMBIENT_BRIGHTNESS_THRESHOLDS);
         }
 
         public int getRefreshRateInLowZone() {

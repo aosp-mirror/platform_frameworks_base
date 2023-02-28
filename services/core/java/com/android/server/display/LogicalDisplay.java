@@ -33,6 +33,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.server.display.layout.Layout;
+import com.android.server.display.mode.DisplayModeDirector;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;

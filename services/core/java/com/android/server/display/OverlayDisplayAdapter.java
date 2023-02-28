@@ -36,6 +36,7 @@ import android.view.SurfaceControl;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.display.mode.DisplayModeDirector;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
