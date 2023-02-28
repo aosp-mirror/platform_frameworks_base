@@ -25,12 +25,12 @@ import android.annotation.SystemApi;
 import android.net.wifi.sharedconnectivity.service.SharedConnectivityService;
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A data class representing an Instant Tether network.
@@ -79,7 +79,7 @@ public final class TetherNetwork implements Parcelable {
     private final String mNetworkName;
     @Nullable private final String mHotspotSsid;
     @Nullable private final String mHotspotBssid;
-    @Nullable @SecurityType private final int[] mHotspotSecurityTypes;
+    @Nullable @SecurityType private final ArraySet<Integer> mHotspotSecurityTypes;
 
     /**
      * Builder class for {@link TetherNetwork}.
@@ -91,9 +91,8 @@ public final class TetherNetwork implements Parcelable {
         private String mNetworkName;
         @Nullable private String mHotspotSsid;
         @Nullable private String mHotspotBssid;
-        @Nullable @SecurityType private int[] mHotspotSecurityTypes;
-
-        public Builder() {}
+        @Nullable @SecurityType private final ArraySet<Integer> mHotspotSecurityTypes =
+                new ArraySet<>();
 
         /**
          * Set the remote device ID.
@@ -168,15 +167,14 @@ public final class TetherNetwork implements Parcelable {
         }
 
         /**
-         * Sets the hotspot security types supported by the remote device, or null if hotspot is
-         * off.
+         * Adds a security type supported by the hotspot created by the remote device.
          *
-         * @param hotspotSecurityTypes The array of security types supported by the hotspot.
+         * @param hotspotSecurityType A security type supported by the hotspot.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setHotspotSecurityTypes(@NonNull @SecurityType int[] hotspotSecurityTypes) {
-            mHotspotSecurityTypes = hotspotSecurityTypes;
+        public Builder addHotspotSecurityType(@SecurityType int hotspotSecurityType) {
+            mHotspotSecurityTypes.add(hotspotSecurityType);
             return this;
         }
 
@@ -218,7 +216,7 @@ public final class TetherNetwork implements Parcelable {
             @NonNull String networkName,
             @Nullable String hotspotSsid,
             @Nullable String hotspotBssid,
-            @Nullable @SecurityType int[] hotspotSecurityTypes) {
+            @Nullable @SecurityType ArraySet<Integer> hotspotSecurityTypes) {
         validate(deviceId,
                 networkType,
                 networkName);
@@ -228,7 +226,7 @@ public final class TetherNetwork implements Parcelable {
         mNetworkName = networkName;
         mHotspotSsid = hotspotSsid;
         mHotspotBssid = hotspotBssid;
-        mHotspotSecurityTypes = hotspotSecurityTypes;
+        mHotspotSecurityTypes = new ArraySet<>(hotspotSecurityTypes);
     }
 
     /**
@@ -293,11 +291,11 @@ public final class TetherNetwork implements Parcelable {
     /**
      * Gets the hotspot security types supported by the remote device.
      *
-     * @return Returns the array of security types supported by the hotspot.
+     * @return Returns a set of the security types supported by the hotspot.
      */
-    @Nullable
+    @NonNull
     @SecurityType
-    public int[] getHotspotSecurityTypes() {
+    public Set<Integer> getHotspotSecurityTypes() {
         return mHotspotSecurityTypes;
     }
 
@@ -311,13 +309,13 @@ public final class TetherNetwork implements Parcelable {
                 && Objects.equals(mNetworkName, other.getNetworkName())
                 && Objects.equals(mHotspotSsid, other.getHotspotSsid())
                 && Objects.equals(mHotspotBssid, other.getHotspotBssid())
-                && Arrays.equals(mHotspotSecurityTypes, other.getHotspotSecurityTypes());
+                && Objects.equals(mHotspotSecurityTypes, other.getHotspotSecurityTypes());
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mDeviceId, mDeviceInfo, mNetworkName, mHotspotSsid, mHotspotBssid,
-                Arrays.hashCode(mHotspotSecurityTypes));
+                mHotspotSecurityTypes);
     }
 
     @Override
@@ -333,7 +331,7 @@ public final class TetherNetwork implements Parcelable {
         dest.writeString(mNetworkName);
         dest.writeString(mHotspotSsid);
         dest.writeString(mHotspotBssid);
-        dest.writeIntArray(mHotspotSecurityTypes);
+        dest.writeArraySet(mHotspotSecurityTypes);
     }
 
     /**
@@ -345,7 +343,7 @@ public final class TetherNetwork implements Parcelable {
     public static TetherNetwork readFromParcel(@NonNull Parcel in) {
         return new TetherNetwork(in.readLong(), DeviceInfo.readFromParcel(in),
                 in.readInt(), in.readString(), in.readString(), in.readString(),
-                in.createIntArray());
+                (ArraySet<Integer>) in.readArraySet(null));
     }
 
     @NonNull
@@ -370,7 +368,7 @@ public final class TetherNetwork implements Parcelable {
                 .append(", networkName=").append(mNetworkName)
                 .append(", hotspotSsid=").append(mHotspotSsid)
                 .append(", hotspotBssid=").append(mHotspotBssid)
-                .append(", hotspotSecurityTypes=").append(Arrays.toString(mHotspotSecurityTypes))
+                .append(", hotspotSecurityTypes=").append(mHotspotSecurityTypes.toString())
                 .append("]").toString();
     }
 }
