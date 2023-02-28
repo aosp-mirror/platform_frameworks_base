@@ -465,7 +465,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private int mPanelAlpha;
     private Runnable mPanelAlphaEndAction;
     private float mBottomAreaShadeAlpha;
-    private final ValueAnimator mBottomAreaShadeAlphaAnimator;
+    final ValueAnimator mBottomAreaShadeAlphaAnimator;
     private final AnimatableProperty mPanelAlphaAnimator = AnimatableProperty.from("panelAlpha",
             NotificationPanelView::setPanelAlphaInternal,
             NotificationPanelView::getCurrentPanelAlpha,
@@ -597,7 +597,6 @@ public final class NotificationPanelViewController implements Dumpable {
     private int mLockscreenToDreamingTransitionTranslationY;
     private int mGoneToDreamingTransitionTranslationY;
     private int mLockscreenToOccludedTransitionTranslationY;
-    private boolean mUnocclusionTransitionFlagEnabled = false;
 
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
             mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
@@ -886,7 +885,6 @@ public final class NotificationPanelViewController implements Dumpable {
         mNotificationPanelUnfoldAnimationController = unfoldComponent.map(
                 SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
 
-        mUnocclusionTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
         updateUserSwitcherFlags();
         mKeyguardBottomAreaViewModel = keyguardBottomAreaViewModel;
         mKeyguardBottomAreaInteractor = keyguardBottomAreaInteractor;
@@ -1045,62 +1043,50 @@ public final class NotificationPanelViewController implements Dumpable {
         mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
                 controller.setup(mNotificationContainerParent));
 
-        if (mUnocclusionTransitionFlagEnabled) {
-            // Dreaming->Lockscreen
-            collectFlow(mView, mKeyguardTransitionInteractor.getDreamingToLockscreenTransition(),
-                    mDreamingToLockscreenTransition, mMainDispatcher);
-            collectFlow(mView, mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha(),
-                    setTransitionAlpha(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
-            collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
-                    mDreamingToLockscreenTransitionTranslationY),
-                    setTransitionY(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
+        // Dreaming->Lockscreen
+        collectFlow(mView, mKeyguardTransitionInteractor.getDreamingToLockscreenTransition(),
+                mDreamingToLockscreenTransition, mMainDispatcher);
+        collectFlow(mView, mDreamingToLockscreenTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        collectFlow(mView, mDreamingToLockscreenTransitionViewModel.lockscreenTranslationY(
+                mDreamingToLockscreenTransitionTranslationY),
+                setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
-            // Occluded->Lockscreen
-            collectFlow(mView, mKeyguardTransitionInteractor.getOccludedToLockscreenTransition(),
-                    mOccludedToLockscreenTransition, mMainDispatcher);
-            collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
-                    setTransitionAlpha(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
-            collectFlow(mView, mOccludedToLockscreenTransitionViewModel.lockscreenTranslationY(
-                    mOccludedToLockscreenTransitionTranslationY),
-                    setTransitionY(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
+        // Occluded->Lockscreen
+        collectFlow(mView, mKeyguardTransitionInteractor.getOccludedToLockscreenTransition(),
+                mOccludedToLockscreenTransition, mMainDispatcher);
+        collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        collectFlow(mView, mOccludedToLockscreenTransitionViewModel.lockscreenTranslationY(
+                mOccludedToLockscreenTransitionTranslationY),
+                setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
-            // Lockscreen->Dreaming
-            collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToDreamingTransition(),
-                    mLockscreenToDreamingTransition, mMainDispatcher);
-            collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
-                    setTransitionAlpha(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
-            collectFlow(mView, mLockscreenToDreamingTransitionViewModel.lockscreenTranslationY(
-                    mLockscreenToDreamingTransitionTranslationY),
-                    setTransitionY(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
+        // Lockscreen->Dreaming
+        collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToDreamingTransition(),
+                mLockscreenToDreamingTransition, mMainDispatcher);
+        collectFlow(mView, mLockscreenToDreamingTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        collectFlow(mView, mLockscreenToDreamingTransitionViewModel.lockscreenTranslationY(
+                mLockscreenToDreamingTransitionTranslationY),
+                setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
-            // Gone->Dreaming
-            collectFlow(mView, mKeyguardTransitionInteractor.getGoneToDreamingTransition(),
-                    mGoneToDreamingTransition, mMainDispatcher);
-            collectFlow(mView, mGoneToDreamingTransitionViewModel.getLockscreenAlpha(),
-                    setTransitionAlpha(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
-            collectFlow(mView, mGoneToDreamingTransitionViewModel.lockscreenTranslationY(
-                    mGoneToDreamingTransitionTranslationY),
-                    setTransitionY(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
+        // Gone->Dreaming
+        collectFlow(mView, mKeyguardTransitionInteractor.getGoneToDreamingTransition(),
+                mGoneToDreamingTransition, mMainDispatcher);
+        collectFlow(mView, mGoneToDreamingTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        collectFlow(mView, mGoneToDreamingTransitionViewModel.lockscreenTranslationY(
+                mGoneToDreamingTransitionTranslationY),
+                setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
-            // Lockscreen->Occluded
-            collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToOccludedTransition(),
-                    mLockscreenToOccludedTransition, mMainDispatcher);
-            collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),
-                    setTransitionAlpha(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
-            collectFlow(mView, mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(
-                    mLockscreenToOccludedTransitionTranslationY),
-                    setTransitionY(mNotificationStackScrollLayoutController),
-                    mMainDispatcher);
-        }
+        // Lockscreen->Occluded
+        collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToOccludedTransition(),
+                mLockscreenToOccludedTransition, mMainDispatcher);
+        collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),
+                setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
+        collectFlow(mView, mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(
+                mLockscreenToOccludedTransitionTranslationY),
+                setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
     }
 
     @VisibleForTesting
@@ -2480,9 +2466,6 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     private void onExpandingFinished() {
-        if (!mUnocclusionTransitionFlagEnabled) {
-            mScrimController.onExpandingFinished();
-        }
         mNotificationStackScrollLayoutController.onExpansionStopped();
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());

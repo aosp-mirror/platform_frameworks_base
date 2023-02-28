@@ -13,13 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.systemui.notetask
 
-import android.app.KeyguardManager
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
 import javax.inject.Inject
@@ -28,11 +25,10 @@ import javax.inject.Inject
 internal class NoteTaskInitializer
 @Inject
 constructor(
-    private val optionalBubbles: Optional<Bubbles>,
-    private val noteTaskController: NoteTaskController,
+    private val controller: NoteTaskController,
     private val commandQueue: CommandQueue,
+    private val optionalBubbles: Optional<Bubbles>,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
-    private val optionalKeyguardManager: Optional<KeyguardManager>,
 ) {
 
     @VisibleForTesting
@@ -40,29 +36,17 @@ constructor(
         object : CommandQueue.Callbacks {
             override fun handleSystemKey(keyCode: Int) {
                 if (keyCode == NoteTaskController.NOTE_TASK_KEY_EVENT) {
-                    showNoteTask()
+                    controller.showNoteTask(NoteTaskEntryPoint.TAIL_BUTTON)
                 }
             }
         }
 
-    private fun showNoteTask() {
-        val uiEvent =
-            if (optionalKeyguardManager.isKeyguardLocked) {
-                NoteTaskController.ShowNoteTaskUiEvent.NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON_LOCKED
-            } else {
-                NoteTaskController.ShowNoteTaskUiEvent.NOTE_OPENED_VIA_STYLUS_TAIL_BUTTON
-            }
-        noteTaskController.showNoteTask(uiEvent = uiEvent)
-    }
-
     fun initialize() {
-        if (isEnabled && optionalBubbles.isPresent) {
-            commandQueue.addCallback(callbacks)
-        }
-        noteTaskController.setNoteTaskShortcutEnabled(isEnabled)
+        controller.setNoteTaskShortcutEnabled(isEnabled)
+
+        // Guard against feature not being enabled or mandatory dependencies aren't available.
+        if (!isEnabled || optionalBubbles.isEmpty) return
+
+        commandQueue.addCallback(callbacks)
     }
 }
-
-private val Optional<KeyguardManager>.isKeyguardLocked: Boolean
-    // If there's no KeyguardManager, assume that the keyguard is not locked.
-    get() = getOrNull()?.isKeyguardLocked ?: false

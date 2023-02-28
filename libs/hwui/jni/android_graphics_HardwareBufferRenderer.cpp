@@ -49,7 +49,7 @@ static RenderCallback createRenderCallback(JNIEnv* env, jobject releaseCallback)
     auto globalCallbackRef =
             std::make_shared<JGlobalRefHolder>(vm, env->NewGlobalRef(releaseCallback));
     return [globalCallbackRef](android::base::unique_fd&& fd, int status) {
-        GraphicsJNI::getJNIEnv()->CallStaticVoidMethod(
+        globalCallbackRef->env()->CallStaticVoidMethod(
                 gHardwareBufferRendererClassInfo.clazz,
                 gHardwareBufferRendererClassInfo.invokeRenderCallback, globalCallbackRef->object(),
                 reinterpret_cast<jint>(fd.release()), reinterpret_cast<jint>(status));
@@ -172,7 +172,8 @@ static const JNINativeMethod gMethods[] = {
 int register_android_graphics_HardwareBufferRenderer(JNIEnv* env) {
     jclass hardwareBufferRendererClazz =
             FindClassOrDie(env, "android/graphics/HardwareBufferRenderer");
-    gHardwareBufferRendererClassInfo.clazz = hardwareBufferRendererClazz;
+    gHardwareBufferRendererClassInfo.clazz =
+            reinterpret_cast<jclass>(env->NewGlobalRef(hardwareBufferRendererClazz));
     gHardwareBufferRendererClassInfo.invokeRenderCallback =
             GetStaticMethodIDOrDie(env, hardwareBufferRendererClazz, "invokeRenderCallback",
                                    "(Ljava/util/function/Consumer;II)V");

@@ -47,6 +47,12 @@ class CredentialSelectorActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
         try {
+            if (CredentialManagerRepo.getCancelUiRequestToken(intent) != null) {
+                Log.d(
+                    Constants.LOG_TAG, "Received UI cancellation intent; cancelling the activity.")
+                this.finish()
+                return
+            }
             val userConfigRepo = UserConfigRepo(this)
             val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
             setContent {
@@ -67,10 +73,19 @@ class CredentialSelectorActivity : ComponentActivity() {
         setIntent(intent)
         Log.d(Constants.LOG_TAG, "Existing activity received new intent")
         try {
-            val userConfigRepo = UserConfigRepo(this)
-            val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
+            val cancelUiRequestToken = CredentialManagerRepo.getCancelUiRequestToken(intent)
             val viewModel: CredentialSelectorViewModel by viewModels()
-            viewModel.onNewCredentialManagerRepo(credManRepo)
+            if (cancelUiRequestToken != null &&
+                viewModel.shouldCancelCurrentUi(cancelUiRequestToken)) {
+                Log.d(
+                    Constants.LOG_TAG, "Received UI cancellation intent; cancelling the activity.")
+                this.finish()
+                return
+            } else {
+                val userConfigRepo = UserConfigRepo(this)
+                val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
+                viewModel.onNewCredentialManagerRepo(credManRepo)
+            }
         } catch (e: Exception) {
             onInitializationError(e, intent)
         }

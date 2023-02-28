@@ -23,6 +23,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.accessibility.AccessibilityEvent;
@@ -30,6 +31,8 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.server.wm.WindowManagerInternal;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -42,6 +45,9 @@ import java.util.List;
  * TODO(262244375): Add unit tests.
  */
 public class ProxyManager {
+    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "ProxyManager";
+
     // Names used to populate ComponentName and ResolveInfo in connection.mA11yServiceInfo and in
     // the infos of connection.setInstalledAndEnabledServices
     static final String PROXY_COMPONENT_PACKAGE_NAME = "ProxyPackage";
@@ -79,6 +85,9 @@ public class ProxyManager {
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             AccessibilityTrace trace,
             WindowManagerInternal windowManagerInternal) throws RemoteException {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "Register proxy for display id: " + displayId);
+        }
 
         // Set a default AccessibilityServiceInfo that is used before the proxy's info is
         // populated. A proxy has the touch exploration and window capabilities.
@@ -134,6 +143,9 @@ public class ProxyManager {
             if (mProxyA11yServiceConnections.contains(displayId)) {
                 mProxyA11yServiceConnections.remove(displayId);
                 removed = true;
+                if (DEBUG) {
+                    Slog.v(LOG_TAG, "Unregister proxy for display id " + displayId);
+                }
             }
         }
         if (removed) {
@@ -155,19 +167,25 @@ public class ProxyManager {
      */
     public boolean isProxyed(int displayId) {
         synchronized (mLock) {
-            return mProxyA11yServiceConnections.contains(displayId);
+            final boolean tracked = mProxyA11yServiceConnections.contains(displayId);
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "Tracking proxy display " + displayId + " : " + tracked);
+            }
+            return tracked;
         }
     }
 
     /**
-     * Sends AccessibilityEvents to all proxies.
-     * {@link android.view.accessibility.AccessibilityDisplayProxy} will filter based on display.
-     * TODO(b/250929565): Filtering should happen in the system, not in the proxy.
+     * Sends AccessibilityEvents to a proxy given the event's displayId.
      */
     public void sendAccessibilityEventLocked(AccessibilityEvent event) {
         final ProxyAccessibilityServiceConnection proxy =
                 mProxyA11yServiceConnections.get(event.getDisplayId());
         if (proxy != null) {
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "Send proxy event " + event + " for display id "
+                        + event.getDisplayId());
+            }
             proxy.notifyAccessibilityEvent(event);
         }
     }
@@ -185,6 +203,9 @@ public class ProxyManager {
                 observingWindows = true;
                 break;
             }
+        }
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "At least one proxy can retrieve windows: " + observingWindows);
         }
         return observingWindows;
     }
@@ -204,6 +225,14 @@ public class ProxyManager {
             if (proxy.mRequestTouchExplorationMode) {
                 clientState |= AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
             }
+        }
+
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "Accessibility is enabled for all proxies: "
+                    + ((clientState & AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED) != 0));
+            Slog.v(LOG_TAG, "Touch exploration is enabled for all proxies: "
+                    + ((clientState & AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED)
+                            != 0));
         }
         return clientState;
         // TODO(b/254545943): When A11yManager is separated, include support for other properties.
@@ -233,6 +262,10 @@ public class ProxyManager {
             ProxyAccessibilityServiceConnection proxy =
                     mProxyA11yServiceConnections.valueAt(i);
             relevantEventTypes |= proxy.getRelevantEventTypes();
+        }
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "Relevant event types for all proxies: "
+                    + AccessibilityEvent.eventTypeToString(relevantEventTypes));
         }
         return relevantEventTypes;
     }
@@ -274,5 +307,26 @@ public class ProxyManager {
 
     void setAccessibilityInputFilter(AccessibilityInputFilter filter) {
         mA11yInputFilter = filter;
+    }
+
+
+    /**
+     * Prints information belonging to each display that is controlled by an
+     * AccessibilityDisplayProxy.
+     */
+    void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        synchronized (mLock) {
+            pw.println();
+            pw.println("Proxy manager state:");
+            pw.println("    Number of proxy connections: " + mProxyA11yServiceConnections.size());
+            pw.println("    Registered proxy connections:");
+            for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
+                final ProxyAccessibilityServiceConnection proxy =
+                        mProxyA11yServiceConnections.valueAt(i);
+                if (proxy != null) {
+                    proxy.dump(fd, pw, args);
+                }
+            }
+        }
     }
 }

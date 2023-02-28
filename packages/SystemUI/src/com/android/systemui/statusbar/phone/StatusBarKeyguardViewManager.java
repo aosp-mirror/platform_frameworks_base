@@ -281,7 +281,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private float mQsExpansion;
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsModernAlternateBouncerEnabled;
-    private boolean mIsUnoccludeTransitionFlagEnabled;
     private boolean mIsBackAnimationEnabled;
 
     private OnDismissAction mAfterKeyguardGoneAction;
@@ -361,7 +360,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 .map(SysUIUnfoldComponent::getFoldAodAnimationController).orElse(null);
         mIsModernAlternateBouncerEnabled = featureFlags.isEnabled(Flags.MODERN_ALTERNATE_BOUNCER);
         mAlternateBouncerInteractor = alternateBouncerInteractor;
-        mIsUnoccludeTransitionFlagEnabled = featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION);
         mIsBackAnimationEnabled =
                 featureFlags.isEnabled(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM);
     }
@@ -879,11 +877,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             // If Keyguard is reshown, don't hide the bouncer as it might just have been requested
             // by a FLAG_DISMISS_KEYGUARD_ACTIVITY.
             reset(isOccluding /* hideBouncerWhenShowing*/);
-        }
-        if (!mIsUnoccludeTransitionFlagEnabled) {
-            if (animate && !isOccluded && isShowing && !primaryBouncerIsShowing()) {
-                mCentralSurfaces.animateKeyguardUnoccluding();
-            }
         }
     }
 

@@ -20,21 +20,20 @@ import android.app.Instrumentation
 import android.os.Bundle
 import android.os.Handler
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.ConditionsFactory
+import android.tools.device.flicker.junit.FlickerBuilderProvider
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
 import com.android.server.wm.flicker.R
-import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.junit.FlickerBuilderProvider
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
-import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
+import android.tools.device.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,7 +57,7 @@ import org.junit.runners.Parameterized
 class OverrideTaskTransitionTest(val flicker: FlickerTest) {
 
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
+    private val testApp = SimpleAppHelper(instrumentation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -75,7 +74,7 @@ class OverrideTaskTransitionTest(val flicker: FlickerTest) {
                 )
                 wmHelper
                     .StateSyncBuilder()
-                    .add(WindowManagerConditionsFactory.isWMStateComplete())
+                    .add(ConditionsFactory.isWMStateComplete())
                     .withAppTransitionIdle()
                     .withWindowSurfaceAppeared(testApp)
                     .waitForAndVerify()

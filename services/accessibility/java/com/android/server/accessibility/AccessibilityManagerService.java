@@ -3928,6 +3928,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         mGlobalClients.getRegisteredCallbackCookie(i);
                 pw.append(Arrays.toString(client.mPackageNames));
             }
+            pw.println();
+            mProxyManager.dump(fd, pw, args);
         }
     }
 

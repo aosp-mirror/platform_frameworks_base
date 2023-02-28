@@ -6675,24 +6675,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         @Deprecated
         public void legacyDumpProfiles(String packageName, boolean dumpClassesAndMethods)
                 throws LegacyDexoptDisabledException {
-            /* Only the shell, root, or the app user should be able to dump profiles. */
-            final int callingUid = Binder.getCallingUid();
             final Computer snapshot = snapshotComputer();
-            final String[] callerPackageNames = snapshot.getPackagesForUid(callingUid);
-            if (!PackageManagerServiceUtils.isRootOrShell(callingUid)
-                    && !ArrayUtils.contains(callerPackageNames, packageName)) {
-                throw new SecurityException("dumpProfiles");
-            }
-
             AndroidPackage pkg = snapshot.getPackage(packageName);
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
 
             synchronized (mInstallLock) {
-                Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
+                Trace.traceBegin(Trace.TRACE_TAG_DALVIK, "dump profiles");
                 mArtManagerService.dumpProfiles(pkg, dumpClassesAndMethods);
-                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                Trace.traceEnd(Trace.TRACE_TAG_DALVIK);
             }
         }
 

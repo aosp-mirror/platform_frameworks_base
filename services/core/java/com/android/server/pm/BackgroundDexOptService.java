@@ -404,7 +404,7 @@ public final class BackgroundDexOptService {
                         "BackgroundDexOptService_" + (isPostBootUpdateJob ? "PostBoot" : "Idle"),
                         () -> {
                             TimingsTraceAndSlog tr =
-                                    new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_PACKAGE_MANAGER);
+                                    new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_DALVIK);
                             tr.traceBegin("jobExecution");
                             boolean completed = false;
                             boolean fatalError = false;
@@ -494,6 +494,8 @@ public final class BackgroundDexOptService {
     @GuardedBy("mLock")
     private void waitForDexOptThreadToFinishLocked() {
         TimingsTraceAndSlog tr = new TimingsTraceAndSlog(TAG, Trace.TRACE_TAG_PACKAGE_MANAGER);
+        // This tracing section doesn't have any correspondence in ART Service - it never waits for
+        // cancellation to finish.
         tr.traceBegin("waitForDexOptThreadToFinishLocked");
         try {
             // Wait but check in regular internal to see if the thread is still alive.

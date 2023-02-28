@@ -87,9 +87,6 @@ object Flags {
     val NOTIFICATION_GROUP_DISMISSAL_ANIMATION =
         releasedFlag(259217907, "notification_group_dismissal_animation")
 
-    // TODO(b/257506350): Tracking Bug
-    @JvmField val FSI_CHROME = unreleasedFlag(117, "fsi_chrome")
-
     @JvmField
     val SIMPLIFIED_APPEAR_FRACTION =
         unreleasedFlag(259395680, "simplified_appear_fraction", teamfood = true)
@@ -188,10 +185,6 @@ object Flags {
     // TODO(b/262780002): Tracking Bug
     @JvmField
     val REVAMPED_WALLPAPER_UI = releasedFlag(222, "revamped_wallpaper_ui")
-
-    /** A different path for unocclusion transitions back to keyguard */
-    // TODO(b/262859270): Tracking Bug
-    @JvmField val UNOCCLUSION_TRANSITION = releasedFlag(223, "unocclusion_transition")
 
     // flag for controlling auto pin confirmation and material u shapes in bouncer
     @JvmField
@@ -381,6 +374,9 @@ object Flags {
 
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
+
+    @JvmField
+    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(1004, "enable_low_light_clock_undocked")
 
     // 1100 - windowing
     @Keep

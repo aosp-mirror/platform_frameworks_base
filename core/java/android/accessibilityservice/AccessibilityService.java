@@ -198,6 +198,26 @@ import java.util.function.Consumer;
  * possible for a node to contain outdated information because the window content may change at any
  * time.
  * </p>
+ * <h3>Drawing Accessibility Overlays</h3>
+ * <p>Accessibility services can draw overlays on top of existing screen contents.
+ * Accessibility overlays can be used to visually highlight items on the screen
+ * e.g. indicate the current item with accessibility focus.
+ * Overlays can also offer the user a way to interact with the service directly and quickly
+ * customize the service's behavior.</p>
+ * <p>Accessibility overlays can be attached to a particular window or to the display itself.
+ * Attaching an overlay to a window allows the overly to move, grow and shrink as the window does.
+ * The overlay will maintain the same relative position within the window bounds as the window
+ * moves. The overlay will also maintain the same relative position within the window bounds if
+ * the window is resized.
+ * To attach an overlay to a window, use {@link attachAccessibilityOverlayToWindow}.
+ * Attaching an overlay to the display means that the overlay is independent of the active
+ * windows on that display.
+ * To attach an overlay to a display, use {@link attachAccessibilityOverlayToDisplay}. </p>
+ * <p> When positioning an overlay that is attached to a window, the service must use window
+ * coordinates. In order to position an overlay on top of an existing UI element it is necessary
+ * to know the bounds of that element in window coordinates. To find the bounds in window
+ * coordinates of an element, find the corresponding {@link AccessibilityNodeInfo} as discussed
+ * above and call {@link AccessibilityNodeInfo#getBoundsInWindow}. </p>
  * <h3>Notification strategy</h3>
  * <p>
  * All accessibility services are notified of all events they have requested, regardless of their
@@ -3421,22 +3441,28 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Attaches a {@link android.view.SurfaceControl} containing an accessibility
+     * <p>Attaches a {@link android.view.SurfaceControl} containing an accessibility
      * overlay to the
      * specified display. This type of overlay should be used for content that does
      * not need to
      * track the location and size of Views in the currently active app e.g. service
      * configuration
-     * or general service UI. To remove this overlay and free the associated
+     * or general service UI.</p>
+     * <p>Generally speaking, an accessibility overlay  will be  a {@link android.view.View}.
+     * To embed the View into a {@link android.view.SurfaceControl}, create a
+     * {@link android.view.SurfaceControlViewHost} and attach the View using
+     * {@link android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by
+     * calling <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.</p>
+     * <p>To remove this overlay and free the associated
      * resources, use
-     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
-     * If the specified overlay has already been attached to the specified display
+     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.</p>
+     * <p>If the specified overlay has already been attached to the specified display
      * this method does nothing.
      * If the specified overlay has already been attached to a previous display this
      * function will transfer the overlay to the new display.
      * Services can attach multiple overlays. Use
      * <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>.
-     * to coordinate the order of the overlays on screen.
+     * to coordinate the order of the overlays on screen.</p>
      *
      * @param displayId the display to which the SurfaceControl should be attached.
      * @param sc        the SurfaceControl containing the overlay content
@@ -3456,20 +3482,24 @@ public abstract class AccessibilityService extends Service {
     }
 
     /**
-     * Attaches an accessibility overlay {@link android.view.SurfaceControl} to the
+     * <p>Attaches an accessibility overlay {@link android.view.SurfaceControl} to the
      * specified
      * window. This method should be used when you want the overlay to move and
-     * resize as the parent
-     * window moves and resizes. To remove this overlay and free the associated
-     * resources, use
-     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.
-     * If the specified overlay has already been attached to the specified window
+     * resize as the parent window moves and resizes.</p>
+     * <p>Generally speaking, an accessibility overlay  will be  a {@link android.view.View}.
+     * To embed the View into a {@link android.view.SurfaceControl}, create a
+     * {@link android.view.SurfaceControlViewHost} and attach the View using
+     * {@link android.view.SurfaceControlViewHost#setView}. Then obtain the SurfaceControl by
+     * calling <code> viewHost.getSurfacePackage().getSurfaceControl()</code>.</p>
+     * <p>To remove this overlay and free the associated resources, use
+     * <code> new SurfaceControl.Transaction().reparent(sc, null).apply();</code>.</p>
+     * <p>If the specified overlay has already been attached to the specified window
      * this method does nothing.
      * If the specified overlay has already been attached to a previous window this
      * function will transfer the overlay to the new window.
      * Services can attach multiple overlays. Use
      * <code> new SurfaceControl.Transaction().setLayer(sc, layer).apply();</code>.
-     * to coordinate the order of the overlays on screen.
+     * to coordinate the order of the overlays on screen.</p>
      *
      * @param accessibilityWindowId The window id, from
      *                              {@link AccessibilityWindowInfo#getId()}.

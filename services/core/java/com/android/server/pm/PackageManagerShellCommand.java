@@ -391,6 +391,11 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runLegacyDexoptCommand(@NonNull String cmd)
             throws RemoteException, LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
+
+        if (!PackageManagerServiceUtils.isRootOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Dexopt shell commands need root or shell access");
+        }
+
         switch (cmd) {
             case "compile":
                 return runCompile();

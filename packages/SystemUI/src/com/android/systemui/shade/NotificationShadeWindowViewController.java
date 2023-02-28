@@ -38,8 +38,6 @@ import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -132,7 +130,6 @@ public class NotificationShadeWindowViewController {
             NotificationInsetsController notificationInsetsController,
             AmbientState ambientState,
             PulsingGestureListener pulsingGestureListener,
-            FeatureFlags featureFlags,
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
             AlternateBouncerInteractor alternateBouncerInteractor,
@@ -165,10 +162,8 @@ public class NotificationShadeWindowViewController {
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory);
 
-        if (featureFlags.isEnabled(Flags.UNOCCLUSION_TRANSITION)) {
-            collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
-                    mLockscreenToDreamingTransition);
-        }
+        collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
+                mLockscreenToDreamingTransition);
     }
 
     /**

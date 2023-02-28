@@ -244,7 +244,7 @@ public final class CreateCredentialRequest implements Parcelable {
     /** A builder for {@link CreateCredentialRequest}. */
     public static final class Builder {
 
-        private boolean mAlwaysSendAppInfoToProvider;
+        private boolean mAlwaysSendAppInfoToProvider = true;
 
         @NonNull
         private String mType;

@@ -41,6 +41,7 @@ android_test {
         "kotlin-stdlib",
         "kotlinx-coroutines-android",
         "wm-flicker-common-app-helpers",
+        "wm-flicker-common-assertions",
         "wm-flicker-window-extensions",
     ],
 }

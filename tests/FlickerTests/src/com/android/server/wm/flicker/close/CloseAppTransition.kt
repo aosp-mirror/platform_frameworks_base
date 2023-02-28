@@ -17,14 +17,14 @@
 package com.android.server.wm.flicker.close
 
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.LAUNCHER
+import android.tools.device.apphelpers.StandardAppHelper
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.replacesLayer
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher.Companion.LAUNCHER
 import org.junit.Test
 
 /** Base test class for transitions that close an app back to the launcher screen */

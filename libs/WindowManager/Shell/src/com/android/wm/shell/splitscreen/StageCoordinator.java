@@ -1925,14 +1925,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         }
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        boolean sizeChanged = updateWindowBounds(layout, wct);
-        if (!sizeChanged) return;
-
+        updateWindowBounds(layout, wct);
         sendOnBoundsChanged();
         if (ENABLE_SHELL_TRANSITIONS) {
-            mSplitLayout.setDividerInteractive(false, false, "onSplitResizeStart");
-            mSplitTransitions.startResizeTransition(wct, this, (finishWct, t) ->
-                    mSplitLayout.setDividerInteractive(true, false, "onSplitResizeFinish"));
+            mSplitTransitions.startResizeTransition(wct, this, null /* callback */);
         } else {
             mSyncQueue.queue(wct);
             mSyncQueue.runInSync(t -> {
@@ -1951,16 +1947,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     /**
      * Populates `wct` with operations that match the split windows to the current layout.
      * To match relevant surfaces, make sure to call updateSurfaceBounds after `wct` is applied
-     *
-     * @return true if stage bounds actually .
      */
-    private boolean updateWindowBounds(SplitLayout layout, WindowContainerTransaction wct) {
+    private void updateWindowBounds(SplitLayout layout, WindowContainerTransaction wct) {
         final StageTaskListener topLeftStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mSideStage : mMainStage;
         final StageTaskListener bottomRightStage =
                 mSideStagePosition == SPLIT_POSITION_TOP_OR_LEFT ? mMainStage : mSideStage;
-        return layout.applyTaskChanges(wct, topLeftStage.mRootTaskInfo,
-                bottomRightStage.mRootTaskInfo);
+        layout.applyTaskChanges(wct, topLeftStage.mRootTaskInfo, bottomRightStage.mRootTaskInfo);
     }
 
     void updateSurfaceBounds(@Nullable SplitLayout layout, @NonNull SurfaceControl.Transaction t,
