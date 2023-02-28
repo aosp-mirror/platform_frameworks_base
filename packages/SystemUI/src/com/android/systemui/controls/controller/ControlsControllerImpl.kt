@@ -497,6 +497,21 @@ class ControlsControllerImpl @Inject constructor (
         }
     }
 
+    override fun canRemoveFavorites(componentName: ComponentName): Boolean =
+            !authorizedPanelsRepository.getPreferredPackages().contains(componentName.packageName)
+
+    override fun removeFavorites(componentName: ComponentName): Boolean {
+        if (!confirmAvailability()) return false
+        if (!canRemoveFavorites(componentName)) return false
+
+        executor.execute {
+            Favorites.removeStructures(componentName)
+            authorizedPanelsRepository.removeAuthorizedPanels(setOf(componentName.packageName))
+            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+        }
+        return true
+    }
+
     override fun replaceFavoritesForStructure(structureInfo: StructureInfo) {
         if (!confirmAvailability()) return
         executor.execute {
@@ -655,10 +670,11 @@ private object Favorites {
         return true
     }
 
-    fun removeStructures(componentName: ComponentName) {
+    fun removeStructures(componentName: ComponentName): Boolean {
         val newFavMap = favMap.toMutableMap()
-        newFavMap.remove(componentName)
+        val removed = newFavMap.remove(componentName) != null
         favMap = newFavMap
+        return removed
     }
 
     fun addFavorite(

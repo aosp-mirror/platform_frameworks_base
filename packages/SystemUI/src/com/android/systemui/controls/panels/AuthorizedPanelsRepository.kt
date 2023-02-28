@@ -26,6 +26,14 @@ interface AuthorizedPanelsRepository {
     /** A set of package names that the user has previously authorized to show panels. */
     fun getAuthorizedPanels(): Set<String>
 
+    /** Preferred applications to query controls suggestions from */
+    fun getPreferredPackages(): Set<String>
+
     /** Adds [packageNames] to the set of packages that the user has authorized to show panels. */
     fun addAuthorizedPanels(packageNames: Set<String>)
+
+    /**
+     * Removes [packageNames] from the set of packages that the user has authorized to show panels.
+     */
+    fun removeAuthorizedPanels(packageNames: Set<String>)
 }
