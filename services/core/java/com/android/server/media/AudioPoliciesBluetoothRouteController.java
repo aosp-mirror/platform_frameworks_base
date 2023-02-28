@@ -51,8 +51,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-class LegacyBluetoothRouteController implements BluetoothRouteController {
-    private static final String TAG = "LBtRouteProvider";
+/**
+ * Controls bluetooth routes and provides selected route override.
+ *
+ * <p>The controller offers similar functionality to {@link LegacyBluetoothRouteController} but does
+ * not support routes selection logic. Instead, relies on external clients to make a decision
+ * about currently selected route.
+ *
+ * <p>Selected route override should be used by {@link AudioManager} which is aware of Audio
+ * Policies.
+ */
+class AudioPoliciesBluetoothRouteController implements BluetoothRouteController {
+    private static final String TAG = "APBtRouteController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String HEARING_AID_ROUTE_ID_PREFIX = "HEARING_AID_";
@@ -67,7 +77,7 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
 
     private final Context mContext;
     private final BluetoothAdapter mBluetoothAdapter;
-    private final BluetoothRouteController.BluetoothRoutesUpdatedListener mListener;
+    private final BluetoothRoutesUpdatedListener mListener;
     private final AudioManager mAudioManager;
     private final BluetoothProfileListener mProfileListener = new BluetoothProfileListener();
 
@@ -80,8 +90,8 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
     private BluetoothHearingAid mHearingAidProfile;
     private BluetoothLeAudio mLeAudioProfile;
 
-    LegacyBluetoothRouteController(Context context, BluetoothAdapter btAdapter,
-            BluetoothRouteController.BluetoothRoutesUpdatedListener listener) {
+    AudioPoliciesBluetoothRouteController(Context context, BluetoothAdapter btAdapter,
+            BluetoothRoutesUpdatedListener listener) {
         mContext = context;
         mBluetoothAdapter = btAdapter;
         mListener = listener;
@@ -496,7 +506,7 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
         @Override
         public void onReceive(Context context, Intent intent) {
             BluetoothDevice device = intent.getParcelableExtra(
-                    BluetoothDevice.EXTRA_DEVICE, android.bluetooth.BluetoothDevice.class);
+                    BluetoothDevice.EXTRA_DEVICE, BluetoothDevice.class);
 
             switch (intent.getAction()) {
                 case BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED:
