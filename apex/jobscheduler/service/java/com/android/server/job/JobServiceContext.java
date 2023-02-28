@@ -727,8 +727,11 @@ public final class JobServiceContext implements ServiceConnection {
                     // Exception-throwing-can down the road to JobParameters.completeWork >:(
                     return true;
                 }
-                mService.mJobs.touchJob(mRunningJob);
-                return mRunningJob.completeWorkLocked(workId);
+                if (mRunningJob.completeWorkLocked(workId)) {
+                    mService.mJobs.touchJob(mRunningJob);
+                    return true;
+                }
+                return false;
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
