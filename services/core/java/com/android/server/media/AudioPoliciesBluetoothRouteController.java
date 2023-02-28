@@ -142,6 +142,12 @@ class AudioPoliciesBluetoothRouteController implements BluetoothRouteController 
         mContext.unregisterReceiver(mDeviceStateChangedReceiver);
     }
 
+    @Override
+    public boolean selectRoute(String deviceAddress) {
+        // Temporary no-op.
+        return false;
+    }
+
     /**
      * Transfers to a given bluetooth route.
      * The dedicated BT device with the route would be activated.
