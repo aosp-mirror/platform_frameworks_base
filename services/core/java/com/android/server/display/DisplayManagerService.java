@@ -2126,16 +2126,24 @@ public final class DisplayManagerService extends SystemService {
                 autoHdrOutputTypes = getEnabledAutoHdrTypesLocked();
             }
 
+            int conversionMode = hdrConversionMode.getConversionMode();
+            int preferredHdrType = hdrConversionMode.getPreferredHdrOutputType();
             // If the HDR conversion is disabled by an app through WindowManager.LayoutParams, then
             // set HDR conversion mode to HDR_CONVERSION_PASSTHROUGH.
             if (mOverrideHdrConversionMode == null) {
-                mSystemPreferredHdrOutputType =
-                        mInjector.setHdrConversionMode(hdrConversionMode.getConversionMode(),
-                        hdrConversionMode.getPreferredHdrOutputType(), autoHdrOutputTypes);
+                // HDR_CONVERSION_FORCE with HDR_TYPE_INVALID is used to represent forcing SDR type.
+                // But, internally SDR is selected by using passthrough mode.
+                if (conversionMode == HdrConversionMode.HDR_CONVERSION_FORCE
+                        && preferredHdrType == Display.HdrCapabilities.HDR_TYPE_INVALID) {
+                    conversionMode = HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+                }
             } else {
-                mInjector.setHdrConversionMode(mOverrideHdrConversionMode.getConversionMode(),
-                        mOverrideHdrConversionMode.getPreferredHdrOutputType(), null);
+                conversionMode = mOverrideHdrConversionMode.getConversionMode();
+                preferredHdrType = mOverrideHdrConversionMode.getPreferredHdrOutputType();
+                autoHdrOutputTypes = null;
             }
+            mSystemPreferredHdrOutputType = mInjector.setHdrConversionMode(
+                    conversionMode, preferredHdrType, autoHdrOutputTypes);
         }
     }
 

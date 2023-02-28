@@ -1409,9 +1409,10 @@ public final class DisplayManager {
      * @param hdrConversionMode The {@link HdrConversionMode} to set.
      * Note, {@code HdrConversionMode.preferredHdrOutputType} is only applicable when
      * {@code HdrConversionMode.conversionMode} is {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
+     * If {@code HdrConversionMode.preferredHdrOutputType} is not set in case when
+     * {@code HdrConversionMode.conversionMode} is {@link HdrConversionMode#HDR_CONVERSION_FORCE},
+     * it means that preferred output type is SDR.
      *
-     * @throws IllegalArgumentException if hdrConversionMode.preferredHdrOutputType is not set
-     * when hdrConversionMode.conversionMode is {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
      * @throws IllegalArgumentException if hdrConversionMode.preferredHdrOutputType is set but
      * hdrConversionMode.conversionMode is not {@link HdrConversionMode#HDR_CONVERSION_FORCE}.
      *
