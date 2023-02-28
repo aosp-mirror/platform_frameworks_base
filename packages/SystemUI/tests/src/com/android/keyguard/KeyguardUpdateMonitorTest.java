@@ -57,8 +57,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
@@ -91,7 +89,6 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
-import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -149,6 +146,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -232,8 +230,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
     @Mock
-    private IActivityManager mActivityService;
-    @Mock
     private SessionTracker mSessionTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -270,8 +266,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        when(mActivityService.getCurrentUser()).thenReturn(mCurrentUserInfo);
-        when(mActivityService.getCurrentUserId()).thenReturn(mCurrentUserId);
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates()).thenReturn(true);
         when(mFaceManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
@@ -311,13 +305,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class)
-                .spyStatic(ActivityManager.class)
                 .startMocking();
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(SubscriptionManager::getDefaultSubscriptionId);
         KeyguardUpdateMonitor.setCurrentUser(mCurrentUserId);
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
-        ExtendedMockito.doReturn(mActivityService).when(ActivityManager::getService);
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.systemui.R.integer.config_face_auth_supported_posture,
@@ -1091,11 +1083,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testBiometricsCleared_whenUserSwitches() throws Exception {
-        final IRemoteCallback reply = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) {
-            } // do nothing
-        };
         final BiometricAuthenticated dummyAuthentication =
                 new BiometricAuthenticated(true /* authenticated */, true /* strong */);
         mKeyguardUpdateMonitor.mUserFaceAuthenticated.put(0 /* user */, dummyAuthentication);
@@ -1103,18 +1090,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.mUserFingerprintAuthenticated.size()).isEqualTo(1);
         assertThat(mKeyguardUpdateMonitor.mUserFaceAuthenticated.size()).isEqualTo(1);
 
-        mKeyguardUpdateMonitor.handleUserSwitching(10 /* user */, reply);
+        mKeyguardUpdateMonitor.handleUserSwitching(10 /* user */, new CountDownLatch(0));
         assertThat(mKeyguardUpdateMonitor.mUserFingerprintAuthenticated.size()).isEqualTo(0);
         assertThat(mKeyguardUpdateMonitor.mUserFaceAuthenticated.size()).isEqualTo(0);
     }
 
     @Test
     public void testMultiUserJankMonitor_whenUserSwitches() throws Exception {
-        final IRemoteCallback reply = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) {
-            } // do nothing
-        };
         mKeyguardUpdateMonitor.handleUserSwitchComplete(10 /* user */);
         verify(mInteractionJankMonitor).end(InteractionJankMonitor.CUJ_USER_SWITCH);
         verify(mLatencyTracker).onActionEnd(LatencyTracker.ACTION_USER_SWITCH);

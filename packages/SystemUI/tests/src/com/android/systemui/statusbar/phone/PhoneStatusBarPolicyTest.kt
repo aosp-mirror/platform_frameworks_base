@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone
 
 import android.app.AlarmManager
-import android.app.IActivityManager
 import android.app.admin.DevicePolicyManager
 import android.content.SharedPreferences
 import android.os.UserManager
@@ -87,7 +86,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var locationController: LocationController
     @Mock private lateinit var sensorPrivacyController: SensorPrivacyController
-    @Mock private lateinit var iActivityManager: IActivityManager
     @Mock private lateinit var alarmManager: AlarmManager
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var userTracker: UserTracker
@@ -176,6 +174,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             commandQueue,
             broadcastDispatcher,
             executor,
+            executor,
             testableLooper.looper,
             context.resources,
             castController,
@@ -190,7 +189,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             keyguardStateController,
             locationController,
             sensorPrivacyController,
-            iActivityManager,
             alarmManager,
             userManager,
             userTracker,
