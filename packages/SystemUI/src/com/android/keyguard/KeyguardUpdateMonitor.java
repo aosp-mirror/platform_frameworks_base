@@ -29,6 +29,7 @@ import static android.hardware.biometrics.BiometricConstants.LockoutMode;
 import static android.hardware.biometrics.BiometricSourceType.FACE;
 import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
+import static android.os.PowerManager.WAKE_REASON_UNKNOWN;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -152,6 +153,7 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.dump.DumpsysTableLogger;
+import com.android.systemui.keyguard.shared.model.SysUiFaceAuthenticateOptions;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.WeatherData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -3023,6 +3025,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (unlockPossible) {
             mFaceCancelSignal = new CancellationSignal();
 
+            final FaceAuthenticateOptions faceAuthenticateOptions =
+                    new SysUiFaceAuthenticateOptions(
+                            userId,
+                            faceAuthUiEvent,
+                            faceAuthUiEvent == FACE_AUTH_UPDATED_STARTED_WAKING_UP
+                                    ? faceAuthUiEvent.getExtraInfo()
+                                    : WAKE_REASON_UNKNOWN
+                    ).toFaceAuthenticateOptions();
             // This would need to be updated for multi-sensor devices
             final boolean supportsFaceDetection = !mFaceSensorProperties.isEmpty()
                     && mFaceSensorProperties.get(0).supportsFaceDetection;
@@ -3033,9 +3043,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     // Run face detection. (If a face is detected, show the bouncer.)
                     mLogger.v("startListeningForFace - detect");
                     mFaceManager.detectFace(mFaceCancelSignal, mFaceDetectionCallback,
-                            new FaceAuthenticateOptions.Builder()
-                                    .setUserId(userId)
-                                    .build());
+                            faceAuthenticateOptions);
                 } else {
                     // Don't run face detection. Instead, inform the user
                     // face auth is unavailable and how to proceed.
@@ -3054,7 +3062,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 final boolean isBypassEnabled = mKeyguardBypassController != null
                         && mKeyguardBypassController.isBypassEnabled();
                 mFaceManager.authenticate(null /* crypto */, mFaceCancelSignal,
-                        mFaceAuthenticationCallback, null /* handler */, userId);
+                        mFaceAuthenticationCallback, null /* handler */,
+                        faceAuthenticateOptions);
             }
             setFaceRunningState(BIOMETRIC_STATE_RUNNING);
         }
