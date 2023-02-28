@@ -151,7 +151,6 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     @Override
     public void setConfiguration(Configuration configuration) {
         super.setConfiguration(configuration);
-        // TODO(b/266262111): Investigate loss of theme configuration when switching TaskListener
         mContext = mContext.createConfigurationContext(configuration);
     }
 
@@ -211,7 +210,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         }
 
         View layout = getLayout();
-        if (layout == null || prevTaskListener != taskListener) {
+        if (layout == null || prevTaskListener != taskListener
+                || mTaskConfig.uiMode != prevTaskConfig.uiMode) {
             // Layout wasn't created yet or TaskListener changed, recreate the layout for new
             // surface parent.
             release();
