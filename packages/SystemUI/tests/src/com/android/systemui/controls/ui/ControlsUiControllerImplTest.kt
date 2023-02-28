@@ -52,6 +52,7 @@ import com.android.systemui.shade.ShadeController
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
+import com.android.systemui.util.FakeSystemUIDialogController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -63,21 +64,20 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.android.wm.shell.TaskView
 import com.android.wm.shell.TaskViewFactory
 import com.google.common.truth.Truth.assertThat
-import dagger.Lazy
-import java.util.Optional
-import java.util.function.Consumer
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import java.util.Optional
+import java.util.function.Consumer
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -98,13 +98,15 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
     @Mock lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
     @Mock lateinit var featureFlags: FeatureFlags
     @Mock lateinit var packageManager: PackageManager
-    val sharedPreferences = FakeSharedPreferences()
-    lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
 
-    var uiExecutor = FakeExecutor(FakeSystemClock())
-    var bgExecutor = FakeExecutor(FakeSystemClock())
-    lateinit var underTest: ControlsUiControllerImpl
-    lateinit var parent: FrameLayout
+    private val sharedPreferences = FakeSharedPreferences()
+    private val fakeDialogController = FakeSystemUIDialogController()
+    private val uiExecutor = FakeExecutor(FakeSystemClock())
+    private val bgExecutor = FakeExecutor(FakeSystemClock())
+
+    private lateinit var controlsSettingsRepository: FakeControlsSettingsRepository
+    private lateinit var parent: FrameLayout
+    private lateinit var underTest: ControlsUiControllerImpl
 
     @Before
     fun setup() {
@@ -125,12 +127,12 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
 
         underTest =
             ControlsUiControllerImpl(
-                Lazy { controlsController },
+                { controlsController },
                 context,
                 packageManager,
                 uiExecutor,
                 bgExecutor,
-                Lazy { controlsListingController },
+                { controlsListingController },
                 controlActionCoordinator,
                 activityStarter,
                 iconCache,
@@ -142,7 +144,8 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
                 controlsSettingsRepository,
                 authorizedPanelsRepository,
                 featureFlags,
-                dumpManager
+                ControlsDialogsFactory { fakeDialogController.dialog },
+                dumpManager,
             )
         `when`(
                 userFileManager.getSharedPreferences(
@@ -410,8 +413,45 @@ class ControlsUiControllerImplTest : SysuiTestCase() {
         verify(controlsListingController, never()).removeCallback(any())
     }
 
+    @Test
+    fun testRemovingAppsRemovesFavorite() {
+        val componentName = ComponentName(context, "cls")
+        whenever(controlsController.removeFavorites(eq(componentName))).thenReturn(true)
+        val panel = SelectedItem.PanelItem("App name", componentName)
+        sharedPreferences
+            .edit()
+            .putString("controls_component", panel.componentName.flattenToString())
+            .putString("controls_structure", panel.appName.toString())
+            .putBoolean("controls_is_panel", true)
+            .commit()
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        fakeDialogController.clickPositive()
+
+        verify(controlsController).removeFavorites(eq(componentName))
+        assertThat(underTest.getPreferredSelectedItem(emptyList()))
+            .isEqualTo(SelectedItem.EMPTY_SELECTION)
+        with(sharedPreferences) {
+            assertThat(contains("controls_component")).isFalse()
+            assertThat(contains("controls_structure")).isFalse()
+            assertThat(contains("controls_is_panel")).isFalse()
+        }
+    }
+
+    @Test
+    fun testHideCancelsTheRemoveAppDialog() {
+        val componentName = ComponentName(context, "cls")
+        underTest.show(parent, {}, context)
+        underTest.startRemovingApp(componentName, "Test App")
+
+        underTest.hide(parent)
+
+        verify(fakeDialogController.dialog).cancel()
+    }
+
     private fun setUpPanel(panel: SelectedItem.PanelItem): ControlsServiceInfo {
-        val activity = ComponentName("pkg", "activity")
+        val activity = ComponentName(context, "activity")
         sharedPreferences
             .edit()
             .putString("controls_component", panel.componentName.flattenToString())

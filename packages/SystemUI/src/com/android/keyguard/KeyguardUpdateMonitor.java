@@ -814,6 +814,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    private void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) {
+        Assert.isMainThread();
+        Trace.beginSection("KeyGuardUpdateMonitor#onBiometricDetected");
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onBiometricDetected(userId, biometricSourceType, isStrongBiometric);
+            }
+        }
+        Trace.endSection();
+    }
+
     @VisibleForTesting
     protected void onFingerprintAuthenticated(int userId, boolean isStrongBiometric) {
         Assert.isMainThread();
@@ -890,6 +903,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    private void handleBiometricDetected(int authUserId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) {
+        Trace.beginSection("KeyGuardUpdateMonitor#handlerBiometricDetected");
+        onBiometricDetected(authUserId, biometricSourceType, isStrongBiometric);
+        if (biometricSourceType == FINGERPRINT) {
+            mLogger.logFingerprintDetected(authUserId, isStrongBiometric);
+        } else if (biometricSourceType == FACE) {
+            mLogger.logFaceDetected(authUserId, isStrongBiometric);
+            setFaceRunningState(BIOMETRIC_STATE_STOPPED);
+        }
+
+        Trace.endSection();
+    }
+
     private void handleFingerprintAuthenticated(int authUserId, boolean isStrongBiometric) {
         Trace.beginSection("KeyGuardUpdateMonitor#handlerFingerPrintAuthenticated");
         if (mHandler.hasCallbacks(mFpCancelNotReceived)) {
@@ -941,8 +968,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void onFingerprintCancelNotReceived() {
         mLogger.e("Fp cancellation not received, transitioning to STOPPED");
+        final boolean wasCancellingRestarting = mFingerprintRunningState
+                == BIOMETRIC_STATE_CANCELLING_RESTARTING;
         mFingerprintRunningState = BIOMETRIC_STATE_STOPPED;
-        KeyguardUpdateMonitor.this.updateFingerprintListeningState(BIOMETRIC_ACTION_STOP);
+        if (wasCancellingRestarting) {
+            KeyguardUpdateMonitor.this.updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
+        } else {
+            KeyguardUpdateMonitor.this.updateFingerprintListeningState(BIOMETRIC_ACTION_STOP);
+        }
     }
 
     private void handleFingerprintError(int msgId, String errString) {
@@ -1029,6 +1062,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     () -> updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE),
                     getBiometricLockoutDelay());
         } else {
+            boolean temporaryLockoutReset = wasLockout && !mFingerprintLockedOut;
+            if (temporaryLockoutReset) {
+                mLogger.d("temporaryLockoutReset - stopListeningForFingerprint() to stop"
+                        + " detectFingerprint");
+                stopListeningForFingerprint();
+            }
             updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
         }
 
@@ -1728,10 +1767,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 }
             };
 
+    private final FingerprintManager.FingerprintDetectionCallback mFingerprintDetectionCallback =
+            (sensorId, userId, isStrongBiometric) -> {
+                // Trigger the fingerprint detected path so the bouncer can be shown
+                handleBiometricDetected(userId, FINGERPRINT, isStrongBiometric);
+            };
+
     private final FaceManager.FaceDetectionCallback mFaceDetectionCallback
             = (sensorId, userId, isStrongBiometric) -> {
-                // Trigger the face success path so the bouncer can be shown
-                handleFaceAuthenticated(userId, isStrongBiometric);
+                // Trigger the face detected path so the bouncer can be shown
+                handleBiometricDetected(userId, FACE, isStrongBiometric);
             };
 
     @VisibleForTesting
@@ -2759,8 +2804,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         boolean shouldListen = shouldListenKeyguardState && shouldListenUserState
                 && shouldListenBouncerState && shouldListenUdfpsState
-                && shouldListenSideFpsState
-                && !isFingerprintLockedOut();
+                && shouldListenSideFpsState;
         logListenerModelData(
                 new KeyguardFingerprintListenModel(
                     System.currentTimeMillis(),
@@ -2819,8 +2863,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean supportsDetect = !mFaceSensorProperties.isEmpty()
                 && mFaceSensorProperties.get(0).supportsFaceDetection
                 && canBypass && !mPrimaryBouncerIsOrWillBeShowing
-                && !isUserInLockdown(user)
-                && !isFingerprintLockedOut();
+                && !isUserInLockdown(user);
         final boolean faceAuthAllowedOrDetectionIsNeeded = faceAuthAllowed || supportsDetect;
 
         // If the face or fp has recently been authenticated do not attempt to authenticate again.
@@ -2916,11 +2959,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mLogger.v("startListeningForFingerprint - detect");
                 mFpm.detectFingerprint(
                         mFingerprintCancelSignal,
-                        (sensorId, user, isStrongBiometric) -> {
-                            mLogger.d("fingerprint detected");
-                            // Trigger the fingerprint success path so the bouncer can be shown
-                            handleFingerprintAuthenticated(user, isStrongBiometric);
-                        },
+                        mFingerprintDetectionCallback,
                         userId);
             } else {
                 mLogger.v("startListeningForFingerprint - authenticate");
