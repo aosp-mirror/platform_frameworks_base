@@ -271,6 +271,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
          */
         void onClientChangeLocked(boolean serviceInfoChanged);
 
+        /**
+         * Called back to notify the system the proxy client for a device has changed.
+         *
+         * Changes include if the proxy is unregistered, if its service info list has changed, or if
+         * its focus appearance has changed.
+         */
+        void onProxyChanged(int deviceId);
+
         int getCurrentUserIdLocked();
 
         Pair<float[], MagnificationSpec> getWindowTransformationMatrixAndMagnificationSpec(
@@ -314,8 +322,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void unbindImeLocked(AbstractAccessibilityServiceConnection connection);
 
         void attachAccessibilityOverlayToDisplay(int displayId, SurfaceControl sc);
-
-        void setCurrentUserFocusAppearance(int strokeWidth, int color);
 
     }
 
