@@ -31,7 +31,6 @@ oneway interface ISatellite {
      * Register the callback interface with satellite service.
      *
      * @param listener The callback interface to handle satellite service indications.
-     * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -43,7 +42,7 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void setSatelliteListener(in ISatelliteListener listener, in IIntegerConsumer errorCallback);
+    void setSatelliteListener(in ISatelliteListener listener);
 
     /**
      * Request to enable or disable the satellite service listening mode.
@@ -51,6 +50,8 @@ oneway interface ISatellite {
      *
      * @param enable True to enable satellite listening mode and false to disable.
      * @param isDemoMode Whether demo mode is enabled.
+     * @param timeout How long the satellite modem should wait for the next incoming page before
+     *                disabling listening mode.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -63,7 +64,7 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestSatelliteListeningEnabled(in boolean enable, in boolean isDemoMode,
+    void requestSatelliteListeningEnabled(in boolean enable, in boolean isDemoMode, in int timeout,
             in IIntegerConsumer errorCallback);
 
     /**
