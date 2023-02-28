@@ -68,6 +68,17 @@ import java.util.Objects;
      */
     void stop();
 
+
+    /**
+     * Selects the route with the given {@code deviceAddress}.
+     *
+     * @param deviceAddress The physical address of the device to select. May be null to unselect
+     *                      the currently selected device.
+     * @return Whether the selection succeeds. If the selection fails, the state of the instance
+     * remains unaltered.
+     */
+    boolean selectRoute(@Nullable String deviceAddress);
+
     /**
      * Transfers Bluetooth output to the given route.
      *
@@ -142,6 +153,12 @@ import java.util.Objects;
         @Override
         public void stop() {
             // no op
+        }
+
+        @Override
+        public boolean selectRoute(String deviceAddress) {
+            // no op
+            return false;
         }
 
         @Override
