@@ -34,8 +34,9 @@ oneway interface ITaskOrganizer {
      * has create a starting window for the Task.
      *
      * @param info The information about the Task that's available
+     * @param appToken Token of the application being started.
      */
-    void addStartingWindow(in StartingWindowInfo info);
+    void addStartingWindow(in StartingWindowInfo info, IBinder appToken);
 
     /**
      * Called when the Task want to remove the starting window.
