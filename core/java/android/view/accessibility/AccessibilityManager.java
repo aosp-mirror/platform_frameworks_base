@@ -2068,12 +2068,14 @@ public final class AccessibilityManager {
      * {@link android.view.Display#INVALID_DISPLAY}, or is already being proxy-ed.
      *
      * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission.
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
+     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @RequiresPermission(allOf = {Manifest.permission.MANAGE_ACCESSIBILITY,
+            Manifest.permission.CREATE_VIRTUAL_DEVICE})
     public boolean registerDisplayProxy(@NonNull AccessibilityDisplayProxy proxy) {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -2096,12 +2098,14 @@ public final class AccessibilityManager {
      * @return {@code true} if the proxy is successfully unregistered.
      *
      * @throws SecurityException if the app does not hold the
-     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission.
+     * {@link Manifest.permission#MANAGE_ACCESSIBILITY} permission or the
+     * {@link Manifest.permission#CREATE_VIRTUAL_DEVICE} permission.
      *
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @RequiresPermission(allOf = {Manifest.permission.MANAGE_ACCESSIBILITY,
+            Manifest.permission.CREATE_VIRTUAL_DEVICE})
     public boolean unregisterDisplayProxy(@NonNull AccessibilityDisplayProxy proxy)  {
         final IAccessibilityManager service;
         synchronized (mLock) {
