@@ -39,9 +39,11 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -523,10 +525,27 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
-    private fun assertConnection(
+    private fun TestScope.startCollection(conn: DemoMobileConnectionRepository): Job {
+        val job = launch {
+            launch { conn.cdmaLevel.collect {} }
+            launch { conn.primaryLevel.collect {} }
+            launch { conn.dataActivityDirection.collect {} }
+            launch { conn.carrierNetworkChangeActive.collect {} }
+            launch { conn.isRoaming.collect {} }
+            launch { conn.networkName.collect {} }
+            launch { conn.isEmergencyOnly.collect {} }
+            launch { conn.dataConnectionState.collect {} }
+        }
+        return job
+    }
+
+    private fun TestScope.assertConnection(
         conn: DemoMobileConnectionRepository,
         model: FakeNetworkEventModel,
     ) {
+        val job = startCollection(conn)
+        // Assert the fields using the `MutableStateFlow` so that we don't have to start up
+        // a collector for every field for every test
         when (model) {
             is FakeNetworkEventModel.Mobile -> {
                 assertThat(conn.subId).isEqualTo(model.subId)
@@ -547,12 +566,15 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
             }
             else -> {}
         }
+
+        job.cancel()
     }
 
-    private fun assertCarrierMergedConnection(
+    private fun TestScope.assertCarrierMergedConnection(
         conn: DemoMobileConnectionRepository,
         model: FakeWifiEventModel.CarrierMerged,
     ) {
+        val job = startCollection(conn)
         assertThat(conn.subId).isEqualTo(model.subscriptionId)
         assertThat(conn.cdmaLevel.value).isEqualTo(model.level)
         assertThat(conn.primaryLevel.value).isEqualTo(model.level)
@@ -561,6 +583,7 @@ class DemoMobileConnectionsRepositoryTest : SysuiTestCase() {
         assertThat(conn.isEmergencyOnly.value).isFalse()
         assertThat(conn.isGsm.value).isFalse()
         assertThat(conn.dataConnectionState.value).isEqualTo(DataConnectionState.Connected)
+        job.cancel()
     }
 }
 

@@ -35,8 +35,11 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -122,10 +125,25 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             assertConnection(underTest, networkModel)
         }
 
-    private fun assertConnection(
+    private fun TestScope.startCollection(conn: DemoMobileConnectionRepository): Job {
+        val job = launch {
+            launch { conn.cdmaLevel.collect {} }
+            launch { conn.primaryLevel.collect {} }
+            launch { conn.dataActivityDirection.collect {} }
+            launch { conn.carrierNetworkChangeActive.collect {} }
+            launch { conn.isRoaming.collect {} }
+            launch { conn.networkName.collect {} }
+            launch { conn.isEmergencyOnly.collect {} }
+            launch { conn.dataConnectionState.collect {} }
+        }
+        return job
+    }
+
+    private fun TestScope.assertConnection(
         conn: DemoMobileConnectionRepository,
         model: FakeNetworkEventModel
     ) {
+        val job = startCollection(underTest)
         when (model) {
             is FakeNetworkEventModel.Mobile -> {
                 assertThat(conn.subId).isEqualTo(model.subId)
@@ -148,6 +166,8 @@ internal class DemoMobileConnectionParameterizedTest(private val testCase: TestC
             // DemoMobileConnectionsRepositoryTest.kt
             else -> {}
         }
+
+        job.cancel()
     }
 
     /** Matches [FakeNetworkEventModel] */
