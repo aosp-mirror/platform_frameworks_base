@@ -35,6 +35,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OV
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 import static com.android.internal.accessibility.util.AccessibilityUtils.ACCESSIBILITY_MENU_IN_SYSTEM;
 import static com.android.providers.settings.SettingsState.FALLBACK_FILE_SUFFIX;
+import static com.android.providers.settings.SettingsState.makeKey;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -375,10 +376,6 @@ public class SettingsProvider extends ContentProvider {
     @GuardedBy("mLock")
     private boolean mSyncConfigDisabledUntilReboot;
 
-    public static int makeKey(int type, int userId) {
-        return SettingsState.makeKey(type, userId);
-    }
-
     public static int getTypeFromKey(int key) {
         return SettingsState.getTypeFromKey(key);
     }
@@ -387,9 +384,6 @@ public class SettingsProvider extends ContentProvider {
         return SettingsState.getUserIdFromKey(key);
     }
 
-    public static String keyToString(int key) {
-        return SettingsState.keyToString(key);
-    }
     @ChangeId
     @EnabledSince(targetSdkVersion=android.os.Build.VERSION_CODES.S)
     private static final long ENFORCE_READ_PERMISSION_FOR_MULTI_SIM_DATA_CALL = 172670679L;
@@ -428,22 +422,26 @@ public class SettingsProvider extends ContentProvider {
         switch (method) {
             case Settings.CALL_METHOD_GET_CONFIG: {
                 Setting setting = getConfigSetting(name);
-                return packageValueForCallResult(setting, isTrackingGeneration(args));
+                return packageValueForCallResult(SETTINGS_TYPE_CONFIG, name, requestingUserId,
+                        setting, isTrackingGeneration(args));
             }
 
             case Settings.CALL_METHOD_GET_GLOBAL: {
                 Setting setting = getGlobalSetting(name);
-                return packageValueForCallResult(setting, isTrackingGeneration(args));
+                return packageValueForCallResult(SETTINGS_TYPE_GLOBAL, name, requestingUserId,
+                        setting, isTrackingGeneration(args));
             }
 
             case Settings.CALL_METHOD_GET_SECURE: {
                 Setting setting = getSecureSetting(name, requestingUserId);
-                return packageValueForCallResult(setting, isTrackingGeneration(args));
+                return packageValueForCallResult(SETTINGS_TYPE_SECURE, name, requestingUserId,
+                        setting, isTrackingGeneration(args));
             }
 
             case Settings.CALL_METHOD_GET_SYSTEM: {
                 Setting setting = getSystemSetting(name, requestingUserId);
-                return packageValueForCallResult(setting, isTrackingGeneration(args));
+                return packageValueForCallResult(SETTINGS_TYPE_SYSTEM, name, requestingUserId,
+                        setting, isTrackingGeneration(args));
             }
 
             case Settings.CALL_METHOD_PUT_CONFIG: {
@@ -553,7 +551,7 @@ public class SettingsProvider extends ContentProvider {
 
             case Settings.CALL_METHOD_LIST_CONFIG: {
                 String prefix = getSettingPrefix(args);
-                Bundle result = packageValuesForCallResult(getAllConfigFlags(prefix),
+                Bundle result = packageValuesForCallResult(prefix, getAllConfigFlags(prefix),
                         isTrackingGeneration(args));
                 reportDeviceConfigAccess(prefix);
                 return result;
@@ -1319,6 +1317,7 @@ public class SettingsProvider extends ContentProvider {
         return false;
     }
 
+    @NonNull
     private HashMap<String, String> getAllConfigFlags(@Nullable String prefix) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
@@ -2316,7 +2315,8 @@ public class SettingsProvider extends ContentProvider {
                 "get/set setting for user", null);
     }
 
-    private Bundle packageValueForCallResult(Setting setting, boolean trackingGeneration) {
+    private Bundle packageValueForCallResult(int type, @NonNull String name, int userId,
+            @Nullable Setting setting, boolean trackingGeneration) {
         if (!trackingGeneration) {
             if (setting == null || setting.isNull()) {
                 return NULL_SETTING_BUNDLE;
@@ -2325,21 +2325,40 @@ public class SettingsProvider extends ContentProvider {
         }
         Bundle result = new Bundle();
         result.putString(Settings.NameValueTable.VALUE,
-                !setting.isNull() ? setting.getValue() : null);
+                (setting != null && !setting.isNull()) ? setting.getValue() : null);
 
-        mSettingsRegistry.mGenerationRegistry.addGenerationData(result, setting.getKey());
+        if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
+            // Don't track generation for non-existent settings unless the name is predefined
+            synchronized (mLock) {
+                mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
+                        SettingsState.makeKey(type, userId), name);
+            }
+        }
         return result;
     }
 
-    private Bundle packageValuesForCallResult(HashMap<String, String> keyValues,
-            boolean trackingGeneration) {
+    private boolean isSettingPreDefined(String name, int type) {
+        if (type == SETTINGS_TYPE_GLOBAL) {
+            return sAllGlobalSettings.contains(name);
+        } else if (type == SETTINGS_TYPE_SECURE) {
+            return sAllSecureSettings.contains(name);
+        } else if (type == SETTINGS_TYPE_SYSTEM) {
+            return sAllSystemSettings.contains(name);
+        } else {
+            return false;
+        }
+    }
+
+    private Bundle packageValuesForCallResult(String prefix,
+            @NonNull HashMap<String, String> keyValues, boolean trackingGeneration) {
         Bundle result = new Bundle();
         result.putSerializable(Settings.NameValueTable.VALUE, keyValues);
         if (trackingGeneration) {
+            // Track generation even if the namespace is empty because this is for system apps
             synchronized (mLock) {
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
-                        mSettingsRegistry.getSettingsLocked(
-                                SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM).mKey);
+                        mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_CONFIG,
+                                UserHandle.USER_SYSTEM).mKey, prefix);
             }
         }
 
@@ -3449,7 +3468,7 @@ public class SettingsProvider extends ContentProvider {
 
         private void notifyForSettingsChange(int key, String name) {
             // Increment the generation first, so observers always see the new value
-            mGenerationRegistry.incrementGeneration(key);
+            mGenerationRegistry.incrementGeneration(key, name);
 
             if (isGlobalSettingsKey(key) || isConfigSettingsKey(key)) {
                 final long token = Binder.clearCallingIdentity();
@@ -3487,7 +3506,7 @@ public class SettingsProvider extends ContentProvider {
                 List<String> changedSettings) {
 
             // Increment the generation first, so observers always see the new value
-            mGenerationRegistry.incrementGeneration(key);
+            mGenerationRegistry.incrementGeneration(key, prefix);
 
             StringBuilder stringBuilder = new StringBuilder(prefix);
             for (int i = 0; i < changedSettings.size(); ++i) {
@@ -3513,7 +3532,7 @@ public class SettingsProvider extends ContentProvider {
                     if (profileId != userId) {
                         final int key = makeKey(type, profileId);
                         // Increment the generation first, so observers always see the new value
-                        mGenerationRegistry.incrementGeneration(key);
+                        mGenerationRegistry.incrementGeneration(key, name);
                         mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                                 profileId, 0, uri).sendToTarget();
                     }
