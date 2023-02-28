@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification
 
 import android.animation.ObjectAnimator
 import android.util.FloatProperty
+import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
@@ -302,28 +303,28 @@ class NotificationWakeUpCoordinator @Inject constructor(
             // the doze amount to 0f (not dozing) so that the notifications are no longer hidden.
             // See: UnlockedScreenOffAnimationController.onFinishedWakingUp()
             setDozeAmount(0f, 0f, source = "Override: Shade->Shade (lock cancelled by unlock)")
+            this.state = newState
+            return
         }
 
         if (overrideDozeAmountIfAnimatingScreenOff(mLinearDozeAmount)) {
+            this.state = newState
             return
         }
 
         if (overrideDozeAmountIfBypass()) {
+            this.state = newState
             return
         }
 
         maybeClearDozeAmountOverrideHidingNotifs()
 
-        if (bypassController.bypassEnabled &&
-                newState == StatusBarState.KEYGUARD && state == StatusBarState.SHADE_LOCKED &&
-            (!statusBarStateController.isDozing || shouldAnimateVisibility())) {
-            // We're leaving shade locked. Let's animate the notifications away
-            setNotificationsVisible(visible = true, increaseSpeed = false, animate = false)
-            setNotificationsVisible(visible = false, increaseSpeed = false, animate = true)
-        }
-
         this.state = newState
     }
+
+    @VisibleForTesting
+    val statusBarState: Int
+        get() = state
 
     override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
         val collapsedEnough = event.fraction <= 0.9f
