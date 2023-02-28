@@ -30,7 +30,6 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -100,7 +99,7 @@ public class PasswordTextView extends FrameLayout {
     private Interpolator mAppearInterpolator;
     private Interpolator mDisappearInterpolator;
     private Interpolator mFastOutSlowInInterpolator;
-    private boolean mShowPassword;
+    private boolean mShowPassword = true;
     private UserActivityListener mUserActivityListener;
     private PinShapeInput mPinShapeInput;
     private boolean mUsePinShapes = false;
@@ -158,8 +157,6 @@ public class PasswordTextView extends FrameLayout {
         mDrawPaint.setTypeface(Typeface.create(
                 context.getString(com.android.internal.R.string.config_headlineFontFamily),
                 0));
-        mShowPassword = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.TEXT_SHOW_PASSWORD, 1) == 1;
         mAppearInterpolator = AnimationUtils.loadInterpolator(mContext,
                 android.R.interpolator.linear_out_slow_in);
         mDisappearInterpolator = AnimationUtils.loadInterpolator(mContext,
@@ -439,6 +436,13 @@ public class PasswordTextView extends FrameLayout {
                     R.layout.keyguard_pin_shape_non_hinting_view, null);
         }
         addView(mPinShapeInput.getView());
+    }
+
+    /**
+     * Controls whether the last entered digit is briefly shown after being entered
+     */
+    public void setShowPassword(boolean enabled) {
+        mShowPassword = enabled;
     }
 
     private class CharState {
