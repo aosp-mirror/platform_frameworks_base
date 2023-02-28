@@ -474,6 +474,36 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockRestartDialogLayout).updateVisibility(true);
     }
 
+    @Test
+    public void testRestartLayoutRecreatedIfNeeded() {
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(true).when(mMockRestartDialogLayout)
+                .needsToBeRecreated(any(TaskInfo.class),
+                        any(ShellTaskOrganizer.TaskListener.class));
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockRestartDialogLayout, times(2))
+                .createLayout(anyBoolean());
+    }
+
+    @Test
+    public void testRestartLayoutNotRecreatedIfNotNeeded() {
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(false).when(mMockRestartDialogLayout)
+                .needsToBeRecreated(any(TaskInfo.class),
+                        any(ShellTaskOrganizer.TaskListener.class));
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockRestartDialogLayout, times(1))
+                .createLayout(anyBoolean());
+    }
+
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
             @CameraCompatControlState int cameraCompatControlState) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
