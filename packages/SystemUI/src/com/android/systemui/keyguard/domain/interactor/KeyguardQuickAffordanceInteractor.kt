@@ -26,6 +26,7 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
@@ -410,16 +411,10 @@ constructor(
         )
     }
 
-    private suspend fun isFeatureDisabledByDevicePolicy(): Boolean {
-        val flags =
-            withContext(backgroundDispatcher) {
-                devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId)
-            }
-        val flagsToCheck =
-            DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL or
-                DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL
-        return flagsToCheck and flags != 0
-    }
+    private suspend fun isFeatureDisabledByDevicePolicy(): Boolean =
+        withContext(backgroundDispatcher) {
+            devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+        }
 
     companion object {
         private const val TAG = "KeyguardQuickAffordanceInteractor"
