@@ -426,7 +426,7 @@ public class PackageWatchdog {
                                 }
                                 int impact = registeredObserver.onHealthCheckFailed(
                                         versionedPackage, failureReason, mitigationCount);
-                                if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                                if (impact != PackageHealthObserverImpact.USER_IMPACT_LEVEL_0
                                         && impact < currentObserverImpact) {
                                     currentObserverToNotify = registeredObserver;
                                     currentObserverImpact = impact;
@@ -466,7 +466,7 @@ public class PackageWatchdog {
             if (registeredObserver != null) {
                 int impact = registeredObserver.onHealthCheckFailed(
                         failingPackage, failureReason, 1);
-                if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                if (impact != PackageHealthObserverImpact.USER_IMPACT_LEVEL_0
                         && impact < currentObserverImpact) {
                     currentObserverToNotify = registeredObserver;
                     currentObserverImpact = impact;
@@ -494,7 +494,7 @@ public class PackageWatchdog {
                     PackageHealthObserver registeredObserver = observer.registeredObserver;
                     if (registeredObserver != null) {
                         int impact = registeredObserver.onBootLoop(mitigationCount);
-                        if (impact != PackageHealthObserverImpact.USER_IMPACT_NONE
+                        if (impact != PackageHealthObserverImpact.USER_IMPACT_LEVEL_0
                                 && impact < currentObserverImpact) {
                             currentObserverToNotify = registeredObserver;
                             currentObserverImpact = impact;
@@ -576,19 +576,23 @@ public class PackageWatchdog {
 
     /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
     @Retention(SOURCE)
-    @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_NONE,
-                     PackageHealthObserverImpact.USER_IMPACT_LOW,
-                     PackageHealthObserverImpact.USER_IMPACT_MEDIUM,
-                     PackageHealthObserverImpact.USER_IMPACT_HIGH})
+    @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_10,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_50,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
+                     PackageHealthObserverImpact.USER_IMPACT_LEVEL_100})
     public @interface PackageHealthObserverImpact {
         /** No action to take. */
-        int USER_IMPACT_NONE = 0;
+        int USER_IMPACT_LEVEL_0 = 0;
         /* Action has low user impact, user of a device will barely notice. */
-        int USER_IMPACT_LOW = 1;
-        /* Action has medium user impact, user of a device will likely notice. */
-        int USER_IMPACT_MEDIUM = 3;
+        int USER_IMPACT_LEVEL_10 = 10;
+        /* Actions having medium user impact, user of a device will likely notice. */
+        int USER_IMPACT_LEVEL_30 = 30;
+        int USER_IMPACT_LEVEL_50 = 50;
+        int USER_IMPACT_LEVEL_70 = 70;
         /* Action has high user impact, a last resort, user of a device will be very frustrated. */
-        int USER_IMPACT_HIGH = 5;
+        int USER_IMPACT_LEVEL_100 = 100;
     }
 
     /** Register instances of this interface to receive notifications on package failure. */
@@ -633,7 +637,7 @@ public class PackageWatchdog {
          *                        boot loop (including this time).
          */
         default @PackageHealthObserverImpact int onBootLoop(int mitigationCount) {
-            return PackageHealthObserverImpact.USER_IMPACT_NONE;
+            return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
         }
 
         /**
