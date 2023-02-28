@@ -28,10 +28,6 @@ class NotifPipelineFlags @Inject constructor(
     val featureFlags: FeatureFlags,
     val sysPropFlags: FlagResolver,
 ) {
-    init {
-        featureFlags.addListener(Flags.DISABLE_FSI) { event -> event.requestNoRestart() }
-    }
-
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
 
@@ -39,8 +35,6 @@ class NotifPipelineFlags @Inject constructor(
         featureFlags.isEnabled(Flags.FSI_REQUIRES_KEYGUARD)
 
     fun fsiOnDNDUpdate(): Boolean = featureFlags.isEnabled(Flags.FSI_ON_DND_UPDATE)
-
-    fun disableFsi(): Boolean = featureFlags.isEnabled(Flags.DISABLE_FSI)
 
     fun forceDemoteFsi(): Boolean =
             sysPropFlags.isEnabled(NotificationFlags.FSI_FORCE_DEMOTE)
