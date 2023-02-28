@@ -873,7 +873,7 @@ public class NotificationManager {
      * permission to your manifest, and use
      * {@link android.provider.Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT}.
      */
-    public boolean canSendFullScreenIntent() {
+    public boolean canUseFullScreenIntent() {
         final int result = PermissionChecker.checkPermissionForPreflight(mContext,
                 android.Manifest.permission.USE_FULL_SCREEN_INTENT,
                 mContext.getAttributionSource());
