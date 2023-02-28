@@ -230,14 +230,6 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     }
                     updateChildren(0 /* translationY */, 1f /* alpha */);
                 }
-
-                private void updateChildren(int translationY, float alpha) {
-                    for (int i = 0; i < KeyguardSecurityContainer.this.getChildCount(); ++i) {
-                        View child = KeyguardSecurityContainer.this.getChildAt(i);
-                        child.setTranslationY(translationY);
-                        child.setAlpha(alpha);
-                    }
-                }
             };
 
     // Used to notify the container when something interesting happens.
@@ -562,6 +554,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
      * This will run when the bouncer shows in all cases except when the user drags the bouncer up.
      */
     public void startAppearAnimation(SecurityMode securityMode) {
+        updateChildren(0 /* translationY */, 1f /* alpha */);
         mViewMode.startAppearAnimation(securityMode);
     }
 
@@ -734,6 +727,23 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     /** Handles density or font scale changes. */
     void onDensityOrFontScaleChanged() {
         mViewMode.onDensityOrFontScaleChanged();
+    }
+
+    void resetScale() {
+        setScale(1);
+    }
+
+    private void setScale(float scale) {
+        setScaleX(scale);
+        setScaleY(scale);
+    }
+
+    private void updateChildren(int translationY, float alpha) {
+        for (int i = 0; i < getChildCount(); ++i) {
+            View child = getChildAt(i);
+            child.setTranslationY(translationY);
+            child.setAlpha(alpha);
+        }
     }
 
     /**
