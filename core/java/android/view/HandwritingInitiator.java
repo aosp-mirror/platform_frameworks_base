@@ -172,9 +172,13 @@ public class HandwritingInitiator {
                         if (candidateView == getConnectedView()) {
                             startHandwriting(candidateView);
                         } else if (candidateView.getHandwritingDelegatorCallback() != null) {
+                            String delegatePackageName =
+                                    candidateView.getAllowedHandwritingDelegatePackageName();
+                            if (delegatePackageName == null) {
+                                delegatePackageName = candidateView.getContext().getOpPackageName();
+                            }
                             mImm.prepareStylusHandwritingDelegation(
-                                    candidateView,
-                                    candidateView.getAllowedHandwritingDelegatePackageName());
+                                    candidateView, delegatePackageName);
                             candidateView.getHandwritingDelegatorCallback().run();
                         } else {
                             if (candidateView.getRevealOnFocusHint()) {
@@ -299,8 +303,12 @@ public class HandwritingInitiator {
      */
     @VisibleForTesting
     public boolean tryAcceptStylusHandwritingDelegation(@NonNull View view) {
-        if (mImm.acceptStylusHandwritingDelegation(
-                view, view.getAllowedHandwritingDelegatorPackageName())) {
+        String delegatorPackageName =
+                view.getAllowedHandwritingDelegatorPackageName();
+        if (delegatorPackageName == null) {
+            delegatorPackageName = view.getContext().getOpPackageName();
+        }
+        if (mImm.acceptStylusHandwritingDelegation(view, delegatorPackageName)) {
             if (mState != null) {
                 mState.mHasInitiatedHandwriting = true;
                 mState.mShouldInitHandwriting = false;
