@@ -31,6 +31,7 @@ per-file Input*.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file Input*.aidl = file:/services/core/java/com/android/server/input/OWNERS
 per-file KeyEvent.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file MotionEvent.java = file:/services/core/java/com/android/server/input/OWNERS
+per-file MotionPredictor.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file PointerIcon.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file SimulatedDpad.java = file:/services/core/java/com/android/server/input/OWNERS
 per-file BatchedInputEventReceiver.java = file:/services/core/java/com/android/server/input/OWNERS
