@@ -92,6 +92,8 @@ public class SoundDoseHelper {
 
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
 
+    private static final int MOMENTARY_EXPOSURE_TIMEOUT_MS = (20 * 3600 * 1000); // 20 hours
+
     // 30s after boot completed
     private static final int SAFE_VOLUME_CONFIGURE_TIMEOUT_MS = 30000;
 
@@ -191,6 +193,10 @@ public class SoundDoseHelper {
 
     @GuardedBy("mCsdStateLock")
     private float mCurrentCsd = 0.f;
+
+    @GuardedBy("mCsdStateLock")
+    private long mLastMomentaryExposureTimeMs = -1;
+
     // dose at which the next dose reached warning occurs
     @GuardedBy("mCsdStateLock")
     private float mNextCsdWarning = 1.0f;
@@ -206,10 +212,26 @@ public class SoundDoseHelper {
 
     private final ISoundDoseCallback.Stub mSoundDoseCallback = new ISoundDoseCallback.Stub() {
         public void onMomentaryExposure(float currentMel, int deviceId) {
+            if (!mEnableCsd) {
+                Log.w(TAG, "onMomentaryExposure: csd not supported, ignoring callback");
+                return;
+            }
+
             Log.w(TAG, "DeviceId " + deviceId + " triggered momentary exposure with value: "
                     + currentMel);
             mLogger.enqueue(SoundDoseEvent.getMomentaryExposureEvent(currentMel));
-            if (mEnableCsd) {
+
+            boolean postWarning = false;
+            synchronized (mCsdStateLock) {
+                if (mLastMomentaryExposureTimeMs < 0
+                        || (System.currentTimeMillis() - mLastMomentaryExposureTimeMs)
+                        >= MOMENTARY_EXPOSURE_TIMEOUT_MS) {
+                    mLastMomentaryExposureTimeMs = System.currentTimeMillis();
+                    postWarning = true;
+                }
+            }
+
+            if (postWarning) {
                 mVolumeController.postDisplayCsdWarning(
                         AudioManager.CSD_WARNING_MOMENTARY_EXPOSURE,
                         getTimeoutMsForWarning(AudioManager.CSD_WARNING_MOMENTARY_EXPOSURE));
