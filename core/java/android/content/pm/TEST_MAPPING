@@ -29,6 +29,9 @@
     },
     {
       "path": "system/apex/tests"
+    },
+    {
+      "path": "cts/tests/tests/content/pm/SecureFrp"
     }
   ],
   "presubmit": [
@@ -101,17 +104,6 @@
     },
     {
       "name": "CtsSuspendAppsTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
-    },
-    {
-      "name": "CtsSecureFrpInstallTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
