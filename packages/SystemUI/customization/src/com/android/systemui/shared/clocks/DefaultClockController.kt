@@ -95,7 +95,7 @@ class DefaultClockController(
 
     open inner class DefaultClockFaceController(
         override val view: AnimatableClockView,
-        val seedColor: Int?,
+        var seedColor: Int?,
     ) : ClockFaceController {
 
         // MAGENTA is a placeholder, and will be assigned correctly in initialize
@@ -111,9 +111,9 @@ class DefaultClockController(
 
         init {
             if (seedColor != null) {
-                currentColor = seedColor
+                currentColor = seedColor!!
             }
-            view.setColors(currentColor, currentColor)
+            view.setColors(DOZE_COLOR, currentColor)
         }
 
         override val events =
@@ -141,7 +141,7 @@ class DefaultClockController(
         fun updateColor() {
             val color =
                 if (seedColor != null) {
-                    seedColor
+                    seedColor!!
                 } else if (isRegionDark) {
                     resources.getColor(android.R.color.system_accent1_100)
                 } else {
@@ -190,6 +190,14 @@ class DefaultClockController(
             clocks.forEach { it.onTimeZoneChanged(timeZone) }
 
         override fun onColorPaletteChanged(resources: Resources) {
+            largeClock.updateColor()
+            smallClock.updateColor()
+        }
+
+        override fun onSeedColorChanged(seedColor: Int?) {
+            largeClock.seedColor = seedColor
+            smallClock.seedColor = seedColor
+
             largeClock.updateColor()
             smallClock.updateColor()
         }
