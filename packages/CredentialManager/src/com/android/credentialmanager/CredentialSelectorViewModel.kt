@@ -17,6 +17,7 @@
 package com.android.credentialmanager
 
 import android.app.Activity
+import android.os.IBinder
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -133,6 +134,11 @@ class CredentialSelectorViewModel(
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
+    }
+
+    /** Return true if the current UI's request token matches the UI cancellation request token. */
+    fun shouldCancelCurrentUi(cancelRequestToken: IBinder): Boolean {
+        return credManRepo.requestInfo.token.equals(cancelRequestToken)
     }
 
     /**************************************************************************/

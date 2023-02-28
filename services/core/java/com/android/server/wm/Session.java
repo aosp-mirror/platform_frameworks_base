@@ -948,7 +948,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         synchronized (mService.mGlobalLock) {
             WindowState windowState = mService.windowForClientLocked(this, window, false);
             if (windowState == null) {
-                Slog.e(TAG_WM,
+                Slog.i(TAG_WM,
                         "setOnBackInvokedCallback(): No window state for package:" + mPackageName);
             } else {
                 windowState.setOnBackInvokedCallbackInfo(callbackInfo);

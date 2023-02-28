@@ -18,12 +18,13 @@ package com.android.wm.shell.flicker
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.device.flicker.junit.FlickerBuilderProvider
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.entireScreenCovered
-import com.android.server.wm.flicker.junit.FlickerBuilderProvider
 import com.android.server.wm.flicker.navBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.navBarLayerPositionAtStartAndEnd
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -32,7 +33,6 @@ import com.android.server.wm.flicker.statusBarLayerPositionAtStartAndEnd
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.taskBarLayerIsVisibleAtStartAndEnd
 import com.android.server.wm.flicker.taskBarWindowIsAlwaysVisible
-import com.android.server.wm.traces.common.component.matchers.ComponentNameMatcher
 import org.junit.Assume
 import org.junit.Test
 

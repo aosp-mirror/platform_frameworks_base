@@ -49,7 +49,7 @@ class AnrHelper {
      * this time, the information might be outdated. So we only the dump the unresponsive process
      * instead of including other processes to avoid making the system more busy.
      */
-    private static final long EXPIRED_REPORT_TIME_MS = TimeUnit.MINUTES.toMillis(1);
+    private static final long EXPIRED_REPORT_TIME_MS = TimeUnit.SECONDS.toMillis(10);
 
     /**
      * If the last ANR occurred within this given time, consider it's anomaly.

@@ -780,6 +780,10 @@ class SyntheticPasswordManager {
         int slot = loadWeaverSlot(protectorId, userId);
         destroyState(WEAVER_SLOT_NAME, protectorId, userId);
         if (slot != INVALID_WEAVER_SLOT) {
+            if (!isWeaverAvailable()) {
+                Slog.e(TAG, "Cannot erase Weaver slot because Weaver is unavailable");
+                return;
+            }
             Set<Integer> usedSlots = getUsedWeaverSlots();
             if (!usedSlots.contains(slot)) {
                 Slog.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);

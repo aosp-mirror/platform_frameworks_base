@@ -16,8 +16,8 @@
 
 package com.android.server.wm.flicker.activityembedding
 
+import android.tools.device.flicker.legacy.FlickerTest
 import com.android.server.wm.flicker.BaseTest
-import com.android.server.wm.flicker.FlickerTest
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
 import org.junit.Before
 

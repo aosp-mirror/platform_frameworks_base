@@ -24,8 +24,6 @@ enum class DialogState {
 
 enum class ResultState {
   COMPLETE,
-  NORMAL_CANCELED,
-  LAUNCH_SETTING_CANCELED
 }
 
 data class DialogResult(

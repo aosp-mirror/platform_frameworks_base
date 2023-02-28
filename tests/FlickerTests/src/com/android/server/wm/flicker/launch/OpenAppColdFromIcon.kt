@@ -16,13 +16,14 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.tools.common.NavBar
+import android.tools.common.Rotation
+import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
+import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.rules.RemoveAllTasksButHomeRule
 import androidx.test.filters.RequiresDevice
-import com.android.server.wm.flicker.FlickerBuilder
-import com.android.server.wm.flicker.FlickerTest
-import com.android.server.wm.flicker.FlickerTestFactory
-import com.android.server.wm.flicker.junit.FlickerParametersRunnerFactory
-import com.android.server.wm.flicker.rules.RemoveAllTasksButHomeRule
-import com.android.server.wm.traces.common.service.PlatformConsts
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -61,7 +62,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
                 if (flicker.scenario.isTablet) {
                     tapl.setExpectedRotation(flicker.scenario.startRotation.value)
                 } else {
-                    tapl.setExpectedRotation(PlatformConsts.Rotation.ROTATION_0.value)
+                    tapl.setExpectedRotation(Rotation.ROTATION_0.value)
                 }
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
             }
@@ -87,7 +88,7 @@ class OpenAppColdFromIcon(flicker: FlickerTest) : OpenAppFromLauncherTransition(
         fun getParams(): Collection<FlickerTest> {
             // TAPL fails on landscape mode b/240916028
             return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(PlatformConsts.NavBar.MODE_3BUTTON)
+                supportedNavigationModes = listOf(NavBar.MODE_3BUTTON)
             )
         }
     }

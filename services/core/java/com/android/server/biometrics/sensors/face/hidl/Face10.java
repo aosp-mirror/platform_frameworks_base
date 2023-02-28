@@ -818,12 +818,11 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
-            final List<Face> enrolledList = getEnrolledFaces(mSensorId, userId);
             final FaceInternalCleanupClient client = new FaceInternalCleanupClient(mContext,
                     mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId,
                     createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
                             BiometricsProtoEnums.CLIENT_UNKNOWN),
-                    mBiometricContext, enrolledList,
+                    mBiometricContext,
                     FaceUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCompositeCallback(callback,
                     mBiometricStateCallback));

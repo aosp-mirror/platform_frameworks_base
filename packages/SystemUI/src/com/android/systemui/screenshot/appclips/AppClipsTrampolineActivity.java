@@ -50,6 +50,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.notetask.NoteTaskController;
+import com.android.systemui.notetask.NoteTaskEntryPoint;
 import com.android.systemui.settings.UserTracker;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -239,9 +240,8 @@ public class AppClipsTrampolineActivity extends Activity {
             // Broadcast no longer required, setting it to null.
             mKillAppClipsBroadcastIntent = null;
 
-            // Expand the note bubble before returning the result. As App Clips API is only
-            // available when in a bubble, isInMultiWindowMode is always false below.
-            mNoteTaskController.showNoteTask(false);
+            // Expand the note bubble before returning the result.
+            mNoteTaskController.showNoteTask(NoteTaskEntryPoint.APP_CLIPS);
             setResult(RESULT_OK, convertedData);
             finish();
         }

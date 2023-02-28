@@ -42,6 +42,9 @@ class ActivitySecurityModelFeatureFlags {
     // TODO(b/230590090): Replace with public documentation once ready
     static final String DOC_LINK = "go/android-asm";
 
+    /** Used to determine which version of the ASM logic was used in logs while we iterate */
+    static final int ASM_VERSION = 5;
+
     private static final String NAMESPACE = NAMESPACE_WINDOW_MANAGER;
     private static final String KEY_ASM_PREFIX = "ActivitySecurity__";
     private static final String KEY_ASM_RESTRICTIONS_ENABLED = KEY_ASM_PREFIX

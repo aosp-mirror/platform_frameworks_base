@@ -23,6 +23,7 @@ import android.credentials.Credential.TYPE_PASSWORD_CREDENTIAL
 import android.credentials.CredentialOption
 import android.credentials.GetCredentialRequest
 import android.credentials.ui.AuthenticationEntry
+import android.credentials.ui.CancelUiRequest
 import android.credentials.ui.Constants
 import android.credentials.ui.Entry
 import android.credentials.ui.CreateCredentialProviderData
@@ -72,6 +73,12 @@ class CredentialManagerRepo(
             RequestInfo::class.java
         ) ?: testCreatePasswordRequestInfo()
 
+        val originName: String? = when (requestInfo.type) {
+            RequestInfo.TYPE_CREATE -> requestInfo.createCredentialRequest?.origin
+            RequestInfo.TYPE_GET -> requestInfo.getCredentialRequest?.origin
+            else -> null
+        }
+
         providerEnabledList = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE ->
                 intent.extras?.getParcelableArrayList(
@@ -105,14 +112,15 @@ class CredentialManagerRepo(
                 val isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
                 val providerEnableListUiState = getCreateProviderEnableListInitialUiState()
                 val providerDisableListUiState = getCreateProviderDisableListInitialUiState()
-                val requestDisplayInfoUiState = getCreateRequestDisplayInfoInitialUiState()!!
+                val requestDisplayInfoUiState =
+                    getCreateRequestDisplayInfoInitialUiState(originName)!!
                 UiState(
                     createCredentialUiState = CreateFlowUtils.toCreateCredentialUiState(
                         providerEnableListUiState,
                         providerDisableListUiState,
                         defaultProviderId,
                         requestDisplayInfoUiState,
-                        /** isOnPasskeyIntroStateAlready = */
+                        /** isOnPasskeyIntroStateAlready */
                         false,
                         isPasskeyFirstUse
                     )!!,
@@ -121,7 +129,7 @@ class CredentialManagerRepo(
             }
             RequestInfo.TYPE_GET -> UiState(
                 createCredentialUiState = null,
-                getCredentialUiState = getCredentialInitialUiState()!!,
+                getCredentialUiState = getCredentialInitialUiState(originName)!!,
             )
             else -> throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
         }
@@ -172,11 +180,11 @@ class CredentialManagerRepo(
     }
 
     // IMPORTANT: new invocation should be mindful that this method can throw.
-    private fun getCredentialInitialUiState(): GetCredentialUiState? {
+    private fun getCredentialInitialUiState(originName: String?): GetCredentialUiState? {
         val providerEnabledList = GetFlowUtils.toProviderList(
             providerEnabledList as List<GetCredentialProviderData>, context
         )
-        val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo, context)
+        val requestDisplayInfo = GetFlowUtils.toRequestDisplayInfo(requestInfo, context, originName)
         return GetCredentialUiState(
             providerEnabledList,
             requestDisplayInfo ?: return null,
@@ -198,8 +206,10 @@ class CredentialManagerRepo(
         )
     }
 
-    private fun getCreateRequestDisplayInfoInitialUiState(): RequestDisplayInfo? {
-        return CreateFlowUtils.toRequestDisplayInfo(requestInfo, context)
+    private fun getCreateRequestDisplayInfoInitialUiState(
+        originName: String?
+    ): RequestDisplayInfo? {
+        return CreateFlowUtils.toRequestDisplayInfo(requestInfo, context, originName)
     }
 
     companion object {
@@ -213,6 +223,14 @@ class CredentialManagerRepo(
                 BaseDialogResult.addToBundle(BaseDialogResult(requestToken), resultData)
                 resultReceiver.send(cancelCode, resultData)
             }
+        }
+
+        /** Return the request token whose UI should be cancelled, or null otherwise. */
+        fun getCancelUiRequestToken(intent: Intent): IBinder? {
+            return intent.extras?.getParcelable(
+                CancelUiRequest.EXTRA_CANCEL_UI_REQUEST,
+                CancelUiRequest::class.java
+            )?.token
         }
     }
 
