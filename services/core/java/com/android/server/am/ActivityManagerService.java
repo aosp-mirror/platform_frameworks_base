@@ -3537,7 +3537,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // We'll take the stack crawls of just the top apps using CPU.
         final int workingStatsNumber = processCpuTracker.countWorkingStats();
-        for (int i = 0; i < workingStatsNumber && extraPids.size() < 5; i++) {
+        for (int i = 0; i < workingStatsNumber && extraPids.size() < 2; i++) {
             ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
             if (lastPids.indexOfKey(stats.pid) >= 0) {
                 if (DEBUG_ANR) {
