@@ -780,12 +780,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"enregistrement d\'écran"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sans titre"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Veille"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de police"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"Rapetisser"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"Agrandir"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Commandes pour la fenêtre d\'agrandissement"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"Effectuer un zoom avant"</string>

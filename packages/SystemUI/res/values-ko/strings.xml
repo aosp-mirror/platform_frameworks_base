@@ -197,8 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"알림 세부정보"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"빠른 설정"</string>
-    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
-    <skip />
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"빠른 설정 및 알림 창입니다."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"화면을 잠급니다."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"업무용 잠금 화면"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"닫기"</string>
@@ -780,12 +779,9 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"화면 녹화"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"제목 없음"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
-    <!-- no translation found for font_scaling_dialog_title (6273107303850248375) -->
-    <skip />
-    <!-- no translation found for font_scaling_smaller (1012032217622008232) -->
-    <skip />
-    <!-- no translation found for font_scaling_larger (5476242157436806760) -->
-    <skip />
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"글꼴 크기"</string>
+    <string name="font_scaling_smaller" msgid="1012032217622008232">"축소"</string>
+    <string name="font_scaling_larger" msgid="5476242157436806760">"확대"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
     <string name="accessibility_control_zoom_in" msgid="1189272315480097417">"확대"</string>
@@ -1047,14 +1043,9 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"직장 프로필로 전환"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"닫기"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"잠금 화면 설정"</string>
-    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
-    <skip />
-    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
-    <skip />
-    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
-    <skip />
-    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
-    <skip />
-    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
-    <skip />
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi를 사용할 수 없음"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"카메라 차단됨"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"카메라 및 마이크 차단됨"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"마이크 차단됨"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"우선순위 모드 설정됨"</string>
 </resources>

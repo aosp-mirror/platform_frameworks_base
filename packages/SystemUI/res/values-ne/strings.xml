@@ -197,8 +197,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"सूचना कक्ष।"</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"द्रुत सेटिङहरू"</string>
-    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
-    <skip />
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"द्रुत सेटिङ तथा सूचना कक्ष।"</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"स्क्रीन बन्द गर्नुहोस्।"</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"कार्य प्रोफाइलको लक स्क्रिन"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"बन्द गर्नुहोस्"</string>
