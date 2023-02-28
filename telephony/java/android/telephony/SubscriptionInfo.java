@@ -974,7 +974,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " groupOwner=" + mGroupOwner
                 + " isGroupDisabled=" + mIsGroupDisabled
                 + " displayNameSource="
-                + TelephonyUtils.displayNameSourceToString(mDisplayNameSource)
+                + SubscriptionManager.displayNameSourceToString(mDisplayNameSource)
                 + " iconTint=" + mIconTint
                 + " number=" + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mNumber)
                 + " dataRoaming=" + mDataRoaming
@@ -988,9 +988,9 @@ public class SubscriptionInfo implements Parcelable {
                 + " carrierConfigAccessRules=" + Arrays.toString(mCarrierConfigAccessRules)
                 + " countryIso=" + mCountryIso
                 + " profileClass=" + mProfileClass
-                + " mType=" + TelephonyUtils.subscriptionTypeToString(mType)
+                + " mType=" + SubscriptionManager.subscriptionTypeToString(mType)
                 + " areUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled
-                + " usageSetting=" + TelephonyUtils.usageSettingToString(mUsageSetting)
+                + " usageSetting=" + SubscriptionManager.usageSettingToString(mUsageSetting)
                 + "]";
     }
 
