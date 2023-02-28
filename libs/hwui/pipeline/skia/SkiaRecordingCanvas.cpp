@@ -321,6 +321,11 @@ double SkiaRecordingCanvas::drawAnimatedImage(AnimatedImageDrawable* animatedIma
     return 0;
 }
 
+void SkiaRecordingCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) {
+    mDisplayList->mMeshes.push_back(&mesh);
+    mRecorder.drawMesh(mesh, blender, paint);
+}
+
 }  // namespace skiapipeline
 }  // namespace uirenderer
 }  // namespace android

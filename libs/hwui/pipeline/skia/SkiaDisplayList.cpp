@@ -23,6 +23,7 @@
 #else
 #include "DamageAccumulator.h"
 #endif
+#include "TreeInfo.h"
 #include "VectorDrawable.h"
 #ifdef __ANDROID__
 #include "renderthread/CanvasContext.h"
@@ -102,6 +103,12 @@ bool SkiaDisplayList::prepareListAndChildren(
         info.prepareTextures = false;
         info.canvasContext.unpinImages();
     }
+
+    auto grContext = info.canvasContext.getGrContext();
+    for (auto mesh : mMeshes) {
+        mesh->updateSkMesh(grContext);
+    }
+
 #endif
 
     bool hasBackwardProjectedNodesHere = false;
@@ -168,6 +175,7 @@ void SkiaDisplayList::reset() {
 
     mDisplayList.reset();
 
+    mMeshes.clear();
     mMutableImages.clear();
     mVectorDrawables.clear();
     mAnimatedImages.clear();
