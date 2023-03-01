@@ -877,6 +877,10 @@ public final class SystemServiceRegistry {
             @Override
             public VirtualDeviceManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
+                if (!ctx.getPackageManager().hasSystemFeature(
+                        PackageManager.FEATURE_COMPANION_DEVICE_SETUP)) {
+                    return null;
+                }
                 IVirtualDeviceManager service = IVirtualDeviceManager.Stub.asInterface(
                         ServiceManager.getServiceOrThrow(Context.VIRTUAL_DEVICE_SERVICE));
                 return new VirtualDeviceManager(service, ctx.getOuterContext());
@@ -1648,6 +1652,7 @@ public final class SystemServiceRegistry {
                 case Context.ETHERNET_SERVICE:
                 case Context.CONTEXTHUB_SERVICE:
                 case Context.VIRTUALIZATION_SERVICE:
+                case Context.VIRTUAL_DEVICE_SERVICE:
                     return null;
             }
             Slog.wtf(TAG, "Manager wrapper not available: " + name);
