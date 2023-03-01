@@ -18,9 +18,9 @@ package android.net.wifi.sharedconnectivity.app;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetwork.NETWORK_TYPE_CELLULAR;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
-import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -56,9 +56,11 @@ import java.util.concurrent.Executor;
 @SmallTest
 public class SharedConnectivityManagerTest {
     private static final long DEVICE_ID = 11L;
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder()
+                    .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName(
+                            "TEST_MODEL")
+                    .setConnectionStrength(2).setBatteryPercentage(50).build();
     private static final int NETWORK_TYPE = NETWORK_TYPE_CELLULAR;
     private static final String NETWORK_NAME = "TEST_NETWORK";
     private static final String HOTSPOT_SSID = "TEST_SSID";
@@ -72,13 +74,16 @@ public class SharedConnectivityManagerTest {
     private static final String SERVICE_INTENT_ACTION = "TEST_INTENT_ACTION";
 
 
-    @Mock Context mContext;
+    @Mock
+    Context mContext;
     @Mock
     ISharedConnectivityService mService;
-    @Mock Executor mExecutor;
+    @Mock
+    Executor mExecutor;
     @Mock
     SharedConnectivityClientCallback mClientCallback;
-    @Mock Resources mResources;
+    @Mock
+    Resources mResources;
     @Mock
     ISharedConnectivityService.Stub mIBinder;
 
@@ -284,69 +289,69 @@ public class SharedConnectivityManagerTest {
     }
 
     /**
-     * Verifies connectTetherNetwork behavior.
+     * Verifies connectHotspotNetwork behavior.
      */
     @Test
-    public void connectTetherNetwork_serviceNotConnected_shouldFail() {
-        TetherNetwork network = buildTetherNetwork();
+    public void connectHotspotNetwork_serviceNotConnected_shouldFail() {
+        HotspotNetwork network = buildHotspotNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertThat(manager.connectTetherNetwork(network)).isFalse();
+        assertThat(manager.connectHotspotNetwork(network)).isFalse();
     }
 
     @Test
-    public void connectTetherNetwork() throws RemoteException {
-        TetherNetwork network = buildTetherNetwork();
+    public void connectHotspotNetwork() throws RemoteException {
+        HotspotNetwork network = buildHotspotNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
 
-        manager.connectTetherNetwork(network);
+        manager.connectHotspotNetwork(network);
 
-        verify(mService).connectTetherNetwork(network);
+        verify(mService).connectHotspotNetwork(network);
     }
 
     @Test
-    public void connectTetherNetwork_remoteException_shouldFail() throws RemoteException {
-        TetherNetwork network = buildTetherNetwork();
+    public void connectHotspotNetwork_remoteException_shouldFail() throws RemoteException {
+        HotspotNetwork network = buildHotspotNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
-        doThrow(new RemoteException()).when(mService).connectTetherNetwork(network);
+        doThrow(new RemoteException()).when(mService).connectHotspotNetwork(network);
 
-        assertThat(manager.connectTetherNetwork(network)).isFalse();
+        assertThat(manager.connectHotspotNetwork(network)).isFalse();
     }
 
     /**
-     * Verifies disconnectTetherNetwork behavior.
+     * Verifies disconnectHotspotNetwork behavior.
      */
     @Test
-    public void disconnectTetherNetwork_serviceNotConnected_shouldFail() {
-        TetherNetwork network = buildTetherNetwork();
+    public void disconnectHotspotNetwork_serviceNotConnected_shouldFail() {
+        HotspotNetwork network = buildHotspotNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertThat(manager.disconnectTetherNetwork(network)).isFalse();
+        assertThat(manager.disconnectHotspotNetwork(network)).isFalse();
     }
 
     @Test
-    public void disconnectTetherNetwork() throws RemoteException {
-        TetherNetwork network = buildTetherNetwork();
+    public void disconnectHotspotNetwork() throws RemoteException {
+        HotspotNetwork network = buildHotspotNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
 
-        manager.disconnectTetherNetwork(network);
+        manager.disconnectHotspotNetwork(network);
 
-        verify(mService).disconnectTetherNetwork(network);
+        verify(mService).disconnectHotspotNetwork(network);
     }
 
     @Test
-    public void disconnectTetherNetwork_remoteException_shouldFail() throws RemoteException {
-        TetherNetwork network = buildTetherNetwork();
+    public void disconnectHotspotNetwork_remoteException_shouldFail() throws RemoteException {
+        HotspotNetwork network = buildHotspotNetwork();
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
-        doThrow(new RemoteException()).when(mService).disconnectTetherNetwork(any());
+        doThrow(new RemoteException()).when(mService).disconnectHotspotNetwork(any());
 
-        assertThat(manager.disconnectTetherNetwork(network)).isFalse();
+        assertThat(manager.disconnectHotspotNetwork(network)).isFalse();
     }
 
     /**
@@ -419,7 +424,7 @@ public class SharedConnectivityManagerTest {
      * Verify getters.
      */
     @Test
-    public void getTetherNetworks_serviceNotConnected_shouldReturnEmptyList() {
+    public void getHotspotNetworks_serviceNotConnected_shouldReturnEmptyList() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
@@ -427,22 +432,22 @@ public class SharedConnectivityManagerTest {
     }
 
     @Test
-    public void getTetherNetworks_remoteException_shouldReturnEmptyList() throws RemoteException {
+    public void getHotspotNetworks_remoteException_shouldReturnEmptyList() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
-        doThrow(new RemoteException()).when(mService).getTetherNetworks();
+        doThrow(new RemoteException()).when(mService).getHotspotNetworks();
 
         assertThat(manager.getKnownNetworks()).isEmpty();
     }
 
     @Test
-    public void getTetherNetworks_shouldReturnNetworksList() throws RemoteException {
+    public void getHotspotNetworks_shouldReturnNetworksList() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
-        List<TetherNetwork> networks = List.of(buildTetherNetwork());
+        List<HotspotNetwork> networks = List.of(buildHotspotNetwork());
         manager.setService(mService);
-        when(mService.getTetherNetworks()).thenReturn(networks);
+        when(mService.getHotspotNetworks()).thenReturn(networks);
 
-        assertThat(manager.getTetherNetworks()).containsExactly(buildTetherNetwork());
+        assertThat(manager.getHotspotNetworks()).containsExactly(buildHotspotNetwork());
     }
 
     @Test
@@ -502,35 +507,35 @@ public class SharedConnectivityManagerTest {
     }
 
     @Test
-    public void getTetherNetworkConnectionStatus_serviceNotConnected_shouldReturnNull()
+    public void getHotspotNetworkConnectionStatus_serviceNotConnected_shouldReturnNull()
             throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertThat(manager.getTetherNetworkConnectionStatus()).isNull();
+        assertThat(manager.getHotspotNetworkConnectionStatus()).isNull();
     }
 
     @Test
-    public void getTetherNetworkConnectionStatus_remoteException_shouldReturnNull()
+    public void getHotspotNetworkConnectionStatus_remoteException_shouldReturnNull()
             throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
-        doThrow(new RemoteException()).when(mService).getTetherNetworkConnectionStatus();
+        doThrow(new RemoteException()).when(mService).getHotspotNetworkConnectionStatus();
 
-        assertThat(manager.getTetherNetworkConnectionStatus()).isNull();
+        assertThat(manager.getHotspotNetworkConnectionStatus()).isNull();
     }
 
     @Test
-    public void getTetherNetworkConnectionStatus_serviceConnected_shouldReturnStatus()
+    public void getHotspotNetworkConnectionStatus_serviceConnected_shouldReturnStatus()
             throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
-        TetherNetworkConnectionStatus status = new TetherNetworkConnectionStatus.Builder()
-                .setStatus(TetherNetworkConnectionStatus.CONNECTION_STATUS_ENABLING_HOTSPOT)
+        HotspotNetworkConnectionStatus status = new HotspotNetworkConnectionStatus.Builder()
+                .setStatus(HotspotNetworkConnectionStatus.CONNECTION_STATUS_ENABLING_HOTSPOT)
                 .setExtras(new Bundle()).build();
         manager.setService(mService);
-        when(mService.getTetherNetworkConnectionStatus()).thenReturn(status);
+        when(mService.getHotspotNetworkConnectionStatus()).thenReturn(status);
 
-        assertThat(manager.getTetherNetworkConnectionStatus()).isEqualTo(status);
+        assertThat(manager.getHotspotNetworkConnectionStatus()).isEqualTo(status);
     }
 
     @Test
@@ -571,11 +576,11 @@ public class SharedConnectivityManagerTest {
                 .thenReturn(SERVICE_PACKAGE_NAME, SERVICE_INTENT_ACTION);
     }
 
-    private TetherNetwork buildTetherNetwork() {
-        TetherNetwork.Builder builder =  new TetherNetwork.Builder()
+    private HotspotNetwork buildHotspotNetwork() {
+        HotspotNetwork.Builder builder = new HotspotNetwork.Builder()
                 .setDeviceId(DEVICE_ID)
-                .setDeviceInfo(DEVICE_INFO)
-                .setNetworkType(NETWORK_TYPE)
+                .setNetworkProviderInfo(NETWORK_PROVIDER_INFO)
+                .setHostNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
                 .setHotspotSsid(HOTSPOT_SSID);
         Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(builder::addHotspotSecurityType);
@@ -583,8 +588,8 @@ public class SharedConnectivityManagerTest {
     }
 
     private KnownNetwork buildKnownNetwork() {
-        KnownNetwork.Builder builder =  new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
-                .setSsid(SSID).setDeviceInfo(DEVICE_INFO);
+        KnownNetwork.Builder builder = new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
+                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
         Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
         return builder.build();
     }
