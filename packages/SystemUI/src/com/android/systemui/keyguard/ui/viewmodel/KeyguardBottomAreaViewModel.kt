@@ -135,7 +135,7 @@ constructor(
      *
      * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
      * @param shouldHighlightSelectedAffordance Whether the selected quick affordance should be
-     * highlighted (while all others are dimmed to make the selected one stand out).
+     *   highlighted (while all others are dimmed to make the selected one stand out).
      */
     fun enablePreviewMode(
         initiallySelectedSlotId: String?,

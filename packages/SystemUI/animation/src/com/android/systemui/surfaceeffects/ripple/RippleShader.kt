@@ -25,7 +25,6 @@ import com.android.systemui.surfaceeffects.shaderutil.ShaderUtilLibrary
 
 /**
  * Shader class that renders an expanding ripple effect. The ripple contains three elements:
- *
  * 1. an expanding filled [RippleShape] that appears in the beginning and quickly fades away
  * 2. an expanding ring that appears throughout the effect
  * 3. an expanding ring-shaped area that reveals noise over #2.
@@ -311,6 +310,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
      * Parameters used for fade in and outs of the ripple.
      *
      * <p>Note that all the fade in/ outs are "linear" progression.
+     *
      * ```
      *          (opacity)
      *          1
@@ -325,6 +325,7 @@ class RippleShader(rippleShape: RippleShape = RippleShape.CIRCLE) :
      *               fadeIn        fadeOut
      *               Start & End   Start & End
      * ```
+     *
      * <p>If no fade in/ out is needed, set [fadeInStart] and [fadeInEnd] to 0; [fadeOutStart] and
      * [fadeOutEnd] to 1.
      */

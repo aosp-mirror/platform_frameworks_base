@@ -184,6 +184,7 @@ constructor(
 
     /**
      * Ends the dream content and dream overlay animations, if they're currently running.
+     *
      * @see [AnimatorSet.end]
      */
     fun endAnimations() {
