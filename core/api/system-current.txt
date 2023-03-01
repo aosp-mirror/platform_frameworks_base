@@ -2363,6 +2363,8 @@ package android.app.search {
     method @NonNull public String getTargetId();
     method @NonNull public java.util.List<java.lang.String> getTargetIds();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_DELETE = 9; // 0x9
+    field public static final int ACTION_DISMISS = 10; // 0xa
     field public static final int ACTION_DRAGNDROP = 7; // 0x7
     field public static final int ACTION_LAUNCH_KEYBOARD_FOCUS = 6; // 0x6
     field public static final int ACTION_LAUNCH_TOUCH = 5; // 0x5
