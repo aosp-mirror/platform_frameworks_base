@@ -886,7 +886,7 @@
         <item name="android:textColor">@color/control_primary_text</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:minHeight">@dimen/control_menu_item_min_height</item>
+        <item name="android:minHeight">@dimen/control_menu_item_height</item>
     </style>
 
     <style name="Control.Spinner">
