@@ -3747,6 +3747,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void notifyBiometricAuthModeChanged() {
         mDozeServiceHost.updateDozing();
+        if (mBiometricUnlockController.getMode()
+                == BiometricUnlockController.MODE_DISMISS_BOUNCER) {
+            // Don't update the scrim controller at this time, in favor of the transition repository
+            // updating the scrim
+            return;
+        }
         updateScrimController();
     }
 
