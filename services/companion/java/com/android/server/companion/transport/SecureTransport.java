@@ -21,8 +21,8 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
-import com.android.server.companion.securechannel.AttestationVerifier;
 import com.android.server.companion.securechannel.SecureChannel;
+import com.android.server.companion.transport.CompanionTransportManager.Listener;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -37,15 +37,12 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
 
     private final BlockingQueue<byte[]> mRequestQueue = new ArrayBlockingQueue<>(100);
 
-    SecureTransport(int associationId, ParcelFileDescriptor fd, Context context) {
-        super(associationId, fd, context);
+    SecureTransport(int associationId,
+            ParcelFileDescriptor fd,
+            Context context,
+            Listener listener) {
+        super(associationId, fd, context, listener);
         mSecureChannel = new SecureChannel(mRemoteIn, mRemoteOut, this, context);
-    }
-
-    SecureTransport(int associationId, ParcelFileDescriptor fd, Context context,
-            byte[] preSharedKey, AttestationVerifier verifier) {
-        super(associationId, fd, context);
-        mSecureChannel = new SecureChannel(mRemoteIn, mRemoteOut, this, preSharedKey, verifier);
     }
 
     @Override
