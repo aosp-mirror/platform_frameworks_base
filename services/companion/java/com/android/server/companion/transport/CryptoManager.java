@@ -16,51 +16,51 @@
 
 package com.android.server.companion.transport;
 
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.util.Slog;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
- * This class uses Java Cryptography to encrypt and decrypt messages
+ * This class can be used to encrypt and decrypt bytes using Android Cryptography
  */
 public class CryptoManager {
 
     private static final String TAG = "CDM_CryptoManager";
-    private static final int SECRET_KEY_LENGTH = 32;
-    private static final String ALGORITHM = "AES";
-    private static final String TRANSFORMATION = "AES/CBC/PKCS7Padding";
 
-    private final byte[] mPreSharedKey;
-    private Cipher mEncryptCipher;
-    private Cipher mDecryptCipher;
+    private static final String KEY_STORE_ALIAS = "cdm_secret";
+    private static final String ALGORITHM = KeyProperties.KEY_ALGORITHM_AES;
+    private static final String BLOCK_MODE = KeyProperties.BLOCK_MODE_CBC;
+    private static final String PADDING = KeyProperties.ENCRYPTION_PADDING_PKCS7;
+    private static final String TRANSFORMATION = ALGORITHM + "/" + BLOCK_MODE + "/" + PADDING;
 
-    private SecretKey mSecretKey;
+    private final KeyStore mKeyStore;
 
-    public CryptoManager(byte[] preSharedKey) {
-        if (preSharedKey == null) {
-            mPreSharedKey = Arrays.copyOf(new byte[0], SECRET_KEY_LENGTH);
-        } else {
-            mPreSharedKey = Arrays.copyOf(preSharedKey, SECRET_KEY_LENGTH);
-        }
-        mSecretKey = new SecretKeySpec(mPreSharedKey, ALGORITHM);
+    public CryptoManager() {
+        // Initialize KeyStore
         try {
-            mEncryptCipher = Cipher.getInstance(TRANSFORMATION);
-            mEncryptCipher.init(Cipher.ENCRYPT_MODE, mSecretKey);
-            mDecryptCipher = Cipher.getInstance(TRANSFORMATION);
-        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException e) {
-            Slog.e(TAG, e.getMessage());
+            mKeyStore = KeyStore.getInstance("AndroidKeyStore");
+            mKeyStore.load(null);
+        } catch (KeyStoreException | IOException | NoSuchAlgorithmException
+                 | CertificateException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -69,19 +69,21 @@ public class CryptoManager {
      */
     public byte[] encrypt(byte[] input) {
         try {
-            if (mEncryptCipher == null) {
-                return null;
-            }
+            // Encrypt using Cipher
+            Cipher encryptCipher = Cipher.getInstance(TRANSFORMATION);
+            encryptCipher.init(Cipher.ENCRYPT_MODE, getKey());
+            byte[] encryptedBytes = encryptCipher.doFinal(input);
 
-            byte[] encryptedBytes = mEncryptCipher.doFinal(input);
+            // Write to bytes
             ByteBuffer buffer = ByteBuffer.allocate(
-                            4 + mEncryptCipher.getIV().length + 4 + encryptedBytes.length)
-                    .putInt(mEncryptCipher.getIV().length)
-                    .put(mEncryptCipher.getIV())
+                            4 + encryptCipher.getIV().length + 4 + encryptedBytes.length)
+                    .putInt(encryptCipher.getIV().length)
+                    .put(encryptCipher.getIV())
                     .putInt(encryptedBytes.length)
                     .put(encryptedBytes);
             return buffer.array();
-        } catch (IllegalBlockSizeException | BadPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
+                 | IllegalBlockSizeException | BadPaddingException e) {
             Slog.e(TAG, e.getMessage());
             return null;
         }
@@ -97,20 +99,45 @@ public class CryptoManager {
         byte[] encryptedBytes = new byte[buffer.getInt()];
         buffer.get(encryptedBytes);
         try {
-            mDecryptCipher.init(Cipher.DECRYPT_MODE, getKey(), new IvParameterSpec(iv));
-            return mDecryptCipher.doFinal(encryptedBytes);
-        } catch (InvalidKeyException | InvalidAlgorithmParameterException
-                 | IllegalBlockSizeException | BadPaddingException e) {
+            Cipher decryptCipher = Cipher.getInstance(TRANSFORMATION);
+            decryptCipher.init(Cipher.DECRYPT_MODE, getKey(), new IvParameterSpec(iv));
+            return decryptCipher.doFinal(encryptedBytes);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException
+                 | InvalidAlgorithmParameterException | IllegalBlockSizeException
+                 | BadPaddingException e) {
             Slog.e(TAG, e.getMessage());
             return null;
         }
     }
 
     private SecretKey getKey() {
-        if (mSecretKey != null) {
-            return mSecretKey;
+        try {
+            KeyStore.Entry keyEntry = mKeyStore.getEntry(KEY_STORE_ALIAS, null);
+            if (keyEntry instanceof KeyStore.SecretKeyEntry
+                    && ((KeyStore.SecretKeyEntry) keyEntry).getSecretKey() != null) {
+                return ((KeyStore.SecretKeyEntry) keyEntry).getSecretKey();
+            } else {
+                return createKey();
+            }
+        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
+            throw new RuntimeException(e);
         }
-        mSecretKey = new SecretKeySpec(mPreSharedKey, ALGORITHM);
-        return mSecretKey;
+    }
+
+    private SecretKey createKey() {
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
+            keyGenerator.init(
+                    new KeyGenParameterSpec.Builder(KEY_STORE_ALIAS,
+                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setBlockModes(BLOCK_MODE)
+                            .setEncryptionPaddings(PADDING)
+                            .setUserAuthenticationRequired(false)
+                            .setRandomizedEncryptionRequired(true)
+                            .build());
+            return keyGenerator.generateKey();
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

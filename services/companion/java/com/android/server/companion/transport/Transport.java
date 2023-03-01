@@ -25,28 +25,23 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.companion.transport.CompanionTransportManager.Listener;
 
 import libcore.util.EmptyArray;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * This class represents the channel established between two devices.
- */
-public abstract class Transport {
+abstract class Transport {
     protected static final String TAG = "CDM_CompanionTransport";
     protected static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    public static final int MESSAGE_REQUEST_PLATFORM_INFO = 0x63807086; // ?PFV
-    public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
+    static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
     static final int MESSAGE_RESPONSE_SUCCESS = 0x33838567; // !SUC
     static final int MESSAGE_RESPONSE_FAILURE = 0x33706573; // !FAI
@@ -54,24 +49,11 @@ public abstract class Transport {
     protected static final int HEADER_LENGTH = 12;
 
     protected final int mAssociationId;
-    protected final ParcelFileDescriptor mFd;
     protected final InputStream mRemoteIn;
     protected final OutputStream mRemoteOut;
     protected final Context mContext;
 
-    /** Message type -> Listener */
-    private final Map<Integer, Listener> mListeners;
-
-    /**
-     * Message listener
-     */
-    public interface Listener {
-        /**
-         * Called when a message is received
-         * @param data data content in the message
-         */
-        void onDataReceived(byte[] data);
-    }
+    private final Listener mListener;
 
     private static boolean isRequest(int message) {
         return (message & 0xFF000000) == 0x63000000;
@@ -86,36 +68,16 @@ public abstract class Transport {
             new SparseArray<>();
     protected final AtomicInteger mNextSequence = new AtomicInteger();
 
-    Transport(int associationId, ParcelFileDescriptor fd, Context context) {
-        mAssociationId = associationId;
-        mFd = fd;
-        mRemoteIn = new ParcelFileDescriptor.AutoCloseInputStream(fd);
-        mRemoteOut = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-        mContext = context;
-        mListeners = new HashMap<>();
-    }
-
-    /**
-     * Add a listener when a message is received for the message type
-     * @param message Message type
-     * @param listener Execute when a message with the type is received
-     */
-    public void addListener(int message, Listener listener) {
-        mListeners.put(message, listener);
-    }
-
-    public int getAssociationId() {
-        return mAssociationId;
-    }
-
-    protected ParcelFileDescriptor getFd() {
-        return mFd;
+    Transport(int associationId, ParcelFileDescriptor fd, Context context, Listener listener) {
+        this.mAssociationId = associationId;
+        this.mRemoteIn = new ParcelFileDescriptor.AutoCloseInputStream(fd);
+        this.mRemoteOut = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+        this.mContext = context;
+        this.mListener = listener;
     }
 
     public abstract void start();
     public abstract void stop();
-    protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
-            throws IOException;
 
     public Future<byte[]> requestForResponse(int message, byte[] data) {
         if (DEBUG) Slog.d(TAG, "Requesting for response");
@@ -136,6 +98,9 @@ public abstract class Transport {
 
         return pending;
     }
+
+    protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
+            throws IOException;
 
     protected final void handleMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException {
@@ -165,11 +130,6 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
                 break;
             }
-            case MESSAGE_REQUEST_PLATFORM_INFO: {
-                callback(message, data);
-                sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
-                break;
-            }
             case MESSAGE_REQUEST_PERMISSION_RESTORE: {
                 if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
                         && !Build.isDebuggable()) {
@@ -178,7 +138,7 @@ public abstract class Transport {
                     break;
                 }
                 try {
-                    callback(message, data);
+                    mListener.onRequestPermissionRestore(data);
                     sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to restore permissions");
@@ -191,12 +151,6 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_FAILURE, sequence, EmptyArray.BYTE);
                 break;
             }
-        }
-    }
-
-    private void callback(int message, byte[] data) {
-        if (mListeners.containsKey(message)) {
-            mListeners.get(message).onDataReceived(data);
         }
     }
 
