@@ -74,8 +74,10 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 import android.view.IWindowManager;
+import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ScreenCapture;
@@ -1133,13 +1135,24 @@ public class BubbleController implements ConfigurationChangeListener,
     /**
      * Performs a screenshot that may exclude the bubble layer, if one is present. The screenshot
      * can be access via the supplied {@link ScreenshotSync#get()} asynchronously.
-     *
-     * TODO(b/267324693): Implement the exclude layer functionality in screenshot.
      */
     public void getScreenshotExcludingBubble(int displayId,
             Pair<ScreenCaptureListener, ScreenshotSync> screenCaptureListener) {
         try {
-            mWmService.captureDisplay(displayId, null, screenCaptureListener.first);
+            ScreenCapture.CaptureArgs args = null;
+            if (mStackView != null) {
+                ViewRootImpl viewRoot = mStackView.getViewRootImpl();
+                if (viewRoot != null) {
+                    SurfaceControl bubbleLayer = viewRoot.getSurfaceControl();
+                    if (bubbleLayer != null) {
+                        args = new ScreenCapture.CaptureArgs.Builder<>()
+                                .setExcludeLayers(new SurfaceControl[] {bubbleLayer})
+                                .build();
+                    }
+                }
+            }
+
+            mWmService.captureDisplay(displayId, args, screenCaptureListener.first);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to capture screenshot");
         }
