@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.policy.RotationLockControllerImpl;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.wrapper.RotationPolicyWrapper;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -136,6 +137,12 @@ public class RotationLockTileTest extends SysuiTestCase {
         enableCameraBasedRotation();
 
         mLockTile.refreshState();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mLockTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

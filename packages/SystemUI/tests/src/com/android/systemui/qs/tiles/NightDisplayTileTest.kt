@@ -37,6 +37,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.LocationController
 import com.google.common.truth.Truth
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,32 +50,23 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class NightDisplayTileTest : SysuiTestCase() {
-    @Mock
-    private lateinit var mHost: QSHost
+    @Mock private lateinit var mHost: QSHost
 
-    @Mock
-    private lateinit var mMetricsLogger: MetricsLogger
+    @Mock private lateinit var mMetricsLogger: MetricsLogger
 
-    @Mock
-    private lateinit var mStatusBarStateController: StatusBarStateController
+    @Mock private lateinit var mStatusBarStateController: StatusBarStateController
 
-    @Mock
-    private lateinit var mActivityStarter: ActivityStarter
+    @Mock private lateinit var mActivityStarter: ActivityStarter
 
-    @Mock
-    private lateinit var mQsLogger: QSLogger
+    @Mock private lateinit var mQsLogger: QSLogger
 
-    @Mock
-    private lateinit var mLocationController: LocationController
+    @Mock private lateinit var mLocationController: LocationController
 
-    @Mock
-    private lateinit var mColorDisplayManager: ColorDisplayManager
+    @Mock private lateinit var mColorDisplayManager: ColorDisplayManager
 
-    @Mock
-    private lateinit var mNightDisplayListenerBuilder: NightDisplayListenerModule.Builder
+    @Mock private lateinit var mNightDisplayListenerBuilder: NightDisplayListenerModule.Builder
 
-    @Mock
-    private lateinit var mNightDisplayListener: NightDisplayListener
+    @Mock private lateinit var mNightDisplayListener: NightDisplayListener
 
     private lateinit var mTestableLooper: TestableLooper
     private lateinit var mTile: NightDisplayTile
@@ -88,24 +80,30 @@ class NightDisplayTileTest : SysuiTestCase() {
         whenever(mHost.context).thenReturn(mContext)
         whenever(mHost.uiEventLogger).thenReturn(mUiEventLogger)
         whenever(mHost.userContext).thenReturn(mContext)
-        whenever(mNightDisplayListenerBuilder.setUser(anyInt())).thenReturn(
-            mNightDisplayListenerBuilder
-        )
+        whenever(mNightDisplayListenerBuilder.setUser(anyInt()))
+            .thenReturn(mNightDisplayListenerBuilder)
         whenever(mNightDisplayListenerBuilder.build()).thenReturn(mNightDisplayListener)
 
-        mTile = NightDisplayTile(
-            mHost,
-            mTestableLooper.looper,
-            Handler(mTestableLooper.looper),
-            FalsingManagerFake(),
-            mMetricsLogger,
-            mStatusBarStateController,
-            mActivityStarter,
-            mQsLogger,
-            mLocationController,
-            mColorDisplayManager,
-            mNightDisplayListenerBuilder
-        )
+        mTile =
+            NightDisplayTile(
+                mHost,
+                mTestableLooper.looper,
+                Handler(mTestableLooper.looper),
+                FalsingManagerFake(),
+                mMetricsLogger,
+                mStatusBarStateController,
+                mActivityStarter,
+                mQsLogger,
+                mLocationController,
+                mColorDisplayManager,
+                mNightDisplayListenerBuilder
+            )
+    }
+
+    @After
+    fun tearDown() {
+        mTile.destroy()
+        mTestableLooper.processAllMessages()
     }
 
     @Test

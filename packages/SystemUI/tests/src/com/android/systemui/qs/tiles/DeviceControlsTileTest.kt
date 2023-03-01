@@ -67,6 +67,7 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import java.util.Optional
+import org.junit.After
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -127,6 +128,12 @@ class DeviceControlsTileTest : SysuiTestCase() {
         setupControlsComponent()
 
         tile = createTile()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     private fun setupControlsComponent() {
