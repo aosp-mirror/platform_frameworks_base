@@ -211,6 +211,16 @@ public class SoundTriggerHalEnforcer implements ISoundTriggerHal {
         mUnderlying.flushCallbacks();
     }
 
+    @Override
+    public void clientAttached(IBinder binder) {
+        mUnderlying.clientAttached(binder);
+    }
+
+    @Override
+    public void clientDetached(IBinder binder) {
+        mUnderlying.clientDetached(binder);
+    }
+
     private RuntimeException handleException(RuntimeException e) {
         if (e instanceof RecoverableException) {
             throw e;
