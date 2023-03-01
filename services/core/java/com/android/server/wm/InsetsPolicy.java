@@ -344,6 +344,19 @@ class InsetsPolicy {
             }
         }
 
+        if (!attrs.isFullscreen() || attrs.getFitInsetsTypes() != 0) {
+            if (state == originalState) {
+                state = new InsetsState(originalState);
+            }
+            // Explicitly exclude floating windows from receiving caption insets. This is because we
+            // hard code caption insets for windows due to a synchronization issue that leads to
+            // flickering that bypasses insets frame calculation, which consequently needs us to
+            // remove caption insets from floating windows.
+            // TODO(b/254128050): Remove this workaround after we find a way to update window frames
+            //  and caption insets frames simultaneously.
+            state.removeSource(InsetsState.ITYPE_CAPTION_BAR);
+        }
+
         final SparseArray<WindowContainerInsetsSourceProvider> providers =
                 mStateController.getSourceProviders();
         final int windowType = attrs.type;
