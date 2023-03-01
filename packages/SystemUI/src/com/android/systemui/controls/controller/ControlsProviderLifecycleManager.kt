@@ -84,7 +84,7 @@ class ControlsProviderLifecycleManager(
         private val BIND_FLAGS_PANEL = Context.BIND_AUTO_CREATE or Context.BIND_NOT_PERCEPTIBLE
     }
 
-    private val intent = Intent().apply {
+    private val intent = Intent(ControlsProviderService.SERVICE_CONTROLS).apply {
         component = componentName
         putExtra(CALLBACK_BUNDLE, Bundle().apply {
             putBinder(CALLBACK_TOKEN, token)
