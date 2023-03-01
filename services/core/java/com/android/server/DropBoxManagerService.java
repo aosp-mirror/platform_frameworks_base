@@ -79,6 +79,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPOutputStream;
@@ -104,6 +105,10 @@ public final class DropBoxManagerService extends SystemService {
 
     // Size beyond which to force-compress newly added entries.
     private static final long COMPRESS_THRESHOLD_BYTES = 16_384;
+
+    // Tags that we should drop by default.
+    private static final List<String> DISABLED_BY_DEFAULT_TAGS =
+            List.of("data_app_wtf", "system_app_wtf", "system_server_wtf");
 
     // TODO: This implementation currently uses one file per entry, which is
     // inefficient for smallish entries -- consider using a single queue file
@@ -549,8 +554,13 @@ public final class DropBoxManagerService extends SystemService {
     public boolean isTagEnabled(String tag) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return !"disabled".equals(Settings.Global.getString(
+            if (DISABLED_BY_DEFAULT_TAGS.contains(tag)) {
+                return "enabled".equals(Settings.Global.getString(
                     mContentResolver, Settings.Global.DROPBOX_TAG_PREFIX + tag));
+            } else {
+                return !"disabled".equals(Settings.Global.getString(
+                    mContentResolver, Settings.Global.DROPBOX_TAG_PREFIX + tag));
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }

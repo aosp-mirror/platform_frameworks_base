@@ -357,11 +357,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         mImeDispatcher = imeDispatcher;
     }
 
-    /** Returns true if a non-null {@link ImeOnBackInvokedDispatcher} has been set. **/
-    public boolean hasImeOnBackInvokedDispatcher() {
-        return mImeDispatcher != null;
-    }
-
     /**
      * Class used to check whether a callback can be registered or not. This is meant to be
      * shared with {@link ProxyOnBackInvokedDispatcher} which needs to do the same checks.

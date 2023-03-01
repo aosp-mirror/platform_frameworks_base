@@ -389,6 +389,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         @Override
         public void getTypeAnonymousAsync(Uri uri, RemoteCallback callback) {
+            uri = validateIncomingUri(uri);
+            uri = maybeGetUriWithoutUserId(uri);
             final Bundle result = new Bundle();
             try {
                 result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getTypeAnonymous(uri));

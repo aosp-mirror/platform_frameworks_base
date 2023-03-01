@@ -42,6 +42,10 @@ enum SatelliteModemState {
      */
     SATELLITE_MODEM_STATE_OFF = 4,
     /**
+     * Satellite modem is unavailable.
+     */
+    SATELLITE_MODEM_STATE_UNAVAILABLE = 5,
+    /**
      * Satellite modem state is unknown. This generic modem state should be used only when the
      * modem state cannot be mapped to other specific modem states.
      */

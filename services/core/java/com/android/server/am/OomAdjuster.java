@@ -207,7 +207,8 @@ public class OomAdjuster {
                 return AppProtoEnums.OOM_ADJ_REASON_PROCESS_BEGIN;
             case OOM_ADJ_REASON_PROCESS_END:
                 return AppProtoEnums.OOM_ADJ_REASON_PROCESS_END;
-            case OOM_ADJ_REASON_SHORT_FGS_TIMEOUT: // TODO(short-service) add value to AppProtoEnums
+            case OOM_ADJ_REASON_SHORT_FGS_TIMEOUT:
+                return AppProtoEnums.OOM_ADJ_REASON_SHORT_FGS_TIMEOUT;
             default:
                 return AppProtoEnums.OOM_ADJ_REASON_UNKNOWN_TO_PROTO;
         }

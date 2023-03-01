@@ -989,24 +989,6 @@ public final class DisplayManager {
 
     /**
      * Creates a virtual display.
-     *
-     * @see #createVirtualDisplay(String, int, int, int, float, Surface, int,
-     * Handler, VirtualDisplay.Callback)
-     */
-    @Nullable
-    public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            @IntRange(from = 1) int width,
-            @IntRange(from = 1) int height,
-            @IntRange(from = 1) int densityDpi,
-            float requestedRefreshRate,
-            @Nullable Surface surface,
-            @VirtualDisplayFlag int flags) {
-        return createVirtualDisplay(name, width, height, densityDpi, requestedRefreshRate,
-                surface, flags, null, null);
-    }
-
-    /**
-     * Creates a virtual display.
      * <p>
      * The content of a virtual display is rendered to a {@link Surface} provided
      * by the application.
@@ -1056,8 +1038,23 @@ public final class DisplayManager {
             @VirtualDisplayFlag int flags,
             @Nullable VirtualDisplay.Callback callback,
             @Nullable Handler handler) {
-        return createVirtualDisplay(name, width, height, densityDpi, 0.0f, surface,
-                flags, handler, callback);
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(name, width, height, densityDpi);
+        builder.setFlags(flags);
+        if (surface != null) {
+            builder.setSurface(surface);
+        }
+        return createVirtualDisplay(builder.build(), handler, callback);
+    }
+
+    /**
+     * Creates a virtual display.
+     *
+     * @see #createVirtualDisplay(VirtualDisplayConfig, Handler, VirtualDisplay.Callback)
+     */
+    @Nullable
+    public VirtualDisplay createVirtualDisplay(@NonNull VirtualDisplayConfig config) {
+        return createVirtualDisplay(config, /*handler=*/null, /*callback=*/null);
     }
 
     /**
@@ -1084,21 +1081,7 @@ public final class DisplayManager {
      * turning off the screen.
      * </p>
      *
-     * @param name The name of the virtual display, must be non-empty.
-     * @param width The width of the virtual display in pixels, must be greater than 0.
-     * @param height The height of the virtual display in pixels, must be greater than 0.
-     * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
-     * @param requestedRefreshRate The requested refresh rate in frames per second.
-     * For best results, specify a divisor of the physical refresh rate, e.g., 30 or 60 on
-     * 120hz display. If an arbitrary refresh rate is specified, the rate will be rounded
-     * up or down to a divisor of the physical display. If 0 is specified, the virtual
-     * display is refreshed at the physical display refresh rate.
-     * @param surface The surface to which the content of the virtual display should
-     * be rendered, or null if there is none initially.
-     * @param flags A combination of virtual display flags:
-     * {@link #VIRTUAL_DISPLAY_FLAG_PUBLIC}, {@link #VIRTUAL_DISPLAY_FLAG_PRESENTATION},
-     * {@link #VIRTUAL_DISPLAY_FLAG_SECURE}, {@link #VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
-     * or {@link #VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}.
+     * @param config The configuration of the virtual display, must be non-null.
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
      * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
@@ -1106,33 +1089,14 @@ public final class DisplayManager {
      * not create the virtual display.
      *
      * @throws SecurityException if the caller does not have permission to create
-     * a virtual display with the specified flags.
+     * a virtual display with flags specified in the configuration.
      */
     @Nullable
-    public VirtualDisplay createVirtualDisplay(@NonNull String name,
-            @IntRange(from = 1) int width,
-            @IntRange(from = 1) int height,
-            @IntRange(from = 1) int densityDpi,
-            float requestedRefreshRate,
-            @Nullable Surface surface,
-            @VirtualDisplayFlag int flags,
+    public VirtualDisplay createVirtualDisplay(
+            @NonNull VirtualDisplayConfig config,
             @Nullable Handler handler,
             @Nullable VirtualDisplay.Callback callback) {
-        if (!ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE && requestedRefreshRate != 0.0f) {
-            Slog.e(TAG, "Please turn on ENABLE_VIRTUAL_DISPLAY_REFRESH_RATE to use the new api");
-            return null;
-        }
-
-        final VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(name, width,
-                height, densityDpi);
-        builder.setFlags(flags);
-        if (surface != null) {
-            builder.setSurface(surface);
-        }
-        if (requestedRefreshRate != 0.0f) {
-            builder.setRequestedRefreshRate(requestedRefreshRate);
-        }
-        return createVirtualDisplay(null /* projection */, builder.build(), callback, handler,
+        return createVirtualDisplay(null /* projection */, config, callback, handler,
                 null /* windowContext */);
     }
 

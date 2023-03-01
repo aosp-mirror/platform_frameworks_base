@@ -28,6 +28,7 @@
 #include <log/log.h>
 
 #include <cstdlib>
+#include <utility>
 #include <vector>
 
 #include "CanvasTransform.h"
@@ -40,6 +41,7 @@
 
 enum class SkBlendMode;
 class SkRRect;
+class Mesh;
 
 namespace android {
 namespace uirenderer {
@@ -65,6 +67,18 @@ struct DisplayListOp {
 };
 
 static_assert(sizeof(DisplayListOp) == 4);
+
+class DrawMeshPayload {
+public:
+    explicit DrawMeshPayload(const SkMesh* mesh) : mesh(mesh) {}
+    explicit DrawMeshPayload(const Mesh* meshWrapper) : meshWrapper(meshWrapper) {}
+
+    [[nodiscard]] const SkMesh& getSkMesh() const;
+
+private:
+    const SkMesh* mesh = nullptr;
+    const Mesh* meshWrapper = nullptr;
+};
 
 struct DrawImagePayload {
     explicit DrawImagePayload(Bitmap& bitmap)
@@ -143,6 +157,7 @@ private:
     void drawDRRect(const SkRRect&, const SkRRect&, const SkPaint&);
 
     void drawMesh(const SkMesh&, const sk_sp<SkBlender>&, const SkPaint&);
+    void drawMesh(const Mesh&, const sk_sp<SkBlender>&, const SkPaint&);
 
     void drawAnnotation(const SkRect&, const char*, SkData*);
     void drawDrawable(SkDrawable*, const SkMatrix*);
@@ -247,6 +262,7 @@ public:
                      SkBlendMode, const SkSamplingOptions&, const SkRect*, const SkPaint*) override;
     void onDrawShadowRec(const SkPath&, const SkDrawShadowRec&) override;
 
+    void drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint);
     void drawVectorDrawable(VectorDrawableRoot* tree);
     void drawWebView(skiapipeline::FunctorDrawable*);
 
