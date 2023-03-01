@@ -37,6 +37,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_IN
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OPEN_ALL_APPS;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_QUICK_SWITCH;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_UNLOCK_ENTRANCE_ANIMATION;
+import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_LAUNCH_CAMERA;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_OCCLUSION;
 import static com.android.internal.util.FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_PASSWORD_APPEAR;
@@ -240,6 +241,7 @@ public class InteractionJankMonitor {
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE = 67;
     public static final int CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME = 68;
     public static final int CUJ_IME_INSETS_ANIMATION = 69;
+    public static final int CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION = 70;
 
     private static final int NO_STATSD_LOGGING = -1;
 
@@ -318,6 +320,7 @@ public class InteractionJankMonitor {
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_SWIPE,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
             UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__IME_INSETS_ANIMATION,
+            UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LOCKSCREEN_CLOCK_MOVE_ANIMATION,
     };
 
     private static class InstanceHolder {
@@ -412,6 +415,7 @@ public class InteractionJankMonitor {
             CUJ_LAUNCHER_CLOSE_ALL_APPS_SWIPE,
             CUJ_LAUNCHER_CLOSE_ALL_APPS_TO_HOME,
             CUJ_IME_INSETS_ANIMATION,
+            CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {
@@ -946,6 +950,8 @@ public class InteractionJankMonitor {
                 return "LAUNCHER_CLOSE_ALL_APPS_TO_HOME";
             case CUJ_IME_INSETS_ANIMATION:
                 return "IME_INSETS_ANIMATION";
+            case CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION:
+                return "CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION";
         }
         return "UNKNOWN";
     }
