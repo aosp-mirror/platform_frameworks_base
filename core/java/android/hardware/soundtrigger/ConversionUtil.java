@@ -34,10 +34,12 @@ import android.media.soundtrigger.RecognitionMode;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.ParcelFileDescriptor;
+import android.system.ErrnoException;
 import android.os.SharedMemory;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.UUID;
 
 /** @hide */
@@ -140,6 +142,14 @@ public class ConversionUtil {
         return aidlPhrase;
     }
 
+    public static SoundTrigger.Keyphrase aidl2apiPhrase(Phrase aidlPhrase) {
+        return new SoundTrigger.Keyphrase(aidlPhrase.id,
+                aidl2apiRecognitionModes(aidlPhrase.recognitionModes),
+                new Locale.Builder().setLanguageTag(aidlPhrase.locale).build(),
+                aidlPhrase.text,
+                Arrays.copyOf(aidlPhrase.users, aidlPhrase.users.length));
+    }
+
     public static RecognitionConfig api2aidlRecognitionConfig(
             SoundTrigger.RecognitionConfig apiConfig) {
         RecognitionConfig aidlConfig = new RecognitionConfig();
@@ -154,6 +164,21 @@ public class ConversionUtil {
         aidlConfig.data = Arrays.copyOf(apiConfig.data, apiConfig.data.length);
         aidlConfig.audioCapabilities = api2aidlAudioCapabilities(apiConfig.audioCapabilities);
         return aidlConfig;
+    }
+
+    public static SoundTrigger.RecognitionConfig aidl2apiRecognitionConfig(
+            RecognitionConfig aidlConfig) {
+        var keyphrases =
+            new SoundTrigger.KeyphraseRecognitionExtra[aidlConfig.phraseRecognitionExtras.length];
+        int i = 0;
+        for (var extras : aidlConfig.phraseRecognitionExtras) {
+            keyphrases[i++] = aidl2apiPhraseRecognitionExtra(extras);
+        }
+        return new SoundTrigger.RecognitionConfig(aidlConfig.captureRequested,
+                false /** allowMultipleTriggers **/,
+                keyphrases,
+                Arrays.copyOf(aidlConfig.data, aidlConfig.data.length),
+                aidl2apiAudioCapabilities(aidlConfig.audioCapabilities));
     }
 
     public static PhraseRecognitionExtra api2aidlPhraseRecognitionExtra(
@@ -281,7 +306,7 @@ public class ConversionUtil {
         return result;
     }
 
-    private static @Nullable ParcelFileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
+    public static @Nullable ParcelFileDescriptor byteArrayToSharedMemory(byte[] data, String name) {
         if (data.length == 0) {
             return null;
         }
@@ -295,6 +320,21 @@ public class ConversionUtil {
             shmem.close();
             return fd;
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static byte[] sharedMemoryToByteArray(@Nullable ParcelFileDescriptor pfd, int size) {
+        if (pfd == null || size == 0) {
+            return new byte[0];
+        }
+        try (SharedMemory mem = SharedMemory.fromFileDescriptor(pfd)) {
+            ByteBuffer buffer = mem.mapReadOnly();
+            byte[] data = new byte[(size > mem.getSize()) ? mem.getSize() : size];
+            buffer.get(data);
+            mem.unmap(buffer);
+            return data;
+        } catch (ErrnoException e) {
             throw new RuntimeException(e);
         }
     }
