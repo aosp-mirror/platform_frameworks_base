@@ -74,6 +74,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private boolean mDesktopActive;
     private AdditionalWindow mHandleMenu;
     private final int mHandleMenuWidthId = R.dimen.freeform_decor_caption_menu_width;
+    private final int mHandleMenuShadowRadiusId = R.dimen.caption_menu_shadow_radius;
+    private final int mHandleMenuCornerRadiusId = R.dimen.caption_menu_corner_radius;
     private PointF mHandleMenuPosition = new PointF();
 
     DesktopModeWindowDecoration(
@@ -353,19 +355,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .windowConfiguration.getBounds().width();
         final int menuWidth = loadDimensionPixelSize(resources, mHandleMenuWidthId);
         final int menuHeight = loadDimensionPixelSize(resources, mCaptionMenuHeightId);
-
-        // Elevation gives the appearance of a changed x/y coordinate; this is to fix that
-        int elevationOffset = 2 * loadDimensionPixelSize(resources,
-                R.dimen.caption_menu_elevation);
+        final int shadowRadius = loadDimensionPixelSize(resources, mHandleMenuShadowRadiusId);
+        final int cornerRadius = loadDimensionPixelSize(resources, mHandleMenuCornerRadiusId);
 
         final int x = mRelayoutParams.mCaptionX + (captionWidth / 2) - (menuWidth / 2)
-                - mResult.mDecorContainerOffsetX - elevationOffset;
-        final int y =
-                mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY - elevationOffset;
+                - mResult.mDecorContainerOffsetX;
+        final int y = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY;
         mHandleMenuPosition.set(x, y);
         String namePrefix = "Caption Menu";
         mHandleMenu = addWindow(R.layout.desktop_mode_decor_handle_menu, namePrefix, t, x, y,
-                menuWidth, menuHeight, 2 * elevationOffset);
+                menuWidth, menuHeight, shadowRadius, cornerRadius);
         mSyncQueue.runInSync(transaction -> {
             transaction.merge(t);
             t.close();
