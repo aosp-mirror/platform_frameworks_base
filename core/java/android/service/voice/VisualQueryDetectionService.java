@@ -49,7 +49,7 @@ import java.util.function.IntConsumer;
  * {@link VoiceInteractionService#createVisualQueryDetector(PersistableBundle, SharedMemory,
  * Executor, VisualQueryDetector.Callback)} is called, the system will bind the application's
  * {@link VisualQueryDetectionService}. When requested from {@link VoiceInteractionService}, the
- * system calls into the {@link VisualQueryDetectionService#onStartDetection(Callback)} to enable
+ * system calls into the {@link VisualQueryDetectionService#onStartDetection()} to enable
  * detection. This method MUST be implemented to support visual query detection service.
  *
  * Note: Methods in this class may be called concurrently.
@@ -78,6 +78,8 @@ public abstract class VisualQueryDetectionService extends Service
     /** @hide */
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
+    private IDetectorSessionVisualQueryDetectionCallback mRemoteCallback = null;
+
 
     private final ISandboxedDetectionService mInterface = new ISandboxedDetectionService.Stub() {
 
@@ -85,7 +87,8 @@ public abstract class VisualQueryDetectionService extends Service
         public void detectWithVisualSignals(
                 IDetectorSessionVisualQueryDetectionCallback callback) {
             Log.v(TAG, "#detectWithVisualSignals");
-            VisualQueryDetectionService.this.onStartDetection(new Callback(callback));
+            mRemoteCallback = callback;
+            VisualQueryDetectionService.this.onStartDetection();
         }
 
         @Override
@@ -178,16 +181,41 @@ public abstract class VisualQueryDetectionService extends Service
 
     /**
      * This is called after the service is set up and the client should open the camera and the
-     * microphone to start recognition.
-     *
-     * Called when the {@link VoiceInteractionService} requests that this service
-     * {@link HotwordDetector#startRecognition()} start recognition on audio coming directly
+     * microphone to start recognition. When the {@link VoiceInteractionService} requests that this
+     * service {@link HotwordDetector#startRecognition()} start recognition on audio coming directly
      * from the device microphone.
-     *
-     * @param callback The callback to use for responding to the detection request.
-     *
+     * <p>
+     * Signal senders that return attention and query results are also expected to be called in this
+     * method according to the detection outcomes.
+     * <p>
+     * On successful user attention, developers should call
+     * {@link VisualQueryDetectionService#gainedAttention()} to enable the streaming of the query.
+     * <p>
+     * On user attention is lost, developers should call
+     * {@link VisualQueryDetectionService#lostAttention()} to disable the streaming of the query.
+     * <p>
+     * On query is detected and ready to stream, developers should call
+     * {@link VisualQueryDetectionService#streamQuery(String)} to return detected query to the
+     * {@link VisualQueryDetector}.
+     * <p>
+     * On streamed query should be rejected, clients should call
+     * {@link VisualQueryDetectionService#rejectQuery()} to abandon query streamed to the
+     * {@link VisualQueryDetector}.
+     * <p>
+     * On streamed query is finished, clients should call
+     * {@link VisualQueryDetectionService#finishQuery()} to complete query streamed to
+     * {@link VisualQueryDetector}.
+     * <p>
+     * Before a call for {@link VisualQueryDetectionService#streamQuery(String)} is triggered,
+     * {@link VisualQueryDetectionService#gainedAttention()} MUST be called to enable the streaming
+     * of query. A query streaming is also expected to be finished by calling either
+     * {@link VisualQueryDetectionService#finishQuery()} or
+     * {@link VisualQueryDetectionService#rejectQuery()} before a new query should start streaming.
+     * When the service enters the state where query streaming should be disabled,
+     * {@link VisualQueryDetectionService#lostAttention()} MUST be called to block unnecessary
+     * streaming.
      */
-    public void onStartDetection(@NonNull Callback callback) {
+    public void onStartDetection() {
         throw new UnsupportedOperationException();
     }
 
@@ -199,118 +227,78 @@ public abstract class VisualQueryDetectionService extends Service
     }
 
     /**
-     * Callback for sending out signals and returning query results.
-     *
-     * On successful user attention, developers should call {@link Callback#onAttentionGained()}
-     * to enable the streaming of the query.
-     * <p>
-     * On user attention is lost, developers should call {@link Callback#onAttentionLost()} to
-     * disable the streaming of the query.
-     * <p>
-     * On query is detected and ready to stream, developers should call
-     * {@link Callback#onQueryDetected(String)} to return detected query to the
-     * {@link VisualQueryDetector}.
-     * <p>
-     * On streamed query should be rejected, clients should call {@link Callback#onQueryRejected()}
-     * to abandon query streamed to the {@link VisualQueryDetector}.
-     * <p>
-     * On streamed query is finished, clients should call {@link Callback#onQueryFinished()} to
-     * complete query streamed to {@link VisualQueryDetector}.
-     * <p>
-     * Before a call for {@link Callback#onQueryDetected(String)} is triggered,
-     * {@link Callback#onAttentionGained()} MUST be called to enable the streaming of query. A query
-     * streaming is also expected to be finished by calling either
-     * {@link Callback#onQueryFinished()} or {@link Callback#onQueryRejected()} before a new query
-     * should start streaming. When the service enters the state where query streaming should be
-     * disabled, {@link Callback#onAttentionLost()} MUST be called to block unnecessary streaming.
+     * Informs the system that the user attention is gained so queries can be streamed.
      */
-    public static final class Callback {
-
-        // TODO: consider making the constructor a test api for testing purpose
-        public Callback() {
-            mRemoteCallback = null;
+    public final void gainedAttention() {
+        try {
+            mRemoteCallback.onAttentionGained();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
+    }
 
-        private final IDetectorSessionVisualQueryDetectionCallback mRemoteCallback;
-
-        private Callback(IDetectorSessionVisualQueryDetectionCallback remoteCallback) {
-            mRemoteCallback = remoteCallback;
+    /**
+     * Informs the system that the user attention is lost to stop streaming.
+     */
+    public final void lostAttention() {
+        try {
+            mRemoteCallback.onAttentionLost();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
+    }
 
-        /**
-         * Informs attention listener that the user attention is gained.
-         */
-        public void onAttentionGained() {
-            try {
-                mRemoteCallback.onAttentionGained();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+    /**
+     * Informs the {@link VisualQueryDetector} with the text content being captured about the
+     * query from the audio source. {@code partialQuery} is provided to the
+     * {@link VisualQueryDetector}. This method is expected to be only triggered if
+     * {@link VisualQueryDetectionService#gainedAttention()} is called to put the service into the
+     * attention gained state.
+     *
+     * @param partialQuery Partially detected query in string.
+     * @throws IllegalStateException if method called without attention gained.
+     */
+    public final void streamQuery(@NonNull String partialQuery) throws IllegalStateException {
+        Objects.requireNonNull(partialQuery);
+        try {
+            mRemoteCallback.onQueryDetected(partialQuery);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("#streamQuery must be only be triggered after "
+                    + "calling #gainedAttention to be in the attention gained state.");
         }
+    }
 
-        /**
-         * Informs attention listener that the user attention is lost.
-         */
-        public void onAttentionLost() {
-            try {
-                mRemoteCallback.onAttentionLost();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+    /**
+     * Informs the {@link VisualQueryDetector} to abandon the streamed partial query that has
+     * been sent to {@link VisualQueryDetector}.This method is expected to be only triggered if
+     * {@link VisualQueryDetectionService#streamQuery(String)} is called to put the service into
+     * the query streaming state.
+     *
+     * @throws IllegalStateException if method called without query streamed.
+     */
+    public final void rejectQuery() throws IllegalStateException {
+        try {
+            mRemoteCallback.onQueryRejected();
+        } catch (RemoteException e) {
+            throw new IllegalStateException("#rejectQuery must be only be triggered after "
+                    + "calling #streamQuery to be in the query streaming state.");
         }
+    }
 
-        /**
-         * Informs the {@link VisualQueryDetector} with the text content being captured about the
-         * query from the audio source. {@code partialQuery} is provided to the
-         * {@link VisualQueryDetector}. This method is expected to be only triggered if
-         * {@link Callback#onAttentionGained()} is called to put the service into the attention
-         * gained state.
-         *
-         * @param partialQuery Partially detected query in string.
-         * @throws IllegalStateException if method called without attention gained.
-         */
-        public void onQueryDetected(@NonNull String partialQuery) throws IllegalStateException {
-            Objects.requireNonNull(partialQuery);
-            try {
-                mRemoteCallback.onQueryDetected(partialQuery);
-            } catch (RemoteException e) {
-                throw new IllegalStateException("#onQueryDetected must be only be triggered after "
-                        + "calling #onAttentionGained to be in the attention gained state.");
-            }
-        }
-
-        /**
-         * Informs the {@link VisualQueryDetector} to abandon the streamed partial query that has
-         * been sent to {@link VisualQueryDetector}.This method is expected to be only triggered if
-         * {@link Callback#onQueryDetected()} is called to put the service into the query streaming
-         * state.
-         *
-         * @throws IllegalStateException if method called without query streamed.
-         */
-        public void onQueryRejected() throws IllegalStateException {
-            try {
-                mRemoteCallback.onQueryRejected();
-            } catch (RemoteException e) {
-                throw new IllegalStateException("#onQueryRejected must be only be triggered after "
-                        + "calling #onQueryDetected to be in the query streaming state.");
-            }
-        }
-
-        /**
-         * Informs {@link VisualQueryDetector} with the metadata to complete the streamed partial
-         * query that has been sent to {@link VisualQueryDetector}. This method is expected to be
-         * only triggered if {@link Callback#onQueryDetected()} is called to put the service into
-         * the query streaming state.
-         *
-         * @throws IllegalStateException if method called without query streamed.
-         */
-        public void onQueryFinished() throws IllegalStateException {
-            try {
-                mRemoteCallback.onQueryFinished();
-            } catch (RemoteException e) {
-                throw new IllegalStateException("#onQueryFinished must be only be triggered after "
-                        + "calling #onQueryDetected to be in the query streaming state.");
-            }
+    /**
+     * Informs {@link VisualQueryDetector} with the metadata to complete the streamed partial
+     * query that has been sent to {@link VisualQueryDetector}. This method is expected to be
+     * only triggered if {@link VisualQueryDetectionService#streamQuery(String)} is called to put
+     * the service into the query streaming state.
+     *
+     * @throws IllegalStateException if method called without query streamed.
+     */
+    public final void finishQuery() throws IllegalStateException {
+        try {
+            mRemoteCallback.onQueryFinished();
+        } catch (RemoteException e) {
+            throw new IllegalStateException("#finishQuery must be only be triggered after "
+                    + "calling #streamQuery to be in the query streaming state.");
         }
     }
 
