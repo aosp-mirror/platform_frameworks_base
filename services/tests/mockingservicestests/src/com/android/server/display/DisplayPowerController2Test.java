@@ -64,6 +64,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.color.ColorDisplayService;
+import com.android.server.display.layout.Layout;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.testutils.OffsettableClock;
@@ -240,12 +241,15 @@ public final class DisplayPowerController2Test {
             boolean isEnabled) {
         DisplayInfo info = new DisplayInfo();
         DisplayDeviceInfo deviceInfo = new DisplayDeviceInfo();
+        deviceInfo.uniqueId = uniqueId;
 
         when(logicalDisplayMock.getDisplayIdLocked()).thenReturn(displayId);
         when(logicalDisplayMock.getPrimaryDisplayDeviceLocked()).thenReturn(displayDeviceMock);
         when(logicalDisplayMock.getDisplayInfoLocked()).thenReturn(info);
         when(logicalDisplayMock.isEnabledLocked()).thenReturn(isEnabled);
         when(logicalDisplayMock.isInTransitionLocked()).thenReturn(false);
+        when(logicalDisplayMock.getBrightnessThrottlingDataIdLocked()).thenReturn(
+                DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID);
         when(displayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);
         when(displayDeviceMock.getDisplayDeviceConfig()).thenReturn(displayDeviceConfigMock);
@@ -626,6 +630,19 @@ public final class DisplayPowerController2Test {
                 .setLightSensorEnabled(false);
     }
 
+    @Test
+    public void testStopScreenOffBrightnessSensorControllerWhenDisplayDeviceChanges() {
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mock(DisplayDeviceConfig.class), /* isEnabled= */ true);
+
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.screenOffBrightnessSensorController).stop();
+    }
+
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,
             String uniqueId) {
         return createDisplayPowerController(displayId, uniqueId, /* isEnabled= */ true);
@@ -662,8 +679,8 @@ public final class DisplayPowerController2Test {
                 mBrightnessTrackerMock, brightnessSetting, () -> {},
                 hbmMetadata, /* bootCompleted= */ false);
 
-        return new DisplayPowerControllerHolder(dpc, displayPowerState, brightnessSetting, animator,
-                automaticBrightnessController, wakelockController,
+        return new DisplayPowerControllerHolder(dpc, display, displayPowerState, brightnessSetting,
+                animator, automaticBrightnessController, wakelockController,
                 screenOffBrightnessSensorController, hbmMetadata);
     }
 
@@ -673,6 +690,7 @@ public final class DisplayPowerController2Test {
      */
     private static class DisplayPowerControllerHolder {
         public final DisplayPowerController2 dpc;
+        public final LogicalDisplay display;
         public final DisplayPowerState displayPowerState;
         public final BrightnessSetting brightnessSetting;
         public final DualRampAnimator<DisplayPowerState> animator;
@@ -681,7 +699,7 @@ public final class DisplayPowerController2Test {
         public final ScreenOffBrightnessSensorController screenOffBrightnessSensorController;
         public final HighBrightnessModeMetadata hbmMetadata;
 
-        DisplayPowerControllerHolder(DisplayPowerController2 dpc,
+        DisplayPowerControllerHolder(DisplayPowerController2 dpc, LogicalDisplay display,
                 DisplayPowerState displayPowerState, BrightnessSetting brightnessSetting,
                 DualRampAnimator<DisplayPowerState> animator,
                 AutomaticBrightnessController automaticBrightnessController,
@@ -689,6 +707,7 @@ public final class DisplayPowerController2Test {
                 ScreenOffBrightnessSensorController screenOffBrightnessSensorController,
                 HighBrightnessModeMetadata hbmMetadata) {
             this.dpc = dpc;
+            this.display = display;
             this.displayPowerState = displayPowerState;
             this.brightnessSetting = brightnessSetting;
             this.animator = animator;
