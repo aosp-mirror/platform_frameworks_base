@@ -2185,8 +2185,6 @@ public class OomAdjuster {
                 }
             }
 
-            // TODO(short-service): While-in-user permissions. Do we need any change here for
-            // short-FGS? (Likely not)
             if (s.isForeground) {
                 final int fgsType = s.foregroundServiceType;
                 if (s.mAllowWhileInUsePermissionInFgs) {
