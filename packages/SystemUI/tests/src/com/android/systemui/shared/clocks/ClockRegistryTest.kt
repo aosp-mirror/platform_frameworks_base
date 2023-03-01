@@ -35,7 +35,6 @@ import junit.framework.Assert.fail
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import org.json.JSONException
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -271,10 +270,14 @@ class ClockRegistryTest : SysuiTestCase() {
 
     @Test
     fun jsonDeserialization_gotExpectedObject() {
-        val expected = ClockSettings("ID", null).apply { _applied_timestamp = 500 }
+        val expected = ClockSettings("ID", null).apply {
+            metadata.put("appliedTimestamp", 500)
+        }
         val actual = ClockSettings.deserialize("""{
             "clockId":"ID",
-            "_applied_timestamp":500
+            "metadata": {
+                "appliedTimestamp":500
+            }
         }""")
         assertEquals(expected, actual)
     }
@@ -291,29 +294,32 @@ class ClockRegistryTest : SysuiTestCase() {
         val expected = ClockSettings("ID", null)
         val actual = ClockSettings.deserialize("""{
             "clockId":"ID",
-            "_applied_timestamp":null
+            "metadata":null
         }""")
         assertEquals(expected, actual)
     }
 
-    @Test(expected = JSONException::class)
-    fun jsonDeserialization_noId_threwException() {
-        val expected = ClockSettings(null, null).apply { _applied_timestamp = 500 }
-        val actual = ClockSettings.deserialize("{\"_applied_timestamp\":500}")
+    @Test
+    fun jsonDeserialization_noId_deserializedEmpty() {
+        val expected = ClockSettings(null, null).apply {
+            metadata.put("appliedTimestamp", 500)
+        }
+        val actual = ClockSettings.deserialize("{\"metadata\":{\"appliedTimestamp\":500}}")
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_gotExpectedString() {
-        val expected = "{\"clockId\":\"ID\",\"_applied_timestamp\":500}"
-        val actual = ClockSettings.serialize(ClockSettings("ID", null)
-            .apply { _applied_timestamp = 500 })
+        val expected = "{\"clockId\":\"ID\",\"metadata\":{\"appliedTimestamp\":500}}"
+        val actual = ClockSettings.serialize(ClockSettings("ID", null).apply {
+            metadata.put("appliedTimestamp", 500)
+        })
         assertEquals(expected, actual)
     }
 
     @Test
     fun jsonSerialization_noTimestamp_gotExpectedString() {
-        val expected = "{\"clockId\":\"ID\"}"
+        val expected = "{\"clockId\":\"ID\",\"metadata\":{}}"
         val actual = ClockSettings.serialize(ClockSettings("ID", null))
         assertEquals(expected, actual)
     }
