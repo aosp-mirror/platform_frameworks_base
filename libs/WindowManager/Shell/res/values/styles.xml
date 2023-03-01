@@ -38,11 +38,9 @@
     </style>
 
     <style name="CaptionWindowingButtonStyle">
-        <item name="android:layout_width">32dp</item>
-        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:padding">4dp</item>
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:layout_marginBottom">5dp</item>
     </style>
 
     <style name="CaptionMenuButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">

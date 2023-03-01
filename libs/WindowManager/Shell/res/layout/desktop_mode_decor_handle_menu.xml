@@ -63,38 +63,46 @@
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="0.5" />
-        <Button
+        <ImageButton
             style="@style/CaptionWindowingButtonStyle"
             android:id="@+id/fullscreen_button"
             android:contentDescription="@string/fullscreen_text"
-            android:background="@drawable/caption_fullscreen_button"/>
+            android:src="@drawable/caption_fullscreen_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
         <Space
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="1" />
-        <Button
+        <ImageButton
             style="@style/CaptionWindowingButtonStyle"
             android:id="@+id/split_screen_button"
             android:contentDescription="@string/split_screen_text"
-            android:background="@drawable/caption_split_screen_button"/>
+            android:src="@drawable/caption_split_screen_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
         <Space
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="1" />
-        <Button
+        <ImageButton
             style="@style/CaptionWindowingButtonStyle"
             android:id="@+id/floating_button"
             android:contentDescription="@string/float_button_text"
-            android:background="@drawable/caption_floating_button"/>
+            android:src="@drawable/caption_floating_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
         <Space
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:layout_weight="1" />
-        <Button
+        <ImageButton
             style="@style/CaptionWindowingButtonStyle"
             android:id="@+id/desktop_button"
             android:contentDescription="@string/desktop_text"
-            android:background="@drawable/caption_desktop_button"/>
+            android:src="@drawable/caption_desktop_button"
+            android:scaleType="fitCenter"
+            android:background="?android:selectableItemBackgroundBorderless"/>
         <Space
             android:layout_width="0dp"
             android:layout_height="1dp"
