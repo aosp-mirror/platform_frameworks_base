@@ -341,12 +341,6 @@ interface IActivityManager {
             in String message, boolean force, int exceptionTypeId);
     void crashApplicationWithTypeWithExtras(int uid, int initialPid, in String packageName,
             int userId, in String message, boolean force, int exceptionTypeId, in Bundle extras);
-    /** @deprecated -- use getProviderMimeTypeAsync */
-    @UnsupportedAppUsage(maxTargetSdk = 29, publicAlternatives =
-            "Use {@link android.content.ContentResolver#getType} public API instead.")
-    String getProviderMimeType(in Uri uri, int userId);
-
-    oneway void getProviderMimeTypeAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     oneway void getMimeTypeFilterAsync(in Uri uri, int userId, in RemoteCallback resultCallback);
     // Cause the specified process to dump the specified heap.
     boolean dumpHeap(in String process, int userId, boolean managed, boolean mallocInfo,

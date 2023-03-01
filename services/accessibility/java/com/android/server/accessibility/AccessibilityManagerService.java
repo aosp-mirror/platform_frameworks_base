@@ -3801,6 +3801,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public boolean registerProxyForDisplay(IAccessibilityServiceClient client, int displayId)
             throws RemoteException {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
         if (client == null) {
             return false;
         }
@@ -3837,6 +3838,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public boolean unregisterProxyForDisplay(int displayId) {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.CREATE_VIRTUAL_DEVICE);
         final long identity = Binder.clearCallingIdentity();
         try {
             return mProxyManager.unregisterProxy(displayId);

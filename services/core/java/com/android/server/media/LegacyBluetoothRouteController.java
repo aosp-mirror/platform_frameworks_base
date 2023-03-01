@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.Set;
 
 class LegacyBluetoothRouteController implements BluetoothRouteController {
-    private static final String TAG = "BTRouteProvider";
+    private static final String TAG = "LBtRouteProvider";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final String HEARING_AID_ROUTE_ID_PREFIX = "HEARING_AID_";
@@ -130,6 +130,12 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
     public void stop() {
         mContext.unregisterReceiver(mAdapterStateChangedReceiver);
         mContext.unregisterReceiver(mDeviceStateChangedReceiver);
+    }
+
+    @Override
+    public boolean selectRoute(String deviceAddress) {
+        // No-op as the class decides if a route is selected based on Bluetooth events.
+        return false;
     }
 
     /**

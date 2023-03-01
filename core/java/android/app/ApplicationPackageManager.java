@@ -556,12 +556,7 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public ActivityInfo getActivityInfo(ComponentName className, ComponentInfoFlags flags)
             throws NameNotFoundException {
-        return getActivityInfoAsUser(className, flags, getUserId());
-    }
-
-    @Override
-    public ActivityInfo getActivityInfoAsUser(ComponentName className,
-            ComponentInfoFlags flags, @UserIdInt int userId) throws NameNotFoundException {
+        final int userId = getUserId();
         try {
             ActivityInfo ai = mPM.getActivityInfo(className,
                     updateFlagsForComponent(flags.getValue(), userId, null), userId);

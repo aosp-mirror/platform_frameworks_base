@@ -415,25 +415,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     /** Returns true if either an exception or a response is found. */
     private void onActionEntrySelected(ProviderPendingIntentResponse
             providerPendingIntentResponse) {
-        // Action entry is expected to either contain the final GetCredentialResponse, or it is
-        // also acceptable if it does not contain anything. In the second case, we re-show this
-        // action on the UI.
-        if (providerPendingIntentResponse == null) {
-            Log.i(TAG, "providerPendingIntentResponse is null");
-            return;
-        }
-
-        GetCredentialException exception = maybeGetPendingIntentException(
-                providerPendingIntentResponse);
-        if (exception != null) {
-            invokeCallbackWithError(exception.getType(), exception.getMessage());
-        }
-        GetCredentialResponse response = PendingIntentResultHandler
-                .extractGetCredentialResponse(
-                        providerPendingIntentResponse.getResultData());
-        if (response != null) {
-            mCallbacks.onFinalResponseReceived(mComponentName, response);
-        }
+        Log.i(TAG, "onActionEntrySelected");
+        onCredentialEntrySelected(providerPendingIntentResponse);
     }
 
 
@@ -450,11 +433,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
     /**
      * When an invalid state occurs, e.g. entry mismatch or no response from provider,
-     * we send back a TYPE_UNKNOWN error as to the developer.
+     * we send back a TYPE_NO_CREDENTIAL error as to the developer.
      */
     private void invokeCallbackOnInternalInvalidState() {
         mCallbacks.onFinalErrorReceived(mComponentName,
-                GetCredentialException.TYPE_UNKNOWN, null);
+                GetCredentialException.TYPE_NO_CREDENTIAL, null);
     }
 
     /** Update auth entries status based on an auth entry selected from a different session. */

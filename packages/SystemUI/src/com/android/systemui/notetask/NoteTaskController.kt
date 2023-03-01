@@ -17,6 +17,7 @@
 package com.android.systemui.notetask
 
 import android.app.KeyguardManager
+import android.app.admin.DevicePolicyManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
@@ -27,7 +28,9 @@ import android.os.UserManager
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.wm.shell.bubbles.Bubble
 import com.android.wm.shell.bubbles.Bubbles
@@ -54,6 +57,8 @@ constructor(
     private val optionalUserManager: Optional<UserManager>,
     private val optionalKeyguardManager: Optional<KeyguardManager>,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
+    private val devicePolicyManager: DevicePolicyManager,
+    private val userTracker: UserTracker,
 ) {
 
     @VisibleForTesting val infoReference = AtomicReference<NoteTaskInfo?>()
@@ -107,11 +112,23 @@ constructor(
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
 
+        val isKeyguardLocked = keyguardManager.isKeyguardLocked
+        // KeyguardQuickAffordanceInteractor blocks the quick affordance from showing in the
+        // keyguard if it is not allowed by the admin policy. Here we block any other way to show
+        // note task when the screen is locked.
+        if (
+            isKeyguardLocked &&
+                devicePolicyManager.areKeyguardShortcutsDisabled(userId = userTracker.userId)
+        ) {
+            logDebug { "Enterprise policy disallows launching note app when the screen is locked." }
+            return
+        }
+
         val info =
             resolver.resolveInfo(
                 entryPoint = entryPoint,
                 isInMultiWindowMode = isInMultiWindowMode,
-                isKeyguardLocked = keyguardManager.isKeyguardLocked,
+                isKeyguardLocked = isKeyguardLocked,
             )
                 ?: return
 

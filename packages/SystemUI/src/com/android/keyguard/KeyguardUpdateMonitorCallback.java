@@ -214,11 +214,19 @@ public class KeyguardUpdateMonitorCallback {
     public void onBiometricAuthFailed(BiometricSourceType biometricSourceType) { }
 
     /**
-     * Called when a biometric is recognized.
+     * Called when a biometric is authenticated.
      * @param userId the user id for which the biometric sample was authenticated
      * @param biometricSourceType
      */
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) { }
+
+    /**
+     * Called when a biometric is detected but not successfully authenticated.
+     * @param userId the user id for which the biometric sample was detected
+     * @param biometricSourceType
+     */
+    public void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) { }
 
     /**

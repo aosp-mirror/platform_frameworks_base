@@ -43,6 +43,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.server.display.BrightnessThrottler.Injector;
 import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData;
 import com.android.server.display.DisplayDeviceConfig.BrightnessThrottlingData.ThrottlingLevel;
+import com.android.server.display.mode.DisplayModeDirectorTest;
 
 import org.junit.Before;
 import org.junit.Test;

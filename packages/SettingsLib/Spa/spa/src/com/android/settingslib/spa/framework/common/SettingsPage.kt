@@ -77,9 +77,8 @@ data class SettingsPage(
         return true
     }
 
-    fun isEnabled(): Boolean {
-        return getPageProvider(sppName)?.isEnabled(arguments) ?: false
-    }
+    fun isEnabled(): Boolean =
+        SpaEnvironment.IS_DEBUG || getPageProvider(sppName)?.isEnabled(arguments) ?: false
 
     fun getTitle(): String {
         return getPageProvider(sppName)?.getTitle(arguments) ?: ""

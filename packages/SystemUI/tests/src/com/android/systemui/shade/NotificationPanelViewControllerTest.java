@@ -78,6 +78,25 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         DejankUtils.setImmediate(true);
     }
 
+    /**
+     * When the Back gesture starts (progress 0%), the scrim will stay at 100% scale (1.0f).
+     */
+    @Test
+    public void testBackGesture_min_scrimAtMaxScale() {
+        mNotificationPanelViewController.onBackProgressed(0.0f);
+        verify(mScrimController).applyBackScaling(1.0f);
+    }
+
+    /**
+     * When the Back gesture is at max (progress 100%), the scrim will be scaled to its minimum.
+     */
+    @Test
+    public void testBackGesture_max_scrimAtMinScale() {
+        mNotificationPanelViewController.onBackProgressed(1.0f);
+        verify(mScrimController).applyBackScaling(
+                NotificationPanelViewController.SHADE_BACK_ANIM_MIN_SCALE);
+    }
+
     @Test
     public void onNotificationHeightChangeWhileOnKeyguardWillComputeMaxKeyguardNotifications() {
         mStatusBarStateController.setState(KEYGUARD);
