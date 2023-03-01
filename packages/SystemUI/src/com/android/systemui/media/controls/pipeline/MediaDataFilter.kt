@@ -329,9 +329,8 @@ constructor(
      * Return the time since last active for the most-recent media.
      *
      * @param sortedEntries userEntries sorted from the earliest to the most-recent.
-     *
      * @return The duration in milliseconds from the most-recent media's last active timestamp to
-     * the present. MAX_VALUE will be returned if there is no media.
+     *   the present. MAX_VALUE will be returned if there is no media.
      */
     private fun timeSinceActiveForMostRecentMedia(
         sortedEntries: SortedMap<String, MediaData>

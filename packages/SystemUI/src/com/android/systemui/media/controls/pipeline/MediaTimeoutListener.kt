@@ -60,6 +60,7 @@ constructor(
 
     /**
      * Callback representing that a media object is now expired:
+     *
      * @param key Media control unique identifier
      * @param timedOut True when expired for {@code PAUSED_MEDIA_TIMEOUT} for active media,
      * ```
@@ -70,6 +71,7 @@ constructor(
 
     /**
      * Callback representing that a media object [PlaybackState] has changed.
+     *
      * @param key Media control unique identifier
      * @param state The new [PlaybackState]
      */
@@ -77,6 +79,7 @@ constructor(
 
     /**
      * Callback representing that the [MediaSession] for an active control has been destroyed
+     *
      * @param key Media control unique identifier
      */
     lateinit var sessionCallback: (String) -> Unit

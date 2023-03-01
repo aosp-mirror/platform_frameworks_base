@@ -35,7 +35,7 @@ open class ChipbarAnimator @Inject constructor() {
      * Animates [innerView] and its children into view.
      *
      * @return true if the animation was successfully started and false if the animation can't be
-     * run for any reason.
+     *   run for any reason.
      *
      * See [ViewHierarchyAnimator.animateAddition].
      */
@@ -55,7 +55,7 @@ open class ChipbarAnimator @Inject constructor() {
      * Animates [innerView] and its children out of view.
      *
      * @return true if the animation was successfully started and false if the animation can't be
-     * run for any reason.
+     *   run for any reason.
      *
      * See [ViewHierarchyAnimator.animateRemoval].
      */

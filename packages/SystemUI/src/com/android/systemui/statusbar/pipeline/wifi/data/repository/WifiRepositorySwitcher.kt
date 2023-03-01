@@ -41,7 +41,6 @@ import kotlinx.coroutines.flow.stateIn
  * or the [WifiRepositoryImpl]'s prod implementation, based on the current demo mode value. In this
  * way, downstream clients can all consist of real implementations and not care about which
  * repository is responsible for the data. Graphically:
- *
  * ```
  * RealRepository
  *                 │

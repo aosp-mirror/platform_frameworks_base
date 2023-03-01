@@ -297,6 +297,7 @@ constructor(
     /**
      * Add the component to the saved list of media browser services, checking for duplicates and
      * removing older components that exceed the maximum limit
+     *
      * @param componentName
      */
     private fun updateResumptionList(componentName: ComponentName) {

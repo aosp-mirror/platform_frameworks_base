@@ -70,9 +70,9 @@ import javax.inject.Named
  *
  * [header] is a [MotionLayout] that has two transitions:
  * * [HEADER_TRANSITION_ID]: [QQS_HEADER_CONSTRAINT] <-> [QS_HEADER_CONSTRAINT] for portrait
- * handheld device configuration.
+ *   handheld device configuration.
  * * [LARGE_SCREEN_HEADER_TRANSITION_ID]: [LARGE_SCREEN_HEADER_CONSTRAINT] for all other
- * configurations
+ *   configurations
  */
 @CentralSurfacesScope
 class ShadeHeaderController
