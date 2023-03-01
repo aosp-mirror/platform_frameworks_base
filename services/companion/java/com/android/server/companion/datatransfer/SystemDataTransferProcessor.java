@@ -23,7 +23,6 @@ import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVER
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.Utils.prepareForIpc;
-import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -92,8 +91,7 @@ public class SystemDataTransferProcessor {
         mAssociationStore = associationStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mTransportManager = transportManager;
-        mTransportManager.addListener(MESSAGE_REQUEST_PERMISSION_RESTORE,
-                this::onReceivePermissionRestore);
+        mTransportManager.setListener(this::onReceivePermissionRestore);
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
         mExecutor = Executors.newSingleThreadExecutor();
     }
