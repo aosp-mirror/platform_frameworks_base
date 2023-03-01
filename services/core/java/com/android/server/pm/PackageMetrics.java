@@ -48,12 +48,14 @@ final class PackageMetrics {
     public static final int STEP_SCAN = 2;
     public static final int STEP_RECONCILE = 3;
     public static final int STEP_COMMIT = 4;
+    public static final int STEP_DEXOPT = 5;
 
     @IntDef(prefix = {"STEP_"}, value = {
             STEP_PREPARE,
             STEP_SCAN,
             STEP_RECONCILE,
             STEP_COMMIT,
+            STEP_DEXOPT
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StepInt {
@@ -175,6 +177,10 @@ final class PackageMetrics {
         }
     }
 
+    public void onStepFinished(@StepInt int step, long durationMillis) {
+        mInstallSteps.put(step, new InstallStep(durationMillis));
+    }
+
     // List of steps (e.g., 1, 2, 3) and corresponding list of durations (e.g., 200ms, 100ms, 150ms)
     private Pair<int[], long[]> getInstallStepDurations() {
         ArrayList<Integer> steps = new ArrayList<>();
@@ -201,6 +207,11 @@ final class PackageMetrics {
 
         InstallStep() {
             mStartTimestampMillis = System.currentTimeMillis();
+        }
+
+        InstallStep(long durationMillis) {
+            mStartTimestampMillis = -1;
+            mDurationMillis = durationMillis;
         }
 
         void finish() {
