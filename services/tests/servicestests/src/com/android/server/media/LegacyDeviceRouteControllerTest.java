@@ -50,7 +50,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Enclosed.class)
-public class DeviceRouteControllerTest {
+public class LegacyDeviceRouteControllerTest {
 
     private static final String DEFAULT_ROUTE_NAME = "default_route";
     private static final String DEFAULT_HEADPHONES_NAME = "headphone";
@@ -97,7 +97,7 @@ public class DeviceRouteControllerTest {
             // Default route should be initialized even when AudioService returns null.
             when(mAudioService.startWatchingRoutes(any())).thenReturn(null);
 
-            DeviceRouteController deviceRouteController = new DeviceRouteController(
+            LegacyDeviceRouteController deviceRouteController = new LegacyDeviceRouteController(
                     mContext,
                     mAudioManager,
                     mAudioService,
@@ -122,7 +122,7 @@ public class DeviceRouteControllerTest {
             AudioRoutesInfo fakeBluetoothAudioRoute = createFakeBluetoothAudioRoute();
             when(mAudioService.startWatchingRoutes(any())).thenReturn(fakeBluetoothAudioRoute);
 
-            DeviceRouteController deviceRouteController = new DeviceRouteController(
+            LegacyDeviceRouteController deviceRouteController = new LegacyDeviceRouteController(
                     mContext,
                     mAudioManager,
                     mAudioService,
@@ -236,7 +236,7 @@ public class DeviceRouteControllerTest {
             when(mResources.getText(mExpectedRouteNameResource))
                     .thenReturn(mExpectedRouteNameValue);
 
-            DeviceRouteController deviceRouteController = new DeviceRouteController(
+            LegacyDeviceRouteController deviceRouteController = new LegacyDeviceRouteController(
                     mContext,
                     mAudioManager,
                     mAudioService,
@@ -269,7 +269,7 @@ public class DeviceRouteControllerTest {
         @Captor
         private ArgumentCaptor<IAudioRoutesObserver.Stub> mAudioRoutesObserverCaptor;
 
-        private DeviceRouteController mDeviceRouteController;
+        private LegacyDeviceRouteController mDeviceRouteController;
         private IAudioRoutesObserver.Stub mAudioRoutesObserver;
 
         @Before
@@ -287,7 +287,7 @@ public class DeviceRouteControllerTest {
             when(mAudioService.startWatchingRoutes(mAudioRoutesObserverCaptor.capture()))
                     .thenReturn(audioRoutesInfo);
 
-            mDeviceRouteController = new DeviceRouteController(
+            mDeviceRouteController = new LegacyDeviceRouteController(
                     mContext,
                     mAudioManager,
                     mAudioService,
