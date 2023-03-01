@@ -32,14 +32,16 @@ import java.util.List;
 public interface SharedConnectivityClientCallback {
     /**
      * This method is being called by {@link SharedConnectivityService} to notify of a change in the
-     * list of available Tether Networks.
-     * @param networks Updated Tether Network list.
+     * list of available Hotspot Networks.
+     *
+     * @param networks Updated Hotspot Network list.
      */
-    void onTetherNetworksUpdated(@NonNull List<TetherNetwork> networks);
+    void onHotspotNetworksUpdated(@NonNull List<HotspotNetwork> networks);
 
     /**
      * This method is being called by {@link SharedConnectivityService} to notify of a change in the
      * list of available Known Networks.
+     *
      * @param networks Updated Known Network list.
      */
     void onKnownNetworksUpdated(@NonNull List<KnownNetwork> networks);
@@ -47,20 +49,23 @@ public interface SharedConnectivityClientCallback {
     /**
      * This method is being called by {@link SharedConnectivityService} to notify of a change in the
      * state of share connectivity settings.
+     *
      * @param state The new state.
      */
     void onSharedConnectivitySettingsChanged(@NonNull SharedConnectivitySettingsState state);
 
     /**
      * This method is being called by {@link SharedConnectivityService} to notify of a change in the
-     * status of the current tether network connection.
+     * status of the current hotspot network connection.
+     *
      * @param status The new status.
      */
-    void onTetherNetworkConnectionStatusChanged(@NonNull TetherNetworkConnectionStatus status);
+    void onHotspotNetworkConnectionStatusChanged(@NonNull HotspotNetworkConnectionStatus status);
 
     /**
      * This method is being called by {@link SharedConnectivityService} to notify of a change in the
      * status of the current known network connection.
+     *
      * @param status The new status.
      */
     void onKnownNetworkConnectionStatusChanged(@NonNull KnownNetworkConnectionStatus status);
