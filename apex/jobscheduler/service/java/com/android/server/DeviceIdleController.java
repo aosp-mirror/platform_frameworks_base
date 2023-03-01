@@ -79,6 +79,9 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyManager;
+import android.telephony.emergency.EmergencyNumber;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -146,15 +149,17 @@ import java.util.stream.Collectors;
        label="deep";
 
        STATE_ACTIVE [
-         label="STATE_ACTIVE\nScreen on OR Charging OR Alarm going off soon",
+         label="STATE_ACTIVE\nScreen on OR charging OR alarm going off soon\n"
+             + "OR active emergency call",
          color=black,shape=diamond
        ]
        STATE_INACTIVE [
-         label="STATE_INACTIVE\nScreen off AND Not charging",color=black,shape=diamond
+         label="STATE_INACTIVE\nScreen off AND not charging AND no active emergency call",
+         color=black,shape=diamond
        ]
        STATE_QUICK_DOZE_DELAY [
          label="STATE_QUICK_DOZE_DELAY\n"
-             + "Screen off AND Not charging\n"
+             + "Screen off AND not charging AND no active emergency call\n"
              + "Location, motion detection, and significant motion monitoring turned off",
          color=black,shape=diamond
        ]
@@ -237,11 +242,12 @@ import java.util.stream.Collectors;
        label="light"
 
        LIGHT_STATE_ACTIVE [
-         label="LIGHT_STATE_ACTIVE\nScreen on OR Charging OR Alarm going off soon",
+         label="LIGHT_STATE_ACTIVE\n"
+             + "Screen on OR charging OR alarm going off soon OR active emergency call",
          color=black,shape=diamond
        ]
        LIGHT_STATE_INACTIVE [
-         label="LIGHT_STATE_INACTIVE\nScreen off AND Not charging",
+         label="LIGHT_STATE_INACTIVE\nScreen off AND not charging AND no active emergency call",
          color=black,shape=diamond
        ]
        LIGHT_STATE_IDLE [label="LIGHT_STATE_IDLE\n",color=red,shape=box]
@@ -411,6 +417,7 @@ public class DeviceIdleController extends SystemService
     private static final int ACTIVE_REASON_FROM_BINDER_CALL = 5;
     private static final int ACTIVE_REASON_FORCED = 6;
     private static final int ACTIVE_REASON_ALARM = 7;
+    private static final int ACTIVE_REASON_EMERGENCY_CALL = 8;
     @VisibleForTesting
     static final int SET_IDLE_FACTOR_RESULT_UNINIT = -1;
     @VisibleForTesting
@@ -764,6 +771,8 @@ public class DeviceIdleController extends SystemService
             }
         }
     };
+
+    private final EmergencyCallListener mEmergencyCallListener = new EmergencyCallListener();
 
     /** Post stationary status only to this listener. */
     private void postStationaryStatus(DeviceIdleInternal.StationaryListener listener) {
@@ -2323,6 +2332,39 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    private class EmergencyCallListener extends TelephonyCallback implements
+            TelephonyCallback.OutgoingEmergencyCallListener,
+            TelephonyCallback.CallStateListener {
+        private volatile boolean mIsEmergencyCallActive;
+
+        @Override
+        public void onOutgoingEmergencyCall(EmergencyNumber placedEmergencyNumber,
+                int subscriptionId) {
+            mIsEmergencyCallActive = true;
+            if (DEBUG) Slog.d(TAG, "onOutgoingEmergencyCall(): subId = " + subscriptionId);
+            synchronized (DeviceIdleController.this) {
+                mActiveReason = ACTIVE_REASON_EMERGENCY_CALL;
+                becomeActiveLocked("emergency call", Process.myUid());
+            }
+        }
+
+        @Override
+        public void onCallStateChanged(int state) {
+            if (DEBUG) Slog.d(TAG, "onCallStateChanged(): state is " + state);
+            // An emergency call just finished
+            if (state == TelephonyManager.CALL_STATE_IDLE && mIsEmergencyCallActive) {
+                mIsEmergencyCallActive = false;
+                synchronized (DeviceIdleController.this) {
+                    becomeInactiveIfAppropriateLocked();
+                }
+            }
+        }
+
+        boolean isEmergencyCallActive() {
+            return mIsEmergencyCallActive;
+        }
+    }
+
     static class Injector {
         private final Context mContext;
         private ConnectivityManager mConnectivityManager;
@@ -2404,6 +2446,10 @@ public class DeviceIdleController extends SystemService
 
         SensorManager getSensorManager() {
             return mContext.getSystemService(SensorManager.class);
+        }
+
+        TelephonyManager getTelephonyManager() {
+            return mContext.getSystemService(TelephonyManager.class);
         }
 
         ConstraintController getConstraintController(Handler handler,
@@ -2633,6 +2679,9 @@ public class DeviceIdleController extends SystemService
                                 ServiceType.QUICK_DOZE).batterySaverEnabled);
 
                 mLocalActivityTaskManager.registerScreenObserver(mScreenObserver);
+
+                mInjector.getTelephonyManager().registerTelephonyCallback(
+                        JobSchedulerBackgroundThread.getExecutor(), mEmergencyCallListener);
 
                 passWhiteListsToForceAppStandbyTrackerLocked();
                 updateInteractivityLocked();
@@ -3435,6 +3484,7 @@ public class DeviceIdleController extends SystemService
 
         final boolean isScreenBlockingInactive =
                 mScreenOn && (!mConstants.WAIT_FOR_UNLOCK || !mScreenLocked);
+        final boolean isEmergencyCallActive = mEmergencyCallListener.isEmergencyCallActive();
         if (DEBUG) {
             Slog.d(TAG, "becomeInactiveIfAppropriateLocked():"
                     + " isScreenBlockingInactive=" + isScreenBlockingInactive
@@ -3442,10 +3492,11 @@ public class DeviceIdleController extends SystemService
                     + ", WAIT_FOR_UNLOCK=" + mConstants.WAIT_FOR_UNLOCK
                     + ", mScreenLocked=" + mScreenLocked + ")"
                     + " mCharging=" + mCharging
+                    + " emergencyCall=" + isEmergencyCallActive
                     + " mForceIdle=" + mForceIdle
             );
         }
-        if (!mForceIdle && (mCharging || isScreenBlockingInactive)) {
+        if (!mForceIdle && (mCharging || isScreenBlockingInactive || isEmergencyCallActive)) {
             return;
         }
         // Become inactive and determine if we will ultimately go idle.
@@ -3568,6 +3619,17 @@ public class DeviceIdleController extends SystemService
         }
         EventLogTags.writeDeviceIdleLightStep();
 
+        if (mEmergencyCallListener.isEmergencyCallActive()) {
+            // The emergency call should have raised the state to ACTIVE and kept it there,
+            // so this method shouldn't be called. Don't proceed further.
+            Slog.wtf(TAG, "stepLightIdleStateLocked called when emergency call is active");
+            if (mLightState != LIGHT_STATE_ACTIVE) {
+                mActiveReason = ACTIVE_REASON_EMERGENCY_CALL;
+                becomeActiveLocked("emergency", Process.myUid());
+            }
+            return;
+        }
+
         switch (mLightState) {
             case LIGHT_STATE_INACTIVE:
                 mCurLightIdleBudget = mConstants.LIGHT_IDLE_MAINTENANCE_MIN_BUDGET;
@@ -3649,6 +3711,17 @@ public class DeviceIdleController extends SystemService
     void stepIdleStateLocked(String reason) {
         if (DEBUG) Slog.d(TAG, "stepIdleStateLocked: mState=" + mState);
         EventLogTags.writeDeviceIdleStep();
+
+        if (mEmergencyCallListener.isEmergencyCallActive()) {
+            // The emergency call should have raised the state to ACTIVE and kept it there,
+            // so this method shouldn't be called. Don't proceed further.
+            Slog.wtf(TAG, "stepIdleStateLocked called when emergency call is active");
+            if (mState != STATE_ACTIVE) {
+                mActiveReason = ACTIVE_REASON_EMERGENCY_CALL;
+                becomeActiveLocked("emergency", Process.myUid());
+            }
+            return;
+        }
 
         if (isUpcomingAlarmClock()) {
             // Whoops, there is an upcoming alarm.  We don't actually want to go idle.
@@ -3982,6 +4055,11 @@ public class DeviceIdleController extends SystemService
         synchronized (this) {
             return mNextAlarmTime;
         }
+    }
+
+    @VisibleForTesting
+    boolean isEmergencyCallActive() {
+        return mEmergencyCallListener.isEmergencyCallActive();
     }
 
     @GuardedBy("this")
