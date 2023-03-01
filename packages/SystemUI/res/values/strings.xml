@@ -2260,7 +2260,7 @@
 
     <!-- Shows in a dialog presented to the user to authorize this app to display a Device controls
          panel (embedded activity) instead of controls rendered by SystemUI [CHAR LIMIT=NONE] -->
-    <string name="controls_panel_authorization">When you add <xliff:g id="appName" example="My app">%s</xliff:g>, it can add controls and content to this panel. In some apps, you can choose which controls show up here.</string>
+    <string name="controls_panel_authorization"><xliff:g id="appName" example="My app">%s</xliff:g>can choose which controls and content show here.</string>
 
     <!-- a11y state description for a control that is currently favorited [CHAR LIMIT=NONE] -->
     <string name="accessibility_control_favorite">Favorited</string>
@@ -2314,7 +2314,7 @@
     <!-- Title of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
     <string name="controls_settings_trivial_controls_dialog_title">Control devices from lock screen?</string>
     <!-- Message of the dialog to control certain devices from lock screen without auth [CHAR LIMIT=NONE] -->
-    <string name="controls_settings_trivial_controls_dialog_message">You can control some devices without unlocking your phone or tablet.\n\nYour device app determines which devices can be controlled in this way.</string>
+    <string name="controls_settings_trivial_controls_dialog_message">You can control some devices without unlocking your phone or tablet. Your device app determines which devices can be controlled in this way.</string>
     <!-- Neutral button title of the controls dialog [CHAR LIMIT=NONE] -->
     <string name="controls_settings_dialog_neutral_button">No thanks</string>
     <!-- Positive button title of the controls dialog  [CHAR LIMIT=NONE] -->
