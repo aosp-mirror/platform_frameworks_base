@@ -20,6 +20,8 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.provider.Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE;
+import static android.provider.Settings.Secure.STYLUS_HANDWRITING_ENABLED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BOUND_TO_METHOD;
 import static android.server.inputmethod.InputMethodManagerServiceProto.CUR_ATTRIBUTE;
@@ -2067,10 +2069,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         synchronized (ImfLock.class) {
+            if (!isStylusHandwritingEnabled(mContext, userId)) {
+                return false;
+            }
+
+            // Check if selected IME of current user supports handwriting.
             if (userId == mSettings.getCurrentUserId()) {
                 return mBindingController.supportsStylusHandwriting();
             }
-
             //TODO(b/197848765): This can be optimized by caching multi-user methodMaps/methodList.
             //TODO(b/210039666): use cache.
             final ArrayMap<String, InputMethodInfo> methodMap = queryMethodMapForUser(userId);
@@ -2079,6 +2085,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final InputMethodInfo imi = methodMap.get(settings.getSelectedInputMethod());
             return imi != null && imi.supportsStylusHandwriting();
         }
+    }
+
+    private boolean isStylusHandwritingEnabled(
+            @NonNull Context context, @UserIdInt int userId) {
+        // If user is a profile, use preference of it`s parent profile.
+        final int profileParentUserId = mUserManagerInternal.getProfileParentId(userId);
+        if (Settings.Secure.getIntForUser(context.getContentResolver(),
+                STYLUS_HANDWRITING_ENABLED, STYLUS_HANDWRITING_DEFAULT_VALUE,
+                profileParentUserId) == 0) {
+            return false;
+        }
+        return true;
     }
 
     @GuardedBy("ImfLock.class")
@@ -3418,8 +3436,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void prepareStylusHandwritingDelegation(
             @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName) {
+        if (!isStylusHandwritingEnabled(mContext, userId)) {
+            Slog.w(TAG, "Can not prepare stylus handwriting delegation. Stylus handwriting"
+                    + " pref is disabled for user: " + userId);
+            return;
+        }
         if (!verifyClientAndPackageMatch(client, delegatorPackageName)) {
             Slog.w(TAG, "prepareStylusHandwritingDelegation() fail");
             throw new IllegalArgumentException("Delegator doesn't match Uid");
@@ -3430,8 +3454,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public boolean acceptStylusHandwritingDelegation(
             @NonNull IInputMethodClient client,
+            @UserIdInt int userId,
             @NonNull String delegatePackageName,
             @NonNull String delegatorPackageName) {
+        if (!isStylusHandwritingEnabled(mContext, userId)) {
+            Slog.w(TAG, "Can not accept stylus handwriting delegation. Stylus handwriting"
+                    + " pref is disabled for user: " + userId);
+            return false;
+        }
         if (!verifyDelegator(client, delegatePackageName, delegatorPackageName)) {
             return false;
         }
