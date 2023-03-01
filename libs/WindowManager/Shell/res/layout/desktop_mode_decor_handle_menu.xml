@@ -21,7 +21,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/desktop_mode_decor_menu_background"
-    android:elevation="@dimen/caption_menu_elevation"
     android:divider="?android:attr/dividerHorizontal"
     android:showDividers="middle"
     android:dividerPadding="18dip">
