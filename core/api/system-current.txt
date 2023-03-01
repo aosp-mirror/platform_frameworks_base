@@ -10028,21 +10028,22 @@ package android.net.wifi.sharedconnectivity.app {
 
   public final class KnownNetwork implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
+    method @Nullable public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
     method public int getNetworkSource();
     method @NonNull public java.util.Set<java.lang.Integer> getSecurityTypes();
     method @NonNull public String getSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.KnownNetwork> CREATOR;
-    field public static final int NETWORK_SOURCE_CLOUD_SELF = 1; // 0x1
-    field public static final int NETWORK_SOURCE_NEARBY_SELF = 0; // 0x0
+    field public static final int NETWORK_SOURCE_CLOUD_SELF = 2; // 0x2
+    field public static final int NETWORK_SOURCE_NEARBY_SELF = 1; // 0x1
+    field public static final int NETWORK_SOURCE_UNKNOWN = 0; // 0x0
   }
 
   public static final class KnownNetwork.Builder {
     ctor public KnownNetwork.Builder();
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder addSecurityType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork build();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setDeviceInfo(@NonNull android.net.wifi.sharedconnectivity.app.DeviceInfo);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setDeviceInfo(@Nullable android.net.wifi.sharedconnectivity.app.DeviceInfo);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setNetworkSource(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setSsid(@NonNull String);
   }
@@ -10079,17 +10080,17 @@ package android.net.wifi.sharedconnectivity.app {
   }
 
   public class SharedConnectivityManager {
-    method public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
-    method public boolean connectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public boolean disconnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public boolean forgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
-    method @Nullable public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus getKnownNetworkConnectionStatus();
-    method @NonNull public java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork> getKnownNetworks();
-    method @Nullable public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState getSettingsState();
-    method @Nullable public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus getTetherNetworkConnectionStatus();
-    method @NonNull public java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork> getTetherNetworks();
-    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
-    method public boolean unregisterCallback(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean connectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean disconnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean forgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus getKnownNetworkConnectionStatus();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork> getKnownNetworks();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState getSettingsState();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus getTetherNetworkConnectionStatus();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork> getTetherNetworks();
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean unregisterCallback(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
   }
 
   public final class SharedConnectivitySettingsState implements android.os.Parcelable {
