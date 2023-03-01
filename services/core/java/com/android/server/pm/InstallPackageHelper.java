@@ -164,6 +164,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.art.model.DexoptParams;
+import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.ArtManagerService;
 import com.android.server.pm.dex.DexManager;
@@ -2534,8 +2535,9 @@ final class InstallPackageHelper {
                                     packageManagerLocal.withFilteredSnapshot()) {
                         DexoptParams params =
                                 dexoptOptions.convertToDexoptParams(0 /* extraFlags */);
-                        DexOptHelper.getArtManagerLocal().dexoptPackage(
+                        DexoptResult dexOptResult = DexOptHelper.getArtManagerLocal().dexoptPackage(
                                 snapshot, packageName, params);
+                        installRequest.onDexoptFinished(dexOptResult);
                     }
                 } else {
                     try {
