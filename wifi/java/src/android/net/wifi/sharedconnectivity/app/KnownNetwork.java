@@ -69,7 +69,7 @@ public final class KnownNetwork implements Parcelable {
     @NetworkSource private final int mNetworkSource;
     private final String mSsid;
     @SecurityType private final ArraySet<Integer> mSecurityTypes;
-    private final DeviceInfo mDeviceInfo;
+    private final NetworkProviderInfo mNetworkProviderInfo;
 
     /**
      * Builder class for {@link KnownNetwork}.
@@ -78,7 +78,7 @@ public final class KnownNetwork implements Parcelable {
         @NetworkSource private int mNetworkSource = -1;
         private String mSsid;
         @SecurityType private final ArraySet<Integer> mSecurityTypes = new ArraySet<>();
-        private android.net.wifi.sharedconnectivity.app.DeviceInfo mDeviceInfo;
+        private NetworkProviderInfo mNetworkProviderInfo;
 
         /**
          * Sets the indicated source of the known network.
@@ -120,12 +120,12 @@ public final class KnownNetwork implements Parcelable {
          * Sets the device information of the device providing connectivity.
          * Must be set if network source is {@link KnownNetwork#NETWORK_SOURCE_NEARBY_SELF}.
          *
-         * @param deviceInfo The device information object.
+         * @param networkProviderInfo The device information object.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setDeviceInfo(@Nullable DeviceInfo deviceInfo) {
-            mDeviceInfo = deviceInfo;
+        public Builder setNetworkProviderInfo(@Nullable NetworkProviderInfo networkProviderInfo) {
+            mNetworkProviderInfo = networkProviderInfo;
             return this;
         }
 
@@ -140,12 +140,12 @@ public final class KnownNetwork implements Parcelable {
                     mNetworkSource,
                     mSsid,
                     mSecurityTypes,
-                    mDeviceInfo);
+                    mNetworkProviderInfo);
         }
     }
 
     private static void validate(int networkSource, String ssid, Set<Integer> securityTypes,
-            DeviceInfo deviceInfo) {
+            NetworkProviderInfo networkProviderInfo) {
         if (networkSource != NETWORK_SOURCE_UNKNOWN
                 && networkSource != NETWORK_SOURCE_CLOUD_SELF
                 && networkSource != NETWORK_SOURCE_NEARBY_SELF) {
@@ -157,7 +157,7 @@ public final class KnownNetwork implements Parcelable {
         if (securityTypes.isEmpty()) {
             throw new IllegalArgumentException("SecurityTypes must be set");
         }
-        if (networkSource == NETWORK_SOURCE_NEARBY_SELF && deviceInfo == null) {
+        if (networkSource == NETWORK_SOURCE_NEARBY_SELF && networkProviderInfo == null) {
             throw new IllegalArgumentException("Device info must be provided when network source"
                     + " is NETWORK_SOURCE_NEARBY_SELF");
         }
@@ -167,12 +167,12 @@ public final class KnownNetwork implements Parcelable {
             @NetworkSource int networkSource,
             @NonNull String ssid,
             @NonNull @SecurityType ArraySet<Integer> securityTypes,
-            @Nullable DeviceInfo deviceInfo) {
-        validate(networkSource, ssid, securityTypes, deviceInfo);
+            @Nullable NetworkProviderInfo networkProviderInfo) {
+        validate(networkSource, ssid, securityTypes, networkProviderInfo);
         mNetworkSource = networkSource;
         mSsid = ssid;
         mSecurityTypes = new ArraySet<>(securityTypes);
-        mDeviceInfo = deviceInfo;
+        mNetworkProviderInfo = networkProviderInfo;
     }
 
     /**
@@ -213,8 +213,8 @@ public final class KnownNetwork implements Parcelable {
      * network source is cloud or unknown.
      */
     @Nullable
-    public DeviceInfo getDeviceInfo() {
-        return mDeviceInfo;
+    public NetworkProviderInfo getNetworkProviderInfo() {
+        return mNetworkProviderInfo;
     }
 
     @Override
@@ -224,12 +224,12 @@ public final class KnownNetwork implements Parcelable {
         return mNetworkSource == other.getNetworkSource()
                 && Objects.equals(mSsid, other.getSsid())
                 && Objects.equals(mSecurityTypes, other.getSecurityTypes())
-                && Objects.equals(mDeviceInfo, other.getDeviceInfo());
+                && Objects.equals(mNetworkProviderInfo, other.getNetworkProviderInfo());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mNetworkSource, mSsid, mSecurityTypes, mDeviceInfo);
+        return Objects.hash(mNetworkSource, mSsid, mSecurityTypes, mNetworkProviderInfo);
     }
 
     @Override
@@ -242,7 +242,7 @@ public final class KnownNetwork implements Parcelable {
         dest.writeInt(mNetworkSource);
         dest.writeString(mSsid);
         dest.writeArraySet(mSecurityTypes);
-        mDeviceInfo.writeToParcel(dest, flags);
+        mNetworkProviderInfo.writeToParcel(dest, flags);
     }
 
     /**
@@ -254,7 +254,7 @@ public final class KnownNetwork implements Parcelable {
     public static KnownNetwork readFromParcel(@NonNull Parcel in) {
         return new KnownNetwork(in.readInt(), in.readString(),
                 (ArraySet<Integer>) in.readArraySet(null),
-                DeviceInfo.readFromParcel(in));
+                NetworkProviderInfo.readFromParcel(in));
     }
 
     @NonNull
@@ -276,7 +276,7 @@ public final class KnownNetwork implements Parcelable {
                 .append("NetworkSource=").append(mNetworkSource)
                 .append(", ssid=").append(mSsid)
                 .append(", securityTypes=").append(mSecurityTypes.toString())
-                .append(", deviceInfo=").append(mDeviceInfo.toString())
+                .append(", networkProviderInfo=").append(mNetworkProviderInfo.toString())
                 .append("]").toString();
     }
 }

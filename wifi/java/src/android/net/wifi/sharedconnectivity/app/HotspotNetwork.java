@@ -33,14 +33,14 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A data class representing an Instant Tether network.
+ * A data class representing a hotspot network.
  * This class is used in IPC calls between the implementer of {@link SharedConnectivityService} and
  * the consumers of {@link com.android.wifitrackerlib}.
  *
  * @hide
  */
 @SystemApi
-public final class TetherNetwork implements Parcelable {
+public final class HotspotNetwork implements Parcelable {
     /**
      * Remote device is connected to the internet via an unknown connection.
      */
@@ -71,33 +71,44 @@ public final class TetherNetwork implements Parcelable {
             NETWORK_TYPE_WIFI,
             NETWORK_TYPE_ETHERNET
     })
-    public @interface NetworkType {}
+    public @interface NetworkType {
+    }
 
     private final long mDeviceId;
-    private final DeviceInfo mDeviceInfo;
-    @NetworkType private final int mNetworkType;
+    private final NetworkProviderInfo mNetworkProviderInfo;
+    @NetworkType
+    private final int mNetworkType;
     private final String mNetworkName;
-    @Nullable private final String mHotspotSsid;
-    @Nullable private final String mHotspotBssid;
-    @Nullable @SecurityType private final ArraySet<Integer> mHotspotSecurityTypes;
+    @Nullable
+    private final String mHotspotSsid;
+    @Nullable
+    private final String mHotspotBssid;
+    @Nullable
+    @SecurityType
+    private final ArraySet<Integer> mHotspotSecurityTypes;
 
     /**
-     * Builder class for {@link TetherNetwork}.
+     * Builder class for {@link HotspotNetwork}.
      */
     public static final class Builder {
         private long mDeviceId = -1;
-        private DeviceInfo mDeviceInfo;
-        @NetworkType private int mNetworkType;
+        private NetworkProviderInfo mNetworkProviderInfo;
+        @NetworkType
+        private int mNetworkType;
         private String mNetworkName;
-        @Nullable private String mHotspotSsid;
-        @Nullable private String mHotspotBssid;
-        @Nullable @SecurityType private final ArraySet<Integer> mHotspotSecurityTypes =
+        @Nullable
+        private String mHotspotSsid;
+        @Nullable
+        private String mHotspotBssid;
+        @Nullable
+        @SecurityType
+        private final ArraySet<Integer> mHotspotSecurityTypes =
                 new ArraySet<>();
 
         /**
          * Set the remote device ID.
          *
-         * @param deviceId Locally unique ID for this Instant Tether network.
+         * @param deviceId Locally unique ID for this Hotspot network.
          * @return Returns the Builder object.
          */
         @NonNull
@@ -109,12 +120,12 @@ public final class TetherNetwork implements Parcelable {
         /**
          * Sets information about the device providing connectivity.
          *
-         * @param deviceInfo The device information object.
+         * @param networkProviderInfo The device information object.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setDeviceInfo(@NonNull DeviceInfo deviceInfo) {
-            mDeviceInfo = deviceInfo;
+        public Builder setNetworkProviderInfo(@NonNull NetworkProviderInfo networkProviderInfo) {
+            mNetworkProviderInfo = networkProviderInfo;
             return this;
         }
 
@@ -125,7 +136,7 @@ public final class TetherNetwork implements Parcelable {
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setNetworkType(@NetworkType int networkType) {
+        public Builder setHostNetworkType(@NetworkType int networkType) {
             mNetworkType = networkType;
             return this;
         }
@@ -179,15 +190,15 @@ public final class TetherNetwork implements Parcelable {
         }
 
         /**
-         * Builds the {@link TetherNetwork} object.
+         * Builds the {@link HotspotNetwork} object.
          *
-         * @return Returns the built {@link TetherNetwork} object.
+         * @return Returns the built {@link HotspotNetwork} object.
          */
         @NonNull
-        public TetherNetwork build() {
-            return new TetherNetwork(
+        public HotspotNetwork build() {
+            return new HotspotNetwork(
                     mDeviceId,
-                    mDeviceInfo,
+                    mNetworkProviderInfo,
                     mNetworkType,
                     mNetworkName,
                     mHotspotSsid,
@@ -209,9 +220,9 @@ public final class TetherNetwork implements Parcelable {
         }
     }
 
-    private TetherNetwork(
+    private HotspotNetwork(
             long deviceId,
-            DeviceInfo deviceInfo,
+            NetworkProviderInfo networkProviderInfo,
             @NetworkType int networkType,
             @NonNull String networkName,
             @Nullable String hotspotSsid,
@@ -221,7 +232,7 @@ public final class TetherNetwork implements Parcelable {
                 networkType,
                 networkName);
         mDeviceId = deviceId;
-        mDeviceInfo = deviceInfo;
+        mNetworkProviderInfo = networkProviderInfo;
         mNetworkType = networkType;
         mNetworkName = networkName;
         mHotspotSsid = hotspotSsid;
@@ -232,7 +243,7 @@ public final class TetherNetwork implements Parcelable {
     /**
      * Gets the remote device ID.
      *
-     * @return Returns the locally unique ID for this Instant Tether network.
+     * @return Returns the locally unique ID for this Hotspot network.
      */
     public long getDeviceId() {
         return mDeviceId;
@@ -241,11 +252,11 @@ public final class TetherNetwork implements Parcelable {
     /**
      * Gets information about the device providing connectivity.
      *
-     * @return Returns the information of the device providing the Instant Tether network.
+     * @return Returns the information of the device providing the Hotspot network.
      */
     @NonNull
-    public DeviceInfo getDeviceInfo() {
-        return mDeviceInfo;
+    public NetworkProviderInfo getNetworkProviderInfo() {
+        return mNetworkProviderInfo;
     }
 
     /**
@@ -254,7 +265,7 @@ public final class TetherNetwork implements Parcelable {
      * @return Returns the network type as represented by IntDef {@link NetworkType}.
      */
     @NetworkType
-    public int getNetworkType() {
+    public int getHostNetworkType() {
         return mNetworkType;
     }
 
@@ -301,11 +312,11 @@ public final class TetherNetwork implements Parcelable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof TetherNetwork)) return false;
-        TetherNetwork other = (TetherNetwork) obj;
+        if (!(obj instanceof HotspotNetwork)) return false;
+        HotspotNetwork other = (HotspotNetwork) obj;
         return mDeviceId == other.getDeviceId()
-                && Objects.equals(mDeviceInfo, other.getDeviceInfo())
-                && mNetworkType == other.getNetworkType()
+                && Objects.equals(mNetworkProviderInfo, other.getNetworkProviderInfo())
+                && mNetworkType == other.getHostNetworkType()
                 && Objects.equals(mNetworkName, other.getNetworkName())
                 && Objects.equals(mHotspotSsid, other.getHotspotSsid())
                 && Objects.equals(mHotspotBssid, other.getHotspotBssid())
@@ -314,8 +325,8 @@ public final class TetherNetwork implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDeviceId, mDeviceInfo, mNetworkName, mHotspotSsid, mHotspotBssid,
-                mHotspotSecurityTypes);
+        return Objects.hash(mDeviceId, mNetworkProviderInfo, mNetworkName, mHotspotSsid,
+                mHotspotBssid, mHotspotSecurityTypes);
     }
 
     @Override
@@ -326,7 +337,7 @@ public final class TetherNetwork implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeLong(mDeviceId);
-        mDeviceInfo.writeToParcel(dest, flags);
+        mNetworkProviderInfo.writeToParcel(dest, flags);
         dest.writeInt(mNetworkType);
         dest.writeString(mNetworkName);
         dest.writeString(mHotspotSsid);
@@ -335,36 +346,36 @@ public final class TetherNetwork implements Parcelable {
     }
 
     /**
-     * Creates a {@link TetherNetwork} object from a parcel.
+     * Creates a {@link HotspotNetwork} object from a parcel.
      *
      * @hide
      */
     @NonNull
-    public static TetherNetwork readFromParcel(@NonNull Parcel in) {
-        return new TetherNetwork(in.readLong(), DeviceInfo.readFromParcel(in),
+    public static HotspotNetwork readFromParcel(@NonNull Parcel in) {
+        return new HotspotNetwork(in.readLong(), NetworkProviderInfo.readFromParcel(in),
                 in.readInt(), in.readString(), in.readString(), in.readString(),
                 (ArraySet<Integer>) in.readArraySet(null));
     }
 
     @NonNull
-    public static final Creator<TetherNetwork> CREATOR = new Creator<>() {
+    public static final Creator<HotspotNetwork> CREATOR = new Creator<>() {
         @Override
-        public TetherNetwork createFromParcel(Parcel in) {
+        public HotspotNetwork createFromParcel(Parcel in) {
             return readFromParcel(in);
         }
 
         @Override
-        public TetherNetwork[] newArray(int size) {
-            return new TetherNetwork[size];
+        public HotspotNetwork[] newArray(int size) {
+            return new HotspotNetwork[size];
         }
     };
 
     @Override
     public String toString() {
-        return new StringBuilder("TetherNetwork[")
+        return new StringBuilder("HotspotNetwork[")
                 .append("deviceId=").append(mDeviceId)
                 .append(", networkType=").append(mNetworkType)
-                .append(", deviceInfo=").append(mDeviceInfo.toString())
+                .append(", networkProviderInfo=").append(mNetworkProviderInfo.toString())
                 .append(", networkName=").append(mNetworkName)
                 .append(", hotspotSsid=").append(mHotspotSsid)
                 .append(", hotspotBssid=").append(mHotspotBssid)
