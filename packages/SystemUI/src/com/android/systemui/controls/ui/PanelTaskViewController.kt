@@ -71,7 +71,7 @@ class PanelTaskViewController(
                 taskView.post {
                     val roundedCorner =
                         activityContext.resources.getDimensionPixelSize(
-                            R.dimen.notification_corner_radius
+                            R.dimen.controls_panel_corner_radius
                         )
                     val radii = FloatArray(8) { roundedCorner.toFloat() }
                     taskView.background =
