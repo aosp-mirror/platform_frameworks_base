@@ -16,12 +16,7 @@
 
 package com.android.server.credentials;
 
-import static com.android.server.credentials.MetricUtilities.METRICS_API_NAME_CLEAR_CREDENTIAL;
-import static com.android.server.credentials.MetricUtilities.METRICS_API_NAME_CREATE_CREDENTIAL;
-import static com.android.server.credentials.MetricUtilities.METRICS_API_NAME_GET_CREDENTIAL;
-import static com.android.server.credentials.MetricUtilities.METRICS_API_NAME_UNKNOWN;
-import static com.android.server.credentials.MetricUtilities.METRICS_API_STATUS_FAILURE;
-import static com.android.server.credentials.MetricUtilities.METRICS_API_STATUS_SUCCESS;
+import static com.android.server.credentials.MetricUtilities.logApiCalled;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -39,7 +34,8 @@ import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
 import com.android.internal.R;
-import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.credentials.metrics.ApiName;
+import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.CandidateProviderMetric;
 import com.android.server.credentials.metrics.ChosenProviderMetric;
 
@@ -162,50 +158,10 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         }
         return false;
     }
-    // TODO: move these definitions to a separate logging focused class.
-    enum RequestType {
-        GET_CREDENTIALS,
-        CREATE_CREDENTIALS,
-        CLEAR_CREDENTIALS,
-    }
 
-    private static int getApiNameFromRequestType(RequestType requestType) {
-        switch (requestType) {
-            case GET_CREDENTIALS:
-                return METRICS_API_NAME_GET_CREDENTIAL;
-            case CREATE_CREDENTIALS:
-                return METRICS_API_NAME_CREATE_CREDENTIAL;
-            case CLEAR_CREDENTIALS:
-                return METRICS_API_NAME_CLEAR_CREDENTIAL;
-            default:
-                return METRICS_API_NAME_UNKNOWN;
-        }
-    }
-
-    protected void logApiCalled(RequestType requestType, boolean isSuccessfulOverall) {
-        var providerSessions = mProviders.values();
-        int providerSize = providerSessions.size();
-        int[] candidateUidList = new int[providerSize];
-        int[] candidateQueryRoundTripTimeList = new int[providerSize];
-        int[] candidateStatusList = new int[providerSize];
-        int index = 0;
-        for (var session : providerSessions) {
-            CandidateProviderMetric metric = session.mCandidateProviderMetric;
-            candidateUidList[index] = metric.getCandidateUid();
-            candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMs();
-            candidateStatusList[index] = metric.getProviderQueryStatus();
-            index++;
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
-                /* api_name */getApiNameFromRequestType(requestType), /* caller_uid */
-                mCallingUid, /* api_status */
-                isSuccessfulOverall ? METRICS_API_STATUS_SUCCESS : METRICS_API_STATUS_FAILURE,
-                candidateUidList,
-                candidateQueryRoundTripTimeList,
-                candidateStatusList, mChosenProviderMetric.getChosenUid(),
-                mChosenProviderMetric.getEntireProviderLatencyMs(),
-                mChosenProviderMetric.getFinalPhaseLatencyMs(),
-                mChosenProviderMetric.getChosenProviderStatus());
+    protected void logApiCall(ApiName apiName, ApiStatus apiStatus) {
+        logApiCalled(apiName, apiStatus, mProviders, mCallingUid,
+                mChosenProviderMetric);
     }
 
     protected boolean isSessionCancelled() {

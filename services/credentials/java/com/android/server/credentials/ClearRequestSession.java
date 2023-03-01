@@ -29,6 +29,9 @@ import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
+import com.android.server.credentials.metrics.ApiName;
+import com.android.server.credentials.metrics.ApiStatus;
+
 import java.util.ArrayList;
 
 /**
@@ -119,18 +122,21 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             // TODO: Differentiate btw cancelled and false
             mChosenProviderMetric.setChosenProviderStatus(
                     MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_SUCCESS);
-            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
+            logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
+                    ApiStatus.METRICS_API_STATUS_CLIENT_CANCELED);
             finishSession(/*propagateCancellation=*/true);
             return;
         }
         try {
             mClientCallback.onSuccess();
-            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
+            logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
+                    ApiStatus.METRICS_API_STATUS_SUCCESS);
         } catch (RemoteException e) {
             mChosenProviderMetric.setChosenProviderStatus(
                     MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_FAILURE);
             Log.i(TAG, "Issue while propagating the response to the client");
-            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
+            logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
+                    ApiStatus.METRICS_API_STATUS_FAILURE);
         }
         finishSession(/*propagateCancellation=*/false);
     }
@@ -139,7 +145,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         Log.i(TAG, "respondToClientWithErrorAndFinish");
         if (isSessionCancelled()) {
             // TODO: Differentiate btw cancelled and false
-            logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ true);
+            logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
+                    ApiStatus.METRICS_API_STATUS_CLIENT_CANCELED);
             finishSession(/*propagateCancellation=*/true);
             return;
         }
@@ -148,7 +155,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-        logApiCalled(RequestType.CLEAR_CREDENTIALS, /* isSuccessful */ false);
+        logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
+                ApiStatus.METRICS_API_STATUS_FAILURE);
         finishSession(/*propagateCancellation=*/false);
     }
 
