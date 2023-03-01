@@ -48,6 +48,8 @@
     <string name="close_sheet" msgid="1393792015338908262">"ಶೀಟ್ ಮುಚ್ಚಿರಿ"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"ಹಿಂದಿನ ಪುಟಕ್ಕೆ ಹಿಂದಿರುಗಿ"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"ಮುಚ್ಚಿರಿ"</string>
+    <!-- no translation found for accessibility_snackbar_dismiss (3456598374801836120) -->
+    <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಪಾಸ್‌ಕೀ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ನಿಮ್ಮ ಸೈನ್-ಇನ್ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಗಾಗಿ ಉಳಿಸಲಾದ ಸೈನ್-ಇನ್ ಮಾಹಿತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
