@@ -46,7 +46,7 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.utils.AlarmQueue;
@@ -132,7 +132,7 @@ public class PrefetchController extends StateController {
         mPcConstants = new PcConstants();
         mHandler = new PcHandler(mContext.getMainLooper());
         mThresholdAlarmListener = new ThresholdAlarmListener(
-                mContext, JobSchedulerBackgroundThread.get().getLooper());
+                mContext, AppSchedulingModuleThread.get().getLooper());
         mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
 
         mUsageStatsManagerInternal
@@ -400,7 +400,7 @@ public class PrefetchController extends StateController {
     public void onConstantsUpdatedLocked() {
         if (mPcConstants.mShouldReevaluateConstraints) {
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 final ArraySet<JobStatus> changedJobs = new ArraySet<>();
                 synchronized (mLock) {
                     final long nowElapsed = sElapsedRealtimeClock.millis();
