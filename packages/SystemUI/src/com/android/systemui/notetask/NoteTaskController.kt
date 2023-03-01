@@ -22,6 +22,9 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+import android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.UserManager
@@ -54,8 +57,8 @@ constructor(
     private val resolver: NoteTaskInfoResolver,
     private val eventLogger: NoteTaskEventLogger,
     private val optionalBubbles: Optional<Bubbles>,
-    private val optionalUserManager: Optional<UserManager>,
-    private val optionalKeyguardManager: Optional<KeyguardManager>,
+    private val userManager: UserManager,
+    private val keyguardManager: KeyguardManager,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
     private val devicePolicyManager: DevicePolicyManager,
     private val userTracker: UserTracker,
@@ -106,8 +109,6 @@ constructor(
         if (!isEnabled) return
 
         val bubbles = optionalBubbles.getOrNull() ?: return
-        val userManager = optionalUserManager.getOrNull() ?: return
-        val keyguardManager = optionalKeyguardManager.getOrNull() ?: return
 
         // TODO(b/249954038): We should handle direct boot (isUserUnlocked). For now, we do nothing.
         if (!userManager.isUserUnlocked) return
@@ -140,12 +141,13 @@ constructor(
             logDebug { "onShowNoteTask - start: $info" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
+                    // TODO(b/267634412, b/268351693): Should use `showOrHideAppBubbleAsUser`
                     bubbles.showOrHideAppBubble(intent)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
-                    context.startActivity(intent)
+                    context.startActivityAsUser(intent, userTracker.userHandle)
                     eventLogger.logNoteTaskOpened(info)
                     logDebug { "onShowNoteTask - opened as activity: $info" }
                 }
@@ -198,12 +200,21 @@ constructor(
 }
 
 private fun createNoteIntent(info: NoteTaskInfo): Intent =
-    Intent(NoteTaskController.ACTION_CREATE_NOTE)
-        .setPackage(info.packageName)
-        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    Intent(NoteTaskController.ACTION_CREATE_NOTE).apply {
+        setPackage(info.packageName)
+
         // EXTRA_USE_STYLUS_MODE does not mean a stylus is in-use, but a stylus entrypoint
         // was used to start it.
-        .putExtra(NoteTaskController.INTENT_EXTRA_USE_STYLUS_MODE, true)
+        putExtra(NoteTaskController.INTENT_EXTRA_USE_STYLUS_MODE, true)
+
+        addFlags(FLAG_ACTIVITY_NEW_TASK)
+        // We should ensure the note experience can be open both as a full screen (lock screen)
+        // and inside the app bubble (contextual). These additional flags will do that.
+        if (info.launchMode == NoteTaskLaunchMode.Activity) {
+            addFlags(FLAG_ACTIVITY_MULTIPLE_TASK)
+            addFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
+        }
+    }
 
 private inline fun logDebug(message: () -> String) {
     if (Build.IS_DEBUGGABLE) {
