@@ -123,7 +123,7 @@
     <java-symbol type="bool" name="config_enhanced_iwlan_handover_check" />
 
     <!-- Whether using the new SubscriptionManagerService or the old SubscriptionController -->
-    <bool name="config_using_subscription_manager_service">false</bool>
+    <bool name="config_using_subscription_manager_service">true</bool>
     <java-symbol type="bool" name="config_using_subscription_manager_service" />
 
     <!-- Whether asynchronously update the subscription database or not. Async mode increases
