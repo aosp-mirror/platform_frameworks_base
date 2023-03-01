@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_WINDOW_TITLE;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
@@ -76,6 +78,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final ComponentName mLowLightDreamComponent;
     private final UiEventLogger mUiEventLogger;
     private final WindowManager mWindowManager;
+    private final String mWindowTitle;
 
     // A reference to the {@link Window} used to hold the dream overlay.
     private Window mWindow;
@@ -151,7 +154,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             TouchInsetManager touchInsetManager,
             @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
                     ComponentName lowLightDreamComponent,
-            DreamOverlayCallbackController dreamOverlayCallbackController) {
+            DreamOverlayCallbackController dreamOverlayCallbackController,
+            @Named(DREAM_OVERLAY_WINDOW_TITLE) String windowTitle) {
         mContext = context;
         mExecutor = executor;
         mWindowManager = windowManager;
@@ -161,6 +165,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mStateController = stateController;
         mUiEventLogger = uiEventLogger;
         mDreamOverlayCallbackController = dreamOverlayCallbackController;
+        mWindowTitle = windowTitle;
 
         final ViewModelStore viewModelStore = new ViewModelStore();
         final Complication.Host host =
@@ -277,7 +282,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private boolean addOverlayWindowLocked(WindowManager.LayoutParams layoutParams) {
         mWindow = new PhoneWindow(mContext);
         // Default to SystemUI name for TalkBack.
-        mWindow.setTitle("");
+        mWindow.setTitle(mWindowTitle);
         mWindow.setAttributes(layoutParams);
         mWindow.setWindowManager(null, layoutParams.token, "DreamOverlay", true);
 
