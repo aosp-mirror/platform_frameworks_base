@@ -25,7 +25,6 @@ import android.os.UserManager
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.notetask.NoteTaskController.Companion.INTENT_EXTRA_USE_STYLUS_MODE
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
@@ -228,10 +227,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         val intentCaptor = argumentCaptor<Intent>()
         verify(context).startActivity(capture(intentCaptor))
         intentCaptor.value.let { intent ->
-            assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
+            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
             assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)
@@ -258,10 +257,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         val intentCaptor = argumentCaptor<Intent>()
         verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
         intentCaptor.value.let { intent ->
-            assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
+            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
             assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
         verifyZeroInteractions(eventLogger)
     }
@@ -286,10 +285,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         val intentCaptor = argumentCaptor<Intent>()
         verify(context).startActivity(capture(intentCaptor))
         intentCaptor.value.let { intent ->
-            assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
+            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
             assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)

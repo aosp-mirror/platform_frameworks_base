@@ -49,7 +49,7 @@ constructor(
             return Intent(context, LaunchNoteTaskActivity::class.java).apply {
                 // Intent's action must be set in shortcuts, or an exception will be thrown.
                 // TODO(b/254606432): Use Intent.ACTION_CREATE_NOTE instead.
-                action = NoteTaskController.ACTION_CREATE_NOTE
+                action = Intent.ACTION_CREATE_NOTE
             }
         }
     }
