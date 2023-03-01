@@ -1172,8 +1172,8 @@
     <string name="no" msgid="5122037903299899715">"Отмена"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Внимание!"</string>
     <string name="loading" msgid="3138021523725055037">"Загрузка…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"I"</string>
-    <string name="capital_off" msgid="7443704171014626777">"O"</string>
+    <string name="capital_on" msgid="2770685323900821829">"Включено"</string>
+    <string name="capital_off" msgid="7443704171014626777">"Выключено"</string>
     <string name="checked" msgid="9179896827054513119">"отмечено"</string>
     <string name="not_checked" msgid="7972320087569023342">"не отмечено"</string>
     <string name="selected" msgid="6614607926197755875">"выбрано"</string>
