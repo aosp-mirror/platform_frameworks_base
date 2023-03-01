@@ -182,9 +182,22 @@ open class UserTrackerImpl internal constructor(
         Log.i(TAG, "Switching to user $newUserId")
 
         setUserIdInternal(newUserId)
-        notifySubscribers {
-            onUserChanging(newUserId, userContext)
-        }.await()
+
+        val list = synchronized(callbacks) {
+            callbacks.toList()
+        }
+        val latch = CountDownLatch(list.size)
+        list.forEach {
+            val callback = it.callback.get()
+            if (callback != null) {
+                it.executor.execute {
+                    callback.onUserChanging(userId, userContext, latch)
+                }
+            } else {
+                latch.countDown()
+            }
+        }
+        latch.await()
     }
 
     @WorkerThread
@@ -224,25 +237,18 @@ open class UserTrackerImpl internal constructor(
         }
     }
 
-    private inline fun notifySubscribers(
-            crossinline action: UserTracker.Callback.() -> Unit
-    ): CountDownLatch {
+    private inline fun notifySubscribers(crossinline action: UserTracker.Callback.() -> Unit) {
         val list = synchronized(callbacks) {
             callbacks.toList()
         }
-        val latch = CountDownLatch(list.size)
 
         list.forEach {
             if (it.callback.get() != null) {
                 it.executor.execute {
                     it.callback.get()?.action()
-                    latch.countDown()
                 }
-            } else {
-                latch.countDown()
             }
         }
-        return latch
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
