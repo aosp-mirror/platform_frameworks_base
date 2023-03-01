@@ -418,8 +418,8 @@ constructor(
      * Calculate the alpha of the view when given a cross-fade progress.
      *
      * @param crossFadeProgress The current cross fade progress. 0.5f means it's just switching
-     * between the start and the end location and the content is fully faded, while 0.75f means that
-     * we're halfway faded in again in the target state.
+     *   between the start and the end location and the content is fully faded, while 0.75f means
+     *   that we're halfway faded in again in the target state.
      */
     private fun calculateAlphaFromCrossFade(crossFadeProgress: Float): Float {
         if (crossFadeProgress <= 0.5f) {
@@ -629,6 +629,7 @@ constructor(
      *
      * @param forceNoAnimation optional parameter telling the system not to animate
      * @param forceStateUpdate optional parameter telling the system to update transition state
+     *
      * ```
      *                         even if location did not change
      * ```
@@ -944,7 +945,7 @@ constructor(
 
     /**
      * @return the current transformation progress if we're in a guided transformation and -1
-     * otherwise
+     *   otherwise
      */
     private fun getTransformationProgress(): Float {
         if (skipQqsOnExpansion) {

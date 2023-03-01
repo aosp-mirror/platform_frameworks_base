@@ -87,7 +87,7 @@ internal object Evaluator {
      * Helper for evaluating 3-valued logical AND/OR.
      *
      * @param returnValueIfAnyMatches AND returns false if any value is false. OR returns true if
-     * any value is true.
+     *   any value is true.
      */
     private fun threeValuedAndOrOr(
         conditions: Collection<Condition>,

@@ -50,6 +50,7 @@ constructor(
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
+     *
      * @return whether alternateBouncer is visible
      */
     fun show(): Boolean {
@@ -74,6 +75,7 @@ constructor(
      * Sets the correct bouncer states to hide the bouncer. Should only be called through
      * StatusBarKeyguardViewManager until ScrimController is refactored to use
      * alternateBouncerInteractor.
+     *
      * @return true if the alternate bouncer was newly hidden, else false.
      */
     fun hide(): Boolean {

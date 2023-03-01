@@ -353,8 +353,8 @@ constructor(
      * True if the checked subId is in the list of current subs or the active mobile data subId
      *
      * @param checkedSubs the list to validate [subId] against. To invalidate the cache, pass in the
-     * new subscription list. Otherwise use [subscriptions.value] to validate a subId against the
-     * current known subscriptions
+     *   new subscription list. Otherwise use [subscriptions.value] to validate a subId against the
+     *   current known subscriptions
      */
     private fun checkSub(subId: Int, checkedSubs: List<SubscriptionModel>): Boolean {
         if (activeMobileDataSubscriptionId.value == subId) return true
