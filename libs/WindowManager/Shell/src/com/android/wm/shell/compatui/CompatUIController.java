@@ -126,13 +126,11 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private final Lazy<Transitions> mTransitionsLazy;
     private final DockStateReader mDockStateReader;
     private final CompatUIConfiguration mCompatUIConfiguration;
-
-    private CompatUICallback mCallback;
-
     // Only show each hint once automatically in the process life.
     private final CompatUIHintsState mCompatUIHintsState;
-
     private final CompatUIShellCommandHandler mCompatUIShellCommandHandler;
+
+    private CompatUICallback mCallback;
 
     // Indicates if the keyguard is currently showing, in which case compat UIs shouldn't
     // be shown.
@@ -372,19 +370,20 @@ public class CompatUIController implements OnDisplaysChangedListener,
         RestartDialogWindowManager layout =
                 mTaskIdToRestartDialogWindowManagerMap.get(taskInfo.taskId);
         if (layout != null) {
-            // TODO(b/266262111) Handle theme change when taskListener changes
-            if (layout.getTaskListener() != taskListener) {
-                mSetOfTaskIdsShowingRestartDialog.remove(taskInfo.taskId);
-            }
-            layout.setRequestRestartDialog(
-                    mSetOfTaskIdsShowingRestartDialog.contains(taskInfo.taskId));
-            // UI already exists, update the UI layout.
-            if (!layout.updateCompatInfo(taskInfo, taskListener,
-                    showOnDisplay(layout.getDisplayId()))) {
-                // The layout is no longer eligible to be shown, remove from active layouts.
+            if (layout.needsToBeRecreated(taskInfo, taskListener)) {
                 mTaskIdToRestartDialogWindowManagerMap.remove(taskInfo.taskId);
+                layout.release();
+            } else {
+                layout.setRequestRestartDialog(
+                        mSetOfTaskIdsShowingRestartDialog.contains(taskInfo.taskId));
+                // UI already exists, update the UI layout.
+                if (!layout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(layout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mTaskIdToRestartDialogWindowManagerMap.remove(taskInfo.taskId);
+                }
+                return;
             }
-            return;
         }
         // Create a new UI layout.
         final Context context = getOrCreateDisplayContext(taskInfo.displayId);
