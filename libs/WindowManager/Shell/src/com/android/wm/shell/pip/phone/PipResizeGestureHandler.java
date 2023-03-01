@@ -32,6 +32,7 @@ import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Looper;
 import android.provider.DeviceConfig;
+import android.util.Log;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.InputChannel;
@@ -243,6 +244,7 @@ public class PipResizeGestureHandler {
 
     @VisibleForTesting
     void onInputEvent(InputEvent ev) {
+        Log.d(TAG, "onInputEvent: " + ev);
         if (!mEnableDragCornerResize && !mEnablePinchResize) {
             // No need to handle anything if neither form of resizing is enabled.
             return;
@@ -256,6 +258,17 @@ public class PipResizeGestureHandler {
         if (ev instanceof MotionEvent) {
             MotionEvent mv = (MotionEvent) ev;
             int action = mv.getActionMasked();
+
+            // TODO: remove logging once b/269505548 is resolved
+            if (action == MotionEvent.ACTION_MOVE && mFirstIndex != -1 && mSecondIndex != -1) {
+                float x0 = mv.getRawX(mFirstIndex);
+                float y0 = mv.getRawY(mFirstIndex);
+                float x1 = mv.getRawX(mSecondIndex);
+                float y1 = mv.getRawY(mSecondIndex);
+                Log.d(TAG, "at onInputEvent (" + x0 + ", " + y0 + ")");
+                Log.d(TAG, "at onInputEvent (" + x1 + ", " + y1 + ")");
+            }
+
             final Rect pipBounds = mPipBoundsState.getBounds();
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 if (!pipBounds.contains((int) mv.getRawX(), (int) mv.getRawY())
@@ -393,6 +406,7 @@ public class PipResizeGestureHandler {
 
     @VisibleForTesting
     void onPinchResize(MotionEvent ev) {
+        Log.d(TAG, "onPinchResize: " + ev);
         int action = ev.getActionMasked();
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -435,6 +449,10 @@ public class PipResizeGestureHandler {
             float y1 = ev.getRawY(mSecondIndex);
             mLastPoint.set(x0, y0);
             mLastSecondPoint.set(x1, y1);
+
+            // TODO: remove logging once b/269505548 is resolved
+            Log.d(TAG, "at onPinchResize (" + x0 + ", " + y0 + ")");
+            Log.d(TAG, "at onPinchResize (" + x1 + ", " + y1 + ")");
 
             // Capture inputs
             if (!mThresholdCrossed
