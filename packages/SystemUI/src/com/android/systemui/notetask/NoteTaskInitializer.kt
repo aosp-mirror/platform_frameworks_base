@@ -15,6 +15,7 @@
  */
 package com.android.systemui.notetask
 
+import android.view.KeyEvent
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.statusbar.CommandQueue
 import com.android.wm.shell.bubbles.Bubbles
@@ -35,7 +36,7 @@ constructor(
     val callbacks =
         object : CommandQueue.Callbacks {
             override fun handleSystemKey(keyCode: Int) {
-                if (keyCode == NoteTaskController.NOTE_TASK_KEY_EVENT) {
+                if (keyCode == KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL) {
                     controller.showNoteTask(NoteTaskEntryPoint.TAIL_BUTTON)
                 }
             }
