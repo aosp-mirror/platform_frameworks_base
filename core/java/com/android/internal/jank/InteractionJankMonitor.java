@@ -951,7 +951,7 @@ public class InteractionJankMonitor {
             case CUJ_IME_INSETS_ANIMATION:
                 return "IME_INSETS_ANIMATION";
             case CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION:
-                return "CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION";
+                return "LOCKSCREEN_CLOCK_MOVE_ANIMATION";
         }
         return "UNKNOWN";
     }
