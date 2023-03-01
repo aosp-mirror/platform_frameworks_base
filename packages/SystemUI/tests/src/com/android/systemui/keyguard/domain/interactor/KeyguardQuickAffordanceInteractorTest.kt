@@ -281,6 +281,24 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun `quickAffordance - hidden when quick settings is visible`() =
+        testScope.runTest {
+            repository.setQuickSettingsVisible(true)
+            quickAccessWallet.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                )
+            )
+
+            val collectedValue =
+                collectLastValue(
+                    underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_END)
+                )
+
+            assertThat(collectedValue()).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
+        }
+
+    @Test
     fun `quickAffordance - bottom start affordance hidden while dozing`() =
         testScope.runTest {
             repository.setDozing(true)

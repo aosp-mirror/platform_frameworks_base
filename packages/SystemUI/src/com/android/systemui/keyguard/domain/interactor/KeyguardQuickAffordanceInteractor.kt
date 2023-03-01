@@ -93,8 +93,9 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
-        ) { affordance, isDozing, isKeyguardShowing ->
-            if (!isDozing && isKeyguardShowing) {
+            keyguardInteractor.isQuickSettingsVisible
+        ) { affordance, isDozing, isKeyguardShowing, isQuickSettingsVisible ->
+            if (!isDozing && isKeyguardShowing && !isQuickSettingsVisible) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden
