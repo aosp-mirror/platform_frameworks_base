@@ -1977,7 +1977,7 @@
     <string name="app_category_social" msgid="2278269325488344054">"Социалдык жана коммуникация"</string>
     <string name="app_category_news" msgid="1172762719574964544">"Жаңылыктар жана журналдар"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"Карталар жана чабыттоо"</string>
-    <string name="app_category_productivity" msgid="1844422703029557883">"Өндүрүш категориясы"</string>
+    <string name="app_category_productivity" msgid="1844422703029557883">"Майнаптуулук"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Атайын мүмкүнчүлүктөр"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Түзмөктүн сактагычы"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB аркылуу мүчүлүштүктөрдү аныктоо"</string>
