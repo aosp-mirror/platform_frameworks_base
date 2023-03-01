@@ -19,9 +19,9 @@ package com.android.server.companion.transport;
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 
 import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
+import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PLATFORM_INFO;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
@@ -30,12 +30,17 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
+import com.android.server.companion.transport.Transport.Listener;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -43,6 +48,9 @@ import java.util.concurrent.Future;
 public class CompanionTransportManager {
     private static final String TAG = "CDM_CompanionTransportManager";
     private static final boolean DEBUG = false;
+
+    private static final int SECURE_CHANNEL_AVAILABLE_SDK = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
+    private static final int NON_ANDROID = -1;
 
     private boolean mSecureTransportEnabled = true;
 
@@ -54,24 +62,29 @@ public class CompanionTransportManager {
         return (message & 0xFF000000) == 0x33000000;
     }
 
-    public interface Listener {
-        void onRequestPermissionRestore(byte[] data);
-    }
-
     private final Context mContext;
 
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
 
-    @Nullable
-    private Listener mListener;
+    @NonNull
+    private final Map<Integer, Listener> mListeners = new HashMap<>();
+
+    private Transport mTempTransport;
 
     public CompanionTransportManager(Context context) {
         mContext = context;
     }
 
-    public void setListener(@NonNull Listener listener) {
-        mListener = listener;
+    /**
+     * Add a message listener when a message is received for the message type
+     */
+    @GuardedBy("mTransports")
+    public void addListener(int message, @NonNull Listener listener) {
+        mListeners.put(message, listener);
+        for (int i = 0; i < mTransports.size(); i++) {
+            mTransports.valueAt(i).addListener(message, listener);
+        }
     }
 
     /**
@@ -105,15 +118,7 @@ public class CompanionTransportManager {
                 detachSystemDataTransport(packageName, userId, associationId);
             }
 
-            final Transport transport;
-            if (isSecureTransportEnabled(associationId)) {
-                transport = new SecureTransport(associationId, fd, mContext, mListener);
-            } else {
-                transport = new RawTransport(associationId, fd, mContext, mListener);
-            }
-
-            transport.start();
-            mTransports.put(associationId, transport);
+            initializeTransport(associationId, fd);
         }
     }
 
@@ -128,13 +133,85 @@ public class CompanionTransportManager {
         }
     }
 
+    @GuardedBy("mTransports")
+    private void initializeTransport(int associationId, ParcelFileDescriptor fd) {
+        if (!isSecureTransportEnabled()) {
+            Transport transport = new RawTransport(associationId, fd, mContext);
+            for (Map.Entry<Integer, Listener> entry : mListeners.entrySet()) {
+                transport.addListener(entry.getKey(), entry.getValue());
+            }
+            transport.start();
+            mTransports.put(associationId, transport);
+            Slog.i(TAG, "RawTransport is created");
+            return;
+        }
+
+        // Exchange platform info to decide which transport should be created
+        mTempTransport = new RawTransport(associationId, fd, mContext);
+        for (Map.Entry<Integer, Listener> entry : mListeners.entrySet()) {
+            mTempTransport.addListener(entry.getKey(), entry.getValue());
+        }
+        mTempTransport.addListener(MESSAGE_REQUEST_PLATFORM_INFO, this::onPlatformInfoReceived);
+        mTempTransport.start();
+
+        int sdk = Build.VERSION.SDK_INT;
+        String release = Build.VERSION.RELEASE;
+        // data format: | SDK_INT (int) | release length (int) | release |
+        final ByteBuffer data = ByteBuffer.allocate(4 + 4 + release.getBytes().length)
+                .putInt(sdk)
+                .putInt(release.getBytes().length)
+                .put(release.getBytes());
+
+        // TODO: it should check if preSharedKey is given
+        mTempTransport.requestForResponse(MESSAGE_REQUEST_PLATFORM_INFO, data.array());
+    }
+
+    /**
+     * Depending on the remote platform info to decide which transport should be created
+     */
+    @GuardedBy("mTransports")
+    private void onPlatformInfoReceived(byte[] data) {
+        // TODO: it should check if preSharedKey is given
+
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        int remoteSdk = buffer.getInt();
+        byte[] remoteRelease = new byte[buffer.getInt()];
+        buffer.get(remoteRelease);
+
+        Slog.i(TAG, "Remote device SDK: " + remoteSdk + ", release:" + new String(remoteRelease));
+
+        Transport transport = mTempTransport;
+        mTempTransport = null;
+
+        int sdk = Build.VERSION.SDK_INT;
+        String release = Build.VERSION.RELEASE;
+        if (remoteSdk == NON_ANDROID) {
+            // TODO: pass in a real preSharedKey
+            transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
+                    mContext, null, null);
+        } else if (sdk < SECURE_CHANNEL_AVAILABLE_SDK
+                || remoteSdk < SECURE_CHANNEL_AVAILABLE_SDK) {
+            // TODO: depending on the release version, either
+            //       1) using a RawTransport for old T versions
+            //       2) or an Ukey2 handshaked transport for UKey2 backported T versions
+        } else {
+            Slog.i(TAG, "Creating a secure channel");
+            transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
+                    mContext);
+            for (Map.Entry<Integer, Listener> entry : mListeners.entrySet()) {
+                transport.addListener(entry.getKey(), entry.getValue());
+            }
+            transport.start();
+        }
+        mTransports.put(transport.getAssociationId(), transport);
+    }
+
     public Future<?> requestPermissionRestore(int associationId, byte[] data) {
         synchronized (mTransports) {
             final Transport transport = mTransports.get(associationId);
             if (transport == null) {
                 return CompletableFuture.failedFuture(new IOException("Missing transport"));
             }
-
             return transport.requestForResponse(MESSAGE_REQUEST_PERMISSION_RESTORE, data);
         }
     }
@@ -146,10 +223,9 @@ public class CompanionTransportManager {
         this.mSecureTransportEnabled = enabled;
     }
 
-    private boolean isSecureTransportEnabled(int associationId) {
+    private boolean isSecureTransportEnabled() {
         boolean enabled = !Build.IS_DEBUGGABLE || mSecureTransportEnabled;
 
-        // TODO: version comparison logic
         return enabled;
     }
 }
