@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -127,6 +128,10 @@ public class DisplayManagerServiceTest {
 
     private Context mContext;
 
+    private int mHdrConversionMode;
+
+    private int mPreferredHdrOutputType;
+
     private final DisplayManagerService.Injector mShortMockedInjector =
             new DisplayManagerService.Injector() {
                 @Override
@@ -176,6 +181,8 @@ public class DisplayManagerServiceTest {
         @Override
         int setHdrConversionMode(int conversionMode, int preferredHdrOutputType,
                 int[] autoHdrTypes) {
+            mHdrConversionMode = conversionMode;
+            mPreferredHdrOutputType = preferredHdrOutputType;
             return Display.HdrCapabilities.HDR_TYPE_INVALID;
         }
 
@@ -185,7 +192,7 @@ public class DisplayManagerServiceTest {
         }
 
         boolean getHdrOutputConversionSupport() {
-            return false;
+            return true;
         }
    }
 
@@ -1539,6 +1546,40 @@ public class DisplayManagerServiceTest {
         assertNotEquals(
                 new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_FORCE, 2),
                 new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_SYSTEM));
+    }
+
+    @Test
+    public void testCreateHdrConversionMode_withInvalidArguments_throwsException() {
+        assertThrows(
+                "preferredHdrOutputType must not be set if the conversion mode is "
+                        + "HDR_CONVERSION_PASSTHROUGH",
+                IllegalArgumentException.class,
+                () -> new HdrConversionMode(HdrConversionMode.HDR_CONVERSION_PASSTHROUGH,
+                        Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION));
+    }
+
+    @Test
+    public void testSetHdrConversionModeInternal_withInvalidArguments_throwsException() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        assertThrows("Expected DisplayManager to throw IllegalArgumentException when "
+                        + "preferredHdrOutputType is set and the conversion mode is "
+                        + "HDR_CONVERSION_SYSTEM",
+                IllegalArgumentException.class,
+                () -> displayManager.setHdrConversionModeInternal(new HdrConversionMode(
+                        HdrConversionMode.HDR_CONVERSION_SYSTEM,
+                        Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION)));
+    }
+
+    @Test
+    public void testSetAndGetHdrConversionModeInternal() {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        final HdrConversionMode mode = new HdrConversionMode(
+                HdrConversionMode.HDR_CONVERSION_FORCE,
+                Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION);
+        displayManager.setHdrConversionModeInternal(mode);
+        assertEquals(mode, displayManager.getHdrConversionModeSettingInternal());
+        assertEquals(mode.getConversionMode(), mHdrConversionMode);
+        assertEquals(mode.getPreferredHdrOutputType(), mPreferredHdrOutputType);
     }
 
     private void testDisplayInfoFrameRateOverrideModeCompat(boolean compatChangeEnabled)
