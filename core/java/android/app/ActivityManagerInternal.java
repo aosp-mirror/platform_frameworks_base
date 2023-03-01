@@ -968,14 +968,6 @@ public abstract class ActivityManagerInternal {
     public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
 
     /**
-     * Called by PowerManager. Return whether a given procstate is allowed to hold
-     * wake locks in deep doze. Because it's called with the power manager lock held, we can't
-     * hold AM locks in it.
-     * @hide
-     */
-    public abstract boolean canHoldWakeLocksInDeepDoze(int uid, int procstate);
-
-    /**
      * Same as {@link android.app.IActivityManager#startProfile(int userId)}, but it would succeed
      * even if the profile is disabled - it should only be called by
      * {@link com.android.server.devicepolicy.DevicePolicyManagerService} when starting a profile
