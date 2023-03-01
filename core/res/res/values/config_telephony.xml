@@ -110,6 +110,10 @@
     <string name="config_satellite_service_package" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_service_package" />
 
+    <!-- Telephony pointing UI package name to be launched. -->
+    <string name="config_pointing_ui_package" translatable="false"></string>
+    <java-symbol type="string" name="config_pointing_ui_package" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be
