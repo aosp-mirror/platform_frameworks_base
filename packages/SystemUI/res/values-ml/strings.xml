@@ -198,8 +198,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"അറിയിപ്പ് ഷെയ്‌ഡ്."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"ദ്രുത ക്രമീകരണങ്ങൾ."</string>
-    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
-    <skip />
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"അറിയിപ്പ് ഷെയ്‌ഡിനുള്ള ദ്രുത ക്രമീകരണം."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"ലോക്ക് സ്‌ക്രീൻ."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"ഔദ്യോഗിക ലോക്ക് സ്ക്രീൻ"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"അവസാനിപ്പിക്കുക"</string>
