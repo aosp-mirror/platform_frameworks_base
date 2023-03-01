@@ -769,6 +769,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             setPermissionFlags(appId, userId, permissionName, newFlags)
         } else if (permission.isRuntime) {
             var newFlags = oldFlags and PermissionFlags.MASK_RUNTIME
+            val wasRevoked = newFlags != 0 && !PermissionFlags.isPermissionGranted(newFlags)
             if (getAppIdTargetSdkVersion(appId, permissionName) < Build.VERSION_CODES.M) {
                 if (permission.isRuntimeOnly) {
                     // Different from the old implementation, which simply skips a runtime-only
@@ -778,6 +779,9 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     newFlags = newFlags and PermissionFlags.MASK_EXEMPT
                 } else {
                     newFlags = newFlags or PermissionFlags.LEGACY_GRANTED
+                    if (wasRevoked) {
+                        newFlags = newFlags or PermissionFlags.APP_OP_REVOKED
+                    }
                     // Explicitly check against the old state to determine if this permission is
                     // new.
                     val isNewPermission =
@@ -808,16 +812,23 @@ class AppIdPermissionPolicy : SchemePolicy() {
                     (isImplicitPermission && isAnySourcePermissionNonRuntime)
                 if (shouldGrantByImplicit) {
                     newFlags = newFlags or PermissionFlags.IMPLICIT_GRANTED
+                    if (wasRevoked) {
+                        newFlags = newFlags or PermissionFlags.APP_OP_REVOKED
+                    }
                 } else {
                     newFlags = newFlags andInv PermissionFlags.IMPLICIT_GRANTED
-                }
-                if ((wasGrantedByLegacy || wasGrantedByImplicit) && !shouldGrantByImplicit) {
-                    // The permission was granted from a compatibility grant or an implicit grant,
-                    // however this flag might still be set if the user denied this permission in
-                    // the settings. Hence upon app upgrade and when this permission is no longer
-                    // LEGACY_GRANTED or IMPLICIT_GRANTED and we revoke the permission, we want to
-                    // remove this flag so that the app can request the permission again.
-                    newFlags = newFlags andInv PermissionFlags.APP_OP_REVOKED
+                    if ((wasGrantedByLegacy || wasGrantedByImplicit) &&
+                        newFlags.hasBits(PermissionFlags.APP_OP_REVOKED)) {
+                        // The permission was granted from a compatibility grant or an implicit
+                        // grant, however this flag might still be set if the user denied this
+                        // permission in the settings. Hence upon app upgrade and when this
+                        // permission is no longer LEGACY_GRANTED or IMPLICIT_GRANTED and we revoke
+                        // the permission, we want to remove this flag so that the app can request
+                        // the permission again.
+                        newFlags = newFlags andInv (
+                            PermissionFlags.RUNTIME_GRANTED or PermissionFlags.APP_OP_REVOKED
+                        )
+                    }
                 }
                 val hasImplicitFlag = newFlags.hasBits(PermissionFlags.IMPLICIT)
                 if (!isImplicitPermission && hasImplicitFlag) {
