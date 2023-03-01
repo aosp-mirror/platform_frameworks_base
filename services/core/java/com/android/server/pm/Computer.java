@@ -675,10 +675,6 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     UserInfo[] getUserInfos();
 
-    boolean isChangeEnabled(long changeId, int uid);
-
-    boolean isChangeEnabled(long changeId, ApplicationInfo info);
-
     @NonNull
     ArrayMap<String, ? extends SharedUserApi> getSharedUsers();
 }

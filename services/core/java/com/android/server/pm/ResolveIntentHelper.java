@@ -466,14 +466,15 @@ final class ResolveIntentHelper {
                     list = new ArrayList<>(1);
                     list.add(ri);
                     PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                            computer, list, true, intent, resolvedType, filterCallingUid);
+                            mPlatformCompat, componentResolver, list, true, intent,
+                            resolvedType, filterCallingUid);
                 }
             }
         } else {
             String pkgName = intent.getPackage();
             if (pkgName == null) {
-                final List<ResolveInfo> result = componentResolver.queryReceivers(
-                        computer, intent, resolvedType, flags, filterCallingUid, userId);
+                final List<ResolveInfo> result = componentResolver
+                        .queryReceivers(computer, intent, resolvedType, flags, userId);
                 if (result != null) {
                     list = result;
                 }
@@ -481,7 +482,7 @@ final class ResolveIntentHelper {
             final AndroidPackage pkg = computer.getPackage(pkgName);
             if (pkg != null) {
                 final List<ResolveInfo> result = componentResolver.queryReceivers(computer,
-                        intent, resolvedType, flags, pkg.getReceivers(), filterCallingUid, userId);
+                        intent, resolvedType, flags, pkg.getReceivers(), userId);
                 if (result != null) {
                     list = result;
                 }
@@ -491,7 +492,8 @@ final class ResolveIntentHelper {
         if (originalIntent != null) {
             // We also have to ensure all components match the original intent
             PackageManagerServiceUtils.applyEnforceIntentFilterMatching(
-                    computer, list, true, originalIntent, resolvedType, filterCallingUid);
+                    mPlatformCompat, componentResolver,
+                    list, true, originalIntent, resolvedType, filterCallingUid);
         }
 
         return computer.applyPostResolutionFilter(list, instantAppPkgName, false, queryingUid,
@@ -575,7 +577,7 @@ final class ResolveIntentHelper {
         String pkgName = intent.getPackage();
         if (pkgName == null) {
             final List<ResolveInfo> resolveInfos = componentResolver.queryProviders(computer,
-                    intent, resolvedType, flags, callingUid, userId);
+                    intent, resolvedType, flags, userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
             }
@@ -585,7 +587,7 @@ final class ResolveIntentHelper {
         final AndroidPackage pkg = computer.getPackage(pkgName);
         if (pkg != null) {
             final List<ResolveInfo> resolveInfos = componentResolver.queryProviders(computer,
-                    intent, resolvedType, flags, pkg.getProviders(), callingUid, userId);
+                    intent, resolvedType, flags, pkg.getProviders(), userId);
             if (resolveInfos == null) {
                 return Collections.emptyList();
             }
