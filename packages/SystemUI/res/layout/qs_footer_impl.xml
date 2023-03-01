@@ -64,7 +64,7 @@
                     android:layout_width="@dimen/qs_footer_action_button_size"
                     android:layout_height="@dimen/qs_footer_action_button_size"
                     android:layout_gravity="center_vertical|end"
-                    android:background="?android:attr/selectableItemBackground"
+                    android:background="@drawable/qs_footer_edit_circle"
                     android:clickable="true"
                     android:contentDescription="@string/accessibility_quick_settings_edit"
                     android:focusable="true"
