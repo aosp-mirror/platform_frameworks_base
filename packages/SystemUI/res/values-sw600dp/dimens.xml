@@ -87,4 +87,7 @@
 
     <!-- Biometric Auth pattern view size, better to align keyguard_security_width -->
     <dimen name="biometric_auth_pattern_view_size">348dp</dimen>
+
+    <dimen name="controls_header_horizontal_padding">12dp</dimen>
+    <dimen name="controls_content_margin_horizontal">24dp</dimen>
 </resources>
