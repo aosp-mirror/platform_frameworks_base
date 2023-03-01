@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
 /**
  * Helper class to perform attestation verification synchronously.
  */
-class AttestationVerifier {
+public class AttestationVerifier {
     private static final long ATTESTATION_VERIFICATION_TIMEOUT_SECONDS = 10; // 10 seconds
     private static final String PARAM_OWNED_BY_SYSTEM = "android.key_owned_by_system";
 
