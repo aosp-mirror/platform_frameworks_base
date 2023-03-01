@@ -12,9 +12,7 @@ android_library {
 
     resource_dirs: ["res"],
 
-    static_libs: [
-            "androidx.preference_preference",
-        ],
+    static_libs: ["androidx.preference_preference"],
 
     sdk_version: "system_current",
     min_sdk_version: "21",
@@ -22,6 +20,7 @@ android_library {
         "//apex_available:platform",
         "com.android.adservices",
         "com.android.cellbroadcast",
+        "com.android.extservices",
         "com.android.permission",
         "com.android.mediaprovider",
     ],
