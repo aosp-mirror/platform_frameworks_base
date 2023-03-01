@@ -786,6 +786,49 @@ public final class UserVisibilityMediator implements Dumpable {
         }
     }
 
+    /** See {@link UserManagerInternal#getDisplaysAssignedToUser(int)}. */
+    @Nullable
+    public int[] getDisplaysAssignedToUser(@UserIdInt int userId) {
+        int mainDisplayId = getDisplayAssignedToUser(userId);
+        if (mainDisplayId == INVALID_DISPLAY) {
+            // The user will not have any extra displays if they have no main display.
+            // Return null if no display is assigned to the user.
+            if (DBG) {
+                Slogf.d(TAG, "getDisplaysAssignedToUser(): returning null"
+                        + " because there is no display assigned to user %d", userId);
+            }
+            return null;
+        }
+
+        synchronized (mLock) {
+            if (mExtraDisplaysAssignedToUsers == null
+                    || mExtraDisplaysAssignedToUsers.size() == 0) {
+                return new int[]{mainDisplayId};
+            }
+
+            int count = 0;
+            int[] displayIds = new int[mExtraDisplaysAssignedToUsers.size() + 1];
+            displayIds[count++] = mainDisplayId;
+            for (int i = 0; i < mExtraDisplaysAssignedToUsers.size(); ++i) {
+                if (mExtraDisplaysAssignedToUsers.valueAt(i) == userId) {
+                    displayIds[count++] = mExtraDisplaysAssignedToUsers.keyAt(i);
+                }
+            }
+            // Return the array if the array length happens to be correct.
+            if (displayIds.length == count) {
+                return displayIds;
+            }
+
+            // Copy the results to a new array with the exact length. The size of displayIds[] is
+            // initialized to `1 + mExtraDisplaysAssignedToUsers.size()`, which is usually larger
+            // than the actual length, because mExtraDisplaysAssignedToUsers contains displayIds for
+            // other users. Therefore, we need to copy to a new array with the correct length.
+            int[] results = new int[count];
+            System.arraycopy(displayIds, 0, results, 0, count);
+            return results;
+        }
+    }
+
     /**
      * See {@link UserManagerInternal#getUserAssignedToDisplay(int)}.
      */
