@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"Zadané kódy PIN sa nezhodujú."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Zadajte kód PIN s dĺžkou 4 až 8 číslic."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Zadajte kód PUK, ktorý má 8 alebo viac čísel."</string>
-    <string name="needPuk" msgid="7321876090152422918">"SIM karta je uzamknutá pomocou kódu PUK. Odomknite ju zadaním kódu PUK."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Ak chcete odblokovať SIM kartu, zadajte kód PUK2."</string>
+    <string name="needPuk" msgid="3503414069503752211">"SIM karta je uzamknutá kódom PUK. Zadaním kódu PUK ju odomknite."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"Ak chcete SIM kartu odblokovať, zadajte kód PUK2."</string>
     <string name="enablePin" msgid="2543771964137091212">"Neúspešné, povoľte uzamknutie SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="few">Zostávajú vám <xliff:g id="NUMBER_1">%d</xliff:g> pokusy, potom sa vaša SIM karta uzamkne.</item>
@@ -329,7 +329,7 @@
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Zapnúť funkciu Preskúmanie dotykom"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Po klepnutí na položku sa vysloví jej názov a obrazovku je možné preskúmať pomocou gest."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Sledovať zadávaný text"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje ako sú čísla kreditných kariet a heslá."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"Sledovanie zahŕňa osobné údaje, ako sú čísla kreditných kariet a heslá."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"Ovládať priblíženie obrazovky"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"Ovládajte umiestnenie a úroveň priblíženia obrazovky."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"Gestá"</string>
@@ -925,14 +925,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Skúsiť znova"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Všetky funkcie a dáta získate po odomknutí"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Prekročili ste maximálny povolený počet pokusov o odomknutie tvárou"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Žiadna SIM karta"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"V tablete nie je žiadna SIM karta."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"V zariadení Android TV nie je SIM karta."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"V telefóne nie je žiadna SIM karta."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Vložte SIM kartu."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM karta chýba alebo sa z nej nedá čítať. Vložte SIM kartu."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM karta je nepoužiteľná."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Vaša SIM karta bola natrvalo zakázaná.\nAk chcete získať inú SIM kartu, kontaktujte svojho operátora."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Žiadna SIM karta"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"V tablete nie je SIM karta."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"V zariadení Android TV nie je SIM karta."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"V telefóne nie je SIM karta."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Pridajte SIM kartu."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM karta chýba alebo sa nedá čítať. Pridajte SIM kartu."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Nepoužiteľná SIM karta."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Vaša SIM karta bola natrvalo deaktivovaná.\n Požiadajte svojho poskytovateľa bezdrôtových služieb o ďalšiu SIM kartu."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Predchádzajúca stopa"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Ďalšia stopa"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pozastaviť"</string>
@@ -942,10 +942,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Pretočiť dopredu"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Len tiesňové volania"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Sieť je zablokovaná"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM karta je uzamknutá pomocou kódu PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM karta je uzamknutá kódom PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Prečítajte si Príručku používateľa alebo kontaktujte podporu zákazníka."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM karta je uzamknutá."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Prebieha odomykanie SIM karty..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM karta je uzamknutá."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM karta sa odomyká…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste použili nesprávny bezpečnostný vzor. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávne heslo. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste zadali nesprávny kód PIN. \n\nSkúste to znova o <xliff:g id="NUMBER_1">%2$d</xliff:g> s."</string>
@@ -987,7 +987,7 @@
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Výber používateľa"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Stav"</string>
     <string name="keyguard_accessibility_camera" msgid="7862557559464986528">"Fotoaparát"</string>
-    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládacie prvky médií"</string>
+    <string name="keygaurd_accessibility_media_controls" msgid="2267379779900620614">"Ovládanie médií"</string>
     <string name="keyguard_accessibility_widget_reorder_start" msgid="7066213328912939191">"Zmena usporiadania miniaplikácií sa začala."</string>
     <string name="keyguard_accessibility_widget_reorder_end" msgid="1083806817600593490">"Zmena usporiadania miniaplikácií sa skončila."</string>
     <string name="keyguard_accessibility_widget_deleted" msgid="1509738950119878705">"Miniaplikácia <xliff:g id="WIDGET_INDEX">%1$s</xliff:g> bola odstránená."</string>
@@ -1328,10 +1328,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Zmena v časti Nastavenia &gt; Aplikácie"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Vždy povoliť"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Nikdy nepovoliť"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM karta bola odobraná"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Mobilná sieť nebude k dispozícii, kým nevložíte platnú SIM kartu a zariadenie nereštartujete."</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"SIM karta bola odstránená"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"Mobilná sieť bude nedostupná, kým nepoužijete platnú SIM kartu."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Hotovo"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"Bola pridaná SIM karta"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"Bola pridaná SIM karta"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Ak chcete získať prístup k mobilnej sieti, reštartujte svoje zariadenie."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Reštartovať"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivovať mobilnú službu"</string>
@@ -1643,7 +1643,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM karta je teraz zakázaná. Ak chcete pokračovať, zadajte kód PUK. Podrobné informácie získate od operátora."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Zadajte požadovaný kód PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Potvrďte požadovaný kód PIN"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Prebieha odomykanie SIM karty..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM karta sa odomyká…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Nesprávny kód PIN."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Zadajte kód PIN s dĺžkou 4 až 8 číslic."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Kód PUK musí obsahovať 8 číslic."</string>

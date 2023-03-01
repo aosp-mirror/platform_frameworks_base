@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"તમે લખેલ પિન મેળ ખાતો નથી."</string>
     <string name="invalidPin" msgid="7542498253319440408">"એક પિન લખો જે 4 થી 8 સંખ્યાનો છે."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"એક PUK લખો કે જે 8 અંક કે તેથી લાંબો હોય."</string>
-    <string name="needPuk" msgid="7321876090152422918">"તમારો સિમ કાર્ડ, PUK-લૉક કરેલ છે. તેને અનલૉક કરવા માટે PUK કોડ લખો."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"સિમ કાર્ડને અનાવરોધિત કરવા માટે PUK2 લખો."</string>
+    <string name="needPuk" msgid="3503414069503752211">"તમારું સિમ કાર્ડ PUK-લૉક કરેલું છે. તેને અનલૉક કરવા માટે PUK કોડ ટાઇપ કરો."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"સિમ કાર્ડ અનલૉક કરવા માટે PUK2 ટાઇપ કરો."</string>
     <string name="enablePin" msgid="2543771964137091212">"અસફળ, સિમ/RUIM લૉક સક્ષમ કરો."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">સિમ લૉક થાય તે પહેલાં તમારી પાસે <xliff:g id="NUMBER_1">%d</xliff:g> પ્રયત્ન બાકી છે.</item>
@@ -923,14 +923,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ફરી પ્રયાસ કરો"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"તમામ સુવિધાઓ અને ડેટા માટે અનલૉક કરો"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"મહત્તમ ફેસ અનલૉક પ્રયાસો ઓળંગાયા"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"કોઈ સિમ કાર્ડ નથી"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ટૅબ્લેટમાં સિમ કાર્ડ નથી."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"તમારા Android TV ડિવાઇસમાં કોઈ સિમ કાર્ડ નથી."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"ફોનમાં સિમ કાર્ડ નથી."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"એક સિમ કાર્ડ દાખલ કરો."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"સિમ કાર્ડ ખૂટે છે અથવા વાંચન યોગ્ય નથી. સિમ કાર્ડ દાખલ કરો."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"બિનઉપયોગી સિમ કાર્ડ."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"તમારો સિમ કાર્ડ કાયમી રૂપે અક્ષમ કરવામાં આવ્યો છે.\n બીજા સિમ કાર્ડ માટે તમારા વાયરલેસ સેવા પ્રદાતાનો સંપર્ક કરો."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"કોઈ સિમ કાર્ડ નથી"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"ટૅબ્લેટમાં કોઈ સિમ કાર્ડ નથી."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"તમારા Android TV ડિવાઇસમાં કોઈ સિમ કાર્ડ નથી."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"ફોનમાં કોઈ સિમ કાર્ડ નથી."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"સિમ કાર્ડ ઉમેરો."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"સિમ કાર્ડ ખૂટે છે અથવા વાંચી શકાય એવું નથી. સિમ કાર્ડ ઉમેરો."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"ઉપયોગમાં ન લઈ શકાતું સિમ કાર્ડ."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"તમારું સિમ કાર્ડ કાયમ માટે નિષ્ક્રિય કરવામાં આવ્યું છે.\n બીજા સિમ કાર્ડ માટે તમારા વાયરલેસ સેવા પ્રદાતાનો સંપર્ક કરો."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"પહેલાનો ટ્રૅક"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"આગલો ટ્રૅક"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"થોભો"</string>
@@ -940,10 +940,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ઝડપી ફોરવર્ડ કરો"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"ફક્ત ઇમર્જન્સી કૉલ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"નેટવર્ક લૉક થયું"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"સિમ કાર્ડ, PUK-લૉક કરેલ છે."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"સિમ કાર્ડ PUK-લૉક કરેલું છે."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"વપરાશકર્તા માર્ગદર્શિકા જુઓ અથવા ગ્રાહક સંભાળનો સંપર્ક કરો."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"સિમ કાર્ડ લૉક કરેલ છે."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"સિમ કાર્ડ લૉક કરેલું છે."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે તમારી અનલૉક પૅટર્ન દોરી. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે તમારો પાસવર્ડ લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકંડમાં ફરીથી પ્રયાસ કરો."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"તમે <xliff:g id="NUMBER_0">%1$d</xliff:g> વખત ખોટી રીતે તમારો પિન લખ્યો છે. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> સેકન્ડમાં ફરીથી પ્રયાસ કરો."</string>
@@ -1326,10 +1326,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"તમે પછીથી આને સેટિંગ &gt; ઍપમાં બદલી શકો છો"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"હંમેશા મંજૂરી આપો"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ક્યારેય મંજૂરી આપશો નહીં"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"સિમ કાર્ડ કાઢી નાખ્યો"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"એક માન્ય સિમ કાર્ડ દાખલ કરીને તમે પુનઃપ્રારંભ ન કરો ત્યાં સુધી મોબાઇલ નેટવર્ક અનુપલબ્ધ રહેશે."</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"સિમ કાર્ડ કાઢી નાખ્યું"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"તમે માન્ય સિમ કાર્ડ વડે ફરી શરૂ ન કરો, ત્યાં સુધી મોબાઇલ નેટવર્ક ઉપલબ્ધ નહીં થાય."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"થઈ ગયું"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"સિમ કાર્ડ ઉમેર્યો"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"સિમ કાર્ડ ઉમેર્યું"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"મોબાઇલ નેટવર્કને ઍક્સેસ કરવા માટે તમારા ઉપકરણને પુનઃપ્રારંભ કરો."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"રિસ્ટાર્ટ કરો"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"મોબાઇલ સેવાને સક્રિય કરો"</string>
@@ -1641,7 +1641,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"સિમ હવે અક્ષમ છે. ચાલુ રાખવા માટે PUK કોડ દાખલ કરો. વિગતો માટે કેરીઅરનો સંપર્ક કરો."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"જોઈતો પિન કોડ દાખલ કરો"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"જોઈતા પિન કોડની પુષ્ટિ કરો"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"સિમ કાર્ડ અનલૉક કરી રહ્યાં છીએ…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"ખોટો પિન કોડ."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"એક પિન લખો જે 4 થી 8 સંખ્યાનો છે."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK કોડ 8 નંબર્સનો હોવો જોઈએ."</string>
