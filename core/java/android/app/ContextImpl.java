@@ -2814,7 +2814,7 @@ class ContextImpl extends Context {
     public @NonNull Context createDeviceContext(int deviceId) {
         if (deviceId != Context.DEVICE_ID_DEFAULT) {
             VirtualDeviceManager vdm = getSystemService(VirtualDeviceManager.class);
-            if (!vdm.isValidVirtualDeviceId(deviceId)) {
+            if (vdm == null || !vdm.isValidVirtualDeviceId(deviceId)) {
                 throw new IllegalArgumentException(
                         "Not a valid ID of the default device or any virtual device: " + deviceId);
             }
