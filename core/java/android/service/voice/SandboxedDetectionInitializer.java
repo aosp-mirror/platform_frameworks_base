@@ -28,12 +28,12 @@ import android.os.SharedMemory;
 import java.util.function.IntConsumer;
 
 /**
- * Base for all sandboxed detection services, providing a common interface for initialization.
+ * Provides common initialzation methods for sandboxed detection services.
  *
  * @hide
  */
 @SystemApi
-public interface SandboxedDetectionServiceBase {
+public interface SandboxedDetectionInitializer {
 
     /**
      * Indicates that the updated status is successful.
@@ -77,7 +77,7 @@ public interface SandboxedDetectionServiceBase {
         if (callback != null) {
             intConsumer =
                     value -> {
-                        if (value > SandboxedDetectionServiceBase
+                        if (value > SandboxedDetectionInitializer
                                 .getMaxCustomInitializationStatus()) {
                             throw new IllegalArgumentException(
                                     "The initialization status is invalid for " + value);

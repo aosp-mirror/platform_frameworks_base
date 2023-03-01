@@ -201,9 +201,10 @@ public class VisualQueryDetector {
          * short amount of time to report its initialization state.
          *
          * @param status Info about initialization state of {@link VisualQueryDetectionService}; the
-         * allowed values are {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS},
-         * 1<->{@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()},
-         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}.
+         * allowed values are
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link SandboxedDetectionInitializer#getMaxCustomInitializationStatus()},
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_UNKNOWN}.
          */
         void onVisualQueryDetectionServiceInitialized(int status);
 
