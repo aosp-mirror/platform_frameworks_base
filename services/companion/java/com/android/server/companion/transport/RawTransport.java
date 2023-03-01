@@ -21,6 +21,8 @@ import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.server.companion.transport.CompanionTransportManager.Listener;
+
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
@@ -30,8 +32,8 @@ import java.nio.ByteBuffer;
 class RawTransport extends Transport {
     private volatile boolean mStopped;
 
-    RawTransport(int associationId, ParcelFileDescriptor fd, Context context) {
-        super(associationId, fd, context);
+    RawTransport(int associationId, ParcelFileDescriptor fd, Context context, Listener listener) {
+        super(associationId, fd, context, listener);
     }
 
     @Override
@@ -62,7 +64,7 @@ class RawTransport extends Transport {
     protected void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException {
         if (DEBUG) {
-            Slog.e(TAG, "Sending message 0x" + Integer.toHexString(message)
+            Slog.d(TAG, "Sending message 0x" + Integer.toHexString(message)
                     + " sequence " + sequence + " length " + data.length
                     + " to association " + mAssociationId);
         }
