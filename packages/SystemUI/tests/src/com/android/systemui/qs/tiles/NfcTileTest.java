@@ -39,6 +39,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,6 +95,12 @@ public class NfcTileTest extends SysuiTestCase {
         );
 
         mNfcTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mNfcTile.destroy();
         mTestableLooper.processAllMessages();
     }
 
