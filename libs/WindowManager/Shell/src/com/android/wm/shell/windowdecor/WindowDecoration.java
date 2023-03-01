@@ -391,11 +391,12 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      * @param yPos y position of new window
      * @param width width of new window
      * @param height height of new window
-     * @param cropPadding padding to add to window crop to ensure shadows display properly
-     * @return
+     * @param shadowRadius radius of the shadow of the new window
+     * @param cornerRadius radius of the corners of the new window
+     * @return the {@link AdditionalWindow} that was added.
      */
     AdditionalWindow addWindow(int layoutId, String namePrefix, SurfaceControl.Transaction t,
-            int xPos, int yPos, int width, int height, int cropPadding) {
+            int xPos, int yPos, int width, int height, int shadowRadius, int cornerRadius) {
         final SurfaceControl.Builder builder = mSurfaceControlBuilderSupplier.get();
         SurfaceControl windowSurfaceControl = builder
                 .setName(namePrefix + " of Task=" + mTaskInfo.taskId)
@@ -404,9 +405,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .build();
         View v = LayoutInflater.from(mDecorWindowContext).inflate(layoutId, null);
 
-        t.setPosition(
-                windowSurfaceControl, xPos, yPos)
-                .setWindowCrop(windowSurfaceControl, width + cropPadding, height + cropPadding)
+        t.setPosition(windowSurfaceControl, xPos, yPos)
+                .setWindowCrop(windowSurfaceControl, width, height)
+                .setShadowRadius(windowSurfaceControl, shadowRadius)
+                .setCornerRadius(windowSurfaceControl, cornerRadius)
                 .show(windowSurfaceControl);
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
