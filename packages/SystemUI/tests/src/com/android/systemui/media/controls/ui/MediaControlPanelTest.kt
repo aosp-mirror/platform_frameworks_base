@@ -731,6 +731,19 @@ public class MediaControlPanelTest : SysuiTestCase() {
     }
 
     @Test
+    fun getWallpaperColor_recycledBitmap_notCrashing() {
+        // Setup redArt icon.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redArt = Icon.createWithBitmap(redBmp)
+
+        // Recycle bitmap of redArt icon.
+        redArt.bitmap.recycle()
+
+        // get wallpaperColor without illegal exception.
+        player.getWallpaperColor(redArt)
+    }
+
+    @Test
     fun bind_seekBarDisabled_hasActions_seekBarVisibilityIsSetToInvisible() {
         useRealConstraintSets()
 
