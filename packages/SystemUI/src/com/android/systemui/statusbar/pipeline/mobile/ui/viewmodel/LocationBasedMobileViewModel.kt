@@ -25,7 +25,7 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
  * allows the mobile icon to change some view parameters at different locations
  *
  * @param commonImpl for convenience, this class wraps a base interface that can provides all of the
- * common implementations between locations. See [MobileIconViewModel]
+ *   common implementations between locations. See [MobileIconViewModel]
  */
 abstract class LocationBasedMobileViewModel(
     val commonImpl: MobileIconViewModelCommon,

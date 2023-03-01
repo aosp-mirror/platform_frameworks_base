@@ -26,8 +26,7 @@ import dagger.multibindings.StringKey
 @Module
 interface QRCodeScannerModule {
 
-    /**
-     */
+    /**  */
     @Binds
     @IntoMap
     @StringKey(QRCodeScannerTile.TILE_SPEC)

@@ -33,8 +33,8 @@ import javax.inject.Inject
  * launched, creating a new shortcut for [CreateNoteTaskShortcutActivity], and will finish.
  *
  * @see <a
- * href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
- * a custom shortcut activity</a>
+ *   href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
+ *   a custom shortcut activity</a>
  */
 class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentActivity() {
 

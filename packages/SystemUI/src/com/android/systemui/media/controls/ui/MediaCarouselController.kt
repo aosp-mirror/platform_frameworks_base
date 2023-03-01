@@ -853,10 +853,12 @@ constructor(
      * @param startLocation the start location of our state or -1 if this is directly set
      * @param endLocation the ending location of our state.
      * @param progress the progress of the transition between startLocation and endlocation. If
+     *
      * ```
      *                 this is not a guided transformation, this will be 1.0f
      * @param immediately
      * ```
+     *
      * should this state be applied immediately, canceling all animations?
      */
     fun setCurrentState(
@@ -1100,17 +1102,17 @@ constructor(
      *
      * @param eventId UI event id (e.g. 800 for SMARTSPACE_CARD_SEEN)
      * @param instanceId id to uniquely identify a card, e.g. each headphone generates a new
-     * instanceId
+     *   instanceId
      * @param uid uid for the application that media comes from
      * @param surfaces list of display surfaces the media card is on (e.g. lockscreen, shade) when
-     * the event happened
+     *   the event happened
      * @param interactedSubcardRank the rank for interacted media item for recommendation card, -1
-     * for tapping on card but not on any media item, 0 for first media item, 1 for second, etc.
+     *   for tapping on card but not on any media item, 0 for first media item, 1 for second, etc.
      * @param interactedSubcardCardinality how many media items were shown to the user when there is
-     * user interaction
+     *   user interaction
      * @param rank the rank for media card in the media carousel, starting from 0
      * @param receivedLatencyMillis latency in milliseconds for card received events. E.g. latency
-     * between headphone connection to sysUI displays media recommendation card
+     *   between headphone connection to sysUI displays media recommendation card
      * @param isSwipeToDismiss whether is to log swipe-to-dismiss event
      */
     fun logSmartspaceCardReported(
@@ -1371,6 +1373,7 @@ internal object MediaPlayerData {
 
     /**
      * Removes media player given the key.
+     *
      * @param isDismissed determines whether the media player is removed from the carousel.
      */
     fun removeMediaPlayer(key: String, isDismissed: Boolean = false) =

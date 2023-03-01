@@ -132,6 +132,7 @@ private object InternalFaceAuthReasons {
 
 /**
  * UiEvents that are logged to identify why face auth is being triggered.
+ *
  * @param extraInfo is logged as the position. See [UiEventLogger#logWithInstanceIdAndPosition]
  */
 enum class FaceAuthUiEvent

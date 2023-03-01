@@ -348,14 +348,17 @@ constructor(
      * bottom of UMO reach the bottom of this group It will change to alpha 1.0 when the visible
      * bottom of UMO reach the top of the group below e.g.Album title, artist title and play-pause
      * button will change alpha together.
+     *
      * ```
      *     And their alpha becomes 1.0 when the visible bottom of UMO reach the top of controls,
      *     including progress bar, next button, previous button
      * ```
+     *
      * widgetGroupIds: a group of widgets have same state during UMO is squished,
      * ```
      *     e.g. Album title, artist title and play-pause button
      * ```
+     *
      * groupEndPosition: the height of UMO, when the height reaches this value,
      * ```
      *     widgets in this group should have 1.0 as alpha
@@ -363,6 +366,7 @@ constructor(
      *         visible when the height of UMO reaches the top of controls group
      *         (progress bar, previous button and next button)
      * ```
+     *
      * squishedViewState: hold the widgetState of each widget, which will be modified
      * squishFraction: the squishFraction of UMO
      */
@@ -665,7 +669,7 @@ constructor(
      *
      * @param location Target
      * @param locationWhenHidden Location that will be used when the target is not
-     * [MediaHost.visible]
+     *   [MediaHost.visible]
      * @return State require for executing a transition, and also the respective [MediaHost].
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
