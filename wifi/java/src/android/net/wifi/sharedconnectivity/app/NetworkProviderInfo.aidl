@@ -16,4 +16,4 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
-parcelable TetherNetwork;
+parcelable NetworkProviderInfo;

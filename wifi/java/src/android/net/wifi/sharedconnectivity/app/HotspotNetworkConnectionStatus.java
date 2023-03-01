@@ -28,23 +28,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * The status of a connection to an instant tether network after the client called
- * {@link SharedConnectivityManager#connectTetherNetwork}.
+ * The status of a connection to a hotspot network after the client called
+ * {@link SharedConnectivityManager#connectHotspotNetwork}.
  *
  * @hide
  */
 @SystemApi
-public final class TetherNetworkConnectionStatus implements Parcelable {
+public final class HotspotNetworkConnectionStatus implements Parcelable {
 
     /**
      * Connection status is unknown.
      */
-    public static final int CONNECTION_STATUS_UNKNOWN  = 0;
+    public static final int CONNECTION_STATUS_UNKNOWN = 0;
 
     /**
      * The connection is being initiated.
      */
-    public static final int CONNECTION_STATUS_ENABLING_HOTSPOT  = 1;
+    public static final int CONNECTION_STATUS_ENABLING_HOTSPOT = 1;
 
     /**
      * Device providing the hotspot failed to initiate it.
@@ -102,21 +102,22 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
             CONNECTION_STATUS_ENABLING_HOTSPOT_TIMEOUT,
             CONNECTION_STATUS_CONNECT_TO_HOTSPOT_FAILED,
     })
-    public @interface ConnectionStatus {}
+    public @interface ConnectionStatus {
+    }
 
-    @ConnectionStatus private final int mStatus;
-    private final TetherNetwork mTetherNetwork;
+    @ConnectionStatus
+    private final int mStatus;
+    private final HotspotNetwork mHotspotNetwork;
     private final Bundle mExtras;
 
     /**
-     * Builder class for {@link TetherNetworkConnectionStatus}.
+     * Builder class for {@link HotspotNetworkConnectionStatus}.
      */
     public static final class Builder {
-        @ConnectionStatus private int mStatus;
-        private TetherNetwork mTetherNetwork;
+        @ConnectionStatus
+        private int mStatus;
+        private HotspotNetwork mHotspotNetwork;
         private Bundle mExtras;
-
-        public Builder() {}
 
         /**
          * Sets the status of the connection
@@ -130,13 +131,13 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
         }
 
         /**
-         * Sets the {@link TetherNetwork} object of the connection.
+         * Sets the {@link HotspotNetwork} object of the connection.
          *
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setTetherNetwork(@NonNull TetherNetwork tetherNetwork) {
-            mTetherNetwork = tetherNetwork;
+        public Builder setHotspotNetwork(@NonNull HotspotNetwork hotspotNetwork) {
+            mHotspotNetwork = hotspotNetwork;
             return this;
         }
 
@@ -152,20 +153,21 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
         }
 
         /**
-         * Builds the {@link TetherNetworkConnectionStatus} object.
+         * Builds the {@link HotspotNetworkConnectionStatus} object.
          *
-         * @return Returns the built {@link TetherNetworkConnectionStatus} object.
+         * @return Returns the built {@link HotspotNetworkConnectionStatus} object.
          */
         @NonNull
-        public TetherNetworkConnectionStatus build() {
-            return new TetherNetworkConnectionStatus(mStatus, mTetherNetwork, mExtras);
+        public HotspotNetworkConnectionStatus build() {
+            return new HotspotNetworkConnectionStatus(mStatus, mHotspotNetwork, mExtras);
         }
     }
 
-    private TetherNetworkConnectionStatus(@ConnectionStatus int status, TetherNetwork tetherNetwork,
+    private HotspotNetworkConnectionStatus(@ConnectionStatus int status,
+            HotspotNetwork hotspotNetwork,
             Bundle extras) {
         mStatus = status;
-        mTetherNetwork = tetherNetwork;
+        mHotspotNetwork = hotspotNetwork;
         mExtras = extras;
     }
 
@@ -180,13 +182,13 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
     }
 
     /**
-     * Gets the {@link TetherNetwork} object of the connection.
+     * Gets the {@link HotspotNetwork} object of the connection.
      *
-     * @return Returns a TetherNetwork object.
+     * @return Returns a HotspotNetwork object.
      */
     @NonNull
-    public TetherNetwork getTetherNetwork() {
-        return mTetherNetwork;
+    public HotspotNetwork getHotspotNetwork() {
+        return mHotspotNetwork;
     }
 
     /**
@@ -201,15 +203,15 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof TetherNetworkConnectionStatus)) return false;
-        TetherNetworkConnectionStatus other = (TetherNetworkConnectionStatus) obj;
+        if (!(obj instanceof HotspotNetworkConnectionStatus)) return false;
+        HotspotNetworkConnectionStatus other = (HotspotNetworkConnectionStatus) obj;
         return mStatus == other.getStatus()
-                && Objects.equals(mTetherNetwork, other.getTetherNetwork());
+                && Objects.equals(mHotspotNetwork, other.getHotspotNetwork());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mTetherNetwork);
+        return Objects.hash(mStatus, mHotspotNetwork);
     }
 
     @Override
@@ -220,39 +222,39 @@ public final class TetherNetworkConnectionStatus implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mStatus);
-        mTetherNetwork.writeToParcel(dest, flags);
+        mHotspotNetwork.writeToParcel(dest, flags);
         dest.writeBundle(mExtras);
     }
 
     /**
-     * Creates a {@link TetherNetworkConnectionStatus} object from a parcel.
+     * Creates a {@link HotspotNetworkConnectionStatus} object from a parcel.
      *
      * @hide
      */
     @NonNull
-    public static TetherNetworkConnectionStatus readFromParcel(@NonNull Parcel in) {
-        return new TetherNetworkConnectionStatus(in.readInt(),
-                TetherNetwork.readFromParcel(in), in.readBundle());
+    public static HotspotNetworkConnectionStatus readFromParcel(@NonNull Parcel in) {
+        return new HotspotNetworkConnectionStatus(in.readInt(),
+                HotspotNetwork.readFromParcel(in), in.readBundle());
     }
 
     @NonNull
-    public static final Creator<TetherNetworkConnectionStatus> CREATOR = new Creator<>() {
+    public static final Creator<HotspotNetworkConnectionStatus> CREATOR = new Creator<>() {
         @Override
-        public TetherNetworkConnectionStatus createFromParcel(Parcel in) {
+        public HotspotNetworkConnectionStatus createFromParcel(Parcel in) {
             return readFromParcel(in);
         }
 
         @Override
-        public TetherNetworkConnectionStatus[] newArray(int size) {
-            return new TetherNetworkConnectionStatus[size];
+        public HotspotNetworkConnectionStatus[] newArray(int size) {
+            return new HotspotNetworkConnectionStatus[size];
         }
     };
 
     @Override
     public String toString() {
-        return new StringBuilder("TetherNetworkConnectionStatus[")
+        return new StringBuilder("HotspotNetworkConnectionStatus[")
                 .append("status=").append(mStatus)
-                .append("tether network=").append(mTetherNetwork.toString())
+                .append("hotspot network=").append(mHotspotNetwork.toString())
                 .append("extras=").append(mExtras.toString())
                 .append("]").toString();
     }

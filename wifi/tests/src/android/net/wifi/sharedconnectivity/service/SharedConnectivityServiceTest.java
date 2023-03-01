@@ -18,11 +18,11 @@ package android.net.wifi.sharedconnectivity.service;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetwork.NETWORK_TYPE_CELLULAR;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
 import static android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.CONNECTION_STATUS_SAVED;
-import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
-import static android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -30,12 +30,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.sharedconnectivity.app.DeviceInfo;
+import android.net.wifi.sharedconnectivity.app.HotspotNetwork;
+import android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
 import android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus;
+import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo;
 import android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState;
-import android.net.wifi.sharedconnectivity.app.TetherNetwork;
-import android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -55,27 +55,31 @@ import java.util.List;
  */
 @SmallTest
 public class SharedConnectivityServiceTest {
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
-    private static final TetherNetwork TETHER_NETWORK =
-            new TetherNetwork.Builder().setDeviceId(1).setDeviceInfo(DEVICE_INFO)
-                    .setNetworkType(NETWORK_TYPE_CELLULAR).setNetworkName("TEST_NETWORK")
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder()
+                    .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName(
+                            "TEST_MODEL")
+                    .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final HotspotNetwork HOTSPOT_NETWORK =
+            new HotspotNetwork.Builder().setDeviceId(1).setNetworkProviderInfo(
+                            NETWORK_PROVIDER_INFO)
+                    .setHostNetworkType(NETWORK_TYPE_CELLULAR).setNetworkName("TEST_NETWORK")
                     .setHotspotSsid("TEST_SSID").setHotspotBssid("TEST_BSSID")
                     .addHotspotSecurityType(SECURITY_TYPE_WEP)
                     .addHotspotSecurityType(SECURITY_TYPE_EAP).build();
-    private static final List<TetherNetwork> TETHER_NETWORKS = List.of(TETHER_NETWORK);
+    private static final List<HotspotNetwork> HOTSPOT_NETWORKS = List.of(HOTSPOT_NETWORK);
     private static final KnownNetwork KNOWN_NETWORK =
             new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE_NEARBY_SELF)
                     .setSsid("TEST_SSID").addSecurityType(SECURITY_TYPE_WEP)
-                    .addSecurityType(SECURITY_TYPE_EAP).setDeviceInfo(DEVICE_INFO).build();
+                    .addSecurityType(SECURITY_TYPE_EAP).setNetworkProviderInfo(
+                            NETWORK_PROVIDER_INFO).build();
     private static final List<KnownNetwork> KNOWN_NETWORKS = List.of(KNOWN_NETWORK);
     private static final SharedConnectivitySettingsState SETTINGS_STATE =
             new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(true)
                     .setExtras(Bundle.EMPTY).build();
-    private static final TetherNetworkConnectionStatus TETHER_NETWORK_CONNECTION_STATUS =
-            new TetherNetworkConnectionStatus.Builder().setStatus(CONNECTION_STATUS_UNKNOWN)
-                    .setTetherNetwork(TETHER_NETWORK).setExtras(Bundle.EMPTY).build();
+    private static final HotspotNetworkConnectionStatus TETHER_NETWORK_CONNECTION_STATUS =
+            new HotspotNetworkConnectionStatus.Builder().setStatus(CONNECTION_STATUS_UNKNOWN)
+                    .setHotspotNetwork(HOTSPOT_NETWORK).setExtras(Bundle.EMPTY).build();
     private static final KnownNetworkConnectionStatus KNOWN_NETWORK_CONNECTION_STATUS =
             new KnownNetworkConnectionStatus.Builder().setStatus(CONNECTION_STATUS_SAVED)
                     .setKnownNetwork(KNOWN_NETWORK).setExtras(Bundle.EMPTY).build();
@@ -89,16 +93,20 @@ public class SharedConnectivityServiceTest {
         }
 
         @Override
-        public void onConnectTetherNetwork(@NonNull TetherNetwork network) {}
+        public void onConnectHotspotNetwork(@NonNull HotspotNetwork network) {
+        }
 
         @Override
-        public void onDisconnectTetherNetwork(@NonNull TetherNetwork network) {}
+        public void onDisconnectHotspotNetwork(@NonNull HotspotNetwork network) {
+        }
 
         @Override
-        public void onConnectKnownNetwork(@NonNull KnownNetwork network) {}
+        public void onConnectKnownNetwork(@NonNull KnownNetwork network) {
+        }
 
         @Override
-        public void onForgetKnownNetwork(@NonNull KnownNetwork network) {}
+        public void onForgetKnownNetwork(@NonNull KnownNetwork network) {
+        }
     }
 
     @Before
@@ -115,15 +123,15 @@ public class SharedConnectivityServiceTest {
     }
 
     @Test
-    public void getTetherNetworks() throws RemoteException {
+    public void getHotspotNetworks() throws RemoteException {
         SharedConnectivityService service = createService();
         ISharedConnectivityService.Stub binder =
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
-        service.setTetherNetworks(TETHER_NETWORKS);
+        service.setHotspotNetworks(HOTSPOT_NETWORKS);
 
-        assertThat(binder.getTetherNetworks())
-                .containsExactlyElementsIn(List.copyOf(TETHER_NETWORKS));
+        assertThat(binder.getHotspotNetworks())
+                .containsExactlyElementsIn(List.copyOf(HOTSPOT_NETWORKS));
     }
 
     @Test
@@ -150,14 +158,14 @@ public class SharedConnectivityServiceTest {
     }
 
     @Test
-    public void updateTetherNetworkConnectionStatus() throws RemoteException {
+    public void updateHotspotNetworkConnectionStatus() throws RemoteException {
         SharedConnectivityService service = createService();
         ISharedConnectivityService.Stub binder =
                 (ISharedConnectivityService.Stub) service.onBind(new Intent());
 
-        service.updateTetherNetworkConnectionStatus(TETHER_NETWORK_CONNECTION_STATUS);
+        service.updateHotspotNetworkConnectionStatus(TETHER_NETWORK_CONNECTION_STATUS);
 
-        assertThat(binder.getTetherNetworkConnectionStatus())
+        assertThat(binder.getHotspotNetworkConnectionStatus())
                 .isEqualTo(TETHER_NETWORK_CONNECTION_STATUS);
     }
 

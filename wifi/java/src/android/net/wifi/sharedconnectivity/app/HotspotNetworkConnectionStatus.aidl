@@ -16,4 +16,4 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
-parcelable DeviceInfo;
+parcelable HotspotNetworkConnectionStatus;

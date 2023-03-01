@@ -18,10 +18,10 @@ package android.net.wifi.sharedconnectivity.app;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
-import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
-import static android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.CONNECTION_STATUS_ENABLING_HOTSPOT;
-import static android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.CONNECTION_STATUS_TETHERING_TIMEOUT;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetwork.NETWORK_TYPE_CELLULAR;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus.CONNECTION_STATUS_ENABLING_HOTSPOT;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus.CONNECTION_STATUS_TETHERING_TIMEOUT;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -35,14 +35,15 @@ import org.junit.Test;
 import java.util.Arrays;
 
 /**
- * Unit tests for {@link TetherNetworkConnectionStatus}.
+ * Unit tests for {@link HotspotNetworkConnectionStatus}.
  */
 @SmallTest
-public class TetherNetworkConnectionStatusTest {
+public class HotspotNetworkConnectionStatusTest {
     private static final long DEVICE_ID = 11L;
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_TABLET)
+                    .setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
+                    .setConnectionStrength(2).setBatteryPercentage(50).build();
     private static final int NETWORK_TYPE = NETWORK_TYPE_CELLULAR;
     private static final String NETWORK_NAME = "TEST_NETWORK";
     private static final String HOTSPOT_SSID = "TEST_SSID";
@@ -57,7 +58,7 @@ public class TetherNetworkConnectionStatusTest {
      */
     @Test
     public void testParcelOperation() {
-        TetherNetworkConnectionStatus status = buildConnectionStatusBuilder().build();
+        HotspotNetworkConnectionStatus status = buildConnectionStatusBuilder().build();
 
         Parcel parcelW = Parcel.obtain();
         status.writeToParcel(parcelW, 0);
@@ -67,8 +68,8 @@ public class TetherNetworkConnectionStatusTest {
         Parcel parcelR = Parcel.obtain();
         parcelR.unmarshall(bytes, 0, bytes.length);
         parcelR.setDataPosition(0);
-        TetherNetworkConnectionStatus fromParcel =
-                TetherNetworkConnectionStatus.CREATOR.createFromParcel(parcelR);
+        HotspotNetworkConnectionStatus fromParcel =
+                HotspotNetworkConnectionStatus.CREATOR.createFromParcel(parcelR);
 
         assertThat(fromParcel).isEqualTo(status);
         assertThat(fromParcel.hashCode()).isEqualTo(status.hashCode());
@@ -79,16 +80,16 @@ public class TetherNetworkConnectionStatusTest {
      */
     @Test
     public void testEqualsOperation() {
-        TetherNetworkConnectionStatus status1 = buildConnectionStatusBuilder().build();
-        TetherNetworkConnectionStatus status2 = buildConnectionStatusBuilder().build();
+        HotspotNetworkConnectionStatus status1 = buildConnectionStatusBuilder().build();
+        HotspotNetworkConnectionStatus status2 = buildConnectionStatusBuilder().build();
         assertThat(status1).isEqualTo(status2);
 
-        TetherNetworkConnectionStatus.Builder builder = buildConnectionStatusBuilder()
+        HotspotNetworkConnectionStatus.Builder builder = buildConnectionStatusBuilder()
                 .setStatus(CONNECTION_STATUS_TETHERING_TIMEOUT);
         assertThat(builder.build()).isNotEqualTo(status1);
 
         builder = buildConnectionStatusBuilder()
-                .setTetherNetwork(buildTetherNetworkBuilder().setDeviceId(DEVICE_ID_1).build());
+                .setHotspotNetwork(buildHotspotNetworkBuilder().setDeviceId(DEVICE_ID_1).build());
         assertThat(builder.build()).isNotEqualTo(status1);
     }
 
@@ -97,24 +98,24 @@ public class TetherNetworkConnectionStatusTest {
      */
     @Test
     public void testGetMethods() {
-        TetherNetworkConnectionStatus status = buildConnectionStatusBuilder().build();
+        HotspotNetworkConnectionStatus status = buildConnectionStatusBuilder().build();
         assertThat(status.getStatus()).isEqualTo(CONNECTION_STATUS_ENABLING_HOTSPOT);
-        assertThat(status.getTetherNetwork()).isEqualTo(buildTetherNetworkBuilder().build());
+        assertThat(status.getHotspotNetwork()).isEqualTo(buildHotspotNetworkBuilder().build());
         assertThat(status.getExtras().getInt(BUNDLE_KEY)).isEqualTo(BUNDLE_VALUE);
     }
 
     @Test
     public void testHashCode() {
-        TetherNetworkConnectionStatus status1 = buildConnectionStatusBuilder().build();
-        TetherNetworkConnectionStatus status2 = buildConnectionStatusBuilder().build();
+        HotspotNetworkConnectionStatus status1 = buildConnectionStatusBuilder().build();
+        HotspotNetworkConnectionStatus status2 = buildConnectionStatusBuilder().build();
 
         assertThat(status1.hashCode()).isEqualTo(status2.hashCode());
     }
 
-    private TetherNetworkConnectionStatus.Builder buildConnectionStatusBuilder() {
-        return new TetherNetworkConnectionStatus.Builder()
+    private HotspotNetworkConnectionStatus.Builder buildConnectionStatusBuilder() {
+        return new HotspotNetworkConnectionStatus.Builder()
                 .setStatus(CONNECTION_STATUS_ENABLING_HOTSPOT)
-                .setTetherNetwork(buildTetherNetworkBuilder().build())
+                .setHotspotNetwork(buildHotspotNetworkBuilder().build())
                 .setExtras(buildBundle());
     }
 
@@ -124,11 +125,11 @@ public class TetherNetworkConnectionStatusTest {
         return bundle;
     }
 
-    private TetherNetwork.Builder buildTetherNetworkBuilder() {
-        TetherNetwork.Builder builder =  new TetherNetwork.Builder()
+    private HotspotNetwork.Builder buildHotspotNetworkBuilder() {
+        HotspotNetwork.Builder builder = new HotspotNetwork.Builder()
                 .setDeviceId(DEVICE_ID)
-                .setDeviceInfo(DEVICE_INFO)
-                .setNetworkType(NETWORK_TYPE)
+                .setNetworkProviderInfo(NETWORK_PROVIDER_INFO)
+                .setHostNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
                 .setHotspotSsid(HOTSPOT_SSID)
                 .setHotspotBssid(HOTSPOT_BSSID);
