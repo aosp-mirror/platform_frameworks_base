@@ -215,9 +215,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
         private boolean performA11yAction(View view, int action) {
             final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
-            if (action == AccessibilityAction.ACTION_CLICK.getId()) {
-                handleSingleTap(view);
-            } else if (action == R.id.accessibility_action_move_up) {
+            if (action == R.id.accessibility_action_move_up) {
                 moveButton(0, -windowBounds.height());
             } else if (action == R.id.accessibility_action_move_down) {
                 moveButton(0, windowBounds.height());
@@ -264,8 +262,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             } else if (id == R.id.magnifier_full_button) {
                 hideSettingPanel();
                 toggleMagnificationMode();
-            } else {
-                hideSettingPanel();
             }
         }
     };
@@ -273,7 +269,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     @Override
     public boolean onSingleTap(View view) {
         mSingleTapDetected = true;
-        handleSingleTap(view);
         return true;
     }
 
@@ -496,22 +491,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
         if (mIsVisible) {
             mWindowManager.updateViewLayout(mSettingView, mParams);
-        }
-    }
-
-    private void handleSingleTap(View view) {
-        int id = view.getId();
-        if (id == R.id.magnifier_small_button) {
-            setMagnifierSize(MagnificationSize.SMALL);
-        } else if (id == R.id.magnifier_medium_button) {
-            setMagnifierSize(MagnificationSize.MEDIUM);
-        } else if (id == R.id.magnifier_large_button) {
-            setMagnifierSize(MagnificationSize.LARGE);
-        } else if (id == R.id.magnifier_full_button) {
-            hideSettingPanel();
-            toggleMagnificationMode();
-        } else {
-            hideSettingPanel();
         }
     }
 
