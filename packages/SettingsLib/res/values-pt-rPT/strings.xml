@@ -527,7 +527,7 @@
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Concluir"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes e lembretes"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir a definição de alarmes e lembretes"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permitir alarmes e lembretes"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes e lembretes"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permita que esta app defina alarmes e agende outras ações com base no tempo. Esta ação permite que a app seja executada em segundo plano, o que pode utilizar mais bateria.\n\nSe esta autorização estiver desativada, os alarmes existentes e os eventos com base no tempo agendados por esta app não funcionam."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"agendar, alarme, lembrete, relógio"</string>
