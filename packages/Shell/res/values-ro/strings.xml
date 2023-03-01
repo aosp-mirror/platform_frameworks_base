@@ -21,14 +21,14 @@
     <string name="bugreport_in_progress_title" msgid="4311705936714972757">"Raportul de eroare <xliff:g id="ID">#%d</xliff:g> se generează"</string>
     <string name="bugreport_finished_title" msgid="4429132808670114081">"Raportul de eroare <xliff:g id="ID">#%d</xliff:g> a fost creat"</string>
     <string name="bugreport_updating_title" msgid="4423539949559634214">"Se adaugă detaliile la raportul de eroare"</string>
-    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Așteptați…"</string>
+    <string name="bugreport_updating_wait" msgid="3322151947853929470">"Te rugăm să aștepți…"</string>
     <string name="bugreport_finished_text" product="watch" msgid="1223616207145252689">"Raportul de eroare va apărea curând pe telefon"</string>
-    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Selectați pentru a trimite raportul de eroare"</string>
-    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Atingeți pentru a trimite raportul de eroare"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selectați pentru a trimite raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Atingeți ca să trimiteți raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
-    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Atingeți ca să trimiteți raportul de eroare fără captură de ecran sau așteptați finalizarea acesteia"</string>
-    <string name="bugreport_confirm" msgid="5917407234515812495">"Rapoartele despre erori conțin date din diferite fișiere de jurnal ale sistemului. Acestea pot include date pe care le puteți considera sensibile (cum ar fi utilizarea aplicației și date despre locație). Permiteți accesul la rapoartele despre erori numai aplicațiilor și persoanelor în care aveți încredere."</string>
+    <string name="bugreport_finished_text" product="tv" msgid="5758325479058638893">"Selectează pentru a trimite raportul de eroare"</string>
+    <string name="bugreport_finished_text" product="default" msgid="8353769438382138847">"Atinge pentru a trimite raportul de eroare"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="tv" msgid="2343263822812016950">"Selectează pentru a trimite raportul fără captură de ecran sau așteaptă finalizarea acesteia"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="watch" msgid="1474435374470177193">"Atinge ca să trimiți raportul de eroare fără captură de ecran sau așteaptă finalizarea acesteia"</string>
+    <string name="bugreport_finished_pending_screenshot_text" product="default" msgid="1474435374470177193">"Atinge ca să trimiți raportul de eroare fără captură de ecran sau așteaptă finalizarea acesteia"</string>
+    <string name="bugreport_confirm" msgid="5917407234515812495">"Rapoartele despre erori conțin date din diferite fișiere de jurnal ale sistemului. Acestea pot include date pe care le poți considera sensibile (cum ar fi utilizarea aplicației și date despre locație). Permite accesul la rapoartele despre erori numai aplicațiilor și persoanelor în care ai încredere."</string>
     <string name="bugreport_confirm_dont_repeat" msgid="6179945398364357318">"Nu mai afișa"</string>
     <string name="bugreport_storage_title" msgid="5332488144740527109">"Rapoarte de erori"</string>
     <string name="bugreport_unreadable_text" msgid="586517851044535486">"Fișierul cu raportul de eroare nu a putut fi citit"</string>
@@ -42,6 +42,6 @@
     <string name="bugreport_info_name" msgid="4414036021935139527">"Numele fișierului"</string>
     <string name="bugreport_info_title" msgid="2306030793918239804">"Titlul erorii"</string>
     <string name="bugreport_info_description" msgid="5072835127481627722">"Rezumat privind eroarea"</string>
-    <string name="save" msgid="4781509040564835759">"Salvați"</string>
-    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Trimiteți raportul de eroare"</string>
+    <string name="save" msgid="4781509040564835759">"Salvează"</string>
+    <string name="bugreport_intent_chooser_title" msgid="7605709494790894076">"Trimite raportul de eroare"</string>
 </resources>
