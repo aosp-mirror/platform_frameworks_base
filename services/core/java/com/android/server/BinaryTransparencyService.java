@@ -350,7 +350,7 @@ public class BinaryTransparencyService extends SystemService {
                 // lastly measure all newly installed MBAs
                 List<IBinaryTransparencyService.AppInfo> allMbaInfo =
                         collectAllSilentInstalledMbaInfo(packagesMeasured);
-                for (IBinaryTransparencyService.AppInfo appInfo : allUpdatedPreloadInfo) {
+                for (IBinaryTransparencyService.AppInfo appInfo : allMbaInfo) {
                     packagesMeasured.putBoolean(appInfo.packageName, true);
                     writeAppInfoToLog(appInfo);
                 }
