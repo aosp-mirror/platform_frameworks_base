@@ -1948,9 +1948,13 @@ class ActivityStarter {
             boolean passesAsmChecks = true;
             Task sourceTask = mSourceRecord.getTask();
 
-            // Don't allow launches into a new task if the current task is not foreground.
+            // Allow launching into a new task (or a task matching the launched activity's
+            // affinity) only if the current task is foreground or mutating its own task.
+            // The latter can happen eg. if caller uses NEW_TASK flag and the activity being
+            // launched matches affinity of source task.
             if (taskToFront) {
-                passesAsmChecks = sourceTask != null && sourceTask.isVisible();
+                passesAsmChecks = sourceTask != null
+                        && (sourceTask.isVisible() || sourceTask == targetTask);
             }
 
             if (passesAsmChecks) {
