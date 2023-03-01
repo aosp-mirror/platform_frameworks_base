@@ -92,7 +92,8 @@ interface MobileIconInteractor {
      * 1. The default network name, if one is configured
      * 2. A derived name based off of the intent [ACTION_SERVICE_PROVIDERS_UPDATED]
      * 3. Or, in the case where the repository sends us the default network name, we check for an
-     * override in [connectionInfo.operatorAlphaShort], a value that is derived from [ServiceState]
+     *    override in [connectionInfo.operatorAlphaShort], a value that is derived from
+     *    [ServiceState]
      */
     val networkName: StateFlow<NetworkNameModel>
 

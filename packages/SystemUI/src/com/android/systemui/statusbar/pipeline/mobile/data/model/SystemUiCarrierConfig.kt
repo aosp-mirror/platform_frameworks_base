@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * 1. Define a new `private val` wrapping the key using [BooleanCarrierConfig]
  * 2. Define a public `val` exposing the wrapped flow using [BooleanCarrierConfig.config]
  * 3. Add the new [BooleanCarrierConfig] to the list of tracked configs, so they are properly
- * updated when a new carrier config comes down
+ *    updated when a new carrier config comes down
  */
 class SystemUiCarrierConfig
 internal constructor(

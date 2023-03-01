@@ -52,6 +52,7 @@ data class SmartspaceMediaData(
      * Indicates if all the data is valid.
      *
      * TODO(b/230333302): Make MediaControlPanel more flexible so that we can display fewer than
+     *
      * ```
      *     [NUM_REQUIRED_RECOMMENDATIONS].
      * ```

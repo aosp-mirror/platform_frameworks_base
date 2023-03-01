@@ -53,6 +53,7 @@ interface KeyguardBouncerRepository {
     val primaryBouncerScrimmed: StateFlow<Boolean>
     /**
      * Set how much of the notification panel is showing on the screen.
+     *
      * ```
      *      0f = panel fully hidden = bouncer fully showing
      *      1f = panel fully showing = bouncer fully hidden
@@ -134,6 +135,7 @@ constructor(
     override val primaryBouncerScrimmed = _primaryBouncerScrimmed.asStateFlow()
     /**
      * Set how much of the notification panel is showing on the screen.
+     *
      * ```
      *      0f = panel fully hidden = bouncer fully showing
      *      1f = panel fully showing = bouncer fully hidden

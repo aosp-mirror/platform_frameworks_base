@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.runCurrent
 
 /**
  * Collect [flow] in a new [Job] and return a getter for the last collected value.
+ *
  * ```
  * fun myTest() = runTest {
  *   // ...

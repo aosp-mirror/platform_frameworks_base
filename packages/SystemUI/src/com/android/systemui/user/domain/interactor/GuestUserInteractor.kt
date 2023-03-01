@@ -297,7 +297,7 @@ constructor(
      * to create a new one.
      *
      * @return The multi-user user ID of the newly created guest user, or [UserHandle.USER_NULL] if
-     * the guest couldn't be created.
+     *   the guest couldn't be created.
      */
     @UserIdInt
     private suspend fun createInBackground(): Int {
