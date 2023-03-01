@@ -20,6 +20,7 @@ import static android.net.wifi.WifiAnnotations.SecurityType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,21 +39,28 @@ import java.util.Set;
  */
 @SystemApi
 public final class KnownNetwork implements Parcelable {
+
+    /**
+     * Network source is unknown.
+     */
+    public static final int NETWORK_SOURCE_UNKNOWN = 0;
+
     /**
      * Network is known by a nearby device with the same user account.
      */
-    public static final int NETWORK_SOURCE_NEARBY_SELF = 0;
+    public static final int NETWORK_SOURCE_NEARBY_SELF = 1;
 
     /**
      * Network is known via cloud storage associated with this device's user account.
      */
-    public static final int NETWORK_SOURCE_CLOUD_SELF = 1;
+    public static final int NETWORK_SOURCE_CLOUD_SELF = 2;
 
     /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
+            NETWORK_SOURCE_UNKNOWN,
             NETWORK_SOURCE_NEARBY_SELF,
             NETWORK_SOURCE_CLOUD_SELF
     })
@@ -110,12 +118,13 @@ public final class KnownNetwork implements Parcelable {
 
         /**
          * Sets the device information of the device providing connectivity.
+         * Must be set if network source is {@link KnownNetwork#NETWORK_SOURCE_NEARBY_SELF}.
          *
          * @param deviceInfo The device information object.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setDeviceInfo(@NonNull DeviceInfo deviceInfo) {
+        public Builder setDeviceInfo(@Nullable DeviceInfo deviceInfo) {
             mDeviceInfo = deviceInfo;
             return this;
         }
@@ -135,9 +144,11 @@ public final class KnownNetwork implements Parcelable {
         }
     }
 
-    private static void validate(int networkSource, String ssid, Set<Integer> securityTypes) {
-        if (networkSource != NETWORK_SOURCE_CLOUD_SELF && networkSource
-                != NETWORK_SOURCE_NEARBY_SELF) {
+    private static void validate(int networkSource, String ssid, Set<Integer> securityTypes,
+            DeviceInfo deviceInfo) {
+        if (networkSource != NETWORK_SOURCE_UNKNOWN
+                && networkSource != NETWORK_SOURCE_CLOUD_SELF
+                && networkSource != NETWORK_SOURCE_NEARBY_SELF) {
             throw new IllegalArgumentException("Illegal network source");
         }
         if (TextUtils.isEmpty(ssid)) {
@@ -146,14 +157,18 @@ public final class KnownNetwork implements Parcelable {
         if (securityTypes.isEmpty()) {
             throw new IllegalArgumentException("SecurityTypes must be set");
         }
+        if (networkSource == NETWORK_SOURCE_NEARBY_SELF && deviceInfo == null) {
+            throw new IllegalArgumentException("Device info must be provided when network source"
+                    + " is NETWORK_SOURCE_NEARBY_SELF");
+        }
     }
 
     private KnownNetwork(
             @NetworkSource int networkSource,
             @NonNull String ssid,
             @NonNull @SecurityType ArraySet<Integer> securityTypes,
-            @NonNull DeviceInfo deviceInfo) {
-        validate(networkSource, ssid, securityTypes);
+            @Nullable DeviceInfo deviceInfo) {
+        validate(networkSource, ssid, securityTypes, deviceInfo);
         mNetworkSource = networkSource;
         mSsid = ssid;
         mSecurityTypes = new ArraySet<>(securityTypes);
@@ -194,9 +209,10 @@ public final class KnownNetwork implements Parcelable {
     /**
      * Gets the device information of the device providing connectivity.
      *
-     * @return Returns the information of the device providing the known network.
+     * @return Returns the information of the device providing the known network. Can be null if the
+     * network source is cloud or unknown.
      */
-    @NonNull
+    @Nullable
     public DeviceInfo getDeviceInfo() {
         return mDeviceInfo;
     }
