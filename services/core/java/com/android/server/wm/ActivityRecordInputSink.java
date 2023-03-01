@@ -86,6 +86,10 @@ class ActivityRecordInputSink {
             mInputWindowHandle.layoutParamsFlags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
             changed |= notTouchable;
         }
+        if (mInputWindowHandle.displayId != mActivityRecord.getDisplayId()) {
+            mInputWindowHandle.displayId = mActivityRecord.getDisplayId();
+            changed = true;
+        }
         return changed;
     }
 
