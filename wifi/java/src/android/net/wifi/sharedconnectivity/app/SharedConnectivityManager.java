@@ -19,6 +19,7 @@ package android.net.wifi.sharedconnectivity.app;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -151,7 +152,7 @@ public class SharedConnectivityManager {
      * Creates a new instance of {@link SharedConnectivityManager}.
      *
      * Automatically binds to implementation of {@link SharedConnectivityService} specified in
-     * device overlay.
+     * the device overlay.
      *
      * @return An instance of {@link SharedConnectivityManager} or null if the shared connectivity
      * service is not found.
@@ -266,9 +267,10 @@ public class SharedConnectivityManager {
      *
      * @param executor The Executor used to invoke the callback.
      * @param callback The callback of type {@link SharedConnectivityClientCallback} that is invoked
-     *                 when the service updates either the list of Tether Networks or Known
-     *                 Networks.
+     *                 when the service updates its data.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public void registerCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull SharedConnectivityClientCallback callback) {
         Objects.requireNonNull(executor, "executor cannot be null");
@@ -297,6 +299,8 @@ public class SharedConnectivityManager {
      *
      * @return Returns true if the callback was successfully unregistered, false otherwise.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean unregisterCallback(
             @NonNull SharedConnectivityClientCallback callback) {
         Objects.requireNonNull(callback, "callback cannot be null");
@@ -325,7 +329,7 @@ public class SharedConnectivityManager {
         return true;
     }
 
-     /**
+    /**
      * Send command to the implementation of {@link SharedConnectivityService} requesting connection
      * to the specified Tether Network.
      *
@@ -334,6 +338,8 @@ public class SharedConnectivityManager {
      * @return Returns true if the service received the command. Does not guarantee that the
      *         connection was successful.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean connectTetherNetwork(@NonNull TetherNetwork network) {
         Objects.requireNonNull(network, "Tether network cannot be null");
 
@@ -359,6 +365,8 @@ public class SharedConnectivityManager {
      * @return Returns true if the service received the command. Does not guarantee that the
      *         disconnection was successful.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean disconnectTetherNetwork(@NonNull TetherNetwork network) {
         if (mService == null) {
             return false;
@@ -382,6 +390,8 @@ public class SharedConnectivityManager {
      * @return Returns true if the service received the command. Does not guarantee that the
      *         connection was successful.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean connectKnownNetwork(@NonNull KnownNetwork network) {
         Objects.requireNonNull(network, "Known network cannot be null");
 
@@ -405,6 +415,8 @@ public class SharedConnectivityManager {
      * @return Returns true if the service received the command. Does not guarantee that the
      *         forget action was successful.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean forgetKnownNetwork(@NonNull KnownNetwork network) {
         Objects.requireNonNull(network, "Known network cannot be null");
 
@@ -426,6 +438,8 @@ public class SharedConnectivityManager {
      *
      * @return Returns a {@link List} of {@link TetherNetwork} objects, empty list on failure.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @NonNull
     public List<TetherNetwork> getTetherNetworks() {
         if (mService == null) {
@@ -445,6 +459,8 @@ public class SharedConnectivityManager {
      *
      * @return Returns a {@link List} of {@link KnownNetwork} objects, empty list on failure.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @NonNull
     public List<KnownNetwork> getKnownNetworks() {
         if (mService == null) {
@@ -465,6 +481,8 @@ public class SharedConnectivityManager {
      * @return Returns a {@link SharedConnectivitySettingsState} object with the state, null on
      * failure.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @Nullable
     public SharedConnectivitySettingsState getSettingsState() {
         if (mService == null) {
@@ -486,6 +504,8 @@ public class SharedConnectivityManager {
      * null on failure. If no connection is active the status will be
      * {@link TetherNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @Nullable
     public TetherNetworkConnectionStatus getTetherNetworkConnectionStatus() {
         if (mService == null) {
@@ -507,6 +527,8 @@ public class SharedConnectivityManager {
      * null on failure. If no connection is active the status will be
      * {@link KnownNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @Nullable
     public KnownNetworkConnectionStatus getKnownNetworkConnectionStatus() {
         if (mService == null) {

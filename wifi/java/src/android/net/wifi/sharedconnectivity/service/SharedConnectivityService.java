@@ -82,66 +82,148 @@ public abstract class SharedConnectivityService extends Service {
         if (DEBUG) Log.i(TAG, "onBind intent=" + intent);
         mHandler = new Handler(getMainLooper());
         IBinder serviceStub = new ISharedConnectivityService.Stub() {
+
+            /**
+             * Registers a callback for receiving updates to the list of Tether Networks, Known
+             * Networks, shared connectivity settings state, tether network connection status and
+             * known network connection status.
+             *
+             * @param callback The callback of type {@link ISharedConnectivityCallback} to be called
+             *                 when there is update to the data.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public void registerCallback(ISharedConnectivityCallback callback) {
                 checkPermissions();
                 mHandler.post(() -> onRegisterCallback(callback));
             }
 
+            /**
+             * Unregisters a previously registered callback.
+             *
+             * @param callback The callback to unregister.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public void unregisterCallback(ISharedConnectivityCallback callback) {
                 checkPermissions();
                 mHandler.post(() -> onUnregisterCallback(callback));
             }
 
+            /**
+             * Connects to a tether network.
+             *
+             * @param network The network to connect to.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public void connectTetherNetwork(TetherNetwork network) {
                 checkPermissions();
                 mHandler.post(() -> onConnectTetherNetwork(network));
             }
 
+            /**
+             * Disconnects from a previously connected tether network.
+             *
+             * @param network The network to disconnect from.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public void disconnectTetherNetwork(TetherNetwork network) {
                 checkPermissions();
                 mHandler.post(() -> onDisconnectTetherNetwork(network));
             }
 
+            /**
+             * Adds a known network to the available networks on the device and connects to it.
+             *
+             * @param network The network to connect to.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public void connectKnownNetwork(KnownNetwork network) {
                 checkPermissions();
                 mHandler.post(() -> onConnectKnownNetwork(network));
             }
 
+            /**
+             * Removes a known network from the available networks on the device which will also
+             * disconnect the device from the network if it is connected to it.
+             *
+             * @param network The network to forget.
+             */
             @Override
             public void forgetKnownNetwork(KnownNetwork network) {
                 checkPermissions();
                 mHandler.post(() -> onForgetKnownNetwork(network));
             }
 
+            /**
+             * Gets the list of tether networks the user can select to connect to.
+             *
+             * @return Returns a {@link List} of {@link TetherNetwork} objects
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public List<TetherNetwork> getTetherNetworks() {
                 checkPermissions();
                 return mTetherNetworks;
             }
 
+            /**
+             * Gets the list of known networks the user can select to connect to.
+             *
+             * @return Returns a {@link List} of {@link KnownNetwork} objects.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public List<KnownNetwork> getKnownNetworks() {
                 checkPermissions();
                 return mKnownNetworks;
             }
 
+            /**
+             * Gets the shared connectivity settings state.
+             *
+             * @return Returns a {@link SharedConnectivitySettingsState} object with the state.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public SharedConnectivitySettingsState getSettingsState() {
                 checkPermissions();
                 return mSettingsState;
             }
 
+            /**
+             * Gets the connection status of the tether network the user selected to connect to.
+             *
+             * @return Returns a {@link TetherNetworkConnectionStatus} object with the connection
+             * status.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public TetherNetworkConnectionStatus getTetherNetworkConnectionStatus() {
                 checkPermissions();
                 return mTetherNetworkConnectionStatus;
             }
 
+            /**
+             * Gets the connection status of the known network the user selected to connect to.
+             *
+             * @return Returns a {@link KnownNetworkConnectionStatus} object with the connection
+             * status.
+             */
+            @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+                    android.Manifest.permission.NETWORK_SETUP_WIZARD})
             @Override
             public KnownNetworkConnectionStatus getKnownNetworkConnectionStatus() {
                 checkPermissions();
