@@ -308,7 +308,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                     TestConfig(
                         isVisible = true,
                         isClickable = false,
-                        isActivated = true,
+                        isActivated = false,
                         icon = icon,
                         canShowWhileLocked = false,
                         intent = Intent("action"),
@@ -363,7 +363,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                     TestConfig(
                         isVisible = true,
                         isClickable = false,
-                        isActivated = true,
+                        isActivated = false,
                         icon = icon,
                         canShowWhileLocked = false,
                         intent = Intent("action"),
