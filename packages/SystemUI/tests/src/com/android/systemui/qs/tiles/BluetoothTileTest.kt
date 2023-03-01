@@ -22,6 +22,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.BluetoothController
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,6 +77,12 @@ class BluetoothTileTest : SysuiTestCase() {
         )
 
         tile.initialize()
+        testableLooper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
         testableLooper.processAllMessages()
     }
 
