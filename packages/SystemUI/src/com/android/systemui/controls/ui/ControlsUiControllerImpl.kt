@@ -546,8 +546,12 @@ class ControlsUiControllerImpl @Inject constructor (
             RenderInfo.registerComponentIcon(it.componentName, it.icon)
         }
 
-        var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
-            addAll(items)
+        val adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
+            add(selected)
+            addAll(items
+                    .filter { it !== selected }
+                    .sortedBy { it.appName.toString() }
+            )
         }
 
         val iconSize = context.resources
