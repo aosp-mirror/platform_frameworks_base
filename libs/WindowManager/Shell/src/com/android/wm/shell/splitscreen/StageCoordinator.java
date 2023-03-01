@@ -204,7 +204,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     // and exit, since exit itself can trigger a number of changes that update the stages.
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
-    private boolean mIsSplitEntering;
+    private boolean mIsDividerRemoteAnimating;
     private boolean mIsDropEntering;
     private boolean mIsExiting;
 
@@ -881,7 +881,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // Set false to avoid record new bounds with old task still on top;
         mShouldUpdateRecents = false;
-        mIsSplitEntering = true;
+        mIsDividerRemoteAnimating = true;
         if (mSplitRequest == null) {
             mSplitRequest = new SplitRequest(mainTaskId,
                     mainPendingIntent != null ? mainPendingIntent.getIntent() : null,
@@ -974,7 +974,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     private void onRemoteAnimationFinishedOrCancelled(WindowContainerTransaction evictWct) {
-        mIsSplitEntering = false;
+        mIsDividerRemoteAnimating = false;
         mShouldUpdateRecents = true;
         mSplitRequest = null;
         // If any stage has no child after animation finished, it means that split will display
@@ -1240,7 +1240,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         });
         mShouldUpdateRecents = false;
-        mIsSplitEntering = false;
+        mIsDividerRemoteAnimating = false;
 
         mSplitLayout.getInvisibleBounds(mTempRect1);
         if (childrenToTop == null || childrenToTop.getTopVisibleChildTaskId() == INVALID_TASK_ID) {
@@ -1573,7 +1573,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 && !ENABLE_SHELL_TRANSITIONS) {
             // Clear the divider remote animating flag as the divider will be re-rendered to apply
             // the new rotation config.
-            mIsSplitEntering = false;
+            mIsDividerRemoteAnimating = false;
             mSplitLayout.update(null /* t */);
             onLayoutSizeChanged(mSplitLayout);
         }
@@ -1623,9 +1623,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void onChildTaskAppeared(StageListenerImpl stageListener, int taskId) {
-        if (stageListener == mSideStageListener && !isSplitScreenVisible() && isSplitActive()
-                && !mIsSplitEntering) {
-            // Handle entring split case here if split already running background.
+        // Handle entering split screen while there is a split pair running in the background.
+        if (stageListener == mSideStageListener && !isSplitScreenVisible()
+                && mSplitRequest == null) {
             if (mIsDropEntering) {
                 mSplitLayout.resetDividerPosition();
             } else {
@@ -1717,7 +1717,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mDividerVisible = visible;
         sendSplitVisibilityChanged();
 
-        if (mIsSplitEntering) {
+        if (mIsDividerRemoteAnimating) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "   Skip animating divider bar due to it's remote animating.");
             return;
@@ -1737,7 +1737,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     "   Skip animating divider bar due to divider leash not ready.");
             return;
         }
-        if (mIsSplitEntering) {
+        if (mIsDividerRemoteAnimating) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
                     "   Skip animating divider bar due to it's remote animating.");
             return;
@@ -1805,7 +1805,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 mSplitLayout.flingDividerToDismiss(
                         mSideStagePosition != SPLIT_POSITION_BOTTOM_OR_RIGHT,
                         EXIT_REASON_APP_FINISHED);
-            } else if (!isSplitScreenVisible() && !mIsSplitEntering) {
+            } else if (!isSplitScreenVisible() && mSplitRequest == null) {
+                // Dismiss split screen in the background once any sides of the split become empty.
                 exitSplitScreen(null /* childrenToTop */, EXIT_REASON_APP_FINISHED);
             }
         } else if (isSideStage && hasChildren && !mMainStage.isActive()) {
