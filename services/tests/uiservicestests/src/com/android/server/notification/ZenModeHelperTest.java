@@ -38,11 +38,12 @@ import static android.service.notification.Condition.STATE_TRUE;
 import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
-import static com.android.os.AtomsProto.DNDModeProto.CHANNELS_BYPASSING_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.ENABLED_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.ID_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.UID_FIELD_NUMBER;
-import static com.android.os.AtomsProto.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.CHANNELS_BYPASSING_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.ENABLED_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.ID_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.UID_FIELD_NUMBER;
+import static com.android.os.dnd.DNDModeProto.ZEN_MODE_FIELD_NUMBER;
+import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
 import static junit.framework.Assert.assertEquals;
@@ -95,7 +96,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
-import android.service.notification.DNDModeProto;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenPolicy;
@@ -898,7 +898,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(n + 1, events.size());
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == DND_MODE_RULE) {
-                if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == DNDModeProto.ROOT_CONFIG) {
+                if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == ROOT_CONFIG) {
                     assertTrue(builder.getBoolean(ENABLED_FIELD_NUMBER));
                     assertFalse(builder.getBoolean(CHANNELS_BYPASSING_FIELD_NUMBER));
                 }
