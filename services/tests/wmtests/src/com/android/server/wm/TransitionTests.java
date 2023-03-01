@@ -1376,6 +1376,9 @@ public class TransitionTests extends WindowTestsBase {
         enteringAnimReports.clear();
         closeTransition.finishTransition();
 
+        assertEquals(ActivityTaskManagerService.APP_SWITCH_DISALLOW, mAtm.getBalAppSwitchesState());
+        assertFalse(activity1.app.hasActivityInVisibleTask());
+
         verify(snapshotController, times(1)).recordSnapshot(eq(task1), eq(false));
         assertTrue(enteringAnimReports.contains(activity2));
     }

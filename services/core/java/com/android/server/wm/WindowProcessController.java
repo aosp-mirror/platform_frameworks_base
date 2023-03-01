@@ -1839,6 +1839,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     pw.print("F|");
                 }
             }
+            if ((stateFlags & ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK) != 0) {
+                pw.print("VT|");
+            }
             final int taskLayer = stateFlags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
             if (taskLayer != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {
                 pw.print("taskLayer=" + taskLayer);
