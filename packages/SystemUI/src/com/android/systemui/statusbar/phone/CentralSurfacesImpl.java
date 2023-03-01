@@ -2254,10 +2254,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mShadeController.isExpandedVisible());
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
-            pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller));
-            pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller)
-                    + " scroll " + mStackScroller.getScrollX()
+            pw.print("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller));
+            pw.print(" scroll " + mStackScroller.getScrollX()
                     + "," + mStackScroller.getScrollY());
+            pw.println(" translationX " + mStackScroller.getTranslationX());
         }
 
         pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
