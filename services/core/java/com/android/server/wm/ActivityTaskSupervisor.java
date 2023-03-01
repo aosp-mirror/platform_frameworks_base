@@ -1239,8 +1239,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return Context.DEVICE_ID_DEFAULT;
         }
         if (mVirtualDeviceManager == null) {
-            mVirtualDeviceManager =
-                    mService.mContext.getSystemService(VirtualDeviceManager.class);
+            if (mService.mHasCompanionDeviceSetupFeature) {
+                mVirtualDeviceManager =
+                        mService.mContext.getSystemService(VirtualDeviceManager.class);
+            }
+            if (mVirtualDeviceManager == null) {
+                return Context.DEVICE_ID_DEFAULT;
+            }
         }
         return mVirtualDeviceManager.getDeviceIdForDisplayId(displayId);
     }
