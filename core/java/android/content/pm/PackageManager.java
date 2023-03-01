@@ -5720,6 +5720,17 @@ public abstract class PackageManager {
     }
 
     /**
+     * @hide
+     */
+    @NonNull
+    public ActivityInfo getActivityInfoAsUser(@NonNull ComponentName component,
+            @NonNull ComponentInfoFlags flags, @UserIdInt int userId)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getActivityInfoAsUser not implemented in subclass");
+    }
+
+    /**
      * Retrieve all of the information we know about a particular receiver
      * class.
      *

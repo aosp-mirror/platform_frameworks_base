@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
@@ -180,6 +183,28 @@ public class IntentFilter implements Parcelable {
     private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     private static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
+
+    /**
+     * An intent with action set as null used to always pass the action test during intent
+     * filter matching. This causes a lot of confusion and unexpected intent matches.
+     * Null action intents should be blocked when either the intent sender or receiver
+     * application targets U or higher.
+     *
+     * mBlockNullAction indicates whether the intent filter owner (intent receiver) is
+     * targeting U+. This value will be properly set by package manager when IntentFilters are
+     * passed to an application, so that when an application is trying to perform intent filter
+     * matching locally, the correct matching algorithm will be chosen.
+     *
+     * When an IntentFilter is sent to system server (e.g. for registering runtime receivers),
+     * the value set in mBlockNullAction will be ignored and overwritten with the correct
+     * value evaluated based on the Binder calling identity. This makes sure that the
+     * security enforcement cannot be bypassed by crafting a malicious IntentFilter.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long BLOCK_NULL_ACTION_INTENTS = 264497795;
 
     /**
      * The filter {@link #setPriority} value at which system high-priority
@@ -2276,6 +2301,7 @@ public class IntentFilter implements Parcelable {
         String type = resolve ? intent.resolveType(resolver) : intent.getType();
         return match(intent.getAction(), type, intent.getScheme(),
                      intent.getData(), intent.getCategories(), logTag,
+                     CompatChanges.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS),
                      false /* supportWildcards */, null /* ignoreActions */,
                      intent.getExtras());
     }
@@ -2328,6 +2354,7 @@ public class IntentFilter implements Parcelable {
             Uri data, Set<String> categories, String logTag, boolean supportWildcards,
             @Nullable Collection<String> ignoreActions) {
         return match(action, type, scheme, data, categories, logTag, supportWildcards,
+                CompatChanges.isChangeEnabled(BLOCK_NULL_ACTION_INTENTS),
                 ignoreActions, null /* extras */);
     }
 
@@ -2339,8 +2366,10 @@ public class IntentFilter implements Parcelable {
      */
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag, boolean supportWildcards,
-            @Nullable Collection<String> ignoreActions, @Nullable Bundle extras) {
-        if (action != null && !matchAction(action, supportWildcards, ignoreActions)) {
+            boolean blockNullAction, @Nullable Collection<String> ignoreActions,
+            @Nullable Bundle extras) {
+        if ((action == null && blockNullAction)
+                || !matchAction(action, supportWildcards, ignoreActions)) {
             if (false) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;

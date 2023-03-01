@@ -45,6 +45,8 @@ import com.android.credentialmanager.getflow.GetCredentialUiState
 import androidx.credentials.CreateCredentialRequest.DisplayInfo
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePasswordRequest
+import androidx.credentials.GetPasswordOption
+import androidx.credentials.GetPublicKeyCredentialOption
 
 import java.time.Instant
 
@@ -71,7 +73,7 @@ class CredentialManagerRepo(
         requestInfo = intent.extras?.getParcelable(
             RequestInfo.EXTRA_REQUEST_INFO,
             RequestInfo::class.java
-        ) ?: testCreatePasswordRequestInfo()
+        ) ?: testCreatePasskeyRequestInfo()
 
         val originName: String? = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE -> requestInfo.createCredentialRequest?.origin
@@ -120,8 +122,7 @@ class CredentialManagerRepo(
                         providerDisableListUiState,
                         defaultProviderId,
                         requestDisplayInfoUiState,
-                        /** isOnPasskeyIntroStateAlready */
-                        false,
+                        isOnPasskeyIntroStateAlready = false,
                         isPasskeyFirstUse
                     )!!,
                     getCredentialUiState = null,
@@ -400,7 +401,8 @@ class CredentialManagerRepo(
                 "                   \"authenticatorSelection\": {\n" +
                 "                     \"residentKey\": \"required\",\n" +
                 "                     \"requireResidentKey\": true\n" +
-                "                   }}"
+                "                   }}",
+            preferImmediatelyAvailableCredentials = true,
         )
         val credentialData = request.credentialData
         return RequestInfo.newCreateRequestInfo(
@@ -446,19 +448,28 @@ class CredentialManagerRepo(
     }
 
     private fun testGetRequestInfo(): RequestInfo {
+        val passwordOption = GetPasswordOption()
+        val passkeyOption = GetPublicKeyCredentialOption(
+            "json", preferImmediatelyAvailableCredentials = false)
         return RequestInfo.newGetRequestInfo(
             Binder(),
             GetCredentialRequest.Builder(
                 Bundle()
             ).addCredentialOption(
                 CredentialOption(
-                    "androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
-                    Bundle(),
-                    Bundle(), /*isSystemProviderRequired=*/
-                    false
+                    passwordOption.type,
+                    passwordOption.requestData,
+                    passwordOption.candidateQueryData,
+                    passwordOption.isSystemProviderRequired
                 )
-            )
-                .build(),
+            ).addCredentialOption(
+                CredentialOption(
+                    passkeyOption.type,
+                    passkeyOption.requestData,
+                    passkeyOption.candidateQueryData,
+                    passkeyOption.isSystemProviderRequired
+                )
+            ).build(),
             "com.google.android.youtube"
         )
     }

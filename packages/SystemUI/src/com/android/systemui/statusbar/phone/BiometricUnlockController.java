@@ -374,6 +374,17 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     @Override
+    public void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) {
+        Trace.beginSection("BiometricUnlockController#onBiometricDetected");
+        if (mUpdateMonitor.isGoingToSleep()) {
+            Trace.endSection();
+            return;
+        }
+        startWakeAndUnlock(MODE_SHOW_BOUNCER);
+    }
+
+    @Override
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) {
         Trace.beginSection("BiometricUnlockController#onBiometricAuthenticated");

@@ -24,18 +24,19 @@ import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TAB
 import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
 import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_WIFI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.google.common.truth.Truth.assertThat;
 
 import android.os.Parcel;
+import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 /**
- * Unit tests for {@link android.net.wifi.sharedconnectivity.app.TetherNetwork}.
+ * Unit tests for {@link TetherNetwork}.
  */
 @SmallTest
 public class TetherNetworkTest {
@@ -76,8 +77,8 @@ public class TetherNetworkTest {
         parcelR.setDataPosition(0);
         TetherNetwork fromParcel = TetherNetwork.CREATOR.createFromParcel(parcelR);
 
-        assertEquals(network, fromParcel);
-        assertEquals(network.hashCode(), fromParcel.hashCode());
+        assertThat(fromParcel).isEqualTo(network);
+        assertThat(fromParcel.hashCode()).isEqualTo(network.hashCode());
     }
 
     /**
@@ -87,28 +88,31 @@ public class TetherNetworkTest {
     public void testEqualsOperation() {
         TetherNetwork network1 = buildTetherNetworkBuilder().build();
         TetherNetwork network2 = buildTetherNetworkBuilder().build();
-        assertEquals(network1, network2);
+        assertThat(network1).isEqualTo(network2);
 
         TetherNetwork.Builder builder = buildTetherNetworkBuilder().setDeviceId(DEVICE_ID_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
         builder = buildTetherNetworkBuilder().setDeviceInfo(DEVICE_INFO_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
         builder = buildTetherNetworkBuilder().setNetworkType(NETWORK_TYPE_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
         builder = buildTetherNetworkBuilder().setNetworkName(NETWORK_NAME_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
         builder = buildTetherNetworkBuilder().setHotspotSsid(HOTSPOT_SSID_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
         builder = buildTetherNetworkBuilder().setHotspotBssid(HOTSPOT_BSSID_1);
-        assertNotEquals(network1, builder.build());
+        assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder().setHotspotSecurityTypes(HOTSPOT_SECURITY_TYPES_1);
-        assertNotEquals(network1, builder.build());
+        builder = buildTetherNetworkBuilder();
+        TetherNetwork.Builder builder1 = buildTetherNetworkBuilder();
+        Arrays.stream(HOTSPOT_SECURITY_TYPES_1).forEach(builder1::addHotspotSecurityType);
+
+        assertThat(builder1.build()).isNotEqualTo(builder.build());
     }
 
     /**
@@ -117,23 +121,35 @@ public class TetherNetworkTest {
     @Test
     public void testGetMethods() {
         TetherNetwork network = buildTetherNetworkBuilder().build();
-        assertEquals(network.getDeviceId(), DEVICE_ID);
-        assertEquals(network.getDeviceInfo(), DEVICE_INFO);
-        assertEquals(network.getNetworkType(), NETWORK_TYPE);
-        assertEquals(network.getNetworkName(), NETWORK_NAME);
-        assertEquals(network.getHotspotSsid(), HOTSPOT_SSID);
-        assertEquals(network.getHotspotBssid(), HOTSPOT_BSSID);
-        assertArrayEquals(network.getHotspotSecurityTypes(), HOTSPOT_SECURITY_TYPES);
+        ArraySet<Integer> securityTypes = new ArraySet<>();
+        Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(securityTypes::add);
+
+        assertThat(network.getDeviceId()).isEqualTo(DEVICE_ID);
+        assertThat(network.getDeviceInfo()).isEqualTo(DEVICE_INFO);
+        assertThat(network.getNetworkType()).isEqualTo(NETWORK_TYPE);
+        assertThat(network.getNetworkName()).isEqualTo(NETWORK_NAME);
+        assertThat(network.getHotspotSsid()).isEqualTo(HOTSPOT_SSID);
+        assertThat(network.getHotspotBssid()).isEqualTo(HOTSPOT_BSSID);
+        assertThat(network.getHotspotSecurityTypes()).containsExactlyElementsIn(securityTypes);
+    }
+
+    @Test
+    public void testHashCode() {
+        TetherNetwork network1 = buildTetherNetworkBuilder().build();
+        TetherNetwork network2 = buildTetherNetworkBuilder().build();
+
+        assertThat(network1.hashCode()).isEqualTo(network2.hashCode());
     }
 
     private TetherNetwork.Builder buildTetherNetworkBuilder() {
-        return new TetherNetwork.Builder()
+        TetherNetwork.Builder builder =  new TetherNetwork.Builder()
                 .setDeviceId(DEVICE_ID)
                 .setDeviceInfo(DEVICE_INFO)
                 .setNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
                 .setHotspotSsid(HOTSPOT_SSID)
-                .setHotspotBssid(HOTSPOT_BSSID)
-                .setHotspotSecurityTypes(HOTSPOT_SECURITY_TYPES);
+                .setHotspotBssid(HOTSPOT_BSSID);
+        Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(builder::addHotspotSecurityType);
+        return builder;
     }
 }

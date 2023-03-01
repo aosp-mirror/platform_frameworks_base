@@ -293,7 +293,19 @@ public final class NotificationPanelViewController implements Dumpable {
      * custom clock animation is in use.
      */
     private static final int KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION = 1000;
+    /**
+     * Whether the Shade should animate to reflect Back gesture progress.
+     * To minimize latency at runtime, we cache this, else we'd be reading it every time
+     * updateQsExpansion() is called... and it's called very often.
+     *
+     * Whenever we change this flag, SysUI is restarted, so it's never going to be "stale".
+     */
 
+    public final boolean mAnimateBack;
+    /**
+     * The minimum scale to "squish" the Shade and associated elements down to, for Back gesture
+     */
+    public static final float SHADE_BACK_ANIM_MIN_SCALE = 0.9f;
     private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     private final Resources mResources;
     private final KeyguardStateController mKeyguardStateController;
@@ -361,6 +373,8 @@ public final class NotificationPanelViewController implements Dumpable {
     private CentralSurfaces mCentralSurfaces;
     private HeadsUpManagerPhone mHeadsUpManager;
     private float mExpandedHeight = 0;
+    /** The current squish amount for the predictive back animation */
+    private float mCurrentBackProgress = 0.0f;
     private boolean mTracking;
     private boolean mHintAnimationRunning;
     private KeyguardBottomAreaView mKeyguardBottomArea;
@@ -815,6 +829,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mShadeHeaderController = shadeHeaderController;
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
+        mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
@@ -1951,6 +1966,14 @@ public final class NotificationPanelViewController implements Dumpable {
             if (mFixedDuration != NO_FIXED_DURATION) {
                 animator.setDuration(mFixedDuration);
             }
+
+            // Reset Predictive Back animation's transform after Shade is completely hidden.
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    resetBackTransformation();
+                }
+            });
         }
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
@@ -2175,6 +2198,53 @@ public final class NotificationPanelViewController implements Dumpable {
         }
     }
 
+    /**
+     * When the back gesture triggers a fully-expanded shade --> QQS shade collapse transition,
+     * the expansionFraction goes down from 1.0 --> 0.0 (collapsing), so the current "squish" amount
+     * (mCurrentBackProgress) must be un-applied from various UI elements in tandem, such that,
+     * as the shade ends up in its half-expanded state (with QQS above), it is back at 100% scale.
+     * Without this, the shade would collapse, and stay squished.
+     */
+    public void adjustBackAnimationScale(float expansionFraction) {
+        if (expansionFraction > 0.0f) { // collapsing
+            float animatedFraction = expansionFraction * mCurrentBackProgress;
+            applyBackScaling(animatedFraction);
+        } else {
+            // collapsed! reset, so that if we re-expand shade, it won't start off "squished"
+            mCurrentBackProgress = 0;
+        }
+    }
+
+    //TODO(b/270981268): allow cancelling back animation mid-flight
+    /** Called when Back gesture has been committed (i.e. a back event has definitely occurred) */
+    public void onBackPressed() {
+        closeQsIfPossible();
+    }
+    /** Sets back progress. */
+    public void onBackProgressed(float progressFraction) {
+        // TODO: non-linearly transform progress fraction into squish amount (ease-in, linear out)
+        mCurrentBackProgress = progressFraction;
+        applyBackScaling(progressFraction);
+    }
+
+    /** Resets back progress. */
+    public void resetBackTransformation() {
+        mCurrentBackProgress = 0.0f;
+        applyBackScaling(0.0f);
+    }
+
+    /** Scales multiple elements in tandem to achieve the illusion of the QS+Shade shrinking
+     *  as a single visual element (used by the Predictive Back Gesture preview animation).
+     *  fraction = 0 implies "no scaling", and 1 means "scale down to minimum size (90%)".
+     */
+    public void applyBackScaling(float fraction) {
+        if (mNotificationContainerParent == null) {
+            return;
+        }
+        float scale = MathUtils.lerp(1.0f, SHADE_BACK_ANIM_MIN_SCALE, fraction);
+        mNotificationContainerParent.applyBackScaling(scale, mSplitShadeEnabled);
+        mScrimController.applyBackScaling(scale);
+    }
     /** */
     public float getLockscreenShadeDragProgress() {
         // mTransitioningToFullShadeProgress > 0 means we're doing regular lockscreen to shade
@@ -4851,6 +4921,11 @@ public final class NotificationPanelViewController implements Dumpable {
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
+                    if (QuickStepContract.ALLOW_BACK_GESTURE_IN_SHADE && mAnimateBack) {
+                        // Cache the gesture insets now, so we can quickly query them during
+                        // ACTION_MOVE and decide whether to intercept events for back gesture anim.
+                        mQsController.updateGestureInsetsCache();
+                    }
                     mShadeLog.logMotionEvent(event, "onTouch: down action");
                     startExpandMotion(x, y, false /* startTracking */, mExpandedHeight);
                     mMinExpandHeight = 0.0f;
@@ -4900,6 +4975,12 @@ public final class NotificationPanelViewController implements Dumpable {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    // If the shade is half-collapsed, a horizontal swipe inwards from L/R edge
+                    // must be routed to the back gesture (which shows a preview animation).
+                    if (QuickStepContract.ALLOW_BACK_GESTURE_IN_SHADE && mAnimateBack
+                            && mQsController.shouldBackBypassQuickSettings(x)) {
+                        return false;
+                    }
                     if (isFullyCollapsed()) {
                         // If panel is fully collapsed, reset haptic effect before adding movement.
                         mHasVibratedOnOpen = false;

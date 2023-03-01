@@ -53,9 +53,7 @@ import com.android.internal.telephony.ITelephonyRegistry;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -83,15 +81,16 @@ public class TelephonyRegistryManager {
      * A mapping between {@link SubscriptionManager.OnSubscriptionsChangedListener} and
      * its callback IOnSubscriptionsChangedListener.
      */
-    private final Map<SubscriptionManager.OnSubscriptionsChangedListener,
-                IOnSubscriptionsChangedListener> mSubscriptionChangedListenerMap = new HashMap<>();
+    private final ConcurrentHashMap<SubscriptionManager.OnSubscriptionsChangedListener,
+            IOnSubscriptionsChangedListener>
+                    mSubscriptionChangedListenerMap = new ConcurrentHashMap<>();
     /**
      * A mapping between {@link SubscriptionManager.OnOpportunisticSubscriptionsChangedListener} and
      * its callback IOnSubscriptionsChangedListener.
      */
-    private final Map<SubscriptionManager.OnOpportunisticSubscriptionsChangedListener,
-            IOnSubscriptionsChangedListener> mOpportunisticSubscriptionChangedListenerMap
-            = new HashMap<>();
+    private final ConcurrentHashMap<SubscriptionManager.OnOpportunisticSubscriptionsChangedListener,
+            IOnSubscriptionsChangedListener>
+                    mOpportunisticSubscriptionChangedListenerMap = new ConcurrentHashMap<>();
 
     /**
      * A mapping between {@link CarrierConfigManager.CarrierConfigChangeListener} and its callback

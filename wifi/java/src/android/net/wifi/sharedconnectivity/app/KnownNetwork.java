@@ -24,11 +24,12 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A data class representing a known Wi-Fi network.
@@ -59,7 +60,7 @@ public final class KnownNetwork implements Parcelable {
 
     @NetworkSource private final int mNetworkSource;
     private final String mSsid;
-    @SecurityType private final int[] mSecurityTypes;
+    @SecurityType private final ArraySet<Integer> mSecurityTypes;
     private final DeviceInfo mDeviceInfo;
 
     /**
@@ -68,10 +69,8 @@ public final class KnownNetwork implements Parcelable {
     public static final class Builder {
         @NetworkSource private int mNetworkSource = -1;
         private String mSsid;
-        @SecurityType private int[] mSecurityTypes;
+        @SecurityType private final ArraySet<Integer> mSecurityTypes = new ArraySet<>();
         private android.net.wifi.sharedconnectivity.app.DeviceInfo mDeviceInfo;
-
-        public Builder() {}
 
         /**
          * Sets the indicated source of the known network.
@@ -98,14 +97,14 @@ public final class KnownNetwork implements Parcelable {
         }
 
         /**
-         * Sets the security types of the known network.
+         * Adds a security type of the known network.
          *
-         * @param securityTypes The array of security types supported by the known network.
+         * @param securityType A security type supported by the known network.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setSecurityTypes(@NonNull @SecurityType int[] securityTypes) {
-            mSecurityTypes = securityTypes;
+        public Builder addSecurityType(@SecurityType int securityType) {
+            mSecurityTypes.add(securityType);
             return this;
         }
 
@@ -136,7 +135,7 @@ public final class KnownNetwork implements Parcelable {
         }
     }
 
-    private static void validate(int networkSource, String ssid, int [] securityTypes) {
+    private static void validate(int networkSource, String ssid, Set<Integer> securityTypes) {
         if (networkSource != NETWORK_SOURCE_CLOUD_SELF && networkSource
                 != NETWORK_SOURCE_NEARBY_SELF) {
             throw new IllegalArgumentException("Illegal network source");
@@ -144,7 +143,7 @@ public final class KnownNetwork implements Parcelable {
         if (TextUtils.isEmpty(ssid)) {
             throw new IllegalArgumentException("SSID must be set");
         }
-        if (securityTypes == null || securityTypes.length == 0) {
+        if (securityTypes.isEmpty()) {
             throw new IllegalArgumentException("SecurityTypes must be set");
         }
     }
@@ -152,12 +151,12 @@ public final class KnownNetwork implements Parcelable {
     private KnownNetwork(
             @NetworkSource int networkSource,
             @NonNull String ssid,
-            @NonNull @SecurityType int[] securityTypes,
+            @NonNull @SecurityType ArraySet<Integer> securityTypes,
             @NonNull DeviceInfo deviceInfo) {
         validate(networkSource, ssid, securityTypes);
         mNetworkSource = networkSource;
         mSsid = ssid;
-        mSecurityTypes = securityTypes;
+        mSecurityTypes = new ArraySet<>(securityTypes);
         mDeviceInfo = deviceInfo;
     }
 
@@ -184,11 +183,11 @@ public final class KnownNetwork implements Parcelable {
     /**
      * Gets the security types of the known network.
      *
-     * @return Returns the array of security types supported by the known network.
+     * @return Returns a set with security types supported by the known network.
      */
     @NonNull
     @SecurityType
-    public int[] getSecurityTypes() {
+    public Set<Integer> getSecurityTypes() {
         return mSecurityTypes;
     }
 
@@ -208,14 +207,13 @@ public final class KnownNetwork implements Parcelable {
         KnownNetwork other = (KnownNetwork) obj;
         return mNetworkSource == other.getNetworkSource()
                 && Objects.equals(mSsid, other.getSsid())
-                && Arrays.equals(mSecurityTypes, other.getSecurityTypes())
+                && Objects.equals(mSecurityTypes, other.getSecurityTypes())
                 && Objects.equals(mDeviceInfo, other.getDeviceInfo());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mNetworkSource, mSsid, Arrays.hashCode(mSecurityTypes),
-                mDeviceInfo.hashCode());
+        return Objects.hash(mNetworkSource, mSsid, mSecurityTypes, mDeviceInfo);
     }
 
     @Override
@@ -227,7 +225,7 @@ public final class KnownNetwork implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mNetworkSource);
         dest.writeString(mSsid);
-        dest.writeIntArray(mSecurityTypes);
+        dest.writeArraySet(mSecurityTypes);
         mDeviceInfo.writeToParcel(dest, flags);
     }
 
@@ -238,7 +236,8 @@ public final class KnownNetwork implements Parcelable {
      */
     @NonNull
     public static KnownNetwork readFromParcel(@NonNull Parcel in) {
-        return new KnownNetwork(in.readInt(), in.readString(), in.createIntArray(),
+        return new KnownNetwork(in.readInt(), in.readString(),
+                (ArraySet<Integer>) in.readArraySet(null),
                 DeviceInfo.readFromParcel(in));
     }
 
@@ -260,7 +259,7 @@ public final class KnownNetwork implements Parcelable {
         return new StringBuilder("KnownNetwork[")
                 .append("NetworkSource=").append(mNetworkSource)
                 .append(", ssid=").append(mSsid)
-                .append(", securityTypes=").append(Arrays.toString(mSecurityTypes))
+                .append(", securityTypes=").append(mSecurityTypes.toString())
                 .append(", deviceInfo=").append(mDeviceInfo.toString())
                 .append("]").toString();
     }
