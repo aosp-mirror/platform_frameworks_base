@@ -461,7 +461,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
             assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
     }
 
@@ -488,7 +488,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
             assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.getBooleanExtra(INTENT_EXTRA_USE_STYLUS_MODE, false)).isTrue()
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
     }
     // endregion
