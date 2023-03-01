@@ -251,13 +251,13 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
                 || (isFastNonDismissGesture && isAbleToShowMenu);
         int menuSnapTarget = menuRow.getMenuSnapTarget();
         boolean isNonFalseMenuRevealingGesture =
-                !isFalseGesture() && isMenuRevealingGestureAwayFromMenu;
+                isMenuRevealingGestureAwayFromMenu && !isFalseGesture();
         if ((isNonDismissGestureTowardsMenu || isNonFalseMenuRevealingGesture)
                 && menuSnapTarget != 0) {
             // Menu has not been snapped to previously and this is menu revealing gesture
             snapOpen(animView, menuSnapTarget, velocity);
             menuRow.onSnapOpen();
-        } else if (isDismissGesture(ev) && !gestureTowardsMenu) {
+        } else if (isDismissGesture && !gestureTowardsMenu) {
             dismiss(animView, velocity);
             menuRow.onDismiss();
         } else {
