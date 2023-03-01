@@ -13265,20 +13265,16 @@ package android.service.voice {
 
   public abstract class VisualQueryDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionServiceBase {
     ctor public VisualQueryDetectionService();
+    method public final void finishQuery() throws java.lang.IllegalStateException;
+    method public final void gainedAttention();
+    method public final void lostAttention();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onStartDetection(@NonNull android.service.voice.VisualQueryDetectionService.Callback);
+    method public void onStartDetection();
     method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
+    method public final void rejectQuery() throws java.lang.IllegalStateException;
+    method public final void streamQuery(@NonNull String) throws java.lang.IllegalStateException;
     field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
-  }
-
-  public static final class VisualQueryDetectionService.Callback {
-    ctor public VisualQueryDetectionService.Callback();
-    method public void onAttentionGained();
-    method public void onAttentionLost();
-    method public void onQueryDetected(@NonNull String) throws java.lang.IllegalStateException;
-    method public void onQueryFinished() throws java.lang.IllegalStateException;
-    method public void onQueryRejected() throws java.lang.IllegalStateException;
   }
 
   public final class VisualQueryDetectionServiceFailure extends android.service.voice.DetectorFailure {
