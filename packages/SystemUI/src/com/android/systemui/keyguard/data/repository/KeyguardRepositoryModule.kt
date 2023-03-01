@@ -31,6 +31,8 @@ interface KeyguardRepositoryModule {
     @Binds
     fun lightRevealScrimRepository(impl: LightRevealScrimRepositoryImpl): LightRevealScrimRepository
 
+    @Binds fun devicePostureRepository(impl: DevicePostureRepositoryImpl): DevicePostureRepository
+
     @Binds
     fun biometricSettingsRepository(
         impl: BiometricSettingsRepositoryImpl
