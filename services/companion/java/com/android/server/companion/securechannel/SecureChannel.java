@@ -110,7 +110,7 @@ public class SecureChannel {
         this(in, out, callback, null, new AttestationVerifier(context));
     }
 
-    private SecureChannel(
+    public SecureChannel(
             final InputStream in,
             final OutputStream out,
             Callback callback,
@@ -381,9 +381,10 @@ public class SecureChannel {
 
     private void exchangeAuthentication()
             throws IOException, GeneralSecurityException, BadHandleException, CryptoException {
-        if (mVerifier == null) {
+        if (mPreSharedKey != null) {
             exchangePreSharedKey();
-        } else {
+        }
+        if (mVerifier != null) {
             exchangeAttestation();
         }
     }
