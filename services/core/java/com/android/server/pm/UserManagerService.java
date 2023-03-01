@@ -114,6 +114,7 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.util.Xml;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
@@ -7369,9 +7370,19 @@ public class UserManagerService extends IUserManager.Stub {
      * If the main user is a permanent admin user it can't be deleted
      * or downgraded to non-admin status.
      */
-    private static boolean isMainUserPermanentAdmin() {
+    public boolean isMainUserPermanentAdmin() {
         return Resources.getSystem()
-                .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
+                .getBoolean(R.bool.config_isMainUserPermanentAdmin);
+    }
+
+    /**
+     * Returns true if {@link com.android.internal.R.bool#config_canSwitchToHeadlessSystemUser}
+     * is true. If allowed, headless system user can run in the foreground even though
+     * it is not a full user.
+     */
+    public boolean canSwitchToHeadlessSystemUser() {
+        return Resources.getSystem()
+                .getBoolean(R.bool.config_canSwitchToHeadlessSystemUser);
     }
 
 }
