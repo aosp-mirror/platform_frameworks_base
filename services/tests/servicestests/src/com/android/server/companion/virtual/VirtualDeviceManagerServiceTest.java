@@ -355,7 +355,7 @@ public class VirtualDeviceManagerServiceTest {
                 TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
-        mInputController = new InputController(new Object(), mNativeWrapperMock,
+        mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
         mSensorController =

@@ -259,7 +259,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mDisplayManager = displayManager;
         if (inputController == null) {
             mInputController = new InputController(
-                    mVirtualDeviceLock,
                     context.getMainThreadHandler(),
                     context.getSystemService(WindowManager.class));
         } else {
