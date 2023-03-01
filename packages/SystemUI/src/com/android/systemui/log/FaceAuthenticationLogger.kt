@@ -16,7 +16,6 @@ private const val TAG = "KeyguardFaceAuthManagerLog"
  * Helper class for logging for [com.android.keyguard.faceauth.KeyguardFaceAuthManager]
  *
  * To enable logcat echoing for an entire buffer:
- *
  * ```
  *   adb shell settings put global systemui/buffer/KeyguardFaceAuthManagerLog <logLevel>
  *

@@ -51,7 +51,7 @@ object CustomizationProviderContract {
          *
          * Supported operations:
          * - Query - to know which slots are available, query the [SlotTable.URI] [Uri]. The result
-         * set will contain rows with the [SlotTable.Columns] columns.
+         *   set will contain rows with the [SlotTable.Columns] columns.
          */
         object SlotTable {
             const val TABLE_NAME = "slots"
@@ -74,8 +74,8 @@ object CustomizationProviderContract {
          *
          * Supported operations:
          * - Query - to know about all the affordances that are available on the device, regardless
-         * of which ones are currently selected, query the [AffordanceTable.URI] [Uri]. The result
-         * set will contain rows, each with the columns specified in [AffordanceTable.Columns].
+         *   of which ones are currently selected, query the [AffordanceTable.URI] [Uri]. The result
+         *   set will contain rows, each with the columns specified in [AffordanceTable.Columns].
          */
         object AffordanceTable {
             const val TABLE_NAME = "affordances"
@@ -128,14 +128,14 @@ object CustomizationProviderContract {
          *
          * Supported operations:
          * - Insert - to insert an affordance and place it in a slot, insert values for the columns
-         * into the [SelectionTable.URI] [Uri]. The maximum capacity rule is enforced by the system.
-         * Selecting a new affordance for a slot that is already full will automatically remove the
-         * oldest affordance from the slot.
+         *   into the [SelectionTable.URI] [Uri]. The maximum capacity rule is enforced by the
+         *   system. Selecting a new affordance for a slot that is already full will automatically
+         *   remove the oldest affordance from the slot.
          * - Query - to know which affordances are set on which slots, query the
-         * [SelectionTable.URI] [Uri]. The result set will contain rows, each of which with the
-         * columns from [SelectionTable.Columns].
+         *   [SelectionTable.URI] [Uri]. The result set will contain rows, each of which with the
+         *   columns from [SelectionTable.Columns].
          * - Delete - to unselect an affordance, removing it from a slot, delete from the
-         * [SelectionTable.URI] [Uri], passing in values for each column.
+         *   [SelectionTable.URI] [Uri], passing in values for each column.
          */
         object SelectionTable {
             const val TABLE_NAME = "selections"
@@ -160,7 +160,7 @@ object CustomizationProviderContract {
      *
      * Supported operations:
      * - Query - to know the values of flags, query the [FlagsTable.URI] [Uri]. The result set will
-     * contain rows, each of which with the columns from [FlagsTable.Columns].
+     *   contain rows, each of which with the columns from [FlagsTable.Columns].
      */
     object FlagsTable {
         const val TABLE_NAME = "flags"
