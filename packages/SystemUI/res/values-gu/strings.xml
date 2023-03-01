@@ -785,7 +785,7 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"અન્ય"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ડિવાઇસનાં નિયંત્રણોમાં ઉમેરો"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ઉમેરો"</string>
-    <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> દ્વારા સૂચન કરેલા"</string>
+    <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> દ્વારા સૂચવેલા"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"ડિવાઇસ લૉક કરેલું છે"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"લૉક સ્ક્રીનમાંથી ડિવાઇસ બતાવીએ અને નિયંત્રિત કરીએ?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"તમે તમારા બાહ્ય ડિવાઇસ માટેના નિયંત્રણો લૉક સ્ક્રીન પર ઉમેરી શકો છો.\n\nતમારી ડિવાઇસ ઍપ કદાચ તમને તમારો ફોન કે ટૅબ્લેટ અનલૉક કર્યા વિના અમુક ડિવાઇસ નિયંત્રિત કરવાની મંજૂરી આપી શકે.\n\nતમે ગમે ત્યારે સેટિંગમાં જઈને ફેરફાર કરી શકો છો."</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"બ્રોડકાસ્ટ કરી શકતા નથી"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"સાચવી શકતા નથી. ફરી પ્રયાસ કરો."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"સાચવી શકતા નથી."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"ઓછામાં ઓછા 4 અક્ષરનો ઉપયોગ કરો"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"16 કરતાં ઓછા અક્ષરનો ઉપયોગ કરો"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"બિલ્ડ નંબર"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"બિલ્ડ નંબર ક્લિપબૉર્ડ પર કૉપિ કર્યો."</string>
     <string name="basic_status" msgid="2315371112182658176">"વાતચીત ખોલો"</string>
