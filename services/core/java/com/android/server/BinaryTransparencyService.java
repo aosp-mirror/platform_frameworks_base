@@ -34,7 +34,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApexStagedEvent;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.Checksum;
 import android.content.pm.IBackgroundInstallControlService;
 import android.content.pm.IPackageManagerNative;
 import android.content.pm.IStagedApexObserver;
@@ -117,13 +116,16 @@ public class BinaryTransparencyService extends SystemService {
     @VisibleForTesting
     static final String BINARY_HASH_ERROR = "SHA256HashError";
 
-    static final int MEASURE_APEX_AND_MODULES = 1;
-    static final int MEASURE_PRELOADS = 2;
-    static final int MEASURE_NEW_MBAS = 3;
-
     static final long RECORD_MEASUREMENTS_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
     static final String APEX_PRELOAD_LOCATION_ERROR = "could-not-be-determined";
+
+    // Copy from the atom. Consistent for both ApexInfoGathered and MobileBundledAppInfoGathered.
+    static final int DIGEST_ALGORITHM_UNKNOWN = 0;
+    static final int DIGEST_ALGORITHM_CHUNKED_SHA256 = 1;
+    static final int DIGEST_ALGORITHM_CHUNKED_SHA512 = 2;
+    static final int DIGEST_ALGORITHM_VERITY_CHUNKED_SHA256 = 3;
+    static final int DIGEST_ALGORITHM_SHA256 = 4;
 
     // used for indicating any type of error during MBA measurement
     static final int MBA_STATUS_ERROR = 0;
@@ -226,9 +228,9 @@ public class BinaryTransparencyService extends SystemService {
                 appInfo.mbaStatus = mbaStatus;
 
                 // Only digest and split name are different between splits.
-                Checksum checksum = measureApk(split.getPath());
-                appInfo.digest = checksum.getValue();
-                appInfo.digestAlgorithm = checksum.getType();
+                Digest digest = measureApk(split.getPath());
+                appInfo.digest = digest.value;
+                appInfo.digestAlgorithm = digest.algorithm;
 
                 results.add(appInfo);
             }
@@ -260,10 +262,9 @@ public class BinaryTransparencyService extends SystemService {
          * Perform basic measurement (i.e. content digest) on a given APK.
          *
          * @param apkPath The APK (or APEX, since it's also an APK) file to be measured.
-         * @return a {@link android.content.pm.Checksum} with preferred digest algorithm type and
-         *         the checksum.
+         * @return a {@link #Digest} with preferred digest algorithm type and the value.
          */
-        private @Nullable Checksum measureApk(@NonNull String apkPath) {
+        private @Nullable Digest measureApk(@NonNull String apkPath) {
             // compute content digest
             Map<Integer, byte[]> contentDigests = computeApkContentDigest(apkPath);
             if (contentDigests == null) {
@@ -274,20 +275,20 @@ public class BinaryTransparencyService extends SystemService {
                 // And only one of them will be available per package.
                 if (contentDigests.containsKey(
                             ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256)) {
-                    return new Checksum(
-                            Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256,
+                    return new Digest(
+                            DIGEST_ALGORITHM_CHUNKED_SHA256,
                             contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256));
                 } else if (contentDigests.containsKey(
                         ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512)) {
-                    return new Checksum(
-                            Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512,
+                    return new Digest(
+                            DIGEST_ALGORITHM_CHUNKED_SHA512,
                             contentDigests.get(ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512));
                 }
             }
             // When something went wrong, fall back to simple sha256.
             byte[] digest = PackageUtils.computeSha256DigestForLargeFileAsBytes(apkPath,
                     PackageUtils.createLargeFileBuffer());
-            return new Checksum(Checksum.TYPE_WHOLE_SHA256, digest);
+            return new Digest(DIGEST_ALGORITHM_SHA256, digest);
         }
 
 
@@ -381,7 +382,7 @@ public class BinaryTransparencyService extends SystemService {
                     Slog.w(TAG, "Skipping the missing APK in " + pkg.getPath());
                     continue;
                 }
-                Checksum apexChecksum = measureApk(pkg.getPath());
+                Digest apexChecksum = measureApk(pkg.getPath());
                 if (apexChecksum == null) {
                     Slog.w(TAG, "Skipping the missing APEX in " + pkg.getPath());
                     continue;
@@ -390,8 +391,8 @@ public class BinaryTransparencyService extends SystemService {
                 var apexInfo = new IBinaryTransparencyService.ApexInfo();
                 apexInfo.packageName = packageState.getPackageName();
                 apexInfo.longVersion = packageState.getVersionCode();
-                apexInfo.digest = apexChecksum.getValue();
-                apexInfo.digestAlgorithm = apexChecksum.getType();
+                apexInfo.digest = apexChecksum.value;
+                apexInfo.digestAlgorithm = apexChecksum.algorithm;
                 apexInfo.signerDigests =
                         computePackageSignerSha256Digests(packageState.getSigningInfo());
 
@@ -1690,5 +1691,15 @@ public class BinaryTransparencyService extends SystemService {
             return result;
         }
         return slice.getList();
+    }
+
+    private static class Digest {
+        public int algorithm;
+        public byte[] value;
+
+        Digest(int algorithm, byte[] value) {
+            this.algorithm = algorithm;
+            this.value = value;
+        }
     }
 }
