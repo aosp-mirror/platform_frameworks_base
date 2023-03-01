@@ -88,7 +88,7 @@ class InputController {
      */
     private static final int DEVICE_NAME_MAX_LENGTH = 80;
 
-    final Object mLock;
+    final Object mLock = new Object();
 
     /* Token -> file descriptor associations. */
     @GuardedBy("mLock")
@@ -101,18 +101,17 @@ class InputController {
     private final WindowManager mWindowManager;
     private final DeviceCreationThreadVerifier mThreadVerifier;
 
-    InputController(@NonNull Object lock, @NonNull Handler handler,
+    InputController(@NonNull Handler handler,
             @NonNull WindowManager windowManager) {
-        this(lock, new NativeWrapper(), handler, windowManager,
+        this(new NativeWrapper(), handler, windowManager,
                 // Verify that virtual devices are not created on the handler thread.
                 () -> !handler.getLooper().isCurrentThread());
     }
 
     @VisibleForTesting
-    InputController(@NonNull Object lock, @NonNull NativeWrapper nativeWrapper,
+    InputController(@NonNull NativeWrapper nativeWrapper,
             @NonNull Handler handler, @NonNull WindowManager windowManager,
             @NonNull DeviceCreationThreadVerifier threadVerifier) {
-        mLock = lock;
         mHandler = handler;
         mNativeWrapper = nativeWrapper;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
