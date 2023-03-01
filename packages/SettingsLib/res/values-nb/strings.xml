@@ -573,7 +573,7 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du legge til en ny bruker?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel Wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Konfigurere brukeren nå?"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vil du konfigurere brukeren?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Sørg for at brukeren er tilgjengelig for å konfigurere området sitt på enheten"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vil du konfigurere profilen nå?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Konfigurer nå"</string>
