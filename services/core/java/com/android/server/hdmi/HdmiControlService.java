@@ -700,6 +700,7 @@ public class HdmiControlService extends SystemService {
         }
         if (mCecController == null) {
             Slog.i(TAG, "Device does not support HDMI-CEC.");
+            return;
         }
         if (mMhlController == null) {
             mMhlController = HdmiMhlControllerStub.create(this);
@@ -712,9 +713,6 @@ public class HdmiControlService extends SystemService {
         }
         if (mEarcController == null) {
             Slog.i(TAG, "Device does not support eARC.");
-        }
-        if (mCecController == null && mEarcController == null) {
-            return;
         }
         mHdmiCecNetwork = new HdmiCecNetwork(this, mCecController, mMhlController);
         if (isCecControlEnabled()) {
