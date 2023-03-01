@@ -22,6 +22,7 @@ import android.content.Context
 import android.hardware.BatteryState
 import android.hardware.input.InputManager
 import android.hardware.input.InputSettings
+import android.os.Build
 import android.os.Handler
 import android.util.ArrayMap
 import android.util.Log
@@ -398,12 +399,11 @@ constructor(
 
     companion object {
         val TAG = StylusManager::class.simpleName.orEmpty()
-        const val DEBUG = false
     }
 }
 
 private inline fun logDebug(message: () -> String) {
-    if (StylusManager.DEBUG) {
+    if (Build.IS_DEBUGGABLE) {
         Log.d(StylusManager.TAG, message())
     }
 }
