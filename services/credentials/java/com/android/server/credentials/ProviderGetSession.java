@@ -268,8 +268,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     @Override
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
+            mCandidateProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
             mRemoteCredentialService.onBeginGetCredential(mProviderRequest, this);
-            mCandidateProviderMetric.setStartTimeNanoseconds(System.nanoTime());
         }
     }
 

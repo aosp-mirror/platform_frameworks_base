@@ -18,63 +18,69 @@ package com.android.server.credentials.metrics;
 
 /**
  * The central candidate provider metric object that mimics our defined metric setup.
+ * TODO(b/270403549) - iterate on this in V3+
  */
 public class CandidateProviderMetric {
 
+    private static final String TAG = "CandidateProviderMetric";
     private int mCandidateUid = -1;
-    private long mStartTimeNanoseconds = -1;
+
+    // Raw timestamp in nanoseconds, will be converted to microseconds for logging
+
+    private long mStartQueryTimeNanoseconds = -1;
     private long mQueryFinishTimeNanoseconds = -1;
 
     private int mProviderQueryStatus = -1;
 
-    public CandidateProviderMetric(long startTime, long queryFinishTime, int providerQueryStatus,
-            int candidateUid) {
-        this.mStartTimeNanoseconds = startTime;
-        this.mQueryFinishTimeNanoseconds = queryFinishTime;
-        this.mProviderQueryStatus = providerQueryStatus;
-        this.mCandidateUid = candidateUid;
+    public CandidateProviderMetric() {
     }
 
-    public CandidateProviderMetric(){}
+    /* ---------- Latencies ---------- */
 
-    public void setStartTimeNanoseconds(long startTimeNanoseconds) {
-        this.mStartTimeNanoseconds = startTimeNanoseconds;
+    public void setStartQueryTimeNanoseconds(long startQueryTimeNanoseconds) {
+        this.mStartQueryTimeNanoseconds = startQueryTimeNanoseconds;
     }
 
     public void setQueryFinishTimeNanoseconds(long queryFinishTimeNanoseconds) {
         this.mQueryFinishTimeNanoseconds = queryFinishTimeNanoseconds;
     }
 
-    public void setProviderQueryStatus(int providerQueryStatus) {
-        this.mProviderQueryStatus = providerQueryStatus;
-    }
-
-    public void setCandidateUid(int candidateUid) {
-        this.mCandidateUid = candidateUid;
-    }
-
-    public long getStartTimeNanoseconds() {
-        return this.mStartTimeNanoseconds;
+    public long getStartQueryTimeNanoseconds() {
+        return this.mStartQueryTimeNanoseconds;
     }
 
     public long getQueryFinishTimeNanoseconds() {
         return this.mQueryFinishTimeNanoseconds;
     }
 
+    /**
+     * Returns the latency in microseconds for the query phase.
+     */
+    public int getQueryLatencyMicroseconds() {
+        return (int) ((this.getQueryFinishTimeNanoseconds()
+                - this.getStartQueryTimeNanoseconds()) / 1000);
+    }
+
+    // TODO (in direct next dependent CL, so this is transient) - add reference timestamp in micro
+    // seconds for this too.
+
+    /* ------------- Provider Query Status ------------ */
+
+    public void setProviderQueryStatus(int providerQueryStatus) {
+        this.mProviderQueryStatus = providerQueryStatus;
+    }
+
     public int getProviderQueryStatus() {
         return this.mProviderQueryStatus;
+    }
+
+    /* -------------- Candidate Uid ---------------- */
+
+    public void setCandidateUid(int candidateUid) {
+        this.mCandidateUid = candidateUid;
     }
 
     public int getCandidateUid() {
         return this.mCandidateUid;
     }
-
-    /**
-     * Returns the latency in microseconds for the query phase.
-     */
-    public int getQueryLatencyMs() {
-        return (int) ((this.getQueryFinishTimeNanoseconds()
-                - this.getStartTimeNanoseconds()) / 1000);
-    }
-
 }
