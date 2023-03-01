@@ -123,6 +123,21 @@ public final class GnssCapabilities implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SubHalPowerCapabilityFlags {}
 
+    /** The capability is unknown to be supported or not. */
+    public static final int CAPABILITY_UNKNOWN = 0;
+    /** The capability is supported. */
+    public static final int CAPABILITY_SUPPORTED = 1;
+    /** The capability is not supported. */
+    public static final int CAPABILITY_UNSUPPORTED = 2;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = {"CAPABILITY_"}, value = {CAPABILITY_UNKNOWN,
+            CAPABILITY_SUPPORTED,
+            CAPABILITY_UNSUPPORTED})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CapabilitySupportType {}
+
+
     /**
      * Returns an empty GnssCapabilities object.
      *
@@ -375,30 +390,25 @@ public final class GnssCapabilities implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if GNSS chipset supports accumulated delta range, {@code false}
-     * otherwise.
-     *
-     * <p>The value is only known if {@link #isAccumulatedDeltaRangeCapabilityKnown()} is
-     * true.
+     * Returns {@link #CAPABILITY_SUPPORTED} if GNSS chipset supports accumulated delta
+     * range, {@link #CAPABILITY_UNSUPPORTED} if GNSS chipset does not support accumulated
+     * delta range, and {@link #CAPABILITY_UNKNOWN} if it is unknown, which means GNSS
+     * chipset may or may not support accumulated delta range.
      *
      * <p>The accumulated delta range information can be queried in
      * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeState()},
      * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeMeters()}, and
      * {@link android.location.GnssMeasurement#getAccumulatedDeltaRangeUncertaintyMeters()}.
      */
-    public boolean hasAccumulatedDeltaRange() {
+    public @CapabilitySupportType int hasAccumulatedDeltaRange() {
         if (!mIsAdrCapabilityKnown) {
-            throw new IllegalStateException("Accumulated delta range capability is unknown.");
+            return CAPABILITY_UNKNOWN;
         }
-        return (mTopFlags & TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE) != 0;
-    }
-
-    /**
-     * Returns {@code true} if {@link #hasAccumulatedDeltaRange()} is known, {@code false}
-     * otherwise.
-     */
-    public boolean isAccumulatedDeltaRangeCapabilityKnown() {
-        return mIsAdrCapabilityKnown;
+        if ((mTopFlags & TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE) != 0) {
+            return CAPABILITY_SUPPORTED;
+        } else {
+            return CAPABILITY_UNSUPPORTED;
+        }
     }
 
     /**
@@ -597,9 +607,9 @@ public final class GnssCapabilities implements Parcelable {
         if (hasMeasurementCorrectionsForDriving()) {
             builder.append("MEASUREMENT_CORRECTIONS_FOR_DRIVING ");
         }
-        if (mIsAdrCapabilityKnown && hasAccumulatedDeltaRange()) {
+        if (hasAccumulatedDeltaRange() == CAPABILITY_SUPPORTED) {
             builder.append("ACCUMULATED_DELTA_RANGE ");
-        } else if (!mIsAdrCapabilityKnown) {
+        } else if (hasAccumulatedDeltaRange() == CAPABILITY_UNKNOWN) {
             builder.append("ACCUMULATED_DELTA_RANGE(unknown) ");
         }
         if (hasMeasurementCorrectionsLosSats()) {
@@ -795,19 +805,17 @@ public final class GnssCapabilities implements Parcelable {
         /**
          * Sets accumulated delta range capability.
          */
-        public @NonNull Builder setHasAccumulatedDeltaRange(boolean capable) {
-            mIsAdrCapabilityKnown = true;
-            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE,
-                    capable);
-            return this;
-        }
-
-        /**
-         * Clears accumulated delta range capability and sets it as unknown.
-         */
-        public @NonNull Builder clearIsAccumulatedDeltaRangeCapabilityKnown() {
-            mIsAdrCapabilityKnown = false;
-            mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE, false);
+        public @NonNull Builder setHasAccumulatedDeltaRange(@CapabilitySupportType int capable) {
+            if (capable == CAPABILITY_UNKNOWN) {
+                mIsAdrCapabilityKnown = false;
+                mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE, false);
+            } else if (capable == CAPABILITY_SUPPORTED) {
+                mIsAdrCapabilityKnown = true;
+                mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE, true);
+            } else if (capable == CAPABILITY_UNSUPPORTED) {
+                mIsAdrCapabilityKnown = true;
+                mTopFlags = setFlag(mTopFlags, TOP_HAL_CAPABILITY_ACCUMULATED_DELTA_RANGE, false);
+            }
             return this;
         }
 
