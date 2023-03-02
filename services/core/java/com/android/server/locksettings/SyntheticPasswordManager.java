@@ -791,11 +791,11 @@ class SyntheticPasswordManager {
             }
             Set<Integer> usedSlots = getUsedWeaverSlots();
             if (!usedSlots.contains(slot)) {
-                Slog.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
+                Slogf.i(TAG, "Erasing Weaver slot %d", slot);
                 weaverEnroll(slot, null, null);
                 mPasswordSlotManager.markSlotDeleted(slot);
             } else {
-                Slog.w(TAG, "Skip destroying reused weaver slot " + slot + " for user " + userId);
+                Slogf.i(TAG, "Weaver slot %d was already reused; not erasing it", slot);
             }
         }
     }
@@ -863,11 +863,13 @@ class SyntheticPasswordManager {
         long sid = GateKeeper.INVALID_SECURE_USER_ID;
         final byte[] protectorSecret;
 
+        Slogf.i(TAG, "Creating LSKF-based protector %016x for user %d", protectorId, userId);
+
         if (isWeaverAvailable()) {
             // Weaver is available, so make the protector use it to verify the LSKF.  Do this even
             // if the LSKF is empty, as that gives us support for securely deleting the protector.
             int weaverSlot = getNextAvailableWeaverSlot();
-            Slog.i(TAG, "Weaver enroll password to slot " + weaverSlot + " for user " + userId);
+            Slogf.i(TAG, "Enrolling LSKF for user %d into Weaver slot %d", userId, weaverSlot);
             byte[] weaverSecret = weaverEnroll(weaverSlot, stretchedLskfToWeaverKey(stretchedLskf),
                     null);
             if (weaverSecret == null) {
@@ -897,6 +899,7 @@ class SyntheticPasswordManager {
                 } catch (RemoteException ignore) {
                     Slog.w(TAG, "Failed to clear SID from gatekeeper");
                 }
+                Slogf.i(TAG, "Enrolling LSKF for user %d into Gatekeeper", userId);
                 GateKeeperResponse response;
                 try {
                     response = gatekeeper.enroll(fakeUserId(userId), null, null,
@@ -1098,9 +1101,10 @@ class SyntheticPasswordManager {
             Slog.w(TAG, "User is not escrowable");
             return false;
         }
+        Slogf.i(TAG, "Creating token-based protector %016x for user %d", tokenHandle, userId);
         if (isWeaverAvailable()) {
             int slot = getNextAvailableWeaverSlot();
-            Slog.i(TAG, "Weaver enroll token to slot " + slot + " for user " + userId);
+            Slogf.i(TAG, "Using Weaver slot %d for new token-based protector", slot);
             if (weaverEnroll(slot, null, tokenData.weaverSecret) == null) {
                 Slog.e(TAG, "Failed to enroll weaver secret when activating token");
                 return false;
@@ -1480,6 +1484,7 @@ class SyntheticPasswordManager {
 
     /** Destroy a token-based SP protector. */
     public void destroyTokenBasedProtector(long protectorId, int userId) {
+        Slogf.i(TAG, "Destroying token-based protector %016x for user %d", protectorId, userId);
         SyntheticPasswordBlob blob = SyntheticPasswordBlob.fromBytes(loadState(SP_BLOB_NAME,
                     protectorId, userId));
         destroyProtectorCommon(protectorId, userId);
@@ -1505,6 +1510,7 @@ class SyntheticPasswordManager {
      * Destroy an LSKF-based SP protector.  This is used when the user's LSKF is changed.
      */
     public void destroyLskfBasedProtector(long protectorId, int userId) {
+        Slogf.i(TAG, "Destroying LSKF-based protector %016x for user %d", protectorId, userId);
         destroyProtectorCommon(protectorId, userId);
         destroyState(PASSWORD_DATA_NAME, protectorId, userId);
         destroyState(PASSWORD_METRICS_NAME, protectorId, userId);
