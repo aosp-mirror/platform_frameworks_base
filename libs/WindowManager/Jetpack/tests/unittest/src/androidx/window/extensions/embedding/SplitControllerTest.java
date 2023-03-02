@@ -700,7 +700,7 @@ public class SplitControllerTest {
         final boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
-        assertFalse(result);
+        assertTrue(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(), any(),
                 any(), anyBoolean());
     }
@@ -734,7 +734,7 @@ public class SplitControllerTest {
         final boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
-        assertFalse(result);
+        assertTrue(result);
         verify(mSplitPresenter, never()).startActivityToSide(any(), any(), any(), any(), any(),
                 any(), anyBoolean());
     }
@@ -808,7 +808,7 @@ public class SplitControllerTest {
         final Activity launchedActivity = createMockActivity();
         primaryContainer.addPendingAppearedActivity(launchedActivity);
 
-        assertFalse(mSplitController.resolveActivityToContainer(mTransaction, launchedActivity,
+        assertTrue(mSplitController.resolveActivityToContainer(mTransaction, launchedActivity,
                 false /* isOnReparent */));
     }
 
@@ -944,7 +944,7 @@ public class SplitControllerTest {
         boolean result = mSplitController.resolveActivityToContainer(mTransaction, mActivity,
                 false /* isOnReparent */);
 
-        assertFalse(result);
+        assertTrue(result);
         assertEquals(primaryContainer, mSplitController.getContainerWithActivity(mActivity));
 
 

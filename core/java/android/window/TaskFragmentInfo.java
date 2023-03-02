@@ -66,6 +66,13 @@ public final class TaskFragmentInfo implements Parcelable {
     @NonNull
     private final List<IBinder> mActivities = new ArrayList<>();
 
+    /**
+     * List of Activity tokens that were explicitly requested to be launched in this TaskFragment.
+     * It only contains Activities that belong to the organizer process for security.
+     */
+    @NonNull
+    private final List<IBinder> mInRequestedTaskFragmentActivities = new ArrayList<>();
+
     /** Relative position of the fragment's top left corner in the parent container. */
     private final Point mPositionInParent = new Point();
 
@@ -99,15 +106,18 @@ public final class TaskFragmentInfo implements Parcelable {
     public TaskFragmentInfo(
             @NonNull IBinder fragmentToken, @NonNull WindowContainerToken token,
             @NonNull Configuration configuration, int runningActivityCount,
-            boolean isVisible, @NonNull List<IBinder> activities, @NonNull Point positionInParent,
-            boolean isTaskClearedForReuse, boolean isTaskFragmentClearedForPip,
-            boolean isClearedForReorderActivityToFront, @NonNull Point minimumDimensions) {
+            boolean isVisible, @NonNull List<IBinder> activities,
+            @NonNull List<IBinder> inRequestedTaskFragmentActivities,
+            @NonNull Point positionInParent, boolean isTaskClearedForReuse,
+            boolean isTaskFragmentClearedForPip, boolean isClearedForReorderActivityToFront,
+            @NonNull Point minimumDimensions) {
         mFragmentToken = requireNonNull(fragmentToken);
         mToken = requireNonNull(token);
         mConfiguration.setTo(configuration);
         mRunningActivityCount = runningActivityCount;
         mIsVisible = isVisible;
         mActivities.addAll(activities);
+        mInRequestedTaskFragmentActivities.addAll(inRequestedTaskFragmentActivities);
         mPositionInParent.set(positionInParent);
         mIsTaskClearedForReuse = isTaskClearedForReuse;
         mIsTaskFragmentClearedForPip = isTaskFragmentClearedForPip;
@@ -149,6 +159,11 @@ public final class TaskFragmentInfo implements Parcelable {
     @NonNull
     public List<IBinder> getActivities() {
         return mActivities;
+    }
+
+    @NonNull
+    public List<IBinder> getActivitiesRequestedInTaskFragment() {
+        return mInRequestedTaskFragmentActivities;
     }
 
     /** Returns the relative position of the fragment's top left corner in the parent container. */
@@ -215,6 +230,8 @@ public final class TaskFragmentInfo implements Parcelable {
                 && mIsVisible == that.mIsVisible
                 && getWindowingMode() == that.getWindowingMode()
                 && mActivities.equals(that.mActivities)
+                && mInRequestedTaskFragmentActivities.equals(
+                        that.mInRequestedTaskFragmentActivities)
                 && mPositionInParent.equals(that.mPositionInParent)
                 && mIsTaskClearedForReuse == that.mIsTaskClearedForReuse
                 && mIsTaskFragmentClearedForPip == that.mIsTaskFragmentClearedForPip
@@ -229,6 +246,7 @@ public final class TaskFragmentInfo implements Parcelable {
         mRunningActivityCount = in.readInt();
         mIsVisible = in.readBoolean();
         in.readBinderList(mActivities);
+        in.readBinderList(mInRequestedTaskFragmentActivities);
         mPositionInParent.readFromParcel(in);
         mIsTaskClearedForReuse = in.readBoolean();
         mIsTaskFragmentClearedForPip = in.readBoolean();
@@ -245,6 +263,7 @@ public final class TaskFragmentInfo implements Parcelable {
         dest.writeInt(mRunningActivityCount);
         dest.writeBoolean(mIsVisible);
         dest.writeBinderList(mActivities);
+        dest.writeBinderList(mInRequestedTaskFragmentActivities);
         mPositionInParent.writeToParcel(dest, flags);
         dest.writeBoolean(mIsTaskClearedForReuse);
         dest.writeBoolean(mIsTaskFragmentClearedForPip);
@@ -274,6 +293,7 @@ public final class TaskFragmentInfo implements Parcelable {
                 + " runningActivityCount=" + mRunningActivityCount
                 + " isVisible=" + mIsVisible
                 + " activities=" + mActivities
+                + " inRequestedTaskFragmentActivities" + mInRequestedTaskFragmentActivities
                 + " positionInParent=" + mPositionInParent
                 + " isTaskClearedForReuse=" + mIsTaskClearedForReuse
                 + " isTaskFragmentClearedForPip=" + mIsTaskFragmentClearedForPip
