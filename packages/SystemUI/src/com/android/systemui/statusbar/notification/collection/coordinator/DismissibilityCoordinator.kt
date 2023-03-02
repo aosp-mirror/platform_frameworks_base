@@ -46,6 +46,7 @@ constructor(
 
     /**
      * Visits every entry and its children to mark the dismissible entries.
+     *
      * @param markedKeys set to store the marked entry keys
      * @param entries to visit
      * @param isLocked the locked state of the device

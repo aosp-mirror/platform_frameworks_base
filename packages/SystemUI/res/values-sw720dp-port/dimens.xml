@@ -33,5 +33,7 @@
      side -->
     <dimen name="qs_tiles_page_horizontal_margin">60dp</dimen>
 
+    <dimen name="controls_panel_corner_radius">46dp</dimen>
+
     <dimen name="notification_section_divider_height">16dp</dimen>
 </resources>

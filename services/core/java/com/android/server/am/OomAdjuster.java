@@ -127,7 +127,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseSetArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.CompositeRWLock;
@@ -366,19 +365,6 @@ public class OomAdjuster {
      */
     @GuardedBy("mService")
     private boolean mPendingFullOomAdjUpdate = false;
-
-    /**
-     * PIDs that has a SHORT_SERVICE. We need to access it with the PowerManager lock held,
-     * so we use a fine-grained lock here.
-     */
-    @GuardedBy("mPidsWithShortFgs")
-    private final ArraySet<Integer> mPidsWithShortFgs = new ArraySet<>();
-
-    /**
-     * UIDs -> PIDs map, used with mPidsWithShortFgs.
-     */
-    @GuardedBy("mPidsWithShortFgs")
-    private final SparseSetArray<Integer> mUidsToPidsWithShortFgs = new SparseSetArray<>();
 
     /** Overrideable by a test */
     @VisibleForTesting
@@ -1273,10 +1259,17 @@ public class OomAdjuster {
         for (int i = numLru - 1; i >= 0; i--) {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
-            if (!app.isKilledByAm() && app.getThread() != null && !app.isPendingFinishAttach()) {
+            if (!app.isKilledByAm() && app.getThread() != null) {
                 // We don't need to apply the update for the process which didn't get computed
                 if (state.getCompletedAdjSeq() == mAdjSeq) {
                     applyOomAdjLSP(app, true, now, nowElapsed, oomAdjReason);
+                }
+
+                if (app.isPendingFinishAttach()) {
+                    // Avoid trimming processes that are still initializing. If they aren't
+                    // hosting any components yet because they may be unfairly killed.
+                    // We however apply any computed previously computed oom scores before skipping.
+                    continue;
                 }
 
                 final ProcessServiceRecord psr = app.mServices;
@@ -1712,6 +1705,19 @@ public class OomAdjuster {
             return false;
         }
 
+        if (app.isPendingFinishAttach()) {
+            state.setAdjSeq(mAdjSeq);
+            state.setCompletedAdjSeq(mAdjSeq);
+            // If the process is still initializing, we skip computing any states because we
+            // don't want to override the special states that have been set at
+            // AMS#attachApplication with OomAdjuster#setAttachingProcessStates.
+            // In this limbo state, the app has |PROC_START_TIMEOUT| to finish attach application
+            // and receive updated proc_state based on its importance.
+            // Note that in this state, the oom_score is INVALID_ADJ which is outside the standard
+            // oom score range and the app is safe from lmkd kills.
+            return false;
+        }
+
         state.setAdjTypeCode(ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN);
         state.setAdjSource(null);
         state.setAdjTarget(null);
@@ -1956,7 +1962,6 @@ public class OomAdjuster {
                 }
             }
         }
-        updateShortFgsOwner(psr.mApp.uid, psr.mApp.mPid, hasShortForegroundServices);
 
         // If the app was recently in the foreground and moved to a foreground service status,
         // allow it to get a higher rank in memory for some time, compared to other foreground
@@ -2185,8 +2190,6 @@ public class OomAdjuster {
                 }
             }
 
-            // TODO(short-service): While-in-user permissions. Do we need any change here for
-            // short-FGS? (Likely not)
             if (s.isForeground) {
                 final int fgsType = s.foregroundServiceType;
                 if (s.mAllowWhileInUsePermissionInFgs) {
@@ -3228,7 +3231,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    void setAttachingSchedGroupLSP(ProcessRecord app) {
+    void setAttachingProcessStatesLSP(ProcessRecord app) {
         int initialSchedGroup = SCHED_GROUP_DEFAULT;
         final ProcessStateRecord state = app.mState;
         // If the process has been marked as foreground, it is starting as the top app (with
@@ -3248,6 +3251,15 @@ public class OomAdjuster {
 
         state.setSetSchedGroup(initialSchedGroup);
         state.setCurrentSchedulingGroup(initialSchedGroup);
+        state.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
+        state.setCurCapability(PROCESS_CAPABILITY_NONE);
+
+        state.setCurAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setSetAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setVerifiedAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setForcingToImportant(null);
+        state.setHasShownUi(false);
+        state.setCached(true);
     }
 
     // ONLY used for unit testing in OomAdjusterTests.java
@@ -3467,41 +3479,5 @@ public class OomAdjuster {
         } else if (state.getSetAdj() < CACHED_APP_MIN_ADJ) {
             mCachedAppOptimizer.unfreezeAppLSP(app, oomAdjReason);
         }
-    }
-
-    /**
-     * Update {@link #mPidsWithShortFgs} and {@link #mUidsToPidsWithShortFgs} to keep track
-     * of which UID/PID has a short FGS.
-     *
-     * TODO(short-FGS): Remove it and all the relevant code once SHORT_FGS use the FGS procstate.
-     */
-    void updateShortFgsOwner(int uid, int pid, boolean add) {
-        synchronized (mPidsWithShortFgs) {
-            if (add) {
-                mUidsToPidsWithShortFgs.add(uid, pid);
-                mPidsWithShortFgs.add(pid);
-            } else {
-                mUidsToPidsWithShortFgs.remove(uid, pid);
-                mPidsWithShortFgs.remove(pid);
-            }
-        }
-    }
-
-    /**
-     * Whether a UID has a (non-timed-out) short FGS or not.
-     * It's indirectly called by PowerManager, so we can't hold the AM lock in it.
-     */
-    boolean hasUidShortForegroundService(int uid) {
-        synchronized (mPidsWithShortFgs) {
-            final ArraySet<Integer> pids = mUidsToPidsWithShortFgs.get(uid);
-            if (pids == null || pids.size() == 0) {
-                return false;
-            }
-            for (int i = pids.size() - 1; i >= 0; i--) {
-                final int pid = pids.valueAt(i);
-                return mPidsWithShortFgs.contains(pid);
-            }
-        }
-        return false;
     }
 }

@@ -453,6 +453,7 @@ public class TaskInfo {
                 && Objects.equals(shouldDockBigOverlays, that.shouldDockBigOverlays)
                 && Objects.equals(displayCutoutInsets, that.displayCutoutInsets)
                 && getWindowingMode() == that.getWindowingMode()
+                && configuration.uiMode == that.configuration.uiMode
                 && Objects.equals(taskDescription, that.taskDescription)
                 && isFocused == that.isFocused
                 && isVisible == that.isVisible
@@ -481,6 +482,7 @@ public class TaskInfo {
                     .equals(that.configuration.windowConfiguration.getBounds()))
                 && (!hasCompatUI() || configuration.getLayoutDirection()
                     == that.configuration.getLayoutDirection())
+                && (!hasCompatUI() || configuration.uiMode == that.configuration.uiMode)
                 && (!hasCompatUI() || isVisible == that.isVisible);
     }
 

@@ -137,6 +137,7 @@ import android.app.PendingIntent;
 import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
 import android.app.Service;
 import android.app.ServiceStartArgs;
+import android.app.StartForegroundCalledOnStoppedServiceException;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.compat.CompatChanges;
 import android.app.usage.UsageEvents;
@@ -800,13 +801,17 @@ public final class ActiveServices {
                     ? res.permission : "private to package");
         }
 
-
-        // TODO(short-service): This is inside startService() / startForegroundService().
-        // Consider if there's anything special we have to do if these are called on an already-
-        // running short-FGS... But given these APIs shouldn't change the FGS type, we likely
-        // don't need to do anything. (If they would change the FGS type, we'd have to stop
-        // the timeout)
         ServiceRecord r = res.record;
+        // Note, when startService() or startForegroundService() is called on an already
+        // running SHORT_SERVICE FGS, the call will succeed (i.e. we won't throw
+        // ForegroundServiceStartNotAllowedException), even when the service is alerady timed
+        // out. This is because these APIs will essnetially only change the "started" state
+        // of the service, and it won't afect "the foreground-ness" of the service, or the type
+        // of the FGS.
+        // However, this call will still _not_ extend the SHORT_SERVICE timeout either.
+        // Also, if the app tries to change the type of the FGS later (using
+        // Service.startForeground()), at that point we will consult the BFSL check and the timeout
+        // and make the necessary decisions.
         setFgsRestrictionLocked(callingPackage, callingPid, callingUid, service, r, userId,
                 backgroundStartPrivileges, false /* isBindService */);
 
@@ -2035,8 +2040,7 @@ public final class ActiveServices {
                         // suddenly disallow it.
                         // However, this would be very problematic if used with a short-FGS, so we
                         // explicitly disallow this combination.
-                        // TODO(short-service): Change to another exception type?
-                        throw new IllegalStateException(
+                        throw new StartForegroundCalledOnStoppedServiceException(
                                 "startForeground(SHORT_SERVICE) called on a service that's not"
                                 + " started.");
                     }
@@ -2241,10 +2245,6 @@ public final class ActiveServices {
                         cancelForegroundNotificationLocked(r);
                         r.foregroundId = id;
                     }
-
-                    // TODO(short-service): Stop the short service timeout, if the type is changing
-                    // from short to non-short. (should we do it earlier?)
-
                     notification.flags |= Notification.FLAG_FOREGROUND_SERVICE;
                     r.foregroundNoti = notification;
                     r.foregroundServiceType = foregroundServiceType;
@@ -3190,7 +3190,7 @@ public final class ActiveServices {
             try {
                 sr.app.getThread().scheduleTimeoutService(sr, sr.getShortFgsInfo().getStartId());
             } catch (RemoteException e) {
-                // TODO(short-service): Anything to do here?
+                Slog.w(TAG_SERVICE, "Exception from scheduleTimeoutService: " + e.toString());
             }
             // Schedule the procstate demotion timeout and ANR timeout.
             {
@@ -3262,8 +3262,9 @@ public final class ActiveServices {
             }
             mAm.appNotResponding(sr.app, tr);
 
-            // TODO(short-service): Make sure, if the FGS stops after this, the ANR dialog
-            // disappears.
+            // TODO: Can we close the ANR dialog here, if it's still shown? Currently, the ANR
+            // dialog really doesn't remember the "cause" (especially if there have been multiple
+            // ANRs), so it's not doable.
         }
     }
 
@@ -3278,8 +3279,8 @@ public final class ActiveServices {
         }
     }
 
-    // TODO(short-service): Hmm what is it? Should we stop the timeout here?
     private void stopServiceAndUpdateAllowlistManagerLocked(ServiceRecord service) {
+        maybeStopShortFgsTimeoutLocked(service);
         final ProcessServiceRecord psr = service.app.mServices;
         psr.stopService(service);
         psr.updateBoundClientUids();
@@ -5406,8 +5407,6 @@ public final class ActiveServices {
 
         // Check to see if the service had been started as foreground, but being
         // brought down before actually showing a notification.  That is not allowed.
-        // TODO(short-service): This is unlikely related to short-FGS, but I'm curious why it's
-        // not allowed. Look into it.
         if (r.fgRequired) {
             Slog.w(TAG_SERVICE, "Bringing down service while still waiting for start foreground: "
                     + r);
@@ -5478,6 +5477,7 @@ public final class ActiveServices {
         cancelForegroundNotificationLocked(r);
         final boolean exitingFg = r.isForeground;
         if (exitingFg) {
+            maybeStopShortFgsTimeoutLocked(r);
             decActiveForegroundAppLocked(smap, r);
             synchronized (mAm.mProcessStats.mLock) {
                 ServiceState stracker = r.getTracker();
@@ -5501,8 +5501,6 @@ public final class ActiveServices {
                 mFGSLogger.logForegroundServiceStop(r.appInfo.uid, r);
             }
             mAm.updateForegroundServiceUsageStats(r.name, r.userId, false);
-
-            // TODO(short-service): Make sure we stop the timeout by here.
         }
 
         r.isForeground = false;

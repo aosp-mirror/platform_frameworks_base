@@ -19,6 +19,7 @@ package android.net.wifi.sharedconnectivity.app;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -48,7 +49,7 @@ import java.util.concurrent.Executor;
  * This class is the library used by consumers of Shared Connectivity data to bind to the service,
  * receive callbacks from, and send user actions to the service.
  *
- * The methods {@link #connectTetherNetwork}, {@link #disconnectTetherNetwork},
+ * The methods {@link #connectHotspotNetwork}, {@link #disconnectHotspotNetwork},
  * {@link #connectKnownNetwork} and {@link #forgetKnownNetwork} are not valid and will return false
  * if not called between {@link SharedConnectivityClientCallback#onServiceConnected()}
  * and {@link SharedConnectivityClientCallback#onServiceDisconnected()} or if
@@ -73,12 +74,11 @@ public class SharedConnectivityManager {
             mCallback = callback;
         }
 
-        @Override
-        public void onTetherNetworksUpdated(@NonNull List<TetherNetwork> networks) {
+        public void onHotspotNetworksUpdated(@NonNull List<HotspotNetwork> networks) {
             if (mCallback != null) {
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    mExecutor.execute(() -> mCallback.onTetherNetworksUpdated(networks));
+                    mExecutor.execute(() -> mCallback.onHotspotNetworksUpdated(networks));
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -110,14 +110,13 @@ public class SharedConnectivityManager {
             }
         }
 
-        @Override
-        public void onTetherNetworkConnectionStatusChanged(
-                @NonNull TetherNetworkConnectionStatus status) {
+        public void onHotspotNetworkConnectionStatusChanged(
+                @NonNull HotspotNetworkConnectionStatus status) {
             if (mCallback != null) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     mExecutor.execute(() ->
-                            mCallback.onTetherNetworkConnectionStatusChanged(status));
+                            mCallback.onHotspotNetworkConnectionStatusChanged(status));
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -151,7 +150,7 @@ public class SharedConnectivityManager {
      * Creates a new instance of {@link SharedConnectivityManager}.
      *
      * Automatically binds to implementation of {@link SharedConnectivityService} specified in
-     * device overlay.
+     * the device overlay.
      *
      * @return An instance of {@link SharedConnectivityManager} or null if the shared connectivity
      * service is not found.
@@ -258,17 +257,18 @@ public class SharedConnectivityManager {
     }
 
     /**
-     * Registers a callback for receiving updates to the list of Tether Networks, Known Networks,
-     * shared connectivity settings state, tether network connection status and known network
+     * Registers a callback for receiving updates to the list of Hotspot Networks, Known Networks,
+     * shared connectivity settings state, hotspot network connection status and known network
      * connection status.
      * The {@link SharedConnectivityClientCallback#onRegisterCallbackFailed} will be called if the
      * registration failed.
      *
      * @param executor The Executor used to invoke the callback.
      * @param callback The callback of type {@link SharedConnectivityClientCallback} that is invoked
-     *                 when the service updates either the list of Tether Networks or Known
-     *                 Networks.
+     *                 when the service updates its data.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public void registerCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull SharedConnectivityClientCallback callback) {
         Objects.requireNonNull(executor, "executor cannot be null");
@@ -297,6 +297,8 @@ public class SharedConnectivityManager {
      *
      * @return Returns true if the callback was successfully unregistered, false otherwise.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean unregisterCallback(
             @NonNull SharedConnectivityClientCallback callback) {
         Objects.requireNonNull(callback, "callback cannot be null");
@@ -325,26 +327,28 @@ public class SharedConnectivityManager {
         return true;
     }
 
-     /**
+    /**
      * Send command to the implementation of {@link SharedConnectivityService} requesting connection
-     * to the specified Tether Network.
+     * to the specified Hotspot Network.
      *
-     * @param network {@link TetherNetwork} object representing the network the user has requested
+     * @param network {@link HotspotNetwork} object representing the network the user has requested
      *                a connection to.
      * @return Returns true if the service received the command. Does not guarantee that the
-     *         connection was successful.
+     * connection was successful.
      */
-    public boolean connectTetherNetwork(@NonNull TetherNetwork network) {
-        Objects.requireNonNull(network, "Tether network cannot be null");
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public boolean connectHotspotNetwork(@NonNull HotspotNetwork network) {
+        Objects.requireNonNull(network, "Hotspot network cannot be null");
 
         if (mService == null) {
             return false;
         }
 
         try {
-            mService.connectTetherNetwork(network);
+            mService.connectHotspotNetwork(network);
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception in connectTetherNetwork", e);
+            Log.e(TAG, "Exception in connectHotspotNetwork", e);
             return false;
         }
         return true;
@@ -352,22 +356,24 @@ public class SharedConnectivityManager {
 
     /**
      * Send command to the implementation of {@link SharedConnectivityService} requesting
-     * disconnection from the active Tether Network.
+     * disconnection from the active Hotspot Network.
      *
-     * @param network {@link TetherNetwork} object representing the network the user has requested
+     * @param network {@link HotspotNetwork} object representing the network the user has requested
      *                to disconnect from.
      * @return Returns true if the service received the command. Does not guarantee that the
-     *         disconnection was successful.
+     * disconnection was successful.
      */
-    public boolean disconnectTetherNetwork(@NonNull TetherNetwork network) {
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
+    public boolean disconnectHotspotNetwork(@NonNull HotspotNetwork network) {
         if (mService == null) {
             return false;
         }
 
         try {
-            mService.disconnectTetherNetwork(network);
+            mService.disconnectHotspotNetwork(network);
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception in disconnectTetherNetwork", e);
+            Log.e(TAG, "Exception in disconnectHotspotNetwork", e);
             return false;
         }
         return true;
@@ -380,8 +386,10 @@ public class SharedConnectivityManager {
      * @param network {@link KnownNetwork} object representing the network the user has requested
      *                a connection to.
      * @return Returns true if the service received the command. Does not guarantee that the
-     *         connection was successful.
+     * connection was successful.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean connectKnownNetwork(@NonNull KnownNetwork network) {
         Objects.requireNonNull(network, "Known network cannot be null");
 
@@ -403,8 +411,10 @@ public class SharedConnectivityManager {
      * the specified Known Network from the list of Known Networks.
      *
      * @return Returns true if the service received the command. Does not guarantee that the
-     *         forget action was successful.
+     * forget action was successful.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     public boolean forgetKnownNetwork(@NonNull KnownNetwork network) {
         Objects.requireNonNull(network, "Known network cannot be null");
 
@@ -422,20 +432,22 @@ public class SharedConnectivityManager {
     }
 
     /**
-     * Gets the list of tether networks the user can select to connect to.
+     * Gets the list of hotspot networks the user can select to connect to.
      *
-     * @return Returns a {@link List} of {@link TetherNetwork} objects, empty list on failure.
+     * @return Returns a {@link List} of {@link HotspotNetwork} objects, empty list on failure.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @NonNull
-    public List<TetherNetwork> getTetherNetworks() {
+    public List<HotspotNetwork> getHotspotNetworks() {
         if (mService == null) {
             return List.of();
         }
 
         try {
-            return mService.getTetherNetworks();
+            return mService.getHotspotNetworks();
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception in getTetherNetworks", e);
+            Log.e(TAG, "Exception in getHotspotNetworks", e);
         }
         return List.of();
     }
@@ -445,6 +457,8 @@ public class SharedConnectivityManager {
      *
      * @return Returns a {@link List} of {@link KnownNetwork} objects, empty list on failure.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @NonNull
     public List<KnownNetwork> getKnownNetworks() {
         if (mService == null) {
@@ -465,6 +479,8 @@ public class SharedConnectivityManager {
      * @return Returns a {@link SharedConnectivitySettingsState} object with the state, null on
      * failure.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @Nullable
     public SharedConnectivitySettingsState getSettingsState() {
         if (mService == null) {
@@ -480,22 +496,24 @@ public class SharedConnectivityManager {
     }
 
     /**
-     * Gets the connection status of the tether network the user selected to connect to.
+     * Gets the connection status of the hotspot network the user selected to connect to.
      *
-     * @return Returns a {@link TetherNetworkConnectionStatus} object with the connection status,
+     * @return Returns a {@link HotspotNetworkConnectionStatus} object with the connection status,
      * null on failure. If no connection is active the status will be
-     * {@link TetherNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
+     * {@link HotspotNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @Nullable
-    public TetherNetworkConnectionStatus getTetherNetworkConnectionStatus() {
+    public HotspotNetworkConnectionStatus getHotspotNetworkConnectionStatus() {
         if (mService == null) {
             return null;
         }
 
         try {
-            return mService.getTetherNetworkConnectionStatus();
+            return mService.getHotspotNetworkConnectionStatus();
         } catch (RemoteException e) {
-            Log.e(TAG, "Exception in getTetherNetworkConnectionStatus", e);
+            Log.e(TAG, "Exception in getHotspotNetworkConnectionStatus", e);
         }
         return null;
     }
@@ -507,6 +525,8 @@ public class SharedConnectivityManager {
      * null on failure. If no connection is active the status will be
      * {@link KnownNetworkConnectionStatus#CONNECTION_STATUS_UNKNOWN}.
      */
+    @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD})
     @Nullable
     public KnownNetworkConnectionStatus getKnownNetworkConnectionStatus() {
         if (mService == null) {

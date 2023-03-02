@@ -49,6 +49,7 @@ public class CompanionTransportManager {
     private static final String TAG = "CDM_CompanionTransportManager";
     private static final boolean DEBUG = false;
 
+    private static final int SECURE_CHANNEL_AVAILABLE_SDK = Build.VERSION_CODES.UPSIDE_DOWN_CAKE;
     private static final int NON_ANDROID = -1;
 
     private boolean mSecureTransportEnabled = true;
@@ -188,8 +189,8 @@ public class CompanionTransportManager {
             // TODO: pass in a real preSharedKey
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
                     mContext, null, null);
-        } else if (sdk < Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-                || remoteSdk < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        } else if (sdk < SECURE_CHANNEL_AVAILABLE_SDK
+                || remoteSdk < SECURE_CHANNEL_AVAILABLE_SDK) {
             // TODO: depending on the release version, either
             //       1) using a RawTransport for old T versions
             //       2) or an Ukey2 handshaked transport for UKey2 backported T versions

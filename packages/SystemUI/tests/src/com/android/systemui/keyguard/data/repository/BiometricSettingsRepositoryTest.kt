@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
@@ -38,11 +39,14 @@ import com.android.systemui.keyguard.data.repository.BiometricType.FACE
 import com.android.systemui.keyguard.data.repository.BiometricType.REAR_FINGERPRINT
 import com.android.systemui.keyguard.data.repository.BiometricType.SIDE_FINGERPRINT
 import com.android.systemui.keyguard.data.repository.BiometricType.UNDER_DISPLAY_FINGERPRINT
+import com.android.systemui.keyguard.shared.model.DevicePosture
+import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -62,6 +66,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner::class)
@@ -78,6 +83,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     private lateinit var biometricManagerCallback:
         ArgumentCaptor<IBiometricEnabledOnKeyguardCallback.Stub>
     private lateinit var userRepository: FakeUserRepository
+    private lateinit var devicePostureRepository: FakeDevicePostureRepository
 
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
@@ -90,6 +96,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
         testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
         userRepository = FakeUserRepository()
+        devicePostureRepository = FakeDevicePostureRepository()
     }
 
     private suspend fun createBiometricSettingsRepository() {
@@ -108,6 +115,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
                 looper = testableLooper!!.looper,
                 dumpManager = dumpManager,
                 biometricManager = biometricManager,
+                devicePostureRepository = devicePostureRepository,
             )
         testScope.runCurrent()
     }
@@ -297,6 +305,50 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             collectLastValue(underTest.isFaceAuthenticationEnabled)()
 
             verify(biometricManager, times(1)).registerEnabledOnKeyguardCallback(any())
+        }
+
+    @Test
+    fun faceAuthIsAlwaysSupportedIfSpecificPostureIsNotConfigured() =
+        testScope.runTest {
+            overrideResource(
+                R.integer.config_face_auth_supported_posture,
+                DevicePostureController.DEVICE_POSTURE_UNKNOWN
+            )
+
+            createBiometricSettingsRepository()
+
+            assertThat(collectLastValue(underTest.isFaceAuthSupportedInCurrentPosture)()).isTrue()
+        }
+
+    @Test
+    fun faceAuthIsSupportedOnlyWhenDevicePostureMatchesConfigValue() =
+        testScope.runTest {
+            overrideResource(
+                R.integer.config_face_auth_supported_posture,
+                DevicePostureController.DEVICE_POSTURE_FLIPPED
+            )
+
+            createBiometricSettingsRepository()
+
+            val isFaceAuthSupported =
+                collectLastValue(underTest.isFaceAuthSupportedInCurrentPosture)
+
+            assertThat(isFaceAuthSupported()).isFalse()
+
+            devicePostureRepository.setCurrentPosture(DevicePosture.CLOSED)
+            assertThat(isFaceAuthSupported()).isFalse()
+
+            devicePostureRepository.setCurrentPosture(DevicePosture.HALF_OPENED)
+            assertThat(isFaceAuthSupported()).isFalse()
+
+            devicePostureRepository.setCurrentPosture(DevicePosture.OPENED)
+            assertThat(isFaceAuthSupported()).isFalse()
+
+            devicePostureRepository.setCurrentPosture(DevicePosture.UNKNOWN)
+            assertThat(isFaceAuthSupported()).isFalse()
+
+            devicePostureRepository.setCurrentPosture(DevicePosture.FLIPPED)
+            assertThat(isFaceAuthSupported()).isTrue()
         }
 
     private fun enrollmentChange(biometricType: BiometricType, userId: Int, enabled: Boolean) {

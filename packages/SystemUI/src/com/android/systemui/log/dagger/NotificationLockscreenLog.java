@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.people.data;
+package com.android.systemui.log.dagger;
 
-import android.util.Pair;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-/** The interface for throttling expensive runnables per package. */
-interface PerPackageThrottler {
-    /**
-     * Schedule a runnable to run in the future, and debounce runnables for same {@code pkgUserId}
-     * that occur until that future has run.
-     */
-    void scheduleDebounced(Pair<String, Integer> pkgUserId, Runnable runnable);
+import com.android.systemui.plugins.log.LogBuffer;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+/** A {@link LogBuffer} for notification & lockscreen related messages. */
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface NotificationLockscreenLog {
 }

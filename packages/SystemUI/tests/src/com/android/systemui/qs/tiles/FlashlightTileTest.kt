@@ -18,6 +18,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.FlashlightController
 import com.google.common.truth.Truth
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,6 +70,12 @@ class FlashlightTileTest : SysuiTestCase() {
                 qsLogger,
                 flashlightController
             )
+    }
+
+    @After
+    fun tearDown() {
+        tile.destroy()
+        testableLooper.processAllMessages()
     }
 
     @Test

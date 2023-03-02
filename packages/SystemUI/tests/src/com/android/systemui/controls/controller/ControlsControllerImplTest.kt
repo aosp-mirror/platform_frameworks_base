@@ -39,11 +39,9 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.io.File
-import java.util.Optional
-import java.util.function.Consumer
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -58,7 +56,9 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -66,9 +66,10 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.clearInvocations
 import org.mockito.MockitoAnnotations
+import java.io.File
+import java.util.*
+import java.util.function.Consumer
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -146,6 +147,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(authorizedPanelsRepository.getAuthorizedPanels()).thenReturn(setOf())
         `when`(userTracker.userHandle).thenReturn(UserHandle.of(user))
 
         delayableExecutor = FakeExecutor(FakeSystemClock())
@@ -944,6 +946,28 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testBindForPanel() {
         controller.bindComponentForPanel(TEST_COMPONENT)
         verify(bindingController).bindServiceForPanel(TEST_COMPONENT)
+    }
+
+    @Test
+    fun testRemoveFavoriteRemovesFavorite() {
+        val componentName = ComponentName(context, "test.Cls")
+        controller.addFavorite(
+                componentName,
+                "test structure",
+                ControlInfo(
+                        controlId = "testId",
+                        controlTitle = "Test Control",
+                        controlSubtitle = "test control subtitle",
+                        deviceType = DeviceTypes.TYPE_LIGHT,
+                ),
+        )
+
+        controller.removeFavorites(componentName)
+        delayableExecutor.runAllReady()
+
+        verify(authorizedPanelsRepository)
+                .removeAuthorizedPanels(eq(setOf(componentName.packageName)))
+        assertThat(controller.getFavorites()).isEmpty()
     }
 }
 

@@ -370,6 +370,10 @@
 
     <dimen name="freeform_resize_corner">44dp</dimen>
 
-    <dimen name="caption_menu_elevation">4dp</dimen>
+    <!-- The radius of the caption menu shadow. -->
+    <dimen name="caption_menu_shadow_radius">4dp</dimen>
+
+    <!-- The radius of the caption menu corners. -->
+    <dimen name="caption_menu_corner_radius">20dp</dimen>
 
 </resources>

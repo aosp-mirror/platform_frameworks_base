@@ -57,8 +57,9 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
     fun resolveInfo_shouldReturnInfo() {
         val packageName = "com.android.note.app"
         val uid = 123456
-        whenever(roleManager.getRoleHoldersAsUser(NoteTaskInfoResolver.ROLE_NOTES, context.user))
-            .then { listOf(packageName) }
+        whenever(roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, context.user)).then {
+            listOf(packageName)
+        }
         whenever(
                 packageManager.getApplicationInfoAsUser(
                     eq(packageName),
@@ -78,8 +79,9 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
     @Test
     fun resolveInfo_packageManagerThrowsException_shouldReturnInfoWithZeroUid() {
         val packageName = "com.android.note.app"
-        whenever(roleManager.getRoleHoldersAsUser(NoteTaskInfoResolver.ROLE_NOTES, context.user))
-            .then { listOf(packageName) }
+        whenever(roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, context.user)).then {
+            listOf(packageName)
+        }
         whenever(
                 packageManager.getApplicationInfoAsUser(
                     eq(packageName),
@@ -98,8 +100,9 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
 
     @Test
     fun resolveInfo_noRoleHolderIsSet_shouldReturnNull() {
-        whenever(roleManager.getRoleHoldersAsUser(eq(NoteTaskInfoResolver.ROLE_NOTES), any()))
-            .then { listOf<String>() }
+        whenever(roleManager.getRoleHoldersAsUser(eq(RoleManager.ROLE_NOTES), any())).then {
+            emptyList<String>()
+        }
 
         val actual = underTest.resolveInfo()
 

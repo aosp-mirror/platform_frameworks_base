@@ -177,7 +177,8 @@ public class VisualQueryDetector {
     public interface Callback {
 
         /**
-         * Called when the {@link VisualQueryDetectionService} starts to stream partial queries.
+         * Called when the {@link VisualQueryDetectionService} starts to stream partial queries
+         * with {@link VisualQueryDetectionService#streamQuery(String)}.
          *
          * @param partialQuery The partial query in a text form being streamed.
          */
@@ -185,12 +186,13 @@ public class VisualQueryDetector {
 
         /**
          * Called when the {@link VisualQueryDetectionService} decides to abandon the streamed
-         * partial queries.
+         * partial queries with {@link VisualQueryDetectionService#rejectQuery()}.
          */
         void onQueryRejected();
 
         /**
-         *  Called when the {@link VisualQueryDetectionService} finishes streaming partial queries.
+         *  Called when the {@link VisualQueryDetectionService} finishes streaming partial queries
+         *  with {@link VisualQueryDetectionService#finishQuery()}.
          */
         void onQueryFinished();
 

@@ -32,7 +32,6 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
-import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -3328,7 +3327,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mBatteryStatsService.noteProcessDied(app.info.uid, pid);
-        mOomAdjuster.updateShortFgsOwner(app.info.uid, pid, false);
 
         if (!app.isKilled()) {
             if (!fromBinderDied) {
@@ -4927,14 +4925,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            app.mState.setCurAdj(ProcessList.INVALID_ADJ);
-            app.mState.setSetAdj(ProcessList.INVALID_ADJ);
-            app.mState.setVerifiedAdj(ProcessList.INVALID_ADJ);
-            mOomAdjuster.setAttachingSchedGroupLSP(app);
-            app.mState.setForcingToImportant(null);
+            mOomAdjuster.setAttachingProcessStatesLSP(app);
             clearProcessForegroundLocked(app);
-            app.mState.setHasShownUi(false);
-            app.mState.setCached(false);
             app.setDebugging(false);
             app.setKilledByAm(false);
             app.setKilled(false);
@@ -5102,8 +5094,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(thread, mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
+            app.setPendingFinishAttach(true);
+
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
+
+            updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
+            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
+
             final long now = SystemClock.uptimeMillis();
             synchronized (mAppProfiler.mProfilerLock) {
                 app.mProfile.setLastRequestedGc(now);
@@ -5119,8 +5117,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
-            } else {
-                app.setPendingFinishAttach(true);
             }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
@@ -18716,23 +18712,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void unregisterStrictModeCallback(int callingPid) {
             mStrictModeCallbacks.remove(callingPid);
-        }
-
-        @Override
-        public boolean canHoldWakeLocksInDeepDoze(int uid, int procstate) {
-            // This method is called with the PowerManager lock held. Do not hold AM here.
-
-            // If the procstate is high enough, it's always allowed.
-            if (procstate <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
-                return true;
-            }
-            // IF it's too low, it's not allowed.
-            if (procstate > PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                return false;
-            }
-            // If it's PROCESS_STATE_IMPORTANT_FOREGROUND, then we allow it only wheen the UID
-            // has a SHORT_FGS.
-            return mOomAdjuster.hasUidShortForegroundService(uid);
         }
 
         @Override

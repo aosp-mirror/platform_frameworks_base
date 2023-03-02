@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-package android.net.wifi.sharedconnectivity.app;
+package com.android.systemui.keyguard.data.repository
 
-parcelable DeviceInfo;
+import com.android.systemui.keyguard.shared.model.DevicePosture
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+
+class FakeDevicePostureRepository : DevicePostureRepository {
+    private val _currentDevicePosture = MutableStateFlow(DevicePosture.UNKNOWN)
+    override val currentDevicePosture: Flow<DevicePosture>
+        get() = _currentDevicePosture
+
+    fun setCurrentPosture(posture: DevicePosture) {
+        _currentDevicePosture.value = posture
+    }
+}

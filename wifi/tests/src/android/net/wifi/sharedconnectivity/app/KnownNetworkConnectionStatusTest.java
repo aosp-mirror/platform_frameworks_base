@@ -17,10 +17,10 @@
 package android.net.wifi.sharedconnectivity.app;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
 import static android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.CONNECTION_STATUS_SAVED;
 import static android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.CONNECTION_STATUS_SAVE_FAILED;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,9 +41,11 @@ public class KnownNetworkConnectionStatusTest {
     private static final int NETWORK_SOURCE = NETWORK_SOURCE_NEARBY_SELF;
     private static final String SSID = "TEST_SSID";
     private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP};
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder()
+                    .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName(
+                            "TEST_MODEL")
+                    .setConnectionStrength(2).setBatteryPercentage(50).build();
     private static final String SSID_1 = "TEST_SSID1";
     private static final String BUNDLE_KEY = "INT-KEY";
     private static final int BUNDLE_VALUE = 1;
@@ -121,8 +123,8 @@ public class KnownNetworkConnectionStatusTest {
     }
 
     private KnownNetwork.Builder buildKnownNetworkBuilder() {
-        KnownNetwork.Builder builder =  new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
-                .setSsid(SSID).setDeviceInfo(DEVICE_INFO);
+        KnownNetwork.Builder builder = new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
+                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
         Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
         return builder;
     }

@@ -255,7 +255,9 @@ fun Expandable(
                     .onGloballyPositioned {
                         controller.boundsInComposeViewRoot.value = it.boundsInRoot()
                     }
-            ) { wrappedContent(controller.expandable) }
+            ) {
+                wrappedContent(controller.expandable)
+            }
         }
         else -> {
             val clickModifier =
