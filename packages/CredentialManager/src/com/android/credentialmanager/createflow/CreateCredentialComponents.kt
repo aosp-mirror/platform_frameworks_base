@@ -325,7 +325,8 @@ fun MoreOptionsSelectionCard(
             else onBackCreationSelectionButtonSelected,
         )
     }) {
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
+        item { Divider(thickness = 8.dp, color = Color.Transparent) } // Top app bar has a 8dp
+                                                                      // bottom padding already
         item {
             CredentialContainerCard {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
