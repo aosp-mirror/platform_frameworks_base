@@ -218,6 +218,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     final TransitionController.Logger mLogger = new TransitionController.Logger();
 
+    /** Whether this transition was forced to play early (eg for a SLEEP signal). */
+    private boolean mForcePlaying = false;
+
     /**
      * {@code false} if this transition runs purely in WMCore (meaning Shell is completely unaware
      * of it). Currently, this happens before the display is ready since nothing can be seen yet.
@@ -387,6 +390,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
     boolean isCollecting() {
         return mState == STATE_COLLECTING || mState == STATE_STARTED;
+    }
+
+    boolean isAborted() {
+        return mState == STATE_ABORT;
     }
 
     boolean isStarted() {
@@ -997,6 +1004,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     void abort() {
         // This calls back into itself via controller.abort, so just early return here.
         if (mState == STATE_ABORT) return;
+        if (mState == STATE_PENDING) {
+            // hasn't started collecting, so can jump directly to aborted state.
+            mState = STATE_ABORT;
+            return;
+        }
         if (mState != STATE_COLLECTING && mState != STATE_STARTED) {
             throw new IllegalStateException("Too late to abort. state=" + mState);
         }
@@ -1005,6 +1017,27 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Syncengine abort will call through to onTransactionReady()
         mSyncEngine.abort(mSyncId);
         mController.dispatchLegacyAppTransitionCancelled();
+    }
+
+    /** Immediately moves this to playing even if it isn't started yet. */
+    void playNow() {
+        if (!(mState == STATE_COLLECTING || mState == STATE_STARTED)) {
+            return;
+        }
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Force Playing Transition: %d",
+                mSyncId);
+        mForcePlaying = true;
+        setAllReady();
+        if (mState == STATE_COLLECTING) {
+            start();
+        }
+        // Don't wait for actual surface-placement. We don't want anything else collected in this
+        // transition.
+        mSyncEngine.onSurfacePlacement();
+    }
+
+    boolean isForcePlaying() {
+        return mForcePlaying;
     }
 
     void setRemoteTransition(RemoteTransition remoteTransition) {
