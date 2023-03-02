@@ -33,7 +33,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD_OR_PIN;
-import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PIN;
 import static com.android.internal.widget.LockPatternUtils.CURRENT_LSKF_BASED_PROTECTOR_ID_KEY;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
@@ -82,7 +81,6 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -117,7 +115,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -201,7 +198,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
     private static final String BIOMETRIC_PERMISSION = MANAGE_BIOMETRIC;
-    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
@@ -381,7 +377,6 @@ public class LockSettingsService extends ILockSettings.Stub {
      */
     private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
-        if (DEBUG) Slog.v(TAG, "Check child profile lock for user: " + profileUserId);
         // Only for profiles that shares credential with parent
         if (!isCredentialSharableWithParent(profileUserId)) {
             return;
@@ -399,8 +394,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // as its parent.
         final int parentId = mUserManager.getProfileParent(profileUserId).id;
         if (!isUserSecure(parentId) && !profileUserPassword.isNone()) {
-            if (DEBUG) Slog.v(TAG, "Parent does not have a screen lock but profile has one");
-
+            Slogf.i(TAG, "Clearing password for profile user %d to match parent", profileUserId);
             setLockCredentialInternal(LockscreenCredential.createNone(), profileUserPassword,
                     profileUserId, /* isLockTiedToParent= */ true);
             return;
@@ -416,7 +410,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "Failed to talk to GateKeeper service", e);
             return;
         }
-        if (DEBUG) Slog.v(TAG, "Tie profile to parent now!");
         try (LockscreenCredential unifiedProfilePassword = generateRandomProfilePassword()) {
             setLockCredentialInternal(unifiedProfilePassword, profileUserPassword, profileUserId,
                     /* isLockTiedToParent= */ true);
@@ -690,8 +683,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
-        Slog.d(TAG, TextUtils.formatSimple("showing encryption notification, user: %d; reason: %s",
-                user.getIdentifier(), reason));
+        Slogf.d(TAG, "Showing encryption notification for user %d; reason: %s",
+                user.getIdentifier(), reason);
 
         showEncryptionNotification(user, title, message, detail, intent);
     }
@@ -735,7 +728,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void hideEncryptionNotification(UserHandle userHandle) {
-        Slog.d(TAG, "hide encryption notification, user: " + userHandle.getIdentifier());
+        Slogf.d(TAG, "Hiding encryption notification for user %d", userHandle.getIdentifier());
         mNotificationManager.cancelAsUser(null, SystemMessage.NOTE_FBE_ENCRYPTED_NOTIFICATION,
             userHandle);
     }
@@ -888,7 +881,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 && !getBoolean("migrated_frp", false, 0)) {
             migrateFrpCredential();
             setBoolean("migrated_frp", true, 0);
-            Slog.i(TAG, "Migrated migrated_frp.");
         }
     }
 
@@ -1034,7 +1026,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void enforceFrpResolved() {
         final int mainUserId = mInjector.getUserManagerInternal().getMainUserId();
         if (mainUserId < 0) {
-            Slog.i(TAG, "No Main user on device; skip enforceFrpResolved");
+            Slog.d(TAG, "No Main user on device; skipping enforceFrpResolved");
             return;
         }
         final ContentResolver cr = mContext.getContentResolver();
@@ -1269,7 +1261,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void unlockKeystore(byte[] password, int userHandle) {
-        if (DEBUG) Slog.v(TAG, "Unlock keystore for user: " + userHandle);
         Authorization.onLockScreenEvent(false, userHandle, password, null);
     }
 
@@ -1279,7 +1270,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException,
             InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException,
             CertificateException, IOException {
-        if (DEBUG) Slog.v(TAG, "Get child profile decrypted key");
+        Slogf.d(TAG, "Decrypting password for tied profile %d", userId);
         byte[] storedData = mStorage.readChildProfileLock(userId);
         if (storedData == null) {
             throw new FileNotFoundException("Child profile lock file not found");
@@ -1328,7 +1319,6 @@ public class LockSettingsService extends ILockSettings.Stub {
      * {@link com.android.server.SystemServiceManager#unlockUser} </em>
      */
     private void unlockUser(@UserIdInt int userId) {
-        Slogf.i(TAG, "Unlocking user %d", userId);
         // TODO: make this method fully async so we can update UI with progress strings
         final boolean alreadyUnlocked = mUserManager.isUserUnlockingOrUnlocked(userId);
         final CountDownLatch latch = new CountDownLatch(1);
@@ -1638,7 +1628,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             LockscreenCredential savedCredential, int userId, boolean isLockTiedToParent) {
         Objects.requireNonNull(credential);
         Objects.requireNonNull(savedCredential);
-        if (DEBUG) Slog.d(TAG, "setLockCredentialInternal: user=" + userId);
         synchronized (mSpManager) {
             if (savedCredential.isNone() && isProfileWithUnifiedLock(userId)) {
                 // get credential from keystore when profile has unified lock
@@ -1720,6 +1709,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (passwordHistoryLength == 0) {
             passwordHistory = "";
         } else {
+            Slogf.d(TAG, "Adding new password to password history for user %d", userHandle);
             final byte[] hashFactor = getHashFactor(password, userHandle);
             final byte[] salt = getSalt(userHandle).getBytes();
             String hash = password.passwordToHistoryHash(salt, hashFactor);
@@ -1751,7 +1741,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (salt == 0) {
             salt = SecureRandomUtils.randomLong();
             setLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, salt, userId);
-            Slog.v(TAG, "Initialized lock password salt for user: " + userId);
         }
         return Long.toHexString(salt);
     }
@@ -1875,7 +1864,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting /** Note: this method is overridden in unit tests */
     protected void tieProfileLockToParent(int profileUserId, int parentUserId,
             LockscreenCredential password) {
-        if (DEBUG) Slog.v(TAG, "tieProfileLockToParent for user: " + profileUserId);
+        Slogf.i(TAG, "Tying lock for profile user %d to parent user %d", profileUserId,
+                parentUserId);
         final byte[] iv;
         final byte[] ciphertext;
         final long parentSid;
@@ -2002,7 +1992,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void resetKeyStore(int userId) {
         checkWritePermission();
-        if (DEBUG) Slog.v(TAG, "Reset keystore for user: " + userId);
+        Slogf.d(TAG, "Resetting keystore for user %d", userId);
         List<Integer> profileUserIds = new ArrayList<>();
         List<LockscreenCredential> profileUserDecryptedPasswords = new ArrayList<>();
         final List<UserInfo> profiles = mUserManager.getProfiles(userId);
@@ -2039,7 +2029,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 int piUserId = profileUserIds.get(i);
                 LockscreenCredential piUserDecryptedPassword = profileUserDecryptedPasswords.get(i);
                 if (piUserId != -1 && piUserDecryptedPassword != null) {
-                    if (DEBUG) Slog.v(TAG, "Restore tied profile lock");
                     tieProfileLockToParent(piUserId, userId, piUserDecryptedPassword);
                 }
                 if (piUserDecryptedPassword != null) {
@@ -2132,7 +2121,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             Slog.e(TAG, "FRP credential can only be verified prior to provisioning.");
             return VerifyCredentialResponse.ERROR;
         }
-        Slog.d(TAG, "doVerifyCredential: user=" + userId);
+        Slogf.i(TAG, "Verifying lockscreen credential for user %d", userId);
 
         final AuthenticationResult authResult;
         VerifyCredentialResponse response;
@@ -2166,6 +2155,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            Slogf.i(TAG, "Successfully verified lockscreen credential for user %d", userId);
             onCredentialVerified(authResult.syntheticPassword,
                     PasswordMetrics.computeForCredential(credential), userId);
             if ((flags & VERIFY_FLAG_REQUEST_GK_PW_HANDLE) != 0) {
@@ -2324,13 +2314,18 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void removeKeystoreProfileKey(int targetUserId) {
-        Slog.i(TAG, "Remove keystore profile key for user: " + targetUserId);
+        final String encryptAlias = PROFILE_KEY_NAME_ENCRYPT + targetUserId;
+        final String decryptAlias = PROFILE_KEY_NAME_DECRYPT + targetUserId;
         try {
-            mJavaKeyStore.deleteEntry(PROFILE_KEY_NAME_ENCRYPT + targetUserId);
-            mJavaKeyStore.deleteEntry(PROFILE_KEY_NAME_DECRYPT + targetUserId);
+            if (mJavaKeyStore.containsAlias(encryptAlias) ||
+                    mJavaKeyStore.containsAlias(decryptAlias)) {
+                Slogf.i(TAG, "Removing keystore profile key for user %d", targetUserId);
+                mJavaKeyStore.deleteEntry(encryptAlias);
+                mJavaKeyStore.deleteEntry(decryptAlias);
+            }
         } catch (KeyStoreException e) {
-            // We have tried our best to remove all keys
-            Slog.e(TAG, "Unable to remove keystore profile key for user:" + targetUserId, e);
+            // We have tried our best to remove the key.
+            Slogf.e(TAG, e, "Error removing keystore profile key for user %d", targetUserId);
         }
     }
 
@@ -2678,7 +2673,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @VisibleForTesting
     SyntheticPassword initializeSyntheticPassword(int userId) {
         synchronized (mSpManager) {
-            Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
+            Slogf.i(TAG, "Initializing synthetic password for user %d", userId);
             Preconditions.checkState(getCurrentLskfBasedProtectorId(userId) ==
                     SyntheticPasswordManager.NULL_PROTECTOR_ID,
                     "Cannot reinitialize SP");
@@ -2689,6 +2684,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setCurrentLskfBasedProtectorId(protectorId, userId);
             setUserKeyProtection(userId, sp.deriveFileBasedEncryptionKey());
             onSyntheticPasswordCreated(userId, sp);
+            Slogf.i(TAG, "Successfully initialized synthetic password for user %d", userId);
             return sp;
         }
     }
@@ -2725,8 +2721,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         final long finalHandle = handle;
         mHandler.postDelayed(() -> {
             synchronized (mGatekeeperPasswords) {
-                Slog.d(TAG, "Removing handle: " + finalHandle);
-                mGatekeeperPasswords.remove(finalHandle);
+                if (mGatekeeperPasswords.get(finalHandle) != null) {
+                    Slogf.d(TAG, "Cached Gatekeeper password with handle %016x has expired",
+                            finalHandle);
+                    mGatekeeperPasswords.remove(finalHandle);
+                }
             }
         }, GK_PW_HANDLE_STORE_DURATION_MS);
 
@@ -2775,7 +2774,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mSpManager")
     private long setLockCredentialWithSpLocked(LockscreenCredential credential,
             SyntheticPassword sp, int userId) {
-        if (DEBUG) Slog.d(TAG, "setLockCredentialWithSpLocked: user=" + userId);
+        Slogf.i(TAG, "Changing lockscreen credential of user %d; newCredentialType=%s\n",
+                userId, LockPatternUtils.credentialTypeToString(credential.getType()));
         final int savedCredentialType = getCredentialTypeInternal(userId);
         final long oldProtectorId = getCurrentLskfBasedProtectorId(userId);
         final long newProtectorId = mSpManager.createLskfBasedProtector(getGateKeeperService(),
@@ -2820,6 +2820,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         mSpManager.destroyLskfBasedProtector(oldProtectorId, userId);
+        Slogf.i(TAG, "Successfully changed lockscreen credential of user %d", userId);
         return newProtectorId;
     }
 
@@ -2904,6 +2905,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public byte[] getHashFactor(LockscreenCredential currentCredential, int userId) {
         checkPasswordReadPermission();
         try {
+            Slogf.d(TAG, "Getting password history hash factor for user %d", userId);
             if (isProfileWithUnifiedLock(userId)) {
                 try {
                     currentCredential = getDecryptedPasswordForTiedProfile(userId);
@@ -2929,7 +2931,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private long addEscrowToken(@NonNull byte[] token, @TokenType int type, int userId,
             @NonNull EscrowTokenStateChangeCallback callback) {
-        if (DEBUG) Slog.d(TAG, "addEscrowToken: user=" + userId + ", type=" + type);
+        Slogf.i(TAG, "Adding escrow token for user %d", userId);
         synchronized (mSpManager) {
             // If the user has no LSKF, then the token can be activated immediately.  Otherwise, the
             // token can't be activated until the SP is unlocked by another protector (normally the
@@ -2947,18 +2949,20 @@ public class LockSettingsService extends ILockSettings.Stub {
             long handle = mSpManager.addPendingToken(token, type, userId, callback);
             if (sp != null) {
                 // Activate the token immediately
+                Slogf.i(TAG, "Immediately activating escrow token %016x", handle);
                 mSpManager.createTokenBasedProtector(handle, sp, userId);
+            } else {
+                Slogf.i(TAG, "Escrow token %016x will be activated when user is unlocked", handle);
             }
             return handle;
         }
     }
 
     private void activateEscrowTokens(SyntheticPassword sp, int userId) {
-        if (DEBUG) Slog.d(TAG, "activateEscrowTokens: user=" + userId);
         synchronized (mSpManager) {
             disableEscrowTokenOnNonManagedDevicesIfNeeded(userId);
             for (long handle : mSpManager.getPendingTokensForUser(userId)) {
-                Slog.i(TAG, TextUtils.formatSimple("activateEscrowTokens: %x %d ", handle, userId));
+                Slogf.i(TAG, "Activating escrow token %016x for user %d", handle, userId);
                 mSpManager.createTokenBasedProtector(handle, sp, userId);
             }
         }
@@ -3029,6 +3033,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mSpManager")
     private boolean setLockCredentialWithTokenInternalLocked(LockscreenCredential credential,
             long tokenHandle, byte[] token, int userId) {
+        Slogf.i(TAG, "Resetting lockscreen credential of user %d using escrow token %016x",
+                userId, tokenHandle);
         final AuthenticationResult result;
         result = mSpManager.unlockTokenBasedProtector(getGateKeeperService(), tokenHandle, token,
                     userId);
@@ -3051,8 +3057,9 @@ public class LockSettingsService extends ILockSettings.Stub {
     private boolean unlockUserWithToken(long tokenHandle, byte[] token, int userId) {
         AuthenticationResult authResult;
         synchronized (mSpManager) {
+            Slogf.i(TAG, "Unlocking user %d using escrow token %016x", userId, tokenHandle);
             if (!mSpManager.hasEscrowData(userId)) {
-                Slog.w(TAG, "Escrow token is disabled on the current user");
+                Slogf.w(TAG, "Escrow token support is disabled on user %d", userId);
                 return false;
             }
             authResult = mSpManager.unlockTokenBasedProtector(getGateKeeperService(), tokenHandle,
@@ -3063,6 +3070,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
+        Slogf.i(TAG, "Unlocked synthetic password for user %d using escrow token", userId);
         onCredentialVerified(authResult.syntheticPassword,
                 loadPasswordMetrics(authResult.syntheticPassword, userId), userId);
         return true;
@@ -3090,21 +3098,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(timestamp));
     }
 
-    private static String credentialTypeToString(int credentialType) {
-        switch (credentialType) {
-            case CREDENTIAL_TYPE_NONE:
-                return "None";
-            case CREDENTIAL_TYPE_PATTERN:
-                return "Pattern";
-            case CREDENTIAL_TYPE_PIN:
-                return "Pin";
-            case CREDENTIAL_TYPE_PASSWORD:
-                return "Password";
-            default:
-                return "Unknown " + credentialType;
-        }
-    }
-
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, printWriter)) return;
@@ -3121,22 +3114,23 @@ public class LockSettingsService extends ILockSettings.Stub {
             pw.println("User " + userId);
             pw.increaseIndent();
             synchronized (mSpManager) {
-                pw.println(TextUtils.formatSimple("LSKF-based SP protector ID: %x",
+                pw.println(TextUtils.formatSimple("LSKF-based SP protector ID: %016x",
                         getCurrentLskfBasedProtectorId(userId)));
-                pw.println(TextUtils.formatSimple("LSKF last changed: %s (previous protector: %x)",
-                        timestampToString(getLong(LSKF_LAST_CHANGED_TIME_KEY, 0, userId)),
-                        getLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId)));
+                pw.println(TextUtils.formatSimple(
+                            "LSKF last changed: %s (previous protector: %016x)",
+                            timestampToString(getLong(LSKF_LAST_CHANGED_TIME_KEY, 0, userId)),
+                            getLong(PREV_LSKF_BASED_PROTECTOR_ID_KEY, 0, userId)));
             }
             try {
-                pw.println(TextUtils.formatSimple("SID: %x",
+                pw.println(TextUtils.formatSimple("SID: %016x",
                         getGateKeeperService().getSecureUserId(userId)));
             } catch (RemoteException e) {
                 // ignore.
             }
-            // It's OK to dump the password type since anyone with physical access can just
+            // It's OK to dump the credential type since anyone with physical access can just
             // observe it from the keyguard directly.
             pw.println("Quality: " + getKeyguardStoredQuality(userId));
-            pw.println("CredentialType: " + credentialTypeToString(
+            pw.println("CredentialType: " + LockPatternUtils.credentialTypeToString(
                     getCredentialTypeInternal(userId)));
             pw.println("SeparateChallenge: " + getSeparateProfileChallengeEnabledInternal(userId));
             pw.println(TextUtils.formatSimple("Metrics: %s",
@@ -3194,6 +3188,11 @@ public class LockSettingsService extends ILockSettings.Stub {
      * if we are running an automotive build.
      */
     private void disableEscrowTokenOnNonManagedDevicesIfNeeded(int userId) {
+
+        if (!mSpManager.hasAnyEscrowData(userId)) {
+            return;
+        }
+
         // TODO(b/258213147): Remove
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -3238,7 +3237,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // Disable escrow token permanently on all other device/user types.
-        Slog.i(TAG, "Disabling escrow token on user " + userId);
+        Slogf.i(TAG, "Permanently disabling support for escrow tokens on user %d", userId);
         mSpManager.destroyEscrowData(userId);
     }
 
@@ -3470,6 +3469,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             synchronized (mSpManager) {
                 mSpManager.verifyChallenge(getGateKeeperService(), sp, 0L, userId);
             }
+            Slogf.i(TAG, "Restored synthetic password for user %d using reboot escrow", userId);
             onCredentialVerified(sp, loadPasswordMetrics(sp, userId), userId);
         }
     }
