@@ -84,7 +84,7 @@ public class SatelliteStateCallback {
 
     /**@hide*/
     @NonNull
-    public final ISatelliteStateCallback getBinder() {
+    final ISatelliteStateCallback getBinder() {
         return mBinder;
     }
 
