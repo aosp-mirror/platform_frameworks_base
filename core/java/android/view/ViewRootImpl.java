@@ -11382,6 +11382,10 @@ public final class ViewRootImpl implements ViewParent,
             sendBackKeyEvent(KeyEvent.ACTION_DOWN);
             sendBackKeyEvent(KeyEvent.ACTION_UP);
         };
+        if (mOnBackInvokedDispatcher.hasImeOnBackInvokedDispatcher()) {
+            Log.d(TAG, "Skip registering CompatOnBackInvokedCallback on IME dispatcher");
+            return;
+        }
         mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
                 OnBackInvokedDispatcher.PRIORITY_DEFAULT, mCompatOnBackInvokedCallback);
     }
