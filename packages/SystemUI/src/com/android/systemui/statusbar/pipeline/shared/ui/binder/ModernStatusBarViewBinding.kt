@@ -37,4 +37,7 @@ interface ModernStatusBarViewBinding {
 
     /** Notifies that the decor tint has been updated (used only for the dot). */
     fun onDecorTintChanged(newTint: Int)
+
+    /** Returns true if the binding between the view and view-model is currently collecting. */
+    fun isCollecting(): Boolean
 }

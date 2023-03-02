@@ -26,11 +26,13 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
  *
  * @param commonImpl for convenience, this class wraps a base interface that can provides all of the
  *   common implementations between locations. See [MobileIconViewModel]
+ * @property locationName the name of the location of this VM, used for logging.
  */
 abstract class LocationBasedMobileViewModel(
     val commonImpl: MobileIconViewModelCommon,
     statusBarPipelineFlags: StatusBarPipelineFlags,
     debugTint: Int,
+    val locationName: String,
 ) : MobileIconViewModelCommon by commonImpl {
     val useDebugColoring: Boolean = statusBarPipelineFlags.useDebugColoring()
 
@@ -62,18 +64,33 @@ class HomeMobileIconViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
 ) :
     MobileIconViewModelCommon,
-    LocationBasedMobileViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.CYAN)
+    LocationBasedMobileViewModel(
+        commonImpl,
+        statusBarPipelineFlags,
+        debugTint = Color.CYAN,
+        locationName = "Home",
+    )
 
 class QsMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
     statusBarPipelineFlags: StatusBarPipelineFlags,
 ) :
     MobileIconViewModelCommon,
-    LocationBasedMobileViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.GREEN)
+    LocationBasedMobileViewModel(
+        commonImpl,
+        statusBarPipelineFlags,
+        debugTint = Color.GREEN,
+        locationName = "QS",
+    )
 
 class KeyguardMobileIconViewModel(
     commonImpl: MobileIconViewModelCommon,
     statusBarPipelineFlags: StatusBarPipelineFlags,
 ) :
     MobileIconViewModelCommon,
-    LocationBasedMobileViewModel(commonImpl, statusBarPipelineFlags, debugTint = Color.MAGENTA)
+    LocationBasedMobileViewModel(
+        commonImpl,
+        statusBarPipelineFlags,
+        debugTint = Color.MAGENTA,
+        locationName = "Keyguard",
+    )

@@ -38,6 +38,7 @@ class ModernStatusBarWifiView(
     override fun toString(): String {
         return "ModernStatusBarWifiView(" +
             "slot='$slot', " +
+            "isCollecting=${binding.isCollecting()}, " +
             "visibleState=${StatusBarIconView.getVisibleStateString(visibleState)}); " +
             "viewString=${super.toString()}"
     }

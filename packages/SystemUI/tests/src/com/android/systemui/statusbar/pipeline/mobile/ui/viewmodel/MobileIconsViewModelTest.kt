@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirp
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
@@ -51,6 +52,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
     private lateinit var airplaneModeInteractor: AirplaneModeInteractor
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var constants: ConnectivityConstants
+    @Mock private lateinit var logger: MobileViewLogger
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -73,6 +75,7 @@ class MobileIconsViewModelTest : SysuiTestCase() {
         underTest =
             MobileIconsViewModel(
                 subscriptionIdsFlow,
+                logger,
                 interactor,
                 airplaneModeInteractor,
                 constants,

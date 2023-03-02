@@ -164,6 +164,10 @@ class ModernStatusBarViewTest : SysuiTestCase() {
         override fun getShouldIconBeVisible(): Boolean {
             return shouldIconBeVisibleInternal
         }
+
+        override fun isCollecting(): Boolean {
+            return true
+        }
     }
 }
 
