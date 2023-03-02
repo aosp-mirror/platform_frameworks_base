@@ -100,6 +100,16 @@ object Flags {
     val SENSITIVE_REVEAL_ANIM =
         unreleasedFlag(268005230, "sensitive_reveal_anim", teamfood = true)
 
+    // TODO(b/280783617): Tracking Bug
+    @Keep
+    @JvmField
+    val BUILDER_EXTRAS_OVERRIDE =
+            sysPropBooleanFlag(
+                    128,
+                    "persist.sysui.notification.builder_extras_override",
+                    default = false
+            )
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
