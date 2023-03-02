@@ -108,6 +108,8 @@ import android.net.ConnectivityManager;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.nfc.NfcFrameworkInitializer;
+import android.nfc.NfcServiceManager;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.BluetoothServiceManager;
@@ -7920,6 +7922,7 @@ public final class ActivityThread extends ClientTransactionHandler
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
         BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
             BinderCallsStats.startForBluetooth(context); });
+        NfcFrameworkInitializer.setNfcServiceManager(new NfcServiceManager());
     }
 
     private void purgePendingResources() {
