@@ -81,7 +81,6 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -116,7 +115,6 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -200,7 +198,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String TAG = "LockSettingsService";
     private static final String PERMISSION = ACCESS_KEYGUARD_SECURE_STORAGE;
     private static final String BIOMETRIC_PERMISSION = MANAGE_BIOMETRIC;
-    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int PROFILE_KEY_IV_SIZE = 12;
     private static final String SEPARATE_PROFILE_CHALLENGE_KEY = "lockscreen.profilechallenge";
@@ -686,8 +683,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         PendingIntent intent = PendingIntent.getActivity(mContext, 0, unlockIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
-        Slog.d(TAG, TextUtils.formatSimple("showing encryption notification, user: %d; reason: %s",
-                user.getIdentifier(), reason));
+        Slogf.d(TAG, "Showing encryption notification for user %d; reason: %s",
+                user.getIdentifier(), reason);
 
         showEncryptionNotification(user, title, message, detail, intent);
     }
@@ -731,7 +728,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void hideEncryptionNotification(UserHandle userHandle) {
-        Slog.d(TAG, "hide encryption notification, user: " + userHandle.getIdentifier());
+        Slogf.d(TAG, "Hiding encryption notification for user %d", userHandle.getIdentifier());
         mNotificationManager.cancelAsUser(null, SystemMessage.NOTE_FBE_ENCRYPTED_NOTIFICATION,
             userHandle);
     }
@@ -1029,7 +1026,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private void enforceFrpResolved() {
         final int mainUserId = mInjector.getUserManagerInternal().getMainUserId();
         if (mainUserId < 0) {
-            Slog.i(TAG, "No Main user on device; skip enforceFrpResolved");
+            Slog.d(TAG, "No Main user on device; skipping enforceFrpResolved");
             return;
         }
         final ContentResolver cr = mContext.getContentResolver();
@@ -1995,7 +1992,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void resetKeyStore(int userId) {
         checkWritePermission();
-        if (DEBUG) Slog.v(TAG, "Reset keystore for user: " + userId);
+        Slogf.d(TAG, "Resetting keystore for user %d", userId);
         List<Integer> profileUserIds = new ArrayList<>();
         List<LockscreenCredential> profileUserDecryptedPasswords = new ArrayList<>();
         final List<UserInfo> profiles = mUserManager.getProfiles(userId);
@@ -2032,7 +2029,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                 int piUserId = profileUserIds.get(i);
                 LockscreenCredential piUserDecryptedPassword = profileUserDecryptedPasswords.get(i);
                 if (piUserId != -1 && piUserDecryptedPassword != null) {
-                    if (DEBUG) Slog.v(TAG, "Restore tied profile lock");
                     tieProfileLockToParent(piUserId, userId, piUserDecryptedPassword);
                 }
                 if (piUserDecryptedPassword != null) {
