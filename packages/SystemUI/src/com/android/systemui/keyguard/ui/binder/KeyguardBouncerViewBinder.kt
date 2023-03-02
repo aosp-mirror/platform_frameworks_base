@@ -31,7 +31,6 @@ import com.android.settingslib.Utils
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
-import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ActivityStarter
 import kotlinx.coroutines.awaitCancellation
@@ -45,7 +44,6 @@ object KeyguardBouncerViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: KeyguardBouncerViewModel,
-        primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
         componentFactory: KeyguardBouncerComponent.Factory
     ) {
         // Builds the KeyguardSecurityContainerController from bouncer view group.
@@ -143,12 +141,6 @@ object KeyguardBouncerViewBinder {
                     launch {
                         viewModel.bouncerExpansionAmount.collect { expansion ->
                             securityContainerController.setExpansion(expansion)
-                        }
-                    }
-
-                    launch {
-                        primaryBouncerToGoneTransitionViewModel.bouncerAlpha.collect { alpha ->
-                            securityContainerController.setAlpha(alpha)
                         }
                     }
 
