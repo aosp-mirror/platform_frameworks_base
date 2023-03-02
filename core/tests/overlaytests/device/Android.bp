@@ -29,6 +29,7 @@ android_test {
     static_libs: [
         "androidx.test.rules",
         "testng",
+        "compatibility-device-util-axt",
     ],
     test_suites: ["device-tests"],
     data: [
