@@ -128,6 +128,7 @@ import com.android.internal.util.PerfettoTrigger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -578,8 +579,10 @@ public class InteractionJankMonitor {
     public boolean begin(@NonNull Configuration.Builder builder) {
         try {
             final Configuration config = builder.build();
-            EventLogTags.writeJankCujEventsBeginRequest(
-                    config.mCujType, SystemClock.elapsedRealtimeNanos(), SystemClock.uptimeNanos());
+            postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+                EventLogTags.writeJankCujEventsBeginRequest(
+                        config.mCujType, unixNanos, elapsedNanos, realtimeNanos);
+            });
             final TrackerResult result = new TrackerResult();
             final boolean success = config.getHandler().runWithScissors(
                     () -> result.mResult = beginInternal(config), EXECUTOR_TASK_TIMEOUT);
@@ -653,8 +656,10 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is ended successfully, false otherwise.
      */
     public boolean end(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsEndRequest(cujType, SystemClock.elapsedRealtimeNanos(),
-                SystemClock.uptimeNanos());
+        postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+            EventLogTags.writeJankCujEventsEndRequest(
+                    cujType, unixNanos, elapsedNanos, realtimeNanos);
+        });
         FrameTracker tracker = getTracker(cujType);
         // Skip this call since we haven't started a trace yet.
         if (tracker == null) return false;
@@ -692,8 +697,10 @@ public class InteractionJankMonitor {
      * @return boolean true if the tracker is cancelled successfully, false otherwise.
      */
     public boolean cancel(@CujType int cujType) {
-        EventLogTags.writeJankCujEventsCancelRequest(cujType, SystemClock.elapsedRealtimeNanos(),
-                SystemClock.uptimeNanos());
+        postEventLogToWorkerThread((unixNanos, elapsedNanos, realtimeNanos) -> {
+            EventLogTags.writeJankCujEventsCancelRequest(
+                    cujType, unixNanos, elapsedNanos, realtimeNanos);
+        });
         return cancel(cujType, REASON_CANCEL_NORMAL);
     }
 
@@ -1283,5 +1290,22 @@ public class InteractionJankMonitor {
         public int getReason() {
             return mReason;
         }
+    }
+
+    @FunctionalInterface
+    private interface TimeFunction {
+        void invoke(long unixNanos, long elapsedNanos, long realtimeNanos);
+    }
+
+    private void postEventLogToWorkerThread(TimeFunction logFunction) {
+        final Instant now = Instant.now();
+        final long unixNanos = TimeUnit.NANOSECONDS.convert(now.getEpochSecond(), TimeUnit.SECONDS)
+                + now.getNano();
+        final long elapsedNanos = SystemClock.elapsedRealtimeNanos();
+        final long realtimeNanos = SystemClock.uptimeNanos();
+
+        mWorker.getThreadHandler().post(() -> {
+            logFunction.invoke(unixNanos, elapsedNanos, realtimeNanos);
+        });
     }
 }
