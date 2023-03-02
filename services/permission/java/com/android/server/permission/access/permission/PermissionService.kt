@@ -65,7 +65,7 @@ import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.PermissionUri
 import com.android.server.permission.access.UidUri
-import com.android.server.permission.access.appop.UidAppOpPolicy
+import com.android.server.permission.access.appop.AppIdAppOpPolicy
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 import com.android.server.permission.access.util.andInv
 import com.android.server.permission.access.util.hasAnyBit
@@ -101,7 +101,7 @@ class PermissionService(
     private val service: AccessCheckingService
 ) : PermissionManagerServiceInterface {
     private val policy =
-        service.getSchemePolicy(UidUri.SCHEME, PermissionUri.SCHEME) as UidPermissionPolicy
+        service.getSchemePolicy(UidUri.SCHEME, PermissionUri.SCHEME) as AppIdPermissionPolicy
 
     private val context = service.context
     private lateinit var metricsLogger: MetricsLogger
@@ -930,7 +930,8 @@ class PermissionService(
         permissionName: String,
         isGranted: Boolean
     ) {
-        val appOpPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as UidAppOpPolicy
+        val appOpPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME) as
+            AppIdAppOpPolicy
         val appOpName = AppOpsManager.permissionToOp(permissionName)
         val mode = if (isGranted) AppOpsManager.MODE_ALLOWED else AppOpsManager.MODE_ERRORED
         with(appOpPolicy) { setAppOpMode(packageState.appId, userId, appOpName, mode) }
@@ -2102,7 +2103,7 @@ class PermissionService(
      * Callback invoked when interesting actions have been taken on a permission.
      */
     private inner class OnPermissionFlagsChangedListener :
-        UidPermissionPolicy.OnPermissionFlagsChangedListener() {
+        AppIdPermissionPolicy.OnPermissionFlagsChangedListener() {
         private var isPermissionFlagsChanged = false
 
         private val runtimePermissionChangedUids = IntSet()

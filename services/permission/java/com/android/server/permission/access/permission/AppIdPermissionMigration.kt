@@ -25,7 +25,7 @@ import com.android.server.pm.permission.PermissionMigrationHelper
 /**
  * This class migrate legacy permissions to unified permission subsystem
  */
-class UidPermissionMigration {
+class AppIdPermissionMigration {
     internal fun migrateSystemState(state: AccessState) {
         val legacyPermissionsManager =
             LocalServices.getService(PermissionMigrationHelper::class.java)!!
@@ -71,7 +71,7 @@ class UidPermissionMigration {
         userId: Int
     ) {
         val permissionFlags =
-            state.userStates[userId].uidPermissionFlags.getOrPut(appId) { IndexedMap() }
+            state.userStates[userId].appIdPermissionFlags.getOrPut(appId) { IndexedMap() }
 
         legacyPermissionStates.forEach forEachPermission@ { (permissionName, permissionState) ->
             val permission = state.systemState.permissions[permissionName]
@@ -119,7 +119,7 @@ class UidPermissionMigration {
     }
 
     companion object {
-        private val LOG_TAG = UidPermissionMigration::class.java.simpleName
+        private val LOG_TAG = AppIdPermissionMigration::class.java.simpleName
 
         private const val DEBUG_MIGRATION = false
     }

@@ -47,7 +47,7 @@ class AppOpService(
     private val packagePolicy = service.getSchemePolicy(PackageUri.SCHEME, AppOpUri.SCHEME)
         as PackageAppOpPolicy
     private val uidPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME)
-        as UidAppOpPolicy
+        as AppIdAppOpPolicy
 
     private val context = service.context
     private lateinit var handler: Handler

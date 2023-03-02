@@ -37,7 +37,7 @@ import com.android.server.permission.access.util.getAttributeValueOrThrow
 import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
-class UidPermissionPersistence {
+class AppIdPermissionPersistence {
     fun BinaryXmlPullParser.parseSystemState(state: AccessState) {
         val systemState = state.systemState
         when (tagName) {
@@ -126,12 +126,12 @@ class UidPermissionPersistence {
 
     fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
         when (tagName) {
-            TAG_PERMISSIONS -> parsePermissionFlags(state, userId)
+            TAG_APP_ID_PERMISSIONS -> parseAppIdPermissions(state, userId)
             else -> {}
         }
     }
 
-    private fun BinaryXmlPullParser.parsePermissionFlags(state: AccessState, userId: Int) {
+    private fun BinaryXmlPullParser.parseAppIdPermissions(state: AccessState, userId: Int) {
         val userState = state.userStates[userId]
         forEachTag {
             when (tagName) {
@@ -139,7 +139,7 @@ class UidPermissionPersistence {
                 else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing permission state")
             }
         }
-        userState.uidPermissionFlags.retainAllIndexed { _, appId, _ ->
+        userState.appIdPermissionFlags.retainAllIndexed { _, appId, _ ->
             val hasAppId = appId in state.systemState.appIds
             if (!hasAppId) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing permission state")
@@ -151,34 +151,34 @@ class UidPermissionPersistence {
     private fun BinaryXmlPullParser.parseAppId(userState: UserState) {
         val appId = getAttributeIntOrThrow(ATTR_ID)
         val permissionFlags = IndexedMap<String, Int>()
-        userState.uidPermissionFlags[appId] = permissionFlags
-        parseAppIdPermissions(permissionFlags)
+        userState.appIdPermissionFlags[appId] = permissionFlags
+        parsePermissionStates(permissionFlags)
     }
 
-    private fun BinaryXmlPullParser.parseAppIdPermissions(
+    private fun BinaryXmlPullParser.parsePermissionStates(
         permissionFlags: IndexedMap<String, Int>
     ) {
         forEachTag {
             when (tagName) {
-                TAG_PERMISSION -> parseAppIdPermission(permissionFlags)
+                TAG_PERMISSION -> parsePermissionState(permissionFlags)
                 else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing permission state")
             }
         }
     }
 
-    private fun BinaryXmlPullParser.parseAppIdPermission(permissionFlags: IndexedMap<String, Int>) {
+    private fun BinaryXmlPullParser.parsePermissionState(permissionFlags: IndexedMap<String, Int>) {
         val name = getAttributeValueOrThrow(ATTR_NAME).intern()
         val flags = getAttributeIntOrThrow(ATTR_FLAGS)
         permissionFlags[name] = flags
     }
 
     fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
-        serializePermissionFlags(state.userStates[userId])
+        serializeAppIdPermissions(state.userStates[userId])
     }
 
-    private fun BinaryXmlSerializer.serializePermissionFlags(userState: UserState) {
-        tag(TAG_PERMISSIONS) {
-            userState.uidPermissionFlags.forEachIndexed { _, appId, permissionFlags ->
+    private fun BinaryXmlSerializer.serializeAppIdPermissions(userState: UserState) {
+        tag(TAG_APP_ID_PERMISSIONS) {
+            userState.appIdPermissionFlags.forEachIndexed { _, appId, permissionFlags ->
                 serializeAppId(appId, permissionFlags)
             }
         }
@@ -190,19 +190,19 @@ class UidPermissionPersistence {
     ) {
         tag(TAG_APP_ID) {
             attributeInt(ATTR_ID, appId)
-            serializeAppIdPermissions(permissionFlags)
+            serializePermissionStates(permissionFlags)
         }
     }
 
-    private fun BinaryXmlSerializer.serializeAppIdPermissions(
+    private fun BinaryXmlSerializer.serializePermissionStates(
         permissionFlags: IndexedMap<String, Int>
     ) {
         permissionFlags.forEachIndexed { _, name, flags ->
-            serializeAppIdPermission(name, flags)
+            serializePermissionState(name, flags)
         }
     }
 
-    private fun BinaryXmlSerializer.serializeAppIdPermission(name: String, flags: Int) {
+    private fun BinaryXmlSerializer.serializePermissionState(name: String, flags: Int) {
         tag(TAG_PERMISSION) {
             attributeInterned(ATTR_NAME, name)
             attributeInt(ATTR_FLAGS, flags)
@@ -210,9 +210,10 @@ class UidPermissionPersistence {
     }
 
     companion object {
-        private val LOG_TAG = UidPermissionPersistence::class.java.simpleName
+        private val LOG_TAG = AppIdPermissionPersistence::class.java.simpleName
 
         private const val TAG_APP_ID = "app-id"
+        private const val TAG_APP_ID_PERMISSIONS = "app-id-permissions"
         private const val TAG_PERMISSION = "permission"
         private const val TAG_PERMISSIONS = "permissions"
         private const val TAG_PERMISSION_TREES = "permission-trees"

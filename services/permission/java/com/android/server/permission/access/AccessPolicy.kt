@@ -21,9 +21,9 @@ import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.SystemConfig
 import com.android.server.permission.access.appop.PackageAppOpPolicy
-import com.android.server.permission.access.appop.UidAppOpPolicy
+import com.android.server.permission.access.appop.AppIdAppOpPolicy
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
-import com.android.server.permission.access.permission.UidPermissionPolicy
+import com.android.server.permission.access.permission.AppIdPermissionPolicy
 import com.android.server.permission.access.util.forEachTag
 import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
@@ -37,8 +37,8 @@ class AccessPolicy private constructor(
         IndexedMap<String, IndexedMap<String, SchemePolicy>>().apply {
             fun addPolicy(policy: SchemePolicy) =
                 getOrPut(policy.subjectScheme) { IndexedMap() }.put(policy.objectScheme, policy)
-            addPolicy(UidPermissionPolicy())
-            addPolicy(UidAppOpPolicy())
+            addPolicy(AppIdPermissionPolicy())
+            addPolicy(AppIdAppOpPolicy())
             addPolicy(PackageAppOpPolicy())
         }
     )
