@@ -16,13 +16,9 @@
 <com.android.wm.shell.compatui.RestartDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:color/system_neutral1_900">
+    style="@style/LetterboxDialog">
 
     <!-- The background of the top-level layout acts as the background dim. -->
-
-    <!--TODO (b/266288912): Resolve overdraw warning -->
 
     <!-- Vertical margin will be set dynamically since it depends on task bounds.
          Setting the alpha of the dialog container to 0, since it shouldn't be visible until the

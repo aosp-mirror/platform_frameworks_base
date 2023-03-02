@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationInsetsController;
@@ -101,6 +102,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationInsetsController mNotificationInsetsController;
     @Mock private AlternateBouncerInteractor mAlternateBouncerInteractor;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
 
     @Captor private ArgumentCaptor<NotificationShadeWindowView.InteractionEventHandler>
             mInteractionEventHandlerCaptor;
@@ -150,7 +152,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mKeyguardBouncerViewModel,
                 mKeyguardBouncerComponentFactory,
                 mAlternateBouncerInteractor,
-                mKeyguardTransitionInteractor
+                mKeyguardTransitionInteractor,
+                mPrimaryBouncerToGoneTransitionViewModel
         );
         mController.setupExpandedStatusBar();
         mController.setDragDownHelper(mDragDownHelper);

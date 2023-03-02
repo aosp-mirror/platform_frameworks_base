@@ -870,10 +870,9 @@ final class LetterboxUiController {
         return mActivityRecord.mWmService.mContext.getResources();
     }
 
-    private void handleHorizontalDoubleTap(int x) {
-        // TODO(b/260857308): Investigate if enabling reachability for translucent activity
-        if (hasInheritedLetterboxBehavior() || !isHorizontalReachabilityEnabled()
-                || mActivityRecord.isInTransition()) {
+    @VisibleForTesting
+    void handleHorizontalDoubleTap(int x) {
+        if (!isHorizontalReachabilityEnabled() || mActivityRecord.isInTransition()) {
             return;
         }
 
@@ -911,10 +910,9 @@ final class LetterboxUiController {
         mActivityRecord.recomputeConfiguration();
     }
 
-    private void handleVerticalDoubleTap(int y) {
-        // TODO(b/260857308): Investigate if enabling reachability for translucent activity
-        if (hasInheritedLetterboxBehavior() || !isVerticalReachabilityEnabled()
-                || mActivityRecord.isInTransition()) {
+    @VisibleForTesting
+    void handleVerticalDoubleTap(int y) {
+        if (!isVerticalReachabilityEnabled() || mActivityRecord.isInTransition()) {
             return;
         }
 

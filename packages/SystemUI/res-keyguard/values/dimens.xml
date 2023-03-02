@@ -78,7 +78,7 @@
     <!-- The vertical margin between the date and the owner info. -->
 
     <!-- The translation for disappearing security views after having solved them. -->
-    <dimen name="disappear_y_translation">-32dp</dimen>
+    <dimen name="disappear_y_translation">-50dp</dimen>
 
     <!-- Dimens for animation for the Bouncer PIN view -->
     <dimen name="pin_view_trans_y_entry">120dp</dimen>

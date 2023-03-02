@@ -386,6 +386,9 @@ object Flags {
     // TODO(b/254512758): Tracking Bug
     @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag(1002, "rounded_box_ripple")
 
+    // TODO(b/270882464): Tracking Bug
+    val ENABLE_DOCK_SETUP_V2 = unreleasedFlag(1005, "enable_dock_setup_v2")
+
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
@@ -635,11 +638,6 @@ object Flags {
         unreleasedFlag(2501, "output_switcher_routes_processing")
     @JvmField
     val OUTPUT_SWITCHER_DEVICE_STATUS = unreleasedFlag(2502, "output_switcher_device_status")
-
-    // TODO(b/20911786): Tracking Bug
-    @JvmField
-    val OUTPUT_SWITCHER_SHOW_API_ENABLED =
-        releasedFlag(2503, "output_switcher_show_api_enabled", teamfood = true)
 
     // 2700 - unfold transitions
     // TODO(b/265764985): Tracking Bug
