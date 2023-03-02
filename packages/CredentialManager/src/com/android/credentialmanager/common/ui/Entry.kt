@@ -74,6 +74,12 @@ fun Entry(
     /** If true, draws a trailing lock icon. */
     isLockedAuthEntry: Boolean = false,
 ) {
+    val iconPadding = Modifier.wrapContentSize().padding(
+        // Horizontal padding should be 16dp, but the suggestion chip itself
+        // has 8dp horizontal elements padding
+        start = 8.dp, top = 16.dp, bottom = 16.dp
+    )
+    val iconSize = Modifier.size(24.dp)
     SuggestionChip(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
         onClick = onClick,
@@ -81,7 +87,11 @@ fun Entry(
         label = {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(all = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(
+                    // Total end padding should be 16dp, but the suggestion chip itself
+                    // has 8dp horizontal elements padding
+                    horizontal = 8.dp, vertical = 16.dp,
+                ),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.wrapContentSize()) {
@@ -121,7 +131,7 @@ fun Entry(
                     }
                 }
                 if (isLockedAuthEntry) {
-                    Box(modifier = Modifier.wrapContentSize().padding(end = 16.dp)) {
+                    Box(modifier = Modifier.wrapContentSize()) {
                         Icon(
                             imageVector = Icons.Outlined.Lock,
                             // Decorative purpose only.
@@ -137,10 +147,9 @@ fun Entry(
         if (iconImageBitmap != null) {
             if (shouldApplyIconImageBitmapTint) {
                 {
-                    Box(modifier = Modifier.wrapContentSize()
-                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+                    Box(modifier = iconPadding) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
+                            modifier = iconSize,
                             bitmap = iconImageBitmap,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             // Decorative purpose only.
@@ -150,10 +159,9 @@ fun Entry(
                 }
             } else {
                 {
-                    Box(modifier = Modifier.wrapContentSize()
-                        .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+                    Box(modifier = iconPadding) {
                         Image(
-                            modifier = Modifier.size(24.dp),
+                            modifier = iconSize,
                             bitmap = iconImageBitmap,
                             // Decorative purpose only.
                             contentDescription = null,
@@ -163,10 +171,9 @@ fun Entry(
             }
         } else if (iconImageVector != null) {
             {
-                Box(modifier = Modifier.wrapContentSize()
-                    .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+                Box(modifier = iconPadding) {
                     Icon(
-                        modifier = Modifier.size(24.dp),
+                        modifier = iconSize,
                         imageVector = iconImageVector,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         // Decorative purpose only.
@@ -176,10 +183,9 @@ fun Entry(
             }
         } else if (iconPainter != null) {
             {
-                Box(modifier = Modifier.wrapContentSize()
-                    .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
+                Box(modifier = iconPadding) {
                     Icon(
-                        modifier = Modifier.size(24.dp),
+                        modifier = iconSize,
                         painter = iconPainter,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         // Decorative purpose only.
