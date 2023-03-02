@@ -20,7 +20,9 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "android-ex-camera2",
+        "testables",
         "testng",
+        "truth-prebuilt",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",
