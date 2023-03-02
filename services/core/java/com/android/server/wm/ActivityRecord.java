@@ -7973,11 +7973,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return false;
             }
         }
-        // Activity should be resizable if the task is.
-        final boolean isResizeable = task != null
-                ? task.isResizeable() || isResizeable()
-                : isResizeable();
-        return !isResizeable && (info.isFixedOrientation() || hasFixedAspectRatio())
+        return !isResizeable() && (info.isFixedOrientation() || hasFixedAspectRatio())
                 // The configuration of non-standard type should be enforced by system.
                 // {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} is set when this activity is
                 // added to a task, but this function is called when resolving the launch params, at
