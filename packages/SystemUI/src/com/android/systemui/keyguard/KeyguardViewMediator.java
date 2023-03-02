@@ -1920,20 +1920,24 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         // If the keyguard is already showing, see if we don't need to bother re-showing it. Check
         // flags in both files to account for the hiding animation which results in a delay and
-        // discrepancy between flags.
+        // discrepancy between flags. If we're in the middle of hiding, do not short circuit so that
+        // we explicitly re-set state.
         if (mShowing && mKeyguardStateController.isShowing()) {
-            if (mPM.isInteractive()) {
+            if (mPM.isInteractive() && !mHiding) {
                 // It's already showing, and we're not trying to show it while the screen is off.
                 // We can simply reset all of the views.
-                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing (instead, resetting) because it is "
+                        + "already showing, we're interactive, and we were not previously hiding. "
+                        + "It should be safe to short-circuit here.");
                 resetStateLocked();
                 return;
             } else {
-                // We are trying to show the keyguard while the screen is off - this results from
-                // race conditions involving locking while unlocking. Don't short-circuit here and
-                // ensure the keyguard is fully re-shown.
+                // We are trying to show the keyguard while the screen is off or while we were in
+                // the middle of hiding - this results from race conditions involving locking while
+                // unlocking. Don't short-circuit here and ensure the keyguard is fully re-shown.
                 Log.e(TAG,
-                        "doKeyguard: already showing, but re-showing since we're not interactive");
+                        "doKeyguard: already showing, but re-showing because we're interactive or "
+                                + "were in the middle of hiding.");
             }
         }
 
@@ -2427,11 +2431,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 if (DEBUG) Log.d(TAG, "handleShow");
             }
 
-            mHiding = false;
             mKeyguardExitAnimationRunner = null;
             mWakeAndUnlocking = false;
             setPendingLock(false);
-            setShowingLocked(true);
+
+            // Force if we we're showing in the middle of hiding, to ensure we end up in the correct
+            // state.
+            setShowingLocked(true, mHiding /* force */);
+            if (mHiding) {
+                Log.d(TAG, "Forcing setShowingLocked because mHiding=true, which means we're "
+                        + "showing in the middle of hiding.");
+            }
+            mHiding = false;
+
             mKeyguardViewControllerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
