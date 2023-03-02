@@ -23,6 +23,18 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
+            "name": "CtsScopedStorageCoreHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageHostTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageDeviceOnlyTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {
@@ -62,18 +74,6 @@
         }
     ],
     "presubmit-large": [
-        {
-            "name": "CtsScopedStorageCoreHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageHostTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
-        {
-            "name": "CtsScopedStorageDeviceOnlyTest",
-            "file_patterns": ["StorageManagerService\\.java"]
-        },
         {
             "name": "CtsContentTestCases",
             "options": [
