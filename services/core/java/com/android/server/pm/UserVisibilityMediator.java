@@ -108,7 +108,7 @@ public final class UserVisibilityMediator implements Dumpable {
     private final Object mLock = new Object();
 
     private final boolean mVisibleBackgroundUsersEnabled;
-    private final boolean mVisibleBackgroundUserOnDefaultDisplayAllowed;
+    private final boolean mVisibleBackgroundUserOnDefaultDisplayEnabled;
 
     @UserIdInt
     @GuardedBy("mLock")
@@ -168,11 +168,17 @@ public final class UserVisibilityMediator implements Dumpable {
     }
 
     @VisibleForTesting
-    UserVisibilityMediator(boolean backgroundUsersOnDisplaysEnabled,
-            boolean visibleBackgroundUserOnDefaultDisplayAllowed, Handler handler) {
-        mVisibleBackgroundUsersEnabled = backgroundUsersOnDisplaysEnabled;
-        mVisibleBackgroundUserOnDefaultDisplayAllowed =
-                visibleBackgroundUserOnDefaultDisplayAllowed;
+    UserVisibilityMediator(boolean visibleBackgroundUsersOnDisplaysEnabled,
+            boolean visibleBackgroundUserOnDefaultDisplayEnabled, Handler handler) {
+        mVisibleBackgroundUsersEnabled = visibleBackgroundUsersOnDisplaysEnabled;
+        if (visibleBackgroundUserOnDefaultDisplayEnabled
+                && !visibleBackgroundUsersOnDisplaysEnabled) {
+            throw new IllegalArgumentException("Cannot have "
+                    + "visibleBackgroundUserOnDefaultDisplayEnabled without "
+                    + "visibleBackgroundUsersOnDisplaysEnabled");
+        }
+        mVisibleBackgroundUserOnDefaultDisplayEnabled =
+                visibleBackgroundUserOnDefaultDisplayEnabled;
         if (mVisibleBackgroundUsersEnabled) {
             mUsersAssignedToDisplayOnStart = new SparseIntArray();
             mExtraDisplaysAssignedToUsers = new SparseIntArray();
@@ -318,14 +324,14 @@ public final class UserVisibilityMediator implements Dumpable {
 
         boolean visibleBackground = userStartMode == USER_START_MODE_BACKGROUND_VISIBLE;
         if (displayId == DEFAULT_DISPLAY && visibleBackground) {
-            if (mVisibleBackgroundUserOnDefaultDisplayAllowed && isCurrentUserLocked(userId)) {
+            if (mVisibleBackgroundUserOnDefaultDisplayEnabled && isCurrentUserLocked(userId)) {
                 // Shouldn't happen - UserController returns before calling this method
                 Slogf.wtf(TAG, "trying to start current user (%d) visible in background on default"
                         + " display", userId);
                 return USER_ASSIGNMENT_RESULT_SUCCESS_ALREADY_VISIBLE;
 
             }
-            if (!mVisibleBackgroundUserOnDefaultDisplayAllowed
+            if (!mVisibleBackgroundUserOnDefaultDisplayEnabled
                     && !isProfile(userId, profileGroupId)) {
                 Slogf.wtf(TAG, "cannot start full user (%d) visible on default display", userId);
                 return USER_ASSIGNMENT_RESULT_FAILURE;
@@ -383,7 +389,7 @@ public final class UserVisibilityMediator implements Dumpable {
         }
 
         return foreground || displayId != DEFAULT_DISPLAY
-                || (visibleBackground && mVisibleBackgroundUserOnDefaultDisplayAllowed)
+                || (visibleBackground && mVisibleBackgroundUserOnDefaultDisplayEnabled)
                         ? USER_ASSIGNMENT_RESULT_SUCCESS_VISIBLE
                         : USER_ASSIGNMENT_RESULT_SUCCESS_INVISIBLE;
     }
@@ -394,7 +400,7 @@ public final class UserVisibilityMediator implements Dumpable {
             @UserIdInt int profileGroupId, @UserStartMode int userStartMode, int displayId) {
         if (displayId == DEFAULT_DISPLAY) {
             boolean mappingNeeded = false;
-            if (mVisibleBackgroundUserOnDefaultDisplayAllowed
+            if (mVisibleBackgroundUserOnDefaultDisplayEnabled
                     && userStartMode == USER_START_MODE_BACKGROUND_VISIBLE) {
                 int userStartedOnDefaultDisplay = getUserStartedOnDisplay(DEFAULT_DISPLAY);
                 if (userStartedOnDefaultDisplay != USER_NULL
@@ -752,7 +758,7 @@ public final class UserVisibilityMediator implements Dumpable {
      */
     public int getDisplayAssignedToUser(@UserIdInt int userId) {
         if (isCurrentUserOrRunningProfileOfCurrentUser(userId)) {
-            if (mVisibleBackgroundUserOnDefaultDisplayAllowed) {
+            if (mVisibleBackgroundUserOnDefaultDisplayEnabled) {
                 // When device supports visible bg users on default display, the default display is
                 // assigned to the current user, unless a user is started visible on it
                 int userStartedOnDefaultDisplay;
@@ -801,7 +807,7 @@ public final class UserVisibilityMediator implements Dumpable {
     private @UserIdInt int getUserAssignedToDisplay(@UserIdInt int displayId,
             boolean returnCurrentUserByDefault) {
         if (returnCurrentUserByDefault
-                && ((displayId == DEFAULT_DISPLAY && !mVisibleBackgroundUserOnDefaultDisplayAllowed
+                && ((displayId == DEFAULT_DISPLAY && !mVisibleBackgroundUserOnDefaultDisplayEnabled
                 || !mVisibleBackgroundUsersEnabled))) {
             return getCurrentUserId();
         }
@@ -961,8 +967,8 @@ public final class UserVisibilityMediator implements Dumpable {
             ipw.print("Supports visible background users on displays: ");
             ipw.println(mVisibleBackgroundUsersEnabled);
 
-            ipw.print("Allows visible background users on default display: ");
-            ipw.println(mVisibleBackgroundUserOnDefaultDisplayAllowed);
+            ipw.print("Supports visible background users on default display: ");
+            ipw.println(mVisibleBackgroundUserOnDefaultDisplayEnabled);
 
             dumpSparseIntArray(ipw, mUsersAssignedToDisplayOnStart, "user / display", "u", "d");
             dumpSparseIntArray(ipw, mExtraDisplaysAssignedToUsers, "extra display / user",
