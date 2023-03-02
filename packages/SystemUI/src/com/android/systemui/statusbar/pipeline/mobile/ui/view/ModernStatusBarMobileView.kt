@@ -20,6 +20,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.android.systemui.R
+import com.android.systemui.statusbar.StatusBarIconView.getVisibleStateString
 import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconBinder
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.view.ModernStatusBarView
@@ -30,6 +31,14 @@ class ModernStatusBarMobileView(
 ) : ModernStatusBarView(context, attrs) {
 
     var subId: Int = -1
+
+    override fun toString(): String {
+        return "ModernStatusBarMobileView(" +
+            "slot='$slot', " +
+            "subId=$subId, " +
+            "visibleState=${getVisibleStateString(visibleState)}); " +
+            "viewString=${super.toString()}"
+    }
 
     companion object {
 

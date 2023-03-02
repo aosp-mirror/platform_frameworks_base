@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /** A class holding the list of all the system icons that could be shown in the status bar. */
 public class StatusBarIconList {
@@ -302,7 +303,7 @@ public class StatusBarIconList {
 
         @Override
         public String toString() {
-            return String.format("(%s) %s", mName, subSlotsString());
+            return String.format("(%s) holder=%s %s", mName, mHolder, subSlotsString());
         }
 
         private String subSlotsString() {
@@ -310,7 +311,10 @@ public class StatusBarIconList {
                 return "";
             }
 
-            return "" + mSubSlots.size() + " subSlots";
+            return "| " + mSubSlots.size() + " subSlots: "
+                    + mSubSlots.stream()
+                    .map(StatusBarIconHolder::toString)
+                    .collect(Collectors.joining("|"));
         }
     }
 }
