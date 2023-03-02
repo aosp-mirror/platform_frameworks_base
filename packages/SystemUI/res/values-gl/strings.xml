@@ -361,7 +361,7 @@
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"O servizo que proporciona esta función terá acceso a toda a información visible na pantalla ou reproducida desde o teu dispositivo mentres graves ou emitas contido. Isto inclúe información como contrasinais, detalles de pago, fotos, mensaxes e o audio que reproduzas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Queres iniciar a gravación ou a emisión?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Queres comezar a gravar ou emitir contido con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todas"</string>
+    <string name="clear_all_notifications_text" msgid="348312370303046130">"Eliminar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Xestionar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historial"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Notificacións novas"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Non se puido iniciar a emisión"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Non se puido gardar a información. Téntao de novo."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Non se pode gardar a información."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Utiliza como mínimo 4 caracteres"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Utiliza menos de 16 caracteres"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Número de compilación"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Copiouse o número de compilación no portapapeis."</string>
     <string name="basic_status" msgid="2315371112182658176">"Conversa aberta"</string>

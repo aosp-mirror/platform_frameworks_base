@@ -24,6 +24,7 @@ import android.security.rkp.IRegistration;
 import android.security.rkp.IStoreUpgradedKeyCallback;
 import android.security.rkp.service.RegistrationProxy;
 import android.security.rkp.service.RemotelyProvisionedKey;
+import android.security.rkp.service.RkpProxyException;
 import android.util.Log;
 
 import java.util.Set;
@@ -68,10 +69,32 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
             if (e instanceof OperationCanceledException) {
                 Log.i(TAG, "Operation cancelled for client " + mCallback.hashCode());
                 wrapCallback(mCallback::onCancel);
+            } else if (e instanceof RkpProxyException) {
+                Log.e(TAG, "RKP error fetching key for client " + mCallback.hashCode(), e);
+                RkpProxyException rkpException = (RkpProxyException) e;
+                wrapCallback(() -> mCallback.onError(toGetKeyError(rkpException),
+                        e.getMessage()));
             } else {
                 Log.e(TAG, "Error fetching key for client " + mCallback.hashCode(), e);
-                wrapCallback(() -> mCallback.onError(e.getMessage()));
+                wrapCallback(() -> mCallback.onError(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN,
+                        e.getMessage()));
             }
+        }
+    }
+
+    private byte toGetKeyError(RkpProxyException exception) {
+        switch (exception.getError()) {
+            case RkpProxyException.ERROR_UNKNOWN:
+                return IGetKeyCallback.ErrorCode.ERROR_UNKNOWN;
+            case RkpProxyException.ERROR_REQUIRES_SECURITY_PATCH:
+                return IGetKeyCallback.ErrorCode.ERROR_REQUIRES_SECURITY_PATCH;
+            case RkpProxyException.ERROR_PENDING_INTERNET_CONNECTIVITY:
+                return IGetKeyCallback.ErrorCode.ERROR_PENDING_INTERNET_CONNECTIVITY;
+            case RkpProxyException.ERROR_PERMANENT:
+                return IGetKeyCallback.ErrorCode.ERROR_PERMANENT;
+            default:
+                Log.e(TAG, "Unexpected error code in RkpProxyException", exception);
+                return IGetKeyCallback.ErrorCode.ERROR_UNKNOWN;
         }
     }
 
@@ -97,7 +120,8 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
         } catch (Exception e) {
             Log.e(TAG, "getKeyAsync threw an exception for client " + callback.hashCode(), e);
             mGetKeyOperations.remove(callback);
-            wrapCallback(() -> callback.onError(e.getMessage()));
+            wrapCallback(() -> callback.onError(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN,
+                    e.getMessage()));
         }
     }
 

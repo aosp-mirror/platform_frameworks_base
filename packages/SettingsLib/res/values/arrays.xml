@@ -116,6 +116,36 @@
         <item>full</item>
     </string-array>
 
+    <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_filters_entries">
+        <item>Leave only ACL headers</item>
+        <item>Filter A2DP media packets</item>
+        <item>Filter RFCOMM channel</item>
+    </string-array>
+
+        <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_filters_values" translatable="false">
+        <item>headers</item>
+        <item>profiles.a2dp</item>
+        <item>profiles.rfcomm</item>
+    </string-array>
+
+        <!-- Titles for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_profile_filter_entries">
+        <item>Disable</item>
+        <item>Fill with string of characters</item>
+        <item>Leave only header</item>
+        <item>Fully remove</item>
+    </string-array>
+
+        <!-- Values for Bluetooth HCI Snoop Filtered Logging -->
+    <string-array name="bt_hci_snoop_log_profile_filter_values" translatable="false">
+        <item>disabled</item>
+        <item>magic</item>
+        <item>header</item>
+        <item>fullfilter</item>
+    </string-array>
+
     <!-- Titles for Bluetooth AVRCP Versions -->
     <string-array name="bluetooth_avrcp_versions">
         <item>AVRCP 1.5 (Default)</item>

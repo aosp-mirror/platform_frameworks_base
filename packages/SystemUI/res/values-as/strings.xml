@@ -820,8 +820,8 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g>ত <xliff:g id="SONG_NAME">%1$s</xliff:g> গীতটো প্লে’ কৰক"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"আনডু কৰক"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ত প্লে’ কৰিবলৈ ওচৰলৈ যাওক"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ইয়াত খেলিবলৈ <xliff:g id="DEVICENAME">%1$s</xliff:g>ৰ আৰু ওচৰলৈ যাওক"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ত প্লে কৰি থকা হৈছে"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ইয়াত প্লে\' কৰিবলৈ <xliff:g id="DEVICENAME">%1$s</xliff:g>ৰ আৰু ওচৰলৈ যাওক"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ত প্লে\' কৰি থকা হৈছে"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"কিবা ভুল হ’ল। পুনৰ চেষ্টা কৰক।"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"সক্ৰিয় নহয়, এপ্‌টো পৰীক্ষা কৰক"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"বিচাৰি পোৱা নগ’ল"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"সম্প্ৰচাৰ কৰিব নোৱাৰি"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ছেভ কৰিব নোৱাৰি। পুনৰ চেষ্টা কৰক।"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"ছেভ কৰিব নোৱাৰি।"</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"অতি কমেও ৪ টা বৰ্ণ ব্যৱহাৰ কৰক"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"১৬ টাতকৈ কম বৰ্ণ ব্যৱহাৰ কৰক"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"বিল্ডৰ নম্বৰ"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ক্লিপব’ৰ্ডলৈ বিল্ডৰ নম্বৰ প্ৰতিলিপি কৰা হ’ল।"</string>
     <string name="basic_status" msgid="2315371112182658176">"বাৰ্তালাপ খোলক"</string>

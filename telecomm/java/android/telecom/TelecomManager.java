@@ -890,9 +890,13 @@ public class TelecomManager {
             "android.telecom.extra.NOTIFICATION_PHONE_NUMBER";
 
     /**
-     * The intent to clear missed calls.
+     * Included in the extras of the {@link #ACTION_SHOW_MISSED_CALLS_NOTIFICATION}, provides a
+     * pending intent which can be used to clear the missed calls notification and mark unread
+     * missed call log entries as read.
      * @hide
+     * @deprecated Use {@link #cancelMissedCallsNotification()} instead.
      */
+    @Deprecated
     @SystemApi
     public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT =
             "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
@@ -2043,6 +2047,14 @@ public class TelecomManager {
      * {@link #getPhoneAccount}. Self-managed {@link ConnectionService}s must have
      * {@link android.Manifest.permission#MANAGE_OWN_CALLS} to add a new incoming call.
      * <p>
+     * Specify the address associated with the incoming call using
+     * {@link #EXTRA_INCOMING_CALL_ADDRESS}.  If an incoming call is from an anonymous source, omit
+     * this extra and ensure you specify a valid number presentation via
+     * {@link Connection#setAddress(Uri, int)} on the {@link Connection} instance you return in
+     * your
+     * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}
+     * implementation.
+     * <p>
      * The incoming call you are adding is assumed to have a video state of
      * {@link VideoProfile#STATE_AUDIO_ONLY}, unless the extra value
      * {@link #EXTRA_INCOMING_VIDEO_STATE} is specified.
@@ -2222,9 +2234,10 @@ public class TelecomManager {
     }
 
     /**
-     * Removes the missed-call notification if one is present.
+     * Removes the missed-call notification if one is present and marks missed calls in the call
+     * log as read.
      * <p>
-     * Requires that the method-caller be set as the system dialer app.
+     * Requires that the method-caller be set as the default dialer app.
      * </p>
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)

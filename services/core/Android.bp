@@ -142,6 +142,7 @@ java_library_static {
     ],
 
     static_libs: [
+        "android.frameworks.location.altitude-V1-java", // AIDL
         "android.hardware.authsecret-V1.0-java",
         "android.hardware.boot-V1.0-java", // HIDL
         "android.hardware.boot-V1.1-java", // HIDL
