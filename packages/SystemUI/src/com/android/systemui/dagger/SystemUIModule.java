@@ -75,6 +75,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.connectivity.ConnectivityModule;
+import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
@@ -256,9 +257,7 @@ public abstract class SystemUIModule {
     abstract FingerprintInteractiveToAuthProvider optionalFingerprintInteractiveToAuthProvider();
 
     @BindsOptionalOf
-    //TODO(b/269430792 remove full qualifier. Full qualifier is used to avoid merge conflict.)
-    abstract com.android.systemui.statusbar.events.SystemStatusAnimationScheduler
-    optionalSystemStatusAnimationScheduler();
+    abstract SystemStatusAnimationScheduler optionalSystemStatusAnimationScheduler();
 
     @SysUISingleton
     @Binds
