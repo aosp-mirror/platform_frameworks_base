@@ -66,7 +66,7 @@ class SwitchToManagedProfileForCallActivity : AlertActivity(), DialogInterface.O
     private fun switchToManagedProfile() {
         try {
             applicationContext.startActivityAsUser(
-                Intent(Intent.ACTION_DIAL, phoneNumber),
+                Intent(Intent.ACTION_CALL, phoneNumber),
                 ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(),
                 UserHandle.of(managedProfileUserId)
             )
