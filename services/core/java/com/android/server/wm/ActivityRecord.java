@@ -8008,9 +8008,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // The smallest screen width is the short side of screen bounds. Because the bounds
         // and density won't be changed, smallestScreenWidthDp is also fixed.
         overrideConfig.smallestScreenWidthDp = fullConfig.smallestScreenWidthDp;
-        // TODO(b/264276741): Check whether the runtime orietnation request is fixed rather than
-        // the manifest orientation which may be obsolete.
-        if (info.isFixedOrientation()) {
+        if (ActivityInfo.isFixedOrientation(getOverrideOrientation())) {
             // lock rotation too. When in size-compat, onConfigurationChanged will watch for and
             // apply runtime rotation changes.
             overrideConfig.windowConfiguration.setRotation(
@@ -8181,7 +8179,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     /**
      * @return The orientation to use to understand if reachability is enabled.
      */
-    @ActivityInfo.ScreenOrientation
+    @Configuration.Orientation
     int getOrientationForReachability() {
         return mLetterboxUiController.hasInheritedLetterboxBehavior()
                 ? mLetterboxUiController.getInheritedOrientation()
