@@ -52,9 +52,7 @@ import androidx.credentials.CreateCustomCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.CredentialOption
 import androidx.credentials.CreatePublicKeyCredentialRequest
-import androidx.credentials.CreatePublicKeyCredentialRequestPrivileged
 import androidx.credentials.GetPublicKeyCredentialOption
-import androidx.credentials.GetPublicKeyCredentialOptionPrivileged
 import androidx.credentials.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
@@ -185,8 +183,6 @@ class GetFlowUtils {
                     it.isSystemProviderRequired
                 )
                 if (credentialOptionJetpack is GetPublicKeyCredentialOption) {
-                    credentialOptionJetpack.preferImmediatelyAvailableCredentials
-                } else if (credentialOptionJetpack is GetPublicKeyCredentialOptionPrivileged) {
                     credentialOptionJetpack.preferImmediatelyAvailableCredentials
                 } else {
                     false
@@ -448,23 +444,14 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                     )
                 }
-                is CreatePublicKeyCredentialRequestPrivileged -> {
-                    newRequestDisplayInfoFromPasskeyJson(
-                        requestJson = createCredentialRequestJetpack.requestJson,
-                        appLabel = appLabel,
-                        context = context,
-                        preferImmediatelyAvailableCredentials =
-                        createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
-                    )
-                }
                 is CreateCustomCredentialRequest -> {
                     // TODO: directly use the display info once made public
                     val displayInfo = CreateCredentialRequest.DisplayInfo
                         .parseFromCredentialDataBundle(createCredentialRequest.credentialData)
                         ?: return null
                     RequestDisplayInfo(
-                        title = displayInfo.userId,
-                        subtitle = displayInfo.userDisplayName,
+                        title = displayInfo.userId.toString(),
+                        subtitle = displayInfo.userDisplayName?.toString(),
                         type = CredentialType.UNKNOWN,
                         appName = appLabel,
                         typeIcon = displayInfo.credentialTypeIcon?.loadDrawable(context)
