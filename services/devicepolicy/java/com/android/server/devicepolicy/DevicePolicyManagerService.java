@@ -16405,12 +16405,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     mInjector.getPackageManager().getPackagesForUid(caller.getUid()));
             Preconditions.checkArgument(callerUidPackageNames.contains(packageName),
                     "Caller uid doesn't match the one for the provided package.");
+
+            return checkProvisioningPreconditionSkipPermission(action, packageName, caller.getUserId())
+                    == STATUS_OK;
         } finally {
             mInjector.binderRestoreCallingIdentity(ident);
         }
-
-        return checkProvisioningPreconditionSkipPermission(action, packageName, caller.getUserId())
-                == STATUS_OK;
     }
 
     @Override
