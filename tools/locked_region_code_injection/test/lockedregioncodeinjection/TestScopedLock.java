@@ -13,29 +13,26 @@
  */
 package lockedregioncodeinjection;
 
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.analysis.BasicValue;
+public class TestScopedLock {
+    public int mEntered = 0;
+    public int mExited = 0;
 
-import java.util.List;
+    public int mLevel = 0;
+    private final TestScopedTarget mTarget;
 
-public class LockTargetState extends BasicValue {
-    private final List<LockTarget> lockTargets;
-
-    /**
-     * @param type
-     */
-    public LockTargetState(Type type, List<LockTarget> lockTargets) {
-        super(type);
-        this.lockTargets = lockTargets;
+    TestScopedLock(TestScopedTarget target) {
+        mTarget = target;
     }
 
-    public List<LockTarget> getTargets() {
-        return lockTargets;
+    void monitorEnter() {
+        mLevel++;
+        mEntered++;
+        mTarget.enter(mLevel);
     }
 
-    @Override
-    public String toString() {
-        return "LockTargetState(" + getType().getDescriptor()
-                + ", " + lockTargets.size() + ")";
+    void monitorExit() {
+        mLevel--;
+        mExited++;
+        mTarget.exit(mLevel);
     }
 }
