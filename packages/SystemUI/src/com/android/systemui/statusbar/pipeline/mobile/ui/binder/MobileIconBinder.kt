@@ -104,6 +104,11 @@ object MobileIconBinder {
                 // Set the icon for the triangle
                 launch {
                     viewModel.icon.distinctUntilChanged().collect { icon ->
+                        viewModel.verboseLogger?.logBinderReceivedSignalIcon(
+                            view,
+                            viewModel.subscriptionId,
+                            icon,
+                        )
                         mobileDrawable.level =
                             SignalDrawable.getState(
                                 icon.level,
@@ -122,6 +127,11 @@ object MobileIconBinder {
                 // Set the network type icon
                 launch {
                     viewModel.networkTypeIcon.distinctUntilChanged().collect { dataTypeId ->
+                        viewModel.verboseLogger?.logBinderReceivedNetworkTypeIcon(
+                            view,
+                            viewModel.subscriptionId,
+                            dataTypeId,
+                        )
                         dataTypeId?.let { IconViewBinder.bind(dataTypeId, networkTypeView) }
                         networkTypeView.visibility = if (dataTypeId != null) VISIBLE else GONE
                     }

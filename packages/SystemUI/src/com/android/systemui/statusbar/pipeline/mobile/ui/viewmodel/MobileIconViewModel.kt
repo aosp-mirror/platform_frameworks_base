@@ -49,7 +49,7 @@ interface MobileIconViewModelCommon {
     val contentDescription: Flow<ContentDescription>
     val roaming: Flow<Boolean>
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
-    val networkTypeIcon: Flow<Icon?>
+    val networkTypeIcon: Flow<Icon.Resource?>
     val activityInVisible: Flow<Boolean>
     val activityOutVisible: Flow<Boolean>
     val activityContainerVisible: Flow<Boolean>
@@ -161,7 +161,7 @@ constructor(
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    override val networkTypeIcon: Flow<Icon?> =
+    override val networkTypeIcon: Flow<Icon.Resource?> =
         combine(
                 iconInteractor.networkTypeIconGroup,
                 showNetworkTypeIcon,

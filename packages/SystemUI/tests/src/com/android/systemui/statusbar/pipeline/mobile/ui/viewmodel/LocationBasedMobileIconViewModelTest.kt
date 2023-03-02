@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -84,7 +85,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
                 testScope.backgroundScope,
             )
 
-        homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags)
+        homeIcon = HomeMobileIconViewModel(commonImpl, statusBarPipelineFlags, mock())
         qsIcon = QsMobileIconViewModel(commonImpl, statusBarPipelineFlags)
         keyguardIcon = KeyguardMobileIconViewModel(commonImpl, statusBarPipelineFlags)
     }

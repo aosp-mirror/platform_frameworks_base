@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
+import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernStatusBarMobileView
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import javax.inject.Inject
@@ -41,6 +42,7 @@ class MobileIconsViewModel
 constructor(
     val subscriptionIdsFlow: StateFlow<List<Int>>,
     val logger: MobileViewLogger,
+    private val verboseLogger: VerboseMobileViewLogger,
     private val interactor: MobileIconsInteractor,
     private val airplaneModeInteractor: AirplaneModeInteractor,
     private val constants: ConnectivityConstants,
@@ -68,6 +70,7 @@ constructor(
         return LocationBasedMobileViewModel.viewModelForLocation(
             common,
             statusBarPipelineFlags,
+            verboseLogger,
             location,
         )
     }
@@ -82,6 +85,7 @@ constructor(
     @Inject
     constructor(
         private val logger: MobileViewLogger,
+        private val verboseLogger: VerboseMobileViewLogger,
         private val interactor: MobileIconsInteractor,
         private val airplaneModeInteractor: AirplaneModeInteractor,
         private val constants: ConnectivityConstants,
@@ -92,6 +96,7 @@ constructor(
             return MobileIconsViewModel(
                 subscriptionIdsFlow,
                 logger,
+                verboseLogger,
                 interactor,
                 airplaneModeInteractor,
                 constants,

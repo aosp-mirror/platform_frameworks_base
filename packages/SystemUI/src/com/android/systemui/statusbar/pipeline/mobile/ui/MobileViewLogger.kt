@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.pipeline.mobile.ui
 
 import android.view.View
-import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
@@ -109,8 +108,7 @@ constructor(
     }
 
     companion object {
-        @VisibleForTesting
-        internal fun Any.getIdForLogging(): String {
+        fun Any.getIdForLogging(): String {
             // The identityHashCode is guaranteed to be constant for the lifetime of the object.
             return Integer.toHexString(System.identityHashCode(this))
         }
