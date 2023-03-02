@@ -95,6 +95,7 @@ public class NetworkPriorityClassifierTest {
     private static final NetworkCapabilities WIFI_NETWORK_CAPABILITIES =
             new NetworkCapabilities.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     .setSignalStrength(WIFI_RSSI)
                     .setSsid(SSID)
                     .setLinkUpstreamBandwidthKbps(LINK_UPSTREAM_BANDWIDTH_KBPS)
@@ -509,12 +510,14 @@ public class NetworkPriorityClassifierTest {
             VcnCellUnderlyingNetworkTemplate template, boolean expectMatch) {
         assertEquals(
                 expectMatch,
-                checkMatchesCellPriorityRule(
+                checkMatchesPriorityRule(
                         mVcnContext,
                         template,
                         mCellNetworkRecord,
                         SUB_GROUP,
-                        mSubscriptionSnapshot));
+                        mSubscriptionSnapshot,
+                        null /* currentlySelected */,
+                        null /* carrierConfig */));
     }
 
     @Test
