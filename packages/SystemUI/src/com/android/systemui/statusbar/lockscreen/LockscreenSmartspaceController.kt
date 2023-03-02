@@ -500,8 +500,10 @@ constructor(
 
     private fun updateTextColorFromRegionSampler() {
         smartspaceViews.forEach {
-            val textColor = regionSamplers.getValue(it).currentForegroundColor()
-            it.setPrimaryTextColor(textColor)
+            val textColor = regionSamplers.get(it)?.currentForegroundColor()
+            if (textColor != null) {
+                it.setPrimaryTextColor(textColor)
+            }
         }
     }
 

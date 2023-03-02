@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.graphics.Rect
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
@@ -119,10 +120,6 @@ constructor(
 
     private val mLayoutChangedListener =
         object : View.OnLayoutChangeListener {
-            private var currentSmallClockView: View? = null
-            private var currentLargeClockView: View? = null
-            private var currentSmallClockLocation = IntArray(2)
-            private var currentLargeClockLocation = IntArray(2)
 
             override fun onLayoutChange(
                 view: View?,
@@ -135,6 +132,8 @@ constructor(
                 oldRight: Int,
                 oldBottom: Int
             ) {
+                view?.removeOnLayoutChangeListener(this)
+
                 val parent = (view?.parent) as FrameLayout
 
                 // don't pass in negative bounds when clocks are in transition state
@@ -142,31 +141,12 @@ constructor(
                     return
                 }
 
-                // SMALL CLOCK
-                if (parent.id == R.id.lockscreen_clock_view) {
-                    // view bounds have changed due to clock size changing (i.e. different character
-                    // widths)
-                    // AND/OR the view has been translated when transitioning between small and
-                    // large clock
-                    if (
-                        view != currentSmallClockView ||
-                            !view.locationOnScreen.contentEquals(currentSmallClockLocation)
-                    ) {
-                        currentSmallClockView = view
-                        currentSmallClockLocation = view.locationOnScreen
-                        updateRegionSampler(view)
-                    }
-                }
-                // LARGE CLOCK
-                else if (parent.id == R.id.lockscreen_clock_view_large) {
-                    if (
-                        view != currentLargeClockView ||
-                            !view.locationOnScreen.contentEquals(currentLargeClockLocation)
-                    ) {
-                        currentLargeClockView = view
-                        currentLargeClockLocation = view.locationOnScreen
-                        updateRegionSampler(view)
-                    }
+                val currentViewRect = Rect(left, top, right, bottom)
+                val oldViewRect = Rect(oldLeft, oldTop, oldRight, oldBottom)
+
+                if (currentViewRect.width() != oldViewRect.width() ||
+                    currentViewRect.height() != oldViewRect.height()) {
+                    updateRegionSampler(view)
                 }
             }
         }
