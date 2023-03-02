@@ -244,7 +244,7 @@
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR kod skaneri yordamida yangi qurilmalarni ulang"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Qurilmani ulanish kodi orqali ulash"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Olti xonali kod yordamida yangi qurilmalarni ulash mumkin"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Ulangan qurilmalar"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Juftlangan qurilmalar"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Hozirda ulangan"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Qurilma tafsilotlari"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Olib tashlash"</string>

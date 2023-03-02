@@ -673,10 +673,15 @@ public class MediaControlPanel {
                 }
                 mArtworkBoundId = reqId;
 
+                // Transition Colors to current color scheme
+                boolean colorSchemeChanged = mColorSchemeTransition
+                        .updateColorScheme(colorScheme, isArtworkBound);
+
                 // Bind the album view to the artwork or a transition drawable
                 ImageView albumView = mMediaViewHolder.getAlbumView();
                 albumView.setPadding(0, 0, 0, 0);
-                if (updateBackground || (!mIsArtworkBound && isArtworkBound)) {
+                if (updateBackground || colorSchemeChanged
+                        || (!mIsArtworkBound && isArtworkBound)) {
                     if (mPrevArtwork == null) {
                         albumView.setImageDrawable(artwork);
                     } else {
@@ -698,9 +703,6 @@ public class MediaControlPanel {
                     mPrevArtwork = artwork;
                     mIsArtworkBound = isArtworkBound;
                 }
-
-                // Transition Colors to current color scheme
-                mColorSchemeTransition.updateColorScheme(colorScheme, mIsArtworkBound);
 
                 // App icon - use notification icon
                 ImageView appIconView = mMediaViewHolder.getAppIcon();

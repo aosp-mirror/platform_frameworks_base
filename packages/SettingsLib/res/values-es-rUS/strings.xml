@@ -242,7 +242,7 @@
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver y usar los dispositivos disponibles, activa la depuración inalámbrica"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular dispositivo mediante código QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincular dispositivos nuevos mediante escáner de código QR"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular dispositivo con código de sincronización"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular dispositivo con un código de vinculación"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Vincular dispositivos nuevos mediante código de seis dígitos"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos vinculados"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Conectado actualmente"</string>
@@ -579,7 +579,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Agregar"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Usuario nuevo"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Perfil nuevo"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Datos de usuario"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Datos del usuario"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Datos del perfil"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar un bloqueo de pantalla que proteja tus aplicaciones y datos personales."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Configurar bloqueo"</string>

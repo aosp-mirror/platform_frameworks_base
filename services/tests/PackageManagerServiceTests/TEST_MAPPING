@@ -2,11 +2,45 @@
   "presubmit": [
     {
       "name": "AppEnumerationInternalTests"
+    },
+    {
+      "name": "PackageManagerServiceServerTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
     }
   ],
   "postsubmit": [
     {
       "name": "PackageManagerServiceHostTests"
+    },
+    {
+      "name": "PackageManagerServiceServerTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm."
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
     }
   ],
   "imports": [

@@ -499,7 +499,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"ସ୍ୱଚାଳିତ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"କୌଣସି ସାଉଣ୍ଡ କିମ୍ବା ଭାଇବ୍ରେସନ୍ ନାହିଁ ଏବଂ ବାର୍ତ୍ତାଳାପ ବିଭାଗର ନିମ୍ନରେ ଦେଖାଯାଏ"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"ଫୋନ ସେଟିଂସ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ ହୋଇପାରେ"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ଫୋନ୍ ସେଟିଂସ୍ ଆଧାରରେ ରିଙ୍ଗ କିମ୍ବା ଭାଇବ୍ରେଟ୍ ହୋଇପାରେ। <xliff:g id="APP_NAME">%1$s</xliff:g>ରୁ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଡିଫଲ୍ଟ ଭାବରେ ବବଲ୍ ହୁଏ।"</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"ଏହି ବିଜ୍ଞପ୍ତି ପ୍ରାପ୍ତ ହେବା ସମୟରେ ସାଉଣ୍ଡ ହେବା ଉଚିତ ନା ଭାଇବ୍ରେସନ୍ ତାହା ସିଷ୍ଟମକୁ ସ୍ଥିର କରିବାକୁ ଦିଅନ୍ତୁ"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;ସ୍ଥିତି:&lt;/b&gt; ଡିଫଲ୍ଟକୁ ପ୍ରମୋଟ୍ କରାଯାଇଛି"</string>
@@ -640,7 +640,7 @@
     <item msgid="8619482474544321778">"ଏହି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ ନାହିଁ"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"କମ୍‍-ଅଗ୍ରାଧିକାର ବିଜ୍ଞପ୍ତି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ"</string>
-    <string name="other" msgid="429768510980739978">"ଅନ୍ୟାନ୍ୟ"</string>
+    <string name="other" msgid="429768510980739978">"ଅନ୍ୟ"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ଟାଇଲ୍ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ଶେଷରେ ଟାଇଲ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ଟାଇଲ୍ ମୁଭ୍ କରନ୍ତୁ"</string>
@@ -821,9 +821,9 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="APP_LABEL">%3$s</xliff:g>ରୁ <xliff:g id="ARTIST_NAME">%2$s</xliff:g>ଙ୍କ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g>ରୁ <xliff:g id="SONG_NAME">%1$s</xliff:g> ଚଲାନ୍ତୁ"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ପୂର୍ବବତ୍ କରନ୍ତୁ"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ଚଲାଇବା ପାଇଁ ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ଏଠାରେ ଚଲାଇବା ପାଇଁ <xliff:g id="DEVICENAME">%1$s</xliff:g>ର ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ଚାଲୁଛି"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ପ୍ଲେ କରିବା ପାଇଁ ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"ଏଠାରେ ପ୍ଲେ କରିବା ପାଇଁ <xliff:g id="DEVICENAME">%1$s</xliff:g> ପାଖକୁ ମୁଭ କରନ୍ତୁ"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g>ରେ ପ୍ଲେ ହେଉଛି"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"କିଛି ତ୍ରୁଟି ହୋଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>

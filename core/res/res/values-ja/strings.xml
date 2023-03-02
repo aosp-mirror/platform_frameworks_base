@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"共有ストレージからの動画ファイルの読み取りをアプリに許可します。"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"共有ストレージからの画像ファイルの読み取り"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"共有ストレージからの画像ファイルの読み取りをアプリに許可します。"</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ユーザーが選択した画像と動画ファイルの共有ストレージからの読み取り"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"選択した画像と動画ファイルを共有ストレージから読み取ることをアプリに許可します。"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"共有ストレージのコンテンツの変更または削除"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"共有ストレージのコンテンツの書き込みをアプリに許可します。"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP通話の発着信"</string>

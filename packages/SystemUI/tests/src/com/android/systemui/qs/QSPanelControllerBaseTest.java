@@ -224,7 +224,9 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 + "  Tile records:\n"
                 + "    " + mockTileString + "\n"
                 + "    " + mockTileViewString + "\n"
-                + "  media bounds: null\n";
+                + "  media bounds: null\n"
+                + "  horizontal layout: false\n"
+                + "  last orientation: 0\n";
         assertEquals(expected, w.getBuffer().toString());
     }
 

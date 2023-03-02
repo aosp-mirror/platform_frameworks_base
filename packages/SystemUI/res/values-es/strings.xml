@@ -203,7 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Borrar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más dentro.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más dentro.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación más dentro.</item>
     </plurals>
@@ -254,7 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d dispositivos</item>
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -349,7 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Has alcanzado el límite de usuarios"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Puedes añadir hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>
       <item quantity="other">Puedes añadir hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>
       <item quantity="one">Solo se puede crear un usuario.</item>
     </plurals>
@@ -357,7 +357,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se eliminarán todas las aplicaciones y datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en tu pantalla o se reproduzca en tu dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Empezar a grabar o enviar contenido?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Iniciar grabación o el envío de contenido en <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
@@ -539,12 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Volverá a mostrarse en <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d horas</item>
       <item quantity="other">%d horas</item>
       <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minutos</item>
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -771,7 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many">Se han añadido <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
       <item quantity="other">Se han añadido <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
       <item quantity="one">Se ha añadido <xliff:g id="NUMBER_0">%s</xliff:g> control.</item>
     </plurals>
@@ -827,8 +827,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> en <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Deshacer"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para que se reproduzca en ese dispositivo"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para jugar aquí"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido ahí"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido aquí"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Reproduciendo en <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Se ha producido un error. Inténtalo de nuevo."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>

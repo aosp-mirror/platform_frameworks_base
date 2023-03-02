@@ -595,8 +595,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from transferring files over USB.
      *
-     * <p>This restriction can only be set by a device owner, a profile owner on the primary
-     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * <p>This restriction can only be set by a <a href="https://developers.google.com/android/work/terminology#device_owner_do">
+     * device owner</a> or a <a href="https://developers.google.com/android/work/terminology#profile_owner_po">
+     * profile owner</a> on the primary user's profile or a profile owner of an organization-owned
+     * <a href="https://developers.google.com/android/work/terminology#managed_profile">
+     * managed profile</a> on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
      * on the primary user or by a profile owner of an organization-owned managed profile on
      * the parent profile, it disables the primary user from transferring files over USB. No other

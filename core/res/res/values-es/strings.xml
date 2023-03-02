@@ -51,7 +51,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Introduce el código PUK2 para desbloquear la tarjeta SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Error, habilitar bloqueo de SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos para bloquear la tarjeta SIM.</item>
       <item quantity="other">Te quedan <xliff:g id="NUMBER_1">%d</xliff:g> intentos para bloquear la tarjeta SIM.</item>
       <item quantity="one">Te queda <xliff:g id="NUMBER_0">%d</xliff:g> intento para bloquear la tarjeta SIM.</item>
     </plurals>
@@ -91,7 +91,7 @@
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertas"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Desvío de llamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Modo de devolución de llamada de emergencia"</string>
-    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Estado de los datos móviles"</string>
+    <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Estado de datos móviles"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"Mensajes SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Mensajes de voz"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Llamada por Wi-Fi"</string>
@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite que la aplicación lea archivos de vídeo desde tu almacenamiento compartido."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"leer archivos de imagen desde el almacenamiento compartido"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permite que la aplicación lea archivos de imagen desde tu almacenamiento compartido."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"leer los archivos de imagen y de vídeo que el usuario seleccione del almacenamiento compartido"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Permite que la aplicación lea los archivos de imagen y de vídeo que selecciones del almacenamiento compartido."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"editar/eliminar contenido de almacenamiento compartido"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Permite que app edite contenido de almacenamiento compartido."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"hacer/recibir llamadas SIP"</string>

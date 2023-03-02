@@ -86,8 +86,10 @@ public abstract class Image implements AutoCloseable {
      *
      * <p>
      * The format is one of the values from
-     * {@link android.graphics.ImageFormat ImageFormat}. The mapping between the
-     * formats and the planes is as follows:
+     * {@link android.graphics.ImageFormat ImageFormat},
+     * {@link android.graphics.PixelFormat PixelFormat}, or
+     * {@link android.hardware.HardwareBuffer HardwareBuffer}. The mapping between the
+     * formats and the planes is as follows (any formats not listed will have 1 plane):
      * </p>
      *
      * <table>
@@ -171,15 +173,18 @@ public abstract class Image implements AutoCloseable {
      * </tr>
      * <tr>
      *   <td>{@link android.graphics.ImageFormat#YCBCR_P010 YCBCR_P010}</td>
-     *   <td>1</td>
+     *   <td>3</td>
      *   <td>P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
-     *     followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
-     *     little-endian value, with the lower 6 bits set to zero.
+     *     followed by a Wx(H/2) Cb and Cr planes. Each sample is represented by a 16-bit
+     *     little-endian value, with the lower 6 bits set to zero. Since this is guaranteed to be
+     *     a semi-planar format, the Cb plane can also be treated as an interleaved Cb/Cr plane.
      *   </td>
      * </tr>
      * </table>
      *
      * @see android.graphics.ImageFormat
+     * @see android.graphics.PixelFormat
+     * @see android.hardware.HardwareBuffer
      */
     public abstract int getFormat();
 

@@ -823,7 +823,7 @@
     <string name="media_transfer_undo" msgid="1895606387620728736">"पहिल्यासारखे करा"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले करण्यासाठी जवळ जा"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"येथे प्ले करण्यासाठी <xliff:g id="DEVICENAME">%1$s</xliff:g> च्या जवळ जा"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले केला जात आहे"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> वर प्ले होत आहे"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"काहीतरी चूक झाली. पुन्हा प्रयत्न करा."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>

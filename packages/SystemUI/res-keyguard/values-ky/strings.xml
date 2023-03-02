@@ -90,7 +90,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Түзмөктү администратор кулпулап койгон"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Түзмөк кол менен кулпуланды"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таанылган жок"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Жөндөөлөр &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="6513157891227284806">"Жүзүнөн таанып ачуу функциясын колдонуу үчүн Параметрлер &gt; Купуялык бөлүмүнө өтүп, "<b>"Камераны колдонууну"</b>" күйгүзүңүз"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="7730152526369857818">
       <item quantity="other">SIM-картанын PIN кодун киргизиңиз. Сизде <xliff:g id="NUMBER_1">%d</xliff:g> аракет калды.</item>
       <item quantity="one">SIM-картанын PIN кодун киргизиңиз. Сизде <xliff:g id="NUMBER_0">%d</xliff:g> аракет калды, андан кийин түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуна кайрылышыңыз керек болот.</item>

@@ -529,7 +529,7 @@
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta abisuak"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta abisuak ezartzeko baimena"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta abisuak"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nEz baduzu ematen baimen hori, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nBaimen hori ematen ez baduzu, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, abisua, erlojua"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktibatu"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktibatu ez molestatzeko modua"</string>
@@ -603,7 +603,7 @@
     <string name="user_image_photo_selector" msgid="433658323306627093">"Hautatu argazki bat"</string>
     <string name="failed_attempts_now_wiping_device" msgid="4016329172216428897">"Saiakera oker gehiegi egin dituzu. Gailu honetako datuak ezabatu egingo dira."</string>
     <string name="failed_attempts_now_wiping_user" msgid="469060411789668050">"Saiakera oker gehiegi egin dituzu. Erabiltzailea ezabatu egingo da."</string>
-    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Saiakera oker gehiegi egin dituzu. Laneko profila eta bertako datuak ezabatu egingo dira."</string>
+    <string name="failed_attempts_now_wiping_profile" msgid="7626589520888963129">"Saiakera oker gehiegi egin dituzu. Laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="failed_attempts_now_wiping_dialog_dismiss" msgid="2749889771223578925">"Baztertu"</string>
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Gailuaren balio lehenetsia"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desgaituta"</string>

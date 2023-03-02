@@ -151,6 +151,9 @@ java_library {
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
+        //This will eventually replace the item above, and serves the
+        //same purpose.
+        "//external/robolectric:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
     ],
 }
