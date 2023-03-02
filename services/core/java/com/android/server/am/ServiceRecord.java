@@ -392,6 +392,15 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return mStartTime + ams.mConstants.mShortFgsTimeoutDuration
                     + ams.mConstants.mShortFgsAnrExtraWaitDuration;
         }
+
+        String getDescription() {
+            return "sfc=" + this.mStartForegroundCount
+                    + " sid=" + this.mStartId
+                    + " stime=" + this.mStartTime
+                    + " tt=" + this.getTimeoutTime()
+                    + " dt=" + this.getProcStateDemoteTime()
+                    + " at=" + this.getAnrTime();
+        }
     }
 
     /**
@@ -1413,10 +1422,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         this.mShortFgsInfo = null;
     }
 
-    /**
-     * @return true if it's a short FGS that's still up and running, and should be timed out.
-     */
-    public boolean shouldTriggerShortFgsTimeout() {
+    private boolean shouldTriggerShortFgsTimedEvent(long targetTime, long nowUptime) {
         if (!isAppAlive()) {
             return false;
         }
@@ -1424,36 +1430,48 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 || !mShortFgsInfo.isCurrent()) {
             return false;
         }
-        return mShortFgsInfo.getTimeoutTime() <= SystemClock.uptimeMillis();
+        return targetTime <= nowUptime;
+    }
+
+    /**
+     * @return true if it's a short FGS that's still up and running, and should be timed out.
+     */
+    public boolean shouldTriggerShortFgsTimeout(long nowUptime) {
+        return shouldTriggerShortFgsTimedEvent(
+                (mShortFgsInfo == null ? 0 : mShortFgsInfo.getTimeoutTime()),
+                nowUptime);
     }
 
     /**
      * @return true if it's a short FGS's procstate should be demoted.
      */
-    public boolean shouldDemoteShortFgsProcState() {
-        if (!isAppAlive()) {
-            return false;
-        }
-        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
-                || !mShortFgsInfo.isCurrent()) {
-            return false;
-        }
-        return mShortFgsInfo.getProcStateDemoteTime() <= SystemClock.uptimeMillis();
+    public boolean shouldDemoteShortFgsProcState(long nowUptime) {
+        return shouldTriggerShortFgsTimedEvent(
+                (mShortFgsInfo == null ? 0 : mShortFgsInfo.getProcStateDemoteTime()),
+                nowUptime);
     }
 
     /**
      * @return true if it's a short FGS that's still up and running, and should be declared
      * an ANR.
      */
-    public boolean shouldTriggerShortFgsAnr() {
-        if (!isAppAlive()) {
-            return false;
-        }
-        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
-                || !mShortFgsInfo.isCurrent()) {
-            return false;
-        }
-        return mShortFgsInfo.getAnrTime() <= SystemClock.uptimeMillis();
+    public boolean shouldTriggerShortFgsAnr(long nowUptime) {
+        return shouldTriggerShortFgsTimedEvent(
+                (mShortFgsInfo == null ? 0 : mShortFgsInfo.getAnrTime()),
+                nowUptime);
+    }
+
+    /**
+     * Human readable description about short-FGS internal states.
+     */
+    public String getShortFgsTimedEventDescription(long nowUptime) {
+        return "aa=" + isAppAlive()
+                + " sreq=" + this.startRequested
+                + " isfg=" + this.isForeground
+                + " type=" + Integer.toHexString(this.foregroundServiceType)
+                + " sfc=" + this.mStartForegroundCount
+                + " now=" + nowUptime
+                + " " + (mShortFgsInfo == null ? "" : mShortFgsInfo.getDescription());
     }
 
     private boolean isAppAlive() {
