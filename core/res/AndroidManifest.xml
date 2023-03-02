@@ -3707,7 +3707,8 @@
 
     <!-- @SystemApi @hide Allows an application to set a device owner on retail demo devices.-->
     <permission android:name="android.permission.PROVISION_DEMO_DEVICE"
-                android:protectionLevel="signature|setup" />
+                android:protectionLevel="signature|setup|knownSigner"
+                android:knownCerts="@array/demo_device_provisioning_known_signers" />
 
     <!-- @TestApi @hide Allows an application to reset the record of previous system update freeze
          periods. -->
