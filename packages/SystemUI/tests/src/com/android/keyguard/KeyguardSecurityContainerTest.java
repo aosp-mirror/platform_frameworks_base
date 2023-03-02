@@ -37,6 +37,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -157,6 +158,29 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
         mKeyguardSecurityContainer.onApplyWindowInsets(insets);
         assertThat(mKeyguardSecurityContainer.getPaddingBottom()).isEqualTo(systemBarInsetAmount);
+    }
+
+    @Test
+    public void testOnApplyWindowInsets_disappearAnimation_paddingNotSet() {
+        int paddingBottom = getContext().getResources()
+                .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin);
+        int imeInsetAmount = paddingBottom + 1;
+        int systemBarInsetAmount = 0;
+        initMode(MODE_DEFAULT);
+
+        Insets imeInset = Insets.of(0, 0, 0, imeInsetAmount);
+        Insets systemBarInset = Insets.of(0, 0, 0, systemBarInsetAmount);
+
+        WindowInsets insets = new WindowInsets.Builder()
+                .setInsets(ime(), imeInset)
+                .setInsetsIgnoringVisibility(systemBars(), systemBarInset)
+                .build();
+
+        ensureViewFlipperIsMocked();
+        mKeyguardSecurityContainer.startDisappearAnimation(
+                KeyguardSecurityModel.SecurityMode.Password);
+        mKeyguardSecurityContainer.onApplyWindowInsets(insets);
+        assertThat(mKeyguardSecurityContainer.getPaddingBottom()).isNotEqualTo(imeInsetAmount);
     }
 
     @Test
@@ -376,6 +400,17 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         assertThat(mKeyguardSecurityContainer.getScaleY()).isEqualTo(1);
     }
 
+    @Test
+    public void testDisappearAnimationPassword() {
+        ensureViewFlipperIsMocked();
+        KeyguardPasswordView keyguardPasswordView = mock(KeyguardPasswordView.class);
+        when(mSecurityViewFlipper.getSecurityView()).thenReturn(keyguardPasswordView);
+
+        mKeyguardSecurityContainer
+                .startDisappearAnimation(KeyguardSecurityModel.SecurityMode.Password);
+        verify(keyguardPasswordView).setDisappearAnimationListener(any());
+    }
+
     private BackEvent createBackEvent(float touchX, float progress) {
         return new BackEvent(0, 0, progress, BackEvent.EDGE_LEFT);
     }
@@ -446,4 +481,12 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
                 mUserSwitcherController, () -> {
                 }, mFalsingA11yDelegate);
     }
+
+    private void ensureViewFlipperIsMocked() {
+        mSecurityViewFlipper = mock(KeyguardSecurityViewFlipper.class);
+        KeyguardPasswordView keyguardPasswordView = mock(KeyguardPasswordView.class);
+        when(mSecurityViewFlipper.getSecurityView()).thenReturn(keyguardPasswordView);
+        mKeyguardSecurityContainer.mSecurityViewFlipper = mSecurityViewFlipper;
+    }
+
 }
