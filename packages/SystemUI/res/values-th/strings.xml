@@ -1110,16 +1110,10 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"สลับไปใช้โปรไฟล์งาน"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"ปิด"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"การตั้งค่าหน้าจอล็อก"</string>
-    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
-    <skip />
-    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
-    <skip />
-    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
-    <skip />
-    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
-    <skip />
-    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
-    <skip />
-    <!-- no translation found for assistant_attention_content_description (6830215897604642875) -->
-    <skip />
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi ไม่พร้อมใช้งาน"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"กล้องถูกบล็อกอยู่"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"กล้องและไมโครโฟนถูกบล็อกอยู่"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ไมโครโฟนถูกบล็อกอยู่"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"โหมดลำดับความสำคัญเปิดอยู่"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"การเรียกใช้งาน Assistant เปิดอยู่"</string>
 </resources>

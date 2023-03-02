@@ -47,7 +47,8 @@
     <string name="other_password_manager" msgid="565790221427004141">"பிற கடவுச்சொல் நிர்வாகிகள்"</string>
     <string name="close_sheet" msgid="1393792015338908262">"ஷீட்டை மூடும்"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"முந்தைய பக்கத்திற்குச் செல்லும்"</string>
-    <!-- no translation found for accessibility_close_button (1163435587545377687) -->
+    <string name="accessibility_close_button" msgid="1163435587545377687">"மூடும்"</string>
+    <!-- no translation found for accessibility_snackbar_dismiss (3456598374801836120) -->
     <skip />
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட கடவுக்குறியீட்டைப் பயன்படுத்தவா?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"<xliff:g id="APP_NAME">%1$s</xliff:g> ஆப்ஸுக்கு ஏற்கெனவே சேமிக்கப்பட்ட உள்நுழைவுத் தகவலைப் பயன்படுத்தவா?"</string>
@@ -60,8 +61,7 @@
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"பூட்டப்பட்ட கடவுச்சொல் நிர்வாகிகள்"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"அன்லாக் செய்ய தட்டவும்"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"உள்நுழைவு விவரங்கள் இல்லை"</string>
-    <!-- no translation found for no_sign_in_info_in (2641118151920288356) -->
-    <skip />
+    <string name="no_sign_in_info_in" msgid="2641118151920288356">"<xliff:g id="SOURCE">%1$s</xliff:g> கணக்கில் உள்நுழைவு விவரங்கள் இல்லை"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"உள்நுழைவுகளை நிர்வகித்தல்"</string>
     <string name="get_dialog_heading_from_another_device" msgid="1166697017046724072">"மற்றொரு சாதனத்திலிருந்து பயன்படுத்து"</string>
     <string name="get_dialog_option_headline_use_a_different_device" msgid="8201578814988047549">"வேறு சாதனத்தைப் பயன்படுத்து"</string>

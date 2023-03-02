@@ -342,7 +342,13 @@ object KeyguardBottomAreaViewBinder {
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
                 view.setOnTouchListener(
-                    OnTouchListener(view, viewModel, messageDisplayer, vibratorHelper)
+                    OnTouchListener(
+                        view,
+                        viewModel,
+                        messageDisplayer,
+                        vibratorHelper,
+                        falsingManager,
+                    )
                 )
             } else {
                 view.setOnClickListener(OnClickListener(viewModel, checkNotNull(falsingManager)))
@@ -371,6 +377,7 @@ object KeyguardBottomAreaViewBinder {
         private val viewModel: KeyguardQuickAffordanceViewModel,
         private val messageDisplayer: (Int) -> Unit,
         private val vibratorHelper: VibratorHelper?,
+        private val falsingManager: FalsingManager?,
     ) : View.OnTouchListener {
 
         private val longPressDurationMs = ViewConfiguration.getLongPressTimeout().toLong()
@@ -395,7 +402,14 @@ object KeyguardBottomAreaViewBinder {
                                     .scaleY(PRESSED_SCALE)
                                     .setDuration(longPressDurationMs)
                                     .withEndAction {
-                                        dispatchClick(viewModel.configKey)
+                                        if (
+                                            falsingManager
+                                                ?.isFalseLongTap(
+                                                    FalsingManager.MODERATE_PENALTY
+                                                ) == false
+                                        ) {
+                                            dispatchClick(viewModel.configKey)
+                                        }
                                         cancel()
                                     }
                         }
@@ -421,7 +435,8 @@ object KeyguardBottomAreaViewBinder {
                         // the pointer performs a click.
                         if (
                             viewModel.configKey != null &&
-                                distanceMoved(event) <= ViewConfiguration.getTouchSlop()
+                                distanceMoved(event) <= ViewConfiguration.getTouchSlop() &&
+                                falsingManager?.isFalseTap(FalsingManager.NO_PENALTY) == false
                         ) {
                             dispatchClick(viewModel.configKey)
                         }

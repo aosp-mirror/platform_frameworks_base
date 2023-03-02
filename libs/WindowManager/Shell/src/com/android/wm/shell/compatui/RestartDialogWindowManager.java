@@ -155,6 +155,11 @@ class RestartDialogWindowManager extends CompatUIWindowManagerAbstract {
         return super.updateCompatInfo(taskInfo, taskListener, canShow);
     }
 
+    boolean needsToBeRecreated(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+        return taskInfo.configuration.uiMode != mTaskInfo.configuration.uiMode
+                || !getTaskListener().equals(taskListener);
+    }
+
     private void updateDialogMargins() {
         if (mLayout == null) {
             return;

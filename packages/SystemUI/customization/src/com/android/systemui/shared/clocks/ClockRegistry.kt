@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 
 private val TAG = ClockRegistry::class.simpleName!!
 private const val DEBUG = true
+private val KEY_TIMESTAMP = "appliedTimestamp"
 
 /** ClockRegistry aggregates providers and plugins */
 open class ClockRegistry(
@@ -134,9 +135,9 @@ open class ClockRegistry(
         assertNotMainThread()
 
         try {
-            value?._applied_timestamp = System.currentTimeMillis()
-            val json = ClockSettings.serialize(value)
+            value?.metadata?.put(KEY_TIMESTAMP, System.currentTimeMillis())
 
+            val json = ClockSettings.serialize(value)
             if (handleAllUsers) {
                 Settings.Secure.putStringForUser(
                     context.contentResolver,
@@ -172,7 +173,7 @@ open class ClockRegistry(
         clockChangeListeners.forEach(func)
     }
 
-    private fun mutateSetting(mutator: (ClockSettings) -> ClockSettings) {
+    public fun mutateSetting(mutator: (ClockSettings) -> ClockSettings) {
         scope.launch(bgDispatcher) { applySettings(mutator(settings ?: ClockSettings())) }
     }
 

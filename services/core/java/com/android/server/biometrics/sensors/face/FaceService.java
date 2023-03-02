@@ -260,8 +260,9 @@ public class FaceService extends SystemService {
             if (provider == null) {
                 Slog.w(TAG, "Null provider for authenticate");
                 return -1;
+            } else {
+                options.setSensorId(provider.first);
             }
-            options.setSensorId(provider.first);
 
             return provider.second.scheduleAuthenticate(token, operationId,
                     0 /* cookie */, new ClientMonitorCallbackConverter(receiver), options,
@@ -285,7 +286,6 @@ public class FaceService extends SystemService {
                 Slog.w(TAG, "Null provider for detectFace");
                 return -1;
             }
-            options.setSensorId(provider.first);
 
             return provider.second.scheduleFaceDetect(token,
                     new ClientMonitorCallbackConverter(receiver), options,

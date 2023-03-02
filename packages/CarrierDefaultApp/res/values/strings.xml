@@ -19,7 +19,7 @@
     <!-- Notification title text for the performance boost notification. -->
     <string name="performance_boost_notification_title">Improve your app experience</string>
     <!-- Notification detail text for the performance boost notification. -->
-    <string name="performance_boost_notification_detail">Tap to visit %s\'s website and learn more.</string>
+    <string name="performance_boost_notification_detail">Tap to visit %s\'s website and learn more</string>
     <!-- Notification button text to cancel the performance boost notification. -->
     <string name="performance_boost_notification_button_not_now">Not now</string>
     <!-- Notification button text to manage the performance boost notification. -->

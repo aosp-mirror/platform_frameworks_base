@@ -18,10 +18,10 @@ package android.net.wifi.sharedconnectivity.app;
 
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_PSK;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_PHONE;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_CLOUD_SELF;
 import static android.net.wifi.sharedconnectivity.app.KnownNetwork.NETWORK_SOURCE_NEARBY_SELF;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -43,15 +43,17 @@ public class KnownNetworkTest {
     private static final int NETWORK_SOURCE = NETWORK_SOURCE_NEARBY_SELF;
     private static final String SSID = "TEST_SSID";
     private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP};
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_TABLET)
+                    .setDeviceName("TEST_NAME").setModelName("TEST_MODEL").setConnectionStrength(2)
+                    .setBatteryPercentage(50).build();
     private static final int NETWORK_SOURCE_1 = NETWORK_SOURCE_CLOUD_SELF;
     private static final String SSID_1 = "TEST_SSID1";
     private static final int[] SECURITY_TYPES_1 = {SECURITY_TYPE_PSK};
-    private static final DeviceInfo DEVICE_INFO_1 = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_PHONE).setDeviceName("TEST_NAME_1")
-            .setModelName("TEST_MODEL_1").setConnectionStrength(3).setBatteryPercentage(33).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO1 =
+            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_PHONE)
+                    .setDeviceName("TEST_NAME_1").setModelName("TEST_MODEL_1")
+                    .setConnectionStrength(3).setBatteryPercentage(33).build();
 
     /**
      * Verifies parcel serialization/deserialization.
@@ -94,7 +96,7 @@ public class KnownNetworkTest {
         Arrays.stream(SECURITY_TYPES_1).forEach(builder::addSecurityType);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildKnownNetworkBuilder().setDeviceInfo(DEVICE_INFO_1);
+        builder = buildKnownNetworkBuilder().setNetworkProviderInfo(NETWORK_PROVIDER_INFO1);
         assertThat(builder.build()).isNotEqualTo(network1);
     }
 
@@ -110,7 +112,7 @@ public class KnownNetworkTest {
         assertThat(network.getNetworkSource()).isEqualTo(NETWORK_SOURCE);
         assertThat(network.getSsid()).isEqualTo(SSID);
         assertThat(network.getSecurityTypes()).containsExactlyElementsIn(securityTypes);
-        assertThat(network.getDeviceInfo()).isEqualTo(DEVICE_INFO);
+        assertThat(network.getNetworkProviderInfo()).isEqualTo(NETWORK_PROVIDER_INFO);
     }
 
     @Test
@@ -122,8 +124,8 @@ public class KnownNetworkTest {
     }
 
     private KnownNetwork.Builder buildKnownNetworkBuilder() {
-        KnownNetwork.Builder builder =  new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
-                .setSsid(SSID).setDeviceInfo(DEVICE_INFO);
+        KnownNetwork.Builder builder = new KnownNetwork.Builder().setNetworkSource(NETWORK_SOURCE)
+                .setSsid(SSID).setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
         Arrays.stream(SECURITY_TYPES).forEach(builder::addSecurityType);
         return builder;
     }

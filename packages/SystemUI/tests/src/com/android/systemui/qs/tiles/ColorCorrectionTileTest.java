@@ -43,6 +43,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,6 +99,12 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
         );
 
         mTile.initialize();
+        mTestableLooper.processAllMessages();
+    }
+
+    @After
+    public void tearDown() {
+        mTile.destroy();
         mTestableLooper.processAllMessages();
     }
 

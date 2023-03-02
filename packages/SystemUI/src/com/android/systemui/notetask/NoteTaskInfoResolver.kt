@@ -31,6 +31,7 @@ constructor(
     private val roleManager: RoleManager,
     private val packageManager: PackageManager,
 ) {
+
     fun resolveInfo(
         entryPoint: NoteTaskEntryPoint? = null,
         isInMultiWindowMode: Boolean = false,
@@ -38,7 +39,8 @@ constructor(
     ): NoteTaskInfo? {
         // TODO(b/267634412): Select UserHandle depending on where the user initiated note-taking.
         val user = context.user
-        val packageName = roleManager.getRoleHoldersAsUser(ROLE_NOTES, user).firstOrNull()
+        val packageName =
+            roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, user).firstOrNull()
 
         if (packageName.isNullOrEmpty()) return null
 

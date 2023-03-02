@@ -38,7 +38,6 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -347,10 +346,9 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 }
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
                 updatePercentText();
-                addView(mBatteryPercentView,
-                        new ViewGroup.LayoutParams(
-                                LayoutParams.WRAP_CONTENT,
-                                LayoutParams.MATCH_PARENT));
+                addView(mBatteryPercentView, new LayoutParams(
+                        LayoutParams.WRAP_CONTENT,
+                        LayoutParams.MATCH_PARENT));
             }
         } else {
             if (showing) {

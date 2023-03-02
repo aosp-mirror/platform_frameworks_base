@@ -38,6 +38,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.settings.GlobalSettings
 import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -92,6 +93,12 @@ class AirplaneModeTileTest : SysuiTestCase() {
             mConnectivityManager,
             mGlobalSettings,
             mUserTracker)
+    }
+
+    @After
+    fun tearDown() {
+        mTile.destroy()
+        mTestableLooper.processAllMessages()
     }
 
     @Test

@@ -656,11 +656,14 @@ public class BackupTransport {
     }
 
     /**
-     * Ask the transport for a {@link IBackupManagerMonitor} instance which will be used by the
+     * Ask the transport for a {@link BackupManagerMonitor} instance which will be used by the
      * framework to report logging events back to the transport.
      *
      * <p>Backups requested from outside the framework may pass in a monitor with the request,
      * however backups initiated by the framework will call this method to retrieve one.
+     *
+     * @return {@link BackupManagerMonitor} or {@code null} if the transport implementation does not
+     *         wish to receive the logging events.
      */
     @Nullable
     public BackupManagerMonitor getBackupManagerMonitor() {

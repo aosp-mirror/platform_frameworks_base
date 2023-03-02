@@ -1699,7 +1699,7 @@ package android.app.backup {
     method @RequiresPermission(android.Manifest.permission.BACKUP) public boolean isBackupEnabled();
     method @RequiresPermission(android.Manifest.permission.BACKUP) public boolean isBackupServiceActive(android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public String[] listAllTransports();
-    method @NonNull public void reportDelayedRestoreResult(@NonNull android.app.backup.BackupRestoreEventLogger);
+    method public void reportDelayedRestoreResult(@NonNull android.app.backup.BackupRestoreEventLogger);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public int requestBackup(String[], android.app.backup.BackupObserver);
     method @RequiresPermission(android.Manifest.permission.BACKUP) public int requestBackup(String[], android.app.backup.BackupObserver, android.app.backup.BackupManagerMonitor, int);
     method @Deprecated public int requestRestore(android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor);
@@ -10001,48 +10001,80 @@ package android.net.wifi.nl80211 {
 
 package android.net.wifi.sharedconnectivity.app {
 
-  public final class DeviceInfo implements android.os.Parcelable {
+  public final class HotspotNetwork implements android.os.Parcelable {
     method public int describeContents();
-    method @IntRange(from=0, to=100) public int getBatteryPercentage();
-    method @IntRange(from=0, to=3) public int getConnectionStrength();
-    method @NonNull public String getDeviceName();
-    method public int getDeviceType();
-    method @NonNull public String getModelName();
+    method public long getDeviceId();
+    method public int getHostNetworkType();
+    method @Nullable public String getHotspotBssid();
+    method @NonNull public java.util.Set<java.lang.Integer> getHotspotSecurityTypes();
+    method @Nullable public String getHotspotSsid();
+    method @NonNull public String getNetworkName();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo getNetworkProviderInfo();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.DeviceInfo> CREATOR;
-    field public static final int DEVICE_TYPE_LAPTOP = 3; // 0x3
-    field public static final int DEVICE_TYPE_PHONE = 1; // 0x1
-    field public static final int DEVICE_TYPE_TABLET = 2; // 0x2
-    field public static final int DEVICE_TYPE_UNKNOWN = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.HotspotNetwork> CREATOR;
+    field public static final int NETWORK_TYPE_CELLULAR = 1; // 0x1
+    field public static final int NETWORK_TYPE_ETHERNET = 3; // 0x3
+    field public static final int NETWORK_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int NETWORK_TYPE_WIFI = 2; // 0x2
   }
 
-  public static final class DeviceInfo.Builder {
-    ctor public DeviceInfo.Builder();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo build();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo.Builder setBatteryPercentage(@IntRange(from=0, to=100) int);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo.Builder setConnectionStrength(@IntRange(from=0, to=3) int);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo.Builder setDeviceName(@NonNull String);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo.Builder setDeviceType(int);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo.Builder setModelName(@NonNull String);
+  public static final class HotspotNetwork.Builder {
+    ctor public HotspotNetwork.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder addHotspotSecurityType(int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork build();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setDeviceId(long);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setHostNetworkType(int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setHotspotBssid(@NonNull String);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setHotspotSsid(@NonNull String);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setNetworkName(@NonNull String);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork.Builder setNetworkProviderInfo(@NonNull android.net.wifi.sharedconnectivity.app.NetworkProviderInfo);
+  }
+
+  public final class HotspotNetworkConnectionStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getExtras();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetwork getHotspotNetwork();
+    method public int getStatus();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONNECTION_STATUS_CONNECT_TO_HOTSPOT_FAILED = 9; // 0x9
+    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT = 1; // 0x1
+    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT_FAILED = 7; // 0x7
+    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT_TIMEOUT = 8; // 0x8
+    field public static final int CONNECTION_STATUS_NO_CELL_DATA = 6; // 0x6
+    field public static final int CONNECTION_STATUS_PROVISIONING_FAILED = 3; // 0x3
+    field public static final int CONNECTION_STATUS_TETHERING_TIMEOUT = 4; // 0x4
+    field public static final int CONNECTION_STATUS_TETHERING_UNSUPPORTED = 5; // 0x5
+    field public static final int CONNECTION_STATUS_UNKNOWN = 0; // 0x0
+    field public static final int CONNECTION_STATUS_UNKNOWN_ERROR = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus> CREATOR;
+  }
+
+  public static final class HotspotNetworkConnectionStatus.Builder {
+    ctor public HotspotNetworkConnectionStatus.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus build();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus.Builder setHotspotNetwork(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetwork);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus.Builder setStatus(int);
   }
 
   public final class KnownNetwork implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
+    method @Nullable public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo getNetworkProviderInfo();
     method public int getNetworkSource();
     method @NonNull public java.util.Set<java.lang.Integer> getSecurityTypes();
     method @NonNull public String getSsid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.KnownNetwork> CREATOR;
-    field public static final int NETWORK_SOURCE_CLOUD_SELF = 1; // 0x1
-    field public static final int NETWORK_SOURCE_NEARBY_SELF = 0; // 0x0
+    field public static final int NETWORK_SOURCE_CLOUD_SELF = 2; // 0x2
+    field public static final int NETWORK_SOURCE_NEARBY_SELF = 1; // 0x1
+    field public static final int NETWORK_SOURCE_UNKNOWN = 0; // 0x0
   }
 
   public static final class KnownNetwork.Builder {
     ctor public KnownNetwork.Builder();
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder addSecurityType(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork build();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setDeviceInfo(@NonNull android.net.wifi.sharedconnectivity.app.DeviceInfo);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setNetworkProviderInfo(@Nullable android.net.wifi.sharedconnectivity.app.NetworkProviderInfo);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setNetworkSource(int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetwork.Builder setSsid(@NonNull String);
   }
@@ -10067,29 +10099,56 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus.Builder setStatus(int);
   }
 
+  public final class NetworkProviderInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0, to=100) public int getBatteryPercentage();
+    method @IntRange(from=0, to=3) public int getConnectionStrength();
+    method @NonNull public String getDeviceName();
+    method public int getDeviceType();
+    method @NonNull public String getModelName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.NetworkProviderInfo> CREATOR;
+    field public static final int DEVICE_TYPE_AUTO = 5; // 0x5
+    field public static final int DEVICE_TYPE_LAPTOP = 3; // 0x3
+    field public static final int DEVICE_TYPE_PHONE = 1; // 0x1
+    field public static final int DEVICE_TYPE_TABLET = 2; // 0x2
+    field public static final int DEVICE_TYPE_UNKNOWN = 0; // 0x0
+    field public static final int DEVICE_TYPE_WATCH = 4; // 0x4
+  }
+
+  public static final class NetworkProviderInfo.Builder {
+    ctor public NetworkProviderInfo.Builder();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo build();
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setBatteryPercentage(@IntRange(from=0, to=100) int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setConnectionStrength(@IntRange(from=0, to=3) int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setDeviceName(@NonNull String);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setDeviceType(int);
+    method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setModelName(@NonNull String);
+  }
+
   public interface SharedConnectivityClientCallback {
+    method public void onHotspotNetworkConnectionStatusChanged(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus);
+    method public void onHotspotNetworksUpdated(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.HotspotNetwork>);
     method public void onKnownNetworkConnectionStatusChanged(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus);
     method public void onKnownNetworksUpdated(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork>);
     method public void onRegisterCallbackFailed(@NonNull Exception);
     method public void onServiceConnected();
     method public void onServiceDisconnected();
     method public void onSharedConnectivitySettingsChanged(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState);
-    method public void onTetherNetworkConnectionStatusChanged(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus);
-    method public void onTetherNetworksUpdated(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork>);
   }
 
   public class SharedConnectivityManager {
-    method public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
-    method public boolean connectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public boolean disconnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public boolean forgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
-    method @Nullable public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus getKnownNetworkConnectionStatus();
-    method @NonNull public java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork> getKnownNetworks();
-    method @Nullable public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState getSettingsState();
-    method @Nullable public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus getTetherNetworkConnectionStatus();
-    method @NonNull public java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork> getTetherNetworks();
-    method public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
-    method public boolean unregisterCallback(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean connectHotspotNetwork(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetwork);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean connectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean disconnectHotspotNetwork(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetwork);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean forgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus getHotspotNetworkConnectionStatus();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.sharedconnectivity.app.HotspotNetwork> getHotspotNetworks();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus getKnownNetworkConnectionStatus();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork> getKnownNetworks();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState getSettingsState();
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public boolean unregisterCallback(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivityClientCallback);
   }
 
   public final class SharedConnectivitySettingsState implements android.os.Parcelable {
@@ -10107,62 +10166,6 @@ package android.net.wifi.sharedconnectivity.app {
     method @NonNull public android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState.Builder setInstantTetherEnabled(boolean);
   }
 
-  public final class TetherNetwork implements android.os.Parcelable {
-    method public int describeContents();
-    method public long getDeviceId();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.DeviceInfo getDeviceInfo();
-    method @Nullable public String getHotspotBssid();
-    method @NonNull public java.util.Set<java.lang.Integer> getHotspotSecurityTypes();
-    method @Nullable public String getHotspotSsid();
-    method @NonNull public String getNetworkName();
-    method public int getNetworkType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.TetherNetwork> CREATOR;
-    field public static final int NETWORK_TYPE_CELLULAR = 1; // 0x1
-    field public static final int NETWORK_TYPE_ETHERNET = 3; // 0x3
-    field public static final int NETWORK_TYPE_UNKNOWN = 0; // 0x0
-    field public static final int NETWORK_TYPE_WIFI = 2; // 0x2
-  }
-
-  public static final class TetherNetwork.Builder {
-    ctor public TetherNetwork.Builder();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder addHotspotSecurityType(int);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork build();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setDeviceId(long);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setDeviceInfo(@NonNull android.net.wifi.sharedconnectivity.app.DeviceInfo);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setHotspotBssid(@NonNull String);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setHotspotSsid(@NonNull String);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setNetworkName(@NonNull String);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork.Builder setNetworkType(int);
-  }
-
-  public final class TetherNetworkConnectionStatus implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public android.os.Bundle getExtras();
-    method public int getStatus();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetwork getTetherNetwork();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CONNECTION_STATUS_CONNECT_TO_HOTSPOT_FAILED = 9; // 0x9
-    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT = 1; // 0x1
-    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT_FAILED = 7; // 0x7
-    field public static final int CONNECTION_STATUS_ENABLING_HOTSPOT_TIMEOUT = 8; // 0x8
-    field public static final int CONNECTION_STATUS_NO_CELL_DATA = 6; // 0x6
-    field public static final int CONNECTION_STATUS_PROVISIONING_FAILED = 3; // 0x3
-    field public static final int CONNECTION_STATUS_TETHERING_TIMEOUT = 4; // 0x4
-    field public static final int CONNECTION_STATUS_TETHERING_UNSUPPORTED = 5; // 0x5
-    field public static final int CONNECTION_STATUS_UNKNOWN = 0; // 0x0
-    field public static final int CONNECTION_STATUS_UNKNOWN_ERROR = 2; // 0x2
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus> CREATOR;
-  }
-
-  public static final class TetherNetworkConnectionStatus.Builder {
-    ctor public TetherNetworkConnectionStatus.Builder();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus build();
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setExtras(@NonNull android.os.Bundle);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setStatus(int);
-    method @NonNull public android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus.Builder setTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-  }
-
 }
 
 package android.net.wifi.sharedconnectivity.service {
@@ -10170,15 +10173,15 @@ package android.net.wifi.sharedconnectivity.service {
   public abstract class SharedConnectivityService extends android.app.Service {
     ctor public SharedConnectivityService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onConnectHotspotNetwork(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetwork);
     method public abstract void onConnectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
-    method public abstract void onConnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
-    method public abstract void onDisconnectTetherNetwork(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetwork);
+    method public abstract void onDisconnectHotspotNetwork(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetwork);
     method public abstract void onForgetKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);
+    method public final void setHotspotNetworks(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.HotspotNetwork>);
     method public final void setKnownNetworks(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.KnownNetwork>);
     method public final void setSettingsState(@NonNull android.net.wifi.sharedconnectivity.app.SharedConnectivitySettingsState);
-    method public final void setTetherNetworks(@NonNull java.util.List<android.net.wifi.sharedconnectivity.app.TetherNetwork>);
+    method public final void updateHotspotNetworkConnectionStatus(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus);
     method public final void updateKnownNetworkConnectionStatus(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetworkConnectionStatus);
-    method public final void updateTetherNetworkConnectionStatus(@NonNull android.net.wifi.sharedconnectivity.app.TetherNetworkConnectionStatus);
   }
 
 }
@@ -13262,20 +13265,16 @@ package android.service.voice {
 
   public abstract class VisualQueryDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionServiceBase {
     ctor public VisualQueryDetectionService();
+    method public final void finishQuery() throws java.lang.IllegalStateException;
+    method public final void gainedAttention();
+    method public final void lostAttention();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public void onStartDetection(@NonNull android.service.voice.VisualQueryDetectionService.Callback);
+    method public void onStartDetection();
     method public void onStopDetection();
     method public void onUpdateState(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, long, @Nullable java.util.function.IntConsumer);
+    method public final void rejectQuery() throws java.lang.IllegalStateException;
+    method public final void streamQuery(@NonNull String) throws java.lang.IllegalStateException;
     field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
-  }
-
-  public static final class VisualQueryDetectionService.Callback {
-    ctor public VisualQueryDetectionService.Callback();
-    method public void onAttentionGained();
-    method public void onAttentionLost();
-    method public void onQueryDetected(@NonNull String) throws java.lang.IllegalStateException;
-    method public void onQueryFinished() throws java.lang.IllegalStateException;
-    method public void onQueryRejected() throws java.lang.IllegalStateException;
   }
 
   public final class VisualQueryDetectionServiceFailure extends android.service.voice.DetectorFailure {
@@ -17290,9 +17289,9 @@ package android.view.accessibility {
   public final class AccessibilityManager {
     method public int getAccessibilityWindowId(@Nullable android.os.IBinder);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void performAccessibilityShortcut();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public boolean registerDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
+    method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_ACCESSIBILITY, android.Manifest.permission.CREATE_VIRTUAL_DEVICE}) public boolean registerDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void registerSystemAction(@NonNull android.app.RemoteAction, int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public boolean unregisterDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
+    method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_ACCESSIBILITY, android.Manifest.permission.CREATE_VIRTUAL_DEVICE}) public boolean unregisterDisplayProxy(@NonNull android.view.accessibility.AccessibilityDisplayProxy);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY) public void unregisterSystemAction(int);
   }
 

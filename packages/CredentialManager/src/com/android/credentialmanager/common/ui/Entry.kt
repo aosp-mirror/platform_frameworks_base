@@ -305,7 +305,7 @@ fun MoreOptionTopAppBar(
         },
         navigationIcon = {
             IconButton(
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, start = 4.dp),
+                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, start = 4.dp).size(48.dp),
                 onClick = onNavigationIconClicked
             ) {
                 Box(

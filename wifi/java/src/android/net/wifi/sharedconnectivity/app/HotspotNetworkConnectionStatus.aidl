@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.server.people.data;
+package android.net.wifi.sharedconnectivity.app;
 
-import android.util.Pair;
-
-/** The interface for throttling expensive runnables per package. */
-interface PerPackageThrottler {
-    /**
-     * Schedule a runnable to run in the future, and debounce runnables for same {@code pkgUserId}
-     * that occur until that future has run.
-     */
-    void scheduleDebounced(Pair<String, Integer> pkgUserId, Runnable runnable);
-}
+parcelable HotspotNetworkConnectionStatus;

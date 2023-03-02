@@ -135,7 +135,7 @@ constructor(
      *
      * @param initiallySelectedSlotId The ID of the initial slot to render as the selected one.
      * @param shouldHighlightSelectedAffordance Whether the selected quick affordance should be
-     * highlighted (while all others are dimmed to make the selected one stand out).
+     *   highlighted (while all others are dimmed to make the selected one stand out).
      */
     fun enablePreviewMode(
         initiallySelectedSlotId: String?,
@@ -187,6 +187,7 @@ constructor(
                             previewMode.isInPreviewMode &&
                                 previewMode.shouldHighlightSelectedAffordance &&
                                 !isSelected,
+                        forceInactive = previewMode.isInPreviewMode
                     )
                 }
                 .distinctUntilChanged()
@@ -198,6 +199,7 @@ constructor(
         isClickable: Boolean,
         isSelected: Boolean,
         isDimmed: Boolean,
+        forceInactive: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -213,7 +215,7 @@ constructor(
                         )
                     },
                     isClickable = isClickable,
-                    isActivated = activationState is ActivationState.Active,
+                    isActivated = !forceInactive && activationState is ActivationState.Active,
                     isSelected = isSelected,
                     useLongPress = quickAffordanceInteractor.useLongPress,
                     isDimmed = isDimmed,

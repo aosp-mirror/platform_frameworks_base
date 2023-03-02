@@ -79,7 +79,7 @@ public class MidiEventScheduler extends EventScheduler {
     /**
      * Create an event that contains the message.
      */
-    private MidiEvent createScheduledEvent(byte[] msg, int offset, int count,
+    public MidiEvent createScheduledEvent(byte[] msg, int offset, int count,
             long timestamp) {
         MidiEvent event;
         if (count > POOL_EVENT_SIZE) {

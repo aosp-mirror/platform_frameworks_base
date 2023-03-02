@@ -30,12 +30,14 @@ data class TurbulenceNoiseAnimationConfig(
      * Noise move speed variables.
      *
      * Its sign determines the direction; magnitude determines the speed. <ul>
+     *
      * ```
      *     <li> [noiseMoveSpeedX] positive: right to left; negative: left to right.
      *     <li> [noiseMoveSpeedY] positive: bottom to top; negative: top to bottom.
      *     <li> [noiseMoveSpeedZ] its sign doesn't matter much, as it moves in Z direction. Use it
      *     to add turbulence in place.
      * ```
+     *
      * </ul>
      */
     val noiseMoveSpeedX: Float = 0f,

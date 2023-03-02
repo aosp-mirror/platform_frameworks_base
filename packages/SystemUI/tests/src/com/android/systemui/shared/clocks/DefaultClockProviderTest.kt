@@ -26,6 +26,7 @@ import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.shared.clocks.DefaultClockController.Companion.DOZE_COLOR
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -40,7 +41,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.notNull
 import org.mockito.Mock
 import org.mockito.Mockito.never
@@ -97,13 +97,14 @@ class DefaultClockProviderTest : SysuiTestCase() {
     @Test
     fun defaultClock_initialize() {
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
-        verify(mockSmallClockView).setColors(Color.MAGENTA, Color.MAGENTA)
-        verify(mockLargeClockView).setColors(Color.MAGENTA, Color.MAGENTA)
+        verify(mockSmallClockView).setColors(DOZE_COLOR, Color.MAGENTA)
+        verify(mockLargeClockView).setColors(DOZE_COLOR, Color.MAGENTA)
 
         clock.initialize(resources, 0f, 0f)
 
-        verify(mockSmallClockView).setColors(eq(DOZE_COLOR), anyInt())
-        verify(mockLargeClockView).setColors(eq(DOZE_COLOR), anyInt())
+        val expectedColor = 0
+        verify(mockSmallClockView).setColors(DOZE_COLOR, expectedColor)
+        verify(mockLargeClockView).setColors(DOZE_COLOR, expectedColor)
         verify(mockSmallClockView).onTimeZoneChanged(notNull())
         verify(mockLargeClockView).onTimeZoneChanged(notNull())
         verify(mockSmallClockView).refreshTime()
@@ -159,15 +160,31 @@ class DefaultClockProviderTest : SysuiTestCase() {
 
     @Test
     fun defaultClock_events_onColorPaletteChanged() {
+        val expectedColor = 0
         val clock = provider.createClock(DEFAULT_CLOCK_ID)
 
-        verify(mockSmallClockView).setColors(Color.MAGENTA, Color.MAGENTA)
-        verify(mockLargeClockView).setColors(Color.MAGENTA, Color.MAGENTA)
+        verify(mockSmallClockView).setColors(DOZE_COLOR, Color.MAGENTA)
+        verify(mockLargeClockView).setColors(DOZE_COLOR, Color.MAGENTA)
 
         clock.events.onColorPaletteChanged(resources)
 
-        verify(mockSmallClockView).setColors(eq(DOZE_COLOR), anyInt())
-        verify(mockLargeClockView).setColors(eq(DOZE_COLOR), anyInt())
+        verify(mockSmallClockView).setColors(DOZE_COLOR, expectedColor)
+        verify(mockLargeClockView).setColors(DOZE_COLOR, expectedColor)
+    }
+
+    @Test
+    fun defaultClock_events_onSeedColorChanged() {
+        val initSeedColor = 10
+        val newSeedColor = 20
+        val clock = provider.createClock(ClockSettings(DEFAULT_CLOCK_ID, initSeedColor))
+
+        verify(mockSmallClockView).setColors(DOZE_COLOR, initSeedColor)
+        verify(mockLargeClockView).setColors(DOZE_COLOR, initSeedColor)
+
+        clock.events.onSeedColorChanged(newSeedColor)
+
+        verify(mockSmallClockView).setColors(DOZE_COLOR, newSeedColor)
+        verify(mockLargeClockView).setColors(DOZE_COLOR, newSeedColor)
     }
 
     @Test

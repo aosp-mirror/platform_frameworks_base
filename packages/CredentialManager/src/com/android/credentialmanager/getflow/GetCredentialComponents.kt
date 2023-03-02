@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
@@ -141,70 +140,72 @@ fun PrimarySelectionCard(
         providerDisplayInfo.sortedUserNameToCredentialEntryList
     val authenticationEntryList = providerDisplayInfo.authenticationEntryList
     SheetContainerCard {
-        HeadlineText(
-            text = stringResource(
-                if (sortedUserNameToCredentialEntryList
-                        .size == 1 && authenticationEntryList.isEmpty()
-                ) {
-                    if (sortedUserNameToCredentialEntryList.first()
-                            .sortedCredentialEntryList.first().credentialType
-                        == CredentialType.PASSKEY
-                    ) R.string.get_dialog_title_use_passkey_for
-                    else R.string.get_dialog_title_use_sign_in_for
-                } else if (
-                    sortedUserNameToCredentialEntryList
-                        .isEmpty() && authenticationEntryList.size == 1
-                ) {
-                    R.string.get_dialog_title_use_sign_in_for
-                } else R.string.get_dialog_title_choose_sign_in_for,
-                requestDisplayInfo.appName
-            ),
-        )
-        Divider(thickness = 24.dp, color = Color.Transparent)
-        CredentialContainerCard {
-            val usernameForCredentialSize = sortedUserNameToCredentialEntryList.size
-            val authenticationEntrySize = authenticationEntryList.size
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                // Show max 4 entries in this primary page
-                if (usernameForCredentialSize + authenticationEntrySize <= 4) {
-                    items(sortedUserNameToCredentialEntryList) {
-                        CredentialEntryRow(
-                            credentialEntryInfo = it.sortedCredentialEntryList.first(),
-                            onEntrySelected = onEntrySelected,
-                        )
-                    }
-                    items(authenticationEntryList) {
-                        AuthenticationEntryRow(
-                            authenticationEntryInfo = it,
-                            onEntrySelected = onEntrySelected,
-                        )
-                    }
-                } else if (usernameForCredentialSize < 4) {
-                    items(sortedUserNameToCredentialEntryList) {
-                        CredentialEntryRow(
-                            credentialEntryInfo = it.sortedCredentialEntryList.first(),
-                            onEntrySelected = onEntrySelected,
-                        )
-                    }
-                    items(authenticationEntryList.take(4 - usernameForCredentialSize)) {
-                        AuthenticationEntryRow(
-                            authenticationEntryInfo = it,
-                            onEntrySelected = onEntrySelected,
-                        )
-                    }
-                } else {
-                    items(sortedUserNameToCredentialEntryList.take(4)) {
-                        CredentialEntryRow(
-                            credentialEntryInfo = it.sortedCredentialEntryList.first(),
-                            onEntrySelected = onEntrySelected,
-                        )
+        item {
+            HeadlineText(
+                text = stringResource(
+                    if (sortedUserNameToCredentialEntryList
+                            .size == 1 && authenticationEntryList.isEmpty()
+                    ) {
+                        if (sortedUserNameToCredentialEntryList.first()
+                                .sortedCredentialEntryList.first().credentialType
+                            == CredentialType.PASSKEY
+                        ) R.string.get_dialog_title_use_passkey_for
+                        else R.string.get_dialog_title_use_sign_in_for
+                    } else if (
+                        sortedUserNameToCredentialEntryList
+                            .isEmpty() && authenticationEntryList.size == 1
+                    ) {
+                        R.string.get_dialog_title_use_sign_in_for
+                    } else R.string.get_dialog_title_choose_sign_in_for,
+                    requestDisplayInfo.appName
+                ),
+            )
+        }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item {
+            CredentialContainerCard {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    val usernameForCredentialSize = sortedUserNameToCredentialEntryList.size
+                    val authenticationEntrySize = authenticationEntryList.size
+                    // Show max 4 entries in this primary page
+                    if (usernameForCredentialSize + authenticationEntrySize <= 4) {
+                        sortedUserNameToCredentialEntryList.forEach {
+                            CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                        authenticationEntryList.forEach {
+                            AuthenticationEntryRow(
+                                authenticationEntryInfo = it,
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                    } else if (usernameForCredentialSize < 4) {
+                        sortedUserNameToCredentialEntryList.forEach {
+                            CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                        authenticationEntryList.take(4 - usernameForCredentialSize).forEach {
+                            AuthenticationEntryRow(
+                                authenticationEntryInfo = it,
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
+                    } else {
+                        sortedUserNameToCredentialEntryList.take(4).forEach {
+                            CredentialEntryRow(
+                                credentialEntryInfo = it.sortedCredentialEntryList.first(),
+                                onEntrySelected = onEntrySelected,
+                            )
+                        }
                     }
                 }
             }
         }
-        Divider(thickness = 24.dp, color = Color.Transparent)
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
         var totalEntriesCount = sortedUserNameToCredentialEntryList
             .flatMap { it.sortedCredentialEntryList }.size + authenticationEntryList
             .size + providerInfoList.flatMap { it.actionEntryList }.size
@@ -212,24 +213,26 @@ fun PrimarySelectionCard(
         // Row horizontalArrangement differs on only one actionButton(should place on most
         // left)/only one confirmButton(should place on most right)/two buttons exist the same
         // time(should be one on the left, one on the right)
-        CtaButtonRow(
-            leftButton = if (totalEntriesCount > 1) {
-                {
-                    ActionButton(
-                        stringResource(R.string.get_dialog_use_saved_passkey_for),
-                        onMoreOptionSelected
-                    )
-                }
-            } else null,
-            rightButton = if (activeEntry != null) { // Only one sign-in options exist
-                {
-                    ConfirmButton(
-                        stringResource(R.string.string_continue),
-                        onClick = onConfirm
-                    )
-                }
-            } else null,
-        )
+        item {
+            CtaButtonRow(
+                leftButton = if (totalEntriesCount > 1) {
+                    {
+                        ActionButton(
+                            stringResource(R.string.get_dialog_use_saved_passkey_for),
+                            onMoreOptionSelected
+                        )
+                    }
+                } else null,
+                rightButton = if (activeEntry != null) { // Only one sign-in options exist
+                    {
+                        ConfirmButton(
+                            stringResource(R.string.string_continue),
+                            onClick = onConfirm
+                        )
+                    }
+                } else null,
+            )
+        }
     }
 }
 
@@ -252,47 +255,45 @@ fun AllSignInOptionCard(
             onNavigationIconClicked = if (isNoAccount) onCancel else onBackButtonClicked,
         )
     }) {
-        LazyColumn {
-            // For username
-            items(sortedUserNameToCredentialEntryList) { item ->
-                PerUserNameCredentials(
-                    perUserNameCredentialEntryList = item,
+        // For username
+        items(sortedUserNameToCredentialEntryList) { item ->
+            PerUserNameCredentials(
+                perUserNameCredentialEntryList = item,
+                onEntrySelected = onEntrySelected,
+            )
+        }
+        // Locked password manager
+        if (authenticationEntryList.isNotEmpty()) {
+            item {
+                LockedCredentials(
+                    authenticationEntryList = authenticationEntryList,
                     onEntrySelected = onEntrySelected,
                 )
             }
-            // Locked password manager
-            if (authenticationEntryList.isNotEmpty()) {
-                item {
-                    LockedCredentials(
-                        authenticationEntryList = authenticationEntryList,
-                        onEntrySelected = onEntrySelected,
-                    )
-                }
-            }
-            // From another device
-            val remoteEntry = providerDisplayInfo.remoteEntry
-            if (remoteEntry != null) {
-                item {
-                    RemoteEntryCard(
-                        remoteEntry = remoteEntry,
-                        onEntrySelected = onEntrySelected,
-                    )
-                }
-            }
+        }
+        // From another device
+        val remoteEntry = providerDisplayInfo.remoteEntry
+        if (remoteEntry != null) {
             item {
-                Divider(
-                    thickness = 1.dp,
-                    color = Color.LightGray,
-                    modifier = Modifier.padding(top = 16.dp)
+                RemoteEntryCard(
+                    remoteEntry = remoteEntry,
+                    onEntrySelected = onEntrySelected,
                 )
             }
-            // Manage sign-ins (action chips)
-            item {
-                ActionChips(
-                    providerInfoList = providerInfoList,
-                    onEntrySelected = onEntrySelected
-                )
-            }
+        }
+        item {
+            Divider(
+                thickness = 1.dp,
+                color = Color.LightGray,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+        // Manage sign-ins (action chips)
+        item {
+            ActionChips(
+                providerInfoList = providerInfoList,
+                onEntrySelected = onEntrySelected
+            )
         }
     }
 }
