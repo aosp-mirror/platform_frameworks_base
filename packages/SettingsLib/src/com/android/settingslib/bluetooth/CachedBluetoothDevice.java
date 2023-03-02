@@ -208,7 +208,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
         synchronized (mProfileLock) {
             if (profile instanceof A2dpProfile || profile instanceof HeadsetProfile
-                    || profile instanceof HearingAidProfile) {
+                    || profile instanceof HearingAidProfile || profile instanceof LeAudioProfile) {
                 setProfileConnectedStatus(profile.getProfileId(), false);
                 switch (newProfileState) {
                     case BluetoothProfile.STATE_CONNECTED:
