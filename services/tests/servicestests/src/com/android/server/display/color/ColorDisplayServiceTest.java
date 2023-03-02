@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.Time;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -77,6 +78,7 @@ public class ColorDisplayServiceTest {
 
     private MockTwilightManager mTwilightManager;
     private DisplayTransformManager mDisplayTransformManager;
+    private DisplayManagerInternal mDisplayManagerInternal;
 
     private ColorDisplayService mCds;
     private ColorDisplayService.BinderService mBinderService;
@@ -116,6 +118,10 @@ public class ColorDisplayServiceTest {
         doReturn(true).when(mDisplayTransformManager).needsLinearColorMatrix();
         LocalServices.addService(DisplayTransformManager.class, mDisplayTransformManager);
 
+        mDisplayManagerInternal = Mockito.mock(DisplayManagerInternal.class);
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
+        LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternal);
+
         mCds = new ColorDisplayService(mContext);
         mBinderService = mCds.new BinderService();
         LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
@@ -142,6 +148,7 @@ public class ColorDisplayServiceTest {
         FakeSettingsProvider.clearSettingsProvider();
 
         LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
+        LocalServices.removeServiceForTest(DisplayManagerInternal.class);
     }
 
     @Test
