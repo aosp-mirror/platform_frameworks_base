@@ -509,7 +509,7 @@ public final class SystemServiceRegistry {
                 new ServiceFetcher<InputManager>() {
             @Override
             public InputManager getService(ContextImpl ctx) {
-                return InputManager.getInstance(ctx);
+                return InputManager.getInstance(ctx.getOuterContext());
             }});
 
         registerService(Context.DISPLAY_SERVICE, DisplayManager.class,
