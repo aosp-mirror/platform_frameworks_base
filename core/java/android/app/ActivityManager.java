@@ -630,7 +630,7 @@ public class ActivityManager {
             PROCESS_CAPABILITY_FOREGROUND_LOCATION,
             PROCESS_CAPABILITY_FOREGROUND_CAMERA,
             PROCESS_CAPABILITY_FOREGROUND_MICROPHONE,
-            PROCESS_CAPABILITY_NETWORK,
+            PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK,
             PROCESS_CAPABILITY_BFSL,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -791,7 +791,7 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
             | PROCESS_CAPABILITY_FOREGROUND_CAMERA
             | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-            | PROCESS_CAPABILITY_NETWORK
+            | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
             | PROCESS_CAPABILITY_BFSL;
 
     /**
@@ -810,7 +810,7 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0 ? 'L' : '-');
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0 ? 'C' : '-');
         pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
-        pw.print((caps & PROCESS_CAPABILITY_NETWORK) != 0 ? 'N' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         pw.print((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
     }
 
@@ -819,7 +819,7 @@ public class ActivityManager {
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0 ? 'L' : '-');
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0 ? 'C' : '-');
         sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0 ? 'M' : '-');
-        sb.append((caps & PROCESS_CAPABILITY_NETWORK) != 0 ? 'N' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         sb.append((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
     }
 

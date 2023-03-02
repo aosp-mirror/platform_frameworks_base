@@ -18,8 +18,8 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_RECENT;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
@@ -185,10 +185,10 @@ public class UidObserverControllerTest {
         verifyNoMoreInteractions(observer2);
 
         addPendingChange(TEST_UID1, UidRecord.CHANGE_PROCSTATE | UidRecord.CHANGE_CAPABILITY,
-                PROCESS_STATE_RECEIVER, 111, PROCESS_CAPABILITY_NETWORK, false);
+                PROCESS_STATE_RECEIVER, 111, PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK, false);
         mUidObserverController.dispatchUidsChanged();
         verify(observer2).onUidStateChanged(TEST_UID1, PROCESS_STATE_RECEIVER,
-                111, PROCESS_CAPABILITY_NETWORK);
+                111, PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK);
         verifyNoMoreInteractions(observer1);
         verifyNoMoreInteractions(observer2);
 
