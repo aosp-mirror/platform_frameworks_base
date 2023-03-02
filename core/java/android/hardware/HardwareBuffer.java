@@ -40,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
  * HardwareBuffer wraps a native <code>AHardwareBuffer</code> object, which is a low-level object
  * representing a memory buffer accessible by various hardware units. HardwareBuffer allows sharing
  * buffers across different application processes. In particular, HardwareBuffers may be mappable
- * to memory accessibly to various hardware systems, such as the GPU, a sensor or context hub, or
+ * to memory accessible to various hardware systems, such as the GPU, a sensor or context hub, or
  * other auxiliary processing units.
  *
  * For more information, see the NDK documentation for <code>AHardwareBuffer</code>.
