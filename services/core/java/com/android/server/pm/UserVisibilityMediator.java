@@ -63,18 +63,38 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Class responsible for deciding whether a user is visible (or visible for a given display).
  *
- * <p>Currently, it has 2 "modes" (set on constructor), which defines the class behavior (i.e, the
+ * <p>Currently, it has 3 "modes" (set on constructor), which defines the class behavior (i.e, the
  * logic that dictates the result of methods such as {@link #isUserVisible(int)} and
  * {@link #isUserVisible(int, int)}):
  *
  * <ul>
- *   <li>default: this is the most common mode (used by phones, tablets, foldables, automotives with
- *   just cluster and driver displayes, etc...), where the logic is based solely on the current
- *   foreground user (and its started profiles)
- *   <li>{@code MUMD}: mode for "(concurrent) Multiple Users on Multiple Displays", which is used on
- *   automotives with passenger display. In this mode, users started in background on the secondary
- *   display are stored in map.
+ *   <li>default (A.K.A {@code SUSD} - Single User on Single Display): this is the most common mode
+ *   (used by phones, tablets, foldables, cars with just cluster and driver displays, etc.),
+ *   where just the current foreground user and its profiles are visible; hence, most methods are
+ *   optimized to just check for the current user / profile. This mode is unit tested by
+ *   {@link com.android.server.pm.UserVisibilityMediatorSUSDTest} and CTS tested by
+ *   {@link android.multiuser.cts.UserVisibilityTest}.
+ *   <li>concurrent users (A.K.A. {@code MUMD} - Multiple Users on Multiple Displays): typically
+ *   used on automotive builds where the car has additional displays for passengers, it allows users
+ *   to be started in the background but visible on these displays; hence, it contains additional
+ *   maps to account for the visibility state. This mode is unit tested by
+ *   {@link com.android.server.pm.UserVisibilityMediatorMUMDTest} and CTS tested by
+ *   {@link android.multiuser.cts.UserVisibilityTest}.
+ *   <li>no driver (A.K.A. {@code MUPAND} - MUltiple PAssengers, No Driver): extension of the
+ *   previous mode and typically used on automotive builds where the car has additional displays for
+ *   passengers but uses a secondary Android system for the back passengers, so all "human" users
+ *   are started in the background (and the current foreground user is the system user), hence the
+ *   "no driver name". This mode is unit tested by
+ *   {@link com.android.server.pm.UserVisibilityMediatorMUPANDTest} and CTS tested by
+ *   {@link android.multiuser.cts.UserVisibilityVisibleBackgroundUsersOnDefaultDisplayTest}.
  * </ul>
+ *
+ * <p>When you make changes in this class, you should run at least the 3 unit tests and
+ * {@link android.multiuser.cts.UserVisibilityTest} (which actually applies for all modes); for
+ * example, by calling {@code atest UserVisibilityMediatorSUSDTest UserVisibilityMediatorMUMDTest
+ * UserVisibilityMediatorMUPANDTest UserVisibilityTest}. Ideally, you should run the other 2 CTS
+ * tests as well (you can emulate these modes using {@code adb} commands; their javadoc provides
+ * instructions on how to do so).
  *
  * <p>This class is thread safe.
  */
