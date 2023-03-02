@@ -60,14 +60,17 @@ public interface CallEventCallback {
 
     /**
      * Informs this {@link android.telecom.CallEventCallback} on events raised from a
-     * {@link android.telecom.InCallService} presenting this call. The event key and extra values
-     * are defined in AndroidX. This enables alternative calling surfaces, such as an automotive
-     * UI, to relay requests to perform other non-standard call actions to the app. For example,
-     * an automotive calling solution may offer the ability for the user to raise their hand
-     * during a meeting.
+     * {@link android.telecom.InCallService} presenting this call. These events and the
+     * associated extra keys for the {@code Bundle} parameter are mutually defined by a VoIP
+     * application and {@link android.telecom.InCallService}. This enables alternative calling
+     * surfaces, such as an automotive UI, to relay requests to perform other non-standard call
+     * actions to the app. For example, an automotive calling solution may offer the ability for
+     * the user to raise their hand during a meeting.
      *
-     * @param event that is defined in AndroidX (ex. the number of participants changed)
-     * @param extras the updated value in relation to the event (ex. 4 participants)
+     * @param event a string event identifier agreed upon between a VoIP application and an
+     *              {@link android.telecom.InCallService}
+     * @param extras a {@link android.os.Bundle} containing information about the event, as agreed
+     *              upon between a VoIP application and {@link android.telecom.InCallService}.
      */
     void onEvent(@NonNull String event, @NonNull Bundle extras);
 }
