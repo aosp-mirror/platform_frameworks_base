@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.shared
+package com.android.systemui.statusbar.pipeline.mobile.data
 
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -130,24 +130,6 @@ constructor(
                 str1 = displayInfo.toString()
             },
             { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1" },
-        )
-    }
-
-    fun logUiAdapterSubIdsUpdated(subs: List<Int>) {
-        buffer.log(
-            TAG,
-            LogLevel.INFO,
-            { str1 = subs.toString() },
-            { "Sub IDs in MobileUiAdapter updated internally: $str1" },
-        )
-    }
-
-    fun logUiAdapterSubIdsSentToIconController(subs: List<Int>) {
-        buffer.log(
-            TAG,
-            LogLevel.INFO,
-            { str1 = subs.toString() },
-            { "Sub IDs in MobileUiAdapter being sent to icon controller: $str1" },
         )
     }
 
