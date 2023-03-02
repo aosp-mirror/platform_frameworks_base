@@ -145,11 +145,16 @@ public abstract class DisplayEventReceiver {
 
         static final FrameTimeline[] INVALID_FRAME_TIMELINES =
                 {new FrameTimeline(FrameInfo.INVALID_VSYNC_ID, Long.MAX_VALUE, Long.MAX_VALUE)};
+        // The amount of frame timeline choices.
+        // Must be in sync with VsyncEventData::kFrameTimelinesLength in
+        // frameworks/native/libs/gui/include/gui/VsyncEventData.h. If they do not match, a runtime
+        // assertion is thrown when Choreographer is processing VsyncEventData.
+        static final int FRAME_TIMELINES_LENGTH = 7;
 
         public static class FrameTimeline {
-            FrameTimeline(long vsyncId, long expectedPresentTime, long deadline) {
+            FrameTimeline(long vsyncId, long expectedPresentationTime, long deadline) {
                 this.vsyncId = vsyncId;
-                this.expectedPresentTime = expectedPresentTime;
+                this.expectedPresentationTime = expectedPresentationTime;
                 this.deadline = deadline;
             }
 
@@ -158,7 +163,7 @@ public abstract class DisplayEventReceiver {
             public final long vsyncId;
 
             // The frame timestamp for when the frame is expected to be presented.
-            public final long expectedPresentTime;
+            public final long expectedPresentationTime;
 
             // The frame deadline timestamp in {@link System#nanoTime()} timebase that it is
             // allotted for the frame to be completed.
