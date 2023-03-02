@@ -193,6 +193,9 @@ public class Am extends BaseCommand {
                 instrument.alwaysCheckSignature = true;
             } else if (opt.equals("--instrument-sdk-sandbox")) {
                 instrument.instrumentSdkSandbox = true;
+            } else if (opt.equals("--instrument-sdk-in-sandbox")) {
+                instrument.instrumentSdkSandbox = true;
+                instrument.instrumentSdkInSandbox = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 return;

@@ -15470,7 +15470,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ai,
                         noRestart,
                         disableHiddenApiChecks,
-                        disableTestApiChecks);
+                        disableTestApiChecks,
+                        (flags & ActivityManager.INSTR_FLAG_INSTRUMENT_SDK_IN_SANDBOX) != 0);
             }
 
             ActiveInstrumentation activeInstr = new ActiveInstrumentation(this);
@@ -15567,7 +15568,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             ApplicationInfo sdkSandboxClientAppInfo,
             boolean noRestart,
             boolean disableHiddenApiChecks,
-            boolean disableTestApiChecks) {
+            boolean disableTestApiChecks,
+            boolean isSdkInSandbox) {
 
         if (noRestart) {
             reportStartInstrumentationFailureLocked(
@@ -15589,7 +15591,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             sdkSandboxInfo =
                     sandboxManagerLocal.getSdkSandboxApplicationInfoForInstrumentation(
-                            sdkSandboxClientAppInfo, userId);
+                            sdkSandboxClientAppInfo, userId, isSdkInSandbox);
         } catch (NameNotFoundException e) {
             reportStartInstrumentationFailureLocked(
                     watcher, className, "Can't find SdkSandbox package");
