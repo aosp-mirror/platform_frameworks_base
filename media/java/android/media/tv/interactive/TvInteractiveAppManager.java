@@ -681,14 +681,14 @@ public final class TvInteractiveAppManager {
             }
 
             @Override
-            public void onAdBuffer(AdBuffer buffer, int seq) {
+            public void onAdBufferReady(AdBuffer buffer, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
                         Log.e(TAG, "Callback not found for seq " + seq);
                         return;
                     }
-                    record.postAdBuffer(buffer);
+                    record.postAdBufferReady(buffer);
                 }
             }
         };
@@ -2245,12 +2245,12 @@ public final class TvInteractiveAppManager {
             });
         }
 
-        void postAdBuffer(AdBuffer buffer) {
+        void postAdBufferReady(AdBuffer buffer) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     if (mSession.getInputSession() != null) {
-                        mSession.getInputSession().notifyAdBuffer(buffer);
+                        mSession.getInputSession().notifyAdBufferReady(buffer);
                     }
                 }
             });
