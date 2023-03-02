@@ -598,6 +598,23 @@ public class ActivityClient {
     }
 
     /**
+     * Returns {@code true} if the activity was explicitly requested to be launched in the
+     * TaskFragment.
+     *
+     * @param activityToken The token of the Activity.
+     * @param taskFragmentToken The token of the TaskFragment.
+     */
+    public boolean isRequestedToLaunchInTaskFragment(IBinder activityToken,
+            IBinder taskFragmentToken) {
+        try {
+            return getActivityClientController().isRequestedToLaunchInTaskFragment(activityToken,
+                    taskFragmentToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Shows or hides a Camera app compat toggle for stretched issues with the requested state.
      *
      * @param token The token for the window that needs a control.
