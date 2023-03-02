@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
-package android.net.wifi.sharedconnectivity.app;
+package com.android.systemui.log.dagger;
 
-parcelable DeviceInfo;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import com.android.systemui.plugins.log.LogBuffer;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+
+import javax.inject.Qualifier;
+
+/** A {@link LogBuffer} for notification & lockscreen related messages. */
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface NotificationLockscreenLog {
+}

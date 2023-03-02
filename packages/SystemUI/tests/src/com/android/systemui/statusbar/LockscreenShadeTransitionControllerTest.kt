@@ -211,16 +211,6 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testTriggeringBouncerWhenPrivateNotificationsArentAllowed() {
-        whenever(lockScreenUserManager.userAllowsPrivateNotificationsInPublic(anyInt())).thenReturn(
-                false)
-        transitionController.goToLockedShade(null)
-        verify(statusbarStateController, never()).setState(anyInt())
-        verify(statusbarStateController).setLeaveOpenOnKeyguardHide(true)
-        verify(mCentralSurfaces).showBouncerWithDimissAndCancelIfKeyguard(anyObject(), anyObject())
-    }
-
-    @Test
     fun testTriggeringBouncerNoNotificationsOnLockscreen() {
         whenever(lockScreenUserManager.shouldShowLockscreenNotifications()).thenReturn(false)
         transitionController.goToLockedShade(null)

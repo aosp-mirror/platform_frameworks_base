@@ -2254,10 +2254,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             pw.println("Current Status Bar state:");
             pw.println("  mExpandedVisible=" + mShadeController.isExpandedVisible());
             pw.println("  mDisplayMetrics=" + mDisplayMetrics);
-            pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller));
-            pw.println("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller)
-                    + " scroll " + mStackScroller.getScrollX()
+            pw.print("  mStackScroller: " + CentralSurfaces.viewInfo(mStackScroller));
+            pw.print(" scroll " + mStackScroller.getScrollX()
                     + "," + mStackScroller.getScrollY());
+            pw.println(" translationX " + mStackScroller.getTranslationX());
         }
 
         pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
@@ -3747,6 +3747,12 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     @Override
     public void notifyBiometricAuthModeChanged() {
         mDozeServiceHost.updateDozing();
+        if (mBiometricUnlockController.getMode()
+                == BiometricUnlockController.MODE_DISMISS_BOUNCER) {
+            // Don't update the scrim controller at this time, in favor of the transition repository
+            // updating the scrim
+            return;
+        }
         updateScrimController();
     }
 
@@ -3799,6 +3805,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             } else {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
             }
+            // This will cancel the keyguardFadingAway animation if it is running. We need to do
+            // this as otherwise it can remain pending and leave keyguard in a weird state.
+            mUnlockScrimCallback.onCancelled();
         } else if (mBouncerShowing && !unlocking) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by

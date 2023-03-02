@@ -348,6 +348,7 @@ constructor(
 
     /**
      * Overrides non-bouncer show logic in shouldPauseAuth to still show icon.
+     *
      * @return whether the udfpsBouncer has been newly shown or hidden
      */
     private fun showUdfpsBouncer(show: Boolean): Boolean {

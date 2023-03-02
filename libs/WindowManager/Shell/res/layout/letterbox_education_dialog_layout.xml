@@ -16,9 +16,7 @@
 <com.android.wm.shell.compatui.letterboxedu.LetterboxEduDialogLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@android:color/system_neutral1_900">
+    style="@style/LetterboxDialog">
 
     <!-- The background of the top-level layout acts as the background dim. -->
 

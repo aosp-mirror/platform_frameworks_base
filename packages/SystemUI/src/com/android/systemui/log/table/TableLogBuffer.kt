@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.Flow
  *
  * Some parts of System UI maintain a lot of pieces of state at once.
  * [com.android.systemui.plugins.log.LogBuffer] allows us to easily log change events:
- *
  * - 10-10 10:10:10.456: state2 updated to newVal2
  * - 10-10 10:11:00.000: stateN updated to StateN(val1=true, val2=1)
  * - 10-10 10:11:02.123: stateN updated to StateN(val1=true, val2=2)
@@ -37,7 +36,6 @@ import kotlinx.coroutines.flow.Flow
  * - 10-10 10:11:06.000: stateN updated to StateN(val1=false, val2=3)
  *
  * However, it can sometimes be more useful to view the state changes in table format:
- *
  * - timestamp--------- | state1- | state2- | ... | stateN.val1 | stateN.val2
  * - -------------------------------------------------------------------------
  * - 10-10 10:10:10.123 | val1--- | val2--- | ... | false------ | 0-----------
@@ -56,23 +54,18 @@ import kotlinx.coroutines.flow.Flow
  * individual fields.
  *
  * How it works:
- *
  * 1) Create an instance of this buffer via [TableLogBufferFactory].
- *
  * 2) For any states being logged, implement [Diffable]. Implementing [Diffable] allows the state to
- * only log the fields that have *changed* since the previous update, instead of always logging all
- * fields.
- *
+ *    only log the fields that have *changed* since the previous update, instead of always logging
+ *    all fields.
  * 3) Each time a change in a state happens, call [logDiffs]. If your state is emitted using a
- * [Flow], you should use the [logDiffsForTable] extension function to automatically log diffs any
- * time your flow emits a new value.
+ *    [Flow], you should use the [logDiffsForTable] extension function to automatically log diffs
+ *    any time your flow emits a new value.
  *
  * When a dump occurs, there will be two dumps:
- *
  * 1) The change events under the dumpable name "$name-changes".
- *
  * 2) This class will coalesce all the diffs into a table format and log them under the dumpable
- * name "$name-table".
+ *    name "$name-table".
  *
  * @param maxSize the maximum size of the buffer. Must be > 0.
  */
@@ -99,11 +92,10 @@ class TableLogBuffer(
      * The [newVal] object's method [Diffable.logDiffs] will be used to fetch the diffs.
      *
      * @param columnPrefix a prefix that will be applied to every column name that gets logged. This
-     * ensures that all the columns related to the same state object will be grouped together in the
-     * table.
-     *
+     *   ensures that all the columns related to the same state object will be grouped together in
+     *   the table.
      * @throws IllegalArgumentException if [columnPrefix] or column name contain "|". "|" is used as
-     * the separator token for parsing, so it can't be present in any part of the column name.
+     *   the separator token for parsing, so it can't be present in any part of the column name.
      */
     @Synchronized
     fun <T : Diffable<T>> logDiffs(columnPrefix: String, prevVal: T, newVal: T) {
@@ -117,7 +109,7 @@ class TableLogBuffer(
      * Logs change(s) to the buffer using [rowInitializer].
      *
      * @param rowInitializer a function that will be called immediately to store relevant data on
-     * the row.
+     *   the row.
      */
     @Synchronized
     fun logChange(columnPrefix: String, rowInitializer: (TableRowLogger) -> Unit) {

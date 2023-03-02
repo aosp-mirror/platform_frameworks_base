@@ -38,11 +38,9 @@
     </style>
 
     <style name="CaptionWindowingButtonStyle">
-        <item name="android:layout_width">32dp</item>
-        <item name="android:layout_height">32dp</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
         <item name="android:padding">4dp</item>
-        <item name="android:layout_marginTop">5dp</item>
-        <item name="android:layout_marginBottom">5dp</item>
     </style>
 
     <style name="CaptionMenuButtonStyle" parent="@style/Widget.AppCompat.Button.Borderless">
@@ -78,6 +76,12 @@
         <item name="android:lineSpacingExtra">4sp</item>
         <item name="android:lineHeight">16sp</item>
         <item name="android:textColor">@color/tv_pip_edu_text</item>
+    </style>
+
+    <style name="LetterboxDialog" parent="@android:style/Theme.Holo">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@color/letterbox_dialog_background</item>
     </style>
 
     <style name="RestartDialogTitleText">

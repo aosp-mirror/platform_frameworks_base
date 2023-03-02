@@ -13,7 +13,7 @@
 
 package com.android.systemui.statusbar.notification
 
-import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.log.dagger.NotificationLockscreenLog
 import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.statusbar.StatusBarState
@@ -21,7 +21,12 @@ import javax.inject.Inject
 
 class NotificationWakeUpCoordinatorLogger
 @Inject
-constructor(@NotificationLog private val buffer: LogBuffer) {
+constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
+    private var lastSetDozeAmountLogWasFractional = false
+    private var lastSetDozeAmountLogState = -1
+    private var lastSetDozeAmountLogSource = "undefined"
+    private var lastOnDozeAmountChangedLogWasFractional = false
+
     fun logSetDozeAmount(
         linear: Float,
         eased: Float,
@@ -29,6 +34,20 @@ constructor(@NotificationLog private val buffer: LogBuffer) {
         state: Int,
         changed: Boolean,
     ) {
+        // Avoid logging on every frame of the animation if important values are not changing
+        val isFractional = linear != 1f && linear != 0f
+        if (
+            lastSetDozeAmountLogWasFractional &&
+                isFractional &&
+                lastSetDozeAmountLogState == state &&
+                lastSetDozeAmountLogSource == source
+        ) {
+            return
+        }
+        lastSetDozeAmountLogWasFractional = isFractional
+        lastSetDozeAmountLogState = state
+        lastSetDozeAmountLogSource = source
+
         buffer.log(
             TAG,
             DEBUG,
@@ -66,6 +85,10 @@ constructor(@NotificationLog private val buffer: LogBuffer) {
     }
 
     fun logOnDozeAmountChanged(linear: Float, eased: Float) {
+        // Avoid logging on every frame of the animation when values are fractional
+        val isFractional = linear != 1f && linear != 0f
+        if (lastOnDozeAmountChangedLogWasFractional && isFractional) return
+        lastOnDozeAmountChangedLogWasFractional = isFractional
         buffer.log(
             TAG,
             DEBUG,

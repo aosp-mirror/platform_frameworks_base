@@ -38,6 +38,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -195,6 +196,9 @@ public class AccountManagerService
     private final IAccountAuthenticatorCache mAuthenticatorCache;
     private static final String PRE_N_DATABASE_NAME = "accounts.db";
     private static final Intent ACCOUNTS_CHANGED_INTENT;
+    private static final Bundle ACCOUNTS_CHANGED_OPTIONS = new BroadcastOptions()
+            .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+            .toBundle();
 
     private static final int SIGNATURE_CHECK_MISMATCH = 0;
     private static final int SIGNATURE_CHECK_MATCH = 1;
@@ -1075,7 +1079,8 @@ public class AccountManagerService
         Log.i(TAG, "the accountType= " + (accountType == null ? "" : accountType)
                 + " changed with useCase=" + useCase + " for userId=" + userId
                 + ", sending broadcast of " + ACCOUNTS_CHANGED_INTENT.getAction());
-        mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId));
+        mContext.sendBroadcastAsUser(ACCOUNTS_CHANGED_INTENT, new UserHandle(userId),
+                null /* receiverPermission */, ACCOUNTS_CHANGED_OPTIONS);
     }
 
     private void sendAccountRemovedBroadcast(

@@ -1091,7 +1091,6 @@ public class BackupManager {
      *
      * @hide
      */
-    @NonNull
     @SystemApi
     public void reportDelayedRestoreResult(@NonNull BackupRestoreEventLogger logger) {
         checkServiceBinder();

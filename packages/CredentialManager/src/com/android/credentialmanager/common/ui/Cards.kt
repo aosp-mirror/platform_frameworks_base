@@ -16,11 +16,13 @@
 
 package com.android.credentialmanager.common.ui
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +42,8 @@ import androidx.compose.ui.unit.dp
 fun SheetContainerCard(
     topAppBar: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
+    contentVerticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    content: LazyListScope.() -> Unit,
 ) {
     Card(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
@@ -54,7 +57,7 @@ fun SheetContainerCard(
         if (topAppBar != null) {
             topAppBar()
         }
-        Column(
+        LazyColumn(
             modifier = Modifier.padding(
                 start = 24.dp,
                 end = 24.dp,
@@ -63,6 +66,7 @@ fun SheetContainerCard(
             ).fillMaxWidth().wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
             content = content,
+            verticalArrangement = contentVerticalArrangement,
         )
     }
 }

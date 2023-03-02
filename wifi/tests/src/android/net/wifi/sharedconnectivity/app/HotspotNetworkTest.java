@@ -19,10 +19,10 @@ package android.net.wifi.sharedconnectivity.app;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_EAP;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_PSK;
 import static android.net.wifi.WifiInfo.SECURITY_TYPE_WEP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_PHONE;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_TABLET;
-import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_CELLULAR;
-import static android.net.wifi.sharedconnectivity.app.TetherNetwork.NETWORK_TYPE_WIFI;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetwork.NETWORK_TYPE_CELLULAR;
+import static android.net.wifi.sharedconnectivity.app.HotspotNetwork.NETWORK_TYPE_WIFI;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_TABLET;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -36,14 +36,15 @@ import org.junit.Test;
 import java.util.Arrays;
 
 /**
- * Unit tests for {@link TetherNetwork}.
+ * Unit tests for {@link HotspotNetwork}.
  */
 @SmallTest
-public class TetherNetworkTest {
+public class HotspotNetworkTest {
     private static final long DEVICE_ID = 11L;
-    private static final DeviceInfo DEVICE_INFO = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
+            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_TABLET)
+                    .setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
+                    .setConnectionStrength(2).setBatteryPercentage(50).build();
     private static final int NETWORK_TYPE = NETWORK_TYPE_CELLULAR;
     private static final String NETWORK_NAME = "TEST_NETWORK";
     private static final String HOTSPOT_SSID = "TEST_SSID";
@@ -51,9 +52,10 @@ public class TetherNetworkTest {
     private static final int[] HOTSPOT_SECURITY_TYPES = {SECURITY_TYPE_WEP, SECURITY_TYPE_EAP};
 
     private static final long DEVICE_ID_1 = 111L;
-    private static final DeviceInfo DEVICE_INFO_1 = new DeviceInfo.Builder()
-            .setDeviceType(DEVICE_TYPE_PHONE).setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-            .setConnectionStrength(2).setBatteryPercentage(50).build();
+    private static final NetworkProviderInfo NETWORK_PROVIDER_INFO1 =
+            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_PHONE)
+                    .setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
+                    .setConnectionStrength(2).setBatteryPercentage(50).build();
     private static final int NETWORK_TYPE_1 = NETWORK_TYPE_WIFI;
     private static final String NETWORK_NAME_1 = "TEST_NETWORK1";
     private static final String HOTSPOT_SSID_1 = "TEST_SSID1";
@@ -65,7 +67,7 @@ public class TetherNetworkTest {
      */
     @Test
     public void testParcelOperation() {
-        TetherNetwork network = buildTetherNetworkBuilder().build();
+        HotspotNetwork network = buildHotspotNetworkBuilder().build();
 
         Parcel parcelW = Parcel.obtain();
         network.writeToParcel(parcelW, 0);
@@ -75,7 +77,7 @@ public class TetherNetworkTest {
         Parcel parcelR = Parcel.obtain();
         parcelR.unmarshall(bytes, 0, bytes.length);
         parcelR.setDataPosition(0);
-        TetherNetwork fromParcel = TetherNetwork.CREATOR.createFromParcel(parcelR);
+        HotspotNetwork fromParcel = HotspotNetwork.CREATOR.createFromParcel(parcelR);
 
         assertThat(fromParcel).isEqualTo(network);
         assertThat(fromParcel.hashCode()).isEqualTo(network.hashCode());
@@ -86,30 +88,30 @@ public class TetherNetworkTest {
      */
     @Test
     public void testEqualsOperation() {
-        TetherNetwork network1 = buildTetherNetworkBuilder().build();
-        TetherNetwork network2 = buildTetherNetworkBuilder().build();
+        HotspotNetwork network1 = buildHotspotNetworkBuilder().build();
+        HotspotNetwork network2 = buildHotspotNetworkBuilder().build();
         assertThat(network1).isEqualTo(network2);
 
-        TetherNetwork.Builder builder = buildTetherNetworkBuilder().setDeviceId(DEVICE_ID_1);
+        HotspotNetwork.Builder builder = buildHotspotNetworkBuilder().setDeviceId(DEVICE_ID_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder().setDeviceInfo(DEVICE_INFO_1);
+        builder = buildHotspotNetworkBuilder().setNetworkProviderInfo(NETWORK_PROVIDER_INFO1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder().setNetworkType(NETWORK_TYPE_1);
+        builder = buildHotspotNetworkBuilder().setHostNetworkType(NETWORK_TYPE_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder().setNetworkName(NETWORK_NAME_1);
+        builder = buildHotspotNetworkBuilder().setNetworkName(NETWORK_NAME_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder().setHotspotSsid(HOTSPOT_SSID_1);
+        builder = buildHotspotNetworkBuilder().setHotspotSsid(HOTSPOT_SSID_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder().setHotspotBssid(HOTSPOT_BSSID_1);
+        builder = buildHotspotNetworkBuilder().setHotspotBssid(HOTSPOT_BSSID_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildTetherNetworkBuilder();
-        TetherNetwork.Builder builder1 = buildTetherNetworkBuilder();
+        builder = buildHotspotNetworkBuilder();
+        HotspotNetwork.Builder builder1 = buildHotspotNetworkBuilder();
         Arrays.stream(HOTSPOT_SECURITY_TYPES_1).forEach(builder1::addHotspotSecurityType);
 
         assertThat(builder1.build()).isNotEqualTo(builder.build());
@@ -120,13 +122,13 @@ public class TetherNetworkTest {
      */
     @Test
     public void testGetMethods() {
-        TetherNetwork network = buildTetherNetworkBuilder().build();
+        HotspotNetwork network = buildHotspotNetworkBuilder().build();
         ArraySet<Integer> securityTypes = new ArraySet<>();
         Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(securityTypes::add);
 
         assertThat(network.getDeviceId()).isEqualTo(DEVICE_ID);
-        assertThat(network.getDeviceInfo()).isEqualTo(DEVICE_INFO);
-        assertThat(network.getNetworkType()).isEqualTo(NETWORK_TYPE);
+        assertThat(network.getNetworkProviderInfo()).isEqualTo(NETWORK_PROVIDER_INFO);
+        assertThat(network.getHostNetworkType()).isEqualTo(NETWORK_TYPE);
         assertThat(network.getNetworkName()).isEqualTo(NETWORK_NAME);
         assertThat(network.getHotspotSsid()).isEqualTo(HOTSPOT_SSID);
         assertThat(network.getHotspotBssid()).isEqualTo(HOTSPOT_BSSID);
@@ -135,17 +137,17 @@ public class TetherNetworkTest {
 
     @Test
     public void testHashCode() {
-        TetherNetwork network1 = buildTetherNetworkBuilder().build();
-        TetherNetwork network2 = buildTetherNetworkBuilder().build();
+        HotspotNetwork network1 = buildHotspotNetworkBuilder().build();
+        HotspotNetwork network2 = buildHotspotNetworkBuilder().build();
 
         assertThat(network1.hashCode()).isEqualTo(network2.hashCode());
     }
 
-    private TetherNetwork.Builder buildTetherNetworkBuilder() {
-        TetherNetwork.Builder builder =  new TetherNetwork.Builder()
+    private HotspotNetwork.Builder buildHotspotNetworkBuilder() {
+        HotspotNetwork.Builder builder = new HotspotNetwork.Builder()
                 .setDeviceId(DEVICE_ID)
-                .setDeviceInfo(DEVICE_INFO)
-                .setNetworkType(NETWORK_TYPE)
+                .setNetworkProviderInfo(NETWORK_PROVIDER_INFO)
+                .setHostNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
                 .setHotspotSsid(HOTSPOT_SSID)
                 .setHotspotBssid(HOTSPOT_BSSID);

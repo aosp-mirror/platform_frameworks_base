@@ -16,8 +16,8 @@
 
 package android.net.wifi.sharedconnectivity.app;
 
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_LAPTOP;
-import static android.net.wifi.sharedconnectivity.app.DeviceInfo.DEVICE_TYPE_PHONE;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_LAPTOP;
+import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE_TYPE_PHONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -28,10 +28,10 @@ import androidx.test.filters.SmallTest;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link DeviceInfo}.
+ * Unit tests for {@link NetworkProviderInfo}.
  */
 @SmallTest
-public class DeviceInfoTest {
+public class NetworkProviderInfoTest {
 
     private static final int DEVICE_TYPE = DEVICE_TYPE_PHONE;
     private static final String DEVICE_NAME = "TEST_NAME";
@@ -50,7 +50,7 @@ public class DeviceInfoTest {
      */
     @Test
     public void testParcelOperation() {
-        DeviceInfo info = buildDeviceInfoBuilder().build();
+        NetworkProviderInfo info = buildNetworkProviderInfoBuilder().build();
 
         Parcel parcelW = Parcel.obtain();
         info.writeToParcel(parcelW, 0);
@@ -60,7 +60,7 @@ public class DeviceInfoTest {
         Parcel parcelR = Parcel.obtain();
         parcelR.unmarshall(bytes, 0, bytes.length);
         parcelR.setDataPosition(0);
-        DeviceInfo fromParcel = DeviceInfo.CREATOR.createFromParcel(parcelR);
+        NetworkProviderInfo fromParcel = NetworkProviderInfo.CREATOR.createFromParcel(parcelR);
 
         assertThat(fromParcel).isEqualTo(info);
         assertThat(fromParcel.hashCode()).isEqualTo(info.hashCode());
@@ -71,24 +71,25 @@ public class DeviceInfoTest {
      */
     @Test
     public void testEqualsOperation() {
-        DeviceInfo info1 = buildDeviceInfoBuilder().build();
-        DeviceInfo info2 = buildDeviceInfoBuilder().build();
+        NetworkProviderInfo info1 = buildNetworkProviderInfoBuilder().build();
+        NetworkProviderInfo info2 = buildNetworkProviderInfoBuilder().build();
         assertThat(info1).isEqualTo(info2);
 
-        DeviceInfo.Builder builder = buildDeviceInfoBuilder().setDeviceType(DEVICE_TYPE_1);
+        NetworkProviderInfo.Builder builder = buildNetworkProviderInfoBuilder().setDeviceType(
+                DEVICE_TYPE_1);
         assertThat(builder.build()).isNotEqualTo(info1);
 
-        builder = buildDeviceInfoBuilder().setDeviceName(DEVICE_NAME_1);
+        builder = buildNetworkProviderInfoBuilder().setDeviceName(DEVICE_NAME_1);
         assertThat(builder.build()).isNotEqualTo(info1);
 
-        builder = buildDeviceInfoBuilder().setModelName(DEVICE_MODEL_1);
+        builder = buildNetworkProviderInfoBuilder().setModelName(DEVICE_MODEL_1);
         assertThat(builder.build()).isNotEqualTo(info1);
 
-        builder = buildDeviceInfoBuilder()
+        builder = buildNetworkProviderInfoBuilder()
                 .setBatteryPercentage(BATTERY_PERCENTAGE_1);
         assertThat(builder.build()).isNotEqualTo(info1);
 
-        builder = buildDeviceInfoBuilder()
+        builder = buildNetworkProviderInfoBuilder()
                 .setConnectionStrength(CONNECTION_STRENGTH_1);
         assertThat(builder.build()).isNotEqualTo(info1);
     }
@@ -98,7 +99,7 @@ public class DeviceInfoTest {
      */
     @Test
     public void testGetMethods() {
-        DeviceInfo info = buildDeviceInfoBuilder().build();
+        NetworkProviderInfo info = buildNetworkProviderInfoBuilder().build();
         assertThat(info.getDeviceType()).isEqualTo(DEVICE_TYPE);
         assertThat(info.getDeviceName()).isEqualTo(DEVICE_NAME);
         assertThat(info.getModelName()).isEqualTo(DEVICE_MODEL);
@@ -108,15 +109,16 @@ public class DeviceInfoTest {
 
     @Test
     public void testHashCode() {
-        DeviceInfo info1 = buildDeviceInfoBuilder().build();
-        DeviceInfo info2 = buildDeviceInfoBuilder().build();
+        NetworkProviderInfo info1 = buildNetworkProviderInfoBuilder().build();
+        NetworkProviderInfo info2 = buildNetworkProviderInfoBuilder().build();
 
         assertThat(info1.hashCode()).isEqualTo(info2.hashCode());
     }
 
-    private DeviceInfo.Builder buildDeviceInfoBuilder() {
-        return new DeviceInfo.Builder().setDeviceType(DEVICE_TYPE).setDeviceName(DEVICE_NAME)
-                .setModelName(DEVICE_MODEL).setBatteryPercentage(BATTERY_PERCENTAGE)
+    private NetworkProviderInfo.Builder buildNetworkProviderInfoBuilder() {
+        return new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE)
+                .setDeviceName(DEVICE_NAME).setModelName(DEVICE_MODEL)
+                .setBatteryPercentage(BATTERY_PERCENTAGE)
                 .setConnectionStrength(CONNECTION_STRENGTH);
     }
 }

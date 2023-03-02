@@ -37,7 +37,7 @@ class FakeKeyguardTransitionRepository : KeyguardTransitionRepository {
         _transitions.emit(step)
     }
 
-    override fun startTransition(info: TransitionInfo): UUID? {
+    override fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean): UUID? {
         return null
     }
 

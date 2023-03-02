@@ -492,7 +492,9 @@ class OrientationReasonListener(
             displayManager,
             handler,
             BiometricDisplayListener.SensorType.SideFingerprint(sensorProps)
-        ) { onOrientationChanged(reason) }
+        ) {
+            onOrientationChanged(reason)
+        }
 }
 
 /**

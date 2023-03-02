@@ -198,8 +198,7 @@
     <skip />
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Tilkynningasvæði."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Flýtistillingar."</string>
-    <!-- no translation found for accessibility_desc_qs_notification_shade (8327226953072700376) -->
-    <skip />
+    <string name="accessibility_desc_qs_notification_shade" msgid="8327226953072700376">"Flýtistillingar og tilkynningagluggi."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Lásskjár."</string>
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Vinnulásskjár"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Loka"</string>
@@ -1111,16 +1110,10 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Skipta yfir í vinnusnið"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Loka"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Stillingar fyrir lásskjá"</string>
-    <!-- no translation found for wifi_unavailable_dream_overlay_content_description (2024166212194640100) -->
-    <skip />
-    <!-- no translation found for camera_blocked_dream_overlay_content_description (4074759493559418130) -->
-    <skip />
-    <!-- no translation found for camera_and_microphone_blocked_dream_overlay_content_description (7891078093416249764) -->
-    <skip />
-    <!-- no translation found for microphone_blocked_dream_overlay_content_description (5466897982130007033) -->
-    <skip />
-    <!-- no translation found for priority_mode_dream_overlay_content_description (6044561000253314632) -->
-    <skip />
-    <!-- no translation found for assistant_attention_content_description (6830215897604642875) -->
-    <skip />
+    <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi er ekki til staðar"</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Lokað fyrir myndavél"</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Lokað fyrir myndavél og hljóðnema"</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Lokað fyrir hljóðnema"</string>
+    <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Kveikt er á forgangsstillingu"</string>
+    <string name="assistant_attention_content_description" msgid="6830215897604642875">"Hjálparinn er að hlusta"</string>
 </resources>

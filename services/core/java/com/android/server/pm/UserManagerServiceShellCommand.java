@@ -150,6 +150,10 @@ public class UserManagerServiceShellCommand extends ShellCommand {
                     return runIsUserVisible();
                 case "get-main-user":
                     return runGetMainUserId();
+                case "can-switch-to-headless-system-user":
+                    return canSwitchToHeadlessSystemUser();
+                case "is-main-user-permanent-admin":
+                    return isMainUserPermanentAdmin();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -529,6 +533,20 @@ public class UserManagerServiceShellCommand extends ShellCommand {
             return 1;
         }
         pw.println("Main user id: " + mainUserId);
+        return 0;
+    }
+
+    private int canSwitchToHeadlessSystemUser() {
+        PrintWriter pw = getOutPrintWriter();
+        boolean canSwitchToHeadlessSystemUser = mService.canSwitchToHeadlessSystemUser();
+        pw.println(canSwitchToHeadlessSystemUser);
+        return 0;
+    }
+
+    private int isMainUserPermanentAdmin() {
+        PrintWriter pw = getOutPrintWriter();
+        boolean isMainUserPermanentAdmin = mService.isMainUserPermanentAdmin();
+        pw.println(isMainUserPermanentAdmin);
         return 0;
     }
 

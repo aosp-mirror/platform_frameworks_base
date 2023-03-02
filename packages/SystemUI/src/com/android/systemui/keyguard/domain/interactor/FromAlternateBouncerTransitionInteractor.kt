@@ -71,8 +71,7 @@ constructor(
                         isPrimaryBouncerShowing,
                         lastStartedTransitionStep,
                         wakefulnessState,
-                        isAodAvailable
-                    ) ->
+                        isAodAvailable) ->
                     if (
                         !isAlternateBouncerShowing &&
                             !isPrimaryBouncerShowing &&

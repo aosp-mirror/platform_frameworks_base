@@ -36,7 +36,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class DeviceInfo implements Parcelable {
+public final class NetworkProviderInfo implements Parcelable {
 
     /**
      * Device type providing connectivity is unknown.
@@ -59,6 +59,16 @@ public final class DeviceInfo implements Parcelable {
     public static final int DEVICE_TYPE_LAPTOP = 3;
 
     /**
+     * Device providing connectivity is a watch.
+     */
+    public static final int DEVICE_TYPE_WATCH = 4;
+
+    /**
+     * Device providing connectivity is a watch.
+     */
+    public static final int DEVICE_TYPE_AUTO = 5;
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -66,7 +76,9 @@ public final class DeviceInfo implements Parcelable {
             DEVICE_TYPE_UNKNOWN,
             DEVICE_TYPE_PHONE,
             DEVICE_TYPE_TABLET,
-            DEVICE_TYPE_LAPTOP
+            DEVICE_TYPE_LAPTOP,
+            DEVICE_TYPE_WATCH,
+            DEVICE_TYPE_AUTO
     })
     public @interface DeviceType {}
 
@@ -77,7 +89,7 @@ public final class DeviceInfo implements Parcelable {
     private final int mConnectionStrength;
 
     /**
-     * Builder class for {@link DeviceInfo}.
+     * Builder class for {@link NetworkProviderInfo}.
      */
     public static final class Builder {
         private int mDeviceType;
@@ -149,13 +161,13 @@ public final class DeviceInfo implements Parcelable {
         }
 
         /**
-         * Builds the {@link DeviceInfo} object.
+         * Builds the {@link NetworkProviderInfo} object.
          *
-         * @return Returns the built {@link DeviceInfo} object.
+         * @return Returns the built {@link NetworkProviderInfo} object.
          */
         @NonNull
-        public DeviceInfo build() {
-            return new DeviceInfo(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
+        public NetworkProviderInfo build() {
+            return new NetworkProviderInfo(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
                     mConnectionStrength);
         }
     }
@@ -163,7 +175,8 @@ public final class DeviceInfo implements Parcelable {
     private static void validate(int deviceType, String deviceName, String modelName,
             int batteryPercentage, int connectionStrength) {
         if (deviceType != DEVICE_TYPE_UNKNOWN && deviceType != DEVICE_TYPE_PHONE
-                && deviceType != DEVICE_TYPE_TABLET && deviceType != DEVICE_TYPE_LAPTOP) {
+                && deviceType != DEVICE_TYPE_TABLET && deviceType != DEVICE_TYPE_LAPTOP
+                && deviceType !=  DEVICE_TYPE_WATCH && deviceType != DEVICE_TYPE_AUTO) {
             throw new IllegalArgumentException("Illegal device type");
         }
         if (Objects.isNull(deviceName)) {
@@ -180,7 +193,7 @@ public final class DeviceInfo implements Parcelable {
         }
     }
 
-    private DeviceInfo(@DeviceType int deviceType, @NonNull String deviceName,
+    private NetworkProviderInfo(@DeviceType int deviceType, @NonNull String deviceName,
             @NonNull String modelName, int batteryPercentage, int connectionStrength) {
         validate(deviceType, deviceName, modelName, batteryPercentage, connectionStrength);
         mDeviceType = deviceType;
@@ -242,8 +255,8 @@ public final class DeviceInfo implements Parcelable {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof DeviceInfo)) return false;
-        DeviceInfo other = (DeviceInfo) obj;
+        if (!(obj instanceof NetworkProviderInfo)) return false;
+        NetworkProviderInfo other = (NetworkProviderInfo) obj;
         return mDeviceType == other.getDeviceType()
                 && Objects.equals(mDeviceName, other.mDeviceName)
                 && Objects.equals(mModelName, other.mModelName)
@@ -271,32 +284,32 @@ public final class DeviceInfo implements Parcelable {
     }
 
     /**
-     * Creates a {@link DeviceInfo} object from a parcel.
+     * Creates a {@link NetworkProviderInfo} object from a parcel.
      *
      * @hide
      */
     @NonNull
-    public static DeviceInfo readFromParcel(@NonNull Parcel in) {
-        return new DeviceInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
+    public static NetworkProviderInfo readFromParcel(@NonNull Parcel in) {
+        return new NetworkProviderInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
                 in.readInt());
     }
 
     @NonNull
-    public static final Creator<DeviceInfo> CREATOR = new Creator<DeviceInfo>() {
+    public static final Creator<NetworkProviderInfo> CREATOR = new Creator<NetworkProviderInfo>() {
         @Override
-        public DeviceInfo createFromParcel(Parcel in) {
+        public NetworkProviderInfo createFromParcel(Parcel in) {
             return readFromParcel(in);
         }
 
         @Override
-        public DeviceInfo[] newArray(int size) {
-            return new DeviceInfo[size];
+        public NetworkProviderInfo[] newArray(int size) {
+            return new NetworkProviderInfo[size];
         }
     };
 
     @Override
     public String toString() {
-        return new StringBuilder("DeviceInfo[")
+        return new StringBuilder("NetworkProviderInfo[")
                 .append("deviceType=").append(mDeviceType)
                 .append(", deviceName=").append(mDeviceName)
                 .append(", modelName=").append(mModelName)

@@ -234,6 +234,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private boolean mLogGesture = false;
     private boolean mInRejectedExclusion = false;
     private boolean mIsOnLeftEdge;
+    private boolean mDeferSetIsOnLeftEdge;
 
     private boolean mIsAttached;
     private boolean mIsGesturalModeEnabled;
@@ -878,7 +879,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             // either the bouncer is showing or the notification panel is hidden
             mInputEventReceiver.setBatchingEnabled(false);
             if (isTrackpadEvent) {
-                // TODO: show the back arrow based on the direction of the swipe.
+                // Since trackpad gestures don't have zones, this will be determined later by the
+                // direction of the gesture. {@code mIsOnLeftEdge} is set to false to begin with.
+                mDeferSetIsOnLeftEdge = true;
                 mIsOnLeftEdge = false;
             } else {
                 mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
@@ -899,7 +902,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 mEdgeBackPlugin.onMotionEvent(ev);
                 dispatchToBackAnimation(ev);
             }
-            if (mLogGesture) {
+            if (mLogGesture || isTrackpadEvent) {
                 mDownPoint.set(ev.getX(), ev.getY());
                 mEndPoint.set(-1, -1);
                 mThresholdCrossed = false;
@@ -907,9 +910,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
             // For debugging purposes, only log edge points
             (isWithinInsets ? mGestureLogInsideInsets : mGestureLogOutsideInsets).log(String.format(
-                    "Gesture [%d,alw=%B,%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
+                    "Gesture [%d,alw=%B,%B,%B,%B,%B,%B,disp=%s,wl=%d,il=%d,wr=%d,ir=%d,excl=%s]",
                     System.currentTimeMillis(), isTrackpadEvent, mAllowGesture, mIsOnLeftEdge,
-                    mIsBackGestureAllowed,
+                    mDeferSetIsOnLeftEdge, mIsBackGestureAllowed,
                     QuickStepContract.isBackGestureDisabled(mSysUiFlags), mDisplaySize,
                     mEdgeWidthLeft, mLeftInset, mEdgeWidthRight, mRightInset, mExcludeRegion));
         } else if (mAllowGesture || mLogGesture) {
@@ -928,6 +931,14 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     mLogGesture = false;
                     return;
                 } else if (action == MotionEvent.ACTION_MOVE) {
+                    if (isTrackpadEvent && mDeferSetIsOnLeftEdge) {
+                        // mIsOnLeftEdge is determined by the relative position between the down
+                        // and the current motion event for trackpad gestures instead of zoning.
+                        mIsOnLeftEdge = mEndPoint.x > mDownPoint.x;
+                        mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
+                        mDeferSetIsOnLeftEdge = false;
+                    }
+
                     if ((ev.getEventTime() - ev.getDownTime()) > mLongPressTimeout) {
                         if (mAllowGesture) {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_LONG_PRESS);
