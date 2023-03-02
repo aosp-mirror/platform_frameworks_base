@@ -1718,6 +1718,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (passwordHistoryLength == 0) {
             passwordHistory = "";
         } else {
+            Slogf.d(TAG, "Adding new password to password history for user %d", userHandle);
             final byte[] hashFactor = getHashFactor(password, userHandle);
             final byte[] salt = getSalt(userHandle).getBytes();
             String hash = password.passwordToHistoryHash(salt, hashFactor);
@@ -1749,7 +1750,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (salt == 0) {
             salt = SecureRandomUtils.randomLong();
             setLong(LockPatternUtils.LOCK_PASSWORD_SALT_KEY, salt, userId);
-            Slog.v(TAG, "Initialized lock password salt for user: " + userId);
         }
         return Long.toHexString(salt);
     }
