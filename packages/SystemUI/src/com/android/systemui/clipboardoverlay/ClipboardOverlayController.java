@@ -346,9 +346,20 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     }
 
     private void animateFromMinimized() {
-        mIsMinimized = false;
-        setExpandedView();
-        animateIn();
+        if (mEnterAnimator != null && mEnterAnimator.isRunning()) {
+            mEnterAnimator.cancel();
+        }
+        mEnterAnimator = mView.getMinimizedFadeoutAnimation();
+        mEnterAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                mIsMinimized = false;
+                setExpandedView();
+                animateIn();
+            }
+        });
+        mEnterAnimator.start();
     }
 
     private String getAccessibilityAnnouncement(ClipboardModel.Type type) {

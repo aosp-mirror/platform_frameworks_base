@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.RemoteAction;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -100,6 +101,9 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<ClipboardOverlayView.ClipboardOverlayCallbacks> mOverlayCallbacksCaptor;
     private ClipboardOverlayView.ClipboardOverlayCallbacks mCallbacks;
+
+    @Captor
+    private ArgumentCaptor<AnimatorListenerAdapter> mAnimatorArgumentCaptor;
 
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -478,12 +482,16 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         when(mClipboardOverlayWindow.getWindowInsets()).thenReturn(
                 getImeInsets(new Rect(0, 0, 0, 1)));
         mOverlayController.setClipData(mSampleClipData, "");
+        Animator mockFadeoutAnimator = Mockito.mock(Animator.class);
+        when(mClipboardOverlayView.getMinimizedFadeoutAnimation()).thenReturn(mockFadeoutAnimator);
 
         verify(mClipboardOverlayView).setMinimized(true);
         verify(mClipboardOverlayView, never()).setMinimized(false);
         verify(mClipboardOverlayView, never()).showTextPreview(any(), anyBoolean());
 
         mCallbacks.onMinimizedViewTapped();
+        verify(mockFadeoutAnimator).addListener(mAnimatorArgumentCaptor.capture());
+        mAnimatorArgumentCaptor.getValue().onAnimationEnd(mockFadeoutAnimator);
 
         verify(mClipboardOverlayView).setMinimized(false);
         verify(mClipboardOverlayView).showTextPreview("Test Item", false);
