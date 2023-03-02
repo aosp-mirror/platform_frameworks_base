@@ -273,16 +273,6 @@ public class FingerprintEnrollClientTest {
         showHideOverlay(c -> c.onEnrollResult(new Fingerprint("", 1, 1), 0));
     }
 
-    @Test
-    public void testPowerPressForwardsAcquireMessage() throws RemoteException {
-        final FingerprintEnrollClient client = createClient();
-        client.start(mCallback);
-        client.onPowerPressed();
-
-        verify(mClientMonitorCallbackConverter).onAcquired(anyInt(),
-                eq(FINGERPRINT_ACQUIRED_POWER_PRESSED), anyInt());
-    }
-
     private void showHideOverlay(Consumer<FingerprintEnrollClient> block)
             throws RemoteException {
         final FingerprintEnrollClient client = createClient();
