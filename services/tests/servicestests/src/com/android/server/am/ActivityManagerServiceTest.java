@@ -528,7 +528,7 @@ public class ActivityManagerServiceTest {
             ActivityManager.PROCESS_CAPABILITY_NONE,
             ActivityManager.PROCESS_CAPABILITY_NONE,
             ActivityManager.PROCESS_CAPABILITY_NONE,
-            ActivityManager.PROCESS_CAPABILITY_NETWORK,
+            ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK,
         };
         final Map<Integer, ChangeRecord> changeItems = new HashMap<>();
         for (int i = 0; i < changesForPendingUidRecords.length; ++i) {
