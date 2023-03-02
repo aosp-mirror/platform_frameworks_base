@@ -974,7 +974,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .build();
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertTrue(activity.shouldCreateCompatDisplayInsets());
 
         // The non-resizable activity should not be size compat because it is on a resizable task
         // in multi-window mode.
@@ -1007,7 +1007,7 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testShouldNotCreateCompatDisplayInsetsWhenRootActivityIsResizeable() {
+    public void testShouldCreateCompatDisplayInsetsWhenUnresizeableAndSupportsSizeChangesFalse() {
         setUpDisplaySizeWithApp(1000, 2500);
 
         // Make the task root resizable.
@@ -1016,7 +1016,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // Create an activity on the same task.
         final ActivityRecord activity = buildActivityRecord(/* supportsSizeChanges= */false,
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        assertFalse(activity.shouldCreateCompatDisplayInsets());
+        assertTrue(activity.shouldCreateCompatDisplayInsets());
     }
 
     @Test
