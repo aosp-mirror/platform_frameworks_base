@@ -353,6 +353,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             }
 
             mWindowManager.addView(mSettingView, mParams);
+            if (resetPosition) {
+                // Request focus on the settings panel when position of the panel is reset.
+                mSettingView.requestFocus();
+            }
 
             // Exclude magnification switch button from system gesture area.
             setSystemGestureExclusion();
@@ -380,8 +384,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSettingView = (LinearLayout) View.inflate(mContext,
                 R.layout.window_magnification_settings_view, null);
 
-        mSettingView.setClickable(true);
         mSettingView.setFocusable(true);
+        mSettingView.setFocusableInTouchMode(true);
         mSettingView.setOnTouchListener(this::onTouch);
 
         mPanelView = mSettingView.findViewById(R.id.magnifier_panel_view);
@@ -530,7 +534,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                LayoutParams.FLAG_NOT_FOCUSABLE,
+                /* _flags= */ 0,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.START;
         params.accessibilityTitle = getAccessibilityWindowTitle(context);
