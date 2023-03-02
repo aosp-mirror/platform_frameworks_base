@@ -21,8 +21,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 
-import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.newTarget;
-
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -160,16 +158,15 @@ public class RemoteTransitionCompat {
 
             final ArrayList<RemoteAnimationTarget> apps = new ArrayList<>();
             final ArrayList<RemoteAnimationTarget> wallpapers = new ArrayList<>();
-            RemoteAnimationTargetCompat.LeafTaskFilter leafTaskFilter =
-                    new RemoteAnimationTargetCompat.LeafTaskFilter();
+            TransitionUtil.LeafTaskFilter leafTaskFilter = new TransitionUtil.LeafTaskFilter();
             // About layering: we divide up the "layer space" into 3 regions (each the size of
             // the change count). This lets us categorize things into above/below/between
             // while maintaining their relative ordering.
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                if (RemoteAnimationTargetCompat.isWallpaper(change)) {
-                    final RemoteAnimationTarget target = newTarget(change,
+                if (TransitionUtil.isWallpaper(change)) {
+                    final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                             // wallpapers go into the "below" layer space
                             info.getChanges().size() - i, info, t, mLeashMap);
                     wallpapers.add(target);
@@ -177,7 +174,7 @@ public class RemoteTransitionCompat {
                     t.setAlpha(target.leash, 1);
                 } else if (leafTaskFilter.test(change)) {
                     // start by putting everything into the "below" layer space.
-                    final RemoteAnimationTarget target = newTarget(change,
+                    final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
                             info.getChanges().size() - i, info, t, mLeashMap);
                     apps.add(target);
                     if (TransitionUtil.isClosingType(change.getMode())) {
@@ -217,8 +214,8 @@ public class RemoteTransitionCompat {
             TransitionInfo.Change recentsOpening = null;
             boolean foundRecentsClosing = false;
             boolean hasChangingApp = false;
-            final RemoteAnimationTargetCompat.LeafTaskFilter leafTaskFilter =
-                    new RemoteAnimationTargetCompat.LeafTaskFilter();
+            final TransitionUtil.LeafTaskFilter leafTaskFilter =
+                    new TransitionUtil.LeafTaskFilter();
             for (int i = 0; i < info.getChanges().size(); ++i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
                 final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
@@ -308,7 +305,8 @@ public class RemoteTransitionCompat {
                     int pausingIdx = TaskState.indexOf(mPausingTasks, change);
                     if (pausingIdx >= 0) {
                         // Something is showing/opening a previously-pausing app.
-                        targets[i] = newTarget(change, layer, mPausingTasks.get(pausingIdx).mLeash);
+                        targets[i] = TransitionUtil.newTarget(change, layer,
+                                mPausingTasks.get(pausingIdx).mLeash);
                         mOpeningTasks.add(mPausingTasks.remove(pausingIdx));
                         // Setup hides opening tasks initially, so make it visible again (since we
                         // are already showing it).
@@ -316,7 +314,7 @@ public class RemoteTransitionCompat {
                         t.setAlpha(change.getLeash(), 1.f);
                     } else {
                         // We are receiving new opening tasks, so convert to onTasksAppeared.
-                        targets[i] = newTarget(change, layer, info, t, mLeashMap);
+                        targets[i] = TransitionUtil.newTarget(change, layer, info, t, mLeashMap);
                         t.reparent(targets[i].leash, mInfo.getRootLeash());
                         t.setLayer(targets[i].leash, layer);
                         mOpeningTasks.add(new TaskState(change, targets[i].leash));
