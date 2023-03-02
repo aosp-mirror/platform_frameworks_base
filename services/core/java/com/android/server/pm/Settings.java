@@ -5034,19 +5034,20 @@ public final class Settings implements Watchable, Snappable {
             }
         }
         pw.print(prefix); pw.print("  timeStamp=");
-            date.setTime(ps.getLastModifiedTime());
-            pw.println(sdf.format(date));
+        date.setTime(ps.getLastModifiedTime());
+        pw.println(sdf.format(date));
         pw.print(prefix); pw.print("  lastUpdateTime=");
-            date.setTime(ps.getLastUpdateTime());
-            pw.println(sdf.format(date));
-        if (ps.getInstallSource().mInstallerPackageName != null) {
-            pw.print(prefix); pw.print("  installerPackageName=");
-            pw.println(ps.getInstallSource().mInstallerPackageName);
-        }
-        if (ps.getInstallSource().mInstallerPackageUid != INVALID_UID) {
-            pw.print(prefix); pw.print("  installerPackageUid=");
-            pw.println(ps.getInstallSource().mInstallerPackageUid);
-        }
+        date.setTime(ps.getLastUpdateTime());
+        pw.println(sdf.format(date));
+        pw.print(prefix); pw.print("  installerPackageName=");
+        pw.println(ps.getInstallSource().mInstallerPackageName);
+        pw.print(prefix); pw.print("  installerPackageUid=");
+        pw.println(ps.getInstallSource().mInstallerPackageUid);
+        pw.print(prefix); pw.print("  initiatingPackageName=");
+        pw.println(ps.getInstallSource().mInitiatingPackageName);
+        pw.print(prefix); pw.print("  originatingPackageName=");
+        pw.println(ps.getInstallSource().mOriginatingPackageName);
+
         if (ps.getInstallSource().mUpdateOwnerPackageName != null) {
             pw.print(prefix); pw.print("  updateOwnerPackageName=");
             pw.println(ps.getInstallSource().mUpdateOwnerPackageName);
