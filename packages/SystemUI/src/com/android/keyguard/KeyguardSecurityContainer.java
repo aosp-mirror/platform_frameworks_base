@@ -1220,8 +1220,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 constraintSet.connect(rightElement, LEFT, leftElement, RIGHT);
                 constraintSet.connect(rightElement, RIGHT, PARENT_ID, RIGHT);
                 constraintSet.connect(mUserSwitcherViewGroup.getId(), TOP, PARENT_ID, TOP);
-                constraintSet.connect(mUserSwitcherViewGroup.getId(), BOTTOM, PARENT_ID, BOTTOM,
-                        yTrans);
+                constraintSet.connect(mUserSwitcherViewGroup.getId(), BOTTOM, PARENT_ID, BOTTOM);
                 constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);
                 constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM);
                 constraintSet.setHorizontalChainStyle(mUserSwitcherViewGroup.getId(), CHAIN_SPREAD);
