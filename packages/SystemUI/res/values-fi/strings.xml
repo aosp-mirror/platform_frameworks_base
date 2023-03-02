@@ -28,7 +28,7 @@
     <string name="invalid_charger_text" msgid="2339310107232691577">"Käytä laitteesi mukana tullutta laturia"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Otetaanko virransäästö käyttöön?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Tietoa virransäästöstä"</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ota käyttöön"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Laita päälle"</string>
     <string name="battery_saver_start_action" msgid="8353766979886287140">"Laita päälle"</string>
     <string name="battery_saver_dismiss_action" msgid="7199342621040014738">"Ei kiitos"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Näytön automaattinen kääntö"</string>
@@ -699,7 +699,7 @@
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> on käynnissä"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"Sovellus avattiin ilman asennusta."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"Sovellus avattiin ilman asennusta. Katso lisätietoja napauttamalla."</string>
-    <string name="app_info" msgid="5153758994129963243">"Sovelluksen tiedot"</string>
+    <string name="app_info" msgid="5153758994129963243">"Sovellustiedot"</string>
     <string name="go_to_web" msgid="636673528981366511">"Siirry selaimeen"</string>
     <string name="mobile_data" msgid="4564407557775397216">"Mobiilidata"</string>
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ei voi lähettää"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Tallennus ei onnistu. Yritä uudelleen."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Tallennus ei onnistu."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Käytä vähintään 4 merkkiä"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Käytä alle 16 merkkiä"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Koontiversion numero"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Koontiversion numero kopioitu leikepöydälle"</string>
     <string name="basic_status" msgid="2315371112182658176">"Avaa keskustelu"</string>

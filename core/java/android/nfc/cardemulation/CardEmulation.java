@@ -265,12 +265,16 @@ public final class CardEmulation {
      * @return whether AIDs in the category can be handled by a service
      *         specified by the foreground app.
      */
+    @SuppressWarnings("NonUserGetterCalled")
     public boolean categoryAllowsForegroundPreference(String category) {
         if (CATEGORY_PAYMENT.equals(category)) {
             boolean preferForeground = false;
+            Context contextAsUser = mContext.createContextAsUser(
+                    UserHandle.of(UserHandle.myUserId()), 0);
             try {
-                preferForeground = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.NFC_PAYMENT_FOREGROUND, UserHandle.myUserId()) != 0;
+                preferForeground = Settings.Secure.getInt(
+                        contextAsUser.getContentResolver(),
+                        Settings.Secure.NFC_PAYMENT_FOREGROUND) != 0;
             } catch (SettingNotFoundException e) {
             }
             return preferForeground;

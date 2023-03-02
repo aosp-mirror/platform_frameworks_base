@@ -36,10 +36,12 @@ import android.sysprop.HdmiProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ConcurrentUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -67,6 +69,32 @@ public final class HdmiControlManager {
     @Nullable private final IHdmiControlService mService;
 
     private static final int INVALID_PHYSICAL_ADDRESS = 0xFFFF;
+
+    /**
+     * A cache of the current device's physical address. When device's HDMI out port
+     * is not connected to any device, it is set to {@link #INVALID_PHYSICAL_ADDRESS}.
+     *
+     * <p>Otherwise it is updated by the {@link ClientHotplugEventListener} registered
+     * with {@link com.android.server.hdmi.HdmiControlService} by the
+     * {@link #addHotplugEventListener(HotplugEventListener)} and the address is from
+     * {@link com.android.server.hdmi.HdmiControlService#getPortInfo()}
+     */
+    @GuardedBy("mLock")
+    private int mLocalPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+
+    private void setLocalPhysicalAddress(int physicalAddress) {
+        synchronized (mLock) {
+            mLocalPhysicalAddress = physicalAddress;
+        }
+    }
+
+    private int getLocalPhysicalAddress() {
+        synchronized (mLock) {
+            return mLocalPhysicalAddress;
+        }
+    }
+
+    private final Object mLock = new Object();
 
     /**
      * Broadcast Action: Display OSD message.
@@ -1094,6 +1122,37 @@ public final class HdmiControlManager {
         mHasAudioSystemDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mHasSwitchDevice = hasDeviceType(types, HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
         mIsSwitchDevice = HdmiProperties.is_switch().orElse(false);
+        addHotplugEventListener(new ClientHotplugEventListener());
+    }
+
+    private final class ClientHotplugEventListener implements HotplugEventListener {
+
+        @Override
+        public void onReceived(HdmiHotplugEvent event) {
+            List<HdmiPortInfo> ports = new ArrayList<>();
+            try {
+                ports = mService.getPortInfo();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (ports.isEmpty()) {
+                Log.e(TAG, "Can't find port info, not updating connected status. "
+                        + "Hotplug event:" + event);
+                return;
+            }
+            // If the HDMI OUT port is plugged or unplugged, update the mLocalPhysicalAddress
+            for (HdmiPortInfo port : ports) {
+                if (port.getId() == event.getPort()) {
+                    if (port.getType() == HdmiPortInfo.PORT_OUTPUT) {
+                        setLocalPhysicalAddress(
+                                event.isConnected()
+                                        ? port.getAddress()
+                                        : INVALID_PHYSICAL_ADDRESS);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     private static boolean hasDeviceType(int[] types, int type) {
@@ -1464,11 +1523,7 @@ public final class HdmiControlManager {
      * 1.4b 8.7 Physical Address for more details on the address discovery proccess.
      */
     public int getPhysicalAddress() {
-        try {
-            return mService.getPhysicalAddress();
-        } catch (RemoteException e) {
-            return INVALID_PHYSICAL_ADDRESS;
-        }
+        return getLocalPhysicalAddress();
     }
 
     /**
@@ -1482,7 +1537,7 @@ public final class HdmiControlManager {
      */
     public boolean isDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Objects.requireNonNull(targetDevice);
-        int physicalAddress = getPhysicalAddress();
+        int physicalAddress = getLocalPhysicalAddress();
         if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }
@@ -1501,7 +1556,7 @@ public final class HdmiControlManager {
     @Deprecated
     public boolean isRemoteDeviceConnected(@NonNull HdmiDeviceInfo targetDevice) {
         Objects.requireNonNull(targetDevice);
-        int physicalAddress = getPhysicalAddress();
+        int physicalAddress = getLocalPhysicalAddress();
         if (physicalAddress == INVALID_PHYSICAL_ADDRESS) {
             return false;
         }

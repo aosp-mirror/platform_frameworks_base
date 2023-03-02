@@ -485,8 +485,8 @@
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ဟော့စပေါ့"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"အလုပ် ပရိုဖိုင်"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"အချို့သူများ အတွက် ပျော်စရာ ဖြစ်ပေမဲ့ အားလုံး အတွက် မဟုတ်ပါ"</string>
-    <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI ဖမ်းစက်က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းကြည့်ရန် နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ ဤ စမ်းသပ်ရေး အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ကျိုးပျက် သို့မဟုတ် ပျောက်ကွယ် သွားနိုင်သည်။ သတိထားလျက် ဆက်လက် ဆောင်ရွက်ပါ။"</string>
-    <string name="tuner_persistent_warning" msgid="230466285569307806">"ဤ စမ်းသပ်ရေး အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ကျိုးပျက် သို့မဟုတ် ပျောက်ကွယ် သွားနိုင်သည်။ သတိထားလျက် ဆက်လက် ဆောင်ရွက်ပါ။"</string>
+    <string name="tuner_warning" msgid="1861736288458481650">"စနစ် UI Tuner က သင့်အတွက် Android အသုံးပြုသူ အင်တာဖေ့စ်ကို ပြောင်းရန်နှင့် စိတ်ကြိုက်ပြုလုပ်ရန် နည်းလမ်း အပိုများကို သင့်အတွက် စီစဉ်ပေးသည်။ အနာဂတ်ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
+    <string name="tuner_persistent_warning" msgid="230466285569307806">"အနာဂတ် ဗားရှင်းများတွင် ဤစမ်းသပ်အင်္ဂါရပ်များမှာ ပြောင်းလဲ၊ ပျက်စီး သို့မဟုတ် ပျောက်ကွယ်သွားနိုင်သည်။ သတိဖြင့် ရှေ့ဆက်ပါ။"</string>
     <string name="got_it" msgid="477119182261892069">"ရပါပြီ"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"ဂုဏ်ပြုပါရစေ! စနစ် UI ဖမ်းစက်ကို ဆက်တင်ထဲသို့ ထည့်ပြီးပြီ။"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"ဆက်တင် အထဲမှ ဖယ်ရှားရန်"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ထုတ်လွှင့်၍ မရပါ"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"သိမ်း၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"သိမ်း၍မရပါ။"</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"အနည်းဆုံး အက္ခရာ ၄ လုံး သုံးရန်"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"အက္ခရာ ၁၆ လုံးအောက် သုံးရန်"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"တည်ဆောက်မှုနံပါတ်"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"တည်ဆောက်မှုနံပါတ်ကို ကလစ်ဘုတ်သို့ မိတ္တူကူးပြီးပါပြီ။"</string>
     <string name="basic_status" msgid="2315371112182658176">"စကားဝိုင်းကို ဖွင့်ရန်"</string>

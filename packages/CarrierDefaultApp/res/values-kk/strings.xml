@@ -3,11 +3,11 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
     <string name="android_system_label" msgid="2797790869522345065">"Мобильдік байланыс операторы"</string>
-    <string name="portal_notification_id" msgid="5155057562457079297">"Мобильдік деректер бітті"</string>
-    <string name="no_data_notification_id" msgid="668400731803969521">"Мобильдік деректер өшірілді"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"Мобильдік интернет бітті"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"Мобильдік интернет өшірілді"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"%s вебсайтына кіру үшін түртіңіз"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Қызмет көрсетушіге (%s) хабарласыңыз"</string>
-    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Мобильдік деректер байланысы жоқ"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Мобильдік интернет байланысы жоқ"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"%s арқылы деректер не роуминг жоспарын енгізу"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Мобильді деректер күйі"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Мобильдік желіге тіркелу"</string>

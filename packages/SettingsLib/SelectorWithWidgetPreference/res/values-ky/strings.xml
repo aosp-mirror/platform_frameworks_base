@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="settings_label" msgid="5948970810295631236">"Жөндөөлөр"</string>
+    <string name="settings_label" msgid="5948970810295631236">"Параметрлер"</string>
 </resources>

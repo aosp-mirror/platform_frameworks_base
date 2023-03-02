@@ -819,8 +819,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> <xliff:g id="SONG_NAME">%1$s</xliff:g> című számának lejátszása innen: <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> lejátszása innen: <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Visszavonás"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Menjen közelebb a következőn való lejátszáshoz: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Menjen közelebb a(z) <xliff:g id="DEVICENAME">%1$s</xliff:g> eszközhöz, hogy itt játszhassa le a tartalmat"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Menjen közelebb, ha itt szeretné lejátszani: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Menjen közelebb az eszközhöz (<xliff:g id="DEVICENAME">%1$s</xliff:g>), ha itt szeretné lejátszani"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Lejátszás folyamatban a(z) <xliff:g id="DEVICENAME">%1$s</xliff:g> eszközön"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Hiba történt. Próbálkozzon újra."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktív, ellenőrizze az appot"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Nem sikerült a közvetítés"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"A mentés nem sikerült. Próbálja újra."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"A mentés nem sikerült."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Legalább négy karaktert használjon"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Legfeljebb 16 karaktert használhat"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Buildszám"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Buildszám a vágólapra másolva."</string>
     <string name="basic_status" msgid="2315371112182658176">"Beszélgetés megnyitása"</string>
