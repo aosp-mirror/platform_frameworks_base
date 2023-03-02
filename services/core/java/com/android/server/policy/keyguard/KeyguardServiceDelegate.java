@@ -29,6 +29,7 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
+import com.android.server.wm.EventLogTags;
 
 import java.io.PrintWriter;
 
@@ -255,6 +256,11 @@ public class KeyguardServiceDelegate {
     public void setOccluded(boolean isOccluded, boolean notify) {
         if (mKeyguardService != null && notify) {
             if (DEBUG) Log.v(TAG, "setOccluded(" + isOccluded + ")");
+            EventLogTags.writeWmSetKeyguardOccluded(
+                    isOccluded ? 1 : 0,
+                    0 /* animate */,
+                    0 /* transit */,
+                    "setOccluded");
             mKeyguardService.setOccluded(isOccluded, false /* animate */);
         }
         mKeyguardState.occluded = isOccluded;
