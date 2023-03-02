@@ -43,6 +43,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -71,6 +72,7 @@ import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedController;
@@ -147,6 +149,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private TaskStackListenerImpl mTaskStackListener;
     private PipParamsChangedForwarder mPipParamsChangedForwarder;
     private DisplayInsetsController mDisplayInsetsController;
+    private TabletopModeController mTabletopModeController;
     private Optional<OneHandedController> mOneHandedController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellController mShellController;
@@ -403,6 +406,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayInsetsController displayInsetsController,
+            TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
@@ -417,7 +421,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 pipDisplayLayoutState, pipMotionHelper, pipMediaController, phonePipMenuController,
                 pipTaskOrganizer, pipTransitionState, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
-                displayInsetsController, oneHandedController, mainExecutor)
+                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor)
                 .mImpl;
     }
 
@@ -444,6 +448,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayInsetsController displayInsetsController,
+            TabletopModeController tabletopModeController,
             Optional<OneHandedController> oneHandedController,
             ShellExecutor mainExecutor
     ) {
@@ -477,6 +482,7 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                 .getInteger(R.integer.config_pipEnterAnimationDuration);
         mPipParamsChangedForwarder = pipParamsChangedForwarder;
         mDisplayInsetsController = displayInsetsController;
+        mTabletopModeController = tabletopModeController;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -658,6 +664,42 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         }
                     }
                 });
+
+        mTabletopModeController.registerOnTabletopModeChangedListener((isInTabletopMode) -> {
+            if (!mTabletopModeController.enableMoveFloatingWindowInTabletop()) return;
+            final String tag = "tabletop-mode";
+            if (!isInTabletopMode) {
+                mPipBoundsState.removeNamedUnrestrictedKeepClearArea(tag);
+                return;
+            }
+
+            // To prepare for the entry bounds.
+            final Rect displayBounds = mPipBoundsState.getDisplayBounds();
+            if (mTabletopModeController.getPreferredHalfInTabletopMode()
+                    == TabletopModeController.PREFERRED_TABLETOP_HALF_TOP) {
+                // Prefer top, avoid the bottom half of the display.
+                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
+                        displayBounds.left, displayBounds.centerY(),
+                        displayBounds.right, displayBounds.bottom));
+            } else {
+                // Prefer bottom, avoid the top half of the display.
+                mPipBoundsState.addNamedUnrestrictedKeepClearArea(tag, new Rect(
+                        displayBounds.left, displayBounds.top,
+                        displayBounds.right, displayBounds.centerY()));
+            }
+
+            // Try to move the PiP window if we have entered PiP mode.
+            if (mPipTransitionState.hasEnteredPip()) {
+                final Rect pipBounds = mPipBoundsState.getBounds();
+                final Point edgeInsets = mPipSizeSpecHandler.getScreenEdgeInsets();
+                if ((pipBounds.height() + 2 * edgeInsets.y) > (displayBounds.height() / 2)) {
+                    // PiP bounds is too big to fit either half, bail early.
+                    return;
+                }
+                mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
+                mMainExecutor.execute(mMovePipInResponseToKeepClearAreasChangeCallback);
+            }
+        });
 
         mOneHandedController.ifPresent(controller -> {
             controller.registerTransitionCallback(
