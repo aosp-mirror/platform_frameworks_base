@@ -1921,6 +1921,10 @@ package android.media.tv {
     method public void removeHardwareDevice(int);
   }
 
+  public class TvView extends android.view.ViewGroup {
+    method public void notifyTvMessage(@NonNull String, @NonNull android.os.Bundle);
+  }
+
 }
 
 package android.media.tv.tuner {
