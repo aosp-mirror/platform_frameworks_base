@@ -2363,13 +2363,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         mInjector.getSystemWrapper().enablePackageCaches();
 
-        // Now after opening every single application zip, make sure they
-        // are all flushed.  Not really needed, but keeps things nice and
-        // tidy.
-        t.traceBegin("GC");
-        VMRuntime.getRuntime().requestConcurrentGC();
-        t.traceEnd();
-
         // The initial scanning above does many calls into installd while
         // holding the mPackages lock, but we're mostly interested in yelling
         // once we have a booted system.
