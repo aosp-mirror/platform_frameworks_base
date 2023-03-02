@@ -84,7 +84,7 @@ public class BatteryUsageStatsStoreTest {
 
         mMockClock.realtime = 1_000_000;
         mMockClock.uptime = 1_000_000;
-        mBatteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mBatteryStats.resetAllStatsCmdLocked();
 
         final long[] timestamps = mBatteryUsageStatsStore.listBatteryUsageStatsTimestamps();
         assertThat(timestamps).hasLength(1);
@@ -114,7 +114,7 @@ public class BatteryUsageStatsStoreTest {
         final int numberOfSnapshots =
                 (int) (MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES / snapshotFileSize);
         for (int i = 0; i < numberOfSnapshots + 2; i++) {
-            mBatteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+            mBatteryStats.resetAllStatsCmdLocked();
 
             mMockClock.realtime += 10_000_000;
             mMockClock.uptime += 10_000_000;
@@ -141,7 +141,7 @@ public class BatteryUsageStatsStoreTest {
             mMockClock.currentTime += 10_000_000;
             prepareBatteryStats();
 
-            mBatteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+            mBatteryStats.resetAllStatsCmdLocked();
         }
 
         assertThat(getDirectorySize(mStoreDirectory)).isNotEqualTo(0);
