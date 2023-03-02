@@ -967,7 +967,7 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig.Builder builder2 = new VirtualDisplayConfig.Builder(
                 VIRTUAL_DISPLAY_NAME, width, height, dpi)
                 .setUniqueId(uniqueId2)
-                .setWindowManagerMirroring(true);
+                .setWindowManagerMirroringEnabled(true);
         final int secondDisplayId = binderService.createVirtualDisplay(builder2.build(),
                 mMockAppToken2 /* callback */, null /* projection */,
                 PACKAGE_NAME);

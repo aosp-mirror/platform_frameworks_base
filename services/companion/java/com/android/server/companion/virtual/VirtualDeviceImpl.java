@@ -97,6 +97,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -830,7 +831,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     private GenericWindowPolicyController createWindowPolicyController(
-            @NonNull List<String> displayCategories) {
+            @NonNull Set<String> displayCategories) {
         final GenericWindowPolicyController gwpc =
                 new GenericWindowPolicyController(FLAG_SECURE,
                         SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,

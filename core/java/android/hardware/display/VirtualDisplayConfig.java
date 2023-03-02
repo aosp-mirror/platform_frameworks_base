@@ -27,13 +27,13 @@ import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
 import android.view.Display;
 import android.view.Surface;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Holds configuration used to create {@link VirtualDisplay} instances.
@@ -51,8 +51,8 @@ public final class VirtualDisplayConfig implements Parcelable {
     private final Surface mSurface;
     private final String mUniqueId;
     private final int mDisplayIdToMirror;
-    private final boolean mWindowManagerMirroring;
-    private ArrayList<String> mDisplayCategories = null;
+    private final boolean mWindowManagerMirroringEnabled;
+    private ArraySet<String> mDisplayCategories = null;
     private final float mRequestedRefreshRate;
 
     private VirtualDisplayConfig(
@@ -64,8 +64,8 @@ public final class VirtualDisplayConfig implements Parcelable {
             @Nullable Surface surface,
             @Nullable String uniqueId,
             int displayIdToMirror,
-            boolean windowManagerMirroring,
-            @NonNull ArrayList<String> displayCategories,
+            boolean windowManagerMirroringEnabled,
+            @NonNull ArraySet<String> displayCategories,
             float requestedRefreshRate) {
         mName = name;
         mWidth = width;
@@ -75,7 +75,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         mSurface = surface;
         mUniqueId = uniqueId;
         mDisplayIdToMirror = displayIdToMirror;
-        mWindowManagerMirroring = windowManagerMirroring;
+        mWindowManagerMirroringEnabled = windowManagerMirroringEnabled;
         mDisplayCategories = displayCategories;
         mRequestedRefreshRate = requestedRefreshRate;
     }
@@ -151,8 +151,8 @@ public final class VirtualDisplayConfig implements Parcelable {
      * if DisplayManager should record contents instead.
      * @hide
      */
-    public boolean isWindowManagerMirroring() {
-        return mWindowManagerMirroring;
+    public boolean isWindowManagerMirroringEnabled() {
+        return mWindowManagerMirroringEnabled;
     }
 
     /**
@@ -161,8 +161,8 @@ public final class VirtualDisplayConfig implements Parcelable {
      * @see Builder#setDisplayCategories
      */
     @NonNull
-    public List<String> getDisplayCategories() {
-        return Collections.unmodifiableList(mDisplayCategories);
+    public Set<String> getDisplayCategories() {
+        return Collections.unmodifiableSet(mDisplayCategories);
     }
 
     /**
@@ -185,8 +185,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         dest.writeTypedObject(mSurface, flags);
         dest.writeString8(mUniqueId);
         dest.writeInt(mDisplayIdToMirror);
-        dest.writeBoolean(mWindowManagerMirroring);
-        dest.writeStringList(mDisplayCategories);
+        dest.writeBoolean(mWindowManagerMirroringEnabled);
+        dest.writeArraySet(mDisplayCategories);
         dest.writeFloat(mRequestedRefreshRate);
     }
 
@@ -210,7 +210,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 && Objects.equals(mSurface, that.mSurface)
                 && Objects.equals(mUniqueId, that.mUniqueId)
                 && mDisplayIdToMirror == that.mDisplayIdToMirror
-                && mWindowManagerMirroring == that.mWindowManagerMirroring
+                && mWindowManagerMirroringEnabled == that.mWindowManagerMirroringEnabled
                 && Objects.equals(mDisplayCategories, that.mDisplayCategories)
                 && mRequestedRefreshRate == that.mRequestedRefreshRate;
     }
@@ -219,7 +219,7 @@ public final class VirtualDisplayConfig implements Parcelable {
     public int hashCode() {
         int hashCode = Objects.hash(
                 mName, mWidth, mHeight, mDensityDpi, mFlags, mSurface, mUniqueId,
-                mDisplayIdToMirror, mWindowManagerMirroring, mDisplayCategories,
+                mDisplayIdToMirror, mWindowManagerMirroringEnabled, mDisplayCategories,
                 mRequestedRefreshRate);
         return hashCode;
     }
@@ -236,7 +236,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                 + " mSurface=" + mSurface
                 + " mUniqueId=" + mUniqueId
                 + " mDisplayIdToMirror=" + mDisplayIdToMirror
-                + " mWindowManagerMirroring=" + mWindowManagerMirroring
+                + " mWindowManagerMirroringEnabled=" + mWindowManagerMirroringEnabled
                 + " mDisplayCategories=" + mDisplayCategories
                 + " mRequestedRefreshRate=" + mRequestedRefreshRate
                 + ")";
@@ -251,9 +251,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         mSurface = in.readTypedObject(Surface.CREATOR);
         mUniqueId = in.readString8();
         mDisplayIdToMirror = in.readInt();
-        mWindowManagerMirroring = in.readBoolean();
-        mDisplayCategories = new ArrayList<>();
-        in.readStringList(mDisplayCategories);
+        mWindowManagerMirroringEnabled = in.readBoolean();
+        mDisplayCategories = (ArraySet<String>) in.readArraySet(null);
         mRequestedRefreshRate = in.readFloat();
     }
 
@@ -283,8 +282,8 @@ public final class VirtualDisplayConfig implements Parcelable {
         private Surface mSurface = null;
         private String mUniqueId = null;
         private int mDisplayIdToMirror = DEFAULT_DISPLAY;
-        private boolean mWindowManagerMirroring = false;
-        private ArrayList<String> mDisplayCategories = new ArrayList<>();
+        private boolean mWindowManagerMirroringEnabled = false;
+        private ArraySet<String> mDisplayCategories = new ArraySet<>();
         private float mRequestedRefreshRate = 0.0f;
 
         /**
@@ -370,8 +369,8 @@ public final class VirtualDisplayConfig implements Parcelable {
          * @hide
          */
         @NonNull
-        public Builder setWindowManagerMirroring(boolean windowManagerMirroring) {
-            mWindowManagerMirroring = windowManagerMirroring;
+        public Builder setWindowManagerMirroringEnabled(boolean windowManagerMirroringEnabled) {
+            mWindowManagerMirroringEnabled = windowManagerMirroringEnabled;
             return this;
         }
 
@@ -383,7 +382,7 @@ public final class VirtualDisplayConfig implements Parcelable {
          * {@link android.content.pm.ActivityInfo#requiredDisplayCategory}.
          */
         @NonNull
-        public Builder setDisplayCategories(@NonNull List<String> displayCategories) {
+        public Builder setDisplayCategories(@NonNull Set<String> displayCategories) {
             mDisplayCategories.clear();
             mDisplayCategories.addAll(Objects.requireNonNull(displayCategories));
             return this;
@@ -435,7 +434,7 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mSurface,
                     mUniqueId,
                     mDisplayIdToMirror,
-                    mWindowManagerMirroring,
+                    mWindowManagerMirroringEnabled,
                     mDisplayCategories,
                     mRequestedRefreshRate);
         }
