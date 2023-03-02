@@ -375,7 +375,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 - mResult.mDecorContainerOffsetX;
         final int y = mRelayoutParams.mCaptionY - mResult.mDecorContainerOffsetY;
         mHandleMenuPosition.set(x, y);
-        String namePrefix = "Caption Menu";
+        final String namePrefix = "Caption Menu";
         mHandleMenu = addWindow(R.layout.desktop_mode_decor_handle_menu, namePrefix, t, x, y,
                 menuWidth, menuHeight, shadowRadius, cornerRadius);
         mSyncQueue.runInSync(transaction -> {
