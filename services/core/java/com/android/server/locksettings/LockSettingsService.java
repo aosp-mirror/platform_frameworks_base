@@ -2728,8 +2728,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         final long finalHandle = handle;
         mHandler.postDelayed(() -> {
             synchronized (mGatekeeperPasswords) {
-                Slog.d(TAG, "Removing handle: " + finalHandle);
-                mGatekeeperPasswords.remove(finalHandle);
+                if (mGatekeeperPasswords.get(finalHandle) != null) {
+                    Slogf.d(TAG, "Cached Gatekeeper password with handle %016x has expired",
+                            finalHandle);
+                    mGatekeeperPasswords.remove(finalHandle);
+                }
             }
         }, GK_PW_HANDLE_STORE_DURATION_MS);
 
