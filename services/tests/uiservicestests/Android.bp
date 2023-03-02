@@ -26,6 +26,7 @@ android_test {
         "services.devicepolicy",
         "services.net",
         "services.usage",
+        "service-permission.impl",
         "guava",
         "androidx.test.rules",
         "hamcrest-library",
