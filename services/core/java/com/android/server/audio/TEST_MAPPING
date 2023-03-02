@@ -1,5 +1,5 @@
 {
-    "presubmit-large": [
+    "presubmit": [
         {
             "name": "CtsMediaAudioTestCases",
             "options": [
@@ -24,9 +24,7 @@
                     "include-annotation": "android.platform.test.annotations.Presubmit"
                 }
             ]
-        }
-    ],
-    "presubmit": [
+        },
         {
             "name": "FrameworksServicesTests",
             "options": [
