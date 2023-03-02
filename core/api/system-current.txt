@@ -10117,7 +10117,7 @@ package android.net.wifi.sharedconnectivity.app {
   }
 
   public static final class NetworkProviderInfo.Builder {
-    ctor public NetworkProviderInfo.Builder();
+    ctor public NetworkProviderInfo.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setBatteryPercentage(@IntRange(from=0, to=100) int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setConnectionStrength(@IntRange(from=0, to=3) int);
