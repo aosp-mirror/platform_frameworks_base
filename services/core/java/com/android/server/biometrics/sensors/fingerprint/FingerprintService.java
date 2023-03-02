@@ -261,7 +261,6 @@ public class FingerprintService extends SystemService {
             final String opPackageName = options.getOpPackageName();
             final String attributionTag = options.getAttributionTag();
             final int userId = options.getUserId();
-            final int sensorId = options.getSensorId();
 
             if (!canUseFingerprint(
                     opPackageName,
@@ -298,21 +297,22 @@ public class FingerprintService extends SystemService {
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
 
             final Pair<Integer, ServiceProvider> provider;
-            if (sensorId == FingerprintManager.SENSOR_ID_ANY) {
+            if (options.getSensorId() == FingerprintManager.SENSOR_ID_ANY) {
                 provider = mRegistry.getSingleProvider();
             } else {
                 Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
-                provider = new Pair<>(sensorId, mRegistry.getProviderForSensor(sensorId));
+                provider = new Pair<>(options.getSensorId(),
+                        mRegistry.getProviderForSensor(options.getSensorId()));
             }
+
             if (provider == null) {
                 Slog.w(TAG, "Null provider for authenticate");
                 return -1;
-            } else {
-                options.setSensorId(provider.first);
             }
+            options.setSensorId(provider.first);
 
             final FingerprintSensorPropertiesInternal sensorProps =
-                    provider.second.getSensorProperties(sensorId);
+                    provider.second.getSensorProperties(options.getSensorId());
             if (!isKeyguard && !Utils.isSettings(getContext(), opPackageName)
                     && sensorProps != null && sensorProps.isAnyUdfpsType()) {
                 try {
@@ -431,9 +431,8 @@ public class FingerprintService extends SystemService {
             if (provider == null) {
                 Slog.w(TAG, "Null provider for detectFingerprint");
                 return -1;
-            } else {
-                options.setSensorId(provider.first);
             }
+            options.setSensorId(provider.first);
 
             return provider.second.scheduleFingerDetect(token,
                     new ClientMonitorCallbackConverter(receiver), options,
