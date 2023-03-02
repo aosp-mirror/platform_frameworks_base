@@ -888,7 +888,7 @@ public final class Choreographer {
 
     void doCallbacks(int callbackType, long frameIntervalNanos) {
         CallbackRecord callbacks;
-        long frameTimeNanos = mFrameData.getFrameTimeNanos();
+        long frameTimeNanos = mFrameData.mFrameTimeNanos;
         synchronized (mLock) {
             // We use "now" to determine when callbacks become due because it's possible
             // for earlier processing phases in a frame to post callbacks that should run
@@ -1042,9 +1042,21 @@ public final class Choreographer {
         private long mVsyncId = FrameInfo.INVALID_VSYNC_ID;
         private long mExpectedPresentationTimeNanos = -1;
         private long mDeadlineNanos = -1;
+        private boolean mInCallback = false;
 
         FrameTimeline() {
             // Intentionally empty; defined so that it is not API/public by default.
+        }
+
+        void setInCallback(boolean inCallback) {
+            mInCallback = inCallback;
+        }
+
+        private void checkInCallback() {
+            if (!mInCallback) {
+                throw new IllegalStateException(
+                        "FrameTimeline is not valid outside of the vsync callback");
+            }
         }
 
         void update(long vsyncId, long expectedPresentationTimeNanos, long deadlineNanos) {
@@ -1058,6 +1070,7 @@ public final class Choreographer {
          * produced by HWUI with the timeline data stored in Surface Flinger.
          */
         public long getVsyncId() {
+            checkInCallback();
             return mVsyncId;
         }
 
@@ -1066,6 +1079,7 @@ public final class Choreographer {
          * presented.
          */
         public long getExpectedPresentationTimeNanos() {
+            checkInCallback();
             return mExpectedPresentationTimeNanos;
         }
 
@@ -1073,6 +1087,7 @@ public final class Choreographer {
          * The time in  {@link System#nanoTime()} timebase which this frame needs to be ready by.
          */
         public long getDeadlineNanos() {
+            checkInCallback();
             return mDeadlineNanos;
         }
     }
@@ -1087,6 +1102,7 @@ public final class Choreographer {
         private final FrameTimeline[] mFrameTimelines =
                 new FrameTimeline[DisplayEventReceiver.VsyncEventData.FRAME_TIMELINES_LENGTH];
         private int mPreferredFrameTimelineIndex;
+        private boolean mInCallback = false;
 
         FrameData() {
             for (int i = 0; i < mFrameTimelines.length; i++) {
@@ -1096,6 +1112,7 @@ public final class Choreographer {
 
         /** The time in nanoseconds when the frame started being rendered. */
         public long getFrameTimeNanos() {
+            checkInCallback();
             return mFrameTimeNanos;
         }
 
@@ -1103,13 +1120,29 @@ public final class Choreographer {
         @NonNull
         @SuppressLint("ArrayReturn") // For API consistency and speed.
         public FrameTimeline[] getFrameTimelines() {
+            checkInCallback();
             return mFrameTimelines;
         }
 
         /** The platform-preferred frame timeline. */
         @NonNull
         public FrameTimeline getPreferredFrameTimeline() {
+            checkInCallback();
             return mFrameTimelines[mPreferredFrameTimelineIndex];
+        }
+
+        void setInCallback(boolean inCallback) {
+            mInCallback = inCallback;
+            for (int i = 0; i < mFrameTimelines.length; i++) {
+                mFrameTimelines[i].setInCallback(inCallback);
+            }
+        }
+
+        private void checkInCallback() {
+            if (!mInCallback) {
+                throw new IllegalStateException(
+                        "FrameData is not valid outside of the vsync callback");
+            }
         }
 
         /**
@@ -1142,16 +1175,16 @@ public final class Choreographer {
                 long frameTimeNanos, DisplayEventReceiver displayEventReceiver, long jitterNanos) {
             int newPreferredIndex = 0;
             final long minimumDeadline =
-                    getPreferredFrameTimeline().getDeadlineNanos() + jitterNanos;
+                    mFrameTimelines[mPreferredFrameTimelineIndex].mDeadlineNanos + jitterNanos;
             // Look for a non-past deadline timestamp in the existing frame data. Otherwise, binder
             // query for new frame data. Note that binder is relatively slow, O(ms), so it is
             // only called when the existing frame data does not hold a valid frame.
             while (newPreferredIndex < mFrameTimelines.length - 1
-                    && mFrameTimelines[newPreferredIndex].getDeadlineNanos() < minimumDeadline) {
+                    && mFrameTimelines[newPreferredIndex].mDeadlineNanos < minimumDeadline) {
                 newPreferredIndex++;
             }
 
-            long newPreferredDeadline = mFrameTimelines[newPreferredIndex].getDeadlineNanos();
+            long newPreferredDeadline = mFrameTimelines[newPreferredIndex].mDeadlineNanos;
             if (newPreferredDeadline < minimumDeadline) {
                 DisplayEventReceiver.VsyncEventData latestVsyncEventData =
                         displayEventReceiver.getLatestVsyncEventData();
@@ -1288,11 +1321,13 @@ public final class Choreographer {
         }
 
         void run(FrameData frameData) {
+            frameData.setInCallback(true);
             if (token == VSYNC_CALLBACK_TOKEN) {
                 ((VsyncCallback) action).onVsync(frameData);
             } else {
                 run(frameData.getFrameTimeNanos());
             }
+            frameData.setInCallback(false);
         }
     }
 
