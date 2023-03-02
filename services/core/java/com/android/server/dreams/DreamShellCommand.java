@@ -39,26 +39,24 @@ public class DreamShellCommand extends ShellCommand {
 
     @Override
     public int onCommand(String cmd) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != Process.ROOT_UID) {
-            Slog.e(TAG, "Must be root before calling Dream shell commands");
-            return -1;
-        }
-
-        if (TextUtils.isEmpty(cmd)) {
-            return super.handleDefaultCommands(cmd);
-        }
         if (DEBUG) {
             Slog.d(TAG, "onCommand:" + cmd);
         }
 
-        switch (cmd) {
-            case "start-dreaming":
-                return startDreaming();
-            case "stop-dreaming":
-                return stopDreaming();
-            default:
-                return super.handleDefaultCommands(cmd);
+        try {
+            switch (cmd) {
+                case "start-dreaming":
+                    enforceCallerIsRoot();
+                    return startDreaming();
+                case "stop-dreaming":
+                    enforceCallerIsRoot();
+                    return stopDreaming();
+                default:
+                    return super.handleDefaultCommands(cmd);
+            }
+        } catch (SecurityException e) {
+            getOutPrintWriter().println(e);
+            return -1;
         }
     }
 
@@ -70,6 +68,12 @@ public class DreamShellCommand extends ShellCommand {
     private int stopDreaming() {
         mService.requestStopDreamFromShell();
         return 0;
+    }
+
+    private void enforceCallerIsRoot() {
+        if (Binder.getCallingUid() != Process.ROOT_UID) {
+            throw new SecurityException("Must be root to call Dream shell commands");
+        }
     }
 
     @Override
