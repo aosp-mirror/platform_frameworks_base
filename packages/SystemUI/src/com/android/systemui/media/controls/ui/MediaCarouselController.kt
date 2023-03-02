@@ -109,10 +109,11 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) : Dumpable {
     /** The current width of the carousel */
-    private var currentCarouselWidth: Int = 0
+    var currentCarouselWidth: Int = 0
+        private set
 
     /** The current height of the carousel */
-    @VisibleForTesting var currentCarouselHeight: Int = 0
+    private var currentCarouselHeight: Int = 0
 
     /** Are we currently showing only active players */
     private var currentlyShowingOnlyActive: Boolean = false
