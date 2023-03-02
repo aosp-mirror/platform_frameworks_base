@@ -64,20 +64,25 @@ public final class KnownNetwork implements Parcelable {
             NETWORK_SOURCE_NEARBY_SELF,
             NETWORK_SOURCE_CLOUD_SELF
     })
-    public @interface NetworkSource {}
+    public @interface NetworkSource {
+    }
 
-    @NetworkSource private final int mNetworkSource;
+    @NetworkSource
+    private final int mNetworkSource;
     private final String mSsid;
-    @SecurityType private final ArraySet<Integer> mSecurityTypes;
+    @SecurityType
+    private final ArraySet<Integer> mSecurityTypes;
     private final NetworkProviderInfo mNetworkProviderInfo;
 
     /**
      * Builder class for {@link KnownNetwork}.
      */
     public static final class Builder {
-        @NetworkSource private int mNetworkSource = -1;
+        @NetworkSource
+        private int mNetworkSource = -1;
         private String mSsid;
-        @SecurityType private final ArraySet<Integer> mSecurityTypes = new ArraySet<>();
+        @SecurityType
+        private final ArraySet<Integer> mSecurityTypes = new ArraySet<>();
         private NetworkProviderInfo mNetworkProviderInfo;
 
         /**
@@ -144,7 +149,8 @@ public final class KnownNetwork implements Parcelable {
         }
     }
 
-    private static void validate(int networkSource, String ssid, Set<Integer> securityTypes,
+    private static void validate(@NetworkSource int networkSource, String ssid,
+            @SecurityType Set<Integer> securityTypes,
             NetworkProviderInfo networkProviderInfo) {
         if (networkSource != NETWORK_SOURCE_UNKNOWN
                 && networkSource != NETWORK_SOURCE_CLOUD_SELF

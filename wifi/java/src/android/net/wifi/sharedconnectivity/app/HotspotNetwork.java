@@ -207,7 +207,7 @@ public final class HotspotNetwork implements Parcelable {
         }
     }
 
-    private static void validate(long deviceId, int networkType, String networkName) {
+    private static void validate(long deviceId, @NetworkType int networkType, String networkName) {
         if (deviceId < 0) {
             throw new IllegalArgumentException("DeviceId must be set");
         }
