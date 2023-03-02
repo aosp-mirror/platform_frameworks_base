@@ -53,6 +53,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -342,10 +343,12 @@ class FlashNotificationsController {
     private void requestStartFlashNotification(FlashNotification flashNotification) {
         if (DEBUG) Log.d(LOG_TAG, "requestStartFlashNotification");
 
-        mIsCameraFlashNotificationEnabled = Settings.System.getIntForUser(
+        boolean isFeatureOn = FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_FLASH_NOTIFICATIONS);
+        mIsCameraFlashNotificationEnabled = isFeatureOn && Settings.System.getIntForUser(
                 mContext.getContentResolver(), SETTING_KEY_CAMERA_FLASH_NOTIFICATION, 0,
                 UserHandle.USER_CURRENT) != 0;
-        mIsScreenFlashNotificationEnabled = Settings.System.getIntForUser(
+        mIsScreenFlashNotificationEnabled = isFeatureOn && Settings.System.getIntForUser(
                 mContext.getContentResolver(), SETTING_KEY_SCREEN_FLASH_NOTIFICATION, 0,
                 UserHandle.USER_CURRENT) != 0;
 
