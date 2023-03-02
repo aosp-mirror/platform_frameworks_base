@@ -172,7 +172,7 @@ public final class NetworkProviderInfo implements Parcelable {
         }
     }
 
-    private static void validate(int deviceType, String deviceName, String modelName,
+    private static void validate(@DeviceType int deviceType, String deviceName, String modelName,
             int batteryPercentage, int connectionStrength) {
         if (deviceType != DEVICE_TYPE_UNKNOWN && deviceType != DEVICE_TYPE_PHONE
                 && deviceType != DEVICE_TYPE_TABLET && deviceType != DEVICE_TYPE_LAPTOP
