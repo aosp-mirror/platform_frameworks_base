@@ -20,6 +20,7 @@ android_app {
     },
 
     static_libs: [
+        "PlatformComposeCore",
         "androidx.activity_activity-compose",
         "androidx.appcompat_appcompat",
         "androidx.compose.animation_animation-core",
