@@ -38,11 +38,13 @@ public abstract class BatteryStatsInternal {
 
     public static final int CPU_WAKEUP_SUBSYSTEM_UNKNOWN = -1;
     public static final int CPU_WAKEUP_SUBSYSTEM_ALARM = 1;
+    public static final int CPU_WAKEUP_SUBSYSTEM_WIFI = 2;
 
     /** @hide */
     @IntDef(prefix = {"CPU_WAKEUP_SUBSYSTEM_"}, value = {
             CPU_WAKEUP_SUBSYSTEM_UNKNOWN,
             CPU_WAKEUP_SUBSYSTEM_ALARM,
+            CPU_WAKEUP_SUBSYSTEM_WIFI,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface CpuWakeupSubsystem {
