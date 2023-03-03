@@ -69,7 +69,7 @@ public:
 
     int updateTargetWorkDuration(int64_t targetDurationNanos);
     int reportActualWorkDuration(int64_t actualDurationNanos);
-    int sendHint(int32_t hint);
+    int sendHint(SessionHint hint);
     int setThreads(const int32_t* threadIds, size_t size);
     int getThreadIds(int32_t* const threadIds, size_t* size);
 
@@ -243,7 +243,7 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
     return 0;
 }
 
-int APerformanceHintSession::sendHint(int32_t hint) {
+int APerformanceHintSession::sendHint(SessionHint hint) {
     if (hint < 0 || hint >= static_cast<int32_t>(mLastHintSentTimestamp.size())) {
         ALOGE("%s: invalid session hint %d", __FUNCTION__, hint);
         return EINVAL;
@@ -335,7 +335,7 @@ void APerformanceHint_closeSession(APerformanceHintSession* session) {
     delete session;
 }
 
-int APerformanceHint_sendHint(void* session, int32_t hint) {
+int APerformanceHint_sendHint(void* session, SessionHint hint) {
     return reinterpret_cast<APerformanceHintSession*>(session)->sendHint(hint);
 }
 
