@@ -20,6 +20,7 @@ package com.android.server.display;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -85,6 +86,7 @@ public final class DisplayDeviceConfigTest {
     public void testConfigValuesFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile();
 
+        assertEquals(mDisplayDeviceConfig.getName(), "Example Display");
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonLong(), 5000);
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonShort(), 50);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
@@ -240,6 +242,7 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testConfigValuesFromConfigResource() {
         setupDisplayDeviceConfigFromConfigResourceFile();
+        assertNull(mDisplayDeviceConfig.getName());
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
                 float[]{2.0f, 200.0f, 600.0f}, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
@@ -370,6 +373,7 @@ public final class DisplayDeviceConfigTest {
     private String getContent() {
         return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<displayConfiguration>\n"
+                +   "<name>Example Display</name>"
                 +   "<screenBrightnessMap>\n"
                 +       "<point>\n"
                 +           "<value>0.0</value>\n"
