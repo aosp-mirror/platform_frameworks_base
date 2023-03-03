@@ -80,10 +80,10 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
             ) {
                 setImage(position)
             }
@@ -108,7 +108,7 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         if (selectedImage == position) return
         selectedImage = position
         val source = ImageDecoder.createSource(resources.assets,
-            "gainmaps/${gainmapImages[position]}")
+                "gainmaps/${gainmapImages[position]}")
         doDecode(source)
     }
 
@@ -137,16 +137,16 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
                 gainmapVisualizer = map
             } else {
                 gainmapVisualizer = Bitmap.createBitmap(map.width, map.height,
-                    Bitmap.Config.ARGB_8888)
+                        Bitmap.Config.ARGB_8888)
                 val canvas = Canvas(gainmapVisualizer!!)
                 val paint = Paint()
                 paint.colorFilter = ColorMatrixColorFilter(
-                    floatArrayOf(
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 0f, 255f
-                    )
+                        floatArrayOf(
+                                0f, 0f, 0f, 1f, 0f,
+                                0f, 0f, 0f, 1f, 0f,
+                                0f, 0f, 0f, 1f, 0f,
+                                0f, 0f, 0f, 0f, 255f
+                        )
                 )
                 canvas.drawBitmap(map, 0f, 0f, paint)
                 canvas.setBitmap(null)
@@ -174,8 +174,14 @@ class GainmapImage(context: Context, attrs: AttributeSet?) : FrameLayout(context
         if (bitmap == null) return
 
         imageView.setImage(ImageSource.cachedBitmap(when (outputMode) {
-            R.id.output_hdr -> { bitmap!!.gainmap = gainmap; bitmap!! }
-            R.id.output_sdr -> { bitmap!!.gainmap = null; bitmap!! }
+            R.id.output_hdr -> {
+                bitmap!!.gainmap = gainmap; bitmap!!
+            }
+
+            R.id.output_sdr -> {
+                bitmap!!.gainmap = null; bitmap!!
+            }
+
             R.id.output_gainmap -> gainmapVisualizer!!
             else -> throw IllegalStateException()
         }))
