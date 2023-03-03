@@ -17,7 +17,7 @@ package com.android.systemui.notetask
 
 import com.android.systemui.notetask.quickaffordance.NoteTaskQuickAffordanceConfig
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
-import com.android.systemui.screenshot.AppClipsTrampolineActivity
+import com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity
 
 /**
  * Supported entry points for [NoteTaskController.showNoteTask].

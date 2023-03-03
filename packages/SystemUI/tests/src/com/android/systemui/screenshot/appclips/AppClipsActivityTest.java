@@ -18,8 +18,8 @@ package com.android.systemui.screenshot.appclips;
 
 import static android.app.Activity.RESULT_OK;
 
-import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
-import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
+import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
+import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -50,9 +50,6 @@ import androidx.test.runner.intercepting.SingleActivityFactory;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.screenshot.AppClipsActivity;
-import com.android.systemui.screenshot.AppClipsTrampolineActivity;
-import com.android.systemui.screenshot.AppClipsViewModel;
 import com.android.systemui.settings.UserTracker;
 
 import org.junit.After;
