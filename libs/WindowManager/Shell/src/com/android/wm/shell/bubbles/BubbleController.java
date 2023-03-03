@@ -61,6 +61,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.service.notification.NotificationListenerService;
@@ -125,6 +126,15 @@ public class BubbleController implements ConfigurationChangeListener {
     private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private static final String SYSTEM_DIALOG_REASON_GESTURE_NAV = "gestureNav";
 
+    // TODO(b/256873975) Should use proper flag when available to shell/launcher
+    /**
+     * Whether bubbles are showing in the bubble bar from launcher. This is only available
+     * on large screens and {@link BubbleController#isShowingAsBubbleBar()} should be used
+     * to check all conditions that indicate if the bubble bar is in use.
+     */
+    private static final boolean BUBBLE_BAR_ENABLED =
+            SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false);
+
     private final Context mContext;
     private final BubblesImpl mImpl = new BubblesImpl();
     private Bubbles.BubbleExpandListener mExpandListener;
@@ -149,9 +159,6 @@ public class BubbleController implements ConfigurationChangeListener {
     private final Handler mMainHandler;
 
     private final ShellExecutor mBackgroundExecutor;
-
-    // Whether or not we should show bubbles pinned at the bottom of the screen.
-    private boolean mIsBubbleBarEnabled;
 
     private BubbleLogger mLogger;
     private BubbleData mBubbleData;
@@ -533,10 +540,10 @@ public class BubbleController implements ConfigurationChangeListener {
         mDataRepository.removeBubblesForUser(removedUserId, parentUserId);
     }
 
-    // TODO(b/256873975): Should pass this into the constructor once flags are available to shell.
-    /** Sets whether the bubble bar is enabled (i.e. bubbles pinned to bottom on large screens). */
-    public void setBubbleBarEnabled(boolean enabled) {
-        mIsBubbleBarEnabled = enabled;
+    /** Whether bubbles are showing in the bubble bar. */
+    public boolean isShowingAsBubbleBar() {
+        // TODO(b/269670598): should also check that we're in gesture nav
+        return BUBBLE_BAR_ENABLED && mBubblePositioner.isLargeScreen();
     }
 
     /** Whether this userId belongs to the current user. */
@@ -603,12 +610,6 @@ public class BubbleController implements ConfigurationChangeListener {
                 mStackView.setExpandListener(mExpandListener);
             }
             mStackView.setUnbubbleConversationCallback(mSysuiProxy::onUnbubbleConversation);
-        }
-
-        if (mIsBubbleBarEnabled && mBubblePositioner.isLargeScreen()) {
-            mBubblePositioner.setUsePinnedLocation(true);
-        } else {
-            mBubblePositioner.setUsePinnedLocation(false);
         }
 
         addToWindowManagerMaybe();
@@ -1848,13 +1849,6 @@ public class BubbleController implements ConfigurationChangeListener {
         public void onUserRemoved(int removedUserId) {
             mMainExecutor.execute(() -> {
                 BubbleController.this.onUserRemoved(removedUserId);
-            });
-        }
-
-        @Override
-        public void setBubbleBarEnabled(boolean enabled) {
-            mMainExecutor.execute(() -> {
-                BubbleController.this.setBubbleBarEnabled(enabled);
             });
         }
 
