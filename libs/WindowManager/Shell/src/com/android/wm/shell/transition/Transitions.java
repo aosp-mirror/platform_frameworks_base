@@ -795,6 +795,12 @@ public class Transitions implements RemoteCallable<Transitions> {
                 ++mergeIdx;
                 continue;
             }
+            if (mergeCandidate.mInfo == null) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition merge candidate"
+                        + " %s is not ready yet", mergeCandidate.mToken);
+                // The later transition should not be merged if the prior one is not ready.
+                return;
+            }
             if (mergeCandidate.mMerged) {
                 throw new IllegalStateException("Can't merge a transition after not-merging"
                         + " a preceding one.");
