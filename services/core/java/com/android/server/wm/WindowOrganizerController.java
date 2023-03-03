@@ -74,7 +74,9 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.AndroidRuntimeException;
@@ -998,11 +1000,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
                 }
                 final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
-                waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
+                int res = waitAsyncStart(() -> mService.mAmInternal.sendIntentSender(
                         hop.getPendingIntent().getTarget(),
                         hop.getPendingIntent().getWhitelistToken(), 0 /* code */,
                         hop.getActivityIntent(), resolvedType, null /* finishReceiver */,
                         null /* requiredPermission */, options));
+                if (ActivityManager.isStartResultSuccessful(res)) {
+                    effects |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
                 break;
             }
             case HIERARCHY_OP_TYPE_START_SHORTCUT: {
@@ -1353,9 +1358,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * Post and wait for the result of the activity start to prevent potential deadlock against
      * {@link WindowManagerGlobalLock}.
      */
-    private void waitAsyncStart(IntSupplier startActivity) {
+    private int waitAsyncStart(IntSupplier startActivity) {
         final Integer[] starterResult = {null};
-        mService.mH.post(() -> {
+        final Handler handler = (Looper.myLooper() == mService.mH.getLooper())
+                // uncommon case where a queued transaction is trying to start an activity. We can't
+                // post to our own thread and wait (otherwise we deadlock), so use anim thread
+                // instead (which is 1 higher priority).
+                ? mService.mWindowManager.mAnimationHandler
+                // Otherwise just put it on main handler
+                : mService.mH;
+        handler.post(() -> {
             try {
                 starterResult[0] = startActivity.getAsInt();
             } catch (Throwable t) {
@@ -1372,6 +1384,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             } catch (InterruptedException ignored) {
             }
         }
+        return starterResult[0];
     }
 
     private int sanitizeAndApplyHierarchyOp(WindowContainer container,
