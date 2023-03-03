@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -338,7 +340,7 @@ fun RemoteEntryCard(
         ) {
             Entry(
                 onClick = { onEntrySelected(remoteEntry) },
-                iconPainter = painterResource(R.drawable.ic_other_devices),
+                iconImageVector = Icons.Outlined.QrCodeScanner,
                 entryHeadlineText = stringResource(
                     R.string.get_dialog_option_headline_use_a_different_device
                 ),
@@ -399,7 +401,7 @@ fun CredentialEntryRow(
         iconImageBitmap = credentialEntryInfo.icon?.toBitmap()?.asImageBitmap(),
         // Fall back to iconPainter if iconImageBitmap isn't available
         iconPainter =
-        if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in)
+        if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = credentialEntryInfo.userName,
         entrySecondLineText = if (
