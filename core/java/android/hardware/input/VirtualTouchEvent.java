@@ -255,7 +255,8 @@ public final class VirtualTouchEvent implements Parcelable {
         public @NonNull Builder setAction(@Action int action) {
             if (action != ACTION_DOWN && action != ACTION_UP && action != ACTION_MOVE
                     && action != ACTION_CANCEL) {
-                throw new IllegalArgumentException("Unsupported touch event action type");
+                throw new IllegalArgumentException(
+                        "Unsupported touch event action type: " + action);
             }
             mAction = action;
             return this;
