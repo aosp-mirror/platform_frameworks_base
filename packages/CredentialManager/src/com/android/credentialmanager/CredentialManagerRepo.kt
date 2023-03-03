@@ -73,7 +73,7 @@ class CredentialManagerRepo(
         requestInfo = intent.extras?.getParcelable(
             RequestInfo.EXTRA_REQUEST_INFO,
             RequestInfo::class.java
-        ) ?: testCreatePasskeyRequestInfo()
+        ) ?: testGetRequestInfo()
 
         val originName: String? = when (requestInfo.type) {
             RequestInfo.TYPE_CREATE -> requestInfo.createCredentialRequest?.origin
