@@ -93,7 +93,7 @@ public class Instrumentation {
 
     private static final String TAG = "Instrumentation";
 
-    private static final long CONNECT_TIMEOUT_MILLIS = 5000;
+    private static final long CONNECT_TIMEOUT_MILLIS = 60_000;
 
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
 
