@@ -295,6 +295,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private boolean mClosingActionMenu;
 
     private int mVolumeControlStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
+    private int mAudioMode = AudioManager.MODE_NORMAL;
     private MediaController mMediaController;
 
     private AudioManager mAudioManager;
@@ -316,6 +317,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mInvalidatePanelMenuFeatures = 0;
         }
     };
+
+    private AudioManager.OnModeChangedListener mOnModeChangedListener;
 
     private Transition mEnterTransition = null;
     private Transition mReturnTransition = USE_DEFAULT_TRANSITION;
@@ -1950,9 +1953,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
-                // If we have a session send it the volume command, otherwise
-                // use the suggested stream.
-                if (mMediaController != null) {
+                // If we have a session and no active phone call send it the volume command,
+                // otherwise use the suggested stream.
+                if (mMediaController != null && !isActivePhoneCallOngoing()) {
                     getMediaSessionManager().dispatchVolumeKeyEventToSessionAsSystemService(event,
                             mMediaController.getSessionToken());
                 } else {
@@ -2001,6 +2004,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         return false;
+    }
+
+    private boolean isActivePhoneCallOngoing() {
+        return mAudioMode == AudioManager.MODE_IN_CALL
+                || mAudioMode == AudioManager.MODE_IN_COMMUNICATION;
     }
 
     private KeyguardManager getKeyguardManager() {
@@ -2323,6 +2331,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     openPanel(st, null);
                 }
             }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mOnModeChangedListener != null) {
+            getAudioManager().removeOnModeChangedListener(mOnModeChangedListener);
+            mOnModeChangedListener = null;
         }
     }
 
@@ -3208,6 +3224,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void setMediaController(MediaController controller) {
         mMediaController = controller;
+        if (controller != null && mOnModeChangedListener == null) {
+            mAudioMode = getAudioManager().getMode();
+            mOnModeChangedListener = mode -> mAudioMode = mode;
+            getAudioManager().addOnModeChangedListener(getContext().getMainExecutor(),
+                    mOnModeChangedListener);
+        } else if (mOnModeChangedListener != null) {
+            getAudioManager().removeOnModeChangedListener(mOnModeChangedListener);
+            mOnModeChangedListener = null;
+        }
     }
 
     @Override
