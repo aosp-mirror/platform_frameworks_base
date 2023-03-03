@@ -45,10 +45,10 @@ import com.android.server.pm.permission.CompatibilityPermissionInfo
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
 
-class UidPermissionPolicy : SchemePolicy() {
-    private val persistence = UidPermissionPersistence()
+class AppIdPermissionPolicy : SchemePolicy() {
+    private val persistence = AppIdPermissionPersistence()
 
-    private val migration = UidPermissionMigration()
+    private val migration = AppIdPermissionMigration()
 
     @Volatile
     private var onPermissionFlagsChangedListeners =
@@ -126,7 +126,7 @@ class UidPermissionPolicy : SchemePolicy() {
 
     override fun MutateStateScope.onAppIdRemoved(appId: Int) {
         newState.userStates.forEachValueIndexed { _, userState ->
-            userState.uidPermissionFlags -= appId
+            userState.appIdPermissionFlags -= appId
             userState.requestWrite()
             // Skip notifying the change listeners since the app ID no longer exists.
         }
@@ -596,7 +596,7 @@ class UidPermissionPolicy : SchemePolicy() {
             requestedPermissions += it.androidPackage!!.requestedPermissions
         }
         newState.userStates.forEachIndexed { _, userId, userState ->
-            userState.uidPermissionFlags[appId]?.forEachReversedIndexed { _, permissionName, _ ->
+            userState.appIdPermissionFlags[appId]?.forEachReversedIndexed { _, permissionName, _ ->
                 if (permissionName !in requestedPermissions) {
                     setPermissionFlags(appId, userId, permissionName, 0)
                 }
@@ -608,7 +608,7 @@ class UidPermissionPolicy : SchemePolicy() {
         // If the app is updated, and has scoped storage permissions, then it is possible that the
         // app updated in an attempt to get unscoped storage. If so, revoke all storage permissions.
         newState.userStates.forEachIndexed { _, userId, userState ->
-            userState.uidPermissionFlags[appId]?.forEachReversedIndexed {
+            userState.appIdPermissionFlags[appId]?.forEachReversedIndexed {
                 _, permissionName, oldFlags ->
                 if (permissionName !in STORAGE_AND_MEDIA_PERMISSIONS || oldFlags == 0) {
                     return@forEachReversedIndexed
@@ -1316,7 +1316,7 @@ class UidPermissionPolicy : SchemePolicy() {
     }
 
     fun GetStateScope.getUidPermissionFlags(appId: Int, userId: Int): IndexedMap<String, Int>? =
-        state.userStates[userId]?.uidPermissionFlags?.get(appId)
+        state.userStates[userId]?.appIdPermissionFlags?.get(appId)
 
     fun GetStateScope.getPermissionFlags(
         appId: Int,
@@ -1336,7 +1336,7 @@ class UidPermissionPolicy : SchemePolicy() {
         userId: Int,
         permissionName: String
     ): Int =
-        state.userStates[userId]?.uidPermissionFlags?.get(appId).getWithDefault(permissionName, 0)
+        state.userStates[userId]?.appIdPermissionFlags?.get(appId).getWithDefault(permissionName, 0)
 
     fun MutateStateScope.setPermissionFlags(
         appId: Int,
@@ -1354,8 +1354,8 @@ class UidPermissionPolicy : SchemePolicy() {
         flagValues: Int
     ): Boolean {
         val userState = newState.userStates[userId]
-        val uidPermissionFlags = userState.uidPermissionFlags
-        var permissionFlags = uidPermissionFlags[appId]
+        val appIdPermissionFlags = userState.appIdPermissionFlags
+        var permissionFlags = appIdPermissionFlags[appId]
         val oldFlags = permissionFlags.getWithDefault(permissionName, 0)
         val newFlags = (oldFlags andInv flagMask) or (flagValues and flagMask)
         if (oldFlags == newFlags) {
@@ -1363,11 +1363,11 @@ class UidPermissionPolicy : SchemePolicy() {
         }
         if (permissionFlags == null) {
             permissionFlags = IndexedMap()
-            uidPermissionFlags[appId] = permissionFlags
+            appIdPermissionFlags[appId] = permissionFlags
         }
         permissionFlags.putWithDefault(permissionName, newFlags, 0)
         if (permissionFlags.isEmpty()) {
-            uidPermissionFlags -= appId
+            appIdPermissionFlags -= appId
         }
         userState.requestWrite()
         onPermissionFlagsChangedListeners.forEachIndexed { _, it ->
@@ -1397,7 +1397,7 @@ class UidPermissionPolicy : SchemePolicy() {
     }
 
     companion object {
-        private val LOG_TAG = UidPermissionPolicy::class.java.simpleName
+        private val LOG_TAG = AppIdPermissionPolicy::class.java.simpleName
 
         private const val PLATFORM_PACKAGE_NAME = "android"
 

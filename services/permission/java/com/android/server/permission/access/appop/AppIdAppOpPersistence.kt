@@ -28,15 +28,15 @@ import com.android.server.permission.access.util.getAttributeIntOrThrow
 import com.android.server.permission.access.util.tag
 import com.android.server.permission.access.util.tagName
 
-class UidAppOpPersistence : BaseAppOpPersistence() {
+class AppIdAppOpPersistence : BaseAppOpPersistence() {
     override fun BinaryXmlPullParser.parseUserState(state: AccessState, userId: Int) {
         when (tagName) {
-            TAG_UID_APP_OPS -> parseUidAppOps(state, userId)
+            TAG_APP_ID_APP_OPS -> parseAppIdAppOps(state, userId)
             else -> {}
         }
     }
 
-    private fun BinaryXmlPullParser.parseUidAppOps(state: AccessState, userId: Int) {
+    private fun BinaryXmlPullParser.parseAppIdAppOps(state: AccessState, userId: Int) {
         val userState = state.userStates[userId]
         forEachTag {
             when (tagName) {
@@ -44,7 +44,7 @@ class UidAppOpPersistence : BaseAppOpPersistence() {
                 else -> Log.w(LOG_TAG, "Ignoring unknown tag $name when parsing app-op state")
             }
         }
-        userState.uidAppOpModes.retainAllIndexed { _, appId, _ ->
+        userState.appIdAppOpModes.retainAllIndexed { _, appId, _ ->
             val hasAppId = appId in state.systemState.appIds
             if (!hasAppId) {
                 Log.w(LOG_TAG, "Dropping unknown app ID $appId when parsing app-op state")
@@ -56,17 +56,17 @@ class UidAppOpPersistence : BaseAppOpPersistence() {
     private fun BinaryXmlPullParser.parseAppId(userState: UserState) {
         val appId = getAttributeIntOrThrow(ATTR_ID)
         val appOpModes = IndexedMap<String, Int>()
-        userState.uidAppOpModes[appId] = appOpModes
+        userState.appIdAppOpModes[appId] = appOpModes
         parseAppOps(appOpModes)
     }
 
     override fun BinaryXmlSerializer.serializeUserState(state: AccessState, userId: Int) {
-        serializeUidAppOps(state.userStates[userId])
+        serializeAppIdAppOps(state.userStates[userId])
     }
 
-    private fun BinaryXmlSerializer.serializeUidAppOps(userState: UserState) {
-        tag(TAG_UID_APP_OPS) {
-            userState.uidAppOpModes.forEachIndexed { _, appId, appOpModes ->
+    private fun BinaryXmlSerializer.serializeAppIdAppOps(userState: UserState) {
+        tag(TAG_APP_ID_APP_OPS) {
+            userState.appIdAppOpModes.forEachIndexed { _, appId, appOpModes ->
                 serializeAppId(appId, appOpModes)
             }
         }
@@ -83,10 +83,10 @@ class UidAppOpPersistence : BaseAppOpPersistence() {
     }
 
     companion object {
-        private val LOG_TAG = UidAppOpPersistence::class.java.simpleName
+        private val LOG_TAG = AppIdAppOpPersistence::class.java.simpleName
 
         private const val TAG_APP_ID = "app-id"
-        private const val TAG_UID_APP_OPS = "uid-app-ops"
+        private const val TAG_APP_ID_APP_OPS = "app-id-app-ops"
 
         private const val ATTR_ID = "id"
     }

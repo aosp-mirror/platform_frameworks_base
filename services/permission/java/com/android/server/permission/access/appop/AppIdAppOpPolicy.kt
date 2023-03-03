@@ -24,7 +24,7 @@ import com.android.server.permission.access.MutateStateScope
 import com.android.server.permission.access.UidUri
 import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
 
-class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
+class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
     @Volatile
     private var onAppOpModeChangedListeners = IndexedListSet<OnAppOpModeChangedListener>()
     private val onAppOpModeChangedListenersLock = Any()
@@ -54,18 +54,18 @@ class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
 
     override fun MutateStateScope.onAppIdRemoved(appId: Int) {
         newState.userStates.forEachIndexed { _, _, userState ->
-            userState.uidAppOpModes -= appId
+            userState.appIdAppOpModes -= appId
             userState.requestWrite()
             // Skip notifying the change listeners since the app ID no longer exists.
         }
     }
 
     fun GetStateScope.getAppOpModes(appId: Int, userId: Int): IndexedMap<String, Int>? =
-        state.userStates[userId].uidAppOpModes[appId]
+        state.userStates[userId].appIdAppOpModes[appId]
 
     fun MutateStateScope.removeAppOpModes(appId: Int, userId: Int): Boolean {
         val userState = newState.userStates[userId]
-        val isChanged = userState.uidAppOpModes.removeReturnOld(appId) != null
+        val isChanged = userState.appIdAppOpModes.removeReturnOld(appId) != null
         if (isChanged) {
             userState.requestWrite()
         }
@@ -73,7 +73,7 @@ class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
     }
 
     fun GetStateScope.getAppOpMode(appId: Int, userId: Int, appOpName: String): Int =
-        state.userStates[userId].uidAppOpModes[appId]
+        state.userStates[userId].appIdAppOpModes[appId]
             .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
 
     fun MutateStateScope.setAppOpMode(
@@ -83,8 +83,8 @@ class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
         mode: Int
     ): Boolean {
         val userState = newState.userStates[userId]
-        val uidAppOpModes = userState.uidAppOpModes
-        var appOpModes = uidAppOpModes[appId]
+        val appIdAppOpModes = userState.appIdAppOpModes
+        var appOpModes = appIdAppOpModes[appId]
         val defaultMode = AppOpsManager.opToDefaultMode(appOpName)
         val oldMode = appOpModes.getWithDefault(appOpName, defaultMode)
         if (oldMode == mode) {
@@ -92,11 +92,11 @@ class UidAppOpPolicy : BaseAppOpPolicy(UidAppOpPersistence()) {
         }
         if (appOpModes == null) {
             appOpModes = IndexedMap()
-            uidAppOpModes[appId] = appOpModes
+            appIdAppOpModes[appId] = appOpModes
         }
         appOpModes.putWithDefault(appOpName, mode, defaultMode)
         if (appOpModes.isEmpty()) {
-            uidAppOpModes -= appId
+            appIdAppOpModes -= appId
         }
         userState.requestWrite()
         onAppOpModeChangedListeners.forEachIndexed { _, it ->
