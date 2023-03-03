@@ -351,8 +351,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         final TaskFragment taskFragment1 = createTaskFragmentWithEmbeddedActivity(task, mOrganizer);
         final ActivityRecord activity0 = taskFragment0.getTopMostActivity();
         final ActivityRecord activity1 = taskFragment1.getTopMostActivity();
-        activity0.setVisibility(true /* visible */, false /* deferHidingClient */);
-        activity1.setVisibility(true /* visible */, false /* deferHidingClient */);
+        activity0.setVisibility(true);
+        activity1.setVisibility(true);
         spyOn(mAtm.mTaskFragmentOrganizerController);
 
         // Move activity to pinned.
