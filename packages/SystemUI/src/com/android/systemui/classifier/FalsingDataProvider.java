@@ -38,6 +38,7 @@ import javax.inject.Inject;
 public class FalsingDataProvider {
 
     private static final long MOTION_EVENT_AGE_MS = 1000;
+    private static final long DROP_EVENT_THRESHOLD_MS = 50;
     private static final float THREE_HUNDRED_SIXTY_DEG = (float) (2 * Math.PI);
 
     private final int mWidthPixels;
@@ -60,6 +61,7 @@ public class FalsingDataProvider {
     private float mAngle = 0;
     private MotionEvent mFirstRecentMotionEvent;
     private MotionEvent mLastMotionEvent;
+    private boolean mDropLastEvent;
     private boolean mJustUnlockedWithFace;
     private boolean mA11YAction;
 
@@ -95,6 +97,12 @@ public class FalsingDataProvider {
             // Ensure prior gesture was completed. May be a no-op.
             completePriorGesture();
         }
+
+        // Drop the gesture closing event if it is close in time to a previous ACTION_MOVE event.
+        // The reason is that the closing ACTION_UP event of  a swipe can be a bit offseted from the
+        // previous ACTION_MOVE event and when it happens, it makes some classifiers fail.
+        mDropLastEvent = shouldDropEvent(motionEvent);
+
         mRecentMotionEvents.addAll(motionEvents);
 
         FalsingClassifier.logVerbose("Size: " + mRecentMotionEvents.size());
@@ -129,6 +137,7 @@ public class FalsingDataProvider {
             mPriorMotionEvents = mRecentMotionEvents;
             mRecentMotionEvents = new TimeLimitedMotionEventBuffer(MOTION_EVENT_AGE_MS);
         }
+        mDropLastEvent = false;
         mA11YAction = false;
     }
 
@@ -150,8 +159,18 @@ public class FalsingDataProvider {
         return mYdpi;
     }
 
+    /**
+     * Get the {@link MotionEvent}s of the most recent gesture.
+     *
+     * Note that this list may not include the last recorded event.
+     * @see #mDropLastEvent
+     */
     public List<MotionEvent> getRecentMotionEvents() {
-        return mRecentMotionEvents;
+        if (!mDropLastEvent || mRecentMotionEvents.isEmpty()) {
+            return mRecentMotionEvents;
+        } else {
+            return mRecentMotionEvents.subList(0, mRecentMotionEvents.size() - 1);
+        }
     }
 
     public List<MotionEvent> getPriorMotionEvents() {
@@ -169,7 +188,12 @@ public class FalsingDataProvider {
         return mFirstRecentMotionEvent;
     }
 
-    /** Get the last recorded {@link MotionEvent}. */
+    /**
+     * Get the last {@link MotionEvent} of the most recent gesture.
+     *
+     * Note that this may be the event prior to the last recorded event.
+     * @see #mDropLastEvent
+     */
     public MotionEvent getLastMotionEvent() {
         recalculateData();
         return mLastMotionEvent;
@@ -236,17 +260,29 @@ public class FalsingDataProvider {
             return;
         }
 
-        if (mRecentMotionEvents.isEmpty()) {
+        List<MotionEvent> recentMotionEvents = getRecentMotionEvents();
+        if (recentMotionEvents.isEmpty()) {
             mFirstRecentMotionEvent = null;
             mLastMotionEvent = null;
         } else {
-            mFirstRecentMotionEvent = mRecentMotionEvents.get(0);
-            mLastMotionEvent = mRecentMotionEvents.get(mRecentMotionEvents.size() - 1);
+            mFirstRecentMotionEvent = recentMotionEvents.get(0);
+            mLastMotionEvent = recentMotionEvents.get(recentMotionEvents.size() - 1);
         }
 
         calculateAngleInternal();
 
         mDirty = false;
+    }
+
+    private boolean shouldDropEvent(MotionEvent event) {
+        if (mRecentMotionEvents.size() < 3) return false;
+
+        MotionEvent lastEvent = mRecentMotionEvents.get(mRecentMotionEvents.size() - 1);
+        boolean isCompletingGesture = event.getActionMasked() == MotionEvent.ACTION_UP
+                && lastEvent.getActionMasked() == MotionEvent.ACTION_MOVE;
+        boolean isRecentEvent =
+                event.getEventTime() - lastEvent.getEventTime() < DROP_EVENT_THRESHOLD_MS;
+        return isCompletingGesture && isRecentEvent;
     }
 
     private void calculateAngleInternal() {
