@@ -35,6 +35,7 @@ import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
+import android.service.credentials.RemoteEntry;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -301,14 +302,14 @@ public final class ProviderCreateSession extends ProviderSession<
         @NonNull
         private final Map<String, Pair<CreateEntry, Entry>> mUiCreateEntries = new HashMap<>();
 
-        @Nullable private Pair<String, Pair<CreateEntry, Entry>> mUiRemoteEntry = null;
+        @Nullable private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
         ProviderResponseDataHandler(String hybridService) {
             mExpectedRemoteEntryProviderService = ComponentName.unflattenFromString(hybridService);
         }
 
         public void addResponseContent(List<CreateEntry> createEntries,
-                CreateEntry remoteEntry) {
+                RemoteEntry remoteEntry) {
             createEntries.forEach(this::addCreateEntry);
             setRemoteEntry(remoteEntry);
         }
@@ -319,7 +320,7 @@ public final class ProviderCreateSession extends ProviderSession<
             mUiCreateEntries.put(id, new Pair<>(createEntry, entry));
         }
 
-        public void setRemoteEntry(@Nullable CreateEntry remoteEntry) {
+        public void setRemoteEntry(@Nullable RemoteEntry remoteEntry) {
             if (remoteEntry == null) {
                 mUiRemoteEntry = null;
                 return;
@@ -363,7 +364,7 @@ public final class ProviderCreateSession extends ProviderSession<
             return mUiCreateEntries.isEmpty() && mUiRemoteEntry == null;
         }
         @Nullable
-        public CreateEntry getRemoteEntry(String entryKey) {
+        public RemoteEntry getRemoteEntry(String entryKey) {
             return mUiRemoteEntry == null || mUiRemoteEntry
                     .first == null || !mUiRemoteEntry.first.equals(entryKey)
                     || mUiRemoteEntry.second == null
