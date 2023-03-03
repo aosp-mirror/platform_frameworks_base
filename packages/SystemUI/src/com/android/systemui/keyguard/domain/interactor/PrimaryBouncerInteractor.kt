@@ -122,21 +122,24 @@ constructor(
     val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
     val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
 
-    init {
-        keyguardUpdateMonitor.registerCallback(
-            object : KeyguardUpdateMonitorCallback() {
-                override fun onBiometricRunningStateChanged(
-                    running: Boolean,
-                    biometricSourceType: BiometricSourceType?
-                ) {
-                    updateSideFpsVisibility()
-                }
+    /**
+     * This callback needs to be a class field so it does not get garbage collected.
+     */
+    val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
+        override fun onBiometricRunningStateChanged(
+            running: Boolean,
+            biometricSourceType: BiometricSourceType?
+        ) {
+            updateSideFpsVisibility()
+        }
 
-                override fun onStrongAuthStateChanged(userId: Int) {
-                    updateSideFpsVisibility()
-                }
-            }
-        )
+        override fun onStrongAuthStateChanged(userId: Int) {
+            updateSideFpsVisibility()
+        }
+    }
+
+    init {
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
