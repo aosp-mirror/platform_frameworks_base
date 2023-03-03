@@ -1891,30 +1891,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * @return the count of all subscriptions in the database, this includes
-     * all subscriptions that have been seen.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public int getAllSubscriptionInfoCount() {
-        if (VDBG) logd("[getAllSubscriptionInfoCount]+");
-
-        int result = 0;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-    }
-
-    /**
      *
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
@@ -2313,24 +2289,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * Return the SubscriptionInfo for default voice subscription.
-     *
-     * Will return null on data only devices, or on error.
-     *
-     * @return the SubscriptionInfo for the default SMS subscription.
-     * @hide
-     */
-    public SubscriptionInfo getDefaultSmsSubscriptionInfo() {
-        return getActiveSubscriptionInfo(getDefaultSmsSubscriptionId());
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public int getDefaultSmsPhoneId() {
-        return getPhoneId(getDefaultSmsSubscriptionId());
-    }
-
-    /**
      * Returns the system's default data subscription id.
      *
      * On a voice only device or on error, will return INVALID_SUBSCRIPTION_ID.
@@ -2378,12 +2336,6 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
-    public int getDefaultDataPhoneId() {
-        return getPhoneId(getDefaultDataSubscriptionId());
-    }
-
-    /** @hide */
     public void clearSubscriptionInfo() {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
@@ -2395,21 +2347,6 @@ public class SubscriptionManager {
         }
 
         return;
-    }
-
-    //FIXME this is vulnerable to race conditions
-    /** @hide */
-    public boolean allDefaultsSelected() {
-        if (!isValidSubscriptionId(getDefaultDataSubscriptionId())) {
-            return false;
-        }
-        if (!isValidSubscriptionId(getDefaultSmsSubscriptionId())) {
-            return false;
-        }
-        if (!isValidSubscriptionId(getDefaultVoiceSubscriptionId())) {
-            return false;
-        }
-        return true;
     }
 
     /**
