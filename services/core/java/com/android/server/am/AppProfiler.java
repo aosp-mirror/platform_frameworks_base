@@ -1892,15 +1892,11 @@ public class AppProfiler {
     }
 
     long getCpuTimeForPid(int pid) {
-        synchronized (mProcessCpuTracker) {
-            return mProcessCpuTracker.getCpuTimeForPid(pid);
-        }
+        return mProcessCpuTracker.getCpuTimeForPid(pid);
     }
 
     long getCpuDelayTimeForPid(int pid) {
-        synchronized (mProcessCpuTracker) {
-            return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
-        }
+        return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
     }
 
     List<ProcessCpuTracker.Stats> getCpuStats(Predicate<ProcessCpuTracker.Stats> predicate) {
