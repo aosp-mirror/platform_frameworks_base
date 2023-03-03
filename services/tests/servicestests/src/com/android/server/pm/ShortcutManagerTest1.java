@@ -4007,6 +4007,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // TODO Check all other fields
     }
 
+    public void testLoadCorruptedShortcuts() throws Exception {
+        initService();
+
+        addPackage("com.android.chrome", 0, 0);
+
+        ShortcutUser user = new ShortcutUser(mService, 0);
+
+        File corruptedShortcutPackage = new File("/data/local/tmp/cts/content/",
+                "broken_shortcut.xml");
+        assertNull(ShortcutPackage.loadFromFile(mService, user, corruptedShortcutPackage, false));
+    }
+
     public void testSaveCorruptAndLoadUser() throws Exception {
         // First, create some shortcuts and save.
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {
@@ -4096,11 +4108,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Save and corrupt the primary files.
         mService.saveDirtyInfo();
-        try (Writer os = new FileWriter(mService.getUserFile(UserHandle.USER_SYSTEM))) {
+        try (Writer os = new FileWriter(
+                mService.getUserFile(UserHandle.USER_SYSTEM).getBaseFile())) {
             os.write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                     + "<user locales=\"en\" last-app-scan-time2=\"14400000");
         }
-        try (Writer os = new FileWriter(mService.getUserFile(USER_10))) {
+        try (Writer os = new FileWriter(mService.getUserFile(USER_10).getBaseFile())) {
             os.write("<?xml version='1.0' encoding='utf");
         }
 

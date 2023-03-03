@@ -9123,8 +9123,7 @@ package android.media.tv.tuner.frontend {
     method public int getProtocolCapability();
   }
 
-  public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
+  public final class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @IntRange(from=0) public long getBitrate();
     method @NonNull public String getContentUrl();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
@@ -9145,6 +9144,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public static final class IptvFrontendSettings.Builder {
+    ctor public IptvFrontendSettings.Builder();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setBitrate(@IntRange(from=0) long);
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setContentUrl(@NonNull String);
@@ -9157,8 +9157,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setSrcPort(int);
   }
 
-  public class IptvFrontendSettingsFec {
-    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder builder();
+  public final class IptvFrontendSettingsFec {
     method @IntRange(from=0) public int getFecColNum();
     method @IntRange(from=0) public int getFecRowNum();
     method public int getFecType();
@@ -9169,6 +9168,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public static final class IptvFrontendSettingsFec.Builder {
+    ctor public IptvFrontendSettingsFec.Builder();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec build();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecColNum(@IntRange(from=0) int);
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecRowNum(@IntRange(from=0) int);
@@ -10962,7 +10962,6 @@ package android.os {
     method @NonNull @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.MANAGE_USERS"}) public java.util.Set<android.os.UserHandle> getVisibleUsers();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean hasRestrictedProfiles();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public boolean hasUserRestrictionForUser(@NonNull String, @NonNull android.os.UserHandle);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isAdminUser();
     method public boolean isCloneProfile();
     method @Deprecated public boolean isCredentialSharableWithParent();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public boolean isGuestUser();

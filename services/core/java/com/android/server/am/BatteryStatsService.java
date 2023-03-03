@@ -23,6 +23,7 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
@@ -479,9 +480,29 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             BatteryStatsService.this.noteJobsDeferred(uid, numDeferred, sinceLast);
         }
 
+        private int transportToSubsystem(NetworkCapabilities nc) {
+            if (nc.hasTransport(TRANSPORT_WIFI)) {
+                return CPU_WAKEUP_SUBSYSTEM_WIFI;
+            }
+            return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
+        }
+
         @Override
         public void noteCpuWakingNetworkPacket(Network network, long elapsedMillis, int uid) {
-            Slog.d(TAG, "Wakeup due to incoming packet on network " + network + " to uid " + uid);
+            if (uid < 0) {
+                Slog.e(TAG, "Invalid uid for waking network packet: " + uid);
+                return;
+            }
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+            final NetworkCapabilities nc = cm.getNetworkCapabilities(network);
+            final int subsystem = transportToSubsystem(nc);
+
+            if (subsystem == CPU_WAKEUP_SUBSYSTEM_UNKNOWN) {
+                Slog.wtf(TAG, "Could not map transport for network: " + network
+                        + " while attributing wakeup by packet sent to uid: " + uid);
+                return;
+            }
+            noteCpuWakingActivity(subsystem, elapsedMillis, uid);
         }
 
         @Override

@@ -537,10 +537,9 @@ public class CarrierConfigManager {
 
     /**
      * CDMA activation goes through OTASP.
-     * <p>
-     * TODO: This should be combined with config_use_hfa_for_provisioning and implemented as an enum
-     * (NONE, HFA, OTASP).
      */
+    // TODO: This should be combined with config_use_hfa_for_provisioning and implemented as an enum
+    // (NONE, HFA, OTASP).
     public static final String KEY_USE_OTASP_FOR_PROVISIONING_BOOL =
             "use_otasp_for_provisioning_bool";
 

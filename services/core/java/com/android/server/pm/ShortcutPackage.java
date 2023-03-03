@@ -2048,6 +2048,9 @@ class ShortcutPackage extends ShortcutPackageItem {
                                         shortcutUser.getUserId(), fromBackup);
                                 // Don't use addShortcut(), we don't need to save the icon.
                                 ret.mShortcuts.put(si.getId(), si);
+                            } catch (IOException e) {
+                                // Don't ignore IO exceptions.
+                                throw e;
                             } catch (Exception e) {
                                 // b/246540168 malformed shortcuts should be ignored
                                 Slog.e(TAG, "Failed parsing shortcut.", e);
