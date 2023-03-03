@@ -90,8 +90,7 @@ public class VirtualAudioControllerTest {
                         /* secureWindowCallback= */ null,
                         /* intentListenerCallback= */ null,
                         /* displayCategories= */ new ArrayList<>(),
-                        /* recentsPolicy= */
-                        VirtualDeviceParams.RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS);
+                        /* showTasksInHostDeviceRecents= */ true);
     }
 
 
