@@ -172,3 +172,12 @@ genrule {
         " > $(out)",
     tools: ["xmllint"],
 }
+
+filegroup {
+    name: "frameworks-base-core-AndroidManifest.xml",
+    srcs: ["AndroidManifest.xml"],
+    visibility: [
+        "//frameworks/base",
+        "//frameworks/base/api",
+    ],
+}
