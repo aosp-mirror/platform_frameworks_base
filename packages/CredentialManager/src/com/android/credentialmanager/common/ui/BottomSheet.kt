@@ -45,7 +45,6 @@ fun ModalBottomSheet(
         modifier = Modifier.background(Color.Transparent),
         sheetState = state,
         sheetContent = sheetContent,
-        scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.8f),
         sheetShape = EntryShape.TopRoundedCorner,
     ) {}
     LaunchedEffect(state.currentValue) {
