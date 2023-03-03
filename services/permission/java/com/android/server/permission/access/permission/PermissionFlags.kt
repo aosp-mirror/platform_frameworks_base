@@ -138,7 +138,7 @@ object PermissionFlags {
      * For example, this flag may be set in
      * [com.android.server.pm.permission.DefaultPermissionGrantPolicy].
      *
-     * @see PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
+     * @see PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT
      */
     const val PREGRANT = 1 shl 9
 
