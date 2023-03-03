@@ -214,6 +214,21 @@ package com.android.server.display.config {
     method public final void setMinimum(java.math.BigInteger);
   }
 
+  public class RefreshRateThrottlingMap {
+    ctor public RefreshRateThrottlingMap();
+    method public String getId();
+    method @NonNull public final java.util.List<com.android.server.display.config.RefreshRateThrottlingPoint> getRefreshRateThrottlingPoint();
+    method public void setId(String);
+  }
+
+  public class RefreshRateThrottlingPoint {
+    ctor public RefreshRateThrottlingPoint();
+    method @NonNull public final com.android.server.display.config.RefreshRateRange getRefreshRateRange();
+    method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatus();
+    method public final void setRefreshRateRange(@NonNull com.android.server.display.config.RefreshRateRange);
+    method public final void setThermalStatus(@NonNull com.android.server.display.config.ThermalStatus);
+  }
+
   public class RefreshRateZone {
     ctor public RefreshRateZone();
     method public String getId();
@@ -264,6 +279,7 @@ package com.android.server.display.config {
   public class ThermalThrottling {
     ctor public ThermalThrottling();
     method public final java.util.List<com.android.server.display.config.BrightnessThrottlingMap> getBrightnessThrottlingMap();
+    method public final java.util.List<com.android.server.display.config.RefreshRateThrottlingMap> getRefreshRateThrottlingMap();
   }
 
   public class ThresholdPoint {

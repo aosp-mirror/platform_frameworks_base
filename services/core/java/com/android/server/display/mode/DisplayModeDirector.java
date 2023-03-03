@@ -224,6 +224,7 @@ public class DisplayModeDirector {
         }
         mLoggingEnabled = loggingEnabled;
         mBrightnessObserver.setLoggingEnabled(loggingEnabled);
+        mSkinThermalStatusObserver.setLoggingEnabled(loggingEnabled);
     }
 
     @NonNull
@@ -2669,7 +2670,7 @@ public class DisplayModeDirector {
         }
     }
 
-    private static final class SensorObserver implements ProximityActiveListener,
+    protected static final class SensorObserver implements ProximityActiveListener,
             DisplayManager.DisplayListener {
         private final String mProximitySensorName = null;
         private final String mProximitySensorType = Sensor.STRING_TYPE_PROXIMITY;
@@ -2952,52 +2953,6 @@ public class DisplayModeDirector {
         }
     }
 
-    private final class SkinThermalStatusObserver extends IThermalEventListener.Stub {
-        private final BallotBox mBallotBox;
-        private final Injector mInjector;
-
-        private @Temperature.ThrottlingStatus int mStatus = -1;
-
-        SkinThermalStatusObserver(Injector injector, BallotBox ballotBox) {
-            mInjector = injector;
-            mBallotBox = ballotBox;
-        }
-
-        @Override
-        public void notifyThrottling(Temperature temp) {
-            mStatus = temp.getStatus();
-            if (mLoggingEnabled) {
-                Slog.d(TAG, "New thermal throttling status "
-                        + ", current thermal status = " + mStatus);
-            }
-            final Vote vote;
-            if (mStatus >= Temperature.THROTTLING_CRITICAL) {
-                vote = Vote.forRenderFrameRates(0f, 60f);
-            } else {
-                vote = null;
-            }
-            mBallotBox.vote(GLOBAL_ID, Vote.PRIORITY_SKIN_TEMPERATURE, vote);
-        }
-
-        public void observe() {
-            IThermalService thermalService = mInjector.getThermalService();
-            if (thermalService == null) {
-                Slog.w(TAG, "Could not observe thermal status. Service not available");
-                return;
-            }
-            try {
-                thermalService.registerThermalEventListenerWithType(this, Temperature.TYPE_SKIN);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to register thermal status listener", e);
-            }
-        }
-
-        void dumpLocked(PrintWriter writer) {
-            writer.println("  SkinThermalStatusObserver:");
-            writer.println("    mStatus: " + mStatus);
-        }
-    }
-
     private class DeviceConfigDisplaySettings implements DeviceConfig.OnPropertiesChangedListener {
         public void startListening() {
             mDeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DISPLAY_MANAGER,
@@ -3184,11 +3139,15 @@ public class DisplayModeDirector {
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
                 Handler handler, long flags);
 
+        Display[] getDisplays();
+
+        boolean getDisplayInfo(int displayId, DisplayInfo displayInfo);
+
         BrightnessInfo getBrightnessInfo(int displayId);
 
         boolean isDozeState(Display d);
 
-        IThermalService getThermalService();
+        boolean registerThermalServiceListener(IThermalEventListener listener);
 
         boolean supportsFrameRateOverride();
     }
@@ -3222,6 +3181,20 @@ public class DisplayModeDirector {
         }
 
         @Override
+        public Display[] getDisplays() {
+            return getDisplayManager().getDisplays(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED);
+        }
+
+        @Override
+        public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
+            Display display = getDisplayManager().getDisplay(displayId);
+            if (display != null) {
+                return display.getDisplayInfo(displayInfo);
+            }
+            return false;
+        }
+
+        @Override
         public BrightnessInfo getBrightnessInfo(int displayId) {
             final Display display = getDisplayManager().getDisplay(displayId);
             if (display != null) {
@@ -3239,9 +3212,20 @@ public class DisplayModeDirector {
         }
 
         @Override
-        public IThermalService getThermalService() {
-            return IThermalService.Stub.asInterface(
-                    ServiceManager.getService(Context.THERMAL_SERVICE));
+        public boolean registerThermalServiceListener(IThermalEventListener listener) {
+            IThermalService thermalService = getThermalService();
+            if (thermalService == null) {
+                Slog.w(TAG, "Could not observe thermal status. Service not available");
+                return false;
+            }
+            try {
+                thermalService.registerThermalEventListenerWithType(listener,
+                        Temperature.TYPE_SKIN);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to register thermal status listener", e);
+                return false;
+            }
+            return true;
         }
 
         @Override
@@ -3254,6 +3238,11 @@ public class DisplayModeDirector {
                 mDisplayManager = mContext.getSystemService(DisplayManager.class);
             }
             return mDisplayManager;
+        }
+
+        private IThermalService getThermalService() {
+            return IThermalService.Stub.asInterface(
+                    ServiceManager.getService(Context.THERMAL_SERVICE));
         }
     }
 
