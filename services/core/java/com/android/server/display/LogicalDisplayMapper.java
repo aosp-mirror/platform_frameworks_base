@@ -1013,19 +1013,23 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             if (newDisplay != oldDisplay) {
                 newDisplay.swapDisplaysLocked(oldDisplay);
             }
+            DisplayDeviceConfig config = device.getDisplayDeviceConfig();
 
             newDisplay.setDevicePositionLocked(displayLayout.getPosition());
             newDisplay.setLeadDisplayLocked(displayLayout.getLeadDisplayId());
             newDisplay.updateLayoutLimitedRefreshRateLocked(
-                    device.getDisplayDeviceConfig().getRefreshRange(
-                            displayLayout.getRefreshRateZoneId()
+                    config.getRefreshRange(displayLayout.getRefreshRateZoneId())
+            );
+            newDisplay.updateRefreshRateThermalThrottling(
+                    config.getRefreshRateThrottlingData(
+                            displayLayout.getRefreshRateThermalThrottlingMapId()
                     )
             );
 
             setEnabledLocked(newDisplay, displayLayout.isEnabled());
             newDisplay.setBrightnessThrottlingDataIdLocked(
                     displayLayout.getBrightnessThrottlingMapId() == null
-                            ? DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
+                            ? DisplayDeviceConfig.DEFAULT_ID
                             : displayLayout.getBrightnessThrottlingMapId());
 
             newDisplay.setDisplayGroupNameLocked(displayLayout.getDisplayGroupName());
