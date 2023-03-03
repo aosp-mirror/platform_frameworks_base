@@ -25,7 +25,6 @@ import static android.service.notification.NotificationListenerService.REASON_GR
 import static android.service.notification.NotificationStats.DISMISSAL_BUBBLE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
-import static com.android.systemui.flags.Flags.WM_BUBBLE_BAR;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -358,7 +357,6 @@ public class BubblesManager {
                 });
             }
         };
-        mBubbles.setBubbleBarEnabled(featureFlags.isEnabled(WM_BUBBLE_BAR));
         mBubbles.setSysuiProxy(mSysuiProxy);
     }
 

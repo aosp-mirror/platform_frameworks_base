@@ -283,7 +283,7 @@ public class BubbleData {
     }
 
     boolean isShowingOverflow() {
-        return mShowingOverflow && (isExpanded() || mPositioner.showingInTaskbar());
+        return mShowingOverflow && isExpanded();
     }
 
     /**
