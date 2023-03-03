@@ -44,11 +44,17 @@ public class ConfirmDialog extends AlertActivity
         implements DialogInterface.OnClickListener, ImageGetter {
     private static final String TAG = "VpnConfirm";
 
+    // Usually the label represents the app name, 150 code points might be enough to display the app
+    // name, and 150 code points won't cover the warning message from VpnDialog.
+    static final int MAX_VPN_LABEL_LENGTH = 150;
+
     @VpnManager.VpnType private final int mVpnType;
 
     private String mPackage;
 
     private IConnectivityManager mService;
+
+    private View mView;
 
     public ConfirmDialog() {
         this(VpnManager.TYPE_VPN_SERVICE);
@@ -56,6 +62,42 @@ public class ConfirmDialog extends AlertActivity
 
     public ConfirmDialog(@VpnManager.VpnType int vpnType) {
         mVpnType = vpnType;
+    }
+
+    /**
+     * This function will use the string resource to combine the VPN label and the package name.
+     *
+     * If the VPN label violates the length restriction, the first 30 code points of VPN label and
+     * the package name will be returned. Or return the VPN label and the package name directly if
+     * the VPN label doesn't violate the length restriction.
+     *
+     * The result will be something like,
+     * - ThisIsAVeryLongVpnAppNameWhich... (com.vpn.app)
+     *   if the VPN label violates the length restriction.
+     * or
+     * - VpnLabelWith&lt;br&gt;HtmlTag (com.vpn.app)
+     *   if the VPN label doesn't violate the length restriction.
+     *
+     */
+    private String getSimplifiedLabel(String vpnLabel, String packageName) {
+        if (vpnLabel.codePointCount(0, vpnLabel.length()) > 30) {
+            return getString(R.string.sanitized_vpn_label_with_ellipsis,
+                vpnLabel.substring(0, vpnLabel.offsetByCodePoints(0, 30)),
+                packageName);
+        }
+
+        return getString(R.string.sanitized_vpn_label, vpnLabel, packageName);
+    }
+
+    protected String getSanitizedVpnLabel(String vpnLabel, String packageName) {
+        final String sanitizedVpnLabel = Html.escapeHtml(vpnLabel);
+        final boolean exceedMaxVpnLabelLength = sanitizedVpnLabel.codePointCount(0,
+            sanitizedVpnLabel.length()) > MAX_VPN_LABEL_LENGTH;
+        if (exceedMaxVpnLabelLength || !vpnLabel.equals(sanitizedVpnLabel)) {
+            return getSimplifiedLabel(sanitizedVpnLabel, packageName);
+        }
+
+        return sanitizedVpnLabel;
     }
 
     @Override
@@ -80,15 +122,16 @@ public class ConfirmDialog extends AlertActivity
             finish();
             return;
         }
-        View view = View.inflate(this, R.layout.confirm, null);
-        ((TextView) view.findViewById(R.id.warning)).setText(
-                Html.fromHtml(getString(R.string.warning, getVpnLabel()),
-                        this, null /* tagHandler */));
+        mView = View.inflate(this, R.layout.confirm, null);
+        ((TextView) mView.findViewById(R.id.warning)).setText(
+                Html.fromHtml(getString(R.string.warning, getSanitizedVpnLabel(
+                    getVpnLabel().toString(), mPackage)),
+                    this /* imageGetter */, null /* tagHandler */));
         mAlertParams.mTitle = getText(R.string.prompt);
         mAlertParams.mPositiveButtonText = getText(android.R.string.ok);
         mAlertParams.mPositiveButtonListener = this;
         mAlertParams.mNegativeButtonText = getText(android.R.string.cancel);
-        mAlertParams.mView = view;
+        mAlertParams.mView = mView;
         setupAlert();
 
         getWindow().setCloseOnTouchOutside(false);
