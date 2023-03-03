@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -516,7 +517,7 @@ fun ExternalOnlySelectionCard(
     onConfirm: () -> Unit,
 ) {
     SheetContainerCard {
-        item { HeadlineIcon(painter = painterResource(R.drawable.ic_other_devices)) }
+        item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item { HeadlineText(text = stringResource(R.string.create_passkey_in_other_device_title)) }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
@@ -695,7 +696,7 @@ fun RemoteEntryRow(
 ) {
     Entry(
         onClick = { onRemoteEntrySelected(remoteInfo) },
-        iconPainter = painterResource(R.drawable.ic_other_devices),
+        iconImageVector = Icons.Outlined.QrCodeScanner,
         entryHeadlineText = stringResource(R.string.another_device),
     )
 }

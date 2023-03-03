@@ -220,7 +220,7 @@ class GetFlowUtils {
                             credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                             userName = credentialEntry.username.toString(),
                             displayName = credentialEntry.displayName?.toString(),
-                            icon = credentialEntry.icon?.loadDrawable(context),
+                            icon = credentialEntry.icon.loadDrawable(context),
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                         ))
                     }
@@ -235,7 +235,7 @@ class GetFlowUtils {
                             credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                             userName = credentialEntry.username.toString(),
                             displayName = credentialEntry.displayName?.toString(),
-                            icon = credentialEntry.icon?.loadDrawable(context),
+                            icon = credentialEntry.icon.loadDrawable(context),
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                         ))
                     }
@@ -250,7 +250,7 @@ class GetFlowUtils {
                             credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
                             userName = credentialEntry.title.toString(),
                             displayName = credentialEntry.subtitle?.toString(),
-                            icon = credentialEntry.icon?.loadDrawable(context),
+                            icon = credentialEntry.icon.loadDrawable(context),
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                         ))
                     }
@@ -432,7 +432,7 @@ class CreateFlowUtils {
                     createCredentialRequestJetpack.password,
                     CredentialType.PASSWORD,
                     appLabel,
-                    context.getDrawable(R.drawable.ic_password) ?: return null,
+                    context.getDrawable(R.drawable.ic_password_24) ?: return null,
                     preferImmediatelyAvailableCredentials = false,
                 )
                 is CreatePublicKeyCredentialRequest -> {
@@ -455,7 +455,7 @@ class CreateFlowUtils {
                         type = CredentialType.UNKNOWN,
                         appName = appLabel,
                         typeIcon = displayInfo.credentialTypeIcon?.loadDrawable(context)
-                            ?: context.getDrawable(R.drawable.ic_other_sign_in) ?: return null,
+                            ?: context.getDrawable(R.drawable.ic_other_sign_in_24) ?: return null,
                         preferImmediatelyAvailableCredentials = false,
                     )
                 }
@@ -643,7 +643,7 @@ class CreateFlowUtils {
                 displayName,
                 CredentialType.PASSKEY,
                 appLabel,
-                context.getDrawable(R.drawable.ic_passkey) ?: return null,
+                context.getDrawable(R.drawable.ic_passkey_24) ?: return null,
                 preferImmediatelyAvailableCredentials,
             )
         }
