@@ -28,6 +28,9 @@
       "path": "cts/hostsidetests/os/test_mappings/packagemanager"
     },
     {
+      "path": "cts/hostsidetests/appsearch"
+    },
+    {
       "path": "system/apex/tests"
     },
     {
@@ -44,6 +47,12 @@
     },
     {
       "name": "ApkVerityTest"
+    },
+    {
+      "name": "CtsSilentUpdateHostTestCases"
+    },
+    {
+      "name": "CtsSuspendAppsTestCases"
     },
     {
       "name": "CtsAppFgsTestCases",
@@ -101,39 +110,6 @@
     },
     {
       "name": "CtsUsesNativeLibraryTest",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
-    },
-    {
-      "name": "CtsAppSearchHostTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
-    },
-    {
-      "name": "CtsSilentUpdateHostTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
-    },
-    {
-      "name": "CtsSuspendAppsTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
