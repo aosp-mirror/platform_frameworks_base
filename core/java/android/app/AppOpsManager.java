@@ -7200,10 +7200,16 @@ public class AppOpsManager {
         if (mContext != null) {
             final PackageManager pm = mContext.getPackageManager();
             try {
-                if (pm != null && pm.checkPermission(Manifest.permission.READ_DEVICE_CONFIG,
-                        mContext.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
-                    DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_PRIVACY,
-                            mContext.getMainExecutor(), properties -> {
+                if (Build.IS_ENG
+                        && pm != null
+                        && pm.checkPermission(
+                                        Manifest.permission.READ_DEVICE_CONFIG,
+                                        mContext.getPackageName())
+                                == PackageManager.PERMISSION_GRANTED) {
+                    DeviceConfig.addOnPropertiesChangedListener(
+                            DeviceConfig.NAMESPACE_PRIVACY,
+                            mContext.getMainExecutor(),
+                            properties -> {
                                 if (properties.getKeyset().contains(FULL_LOG)) {
                                     sFullLog = properties.getBoolean(FULL_LOG, false);
                                 }
