@@ -49,6 +49,7 @@ import android.util.IntArray;
 import android.util.Slog;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -1486,7 +1487,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      */
     private boolean isLargeEnoughForMultiWindow() {
         return getConfiguration().smallestScreenWidthDp
-                >= mAtmService.mLargeScreenSmallestScreenWidthDp;
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
     }
 
     boolean isTopRootTask(Task rootTask) {
