@@ -162,9 +162,9 @@ import com.android.server.pm.UserRestrictionsUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.junit.Ignore;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
@@ -514,7 +514,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED),
@@ -793,7 +795,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
 
         // Remove.  No permissions, but same user, so it'll work.
         mContext.callerPermissions.clear();
@@ -820,7 +824,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(2)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
 
         // TODO Check other internal calls.
     }
@@ -846,7 +852,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(2)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
 
         // Remove.  No permissions, but same user, so it'll work.
         mContext.callerPermissions.clear();
@@ -874,7 +882,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(3)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
     }
 
     /**
@@ -2425,7 +2435,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(2)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE),
+                eq(null),
+                any(Bundle.class));
         verify(mContext.spiedContext).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED),
@@ -5886,7 +5898,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntentAction(
                         DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
-                MockUtils.checkUserHandle(userHandle));
+                MockUtils.checkUserHandle(userHandle),
+                eq(null),
+                any(Bundle.class));
 
         final Intent intent = new Intent(DeviceAdminReceiver.ACTION_PASSWORD_CHANGED);
         intent.setComponent(admin1);

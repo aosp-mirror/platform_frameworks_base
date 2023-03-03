@@ -3212,8 +3212,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private void sendChangedNotification(int userHandle) {
         Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        Bundle options = new BroadcastOptions()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeferUntilActive(true)
+                .toBundle();
         mInjector.binderWithCleanCallingIdentity(() ->
-                mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle)));
+                mContext.sendBroadcastAsUser(intent, new UserHandle(userHandle), null, options));
     }
 
     private void loadSettingsLocked(DevicePolicyData policy, int userHandle) {
