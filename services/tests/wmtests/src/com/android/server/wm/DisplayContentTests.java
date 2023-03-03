@@ -1620,7 +1620,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // If the rotated activity requests to show IME, the IME window should use the
         // transformation from activity to lay out in the same orientation.
-        mDisplayContent.setImeLayeringTarget(mAppWindow);
         LocalServices.getService(WindowManagerInternal.class).onToggleImeRequested(true /* show */,
                 app.token, app.token, mDisplayContent.mDisplayId);
         assertTrue(asyncRotationController.isTargetToken(mImeWindow.mToken));
