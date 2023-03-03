@@ -91,6 +91,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  * <pre>
  *  {@code
  *    <displayConfiguration>
+ *      <name>Built-In Display</name>
  *      <densityMapping>
  *        <density>
  *          <height>480</height>
@@ -499,6 +500,10 @@ public class DisplayDeviceConfig {
     private final List<RefreshRateLimitation> mRefreshRateLimitations =
             new ArrayList<>(2 /*initialCapacity*/);
 
+    // Name of the display, if configured.
+    @Nullable
+    private String mName;
+
     // Nits and backlight values that are loaded from either the display device config file, or
     // config.xml. These are the raw values and just used for the dumpsys
     private float[] mRawNits;
@@ -830,6 +835,15 @@ public class DisplayDeviceConfig {
         int port = physicalAddress.getPort();
         config = getConfigFromSuffix(context, baseDirectory, PORT_SUFFIX_FORMAT, port);
         return config;
+    }
+
+    /** The name of the display.
+     *
+     * @return The name of the display.
+     */
+    @Nullable
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -1646,6 +1660,7 @@ public class DisplayDeviceConfig {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
             if (config != null) {
+                loadName(config);
                 loadDensityMapping(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
@@ -1715,6 +1730,10 @@ public class DisplayDeviceConfig {
         if (mDensityMapping == null) {
             loadDensityMapping(defaultConfig);
         }
+    }
+
+    private void loadName(DisplayConfiguration config) {
+        mName = config.getName();
     }
 
     private void loadDensityMapping(DisplayConfiguration config) {
