@@ -867,7 +867,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId) {
         mBackgroundExecutor.execute(
-                () -> mLockPatternUtils.reportSuccessfulBiometricUnlock(isStrongBiometric, userId));
+                () -> {
+                    mLogger.logReportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+                    mLockPatternUtils.reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+                });
     }
 
     private void handleFingerprintAuthFailed() {
@@ -2504,11 +2507,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // If this message exists, we should not authenticate again until this message is
         // consumed by the handler
         if (mHandler.hasMessages(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE)) {
+            mLogger.logHandlerHasAuthContinueMsgs(action);
             return;
         }
 
         // don't start running fingerprint until they're registered
         if (!mAuthController.areAllFingerprintAuthenticatorsRegistered()) {
+            mLogger.d("All FP authenticators not registered, skipping FP listening state update");
             return;
         }
         final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsSupported());
