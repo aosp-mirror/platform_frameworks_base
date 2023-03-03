@@ -60,7 +60,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final UserHandle mUser;
 
     private final DeviceRouteController mDeviceRouteController;
-    private final BluetoothRouteController mBtRouteProvider;
+    private final BluetoothRouteController mBluetoothRouteController;
 
     private String mSelectedRouteId;
     // For apps without MODIFYING_AUDIO_ROUTING permission.
@@ -84,7 +84,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
-        mBtRouteProvider = BluetoothRouteController.createInstance(context, (routes) -> {
+        mBluetoothRouteController = BluetoothRouteController.createInstance(context, (routes) -> {
             publishProviderState();
             if (updateSessionInfosIfNeeded()) {
                 notifySessionInfoUpdated();
@@ -113,7 +113,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 intentFilter, null, null);
 
         mHandler.post(() -> {
-            mBtRouteProvider.start(mUser);
+            mBluetoothRouteController.start(mUser);
             notifyProviderState();
         });
         updateVolume();
@@ -122,7 +122,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     public void stop() {
         mContext.unregisterReceiver(mAudioReceiver);
         mHandler.post(() -> {
-            mBtRouteProvider.stop();
+            mBluetoothRouteController.stop();
             notifyProviderState();
         });
     }
@@ -189,9 +189,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
         MediaRoute2Info deviceRoute = mDeviceRouteController.getDeviceRoute();
         if (TextUtils.equals(routeId, deviceRoute.getId())) {
-            mBtRouteProvider.transferTo(null);
+            mBluetoothRouteController.transferTo(null);
         } else {
-            mBtRouteProvider.transferTo(routeId);
+            mBluetoothRouteController.transferTo(routeId);
         }
     }
 
@@ -232,7 +232,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
                     SYSTEM_SESSION_ID, packageName).setSystemSession(true);
             builder.addSelectedRoute(deviceRoute.getId());
-            for (MediaRoute2Info route : mBtRouteProvider.getAllBluetoothRoutes()) {
+            for (MediaRoute2Info route : mBluetoothRouteController.getAllBluetoothRoutes()) {
                 builder.addTransferableRoute(route.getId());
             }
             return builder.setProviderId(mUniqueId).build();
@@ -245,7 +245,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // We must have a device route in the provider info.
         builder.addRoute(mDeviceRouteController.getDeviceRoute());
 
-        for (MediaRoute2Info route : mBtRouteProvider.getAllBluetoothRoutes()) {
+        for (MediaRoute2Info route : mBluetoothRouteController.getAllBluetoothRoutes()) {
             builder.addRoute(route);
         }
         MediaRoute2ProviderInfo providerInfo = builder.build();
@@ -269,7 +269,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
 
             MediaRoute2Info deviceRoute = mDeviceRouteController.getDeviceRoute();
             MediaRoute2Info selectedRoute = deviceRoute;
-            MediaRoute2Info selectedBtRoute = mBtRouteProvider.getSelectedRoute();
+            MediaRoute2Info selectedBtRoute = mBluetoothRouteController.getSelectedRoute();
             if (selectedBtRoute != null) {
                 selectedRoute = selectedBtRoute;
                 builder.addTransferableRoute(deviceRoute.getId());
@@ -281,7 +281,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     .build();
             builder.addSelectedRoute(mSelectedRouteId);
 
-            for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
+            for (MediaRoute2Info route : mBluetoothRouteController.getTransferableRoutes()) {
                 builder.addTransferableRoute(route.getId());
             }
 
@@ -361,7 +361,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     .build();
         }
 
-        if (mBtRouteProvider.updateVolumeForDevices(devices, volume)) {
+        if (mBluetoothRouteController.updateVolumeForDevices(devices, volume)) {
             return;
         }
 
