@@ -86,6 +86,9 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.SystemClock;
 import android.provider.DeviceConfig;
+import android.telephony.TelephonyCallback;
+import android.telephony.TelephonyManager;
+import android.telephony.emergency.EmergencyNumber;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -119,6 +122,8 @@ public class DeviceIdleControllerTest {
     private AnyMotionDetectorForTest mAnyMotionDetector;
     private AppStateTrackerForTest mAppStateTracker;
     private DeviceIdleController.Constants mConstants;
+    private TelephonyCallback.OutgoingEmergencyCallListener mEmergencyCallListener;
+    private TelephonyCallback.CallStateListener mCallStateListener;
     private InjectorForTest mInjector;
 
     private MockitoSession mMockingSession;
@@ -140,6 +145,8 @@ public class DeviceIdleControllerTest {
     private Sensor mMotionSensor;
     @Mock
     private SensorManager mSensorManager;
+    @Mock
+    private TelephonyManager mTelephonyManager;
 
     class InjectorForTest extends DeviceIdleController.Injector {
         ConnectivityManager connectivityManager;
@@ -229,6 +236,11 @@ public class DeviceIdleControllerTest {
         ConstraintController getConstraintController(
                 Handler handler, DeviceIdleInternal localService) {
             return constraintController;
+        }
+
+        @Override
+        TelephonyManager getTelephonyManager() {
+            return mTelephonyManager;
         }
 
         @Override
@@ -343,6 +355,15 @@ public class DeviceIdleControllerTest {
 
         // Get the same Constants object that mDeviceIdleController got.
         mConstants = mInjector.getConstants(mDeviceIdleController);
+
+        final ArgumentCaptor<TelephonyCallback> telephonyCallbackCaptor =
+                ArgumentCaptor.forClass(TelephonyCallback.class);
+        verify(mTelephonyManager)
+                .registerTelephonyCallback(any(), telephonyCallbackCaptor.capture());
+        mEmergencyCallListener = (TelephonyCallback.OutgoingEmergencyCallListener)
+                telephonyCallbackCaptor.getValue();
+        mCallStateListener =
+                (TelephonyCallback.CallStateListener) telephonyCallbackCaptor.getValue();
     }
 
     @After
@@ -531,6 +552,16 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_ACTIVE);
+
+        // All other conditions allow for going INACTIVE...
+        setAlarmSoon(false);
+        setChargingOn(false);
+        setScreenOn(false);
+        // ...except the emergency call.
+        setEmergencyCallActive(true);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_ACTIVE);
     }
 
     @Test
@@ -559,6 +590,15 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        // All other conditions allow for going INACTIVE...
+        setChargingOn(false);
+        setScreenOn(false);
+        // ...except the emergency call.
+        setEmergencyCallActive(true);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
     }
 
     @Test
@@ -569,6 +609,7 @@ public class DeviceIdleControllerTest {
         setAlarmSoon(false);
         setChargingOn(false);
         setScreenOn(false);
+        setEmergencyCallActive(false);
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
@@ -613,6 +654,7 @@ public class DeviceIdleControllerTest {
 
         setChargingOn(false);
         setScreenOn(false);
+        setEmergencyCallActive(false);
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyLightStateConditions(LIGHT_STATE_INACTIVE);
@@ -1145,6 +1187,22 @@ public class DeviceIdleControllerTest {
                 longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT),
                 longThat(l -> l > mConstants.LIGHT_IDLE_TIMEOUT_INITIAL_FLEX),
                 eq(true));
+    }
+
+    @Test
+    public void testEmergencyCallEndTriggersInactive() {
+        setAlarmSoon(false);
+        setChargingOn(false);
+        setScreenOn(false);
+        setEmergencyCallActive(true);
+
+        verifyStateConditions(STATE_ACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        setEmergencyCallActive(false);
+
+        verifyStateConditions(STATE_INACTIVE);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
     }
 
     ///////////////// EXIT conditions ///////////////////
@@ -2096,6 +2154,75 @@ public class DeviceIdleControllerTest {
                 .onDeviceStationaryChanged(eq(true));
     }
 
+    @Test
+    public void testEmergencyEndsIdle() {
+        enterDeepState(STATE_ACTIVE);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_INACTIVE);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_SENSING);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_LOCATING);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        // Quick doze enabled or not shouldn't affect the end state.
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(true);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(false);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_IDLE);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        setEmergencyCallActive(true);
+        verifyStateConditions(STATE_ACTIVE);
+    }
+
+    @Test
+    public void testEmergencyEndsLightIdle() {
+        enterLightState(LIGHT_STATE_ACTIVE);
+        setEmergencyCallActive(true);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        setEmergencyCallActive(true);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        setEmergencyCallActive(true);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        setEmergencyCallActive(true);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        setEmergencyCallActive(true);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        setEmergencyCallActive(true);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+    }
+
     private void enterDeepState(int state) {
         switch (state) {
             case STATE_ACTIVE:
@@ -2108,6 +2235,7 @@ public class DeviceIdleControllerTest {
                 setQuickDozeEnabled(true);
                 setScreenOn(false);
                 setChargingOn(false);
+                setEmergencyCallActive(false);
                 mDeviceIdleController.becomeInactiveIfAppropriateLocked();
                 break;
             case STATE_LOCATING:
@@ -2128,6 +2256,7 @@ public class DeviceIdleControllerTest {
                 setQuickDozeEnabled(false);
                 setScreenOn(false);
                 setChargingOn(false);
+                setEmergencyCallActive(false);
                 mDeviceIdleController.becomeInactiveIfAppropriateLocked();
                 int count = 0;
                 while (mDeviceIdleController.getState() != state) {
@@ -2159,6 +2288,7 @@ public class DeviceIdleControllerTest {
                 enterLightState(LIGHT_STATE_ACTIVE);
                 setScreenOn(false);
                 setChargingOn(false);
+                setEmergencyCallActive(false);
                 int count = 0;
                 mDeviceIdleController.becomeInactiveIfAppropriateLocked();
                 while (mDeviceIdleController.getLightState() != lightState) {
@@ -2177,6 +2307,7 @@ public class DeviceIdleControllerTest {
             case LIGHT_STATE_OVERRIDE:
                 setScreenOn(false);
                 setChargingOn(false);
+                setEmergencyCallActive(false);
                 mDeviceIdleController.setLightStateForTest(lightState);
                 break;
             default:
@@ -2186,6 +2317,14 @@ public class DeviceIdleControllerTest {
 
     private void setChargingOn(boolean on) {
         mDeviceIdleController.updateChargingLocked(on);
+    }
+
+    private void setEmergencyCallActive(boolean active) {
+        if (active) {
+            mEmergencyCallListener.onOutgoingEmergencyCall(mock(EmergencyNumber.class), 0);
+        } else {
+            mCallStateListener.onCallStateChanged(TelephonyManager.CALL_STATE_IDLE);
+        }
     }
 
     private void setScreenLocked(boolean locked) {
@@ -2235,6 +2374,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             case STATE_IDLE_PENDING:
                 assertEquals(
@@ -2244,6 +2384,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             case STATE_SENSING:
                 assertEquals(
@@ -2255,6 +2396,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             case STATE_LOCATING:
                 assertEquals(
@@ -2263,6 +2405,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             case STATE_IDLE:
                 if (mDeviceIdleController.hasMotionSensor()) {
@@ -2276,6 +2419,7 @@ public class DeviceIdleControllerTest {
                         && !mDeviceIdleController.isKeyguardShowing());
                 // Light state should be OVERRIDE at this point.
                 verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             case STATE_IDLE_MAINTENANCE:
                 if (mDeviceIdleController.hasMotionSensor()) {
@@ -2287,6 +2431,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             case STATE_QUICK_DOZE_DELAY:
                 // If quick doze is enabled, the motion listener should NOT be active.
@@ -2295,6 +2440,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             default:
                 fail("Conditions for " + stateToString(expectedState) + " unknown.");
@@ -2312,6 +2458,7 @@ public class DeviceIdleControllerTest {
             case LIGHT_STATE_ACTIVE:
                 assertTrue(
                         mDeviceIdleController.isCharging() || mDeviceIdleController.isScreenOn()
+                                || mDeviceIdleController.isEmergencyCallActive()
                                 // Or there's an alarm coming up soon.
                                 || SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM
                                 > mAlarmManager.getNextWakeFromIdleTime());
@@ -2324,6 +2471,7 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn()
                         && !mDeviceIdleController.isKeyguardShowing());
+                assertFalse(mDeviceIdleController.isEmergencyCallActive());
                 break;
             default:
                 fail("Conditions for " + lightStateToString(expectedLightState) + " unknown.");
