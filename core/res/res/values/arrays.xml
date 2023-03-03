@@ -227,4 +227,10 @@
     <string-array name="device_state_notification_thermal_contents">
         <item>@string/concurrent_display_notification_thermal_content</item>
     </string-array>
+
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner of the
+         demo device provisioning permissions. -->
+    <string-array name="demo_device_provisioning_known_signers">
+        <item>@string/config_retailDemoPackageSignature</item>
+    </string-array>
 </resources>

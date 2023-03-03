@@ -63,20 +63,20 @@ import libcore.util.NativeAllocationRegistry;
  * as follows:
  *
  * First, let W be a weight parameter determining how much the gainmap will be applied.
- *   W = clamp((log(H)               - log(displayRatioHdr)) /
- *             (log(displayRatioHdr) - log(displayRatioSdr), 0, 1)
+ *   W = clamp((log(H)                      - log(minDisplayRatioForHdrTransition)) /
+ *             (log(displayRatioForFullHdr) - log(minDisplayRatioForHdrTransition), 0, 1)
  *
  * Next, let L be the gainmap value in log space. We compute this from the value G that was
  * sampled from the texture as follows:
- *   L = mix(log(gainmapRatioMin), log(gainmapRatioMax), pow(G, gainmapGamma))
+ *   L = mix(log(ratioMin), log(ratioMax), pow(G, gamma))
  *
  * Finally, apply the gainmap to compute D, the displayed pixel. If the base image is SDR then
  * compute:
  *   D = (B + epsilonSdr) * exp(L * W) - epsilonHdr
- * If the base image is HDR then compute:
- *   D = (B + epsilonHdr) * exp(L * (W - 1)) - epsilonSdr
  *
- * In the above math, log() is a natural logarithm and exp() is natural exponentiation.
+ * In the above math, log() is a natural logarithm and exp() is natural exponentiation. The base
+ * for these functions cancels out and does not affect the result, so other bases may be used
+ * if preferred.
  */
 public final class Gainmap implements Parcelable {
 

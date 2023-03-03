@@ -39,7 +39,6 @@ import static java.lang.Integer.max;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -174,6 +173,17 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private @Mode int mCurrentMode = MODE_UNINITIALIZED;
     private int mWidth = -1;
 
+    /**
+     * This callback is used to animate KeyguardSecurityContainer and its child views based on
+     * the interaction with the ime. After
+     * {@link WindowInsetsAnimation.Callback#onPrepare(WindowInsetsAnimation)},
+     * {@link #onApplyWindowInsets} is called where we
+     * set the bottom padding to be the height of the keyboard. We use this padding to determine
+     * the delta of vertical distance for y-translation animations.
+     * Note that bottom padding is not set when the disappear animation is started because
+     * we are deferring the y translation logic to the animator in
+     * {@link KeyguardPasswordView#startDisappearAnimation(Runnable)}
+     */
     private final WindowInsetsAnimation.Callback mWindowInsetsAnimationCallback =
             new WindowInsetsAnimation.Callback(DISPATCH_MODE_STOP) {
 
@@ -214,7 +224,6 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                             continue;
                         }
                         interpolatedFraction = animation.getInterpolatedFraction();
-
                         final int paddingBottom = (int) MathUtils.lerp(
                                 start, end,
                                 interpolatedFraction);
@@ -569,13 +578,21 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
      */
     public void startDisappearAnimation(SecurityMode securitySelection) {
         mDisappearAnimRunning = true;
-        mViewMode.startDisappearAnimation(securitySelection);
+        if (securitySelection == SecurityMode.Password
+                && mSecurityViewFlipper.getSecurityView() instanceof KeyguardPasswordView) {
+            ((KeyguardPasswordView) mSecurityViewFlipper.getSecurityView())
+                    .setDisappearAnimationListener(this::setTranslationY);
+        } else {
+            mViewMode.startDisappearAnimation(securitySelection);
+        }
     }
 
     /**
      * This will run when the bouncer shows in all cases except when the user drags the bouncer up.
      */
     public void startAppearAnimation(SecurityMode securityMode) {
+        setTranslationY(0f);
+        setAlpha(1f);
         updateChildren(0 /* translationY */, 1f /* alpha */);
         mViewMode.startAppearAnimation(securityMode);
     }
@@ -624,7 +641,13 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         int inset = max(bottomInset, imeInset);
         int paddingBottom = max(inset, getContext().getResources()
                 .getDimensionPixelSize(R.dimen.keyguard_security_view_bottom_margin));
-        setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
+        // If security mode is password, we rely on the animation value of defined in
+        // KeyguardPasswordView to determine the y translation animation.
+        // This means that we will prevent the WindowInsetsAnimationCallback from setting any y
+        // translation values by preventing the setting of the padding here.
+        if (!mDisappearAnimRunning) {
+            setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
+        }
         return insets.inset(0, 0, 0, inset);
     }
 
@@ -1044,13 +1067,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             int yTranslation = mResources.getDimensionPixelSize(R.dimen.disappear_y_translation);
 
-            AnimatorSet anims = new AnimatorSet();
             ObjectAnimator yAnim = ObjectAnimator.ofFloat(mView, View.TRANSLATION_Y, yTranslation);
-            ObjectAnimator alphaAnim = ObjectAnimator.ofFloat(mView, View.ALPHA, 0f);
-
-            anims.setInterpolator(Interpolators.STANDARD_ACCELERATE);
-            anims.playTogether(alphaAnim, yAnim);
-            anims.start();
+            yAnim.setInterpolator(Interpolators.STANDARD_ACCELERATE);
+            yAnim.setDuration(500);
+            yAnim.start();
         }
 
         private void setupUserSwitcher() {

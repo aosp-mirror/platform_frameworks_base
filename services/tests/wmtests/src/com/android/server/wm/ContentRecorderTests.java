@@ -35,6 +35,8 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 
+import android.app.WindowConfiguration;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -45,6 +47,7 @@ import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.util.DisplayMetrics;
 import android.view.ContentRecordingSession;
+import android.view.Gravity;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -258,8 +261,17 @@ public class ContentRecorderTests extends WindowTestsBase {
 
     @Test
     public void testOnTaskBoundsConfigurationChanged_notifiesCallback() {
+        mTask.getRootTask().setWindowingMode(WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
+
         final int recordedWidth = 333;
         final int recordedHeight = 999;
+
+        final ActivityInfo info = new ActivityInfo();
+        info.windowLayout = new ActivityInfo.WindowLayout(-1 /* width */,
+                        -1 /* widthFraction */, -1 /* height */, -1 /* heightFraction */,
+                        Gravity.NO_GRAVITY, recordedWidth, recordedHeight);
+        mTask.setMinDimensions(info);
+
         // WHEN a recording is ongoing.
         mContentRecorder.setContentRecordingSession(mTaskSession);
         mContentRecorder.updateRecording();
@@ -267,7 +279,6 @@ public class ContentRecorderTests extends WindowTestsBase {
 
         // WHEN a configuration change arrives, and the recorded content is a different size.
         mTask.setBounds(new Rect(0, 0, recordedWidth, recordedHeight));
-        mContentRecorder.onConfigurationChanged(mDefaultDisplay.getLastOrientation());
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
         // THEN content in the captured DisplayArea is scaled to fit the surface size.

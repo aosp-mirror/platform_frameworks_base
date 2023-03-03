@@ -4131,17 +4131,26 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testTooManyGroups() {
+    public void testTooManyGroups_fromTargetApp() {
+        testTooManyGroups(/* fromTargetApp= */ true);
+    }
+
+    @Test
+    public void testTooManyGroups_fromListener() {
+        testTooManyGroups(/* fromTargetApp= */ false);
+    }
+
+    private void testTooManyGroups(boolean fromTargetApp) {
         for (int i = 0; i < NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT; i++) {
             NotificationChannelGroup group = new NotificationChannelGroup(String.valueOf(i),
                     String.valueOf(i));
-            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, fromTargetApp);
         }
         try {
             NotificationChannelGroup group = new NotificationChannelGroup(
                     String.valueOf(NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT),
                     String.valueOf(NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT));
-            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, true);
+            mHelper.createNotificationChannelGroup(PKG_O, UID_O, group, fromTargetApp);
             fail("Allowed to create too many notification channel groups");
         } catch (IllegalStateException e) {
             // great

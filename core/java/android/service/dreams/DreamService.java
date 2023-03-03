@@ -1588,7 +1588,8 @@ public class DreamService extends Service implements Window.Callback {
         // If DreamActivity is destroyed, wake up from Dream.
         void onActivityDestroyed() {
             mActivity = null;
-            onDestroy();
+            mWindow = null;
+            detach();
         }
     }
 

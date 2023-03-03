@@ -119,7 +119,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.security.FileIntegrity;
 import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.json.JSONArray;
@@ -1070,57 +1069,38 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     @VisibleForTesting
-    final File getUserFile(@UserIdInt int userId) {
-        return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
-    }
-
-    @VisibleForTesting
-    final File getReserveCopyUserFile(@UserIdInt int userId) {
-        return new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES_RESERVE_COPY);
+    final ResilientAtomicFile getUserFile(@UserIdInt int userId) {
+        File mainFile = new File(injectUserDataPath(userId), FILENAME_USER_PACKAGES);
+        File temporaryBackup = new File(injectUserDataPath(userId),
+                FILENAME_USER_PACKAGES + ".backup");
+        File reserveCopy = new File(injectUserDataPath(userId),
+                FILENAME_USER_PACKAGES_RESERVE_COPY);
+        int fileMode = FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH;
+        return new ResilientAtomicFile(mainFile, temporaryBackup, reserveCopy, fileMode,
+                "user shortcut", null);
     }
 
     @GuardedBy("mLock")
     private void saveUserLocked(@UserIdInt int userId) {
-        final File path = getUserFile(userId);
-        if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Saving to " + path);
-        }
+        try (ResilientAtomicFile file = getUserFile(userId)) {
+            FileOutputStream os = null;
+            try {
+                if (DEBUG || DEBUG_REBOOT) {
+                    Slog.d(TAG, "Saving to " + file);
+                }
 
-        final File reservePath = getReserveCopyUserFile(userId);
-        reservePath.delete();
+                os = file.startWrite();
 
-        path.getParentFile().mkdirs();
-        final AtomicFile file = new AtomicFile(path);
-        FileOutputStream os = null;
-        try {
-            os = file.startWrite();
+                saveUserInternalLocked(userId, os, /* forBackup= */ false);
 
-            saveUserInternalLocked(userId, os, /* forBackup= */ false);
+                file.finishWrite(os);
 
-            file.finishWrite(os);
-
-            // Remove all dangling bitmap files.
-            cleanupDanglingBitmapDirectoriesLocked(userId);
-        } catch (XmlPullParserException | IOException e) {
-            Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
-            file.failWrite(os);
-        }
-
-        // Store the reserve copy of the file.
-        try (FileInputStream in = new FileInputStream(path);
-             FileOutputStream out = new FileOutputStream(reservePath)) {
-            FileUtils.copy(in, out);
-            FileUtils.sync(out);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to write reserve copy: " + path, e);
-        }
-
-        // Protect both primary and reserve copy with fs-verity.
-        try {
-            FileIntegrity.setUpFsVerity(path);
-            FileIntegrity.setUpFsVerity(reservePath);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to verity-protect", e);
+                // Remove all dangling bitmap files.
+                cleanupDanglingBitmapDirectoriesLocked(userId);
+            } catch (XmlPullParserException | IOException e) {
+                Slog.e(TAG, "Failed to write to file " + file, e);
+                file.failWrite(os);
+            }
         }
 
         getUserShortcutsLocked(userId).logSharingShortcutStats(mMetricsLogger);
@@ -1157,29 +1137,26 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     private ShortcutUser loadUserLocked(@UserIdInt int userId) {
-        final File path = getUserFile(userId);
-        if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Loading from " + path);
-        }
-
-        try (FileInputStream in = new AtomicFile(path).openRead()) {
-            return loadUserInternal(userId, in, /* forBackup= */ false);
-        } catch (FileNotFoundException e) {
-            if (DEBUG || DEBUG_REBOOT) {
-                Slog.d(TAG, "Not found " + path);
-            }
-        } catch (Exception e) {
-            final File reservePath = getReserveCopyUserFile(userId);
-            Slog.e(TAG, "Reading from reserve copy: " + reservePath, e);
-            try (FileInputStream in = new AtomicFile(reservePath).openRead()) {
+        try (ResilientAtomicFile file = getUserFile(userId)) {
+            FileInputStream in = null;
+            try {
+                if (DEBUG || DEBUG_REBOOT) {
+                    Slog.d(TAG, "Loading from " + file);
+                }
+                in = file.openRead();
+                if (in == null) {
+                    if (DEBUG || DEBUG_REBOOT) {
+                        Slog.d(TAG, "Not found " + file);
+                    }
+                    return null;
+                }
                 return loadUserInternal(userId, in, /* forBackup= */ false);
-            } catch (Exception exceptionReadingReserveFile) {
-                Slog.e(TAG, "Failed to read reserve copy: " + reservePath,
-                        exceptionReadingReserveFile);
+            } catch (Exception e) {
+                // Remove corrupted file and retry.
+                file.failRead(in, e);
+                return loadUserLocked(userId);
             }
-            Slog.e(TAG, "Failed to read file " + path, e);
         }
-        return null;
     }
 
     private ShortcutUser loadUserInternal(@UserIdInt int userId, InputStream is,

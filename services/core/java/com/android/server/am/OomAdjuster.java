@@ -22,8 +22,8 @@ import static android.app.ActivityManager.PROCESS_CAPABILITY_BFSL;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManager.PROCESS_CAPABILITY_NETWORK;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
+import static android.app.ActivityManager.PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
@@ -117,6 +117,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ServiceInfo;
+import android.net.NetworkPolicyManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManagerInternal;
@@ -1259,10 +1260,17 @@ public class OomAdjuster {
         for (int i = numLru - 1; i >= 0; i--) {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
-            if (!app.isKilledByAm() && app.getThread() != null && !app.isPendingFinishAttach()) {
+            if (!app.isKilledByAm() && app.getThread() != null) {
                 // We don't need to apply the update for the process which didn't get computed
                 if (state.getCompletedAdjSeq() == mAdjSeq) {
                     applyOomAdjLSP(app, true, now, nowElapsed, oomAdjReason);
+                }
+
+                if (app.isPendingFinishAttach()) {
+                    // Avoid trimming processes that are still initializing. If they aren't
+                    // hosting any components yet because they may be unfairly killed.
+                    // We however apply any computed previously computed oom scores before skipping.
+                    continue;
                 }
 
                 final ProcessServiceRecord psr = app.mServices;
@@ -1695,6 +1703,19 @@ public class OomAdjuster {
             state.setCurRawAdj(CACHED_APP_MAX_ADJ);
             state.setCompletedAdjSeq(state.getAdjSeq());
             state.setCurCapability(PROCESS_CAPABILITY_NONE);
+            return false;
+        }
+
+        if (app.isPendingFinishAttach()) {
+            state.setAdjSeq(mAdjSeq);
+            state.setCompletedAdjSeq(mAdjSeq);
+            // If the process is still initializing, we skip computing any states because we
+            // don't want to override the special states that have been set at
+            // AMS#attachApplication with OomAdjuster#setAttachingProcessStates.
+            // In this limbo state, the app has |PROC_START_TIMEOUT| to finish attach application
+            // and receive updated proc_state based on its importance.
+            // Note that in this state, the oom_score is INVALID_ADJ which is outside the standard
+            // oom score range and the app is safe from lmkd kills.
             return false;
         }
 
@@ -2260,14 +2281,15 @@ public class OomAdjuster {
                         // elevated to a high enough procstate anyway to get network unless they
                         // request otherwise, so don't propagate the network capability by default
                         // in this case unless they explicitly request it.
-                        if ((cstate.getCurCapability() & PROCESS_CAPABILITY_NETWORK) != 0) {
+                        if ((cstate.getCurCapability()
+                                & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0) {
                             if (clientProcState <= PROCESS_STATE_BOUND_FOREGROUND_SERVICE) {
                                 // This is used to grant network access to Expedited Jobs.
                                 if (cr.hasFlag(Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS)) {
-                                    capability |= PROCESS_CAPABILITY_NETWORK;
+                                    capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
                                 }
                             } else {
-                                capability |= PROCESS_CAPABILITY_NETWORK;
+                                capability |= PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
                             }
                         }
 
@@ -2778,27 +2800,33 @@ public class OomAdjuster {
     }
 
     private int getDefaultCapability(ProcessRecord app, int procState) {
+        final int networkCapabilities =
+                NetworkPolicyManager.getDefaultProcessNetworkCapabilities(procState);
+        final int baseCapabilities;
         switch (procState) {
             case PROCESS_STATE_PERSISTENT:
             case PROCESS_STATE_PERSISTENT_UI:
             case PROCESS_STATE_TOP:
-                return PROCESS_CAPABILITY_ALL; // BFSL allowed
+                baseCapabilities = PROCESS_CAPABILITY_ALL; // BFSL allowed
+                break;
             case PROCESS_STATE_BOUND_TOP:
-                return PROCESS_CAPABILITY_NETWORK | PROCESS_CAPABILITY_BFSL;
+                baseCapabilities = PROCESS_CAPABILITY_BFSL;
+                break;
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 if (app.getActiveInstrumentation() != null) {
-                    return PROCESS_CAPABILITY_ALL_IMPLICIT | PROCESS_CAPABILITY_NETWORK ;
+                    baseCapabilities = PROCESS_CAPABILITY_ALL_IMPLICIT;
                 } else {
                     // Capability from foreground service is conditional depending on
                     // foregroundServiceType in the manifest file and the
                     // mAllowWhileInUsePermissionInFgs flag.
-                    return PROCESS_CAPABILITY_NETWORK;
+                    baseCapabilities = PROCESS_CAPABILITY_NONE;
                 }
-            case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return PROCESS_CAPABILITY_NETWORK;
+                break;
             default:
-                return PROCESS_CAPABILITY_NONE;
+                baseCapabilities = PROCESS_CAPABILITY_NONE;
+                break;
         }
+        return baseCapabilities | networkCapabilities;
     }
 
     /**
@@ -3211,7 +3239,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    void setAttachingSchedGroupLSP(ProcessRecord app) {
+    void setAttachingProcessStatesLSP(ProcessRecord app) {
         int initialSchedGroup = SCHED_GROUP_DEFAULT;
         final ProcessStateRecord state = app.mState;
         // If the process has been marked as foreground, it is starting as the top app (with
@@ -3231,6 +3259,15 @@ public class OomAdjuster {
 
         state.setSetSchedGroup(initialSchedGroup);
         state.setCurrentSchedulingGroup(initialSchedGroup);
+        state.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
+        state.setCurCapability(PROCESS_CAPABILITY_NONE);
+
+        state.setCurAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setSetAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setVerifiedAdj(ProcessList.FOREGROUND_APP_ADJ);
+        state.setForcingToImportant(null);
+        state.setHasShownUi(false);
+        state.setCached(true);
     }
 
     // ONLY used for unit testing in OomAdjusterTests.java
