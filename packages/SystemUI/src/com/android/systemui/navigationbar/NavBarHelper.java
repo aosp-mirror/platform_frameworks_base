@@ -90,6 +90,7 @@ public final class NavBarHelper implements
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable, CommandQueue.Callbacks {
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
@@ -98,7 +99,7 @@ public final class NavBarHelper implements
     private final SystemActions mSystemActions;
     private final AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
-    private final List<NavbarTaskbarStateUpdater> mA11yEventListeners = new ArrayList<>();
+    private final List<NavbarTaskbarStateUpdater> mStateListeners = new ArrayList<>();
     private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final ContentResolver mContentResolver;
@@ -107,13 +108,14 @@ public final class NavBarHelper implements
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
     private int mA11yButtonState;
+    private boolean mTogglingNavbarTaskbar;
 
     // Attributes used in NavBarHelper.CurrentSysuiState
     private int mWindowStateDisplayId;
     private @WindowVisibleState int mWindowState;
 
-    private final ContentObserver mAssistContentObserver = new ContentObserver(
-            new Handler(Looper.getMainLooper())) {
+    // Listens for changes to the assistant
+    private final ContentObserver mAssistContentObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             updateAssistantAvailability();
@@ -147,18 +149,33 @@ public final class NavBarHelper implements
         mKeyguardStateController = keyguardStateController;
         mUserTracker = userTracker;
         mSystemActions = systemActions;
-        accessibilityManager.addAccessibilityServicesStateChangeListener(this);
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
 
-        mAccessibilityButtonModeObserver.addListener(this);
-        mAccessibilityButtonTargetsObserver.addListener(this);
         mNavBarMode = navigationModeController.addListener(this);
+        mCommandQueue.addCallback(this);
         overviewProxyService.addCallback(this);
         dumpManager.registerDumpable(this);
     }
 
-    public void init() {
+    /**
+     * Hints to the helper that bars are being replaced, which is a signal to potentially suppress
+     * normal setup/cleanup when no bars are present.
+     */
+    public void setTogglingNavbarTaskbar(boolean togglingNavbarTaskbar) {
+        mTogglingNavbarTaskbar = togglingNavbarTaskbar;
+    }
+
+    /**
+     * Called when the first (non-replacing) bar is registered.
+     */
+    private void setupOnFirstBar() {
+        // Setup accessibility listeners
+        mAccessibilityManager.addAccessibilityServicesStateChangeListener(this);
+        mAccessibilityButtonModeObserver.addListener(this);
+        mAccessibilityButtonTargetsObserver.addListener(this);
+
+        // Setup assistant listener
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
@@ -168,59 +185,76 @@ public final class NavBarHelper implements
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
-        updateAssistantAvailability();
-        updateA11yState();
-        mCommandQueue.addCallback(this);
-
-    }
-
-    public void destroy() {
-        mContentResolver.unregisterContentObserver(mAssistContentObserver);
-        mCommandQueue.removeCallback(this);
     }
 
     /**
+     * Called after the last (non-replacing) bar is unregistered.
+     */
+    private void cleanupAfterLastBar() {
+        // Clean up accessibility listeners
+        mAccessibilityManager.removeAccessibilityServicesStateChangeListener(this);
+        mAccessibilityButtonModeObserver.removeListener(this);
+        mAccessibilityButtonTargetsObserver.removeListener(this);
+
+        // Clean up assistant listeners
+        mContentResolver.unregisterContentObserver(mAssistContentObserver);
+    }
+
+    /**
+     * Registers a listener for future updates to the shared navbar/taskbar state.
      * @param listener Will immediately get callbacks based on current state
      */
     public void registerNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
-        mA11yEventListeners.add(listener);
-        listener.updateAccessibilityServicesState();
-        listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
+        mStateListeners.add(listener);
+        if (!mTogglingNavbarTaskbar && mStateListeners.size() == 1) {
+            setupOnFirstBar();
+
+            // Update the state once the first bar is registered
+            updateAssistantAvailability();
+            updateA11yState();
+            mCommandQueue.recomputeDisableFlags(mContext.getDisplayId(), false /* animate */);
+        } else {
+            listener.updateAccessibilityServicesState();
+            listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
+        }
     }
 
+    /**
+     * Removes a previously registered listener.
+     */
     public void removeNavTaskStateUpdater(NavbarTaskbarStateUpdater listener) {
-        mA11yEventListeners.remove(listener);
+        mStateListeners.remove(listener);
+        if (!mTogglingNavbarTaskbar && mStateListeners.isEmpty()) {
+            cleanupAfterLastBar();
+        }
     }
 
     private void dispatchA11yEventUpdate() {
-        for (NavbarTaskbarStateUpdater listener : mA11yEventListeners) {
+        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
             listener.updateAccessibilityServicesState();
         }
     }
 
     private void dispatchAssistantEventUpdate(boolean assistantAvailable,
             boolean longPressHomeEnabled) {
-        for (NavbarTaskbarStateUpdater listener : mA11yEventListeners) {
+        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
             listener.updateAssistantAvailable(assistantAvailable, longPressHomeEnabled);
         }
     }
 
     @Override
     public void onAccessibilityServicesStateChanged(AccessibilityManager manager) {
-        dispatchA11yEventUpdate();
         updateA11yState();
     }
 
     @Override
     public void onAccessibilityButtonModeChanged(int mode) {
         updateA11yState();
-        dispatchA11yEventUpdate();
     }
 
     @Override
     public void onAccessibilityButtonTargetsChanged(String targets) {
         updateA11yState();
-        dispatchA11yEventUpdate();
     }
 
     /**
@@ -262,6 +296,8 @@ public final class NavBarHelper implements
             updateSystemAction(clickable, SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON);
             updateSystemAction(longClickable, SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER);
         }
+
+        dispatchA11yEventUpdate();
     }
 
     /**

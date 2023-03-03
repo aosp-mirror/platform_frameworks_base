@@ -677,13 +677,14 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         // start firing, since the latter is source of truth
         parseCurrentSysuiState();
         mCommandQueue.addCallback(this);
-        mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
-        mNavBarHelper.init();
         mHomeButtonLongPressDurationMs = Optional.of(mDeviceConfigProxy.getLong(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 HOME_BUTTON_LONG_PRESS_DURATION_MS,
                 /* defaultValue = */ 0
         )).filter(duration -> duration != 0);
+        // This currently MUST be called after mHomeButtonLongPressDurationMs is initialized since
+        // the registration callbacks will trigger code that uses it
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mDeviceConfigProxy.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post, mOnPropertiesChangedListener);
 
@@ -709,7 +710,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mNavigationModeController.removeListener(mModeChangedListener);
 
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.destroy();
         mNotificationShadeDepthController.removeListener(mDepthListener);
 
         mDeviceConfigProxy.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
@@ -745,8 +745,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 mOnComputeInternalInsetsListener);
         mView.getViewRootImpl().addSurfaceChangedCallback(mSurfaceChangedCallback);
         notifyNavigationBarSurface();
-
-        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
         mPipOptional.ifPresent(mView::addPipExclusionBoundsChangeListener);
         mBackAnimation.ifPresent(mView::registerBackAnimation);
@@ -1487,6 +1485,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     void updateAccessibilityStateFlags() {
+        mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
         if (mView != null) {
             int a11yFlags = mNavBarHelper.getA11yButtonState();
             boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;

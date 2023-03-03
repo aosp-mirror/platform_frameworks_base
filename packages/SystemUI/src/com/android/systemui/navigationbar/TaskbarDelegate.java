@@ -239,7 +239,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mOverviewProxyService.addCallback(this);
         onNavigationModeChanged(mNavigationModeController.addListener(this));
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.init();
         mEdgeBackGestureHandler.onNavBarAttached();
         // Initialize component callback
         Display display = mDisplayManager.getDisplay(displayId);
@@ -264,7 +263,6 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mOverviewProxyService.removeCallback(this);
         mNavigationModeController.removeListener(this);
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.destroy();
         mEdgeBackGestureHandler.onNavBarDetached();
         mScreenPinningNotify = null;
         mWindowContext = null;
