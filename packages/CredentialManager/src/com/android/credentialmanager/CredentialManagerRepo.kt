@@ -407,8 +407,8 @@ class CredentialManagerRepo(
         val credentialData = request.credentialData
         return RequestInfo.newCreateRequestInfo(
                 Binder(),
-                CreateCredentialRequest.Builder(credentialData, Bundle())
-                        .setType("androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL")
+                CreateCredentialRequest.Builder("androidx.credentials.TYPE_PUBLIC_KEY_CREDENTIAL",
+                credentialData, Bundle())
                         .setIsSystemProviderRequired(false)
                         .setAlwaysSendAppInfoToProvider(true)
                         .build(),
@@ -420,8 +420,8 @@ class CredentialManagerRepo(
         val request = CreatePasswordRequest("beckett-bakert@gmail.com", "password123")
         return RequestInfo.newCreateRequestInfo(
                 Binder(),
-                CreateCredentialRequest.Builder(request.credentialData, request.candidateQueryData)
-                        .setType(TYPE_PASSWORD_CREDENTIAL)
+                CreateCredentialRequest.Builder(TYPE_PASSWORD_CREDENTIAL,
+                request.credentialData, request.candidateQueryData)
                         .setIsSystemProviderRequired(false)
                         .setAlwaysSendAppInfoToProvider(true)
                         .build(),
@@ -438,8 +438,7 @@ class CredentialManagerRepo(
         )
         return RequestInfo.newCreateRequestInfo(
                 Binder(),
-                CreateCredentialRequest.Builder(data, Bundle())
-                        .setType("other-sign-ins")
+                CreateCredentialRequest.Builder("other-sign-ins", data, Bundle())
                         .setIsSystemProviderRequired(false)
                         .setAlwaysSendAppInfoToProvider(true)
                         .build(),
