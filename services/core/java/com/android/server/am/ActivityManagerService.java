@@ -176,6 +176,7 @@ import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityManager.ProcessCapability;
 import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityManager.UidFrozenStateChangedCallback.UidFrozenState;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.BindServiceEventListener;
 import android.app.ActivityManagerInternal.BroadcastEventListener;
@@ -208,6 +209,7 @@ import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
+import android.app.IUidFrozenStateChangedCallback;
 import android.app.IUidObserver;
 import android.app.IUnsafeIntentStrictModeCallback;
 import android.app.IUserSwitchObserver;
@@ -316,6 +318,7 @@ import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallback;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -7755,6 +7758,66 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean isUidActiveLOSP(int uid) {
         final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
         return uidRecord != null && !uidRecord.isSetIdle();
+    }
+
+    @GuardedBy("mUidFrozenStateChangedCallbackList")
+    private final RemoteCallbackList<IUidFrozenStateChangedCallback>
+            mUidFrozenStateChangedCallbackList = new RemoteCallbackList<>();
+
+    /**
+     * Register a {@link IUidFrozenStateChangedCallback} to receive Uid frozen state events.
+     *
+     * @param callback remote callback object to be registered
+     */
+    public void registerUidFrozenStateChangedCallback(
+            @NonNull IUidFrozenStateChangedCallback callback) {
+        synchronized (mUidFrozenStateChangedCallbackList) {
+            boolean registered = mUidFrozenStateChangedCallbackList.register(callback);
+            if (!registered) {
+                Slog.w(TAG, "Failed to register with RemoteCallbackList!");
+            }
+        }
+    }
+
+    /**
+     * Unregister a {@link IUidFrozenStateChangedCallback}.
+     *
+     * @param callback remote callback object to be unregistered
+     */
+    public void unregisterUidFrozenStateChangedCallback(
+            @NonNull IUidFrozenStateChangedCallback callback) {
+        synchronized (mUidFrozenStateChangedCallbackList) {
+            mUidFrozenStateChangedCallbackList.unregister(callback);
+        }
+    }
+
+    /**
+     * Notify the system that a UID has been frozen or unfrozen.
+     *
+     * @param uids The Uid(s) in question
+     * @param frozenStates Frozen state for each UID index
+     *
+     * @hide
+     */
+    public void reportUidFrozenStateChanged(@NonNull int[] uids,
+            @UidFrozenState int[] frozenStates) {
+        synchronized (mUidFrozenStateChangedCallbackList) {
+            final int n = mUidFrozenStateChangedCallbackList.beginBroadcast();
+            for (int i = 0; i < n; i++) {
+                try {
+                    mUidFrozenStateChangedCallbackList.getBroadcastItem(i).onUidFrozenStateChanged(
+                            uids, frozenStates);
+                } catch (RemoteException e) {
+                    /*
+                    * The process at the other end has died or otherwise gone away.
+                    * According to spec, RemoteCallbacklist will take care of unregistering any
+                    * object associated with that process - we are safe to ignore the exception
+                    * here.
+                    */
+                }
+            }
+            mUidFrozenStateChangedCallbackList.finishBroadcast();
+        }
     }
 
     @Override
