@@ -6458,19 +6458,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 0 /* flags */, null /* resultReceiver */,
                                 SoftInputShowHideReason.HIDE_RESET_SHELL_COMMAND);
                         mBindingController.unbindCurrentMethod();
-                        // Reset the current IME
-                        resetSelectedInputMethodAndSubtypeLocked(null);
-                        // Also reset the settings of the current IME
-                        mSettings.putSelectedInputMethod(null);
-                        // Disable all enabled IMEs.
-                        for (InputMethodInfo inputMethodInfo :
-                                mSettings.getEnabledInputMethodListLocked()) {
-                            setInputMethodEnabledLocked(inputMethodInfo.getId(), false);
+
+                        // Enable default IMEs, disable others
+                        var toDisable = mSettings.getEnabledInputMethodListLocked();
+                        var defaultEnabled = InputMethodInfoUtils.getDefaultEnabledImes(
+                                mContext, mMethodList);
+                        toDisable.removeAll(defaultEnabled);
+                        for (InputMethodInfo info : toDisable) {
+                            setInputMethodEnabledLocked(info.getId(), false);
                         }
-                        // Re-enable with default enabled IMEs.
-                        for (InputMethodInfo imi : InputMethodInfoUtils.getDefaultEnabledImes(
-                                mContext, mMethodList)) {
-                            setInputMethodEnabledLocked(imi.getId(), true);
+                        for (InputMethodInfo info : defaultEnabled) {
+                            setInputMethodEnabledLocked(info.getId(), true);
+                        }
+                        // Choose new default IME, reset to none if no IME available.
+                        if (!chooseNewDefaultIMELocked()) {
+                            resetSelectedInputMethodAndSubtypeLocked(null);
                         }
                         updateInputMethodsFromSettingsLocked(true /* enabledMayChange */);
                         InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(
