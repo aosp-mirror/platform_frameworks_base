@@ -14558,7 +14558,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             brOptions.setDeferUntilActive(true);
         }
 
-        if (ordered && brOptions != null && brOptions.isDeferUntilActive()) {
+        if (mEnableModernQueue && ordered && brOptions != null && brOptions.isDeferUntilActive()) {
             throw new IllegalArgumentException("Ordered broadcasts can't be deferred until active");
         }
 
