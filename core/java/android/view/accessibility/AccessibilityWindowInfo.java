@@ -839,6 +839,7 @@ public final class AccessibilityWindowInfo implements Parcelable {
         mConnectionId = UNDEFINED_WINDOW_ID;
         mAnchorId = AccessibilityNodeInfo.UNDEFINED_NODE_ID;
         mTitle = null;
+        mTransitionTime = 0;
     }
 
     /**
