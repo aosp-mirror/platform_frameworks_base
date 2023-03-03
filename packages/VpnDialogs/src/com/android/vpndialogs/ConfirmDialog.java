@@ -52,6 +52,8 @@ public class ConfirmDialog extends AlertActivity
 
     private View mView;
 
+    private View mView;
+
     public ConfirmDialog() {
         this(VpnManager.TYPE_VPN_SERVICE);
     }
