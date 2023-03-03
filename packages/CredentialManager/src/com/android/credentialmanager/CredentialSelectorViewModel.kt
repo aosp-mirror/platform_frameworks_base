@@ -130,6 +130,11 @@ class CredentialSelectorViewModel(
         onInternalError()
     }
 
+    fun onIllegalUiState(errorMessage: String) {
+        Log.w(Constants.LOG_TAG, errorMessage)
+        onInternalError()
+    }
+
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         credManRepo.onParsingFailureCancel()
