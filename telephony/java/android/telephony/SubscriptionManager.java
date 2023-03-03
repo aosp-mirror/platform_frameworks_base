@@ -1891,30 +1891,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * @return the count of all subscriptions in the database, this includes
-     * all subscriptions that have been seen.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public int getAllSubscriptionInfoCount() {
-        if (VDBG) logd("[getAllSubscriptionInfoCount]+");
-
-        int result = 0;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-    }
-
-    /**
      *
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
@@ -2312,12 +2288,6 @@ public class SubscriptionManager {
         }
     }
 
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public int getDefaultSmsPhoneId() {
-        return getPhoneId(getDefaultSmsSubscriptionId());
-    }
-
     /**
      * Returns the system's default data subscription id.
      *
@@ -2363,12 +2333,6 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public SubscriptionInfo getDefaultDataSubscriptionInfo() {
         return getActiveSubscriptionInfo(getDefaultDataSubscriptionId());
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage
-    public int getDefaultDataPhoneId() {
-        return getPhoneId(getDefaultDataSubscriptionId());
     }
 
     /** @hide */
