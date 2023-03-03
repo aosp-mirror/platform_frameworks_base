@@ -535,7 +535,7 @@ object Flags {
 
     // 1500 - chooser aka sharesheet
     // TODO(b/254512507): Tracking Bug
-    val CHOOSER_UNBUNDLED = releasedFlag(1500, "chooser_unbundled")
+    val CHOOSER_UNBUNDLED = unreleasedFlag(1500, "chooser_unbundled")
 
     // TODO(b/266983432) Tracking Bug
     val SHARESHEET_CUSTOM_ACTIONS =
