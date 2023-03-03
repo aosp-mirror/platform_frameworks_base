@@ -127,7 +127,7 @@ TEST_F(PerformanceHintTest, TestSession) {
     result = APerformanceHint_reportActualWorkDuration(session, -1L);
     EXPECT_EQ(EINVAL, result);
 
-    int hintId = 2;
+    SessionHint hintId = SessionHint::CPU_LOAD_RESET;
     EXPECT_CALL(*iSession, sendHint(Eq(hintId))).Times(Exactly(1));
     result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
@@ -140,7 +140,7 @@ TEST_F(PerformanceHintTest, TestSession) {
     result = APerformanceHint_sendHint(session, hintId);
     EXPECT_EQ(0, result);
 
-    result = APerformanceHint_sendHint(session, -1);
+    result = APerformanceHint_sendHint(session, static_cast<SessionHint>(-1));
     EXPECT_EQ(EINVAL, result);
 
     EXPECT_CALL(*iSession, close()).Times(Exactly(1));
