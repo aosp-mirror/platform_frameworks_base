@@ -182,7 +182,10 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     /** @hide */
     public static final int FLUSH_REASON_VIEW_TREE_APPEARED = 10;
 
-    /** TODO(b/271015194) */
+    /**
+     * After {@link UPSIDE_DOWN_CAKE}, {@link #notifyViewsDisappeared(AutofillId, long[])} wraps
+     * the virtual children with a pair of view tree appearing and view tree appeared events.
+     */
     @ChangeId
     @EnabledSince(targetSdkVersion = UPSIDE_DOWN_CAKE)
     static final long NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS = 258825825L;
