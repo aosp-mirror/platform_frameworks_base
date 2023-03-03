@@ -18,6 +18,7 @@ package com.android.server.power.stats;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
 import static com.android.server.power.stats.CpuWakeupStats.WAKEUP_REASON_HALF_WINDOW_MS;
 import static com.android.server.power.stats.CpuWakeupStats.WAKEUP_RETENTION_MS;
@@ -45,6 +46,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @RunWith(AndroidJUnit4.class)
 public class CpuWakeupStatsTest {
     private static final String KERNEL_REASON_ALARM_IRQ = "120 test.alarm.device";
+    private static final String KERNEL_REASON_WIFI_IRQ = "120 test.wifi.device";
     private static final String KERNEL_REASON_UNKNOWN_IRQ = "140 test.unknown.device";
     private static final String KERNEL_REASON_UNKNOWN = "free-form-reason test.alarm.device";
     private static final String KERNEL_REASON_UNSUPPORTED = "-1 test.alarm.device";
@@ -68,22 +70,23 @@ public class CpuWakeupStatsTest {
         final Set<Long> timestamps = new HashSet<>();
         final long firstWakeup = 453192;
 
-        obj.noteWakeupTimeAndReason(firstWakeup, 32, "unused");
+        obj.noteWakeupTimeAndReason(firstWakeup, 32, KERNEL_REASON_UNKNOWN_IRQ);
         timestamps.add(firstWakeup);
         for (int i = 1; i < 1000; i++) {
             final long delta = mRandom.nextLong(WAKEUP_RETENTION_MS);
             if (timestamps.add(firstWakeup + delta)) {
-                obj.noteWakeupTimeAndReason(firstWakeup + delta, i, "unused");
+                obj.noteWakeupTimeAndReason(firstWakeup + delta, i, KERNEL_REASON_UNKNOWN_IRQ);
             }
         }
         assertThat(obj.mWakeupEvents.size()).isEqualTo(timestamps.size());
 
-        obj.noteWakeupTimeAndReason(firstWakeup + WAKEUP_RETENTION_MS + 1242, 231, "unused");
+        obj.noteWakeupTimeAndReason(firstWakeup + WAKEUP_RETENTION_MS + 1242, 231,
+                KERNEL_REASON_UNKNOWN_IRQ);
         assertThat(obj.mWakeupEvents.size()).isEqualTo(timestamps.size());
 
         for (int i = 0; i < 100; i++) {
             final long now = mRandom.nextLong(WAKEUP_RETENTION_MS + 1, 100 * WAKEUP_RETENTION_MS);
-            obj.noteWakeupTimeAndReason(now, i, "unused");
+            obj.noteWakeupTimeAndReason(now, i, KERNEL_REASON_UNKNOWN_IRQ);
             assertThat(obj.mWakeupEvents.closestIndexOnOrBefore(now - WAKEUP_RETENTION_MS))
                     .isLessThan(0);
         }
@@ -111,17 +114,45 @@ public class CpuWakeupStatsTest {
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_1)).isEqualTo(false);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_2)).isEqualTo(false);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_4)).isEqualTo(false);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(true);
     }
 
     @Test
-    public void alarmIrqAttributionCombined() {
+    public void wifiIrqAttributionSolo() {
+        final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
+        final long wakeupTime = 12423121;
+
+        obj.noteWakeupTimeAndReason(wakeupTime, 1, KERNEL_REASON_WIFI_IRQ);
+
+        // Outside the window, so should be ignored.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI,
+                wakeupTime - WAKEUP_REASON_HALF_WINDOW_MS - 1, TEST_UID_1);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI,
+                wakeupTime + WAKEUP_REASON_HALF_WINDOW_MS + 1, TEST_UID_2);
+        // Should be attributed
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime + 3, TEST_UID_4, TEST_UID_5);
+
+        final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
+        assertThat(attribution).isNotNull();
+        assertThat(attribution.size()).isEqualTo(1);
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_WIFI)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_1)).isEqualTo(false);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_2)).isEqualTo(false);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_3)).isEqualTo(false);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_4)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(true);
+    }
+
+    @Test
+    public void alarmAndWifiIrqAttribution() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 92123210;
 
         obj.noteWakeupTimeAndReason(wakeupTime, 4,
-                KERNEL_REASON_UNKNOWN_IRQ + ":" + KERNEL_REASON_ALARM_IRQ);
+                KERNEL_REASON_WIFI_IRQ + ":" + KERNEL_REASON_ALARM_IRQ);
 
+        // Alarm activity
         // Outside the window, so should be ignored.
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM,
                 wakeupTime - WAKEUP_REASON_HALF_WINDOW_MS - 1, TEST_UID_1);
@@ -132,16 +163,34 @@ public class CpuWakeupStatsTest {
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4,
                 TEST_UID_5);
 
+        // Wifi activity
+        // Outside the window, so should be ignored.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI,
+                wakeupTime - WAKEUP_REASON_HALF_WINDOW_MS - 1, TEST_UID_4);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI,
+                wakeupTime + WAKEUP_REASON_HALF_WINDOW_MS + 1, TEST_UID_3);
+        // Should be attributed
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime + 2, TEST_UID_1);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime - 1, TEST_UID_2,
+                TEST_UID_5);
+
         final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
         assertThat(attribution).isNotNull();
         assertThat(attribution.size()).isEqualTo(2);
+
         assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_ALARM)).isTrue();
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_1)).isEqualTo(false);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_2)).isEqualTo(false);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_3)).isEqualTo(true);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_4)).isEqualTo(true);
         assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_ALARM).get(TEST_UID_5)).isEqualTo(true);
-        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_UNKNOWN)).isTrue();
+
+        assertThat(attribution.contains(CPU_WAKEUP_SUBSYSTEM_WIFI)).isTrue();
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_1)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_2)).isEqualTo(true);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_3)).isEqualTo(false);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_4)).isEqualTo(false);
+        assertThat(attribution.get(CPU_WAKEUP_SUBSYSTEM_WIFI).get(TEST_UID_5)).isEqualTo(true);
     }
 
     @Test
@@ -151,9 +200,11 @@ public class CpuWakeupStatsTest {
 
         obj.noteWakeupTimeAndReason(wakeupTime, 24, KERNEL_REASON_UNKNOWN_IRQ);
 
+        assertThat(obj.mWakeupEvents.size()).isEqualTo(1);
+
         // Unrelated subsystems, should not be attributed
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
-        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4,
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime - 3, TEST_UID_4,
                 TEST_UID_5);
 
         final SparseArray<SparseBooleanArray> attribution = obj.mWakeupAttribution.get(wakeupTime);
@@ -165,42 +216,48 @@ public class CpuWakeupStatsTest {
     }
 
     @Test
-    public void unknownAttribution() {
+    public void unknownWakeupIgnored() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
         final long wakeupTime = 72123210;
 
         obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNKNOWN);
 
-        // Should be ignored as this type of wakeup is unsupported.
+        // Should be ignored as this type of wakeup is not known.
+        assertThat(obj.mWakeupEvents.size()).isEqualTo(0);
+
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4);
 
-        // There should be nothing in the attribution map.
+        // Any nearby activity should not end up in the attribution map.
         assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
     }
 
     @Test
-    public void unsupportedAttribution() {
+    public void unsupportedWakeupIgnored() {
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_3, mHandler);
 
         long wakeupTime = 970934;
         obj.noteWakeupTimeAndReason(wakeupTime, 34, KERNEL_REASON_UNSUPPORTED);
 
         // Should be ignored as this type of wakeup is unsupported.
+        assertThat(obj.mWakeupEvents.size()).isEqualTo(0);
+
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 5, TEST_UID_3);
         obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 3, TEST_UID_4);
 
-        // There should be nothing in the attribution map.
+        // Any nearby activity should not end up in the attribution map.
         assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
 
         wakeupTime = 883124;
         obj.noteWakeupTimeAndReason(wakeupTime, 3, KERNEL_REASON_ABORT);
 
         // Should be ignored as this type of wakeup is unsupported.
-        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime + 2, TEST_UID_1, TEST_UID_4);
-        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, wakeupTime - 5, TEST_UID_3);
+        assertThat(obj.mWakeupEvents.size()).isEqualTo(0);
 
-        // There should be nothing in the attribution map.
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime + 2, TEST_UID_1, TEST_UID_4);
+        obj.noteWakingActivity(CPU_WAKEUP_SUBSYSTEM_WIFI, wakeupTime - 5, TEST_UID_3);
+
+        // Any nearby activity should not end up in the attribution map.
         assertThat(obj.mWakeupAttribution.size()).isEqualTo(0);
     }
 }
