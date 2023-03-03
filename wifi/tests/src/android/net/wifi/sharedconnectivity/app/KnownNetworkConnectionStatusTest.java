@@ -42,10 +42,9 @@ public class KnownNetworkConnectionStatusTest {
     private static final String SSID = "TEST_SSID";
     private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP};
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
-            new NetworkProviderInfo.Builder()
-                    .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName(
-                            "TEST_MODEL")
-                    .setConnectionStrength(2).setBatteryPercentage(50).build();
+            new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
+                    .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
+                    .setBatteryPercentage(50).build();
     private static final String SSID_1 = "TEST_SSID1";
     private static final String BUNDLE_KEY = "INT-KEY";
     private static final int BUNDLE_VALUE = 1;
