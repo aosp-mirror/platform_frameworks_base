@@ -94,12 +94,17 @@ public final class SoundTriggerManager {
             originatorIdentity.packageName = ActivityThread.currentOpPackageName();
 
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                List<ModuleProperties> modulePropertiesList = soundTriggerService
-                        .listModuleProperties(originatorIdentity);
-                if (!modulePropertiesList.isEmpty()) {
+                ModuleProperties moduleProperties = soundTriggerService
+                        .listModuleProperties(originatorIdentity)
+                        .stream()
+                        .filter(prop -> !prop.getSupportedModelArch()
+                                .equals(SoundTrigger.FAKE_HAL_ARCH))
+                        .findFirst()
+                        .orElse(null);
+                if (moduleProperties != null) {
                     mSoundTriggerSession = soundTriggerService.attachAsOriginator(
                                                 originatorIdentity,
-                                                modulePropertiesList.get(0),
+                                                moduleProperties,
                                                 mBinderToken);
                 } else {
                     mSoundTriggerSession = null;
