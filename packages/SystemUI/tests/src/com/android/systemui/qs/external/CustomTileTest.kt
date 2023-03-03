@@ -57,6 +57,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
@@ -350,5 +351,45 @@ class CustomTileTest : SysuiTestCase() {
         verify(activityStarter)
             .startPendingIntentDismissingKeyguard(
                 eq(pi), nullable(), nullable<ActivityLaunchAnimator.Controller>())
+    }
+
+    @Test
+    fun testActiveTileListensOnceAfterCreated() {
+        `when`(tileServiceManager.isActiveTile).thenReturn(true)
+
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.initialize()
+        tile.postStale()
+        testableLooper.processAllMessages()
+
+        verify(tileServiceManager).setBindRequested(true)
+        verify(tileService).onStartListening()
+    }
+
+    @Test
+    fun testActiveTileDoesntListenAfterFirstTime() {
+        `when`(tileServiceManager.isActiveTile).thenReturn(true)
+
+        val tile = CustomTile.create(customTileBuilder, TILE_SPEC, mContext)
+        tile.initialize()
+        // Make sure we have an icon in the tile because we don't have a default icon
+        // This should not be overridden by the retrieved tile that has null icon.
+        tile.qsTile.icon = mock(Icon::class.java)
+        `when`(tile.qsTile.icon.loadDrawable(any(Context::class.java)))
+                .thenReturn(mock(Drawable::class.java))
+
+        tile.postStale()
+        testableLooper.processAllMessages()
+
+        // postStale will set it to not listening after it's done
+        verify(tileService).onStopListening()
+
+        clearInvocations(tileServiceManager, tileService)
+
+        tile.setListening(Any(), true)
+        testableLooper.processAllMessages()
+
+        verify(tileServiceManager, never()).setBindRequested(true)
+        verify(tileService, never()).onStartListening()
     }
 }
