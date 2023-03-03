@@ -4499,7 +4499,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 expandableView.setFakeShadowIntensity(0.0f, 0.0f, 0, 0);
             } else {
                 float yLocation = previous.getTranslationY() + previous.getActualHeight() -
-                        expandableView.getTranslationY() - previous.getExtraBottomPadding();
+                        expandableView.getTranslationY();
                 expandableView.setFakeShadowIntensity(
                         diff / FakeShadowView.SHADOW_SIBLING_TRESHOLD,
                         previous.getOutlineAlpha(), (int) yLocation,
