@@ -132,9 +132,13 @@ class FontScaleConverterFactoryTest {
             }
             .forEach { (table, sp) ->
                 try {
-                    assertWithMessage("convertSpToDp(%s) on table: %s", sp, table)
-                        .that(table.convertSpToDp(sp))
-                        .isFinite()
+                    // Truth is slow because it creates a bunch of
+                    // objects. Don't use it unless we need to.
+                    if (!table.convertSpToDp(sp).isFinite()) {
+                        assertWithMessage("convertSpToDp(%s) on table: %s", sp, table)
+                            .that(table.convertSpToDp(sp))
+                            .isFinite()
+                    }
                 } catch (e: Exception) {
                     throw AssertionError("Exception during convertSpToDp($sp) on table: $table", e)
                 }
