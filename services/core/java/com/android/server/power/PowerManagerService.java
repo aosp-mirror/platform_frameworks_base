@@ -6644,6 +6644,13 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    @VisibleForTesting
+    int getPowerGroupSize() {
+        synchronized (mLock) {
+            return mPowerGroups.size();
+        }
+    }
+
     @GoToSleepReason
     private int getLastSleepReasonInternal() {
         synchronized (mLock) {
