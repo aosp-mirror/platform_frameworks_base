@@ -870,11 +870,11 @@ interface IActivityManager {
     boolean shouldServiceTimeOut(in ComponentName className, in IBinder token);
 
     /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
-    oneway void logFgsApiBegin(int apiType, int appUid, int appPid);
+    void logFgsApiBegin(int apiType, int appUid, int appPid);
 
     /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
-    oneway void logFgsApiEnd(int apiType, int appUid, int appPid);
+    void logFgsApiEnd(int apiType, int appUid, int appPid);
 
     /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
-    oneway void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
+    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
 }

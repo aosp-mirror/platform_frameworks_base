@@ -511,6 +511,8 @@ applications that come with the platform
         <permission name="android.permission.WRITE_APN_SETTINGS"/>
         <!-- Permission required for GTS test - GtsStatsdHostTestCases -->
         <permission name="android.permission.READ_RESTRICTED_STATS"/>
+        <!-- Permission required for CTS test -->
+        <permission name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

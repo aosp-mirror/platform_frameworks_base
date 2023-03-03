@@ -13100,8 +13100,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void logFgsApiBegin(@ForegroundServiceApiType int apiType,
             int uid, int pid) {
-        enforceCallingPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES,
-                "logFgsApiStart");
+        enforceCallingPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE,
+                "logFgsApiBegin");
         synchronized (this) {
             mServices.logFgsApiBeginLocked(apiType, uid, pid);
         }
@@ -13110,8 +13110,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void logFgsApiEnd(@ForegroundServiceApiType int apiType,
             int uid, int pid) {
-        enforceCallingPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES,
-                "logFgsApiStart");
+        enforceCallingPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE,
+                "logFgsApiEnd");
         synchronized (this) {
             mServices.logFgsApiEndLocked(apiType, uid, pid);
         }
@@ -13120,8 +13120,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void logFgsApiStateChanged(@ForegroundServiceApiType int apiType,
             int state, int uid, int pid) {
-        enforceCallingPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES,
-                "logFgsApiStart");
+        enforceCallingPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE,
+                "logFgsApiEvent");
         synchronized (this) {
             mServices.logFgsApiStateChangedLocked(apiType, uid, pid, state);
         }
