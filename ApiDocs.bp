@@ -182,10 +182,10 @@ droidstubs {
 // using droiddoc
 /////////////////////////////////////////////////////////////////////
 
-framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
+framework_docs_only_args = " -android -manifest $(location :frameworks-base-core-AndroidManifest.xml) " +
     "-metalavaApiSince " +
     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
-    "-overview $(location core/java/overview.html) " +
+    "-overview $(location :frameworks-base-java-overview) " +
     // Federate Support Library references against local API file.
     "-federate SupportLib https://developer.android.com " +
     "-federationapi SupportLib $(location :current-support-api) " +
@@ -218,16 +218,16 @@ doc_defaults {
         "sdk.preview 0",
     ],
     arg_files: [
-        "core/res/AndroidManifest.xml",
-        "core/java/overview.html",
+        ":frameworks-base-core-AndroidManifest.xml",
+        ":frameworks-base-java-overview",
         ":current-support-api",
         ":current-androidx-api",
     ],
     // TODO(b/169090544): remove below aidl includes.
     aidl: {
-        local_include_dirs: ["media/aidl"],
         include_dirs: [
             "frameworks/av/aidl",
+            "frameworks/base/media/aidl",
             "frameworks/native/libs/permission/aidl",
         ],
     },
