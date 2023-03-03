@@ -553,8 +553,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
 
         /**
-         * Timestamp of when the trigger event from SoundTriggerHal was received by the system
-         * server.
+         * Timestamp of when the trigger event from SoundTriggerHal was received by the framework.
          *
          * Clock monotonic including suspend time or its equivalent on the system,
          * in the same units and timebase as {@link SystemClock#elapsedRealtime()}.
