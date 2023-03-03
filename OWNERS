@@ -35,3 +35,5 @@ per-file Android.mk = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION
 per-file framework-jarjar-rules.txt = file:platform/build/soong:/OWNERS #{LAST_RESORT_SUGGESTION}
 per-file TestProtoLibraries.bp = file:platform/platform_testing:/libraries/health/OWNERS
 per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
+
+per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
