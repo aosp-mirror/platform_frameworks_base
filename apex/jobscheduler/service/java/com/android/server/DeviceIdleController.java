@@ -5277,6 +5277,8 @@ public class DeviceIdleController extends SystemService
             pw.print("  mScreenLocked="); pw.println(mScreenLocked);
             pw.print("  mNetworkConnected="); pw.println(mNetworkConnected);
             pw.print("  mCharging="); pw.println(mCharging);
+            pw.print("  activeEmergencyCall=");
+            pw.println(mEmergencyCallListener.isEmergencyCallActive());
             if (mConstraints.size() != 0) {
                 pw.println("  mConstraints={");
                 for (int i = 0; i < mConstraints.size(); i++) {
