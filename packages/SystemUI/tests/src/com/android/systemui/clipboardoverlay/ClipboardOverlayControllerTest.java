@@ -446,7 +446,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mFeatureFlags.set(CLIPBOARD_REMOTE_BEHAVIOR, true);
         when(mClipboardUtils.isRemoteCopy(any(Context.class), any(ClipData.class), anyString()))
                 .thenReturn(true);
-        when(mClipboardUtils.getAction(any(CharSequence.class), any(TextLinks.class), anyString()))
+        when(mClipboardUtils.getAction(any(TextLinks.class), anyString()))
                 .thenReturn(Optional.of(Mockito.mock(RemoteAction.class)));
         when(mClipboardOverlayView.post(any(Runnable.class))).thenAnswer(new Answer<Object>() {
             @Override
