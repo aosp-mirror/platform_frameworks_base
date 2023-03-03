@@ -4096,11 +4096,12 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         // Save and corrupt the primary files.
         mService.saveDirtyInfo();
-        try (Writer os = new FileWriter(mService.getUserFile(UserHandle.USER_SYSTEM))) {
+        try (Writer os = new FileWriter(
+                mService.getUserFile(UserHandle.USER_SYSTEM).getBaseFile())) {
             os.write("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                     + "<user locales=\"en\" last-app-scan-time2=\"14400000");
         }
-        try (Writer os = new FileWriter(mService.getUserFile(USER_10))) {
+        try (Writer os = new FileWriter(mService.getUserFile(USER_10).getBaseFile())) {
             os.write("<?xml version='1.0' encoding='utf");
         }
 
