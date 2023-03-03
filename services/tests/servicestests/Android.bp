@@ -115,6 +115,7 @@ android_test {
         ":StubTestApp",
         ":SuspendTestApp",
         ":MediaButtonReceiverHolderTestHelperApp",
+        "data/broken_shortcut.xml",
     ],
 
     java_resources: [
