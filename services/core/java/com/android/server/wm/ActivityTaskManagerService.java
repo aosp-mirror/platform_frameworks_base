@@ -229,6 +229,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
@@ -4112,42 +4113,50 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    void dumpVisibleActivitiesLocked(PrintWriter pw) {
+    void dumpVisibleActivitiesLocked(PrintWriter pw, int displayIdFilter) {
         pw.println("ACTIVITY MANAGER VISIBLE ACTIVITIES (dumpsys activity visible)");
         ArrayList<ActivityRecord> activities =
                 mRootWindowContainer.getDumpActivities("all", /* dumpVisibleRootTasksOnly */ true,
                         /* dumpFocusedRootTaskOnly */ false, UserHandle.USER_ALL);
         boolean needSeparator = false;
+        boolean printedAnything = false;
         for (int i = activities.size() - 1; i >= 0; i--) {
             ActivityRecord activity = activities.get(i);
-            if (!activity.isVisible()) {
+            if (!activity.isVisible() || (displayIdFilter != INVALID_DISPLAY
+                    && activity.getDisplayId() != displayIdFilter)) {
                 continue;
             }
             if (needSeparator) {
                 pw.println();
             }
+            printedAnything = true;
             activity.dump(pw, "", true);
             needSeparator = true;
+        }
+        if (!printedAnything) {
+            pw.println("(nothing)");
         }
     }
 
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
-        dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage,
+            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage,
+            int displayIdFilter) {
+        dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage, displayIdFilter,
                 "ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)");
     }
 
     void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage, String header) {
+            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage, int displayIdFilter,
+            String header) {
         pw.println(header);
 
         boolean printedAnything = mRootWindowContainer.dumpActivities(fd, pw, dumpAll, dumpClient,
-                dumpPackage);
+                dumpPackage, displayIdFilter);
         boolean needSep = printedAnything;
 
         boolean printed = ActivityTaskSupervisor.printThisActivity(pw,
-                mRootWindowContainer.getTopResumedActivity(), dumpPackage, needSep,
-                "  ResumedActivity: ", null);
+                mRootWindowContainer.getTopResumedActivity(), dumpPackage, displayIdFilter, needSep,
+                "  ResumedActivity: ", /* header= */ null);
         if (printed) {
             printedAnything = true;
             needSep = false;
@@ -4205,7 +4214,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
+            boolean dumpFocusedRootTaskOnly, boolean dumpVerbose, int displayIdFilter,
+            @UserIdInt int userId) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (mGlobalLock) {
@@ -4222,6 +4232,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         Task lastTask = null;
         boolean needSep = false;
+        boolean printedAnything = false;
         for (int i = activities.size() - 1; i >= 0; i--) {
             ActivityRecord r = activities.get(i);
             if (needSep) {
@@ -4229,21 +4240,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             needSep = true;
             synchronized (mGlobalLock) {
-                final Task task = r.getTask();
+                Task task = r.getTask();
+                int displayId = task.getDisplayId();
+                if (displayIdFilter != INVALID_DISPLAY && displayId != displayIdFilter) {
+                    continue;
+                }
                 if (lastTask != task) {
+                    printedAnything = true;
                     lastTask = task;
                     pw.print("TASK ");
                     pw.print(lastTask.affinity);
                     pw.print(" id=");
                     pw.print(lastTask.mTaskId);
                     pw.print(" userId=");
-                    pw.println(lastTask.mUserId);
+                    pw.print(lastTask.mUserId);
+                    printDisplayInfoAndNewLine(pw, r);
                     if (dumpAll) {
                         lastTask.dump(pw, "  ");
                     }
                 }
             }
-            dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll);
+            dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll, dumpVerbose);
+        }
+        if (!printedAnything) {
+            // Typically happpens when no task matches displayIdFilter
+            pw.println("(nothing)");
         }
         return true;
     }
@@ -4253,7 +4274,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * there is a thread associated with the activity.
      */
     private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
-            final ActivityRecord r, String[] args, boolean dumpAll) {
+            ActivityRecord r, String[] args, boolean dumpAll, boolean dumpVerbose) {
         String innerPrefix = prefix + "  ";
         IApplicationThread appThread = null;
         synchronized (mGlobalLock) {
@@ -4264,13 +4285,22 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             pw.print(Integer.toHexString(System.identityHashCode(r)));
             pw.print(" pid=");
             if (r.hasProcess()) {
-                pw.println(r.app.getPid());
+                pw.print(r.app.getPid());
                 appThread = r.app.getThread();
             } else {
-                pw.println("(not running)");
+                pw.print("(not running)");
+            }
+            if (dumpVerbose) {
+                pw.print(" userId=");
+                pw.print(r.mUserId);
+                pw.print(" uid=");
+                pw.print(r.getUid());
+                printDisplayInfoAndNewLine(pw, r);
+            } else {
+                pw.println();
             }
             if (dumpAll) {
-                r.dump(pw, innerPrefix, true /* dumpAll */);
+                r.dump(pw, innerPrefix, /* dumpAll= */ true);
             }
         }
         if (appThread != null) {
@@ -4286,6 +4316,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
             }
         }
+    }
+
+    private void printDisplayInfoAndNewLine(PrintWriter pw, ActivityRecord r) {
+        pw.print(" displayId=");
+        DisplayContent displayContent = r.getDisplayContent();
+        if (displayContent == null) {
+            pw.println("N/A");
+            return;
+        }
+        Display display = displayContent.getDisplay();
+        pw.print(display.getDisplayId());
+        pw.print("(type=");
+        pw.print(Display.typeToString(display.getType()));
+        pw.println(")");
     }
 
     private void writeSleepStateToProto(ProtoOutputStream proto, int wakeFullness,
@@ -5317,7 +5361,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 + "------------");
         dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
                 true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
-                "" /* header */);
+                INVALID_DISPLAY, "" /* header */);
         pw.println();
         pw.close();
 
@@ -6368,10 +6412,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args, int opti,
-                boolean dumpAll, boolean dumpClient, String dumpPackage) {
+                boolean dumpAll, boolean dumpClient, String dumpPackage, int displayIdFilter) {
             synchronized (mGlobalLock) {
                 if (DUMP_ACTIVITIES_CMD.equals(cmd) || DUMP_ACTIVITIES_SHORT_CMD.equals(cmd)) {
-                    dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                    dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage,
+                            displayIdFilter);
                 } else if (DUMP_LASTANR_CMD.equals(cmd)) {
                     dumpLastANRLocked(pw);
                 } else if (DUMP_LASTANR_TRACES_CMD.equals(cmd)) {
@@ -6387,7 +6432,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 } else if (DUMP_TOP_RESUMED_ACTIVITY.equals(cmd)) {
                     dumpTopResumedActivityLocked(pw);
                 } else if (DUMP_VISIBLE_ACTIVITIES.equals(cmd)) {
-                    dumpVisibleActivitiesLocked(pw);
+                    dumpVisibleActivitiesLocked(pw, displayIdFilter);
                 }
             }
         }
@@ -6582,9 +6627,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
                 String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-                boolean dumpFocusedRootTaskOnly, @UserIdInt int userId) {
+                boolean dumpFocusedRootTaskOnly, boolean dumpVerbose, int displayIdFilter,
+                @UserIdInt int userId) {
             return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
-                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly, userId);
+                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly, dumpVerbose, displayIdFilter,
+                    userId);
         }
 
         @Override

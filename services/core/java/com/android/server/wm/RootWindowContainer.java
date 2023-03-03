@@ -3446,13 +3446,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean dumpActivities(FileDescriptor fd, PrintWriter pw, boolean dumpAll, boolean dumpClient,
-            String dumpPackage) {
+            String dumpPackage, int displayIdFilter) {
         boolean[] printed = {false};
         boolean[] needSep = {false};
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             DisplayContent displayContent = getChildAt(displayNdx);
             if (printed[0]) {
                 pw.println();
+            }
+            if (displayIdFilter != Display.INVALID_DISPLAY
+                    && displayContent.mDisplayId != displayIdFilter) {
+                continue;
             }
             pw.print("Display #");
             pw.print(displayContent.mDisplayId);

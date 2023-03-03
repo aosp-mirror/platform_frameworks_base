@@ -2221,7 +2221,14 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
             boolean needSep, String prefix, Runnable header) {
-        if (activity != null) {
+        return printThisActivity(pw, activity, dumpPackage, INVALID_DISPLAY, needSep, prefix,
+                header);
+    }
+
+    static boolean printThisActivity(PrintWriter pw, ActivityRecord activity, String dumpPackage,
+            int displayIdFilter, boolean needSep, String prefix, Runnable header) {
+        if (activity != null && (displayIdFilter == INVALID_DISPLAY
+                || displayIdFilter == activity.getDisplayId())) {
             if (dumpPackage == null || dumpPackage.equals(activity.packageName)) {
                 if (needSep) {
                     pw.println();
