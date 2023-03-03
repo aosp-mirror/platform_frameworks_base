@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.android.credentialmanager.ui.theme.Shapes
 
 /**
  * Container card for the whole sheet.
@@ -83,7 +84,7 @@ fun CredentialContainerCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
-        shape = MaterialTheme.shapes.medium,
+        shape = Shapes.medium,
         border = null,
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent,
