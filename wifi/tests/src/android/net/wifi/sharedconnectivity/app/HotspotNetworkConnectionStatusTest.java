@@ -41,9 +41,9 @@ import java.util.Arrays;
 public class HotspotNetworkConnectionStatusTest {
     private static final long DEVICE_ID = 11L;
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
-            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_TABLET)
-                    .setDeviceName("TEST_NAME").setModelName("TEST_MODEL")
-                    .setConnectionStrength(2).setBatteryPercentage(50).build();
+            new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
+                    .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
+                    .setBatteryPercentage(50).build();
     private static final int NETWORK_TYPE = NETWORK_TYPE_CELLULAR;
     private static final String NETWORK_NAME = "TEST_NETWORK";
     private static final String HOTSPOT_SSID = "TEST_SSID";
