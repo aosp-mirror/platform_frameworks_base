@@ -38,6 +38,9 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.util.RotationUtils.deltaRotation;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
+import static android.util.TypedValue.COMPLEX_UNIT_MASK;
+import static android.util.TypedValue.COMPLEX_UNIT_SHIFT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
 import static android.view.Display.FLAG_PRIVATE;
@@ -170,6 +173,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.Insets;
@@ -206,6 +210,7 @@ import android.util.Size;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.ContentRecordingSession;
 import android.view.Display;
@@ -1684,14 +1689,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private int getMinimalTaskSizeDp() {
         final Context displayConfigurationContext =
                 mAtmService.mContext.createConfigurationContext(getConfiguration());
-        final float minimalSize =
-                displayConfigurationContext.getResources().getDimension(
-                        R.dimen.default_minimal_size_resizable_task);
-        if (Double.compare(mDisplayMetrics.density, 0.0) == 0) {
-            throw new IllegalArgumentException("Display with ID=" + getDisplayId() + "has invalid "
-                + "DisplayMetrics.density= 0.0");
+        final Resources res = displayConfigurationContext.getResources();
+        final TypedValue value = new TypedValue();
+        res.getValue(R.dimen.default_minimal_size_resizable_task, value, true /* resolveRefs */);
+        final int valueUnit = ((value.data >> COMPLEX_UNIT_SHIFT) & COMPLEX_UNIT_MASK);
+        if (value.type != TypedValue.TYPE_DIMENSION || valueUnit != COMPLEX_UNIT_DIP) {
+            throw new IllegalArgumentException(
+                "Resource ID #0x" + Integer.toHexString(R.dimen.default_minimal_size_resizable_task)
+                    + " is not in valid type or unit");
         }
-        return (int) (minimalSize / mDisplayMetrics.density);
+        return (int) TypedValue.complexToFloat(value.data);
     }
 
     private boolean updateOrientation(boolean forceUpdate) {
