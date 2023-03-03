@@ -27,6 +27,8 @@ import android.credentials.GetCredentialResponse;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
+
 /**
  * A credential entry that is to be displayed on the account selector that is presented to the
  * user.
@@ -56,7 +58,7 @@ import android.os.Parcelable;
 @SuppressLint("ParcelNotFinal")
 public class CredentialEntry implements Parcelable {
     /** The request option that corresponds to this entry. **/
-    private final @Nullable BeginGetCredentialOption mBeginGetCredentialOption;
+    private final @Nullable String mBeginGetCredentialOptionId;
 
     /** The type of the credential entry to be shown on the UI. */
     private final @NonNull String mType;
@@ -72,19 +74,51 @@ public class CredentialEntry implements Parcelable {
      * to respond to query phase {@link CredentialProviderService#onBeginGetCredential}
      * credential retrieval requests.
      *
+     * @param beginGetCredentialOptionId the beginGetCredentialOptionId to be retrieved from
+     * {@link BeginGetCredentialOption#getId()} - the request option for which this CredentialEntry
+     *                                   is being constructed This helps maintain an association
+     *                                   such that when the user selects this entry, providers can
+     *                                   receive the complete corresponding
+     *                                   {@link GetCredentialRequest}.
+     * @param type the type of the credential for which this credential entry is being created
+     * @param slice the slice containing the metadata to be shown on the UI. Must be
+     *              constructed through the androidx.credentials jetpack library.
+     *
+     * @throws IllegalArgumentException If {@code beginGetCredentialOptionId} or {@code type}
+     * is null, or empty
+     */
+    public CredentialEntry(@NonNull String beginGetCredentialOptionId, @NonNull String type,
+            @NonNull Slice slice) {
+        mBeginGetCredentialOptionId = Preconditions.checkStringNotEmpty(
+                beginGetCredentialOptionId, "beginGetCredentialOptionId must not be "
+                        + "null, or empty");
+        mType = Preconditions.checkStringNotEmpty(type, "type must not be null, or "
+                + "empty");
+        mSlice = requireNonNull(slice, "slice must not be null");
+    }
+
+    /**
+     * Creates an entry that is associated with a {@link BeginGetCredentialOption} request.
+     * Providers must use this constructor when they extend from {@link CredentialProviderService}
+     * to respond to query phase {@link CredentialProviderService#onBeginGetCredential}
+     * credential retrieval requests.
+     *
      * @param beginGetCredentialOption the request option for which this credential entry is
      *                                 being constructed This helps maintain an association,
      *                                 such that when the user selects this entry, providers
-     *                                 can receive the conmplete corresponding request.
+     *                                 can receive the complete corresponding request.
      * @param slice the slice containing the metadata to be shown on the UI. Must be
      *              constructed through the androidx.credentials jetpack library.
      */
     public CredentialEntry(@NonNull BeginGetCredentialOption beginGetCredentialOption,
             @NonNull Slice slice) {
-        mBeginGetCredentialOption = requireNonNull(beginGetCredentialOption,
-                "beginGetCredentialOption must not be null");
-        mType = requireNonNull(mBeginGetCredentialOption.getType(),
-                "type must not be null");
+        requireNonNull(beginGetCredentialOption, "beginGetCredentialOption must not"
+                + " be null");
+        mBeginGetCredentialOptionId = Preconditions.checkStringNotEmpty(
+                beginGetCredentialOption.getId(), "Id in beginGetCredentialOption "
+                        + "must not be null");
+        mType = Preconditions.checkStringNotEmpty(beginGetCredentialOption.getType(),
+                "type in beginGetCredentialOption must not be null");
         mSlice = requireNonNull(slice, "slice must not be null");
     }
 
@@ -101,7 +135,7 @@ public class CredentialEntry implements Parcelable {
      */
     // TODO: Unhide this constructor when the registry APIs are stable
     public CredentialEntry(@NonNull String type, @NonNull Slice slice) {
-        mBeginGetCredentialOption = null;
+        mBeginGetCredentialOptionId = null;
         mType = requireNonNull(type, "type must not be null");
         mSlice = requireNonNull(slice, "slice must not be null");
     }
@@ -110,7 +144,7 @@ public class CredentialEntry implements Parcelable {
         requireNonNull(in, "parcel must not be null");
         mType = in.readString8();
         mSlice = in.readTypedObject(Slice.CREATOR);
-        mBeginGetCredentialOption = in.readTypedObject(BeginGetCredentialOption.CREATOR);
+        mBeginGetCredentialOptionId = in.readString8();
     }
 
     @NonNull
@@ -136,15 +170,16 @@ public class CredentialEntry implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString8(mType);
         dest.writeTypedObject(mSlice, flags);
-        dest.writeTypedObject(mBeginGetCredentialOption, flags);
+        dest.writeString8(mBeginGetCredentialOptionId);
     }
 
     /**
-     * Returns the request option for which this credential entry has been constructed.
+     * Returns the id of the {@link BeginGetCredentialOption} for which this credential
+     * entry has been constructed.
      */
     @NonNull
-    public BeginGetCredentialOption getBeginGetCredentialOption() {
-        return mBeginGetCredentialOption;
+    public String getBeginGetCredentialOptionId() {
+        return mBeginGetCredentialOptionId;
     }
 
     /**
