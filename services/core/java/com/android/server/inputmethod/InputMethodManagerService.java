@@ -3325,6 +3325,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (!canInteractWithImeLocked(uid, client, "showSoftInput", statsToken)) {
                 ImeTracker.forLogging().onFailed(
                         statsToken, ImeTracker.PHASE_SERVER_CLIENT_FOCUSED);
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 return false;
             }
             final long ident = Binder.clearCallingIdentity();
