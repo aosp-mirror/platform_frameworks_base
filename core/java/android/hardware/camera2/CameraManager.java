@@ -118,13 +118,6 @@ public final class CameraManager {
     public static final long OVERRIDE_CAMERA_LANDSCAPE_TO_PORTRAIT = 250678880L;
 
     /**
-     * Package-level opt in/out for the above.
-     * @hide
-     */
-    public static final String PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT =
-            "android.camera.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT";
-
-    /**
      * System property for allowing the above
      * @hide
      */
@@ -1189,7 +1182,8 @@ public final class CameraManager {
             PackageManager packageManager = context.getPackageManager();
 
             try {
-                return packageManager.getProperty(PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT,
+                return packageManager.getProperty(
+                        PackageManager.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT,
                         context.getOpPackageName()).getBoolean();
             } catch (PackageManager.NameNotFoundException e) {
                 // No such property
