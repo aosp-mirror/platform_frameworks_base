@@ -223,6 +223,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         private final DragPositioningCallback mDragPositioningCallback;
         private final DragDetector mDragDetector;
 
+        private boolean mIsDragging;
         private int mDragPointerId = -1;
 
         private DesktopModeTouchEventListener(
@@ -273,23 +274,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
                 return false;
             }
-            switch (e.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    mDragDetector.onMotionEvent(e);
-                    final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-                    if (taskInfo.isFocused) {
-                        return mDragDetector.isDragEvent();
-                    }
-                    return false;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    boolean res = mDragDetector.isDragEvent();
-                    mDragDetector.onMotionEvent(e);
-                    return res;
-                default:
-                    mDragDetector.onMotionEvent(e);
-                    return mDragDetector.isDragEvent();
-            }
+            return mDragDetector.onMotionEvent(e);
         }
 
         /**
@@ -313,13 +298,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDragPointerId = e.getPointerId(0);
                     mDragPositioningCallback.onDragPositioningStart(
                             0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
-                    break;
+                    mIsDragging = false;
+                    return false;
                 }
                 case MotionEvent.ACTION_MOVE: {
                     final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
-                    break;
+                    mIsDragging = true;
+                    return true;
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
@@ -336,7 +323,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                     c -> c.moveToFullscreen(taskInfo));
                         }
                     }
-                    break;
+                    final boolean wasDragging = mIsDragging;
+                    mIsDragging = false;
+                    return wasDragging;
                 }
             }
             return true;
