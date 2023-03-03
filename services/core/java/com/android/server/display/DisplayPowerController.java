@@ -789,6 +789,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
+    @GuardedBy("mLock")
+    private void clearDisplayBrightnessFollowersLocked() {
+        for (int i = 0; i < mDisplayBrightnessFollowers.size(); i++) {
+            DisplayPowerControllerInterface follower = mDisplayBrightnessFollowers.valueAt(i);
+            mHandler.postAtTime(() -> follower.setBrightnessToFollow(
+                    PowerManager.BRIGHTNESS_INVALID_FLOAT, /* nits= */ -1,
+                    /* ambientLux= */ 0), mClock.uptimeMillis());
+        }
+        mDisplayBrightnessFollowers.clear();
+    }
+
     @Nullable
     @Override
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
@@ -946,6 +957,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Override
     public void stop() {
         synchronized (mLock) {
+            clearDisplayBrightnessFollowersLocked();
+
             mStopped = true;
             Message msg = mHandler.obtainMessage(MSG_STOP);
             mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
