@@ -1007,7 +1007,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private void notifyNavigationBarSurface() {
         ViewRootImpl viewRoot = mView.getViewRootImpl();
-        SurfaceControl surface = viewRoot != null ? viewRoot.getSurfaceControl() : null;
+        SurfaceControl surface = viewRoot != null
+                && viewRoot.getSurfaceControl() != null
+                && viewRoot.getSurfaceControl().isValid()
+                        ? viewRoot.getSurfaceControl()
+                        : null;
         mOverviewProxyService.onNavigationBarSurfaceChanged(surface);
     }
 
