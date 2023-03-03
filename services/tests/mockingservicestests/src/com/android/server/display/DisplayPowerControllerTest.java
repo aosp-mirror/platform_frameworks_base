@@ -252,7 +252,7 @@ public final class DisplayPowerControllerTest {
         when(logicalDisplayMock.isEnabledLocked()).thenReturn(isEnabled);
         when(logicalDisplayMock.isInTransitionLocked()).thenReturn(false);
         when(logicalDisplayMock.getBrightnessThrottlingDataIdLocked()).thenReturn(
-                DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID);
+                DisplayDeviceConfig.DEFAULT_ID);
         when(displayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);
         when(displayDeviceMock.getDisplayDeviceConfig()).thenReturn(displayDeviceConfigMock);
