@@ -58,7 +58,7 @@ import java.util.function.IntConsumer;
  */
 @SystemApi
 public abstract class VisualQueryDetectionService extends Service
-        implements SandboxedDetectionServiceBase {
+        implements SandboxedDetectionInitializer {
 
     private static final String TAG = VisualQueryDetectionService.class.getSimpleName();
 
@@ -175,7 +175,7 @@ public abstract class VisualQueryDetectionService extends Service
     private void onUpdateStateInternal(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory, IRemoteCallback callback) {
         IntConsumer intConsumer =
-                SandboxedDetectionServiceBase.createInitializationStatusConsumer(callback);
+                SandboxedDetectionInitializer.createInitializationStatusConsumer(callback);
         onUpdateState(options, sharedMemory, UPDATE_TIMEOUT_MILLIS, intConsumer);
     }
 
