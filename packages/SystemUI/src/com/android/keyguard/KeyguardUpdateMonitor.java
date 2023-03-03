@@ -704,6 +704,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (mKeyguardGoingAway) {
             updateFaceListeningState(BIOMETRIC_ACTION_STOP,
                     FACE_AUTH_STOPPED_KEYGUARD_GOING_AWAY);
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onKeyguardGoingAway();
+                }
+            }
         }
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }

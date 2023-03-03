@@ -29,6 +29,8 @@ import android.os.UserManager
 import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.R
@@ -62,6 +64,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -72,6 +75,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -96,6 +100,7 @@ class UserInteractorTest : SysuiTestCase() {
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: UserInteractor
 
@@ -154,6 +159,7 @@ class UserInteractorTest : SysuiTestCase() {
                         repository = telephonyRepository,
                     ),
                 broadcastDispatcher = fakeBroadcastDispatcher,
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
                 backgroundDispatcher = testDispatcher,
                 activityManager = activityManager,
                 refreshUsersScheduler = refreshUsersScheduler,
@@ -175,6 +181,18 @@ class UserInteractorTest : SysuiTestCase() {
                 featureFlags = featureFlags,
             )
     }
+
+    @Test
+    fun `testKeyguardUpdateMonitor_onKeyguardGoingAway`() =
+        testScope.runTest {
+            val argumentCaptor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
+            verify(keyguardUpdateMonitor).registerCallback(argumentCaptor.capture())
+
+            argumentCaptor.value.onKeyguardGoingAway()
+
+            val lastValue = collectLastValue(underTest.dialogDismissRequests)
+            assertNotNull(lastValue)
+        }
 
     @Test
     fun `onRecordSelected - user`() =
