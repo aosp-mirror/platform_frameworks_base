@@ -9,8 +9,8 @@ import com.android.systemui.R
 data class EdgePanelParams(private var resources: Resources) {
 
     data class ArrowDimens(
-            val length: Float = 0f,
-            val height: Float = 0f,
+            val length: Float? = 0f,
+            val height: Float? = 0f,
             val alpha: Float = 0f,
             var alphaSpring: SpringForce? = null,
             val heightSpring: SpringForce? = null,
@@ -139,17 +139,17 @@ data class EdgePanelParams(private var resources: Resources) {
 
         entryWidthInterpolator = PathInterpolator(.19f, 1.27f, .71f, .86f)
         entryWidthTowardsEdgeInterpolator = PathInterpolator(1f, -3f, 1f, 1.2f)
-        activeWidthInterpolator = PathInterpolator(.15f, .48f, .46f, .89f)
+        activeWidthInterpolator = PathInterpolator(.32f, 0f, .16f, .94f)
         arrowAngleInterpolator = entryWidthInterpolator
         translationInterpolator = PathInterpolator(0.2f, 1.0f, 1.0f, 1.0f)
         farCornerInterpolator = PathInterpolator(.03f, .19f, .14f, 1.09f)
         edgeCornerInterpolator = PathInterpolator(0f, 1.11f, .85f, .84f)
         heightInterpolator = PathInterpolator(1f, .05f, .9f, -0.29f)
 
-        val showArrowOnProgressValue = .2f
+        val showArrowOnProgressValue = .23f
         val showArrowOnProgressValueFactor = 1.05f
 
-        val entryActiveHorizontalTranslationSpring = createSpring(675f, 0.8f)
+        val entryActiveHorizontalTranslationSpring = createSpring(800f, 0.8f)
         val activeCommittedArrowLengthSpring = createSpring(1500f, 0.29f)
         val activeCommittedArrowHeightSpring = createSpring(1500f, 0.29f)
         val flungCommittedEdgeCornerSpring = createSpring(10000f, 1f)
@@ -178,7 +178,7 @@ data class EdgePanelParams(private var resources: Resources) {
                         height = getDimen(R.dimen.navigation_edge_entry_background_height),
                         edgeCornerRadius = getDimen(R.dimen.navigation_edge_entry_edge_corners),
                         farCornerRadius = getDimen(R.dimen.navigation_edge_entry_far_corners),
-                        alphaSpring = createSpring(900f, 1f),
+                        alphaSpring = createSpring(1100f, 1f),
                         widthSpring = createSpring(450f, 0.65f),
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 0.5f),
@@ -232,7 +232,7 @@ data class EdgePanelParams(private var resources: Resources) {
                                 getDimen(R.dimen.navigation_edge_pre_threshold_edge_corners),
                         farCornerRadius =
                                 getDimen(R.dimen.navigation_edge_pre_threshold_far_corners),
-                        widthSpring = createSpring(200f, 0.65f),
+                        widthSpring = createSpring(250f, 0.65f),
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(200f, 1f),
                         edgeCornerRadiusSpring = createSpring(150f, 0.5f),
@@ -244,6 +244,8 @@ data class EdgePanelParams(private var resources: Resources) {
                 arrowDimens = activeIndicator.arrowDimens.copy(
                         lengthSpring = activeCommittedArrowLengthSpring,
                         heightSpring = activeCommittedArrowHeightSpring,
+                        length = null,
+                        height = null,
                 ),
                 backgroundDimens = activeIndicator.backgroundDimens.copy(
                         alpha = 0f,
@@ -255,13 +257,15 @@ data class EdgePanelParams(private var resources: Resources) {
                         farCornerRadiusSpring = flungCommittedFarCornerSpring,
                 ),
                 scale = 0.85f,
-                scaleSpring = createSpring(650f, 1f),
+                scaleSpring = createSpring(1150f, 1f),
         )
 
         flungIndicator = committedIndicator.copy(
                 arrowDimens = committedIndicator.arrowDimens.copy(
                         lengthSpring = createSpring(850f, 0.46f),
                         heightSpring = createSpring(850f, 0.46f),
+                        length = activeIndicator.arrowDimens.length,
+                        height = activeIndicator.arrowDimens.height
                 ),
                 backgroundDimens = committedIndicator.backgroundDimens.copy(
                         widthSpring = flungCommittedWidthSpring,
