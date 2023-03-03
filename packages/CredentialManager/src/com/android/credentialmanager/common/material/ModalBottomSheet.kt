@@ -306,10 +306,6 @@ fun rememberModalBottomSheetState(
  * @param sheetContentColor The preferred content color provided by the bottom sheet to its
  * children. Defaults to the matching content color for [sheetBackgroundColor], or if that is not
  * a color from the theme, this will keep the same content color set above the bottom sheet.
- * @param scrimColor The color of the scrim that is applied to the rest of the screen when the
- * bottom sheet is visible. If the color passed is [Color.Unspecified], then a scrim will no
- * longer be applied and the bottom sheet will not block interaction with the rest of the screen
- * when visible.
  * @param content The content of rest of the screen.
  */
 @Composable
@@ -322,7 +318,6 @@ fun ModalBottomSheetLayout(
     sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
     sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
-    scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
     content: @Composable () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -332,7 +327,7 @@ fun ModalBottomSheetLayout(
         Box(Modifier.fillMaxSize()) {
             content()
             Scrim(
-                color = scrimColor,
+                color = ModalBottomSheetDefaults.scrimColor,
                 onDismiss = {
                     if (sheetState.confirmStateChange(Hidden)) {
                         scope.launch { sheetState.hide() }
@@ -505,5 +500,5 @@ object ModalBottomSheetDefaults {
      */
     val scrimColor: Color
         @Composable
-        get() = MaterialTheme.colorScheme.scrim
+        get() = MaterialTheme.colorScheme.scrim.copy(alpha = .32f)
 }

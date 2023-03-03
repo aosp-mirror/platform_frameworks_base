@@ -31,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
@@ -51,6 +52,7 @@ import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
 import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
+import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
 
 @Composable
 fun CreateCredentialScreen(
@@ -58,6 +60,8 @@ fun CreateCredentialScreen(
     createCredentialUiState: CreateCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
+    val sysUiController = rememberSystemUiController()
+    setBottomSheetSystemBarsColor(sysUiController)
     ModalBottomSheet(
         sheetContent = {
             // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
