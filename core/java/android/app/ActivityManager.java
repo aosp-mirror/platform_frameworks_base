@@ -3933,6 +3933,9 @@ public class ActivityManager {
      * processes to reclaim memory; the system will take care of restarting
      * these processes in the future as needed.
      *
+     * <p class="note">Third party applications can only use this API to kill their own processes.
+     * </p>
+     *
      * @param packageName The name of the package whose processes are to
      * be killed.
      */
