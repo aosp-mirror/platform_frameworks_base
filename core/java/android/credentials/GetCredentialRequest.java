@@ -149,7 +149,6 @@ public final class GetCredentialRequest implements Parcelable {
         mCredentialOptions = credentialOptions;
         AnnotationValidations.validate(NonNull.class, null, mCredentialOptions);
 
-
         Bundle data = in.readBundle();
         mData = data;
         AnnotationValidations.validate(NonNull.class, null, mData);

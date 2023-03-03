@@ -32,7 +32,7 @@ import java.util.Objects;
  */
 public final class BeginCreateCredentialResponse implements Parcelable {
     private final @NonNull List<CreateEntry> mCreateEntries;
-    private final @Nullable CreateEntry mRemoteCreateEntry;
+    private final @Nullable RemoteEntry mRemoteCreateEntry;
 
     /**
      * Creates an empty response instance, to be used when there are no {@link CreateEntry}
@@ -46,7 +46,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
         List<CreateEntry> createEntries = new ArrayList<>();
         in.readTypedList(createEntries, CreateEntry.CREATOR);
         mCreateEntries = createEntries;
-        mRemoteCreateEntry = in.readTypedObject(CreateEntry.CREATOR);
+        mRemoteCreateEntry = in.readTypedObject(RemoteEntry.CREATOR);
     }
 
     @Override
@@ -75,7 +75,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
 
     /* package-private */ BeginCreateCredentialResponse(
             @NonNull List<CreateEntry> createEntries,
-            @Nullable CreateEntry remoteCreateEntry) {
+            @Nullable RemoteEntry remoteCreateEntry) {
         this.mCreateEntries = createEntries;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mCreateEntries);
@@ -88,7 +88,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
     }
 
     /** Returns the remote create entry to be displayed on the UI. */
-    public @Nullable CreateEntry getRemoteCreateEntry() {
+    public @Nullable RemoteEntry getRemoteCreateEntry() {
         return mRemoteCreateEntry;
     }
 
@@ -98,7 +98,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     public static final class Builder {
         private @NonNull List<CreateEntry> mCreateEntries = new ArrayList<>();
-        private @Nullable CreateEntry mRemoteCreateEntry;
+        private @Nullable RemoteEntry mRemoteCreateEntry;
 
         /**
          * Sets the list of create entries to be shown on the UI.
@@ -138,7 +138,7 @@ public final class BeginCreateCredentialResponse implements Parcelable {
          * {@link CredentialProviderService#EXTRA_CREATE_CREDENTIAL_RESPONSE} key should be populated
          * with a {@link android.credentials.CreateCredentialResponse} object.
          */
-        public @NonNull Builder setRemoteCreateEntry(@Nullable CreateEntry remoteCreateEntry) {
+        public @NonNull Builder setRemoteCreateEntry(@Nullable RemoteEntry remoteCreateEntry) {
             mRemoteCreateEntry = remoteCreateEntry;
             return this;
         }
