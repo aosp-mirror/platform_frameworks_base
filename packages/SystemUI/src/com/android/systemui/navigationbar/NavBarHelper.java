@@ -41,11 +41,16 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.util.Log;
+import android.view.IRotationWatcher;
+import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
@@ -58,6 +63,7 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -90,6 +96,7 @@ public final class NavBarHelper implements
         AccessibilityButtonTargetsObserver.TargetsChangedListener,
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable, CommandQueue.Callbacks {
+    private static final String TAG = NavBarHelper.class.getSimpleName();
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
@@ -103,11 +110,14 @@ public final class NavBarHelper implements
     private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final ContentResolver mContentResolver;
+    private final IWindowManager mWm;
+    private final int mDefaultDisplayId;
     private boolean mAssistantAvailable;
     private boolean mLongPressHomeEnabled;
     private boolean mAssistantTouchGestureEnabled;
     private int mNavBarMode;
     private int mA11yButtonState;
+    private int mRotationWatcherRotation;
     private boolean mTogglingNavbarTaskbar;
 
     // Attributes used in NavBarHelper.CurrentSysuiState
@@ -119,6 +129,19 @@ public final class NavBarHelper implements
         @Override
         public void onChange(boolean selfChange, Uri uri) {
             updateAssistantAvailability();
+        }
+    };
+
+    // Listens for changes to display rotation
+    private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
+        @Override
+        public void onRotationChanged(final int rotation) {
+            // We need this to be scheduled as early as possible to beat the redrawing of
+            // window in response to the orientation change.
+            mHandler.postAtFrontOfQueue(() -> {
+                mRotationWatcherRotation = rotation;
+                dispatchRotationChanged(rotation);
+            });
         }
     };
 
@@ -137,7 +160,9 @@ public final class NavBarHelper implements
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             KeyguardStateController keyguardStateController,
             NavigationModeController navigationModeController,
+            IWindowManager wm,
             UserTracker userTracker,
+            DisplayTracker displayTracker,
             DumpManager dumpManager,
             CommandQueue commandQueue) {
         mContext = context;
@@ -151,6 +176,8 @@ public final class NavBarHelper implements
         mSystemActions = systemActions;
         mAccessibilityButtonModeObserver = accessibilityButtonModeObserver;
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
+        mWm = wm;
+        mDefaultDisplayId = displayTracker.getDefaultDisplayId();
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
@@ -185,6 +212,13 @@ public final class NavBarHelper implements
         mContentResolver.registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.ASSIST_TOUCH_GESTURE_ENABLED),
                 false, mAssistContentObserver, UserHandle.USER_ALL);
+
+        // Setup display rotation watcher
+        try {
+            mWm.watchRotation(mRotationWatcher, mDefaultDisplayId);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to register rotation watcher", e);
+        }
     }
 
     /**
@@ -198,6 +232,13 @@ public final class NavBarHelper implements
 
         // Clean up assistant listeners
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
+
+        // Clean up display rotation watcher
+        try {
+            mWm.removeRotationWatcher(mRotationWatcher);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to unregister rotation watcher", e);
+        }
     }
 
     /**
@@ -217,6 +258,7 @@ public final class NavBarHelper implements
             listener.updateAccessibilityServicesState();
             listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
         }
+        listener.updateRotationWatcherState(mRotationWatcherRotation);
     }
 
     /**
@@ -393,6 +435,12 @@ public final class NavBarHelper implements
         mWindowState = state;
     }
 
+    private void dispatchRotationChanged(int rotation) {
+        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
+            listener.updateRotationWatcherState(rotation);
+        }
+    }
+
     public CurrentSysuiState getCurrentSysuiState() {
         return new CurrentSysuiState();
     }
@@ -404,6 +452,7 @@ public final class NavBarHelper implements
     public interface NavbarTaskbarStateUpdater {
         void updateAccessibilityServicesState();
         void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
+        default void updateRotationWatcherState(int rotation) {}
     }
 
     /** Data class to help Taskbar/Navbar initiate state correctly when switching between the two.*/

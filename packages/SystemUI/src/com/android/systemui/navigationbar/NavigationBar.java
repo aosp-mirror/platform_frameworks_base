@@ -350,6 +350,15 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     mLongPressHomeEnabled = longPressHomeEnabled;
                     updateAssistantEntrypoints(available, longPressHomeEnabled);
                 }
+                @Override
+                public void updateRotationWatcherState(int rotation) {
+                    if (mIsOnDefaultDisplay && mView != null) {
+                        mView.getRotationButtonController().onRotationWatcherChanged(rotation);
+                        if (mView.needsReorient(rotation)) {
+                            repositionNavigationBar(rotation);
+                        }
+                    }
+                }
             };
 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
@@ -763,7 +772,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         if (mIsOnDefaultDisplay) {
             final RotationButtonController rotationButtonController =
                     mView.getRotationButtonController();
-            rotationButtonController.setRotationCallback(mRotationWatcher);
 
             // Reset user rotation pref to match that of the WindowManager if starting in locked
             // mode. This will automatically happen when switching from auto-rotate to locked mode.
@@ -797,9 +805,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @Override
     public void onViewDetached() {
-        final RotationButtonController rotationButtonController =
-                mView.getRotationButtonController();
-        rotationButtonController.setRotationCallback(null);
         mView.setUpdateActiveTouchRegionsCallback(null);
         getBarTransitions().destroy();
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
@@ -1700,12 +1705,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private boolean canShowSecondaryHandle() {
         return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null;
     }
-
-    private final Consumer<Integer> mRotationWatcher = rotation -> {
-        if (mView != null && mView.needsReorient(rotation)) {
-            repositionNavigationBar(rotation);
-        }
-    };
 
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {

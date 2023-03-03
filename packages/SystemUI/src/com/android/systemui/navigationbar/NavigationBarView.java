@@ -1099,7 +1099,7 @@ public class NavigationBarView extends FrameLayout {
         requestApplyInsets();
         reorient();
         if (mRotationButtonController != null) {
-            mRotationButtonController.registerListeners();
+            mRotationButtonController.registerListeners(false /* registerRotationWatcher */);
         }
 
         updateNavButtonIcons();
