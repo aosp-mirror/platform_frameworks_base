@@ -39,7 +39,9 @@ fun ModalBottomSheet(
         skipHalfExpanded = true
     )
     ModalBottomSheetLayout(
-        sheetBackgroundColor = MaterialTheme.colorScheme.surface,
+        sheetBackgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
+            ElevationTokens.Level1
+        ),
         modifier = Modifier.background(Color.Transparent),
         sheetState = state,
         sheetContent = sheetContent,

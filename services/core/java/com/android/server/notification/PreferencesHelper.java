@@ -862,11 +862,11 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
             }
+            if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                throw new IllegalStateException("Limit exceed; cannot create more groups");
+            }
             if (fromTargetApp) {
                 group.setBlocked(false);
-                if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
-                    throw new IllegalStateException("Limit exceed; cannot create more groups");
-                }
             }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (oldGroup != null) {

@@ -813,7 +813,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         boolean hasParticipatedDisplay = false;
-        boolean reportTaskStackChanged = false;
+        boolean hasVisibleTransientLaunch = false;
         // Commit all going-invisible containers
         for (int i = 0; i < mParticipants.size(); ++i) {
             final WindowContainer<?> participant = mParticipants.valueAt(i);
@@ -856,7 +856,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         && ar.isVisible()) {
                     // Transient launch was committed, so report enteringAnimation
                     ar.mEnteringAnimation = true;
-                    reportTaskStackChanged = true;
+                    hasVisibleTransientLaunch = true;
 
                     // Since transient launches don't automatically take focus, make sure we
                     // synchronize focus since we committed to the launch.
@@ -900,8 +900,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
 
-        if (reportTaskStackChanged) {
+        if (hasVisibleTransientLaunch) {
+            // Notify the change about the transient-below task that becomes invisible.
             mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
+            // Prevent spurious background app switches.
+            mController.mAtm.stopAppSwitches();
+            // The end of transient launch may not reorder task, so make sure to compute the latest
+            // task rank according to the current visibility.
+            mController.mAtm.mRootWindowContainer.rankTaskLayers();
         }
 
         // dispatch legacy callback in a different loop. This is because multiple legacy handlers

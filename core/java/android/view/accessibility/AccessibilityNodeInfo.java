@@ -834,6 +834,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_REQUEST_TOUCH_PASSTHROUGH = 1 << 25;
 
+    private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 26;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -2641,6 +2643,34 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setRequestTouchPassthrough(boolean touchPassthrough) {
         setBooleanProperty(BOOLEAN_PROPERTY_REQUEST_TOUCH_PASSTHROUGH, touchPassthrough);
+    }
+
+    /**
+     * Gets if the node's accessibility data is considered sensitive.
+     *
+     * @return True if the node is editable, false otherwise.
+     * @see View#isAccessibilityDataSensitive()
+     */
+    public boolean isAccessibilityDataSensitive() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE);
+    }
+
+    /**
+     * Sets whether this node's accessibility data is considered sensitive.
+     *
+     * <p>
+     * <strong>Note:</strong> Cannot be called from an {@link AccessibilityService}.
+     * This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param accessibilityDataSensitive True if the node's accessibility data is considered
+     *                                   sensitive.
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @see View#setAccessibilityDataSensitive
+     */
+    public void setAccessibilityDataSensitive(boolean accessibilityDataSensitive) {
+        setBooleanProperty(BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE,
+                accessibilityDataSensitive);
     }
 
     /**

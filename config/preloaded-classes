@@ -5548,8 +5548,6 @@ android.net.wifi.nl80211.WifiNl80211Manager$ScanEventCallback
 android.net.wifi.nl80211.WifiNl80211Manager$ScanEventHandler
 android.net.wifi.nl80211.WifiNl80211Manager$SignalPollResult
 android.net.wifi.nl80211.WifiNl80211Manager
-android.nfc.BeamShareData$1
-android.nfc.BeamShareData
 android.nfc.IAppCallback$Stub$Proxy
 android.nfc.IAppCallback$Stub
 android.nfc.IAppCallback
@@ -7316,7 +7314,6 @@ android.telephony.TelephonyCallback$EmergencyNumberListListener
 android.telephony.TelephonyCallback$IPhoneStateListenerStub
 android.telephony.TelephonyCallback$ImsCallDisconnectCauseListener
 android.telephony.TelephonyCallback$LinkCapacityEstimateChangedListener
-android.telephony.TelephonyCallback$MediaQualityStatusChangedListener
 android.telephony.TelephonyCallback$MessageWaitingIndicatorListener
 android.telephony.TelephonyCallback$OutgoingEmergencyCallListener
 android.telephony.TelephonyCallback$OutgoingEmergencySmsListener
@@ -8222,7 +8219,6 @@ android.view.GhostView
 android.view.Gravity
 android.view.HandlerActionQueue$HandlerAction
 android.view.HandlerActionQueue
-android.view.HandwritingDelegateConfiguration
 android.view.HandwritingInitiator$HandwritableViewInfo
 android.view.HandwritingInitiator$HandwritingAreaTracker
 android.view.HandwritingInitiator$State
@@ -8364,7 +8360,6 @@ android.view.InsetsSource$1
 android.view.InsetsSource
 android.view.InsetsSourceConsumer
 android.view.InsetsSourceControl$1
-android.view.InsetsSourceControl$Array
 android.view.InsetsSourceControl
 android.view.InsetsState$1
 android.view.InsetsState
@@ -8945,7 +8940,6 @@ android.view.inputmethod.IInputMethodSessionInvoker$$ExternalSyntheticLambda5
 android.view.inputmethod.IInputMethodSessionInvoker$$ExternalSyntheticLambda6
 android.view.inputmethod.IInputMethodSessionInvoker$$ExternalSyntheticLambda8
 android.view.inputmethod.IInputMethodSessionInvoker
-android.view.inputmethod.ImeTracker$1$$ExternalSyntheticLambda0
 android.view.inputmethod.ImeTracker$1
 android.view.inputmethod.ImeTracker$Token$1
 android.view.inputmethod.ImeTracker$Token
@@ -9608,8 +9602,6 @@ android.window.IOnBackInvokedCallback
 android.window.IRemoteTransition$Stub$Proxy
 android.window.IRemoteTransition$Stub
 android.window.IRemoteTransition
-android.window.ISurfaceSyncGroup$Stub
-android.window.ISurfaceSyncGroup
 android.window.ISurfaceSyncGroupCompletedListener$Stub
 android.window.ISurfaceSyncGroupCompletedListener
 android.window.ITaskOrganizer$Stub$Proxy
@@ -9675,7 +9667,6 @@ android.window.WindowContext
 android.window.WindowContextController
 android.window.WindowInfosListener$DisplayInfo
 android.window.WindowInfosListener
-android.window.WindowMetricsController
 android.window.WindowOnBackInvokedDispatcher$Checker
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$ExternalSyntheticLambda0
 android.window.WindowOnBackInvokedDispatcher$OnBackInvokedCallbackWrapper$$ExternalSyntheticLambda1
@@ -10470,7 +10461,6 @@ com.android.internal.dynamicanimation.animation.Force
 com.android.internal.dynamicanimation.animation.SpringAnimation
 com.android.internal.dynamicanimation.animation.SpringForce
 com.android.internal.expresslog.Counter
-com.android.internal.expresslog.Utils
 com.android.internal.graphics.ColorUtils$ContrastCalculator
 com.android.internal.graphics.ColorUtils
 com.android.internal.graphics.SfVsyncFrameCallbackProvider
@@ -10824,7 +10814,6 @@ com.android.internal.statusbar.RegisterStatusBarResult$1
 com.android.internal.statusbar.RegisterStatusBarResult
 com.android.internal.statusbar.StatusBarIcon$1
 com.android.internal.statusbar.StatusBarIcon
-com.android.internal.telecom.ClientTransactionalServiceRepository
 com.android.internal.telecom.IConnectionService$Stub$Proxy
 com.android.internal.telecom.IConnectionService$Stub
 com.android.internal.telecom.IConnectionService
@@ -10907,7 +10896,6 @@ com.android.internal.telephony.CarrierServiceBindHelper$CarrierServiceConnection
 com.android.internal.telephony.CarrierServiceBindHelper$CarrierServicePackageMonitor
 com.android.internal.telephony.CarrierServiceBindHelper
 com.android.internal.telephony.CarrierServiceStateTracker$1
-com.android.internal.telephony.CarrierServiceStateTracker$2
 com.android.internal.telephony.CarrierServiceStateTracker$AllowedNetworkTypesListener
 com.android.internal.telephony.CarrierServiceStateTracker$EmergencyNetworkNotification
 com.android.internal.telephony.CarrierServiceStateTracker$NotificationType
@@ -10926,7 +10914,6 @@ com.android.internal.telephony.CarrierServicesSmsFilter
 com.android.internal.telephony.CarrierSignalAgent$$ExternalSyntheticLambda0
 com.android.internal.telephony.CarrierSignalAgent$$ExternalSyntheticLambda1
 com.android.internal.telephony.CarrierSignalAgent$1
-com.android.internal.telephony.CarrierSignalAgent$2
 com.android.internal.telephony.CarrierSignalAgent
 com.android.internal.telephony.CarrierSmsUtils
 com.android.internal.telephony.CellBroadcastServiceManager$1
@@ -11231,7 +11218,6 @@ com.android.internal.telephony.RadioResponse$$ExternalSyntheticLambda0
 com.android.internal.telephony.RadioResponse$$ExternalSyntheticLambda1
 com.android.internal.telephony.RadioResponse$$ExternalSyntheticLambda2
 com.android.internal.telephony.RadioResponse
-com.android.internal.telephony.RatRatcheter$1
 com.android.internal.telephony.RatRatcheter
 com.android.internal.telephony.Registrant
 com.android.internal.telephony.RegistrantList
@@ -11338,7 +11324,6 @@ com.android.internal.telephony.SubscriptionInfoUpdater$$ExternalSyntheticLambda4
 com.android.internal.telephony.SubscriptionInfoUpdater$$ExternalSyntheticLambda5
 com.android.internal.telephony.SubscriptionInfoUpdater$$ExternalSyntheticLambda6
 com.android.internal.telephony.SubscriptionInfoUpdater$1
-com.android.internal.telephony.SubscriptionInfoUpdater$2
 com.android.internal.telephony.SubscriptionInfoUpdater$UpdateEmbeddedSubsCallback
 com.android.internal.telephony.SubscriptionInfoUpdater
 com.android.internal.telephony.TelephonyCapabilities
@@ -11789,7 +11774,6 @@ com.android.internal.telephony.imsphone.ImsPhoneCallTracker$$ExternalSyntheticLa
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$$ExternalSyntheticLambda2
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$$ExternalSyntheticLambda3
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$10
-com.android.internal.telephony.imsphone.ImsPhoneCallTracker$11
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$1
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$2
 com.android.internal.telephony.imsphone.ImsPhoneCallTracker$3
@@ -12462,7 +12446,6 @@ com.android.internal.view.FloatingActionMode$2
 com.android.internal.view.FloatingActionMode$3
 com.android.internal.view.FloatingActionMode$FloatingToolbarVisibilityHelper
 com.android.internal.view.FloatingActionMode
-com.android.internal.view.IImeTracker
 com.android.internal.view.IInputMethodManager$Stub$Proxy
 com.android.internal.view.IInputMethodManager$Stub
 com.android.internal.view.IInputMethodManager
@@ -14529,7 +14512,6 @@ java.time.format.DateTimeFormatterBuilder$2
 java.time.format.DateTimeFormatterBuilder$CharLiteralPrinterParser
 java.time.format.DateTimeFormatterBuilder$CompositePrinterParser
 java.time.format.DateTimeFormatterBuilder$DateTimePrinterParser
-java.time.format.DateTimeFormatterBuilder$DayPeriod
 java.time.format.DateTimeFormatterBuilder$FractionPrinterParser
 java.time.format.DateTimeFormatterBuilder$InstantPrinterParser
 java.time.format.DateTimeFormatterBuilder$NumberPrinterParser
@@ -15726,7 +15708,6 @@ jdk.internal.misc.VM
 jdk.internal.reflect.Reflection
 jdk.internal.util.ArraysSupport
 jdk.internal.util.Preconditions
-jdk.internal.util.StaticProperty
 libcore.content.type.MimeMap$$ExternalSyntheticLambda0
 libcore.content.type.MimeMap$Builder$Element
 libcore.content.type.MimeMap$Builder

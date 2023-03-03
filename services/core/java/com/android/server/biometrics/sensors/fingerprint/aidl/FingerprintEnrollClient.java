@@ -274,8 +274,5 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    public void onPowerPressed() {
-        onAcquired(BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_POWER_PRESSED,
-                0 /* vendorCode */);
-    }
+    public void onPowerPressed() {}
 }
