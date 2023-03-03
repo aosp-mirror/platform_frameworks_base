@@ -59,7 +59,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.fragment.StatusBarIconBlocklistKt;
-import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventAnimator;
+import com.android.systemui.statusbar.phone.fragment.StatusBarSystemEventDefaultAnimator;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -74,6 +74,8 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import kotlin.Unit;
 
 /** View Controller for {@link com.android.systemui.statusbar.phone.KeyguardStatusBarView}. */
 public class KeyguardStatusBarViewController extends ViewController<KeyguardStatusBarView> {
@@ -123,7 +125,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 public void onDensityOrFontScaleChanged() {
                     mView.loadDimens();
                     // The animator is dependent on resources for offsets
-                    mSystemEventAnimator = new StatusBarSystemEventAnimator(mView, getResources());
+                    mSystemEventAnimator =
+                            getSystemEventAnimator(mSystemEventAnimator.isAnimationRunning());
                 }
 
                 @Override
@@ -248,7 +251,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private int mStatusBarState;
     private boolean mDozing;
     private boolean mShowingKeyguardHeadsUp;
-    private StatusBarSystemEventAnimator mSystemEventAnimator;
+    private StatusBarSystemEventDefaultAnimator mSystemEventAnimator;
+    private float mSystemEventAnimatorAlpha = 1;
 
     /**
      * The alpha value to be set on the View. If -1, this value is to be ignored.
@@ -324,7 +328,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
 
         mView.setKeyguardUserAvatarEnabled(
                 !mStatusBarUserChipViewModel.getChipEnabled());
-        mSystemEventAnimator = new StatusBarSystemEventAnimator(mView, r);
+        mSystemEventAnimator = getSystemEventAnimator(/* isAnimationRunning */ false);
 
         mDisableStateTracker = new DisableStateTracker(
                 /* mask1= */ DISABLE_SYSTEM_INFO,
@@ -480,6 +484,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                     * (1.0f - mKeyguardHeadsUpShowingAmount);
         }
 
+        if (mSystemEventAnimator.isAnimationRunning()) {
+            newAlpha = Math.min(newAlpha, mSystemEventAnimatorAlpha);
+        }
+
         boolean hideForBypass =
                 mFirstBypassAttempt && mKeyguardUpdateMonitor.shouldListenForFace()
                         || mDelayShowingKeyguardStatusBar;
@@ -488,7 +496,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                         && !mDozing
                         && !hideForBypass
                         && !mDisableStateTracker.isDisabled()
-                ? View.VISIBLE : View.INVISIBLE;
+                        ? View.VISIBLE : View.INVISIBLE;
 
         updateViewState(newAlpha, newVisibility);
     }
@@ -614,4 +622,15 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             updateBlockedIcons();
         }
     };
+
+    private StatusBarSystemEventDefaultAnimator getSystemEventAnimator(boolean isAnimationRunning) {
+        return new StatusBarSystemEventDefaultAnimator(getResources(), (alpha) -> {
+            mSystemEventAnimatorAlpha = alpha;
+            updateViewState();
+            return Unit.INSTANCE;
+        }, (translationX) -> {
+            mView.setTranslationX(translationX);
+            return Unit.INSTANCE;
+        }, isAnimationRunning);
+    }
 }
