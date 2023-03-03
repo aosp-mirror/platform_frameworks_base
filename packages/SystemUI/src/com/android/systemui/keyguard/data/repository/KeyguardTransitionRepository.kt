@@ -68,11 +68,8 @@ interface KeyguardTransitionRepository {
     /**
      * Begin a transition from one state to another. Transitions are interruptible, and will issue a
      * [TransitionStep] with state = [TransitionState.CANCELED] before beginning the next one.
-     *
-     * When canceled, there are two options: to continue from the current position of the prior
-     * transition, or to reset the position. When [resetIfCanceled] == true, it will do the latter.
      */
-    fun startTransition(info: TransitionInfo, resetIfCanceled: Boolean = false): UUID?
+    fun startTransition(info: TransitionInfo): UUID?
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -133,10 +130,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         )
     }
 
-    override fun startTransition(
-        info: TransitionInfo,
-        resetIfCanceled: Boolean,
-    ): UUID? {
+    override fun startTransition(info: TransitionInfo): UUID? {
         if (lastStep.from == info.from && lastStep.to == info.to) {
             Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
             return null
@@ -144,11 +138,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         val startingValue =
             if (lastStep.transitionState != TransitionState.FINISHED) {
                 Log.i(TAG, "Transition still active: $lastStep, canceling")
-                if (resetIfCanceled) {
-                    0f
-                } else {
-                    lastStep.value
-                }
+                lastStep.value
             } else {
                 0f
             }
@@ -237,7 +227,10 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     }
 
     private fun trace(step: TransitionStep, isManual: Boolean) {
-        if (step.transitionState == TransitionState.RUNNING) {
+        if (
+            step.transitionState != TransitionState.STARTED &&
+                step.transitionState != TransitionState.FINISHED
+        ) {
             return
         }
         val traceName =
@@ -250,10 +243,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         val traceCookie = traceName.hashCode()
         if (step.transitionState == TransitionState.STARTED) {
             Trace.beginAsyncSection(traceName, traceCookie)
-        } else if (
-            step.transitionState == TransitionState.FINISHED ||
-                step.transitionState == TransitionState.CANCELED
-        ) {
+        } else if (step.transitionState == TransitionState.FINISHED) {
             Trace.endAsyncSection(traceName, traceCookie)
         }
     }
