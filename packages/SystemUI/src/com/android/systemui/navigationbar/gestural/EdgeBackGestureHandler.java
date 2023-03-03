@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -54,6 +55,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.BackEvent;
 
@@ -776,6 +778,19 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         return true;
     }
 
+    private boolean isValidTrackpadBackGesture(boolean isTrackpadEvent) {
+        if (!isTrackpadEvent) {
+            return false;
+        }
+        // for trackpad gestures, unless the whole screen is excluded region, 3-finger swipe
+        // gestures are allowed even if the cursor is in the excluded region.
+        WindowInsets windowInsets = mWindowManager.getCurrentWindowMetrics().getWindowInsets();
+        Insets insets = windowInsets.getInsets(WindowInsets.Type.systemBars());
+        final Rect excludeBounds = mExcludeRegion.getBounds();
+        return !excludeBounds.contains(insets.left, insets.top, mDisplaySize.x - insets.right,
+                mDisplaySize.y - insets.bottom);
+    }
+
     private boolean isWithinTouchRegion(int x, int y) {
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
@@ -896,7 +911,8 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     && (isTrackpadEvent || isWithinInsets)
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
-                    && (isTrackpadEvent || isWithinTouchRegion((int) ev.getX(), (int) ev.getY()));
+                    && (isValidTrackpadBackGesture(isTrackpadEvent) || isWithinTouchRegion(
+                    (int) ev.getX(), (int) ev.getY()));
             if (mAllowGesture) {
                 mEdgeBackPlugin.setIsLeftPanel(mIsOnLeftEdge);
                 mEdgeBackPlugin.onMotionEvent(ev);
