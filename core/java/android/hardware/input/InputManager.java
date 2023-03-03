@@ -48,8 +48,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -305,8 +303,11 @@ public final class InputManager {
 
     private static String sVelocityTrackerStrategy;
 
-    private InputManager(IInputManager im) {
-        mIm = im;
+    private InputManagerGlobal mGlobal;
+
+    private InputManager() {
+        mGlobal = InputManagerGlobal.getInstance();
+        mIm = mGlobal.getInputManagerService();
         try {
             sVelocityTrackerStrategy = mIm.getVelocityTrackerStrategy();
         } catch (RemoteException ex) {
@@ -324,7 +325,8 @@ public final class InputManager {
     @VisibleForTesting
     public static InputManager resetInstance(IInputManager inputManagerService) {
         synchronized (InputManager.class) {
-            sInstance = new InputManager(inputManagerService);
+            InputManagerGlobal.resetInstance(inputManagerService);
+            sInstance = new InputManager();
             return sInstance;
         }
     }
@@ -337,6 +339,7 @@ public final class InputManager {
     @VisibleForTesting
     public static void clearInstance() {
         synchronized (InputManager.class) {
+            InputManagerGlobal.clearInstance();
             sInstance = null;
         }
     }
@@ -364,13 +367,7 @@ public final class InputManager {
     public static InputManager getInstance(Context context) {
         synchronized (InputManager.class) {
             if (sInstance == null) {
-                try {
-                    sInstance = new InputManager(IInputManager.Stub
-                            .asInterface(ServiceManager.getServiceOrThrow(Context.INPUT_SERVICE)));
-
-                } catch (ServiceNotFoundException e) {
-                    throw new IllegalStateException(e);
-                }
+                sInstance = new InputManager();
             }
             if (sInstance.mWeakContext == null || sInstance.mWeakContext.get() == null) {
                 sInstance.mWeakContext = new WeakReference(context);
