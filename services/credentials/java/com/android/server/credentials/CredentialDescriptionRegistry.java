@@ -23,6 +23,8 @@ import android.service.credentials.CredentialEntry;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,6 +92,18 @@ public final class CredentialDescriptionRegistry {
         }
     }
 
+    /** Clears an existing session for a given user identifier. */
+    @GuardedBy("sLock")
+    @VisibleForTesting
+    public static void clearAllSessions() {
+        sLock.lock();
+        try {
+            sCredentialDescriptionSessionPerUser.clear();
+        } finally {
+            sLock.unlock();
+        }
+    }
+
     private Map<String, Set<CredentialDescription>> mCredentialDescriptions;
     private int mTotalDescriptionCount;
 
@@ -138,6 +152,9 @@ public final class CredentialDescriptionRegistry {
     public Set<FilterResult> getFilteredResultForProvider(String packageName,
             String flatRequestStrings) {
         Set<FilterResult> result = new HashSet<>();
+        if (!mCredentialDescriptions.containsKey(packageName)) {
+            return result;
+        }
         Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
         for (CredentialDescription containedDescription: currentSet) {
             if (flatRequestStrings.equals(containedDescription.getFlattenedRequestString())) {
