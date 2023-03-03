@@ -16,11 +16,13 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.getActivityOptions;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -579,8 +581,14 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             EventLog.writeEvent(EventLogTags.SYSUI_FULLSCREEN_NOTIFICATION,
                     entry.getKey());
             mCentralSurfaces.wakeUpForFullScreenIntent();
-            fullScreenIntent.send();
+
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setPendingIntentBackgroundActivityStartMode(
+                    MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+            fullScreenIntent.sendAndReturnResult(null, 0, null, null, null, null,
+                    options.toBundle());
             entry.notifyFullScreenIntentLaunched();
+
             mMetricsLogger.count("note_fullscreen", 1);
 
             String activityName;
