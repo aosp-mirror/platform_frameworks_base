@@ -39,7 +39,8 @@ class SystemUIIssueRegistry : IssueRegistry() {
                 RegisterReceiverViaContextDetector.ISSUE,
                 SoftwareBitmapDetector.ISSUE,
                 NonInjectedServiceDetector.ISSUE,
-                StaticSettingsProviderDetector.ISSUE
+                StaticSettingsProviderDetector.ISSUE,
+                DemotingTestWithoutBugDetector.ISSUE
             )
 
     override val api: Int

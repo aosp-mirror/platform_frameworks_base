@@ -37,7 +37,9 @@ class OverflowMenuAdapterTest : SysuiTestCase() {
                 context,
                 layoutId = 0,
                 labels.zip(ids).map { OverflowMenuAdapter.MenuItem(it.first, it.second) }
-            ) { true }
+            ) {
+                true
+            }
 
         ids.forEachIndexed { index, id -> assertThat(adapter.getItemId(index)).isEqualTo(id) }
     }
@@ -51,7 +53,9 @@ class OverflowMenuAdapterTest : SysuiTestCase() {
                 context,
                 layoutId = 0,
                 labels.zip(ids).map { OverflowMenuAdapter.MenuItem(it.first, it.second) }
-            ) { position -> position == 0 }
+            ) { position ->
+                position == 0
+            }
 
         assertThat(adapter.isEnabled(0)).isTrue()
         assertThat(adapter.isEnabled(1)).isFalse()

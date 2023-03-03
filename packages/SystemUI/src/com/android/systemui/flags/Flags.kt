@@ -157,12 +157,6 @@ object Flags {
     val CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES =
         unreleasedFlag(216, "customizable_lock_screen_quick_affordances", teamfood = true)
 
-    /** Shows chipbar UI whenever the device is unlocked by ActiveUnlock (watch). */
-    // TODO(b/256513609): Tracking Bug
-    @JvmField
-    val ACTIVE_UNLOCK_CHIPBAR =
-        resourceBooleanFlag(217, R.bool.flag_active_unlock_chipbar, "active_unlock_chipbar")
-
     /**
      * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
      * new KeyguardTransitionRepository.
@@ -272,8 +266,7 @@ object Flags {
     /** Enables new QS Edit Mode visual refresh */
     // TODO(b/269787742): Tracking Bug
     @JvmField
-    val ENABLE_NEW_QS_EDIT_MODE =
-        unreleasedFlag(510, "enable_new_qs_edit_mode", teamfood = false)
+    val ENABLE_NEW_QS_EDIT_MODE = unreleasedFlag(510, "enable_new_qs_edit_mode", teamfood = false)
 
     // 600- status bar
 
@@ -359,7 +352,7 @@ object Flags {
     val MEDIA_TTT_RECEIVER_SUCCESS_RIPPLE = releasedFlag(910, "media_ttt_receiver_success_ripple")
 
     // TODO(b/263512203): Tracking Bug
-    val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator", teamfood = true)
+    val MEDIA_EXPLICIT_INDICATOR = unreleasedFlag(911, "media_explicit_indicator")
 
     // TODO(b/265813373): Tracking Bug
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
@@ -391,6 +384,9 @@ object Flags {
 
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
+
+    @JvmField
+    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(1004, "enable_low_light_clock_undocked")
 
     // 1100 - windowing
     @Keep

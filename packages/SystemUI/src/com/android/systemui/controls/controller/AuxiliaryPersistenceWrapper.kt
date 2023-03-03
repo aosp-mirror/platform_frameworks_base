@@ -86,6 +86,7 @@ internal constructor(wrapper: ControlsFavoritePersistenceWrapper) {
      *
      * When the favorites for that application are returned, they will be removed from the auxiliary
      * file immediately, so they won't be retrieved again.
+     *
      * @param componentName the name of the service that provided the controls
      * @return a list of structures with favorites
      */

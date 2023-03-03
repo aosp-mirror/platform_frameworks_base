@@ -28,7 +28,6 @@ import android.provider.Settings
  * Version of [LogcatEchoTracker] for debuggable builds
  *
  * The log level of individual buffers or tags can be controlled via global settings:
- *
  * ```
  * # Echo any message to <bufferName> of <level> or higher
  * $ adb shell settings put global systemui/buffer/<bufferName> <level>

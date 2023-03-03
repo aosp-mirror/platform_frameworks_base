@@ -187,6 +187,7 @@ constructor(
 
     /**
      * Handle request to change the current position in the media track.
+     *
      * @param position Place to seek to in the track.
      */
     @AnyThread

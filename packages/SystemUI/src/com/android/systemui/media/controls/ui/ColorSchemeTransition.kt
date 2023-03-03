@@ -201,7 +201,9 @@ internal constructor(
         animatingColorTransitionFactory(
             loadDefaultColor(R.attr.textColorSecondary),
             ::textSecondaryFromScheme
-        ) { textSecondary -> mediaViewHolder.artistText.setTextColor(textSecondary) }
+        ) { textSecondary ->
+            mediaViewHolder.artistText.setTextColor(textSecondary)
+        }
 
     val textTertiary =
         animatingColorTransitionFactory(
