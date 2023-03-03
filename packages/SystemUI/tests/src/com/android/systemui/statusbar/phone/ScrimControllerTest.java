@@ -24,8 +24,6 @@ import static com.android.systemui.statusbar.phone.ScrimState.SHADE_LOCKED;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -60,12 +58,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
-import com.android.systemui.keyguard.shared.model.KeyguardState;
-import com.android.systemui.keyguard.shared.model.TransitionState;
-import com.android.systemui.keyguard.shared.model.TransitionStep;
-import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -92,10 +85,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import kotlinx.coroutines.CoroutineDispatcher;
-
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper(setAsMainLooper = true)
+@TestableLooper.RunWithLooper
 @SmallTest
 public class ScrimControllerTest extends SysuiTestCase {
 
@@ -124,10 +115,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private DockManager mDockManager;
     @Mock private ScreenOffAnimationController mScreenOffAnimationController;
     @Mock private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-    @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
-    @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
-    @Mock private CoroutineDispatcher mMainDispatcher;
-
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
@@ -238,20 +225,13 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
         when(mDockManager.isDocked()).thenReturn(false);
 
-        when(mKeyguardTransitionInteractor.getPrimaryBouncerToGoneTransition())
-                .thenReturn(emptyFlow());
-        when(mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha()).thenReturn(emptyFlow());
-
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParameters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mKeyguardUnlockAnimationController,
-                mStatusBarKeyguardViewManager,
-                mPrimaryBouncerToGoneTransitionViewModel,
-                mKeyguardTransitionInteractor,
-                mMainDispatcher);
+                mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -881,10 +861,7 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mDockManager, mConfigurationController, new FakeExecutor(new FakeSystemClock()),
                 mScreenOffAnimationController,
                 mKeyguardUnlockAnimationController,
-                mStatusBarKeyguardViewManager,
-                mPrimaryBouncerToGoneTransitionViewModel,
-                mKeyguardTransitionInteractor,
-                mMainDispatcher);
+                mStatusBarKeyguardViewManager);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mNotificationsScrim, mScrimInFront);
         mScrimController.setAnimatorListener(mAnimatorListener);
@@ -1650,18 +1627,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.setRawPanelExpansionFraction(0f);
         finishAnimationsImmediately();
         assertScrimAlpha(mScrimBehind, 0);
-    }
-
-    @Test
-    public void ignoreTransitionRequestWhileKeyguardTransitionRunning() {
-        mScrimController.transitionTo(ScrimState.UNLOCKED);
-        mScrimController.mPrimaryBouncerToGoneTransition.accept(
-                new TransitionStep(KeyguardState.PRIMARY_BOUNCER, KeyguardState.GONE, 0f,
-                        TransitionState.RUNNING, "ScrimControllerTest"));
-
-        // This request should not happen
-        mScrimController.transitionTo(ScrimState.BOUNCER);
-        assertThat(mScrimController.getState()).isEqualTo(ScrimState.UNLOCKED);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {
