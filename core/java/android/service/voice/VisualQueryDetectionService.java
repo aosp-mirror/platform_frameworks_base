@@ -20,9 +20,11 @@ import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.ContentCaptureOptions;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.soundtrigger.SoundTrigger;
 import android.media.AudioFormat;
@@ -35,6 +37,7 @@ import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.speech.IRecognitionServiceManager;
 import android.util.Log;
+import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.IContentCaptureManager;
 
 import java.util.Objects;
@@ -79,6 +82,10 @@ public abstract class VisualQueryDetectionService extends Service
     public static final String KEY_INITIALIZATION_STATUS = "initialization_status";
 
     private IDetectorSessionVisualQueryDetectionCallback mRemoteCallback = null;
+    @Nullable
+    private ContentCaptureManager mContentCaptureManager;
+    @Nullable
+    private IRecognitionServiceManager mIRecognitionServiceManager;
 
 
     private final ISandboxedDetectionService mInterface = new ISandboxedDetectionService.Stub() {
@@ -139,14 +146,28 @@ public abstract class VisualQueryDetectionService extends Service
         @Override
         public void updateContentCaptureManager(IContentCaptureManager manager,
                 ContentCaptureOptions options) {
-            Log.v(TAG, "Ignore #updateContentCaptureManager");
+            mContentCaptureManager = new ContentCaptureManager(
+                    VisualQueryDetectionService.this, manager, options);
         }
 
         @Override
         public void updateRecognitionServiceManager(IRecognitionServiceManager manager) {
-            Log.v(TAG, "Ignore #updateRecognitionServiceManager");
+            mIRecognitionServiceManager = manager;
         }
     };
+
+    @Override
+    @SuppressLint("OnNameExpected")
+    public @Nullable Object getSystemService(@ServiceName @NonNull String name) {
+        if (Context.CONTENT_CAPTURE_MANAGER_SERVICE.equals(name)) {
+            return mContentCaptureManager;
+        } else if (Context.SPEECH_RECOGNITION_SERVICE.equals(name)
+                && mIRecognitionServiceManager != null) {
+            return mIRecognitionServiceManager.asBinder();
+        } else {
+            return super.getSystemService(name);
+        }
+    }
 
     /**
      * {@inheritDoc}
