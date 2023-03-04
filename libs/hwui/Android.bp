@@ -338,6 +338,7 @@ cc_defaults {
         "jni/android_util_PathParser.cpp",
 
         "jni/Bitmap.cpp",
+        "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
         "jni/ByteBufferStreamAdaptor.cpp",
