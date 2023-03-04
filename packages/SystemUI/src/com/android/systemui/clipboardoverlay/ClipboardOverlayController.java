@@ -263,10 +263,11 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
     @Override // ClipboardListener.ClipboardOverlay
     public void setClipData(ClipData data, String source) {
         ClipboardModel model = ClipboardModel.fromClipData(mContext, mClipboardUtils, data, source);
-        if (mExitAnimator != null && mExitAnimator.isRunning()) {
+        boolean wasExiting = (mExitAnimator != null && mExitAnimator.isRunning());
+        if (wasExiting) {
             mExitAnimator.cancel();
         }
-        boolean shouldAnimate = !model.dataMatches(mClipboardModel);
+        boolean shouldAnimate = !model.dataMatches(mClipboardModel) || wasExiting;
         mClipboardModel = model;
         mClipboardLogger.setClipSource(mClipboardModel.getSource());
         if (shouldAnimate) {
@@ -313,15 +314,19 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
                 mOnPreviewTapped = this::editText;
                 break;
             case IMAGE:
-                if (model.isSensitive() || model.loadThumbnail(mContext) != null) {
-                    mView.showImagePreview(
-                            model.isSensitive() ? null : model.loadThumbnail(mContext));
-                    mView.setEditAccessibilityAction(true);
-                    mOnPreviewTapped = () -> editImage(model.getUri());
-                } else {
-                    // image loading failed
-                    mView.showDefaultTextPreview();
-                }
+                mBgExecutor.execute(() -> {
+                    if (model.isSensitive() || model.loadThumbnail(mContext) != null) {
+                        mView.post(() -> {
+                            mView.showImagePreview(
+                                    model.isSensitive() ? null : model.loadThumbnail(mContext));
+                            mView.setEditAccessibilityAction(true);
+                        });
+                        mOnPreviewTapped = () -> editImage(model.getUri());
+                    } else {
+                        // image loading failed
+                        mView.post(mView::showDefaultTextPreview);
+                    }
+                });
                 break;
             case URI:
             case OTHER:
@@ -363,15 +368,15 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
 
     private void classifyText(ClipboardModel model) {
         mBgExecutor.execute(() -> {
-            Optional<RemoteAction> remoteAction = mClipboardUtils.getAction(
-                            model.getText(), model.getTextLinks(), model.getSource());
+            Optional<RemoteAction> remoteAction =
+                    mClipboardUtils.getAction(model.getTextLinks(), model.getSource());
             if (model.equals(mClipboardModel)) {
                 remoteAction.ifPresent(action -> {
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_ACTION_SHOWN);
-                    mView.setActionChip(action, () -> {
+                    mView.post(() -> mView.setActionChip(action, () -> {
                         mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_ACTION_TAPPED);
                         animateOut();
-                    });
+                    }));
                 });
             }
         });

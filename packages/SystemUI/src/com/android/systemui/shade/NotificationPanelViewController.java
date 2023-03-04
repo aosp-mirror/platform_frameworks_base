@@ -23,6 +23,7 @@ import static android.view.View.VISIBLE;
 import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.animation.Interpolators.EMPHASIZED_ACCELERATE;
@@ -71,6 +72,7 @@ import android.os.VibrationEffect;
 import android.provider.Settings;
 import android.transition.ChangeBounds;
 import android.transition.Transition;
+import android.transition.TransitionListenerAdapter;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.transition.TransitionValues;
@@ -98,6 +100,7 @@ import android.widget.FrameLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.policy.SystemBarUtils;
@@ -353,6 +356,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final NotificationGutsManager mGutsManager;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQsController;
+    private final InteractionJankMonitor mInteractionJankMonitor;
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
@@ -642,6 +646,19 @@ public final class NotificationPanelViewController implements Dumpable {
                     step.getTransitionState() == TransitionState.RUNNING;
             };
 
+    private final TransitionListenerAdapter mKeyguardStatusAlignmentTransitionListener =
+            new TransitionListenerAdapter() {
+                @Override
+                public void onTransitionCancel(Transition transition) {
+                    mInteractionJankMonitor.cancel(CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+                }
+
+                @Override
+                public void onTransitionEnd(Transition transition) {
+                    mInteractionJankMonitor.end(CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
+                }
+            };
+
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Handler handler,
@@ -706,6 +723,7 @@ public final class NotificationPanelViewController implements Dumpable {
             NotificationStackSizeCalculator notificationStackSizeCalculator,
             UnlockedScreenOffAnimationController unlockedScreenOffAnimationController,
             ShadeTransitionController shadeTransitionController,
+            InteractionJankMonitor interactionJankMonitor,
             SystemClock systemClock,
             KeyguardBottomAreaViewModel keyguardBottomAreaViewModel,
             KeyguardBottomAreaInteractor keyguardBottomAreaInteractor,
@@ -720,6 +738,7 @@ public final class NotificationPanelViewController implements Dumpable {
             DumpManager dumpManager,
             KeyguardLongPressViewModel keyguardLongPressViewModel,
             KeyguardInteractor keyguardInteractor) {
+        mInteractionJankMonitor = interactionJankMonitor;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -1540,6 +1559,7 @@ public final class NotificationPanelViewController implements Dumpable {
             int statusConstraint = shouldBeCentered ? PARENT_ID : R.id.qs_edge_guideline;
             constraintSet.connect(R.id.keyguard_status_view, END, statusConstraint, END);
             if (animate) {
+                mInteractionJankMonitor.begin(mView, CUJ_LOCKSCREEN_CLOCK_MOVE_ANIMATION);
                 ChangeBounds transition = new ChangeBounds();
                 if (mSplitShadeEnabled) {
                     // Excluding media from the transition on split-shade, as it doesn't transition
@@ -1563,6 +1583,7 @@ public final class NotificationPanelViewController implements Dumpable {
                     // The clock container can sometimes be null. If it is, just fall back to the
                     // old animation rather than setting up the custom animations.
                     if (clockContainerView == null || clockContainerView.getChildCount() == 0) {
+                        transition.addListener(mKeyguardStatusAlignmentTransitionListener);
                         TransitionManager.beginDelayedTransition(
                                 mNotificationContainerParent, transition);
                     } else {
@@ -1581,10 +1602,11 @@ public final class NotificationPanelViewController implements Dumpable {
                         adapter.setDuration(KEYGUARD_STATUS_VIEW_CUSTOM_CLOCK_MOVE_DURATION);
                         adapter.addTarget(clockView);
                         set.addTransition(adapter);
-
+                        set.addListener(mKeyguardStatusAlignmentTransitionListener);
                         TransitionManager.beginDelayedTransition(mNotificationContainerParent, set);
                     }
                 } else {
+                    transition.addListener(mKeyguardStatusAlignmentTransitionListener);
                     TransitionManager.beginDelayedTransition(
                             mNotificationContainerParent, transition);
                 }

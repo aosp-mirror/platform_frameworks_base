@@ -29,6 +29,7 @@ import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.usb.UsbAccessoryUriActivity;
 import com.android.systemui.usb.UsbConfirmActivity;
 import com.android.systemui.usb.UsbDebuggingActivity;
 import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
@@ -93,6 +94,12 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(UsbConfirmActivity.class)
     public abstract Activity bindUsbConfirmActivity(UsbConfirmActivity activity);
+
+    /** Inject into UsbAccessoryUriActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbAccessoryUriActivity.class)
+    public abstract Activity bindUsbAccessoryUriActivity(UsbAccessoryUriActivity activity);
 
     /** Inject into CreateUserActivity. */
     @Binds

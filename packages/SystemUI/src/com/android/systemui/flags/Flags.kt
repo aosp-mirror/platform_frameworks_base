@@ -441,7 +441,9 @@ object Flags {
         )
 
     // TODO(b/256873975): Tracking Bug
-    @JvmField @Keep val WM_BUBBLE_BAR = unreleasedFlag(1111, "wm_bubble_bar")
+    @JvmField
+    @Keep
+    val WM_BUBBLE_BAR = sysPropBooleanFlag(1111, "persist.wm.debug.bubble_bar", default = false)
 
     // TODO(b/260271148): Tracking bug
     @Keep
@@ -464,7 +466,7 @@ object Flags {
     @Keep
     @JvmField
     val ENABLE_PIP_SIZE_LARGE_SCREEN =
-        sysPropBooleanFlag(1114, "persist.wm.debug.enable_pip_size_large_screen", default = false)
+        sysPropBooleanFlag(1114, "persist.wm.debug.enable_pip_size_large_screen", default = true)
 
     // TODO(b/265998256): Tracking bug
     @Keep
