@@ -402,7 +402,7 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_ABORTED),
                           }));
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
-	VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
                        new DiscreteValueValidator(
                         new String[] {
@@ -410,5 +410,6 @@ public class GlobalSettingsValidators {
                             String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_PENDING),
                             String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_DONE)
                         }));
+        VALIDATORS.put(Global.Wearable.DISABLE_AOD_WHILE_PLUGGED, BOOLEAN_VALIDATOR);
     }
 }
