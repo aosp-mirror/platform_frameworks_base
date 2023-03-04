@@ -283,9 +283,9 @@ public interface HotwordDetector {
          *
          * @param status Info about initialization state of {@link HotwordDetectionService} or
          * {@link VisualQueryDetectionService}; allowed values are
-         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS},
-         * 1<->{@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()},
-         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}.
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link SandboxedDetectionInitializer#getMaxCustomInitializationStatus()},
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_UNKNOWN}.
          */
         void onHotwordDetectionServiceInitialized(int status);
 
