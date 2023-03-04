@@ -108,6 +108,8 @@ import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.ambientcontext.AmbientContextManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.appop.AppOpMigrationHelper;
+import com.android.server.appop.AppOpMigrationHelperImpl;
 import com.android.server.art.ArtModuleServiceInitializer;
 import com.android.server.art.DexUseManagerLocal;
 import com.android.server.attention.AttentionManagerService;
@@ -1136,6 +1138,8 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartAccessCheckingService");
         LocalServices.addService(PermissionMigrationHelper.class,
                 new PermissionMigrationHelperImpl());
+        LocalServices.addService(AppOpMigrationHelper.class,
+                new AppOpMigrationHelperImpl());
         mSystemServiceManager.startService(AccessCheckingService.class);
         t.traceEnd();
 

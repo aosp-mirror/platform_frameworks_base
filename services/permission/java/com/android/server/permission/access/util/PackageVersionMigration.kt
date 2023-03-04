@@ -18,6 +18,7 @@ package com.android.server.permission.access.util
 
 import android.util.Log
 import com.android.server.LocalServices
+import com.android.server.appop.AppOpMigrationHelper
 import com.android.server.permission.access.AccessPolicy
 import com.android.server.pm.permission.PermissionMigrationHelper
 
@@ -32,8 +33,8 @@ object PackageVersionMigration {
             LocalServices.getService(PermissionMigrationHelper::class.java)
         val permissionVersion = permissionMigrationHelper.getLegacyPermissionsVersion(userId)
 
-        // TODO appops version would be fixed in appops cl
-        val appOpVersion = 1
+        val appOpMigrationHelper = LocalServices.getService(AppOpMigrationHelper::class.java)
+        val appOpVersion = appOpMigrationHelper.legacyAppOpVersion
 
         return when {
             // Both files don't exist.
