@@ -20,6 +20,7 @@ package com.android.server.display;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,9 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.Temperature;
+import android.util.SparseArray;
+import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -82,6 +86,7 @@ public final class DisplayDeviceConfigTest {
     public void testConfigValuesFromDisplayConfig() throws IOException {
         setupDisplayDeviceConfigFromDisplayConfigFile();
 
+        assertEquals(mDisplayDeviceConfig.getName(), "Example Display");
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonLong(), 5000);
         assertEquals(mDisplayDeviceConfig.getAmbientHorizonShort(), 50);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampDecreaseMaxMillis(), 3000);
@@ -237,6 +242,7 @@ public final class DisplayDeviceConfigTest {
     @Test
     public void testConfigValuesFromConfigResource() {
         setupDisplayDeviceConfigFromConfigResourceFile();
+        assertNull(mDisplayDeviceConfig.getName());
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsNits(), new
                 float[]{2.0f, 200.0f, 600.0f}, ZERO_DELTA);
         assertArrayEquals(mDisplayDeviceConfig.getAutoBrightnessBrighteningLevelsLux(), new
@@ -315,9 +321,59 @@ public final class DisplayDeviceConfigTest {
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
 
+    @Test
+    public void testRefreshRateThermalThrottlingFromDisplayConfig() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile();
+
+        SparseArray<SurfaceControl.RefreshRateRange> defaultMap =
+                mDisplayDeviceConfig.getRefreshRateThrottlingData(null);
+        assertNotNull(defaultMap);
+        assertEquals(2, defaultMap.size());
+        assertEquals(30, defaultMap.get(Temperature.THROTTLING_CRITICAL).min, SMALL_DELTA);
+        assertEquals(60, defaultMap.get(Temperature.THROTTLING_CRITICAL).max, SMALL_DELTA);
+        assertEquals(0, defaultMap.get(Temperature.THROTTLING_SHUTDOWN).min, SMALL_DELTA);
+        assertEquals(30, defaultMap.get(Temperature.THROTTLING_SHUTDOWN).max, SMALL_DELTA);
+
+        SparseArray<SurfaceControl.RefreshRateRange> testMap =
+                mDisplayDeviceConfig.getRefreshRateThrottlingData("test");
+        assertNotNull(testMap);
+        assertEquals(1, testMap.size());
+        assertEquals(60, testMap.get(Temperature.THROTTLING_EMERGENCY).min, SMALL_DELTA);
+        assertEquals(90, testMap.get(Temperature.THROTTLING_EMERGENCY).max, SMALL_DELTA);
+    }
+
+    private String getRefreshThermalThrottlingMaps() {
+        return "<refreshRateThrottlingMap>\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>critical</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>30</minimum>\n"
+               + "            <maximum>60</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>shutdown</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>0</minimum>\n"
+               + "            <maximum>30</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "</refreshRateThrottlingMap>\n"
+               + "<refreshRateThrottlingMap id=\"test\">\n"
+               + "    <refreshRateThrottlingPoint>\n"
+               + "        <thermalStatus>emergency</thermalStatus>\n"
+               + "        <refreshRateRange>\n"
+               + "            <minimum>60</minimum>\n"
+               + "            <maximum>90</maximum>\n"
+               + "        </refreshRateRange>\n"
+               + "    </refreshRateThrottlingPoint>\n"
+               + "</refreshRateThrottlingMap>\n";
+    }
+
     private String getContent() {
         return "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<displayConfiguration>\n"
+                +   "<name>Example Display</name>"
                 +   "<screenBrightnessMap>\n"
                 +       "<point>\n"
                 +           "<value>0.0</value>\n"
@@ -557,6 +613,7 @@ public final class DisplayDeviceConfigTest {
                 +               "<brightness>0.0125</brightness>\n"
                 +           "</brightnessThrottlingPoint>\n"
                 +       "</brightnessThrottlingMap>\n"
+                +  getRefreshThermalThrottlingMaps()
                 +   "</thermalThrottling>\n"
                 +   "<refreshRate>\n"
                 +       "<defaultRefreshRate>45</defaultRefreshRate>\n"

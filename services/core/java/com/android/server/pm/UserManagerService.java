@@ -3635,6 +3635,13 @@ public class UserManagerService extends IUserManager.Stub {
         } finally {
             IoUtils.closeQuietly(fis);
         }
+
+        synchronized (mUsersLock) {
+            if (mUsers.size() == 0) {
+                Slog.e(LOG_TAG, "mUsers is empty, fallback to single user");
+                fallbackToSingleUserLP();
+            }
+        }
     }
 
     /**

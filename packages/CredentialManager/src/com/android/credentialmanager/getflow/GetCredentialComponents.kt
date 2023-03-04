@@ -28,6 +28,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.Divider
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,6 +41,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
@@ -57,6 +60,8 @@ import com.android.credentialmanager.common.ui.SnackbarActionText
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.common.ui.CredentialListSectionHeader
 import com.android.credentialmanager.common.ui.Snackbar
+import com.android.credentialmanager.common.ui.setTransparentSystemBarsColor
+import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
 
 @Composable
 fun GetCredentialScreen(
@@ -64,13 +69,16 @@ fun GetCredentialScreen(
     getCredentialUiState: GetCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
+    val sysUiController = rememberSystemUiController()
     if (getCredentialUiState.currentScreenState == GetScreenState.REMOTE_ONLY) {
+        setTransparentSystemBarsColor(sysUiController)
         RemoteCredentialSnackBarScreen(
             onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
             onCancel = viewModel::onUserCancel,
         )
     } else if (getCredentialUiState.currentScreenState
         == GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY) {
+        setTransparentSystemBarsColor(sysUiController)
         EmptyAuthEntrySnackBarScreen(
             authenticationEntryList =
             getCredentialUiState.providerDisplayInfo.authenticationEntryList,
@@ -78,6 +86,7 @@ fun GetCredentialScreen(
             onLastLockedAuthEntryNotFound = viewModel::onLastLockedAuthEntryNotFoundError,
         )
     } else {
+        setBottomSheetSystemBarsColor(sysUiController)
         ModalBottomSheet(
             sheetContent = {
                 // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
@@ -338,7 +347,7 @@ fun RemoteEntryCard(
         ) {
             Entry(
                 onClick = { onEntrySelected(remoteEntry) },
-                iconPainter = painterResource(R.drawable.ic_other_devices),
+                iconImageVector = Icons.Outlined.QrCodeScanner,
                 entryHeadlineText = stringResource(
                     R.string.get_dialog_option_headline_use_a_different_device
                 ),
@@ -399,7 +408,7 @@ fun CredentialEntryRow(
         iconImageBitmap = credentialEntryInfo.icon?.toBitmap()?.asImageBitmap(),
         // Fall back to iconPainter if iconImageBitmap isn't available
         iconPainter =
-        if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in)
+        if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
         else null,
         entryHeadlineText = credentialEntryInfo.userName,
         entrySecondLineText = if (

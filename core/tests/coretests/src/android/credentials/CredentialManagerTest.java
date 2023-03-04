@@ -101,8 +101,9 @@ public class CredentialManagerTest {
         mGetRequest = new GetCredentialRequest.Builder(Bundle.EMPTY).addCredentialOption(
                 new CredentialOption(Credential.TYPE_PASSWORD_CREDENTIAL, Bundle.EMPTY,
                         Bundle.EMPTY, false)).build();
-        mCreateRequest = new CreateCredentialRequest.Builder(Bundle.EMPTY, Bundle.EMPTY)
-                .setType(Credential.TYPE_PASSWORD_CREDENTIAL)
+        mCreateRequest = new CreateCredentialRequest.Builder(
+                Credential.TYPE_PASSWORD_CREDENTIAL,
+                Bundle.EMPTY, Bundle.EMPTY)
                 .setIsSystemProviderRequired(false)
                 .setAlwaysSendAppInfoToProvider(false)
                 .build();

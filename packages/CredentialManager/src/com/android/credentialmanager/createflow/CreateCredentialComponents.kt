@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import com.android.compose.rememberSystemUiController
 import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
@@ -51,6 +53,7 @@ import com.android.credentialmanager.common.ui.MoreOptionTopAppBar
 import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
+import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
 
 @Composable
 fun CreateCredentialScreen(
@@ -58,6 +61,8 @@ fun CreateCredentialScreen(
     createCredentialUiState: CreateCredentialUiState,
     providerActivityLauncher: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
 ) {
+    val sysUiController = rememberSystemUiController()
+    setBottomSheetSystemBarsColor(sysUiController)
     ModalBottomSheet(
         sheetContent = {
             // Hide the sheet content as opposed to the whole bottom sheet to maintain the scrim
@@ -512,7 +517,7 @@ fun ExternalOnlySelectionCard(
     onConfirm: () -> Unit,
 ) {
     SheetContainerCard {
-        item { HeadlineIcon(painter = painterResource(R.drawable.ic_other_devices)) }
+        item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item { HeadlineText(text = stringResource(R.string.create_passkey_in_other_device_title)) }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
@@ -691,7 +696,7 @@ fun RemoteEntryRow(
 ) {
     Entry(
         onClick = { onRemoteEntrySelected(remoteInfo) },
-        iconPainter = painterResource(R.drawable.ic_other_devices),
+        iconImageVector = Icons.Outlined.QrCodeScanner,
         entryHeadlineText = stringResource(R.string.another_device),
     )
 }

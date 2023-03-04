@@ -1543,14 +1543,14 @@ public abstract class WallpaperService extends Service {
         void doVisibilityChanged(boolean visible) {
             if (!mDestroyed) {
                 mVisible = visible;
-                reportVisibility();
+                reportVisibility(false);
                 if (mReportedVisible) processLocalColors();
             } else {
                 AnimationHandler.requestAnimatorsEnabled(visible, this);
             }
         }
 
-        void reportVisibility() {
+        void reportVisibility(boolean forceReport) {
             if (mScreenshotSurfaceControl != null && mVisible) {
                 if (DEBUG) Log.v(TAG, "Frozen so don't report visibility change");
                 return;
@@ -1558,10 +1558,29 @@ public abstract class WallpaperService extends Service {
             if (!mDestroyed) {
                 mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getState();
                 boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
-                if (mReportedVisible != visible) {
+                if (DEBUG) {
+                    Log.v(
+                            TAG,
+                            "reportVisibility"
+                                    + " mReportedVisible="
+                                    + mReportedVisible
+                                    + " mVisible="
+                                    + mVisible
+                                    + " mDisplayState="
+                                    + mDisplayState);
+                }
+                if (mReportedVisible != visible || forceReport) {
                     mReportedVisible = visible;
-                    if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + visible
-                            + "): " + this);
+                    if (DEBUG) {
+                        Log.v(
+                                TAG,
+                                "onVisibilityChanged("
+                                        + visible
+                                        + "): "
+                                        + this
+                                        + " forceReport="
+                                        + forceReport);
+                    }
                     if (visible) {
                         // If becoming visible, in preview mode the surface
                         // may have been destroyed so now we need to make
@@ -2205,22 +2224,22 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        private final DisplayListener mDisplayListener = new DisplayListener() {
-            @Override
-            public void onDisplayChanged(int displayId) {
-                if (mDisplay.getDisplayId() == displayId) {
-                    reportVisibility();
-                }
-            }
+        private final DisplayListener mDisplayListener =
+                new DisplayListener() {
+                    @Override
+                    public void onDisplayChanged(int displayId) {
+                        if (mDisplay.getDisplayId() == displayId) {
+                            boolean forceReport = mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
+                            reportVisibility(forceReport);
+                        }
+                    }
 
-            @Override
-            public void onDisplayRemoved(int displayId) {
-            }
+                    @Override
+                    public void onDisplayRemoved(int displayId) {}
 
-            @Override
-            public void onDisplayAdded(int displayId) {
-            }
-        };
+                    @Override
+                    public void onDisplayAdded(int displayId) {}
+                };
 
         private Surface getOrCreateBLASTSurface(int width, int height, int format) {
             Surface ret = null;

@@ -18,6 +18,7 @@ package com.android.server.companion.virtual;
 
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_RECENTS;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.content.Context.DEVICE_ID_INVALID;
@@ -117,6 +118,7 @@ import com.android.server.sensors.SensorManagerInternal;
 
 import com.google.android.collect.Sets;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -372,6 +374,11 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1);
     }
 
+    @After
+    public void tearDown() {
+        mDeviceImpl.close();
+    }
+
     @Test
     public void getDeviceIdForDisplayId_invalidDisplayId_returnsDefault() {
         assertThat(mVdm.getDeviceIdForDisplayId(Display.INVALID_DISPLAY))
@@ -444,10 +451,40 @@ public class VirtualDeviceManagerServiceTest {
                 .setBlockedActivities(getBlockedActivities())
                 .setDevicePolicy(POLICY_TYPE_SENSORS, DEVICE_POLICY_CUSTOM)
                 .build();
+        mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         assertThat(mVdm.getDevicePolicy(mDeviceImpl.getDeviceId(), POLICY_TYPE_SENSORS))
                 .isEqualTo(DEVICE_POLICY_CUSTOM);
+    }
+
+    @Test
+    public void getDevicePolicy_defaultRecentsPolicy_gwpcCanShowRecentsOnHostDevice() {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .build();
+        mDeviceImpl.close();
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
+        assertThat(gwpc.canShowTasksInHostDeviceRecents()).isTrue();
+    }
+
+    @Test
+    public void getDevicePolicy_customRecentsPolicy_gwpcCannotShowRecentsOnHostDevice() {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setDevicePolicy(POLICY_TYPE_RECENTS, DEVICE_POLICY_CUSTOM)
+                .build();
+        mDeviceImpl.close();
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
+        assertThat(gwpc.canShowTasksInHostDeviceRecents()).isFalse();
     }
 
     @Test
@@ -501,6 +538,7 @@ public class VirtualDeviceManagerServiceTest {
 
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
                 anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
+        mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
         VirtualSensor sensor = mLocalService.getVirtualSensor(VIRTUAL_DEVICE_ID_1, SENSOR_HANDLE);

@@ -3964,7 +3964,12 @@ public class SubscriptionManager {
 
     /** @hide */
     public static void invalidateActiveDataSubIdCaches() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY);
+        if (isSubscriptionManagerServiceEnabled()) {
+            PropertyInvalidatedCache.invalidateCache(
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY);
+        } else {
+            PropertyInvalidatedCache.invalidateCache(CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY);
+        }
     }
 
     /** @hide */

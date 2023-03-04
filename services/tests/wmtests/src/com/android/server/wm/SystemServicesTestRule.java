@@ -545,7 +545,6 @@ public class SystemServicesTestRule implements TestRule {
             mDevEnableNonResizableMultiWindow = false;
             mMinPercentageMultiWindowSupportHeight = 0.3f;
             mMinPercentageMultiWindowSupportWidth = 0.5f;
-            mLargeScreenSmallestScreenWidthDp = 600;
             mSupportsNonResizableMultiWindow = 0;
             mRespectsActivityMinWidthHeightMultiWindow = 0;
             mForceResizableActivities = false;
