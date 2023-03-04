@@ -1154,6 +1154,11 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @Override
+        public final void schedulePing(RemoteCallback pong) {
+            sendMessage(H.PING, pong);
+        }
+
+        @Override
         public final void bindApplication(String processName, ApplicationInfo appInfo,
                 String sdkSandboxClientAppVolumeUuid, String sdkSandboxClientAppPackage,
                 ProviderInfoList providerList, ComponentName instrumentationName,
@@ -2154,6 +2159,7 @@ public final class ActivityThread extends ClientTransactionHandler
         public static final int DUMP_GFXINFO = 165;
         public static final int DUMP_RESOURCES = 166;
         public static final int TIMEOUT_SERVICE = 167;
+        public static final int PING = 168;
 
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
@@ -2209,6 +2215,7 @@ public final class ActivityThread extends ClientTransactionHandler
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
                     case DUMP_RESOURCES: return "DUMP_RESOURCES";
                     case TIMEOUT_SERVICE: return "TIMEOUT_SERVICE";
+                    case PING: return "PING";
                 }
             }
             return Integer.toString(code);
@@ -2291,6 +2298,9 @@ public final class ActivityThread extends ClientTransactionHandler
                     }
                     handleTimeoutService((IBinder) msg.obj, msg.arg1);
                     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+                    break;
+                case PING:
+                    ((RemoteCallback) msg.obj).sendResult(null);
                     break;
                 case CONFIGURATION_CHANGED:
                     mConfigurationController.handleConfigurationChanged((Configuration) msg.obj);
