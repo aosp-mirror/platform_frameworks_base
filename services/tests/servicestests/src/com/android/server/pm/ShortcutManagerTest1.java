@@ -4007,6 +4007,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         // TODO Check all other fields
     }
 
+    public void testLoadCorruptedShortcuts() throws Exception {
+        initService();
+
+        addPackage("com.android.chrome", 0, 0);
+
+        ShortcutUser user = new ShortcutUser(mService, 0);
+
+        File corruptedShortcutPackage = new File("/data/local/tmp/cts/content/",
+                "broken_shortcut.xml");
+        assertNull(ShortcutPackage.loadFromFile(mService, user, corruptedShortcutPackage, false));
+    }
+
     public void testSaveCorruptAndLoadUser() throws Exception {
         // First, create some shortcuts and save.
         runWithCaller(CALLING_PACKAGE_1, UserHandle.USER_SYSTEM, () -> {

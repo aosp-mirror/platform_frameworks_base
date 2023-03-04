@@ -7937,7 +7937,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         return getTask().getConfiguration().smallestScreenWidthDp
-                >= mAtmService.mLargeScreenSmallestScreenWidthDp;
+                >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP;
     }
 
     /**

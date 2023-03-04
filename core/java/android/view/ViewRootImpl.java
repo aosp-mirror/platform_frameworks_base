@@ -1650,6 +1650,7 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mThreadedRenderer = renderer;
                 renderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
                 updateColorModeIfNeeded(attrs.getColorMode());
+                updateRenderHdrSdrRatio();
                 updateForceDarkMode();
                 mAttachInfo.mHardwareAccelerated = true;
                 mAttachInfo.mHardwareAccelerationRequested = true;
@@ -5379,6 +5380,11 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    private void updateRenderHdrSdrRatio() {
+        mRenderHdrSdrRatio = mDisplay.getHdrSdrRatio();
+        mUpdateHdrSdrRatioInfo = true;
+    }
+
     private void updateColorModeIfNeeded(@ActivityInfo.ColorMode int colorMode) {
         if (mAttachInfo.mThreadedRenderer == null) {
             return;
@@ -5396,8 +5402,7 @@ public final class ViewRootImpl implements ViewParent,
         float desiredRatio = mAttachInfo.mThreadedRenderer.setColorMode(colorMode);
         if (desiredRatio != mDesiredHdrSdrRatio) {
             mDesiredHdrSdrRatio = desiredRatio;
-            mRenderHdrSdrRatio = mDisplay.getHdrSdrRatio();
-            mUpdateHdrSdrRatioInfo = true;
+            updateRenderHdrSdrRatio();
 
             if (mDesiredHdrSdrRatio < 1.01f) {
                 mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
@@ -8496,6 +8501,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mAttachInfo.mThreadedRenderer != null) {
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
             }
+            updateRenderHdrSdrRatio();
             if (mPreviousTransformHint != transformHint) {
                 mPreviousTransformHint = transformHint;
                 dispatchTransformHintChanged(transformHint);

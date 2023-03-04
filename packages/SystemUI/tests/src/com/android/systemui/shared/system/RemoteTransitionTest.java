@@ -49,6 +49,7 @@ import android.window.TransitionInfo;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.wm.shell.util.TransitionUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -120,7 +121,7 @@ public class RemoteTransitionTest extends SysuiTestCase {
         change.setTaskInfo(createTaskInfo(1 /* taskId */, ACTIVITY_TYPE_HOME));
         change.setEndAbsBounds(endBounds);
         change.setEndRelOffset(0, 0);
-        RemoteAnimationTarget wrapped = RemoteAnimationTargetCompat.newTarget(
+        RemoteAnimationTarget wrapped = TransitionUtil.newTarget(
                 change, 0 /* order */, tinfo, mock(SurfaceControl.Transaction.class), null);
         assertEquals(ACTIVITY_TYPE_HOME, wrapped.windowConfiguration.getActivityType());
         assertEquals(new Rect(0, 0, 100, 140), wrapped.localBounds);

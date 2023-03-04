@@ -140,7 +140,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * a given policy type.
      * @hide
      */
-    @IntDef(prefix = "POLICY_TYPE_",  value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO})
+    @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
+            POLICY_TYPE_RECENTS})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface PolicyType {}
@@ -169,22 +170,21 @@ public final class VirtualDeviceParams implements Parcelable {
      *     <li>{@link #DEVICE_POLICY_CUSTOM}: audio framework will assign device specific session
      *     ids to players and recorders constructed within device context. The session ids are
      *     used to re-route corresponding audio streams to VirtualAudioDevice.
-     * <ul/>
+     * </ul>
      */
     public static final int POLICY_TYPE_AUDIO = 1;
 
-    /** @hide */
-    @IntDef(flag = true, prefix = "RECENTS_POLICY_",
-            value = {RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS})
-    @Retention(RetentionPolicy.SOURCE)
-    @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
-    public @interface RecentsPolicy {}
-
     /**
-     * If set, activities launched on this virtual device are allowed to appear in the host device
-     * of the recently launched activities list.
+     * Tells the activity manager how to handle recents entries for activities run on this device.
+     *
+     * <ul>
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Activities launched on VirtualDisplays owned by this
+     *     device will appear in the host device recents.
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Activities launched on VirtualDisplays owned by this
+     *      *     device will not appear in recents.
+     * </ul>
      */
-    public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1 << 0;
+    public static final int POLICY_TYPE_RECENTS = 2;
 
     private final int mLockState;
     @NonNull private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
@@ -201,8 +201,6 @@ public final class VirtualDeviceParams implements Parcelable {
     @NonNull private final SparseIntArray mDevicePolicies;
     @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
     @Nullable private final IVirtualSensorCallback mVirtualSensorCallback;
-    @RecentsPolicy
-    private final int mDefaultRecentsPolicy;
     private final int mAudioPlaybackSessionId;
     private final int mAudioRecordingSessionId;
 
@@ -219,7 +217,6 @@ public final class VirtualDeviceParams implements Parcelable {
             @NonNull SparseIntArray devicePolicies,
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
             @Nullable IVirtualSensorCallback virtualSensorCallback,
-            @RecentsPolicy int defaultRecentsPolicy,
             int audioPlaybackSessionId,
             int audioRecordingSessionId) {
         mLockState = lockState;
@@ -237,10 +234,8 @@ public final class VirtualDeviceParams implements Parcelable {
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
         mVirtualSensorCallback = virtualSensorCallback;
-        mDefaultRecentsPolicy = defaultRecentsPolicy;
         mAudioPlaybackSessionId = audioPlaybackSessionId;
         mAudioRecordingSessionId = audioRecordingSessionId;
-
     }
 
     @SuppressWarnings("unchecked")
@@ -259,7 +254,6 @@ public final class VirtualDeviceParams implements Parcelable {
         parcel.readTypedList(mVirtualSensorConfigs, VirtualSensorConfig.CREATOR);
         mVirtualSensorCallback =
                 IVirtualSensorCallback.Stub.asInterface(parcel.readStrongBinder());
-        mDefaultRecentsPolicy = parcel.readInt();
         mAudioPlaybackSessionId = parcel.readInt();
         mAudioRecordingSessionId = parcel.readInt();
     }
@@ -396,16 +390,6 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the policy of how to handle activities in recents.
-     *
-     * @see RecentsPolicy
-     */
-    @RecentsPolicy
-    public int getDefaultRecentsPolicy() {
-        return mDefaultRecentsPolicy;
-    }
-
-    /**
      * Returns device-specific audio session id for playback.
      *
      * @see Builder#setAudioPlaybackSessionId(int)
@@ -443,7 +427,6 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeTypedList(mVirtualSensorConfigs);
         dest.writeStrongBinder(
                 mVirtualSensorCallback != null ? mVirtualSensorCallback.asBinder() : null);
-        dest.writeInt(mDefaultRecentsPolicy);
         dest.writeInt(mAudioPlaybackSessionId);
         dest.writeInt(mAudioRecordingSessionId);
     }
@@ -478,7 +461,6 @@ public final class VirtualDeviceParams implements Parcelable {
                 && Objects.equals(mBlockedActivities, that.mBlockedActivities)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy
                 && Objects.equals(mName, that.mName)
-                && mDefaultRecentsPolicy == that.mDefaultRecentsPolicy
                 && mAudioPlaybackSessionId == that.mAudioPlaybackSessionId
                 && mAudioRecordingSessionId == that.mAudioRecordingSessionId;
     }
@@ -489,7 +471,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 mLockState, mUsersWithMatchingAccounts, mAllowedCrossTaskNavigations,
                 mBlockedCrossTaskNavigations, mDefaultNavigationPolicy, mAllowedActivities,
                 mBlockedActivities, mDefaultActivityPolicy, mName, mDevicePolicies,
-                mDefaultRecentsPolicy, mAudioPlaybackSessionId, mAudioRecordingSessionId);
+                mAudioPlaybackSessionId, mAudioRecordingSessionId);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -511,7 +493,6 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mDefaultActivityPolicy=" + mDefaultActivityPolicy
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
-                + " mDefaultRecentsPolicy=" + mDefaultRecentsPolicy
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
                 + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
                 + ")";
@@ -548,7 +529,6 @@ public final class VirtualDeviceParams implements Parcelable {
         private boolean mDefaultActivityPolicyConfigured = false;
         @Nullable private String mName;
         @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
-        private int mDefaultRecentsPolicy;
         private int mAudioPlaybackSessionId = AUDIO_SESSION_ID_GENERATE;
         private int mAudioRecordingSessionId = AUDIO_SESSION_ID_GENERATE;
 
@@ -821,17 +801,6 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
-         * Sets the policy to indicate how activities are handled in recents.
-         *
-         * @param defaultRecentsPolicy A policy specifying how to handle activities in recents.
-         */
-        @NonNull
-        public Builder setDefaultRecentsPolicy(@RecentsPolicy int defaultRecentsPolicy) {
-            mDefaultRecentsPolicy = defaultRecentsPolicy;
-            return this;
-        }
-
-        /**
          * Sets audio playback session id specific for this virtual device.
          *
          * <p>Audio players constructed within context associated with this virtual device
@@ -933,7 +902,6 @@ public final class VirtualDeviceParams implements Parcelable {
                     mDevicePolicies,
                     mVirtualSensorConfigs,
                     mVirtualSensorCallback,
-                    mDefaultRecentsPolicy,
                     mAudioPlaybackSessionId,
                     mAudioRecordingSessionId);
         }

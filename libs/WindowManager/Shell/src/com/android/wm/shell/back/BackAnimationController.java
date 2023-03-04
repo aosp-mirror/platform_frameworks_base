@@ -552,6 +552,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (runner.isWaitingAnimation()) {
             ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Gesture released, but animation didn't ready.");
             return;
+        } else if (runner.isAnimationCancelled()) {
+            invokeOrCancelBack();
+            return;
         }
         startPostCommitAnimation();
     }
@@ -653,7 +656,19 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             }
 
             @Override
-            public void onAnimationCancelled() { }
+            public void onAnimationCancelled() {
+                mShellExecutor.execute(() -> {
+                    final BackAnimationRunner runner = mAnimationDefinition.get(
+                            mBackNavigationInfo.getType());
+                    if (runner == null) {
+                        return;
+                    }
+                    runner.cancelAnimation();
+                    if (!mBackGestureStarted) {
+                        invokeOrCancelBack();
+                    }
+                });
+            }
         };
         mBackAnimationAdapter = new BackAnimationAdapter(runner);
     }

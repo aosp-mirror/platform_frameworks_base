@@ -21,6 +21,8 @@
         <option name="cleanup" value="true" />
         <option name="push-file" key="SimpleServiceTestApp3.apk"
                 value="/data/local/tmp/cts/content/SimpleServiceTestApp3.apk" />
+        <option name="push-file" key="broken_shortcut.xml"
+                value="/data/local/tmp/cts/content/broken_shortcut.xml" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">

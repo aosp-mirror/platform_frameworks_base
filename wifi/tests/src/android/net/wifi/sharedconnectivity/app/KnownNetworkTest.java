@@ -44,16 +44,16 @@ public class KnownNetworkTest {
     private static final String SSID = "TEST_SSID";
     private static final int[] SECURITY_TYPES = {SECURITY_TYPE_WEP};
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
-            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_TABLET)
-                    .setDeviceName("TEST_NAME").setModelName("TEST_MODEL").setConnectionStrength(2)
+            new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
+                    .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
                     .setBatteryPercentage(50).build();
     private static final int NETWORK_SOURCE_1 = NETWORK_SOURCE_CLOUD_SELF;
     private static final String SSID_1 = "TEST_SSID1";
     private static final int[] SECURITY_TYPES_1 = {SECURITY_TYPE_PSK};
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO1 =
-            new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE_PHONE)
-                    .setDeviceName("TEST_NAME_1").setModelName("TEST_MODEL_1")
-                    .setConnectionStrength(3).setBatteryPercentage(33).build();
+            new NetworkProviderInfo.Builder("TEST_NAME_1", "TEST_MODEL_1")
+                    .setDeviceType(DEVICE_TYPE_PHONE).setConnectionStrength(3)
+                    .setBatteryPercentage(33).build();
 
     /**
      * Verifies parcel serialization/deserialization.

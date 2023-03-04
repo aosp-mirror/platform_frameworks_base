@@ -687,10 +687,10 @@ public class LogicalDisplayMapperTest {
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
-        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+        assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device1)
                         .getBrightnessThrottlingDataIdLocked());
-        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+        assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device2)
                         .getBrightnessThrottlingDataIdLocked());
 
@@ -700,10 +700,10 @@ public class LogicalDisplayMapperTest {
         assertTrue(mLogicalDisplayMapper.getDisplayLocked(device2).isEnabledLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device1).isInTransitionLocked());
         assertFalse(mLogicalDisplayMapper.getDisplayLocked(device2).isInTransitionLocked());
-        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+        assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device1)
                         .getBrightnessThrottlingDataIdLocked());
-        assertEquals(DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID,
+        assertEquals(DisplayDeviceConfig.DEFAULT_ID,
                 mLogicalDisplayMapper.getDisplayLocked(device2)
                         .getBrightnessThrottlingDataIdLocked());
     }

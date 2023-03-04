@@ -59,12 +59,12 @@ import android.hardware.SensorManager;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.RefreshRateLimitation;
 import android.hardware.fingerprint.IUdfpsRefreshRateRequestCallback;
 import android.os.Handler;
 import android.os.IThermalEventListener;
-import android.os.IThermalService;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.Temperature;
@@ -75,6 +75,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.SurfaceControl.RefreshRateRange;
 import android.view.SurfaceControl.RefreshRateRanges;
 
@@ -83,6 +84,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.display.BrightnessSynchronizer;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
@@ -140,8 +142,6 @@ public class DisplayModeDirectorTest {
     public SensorManagerInternal mSensorManagerInternalMock;
     @Mock
     public DisplayManagerInternal mDisplayManagerInternalMock;
-    @Mock
-    public IThermalService mThermalServiceMock;
 
     @Before
     public void setUp() throws Exception {
@@ -150,7 +150,6 @@ public class DisplayModeDirectorTest {
         final MockContentResolver resolver = mSettingsProviderRule.mockContentResolver(mContext);
         when(mContext.getContentResolver()).thenReturn(resolver);
         mInjector = spy(new FakesInjector());
-        when(mInjector.getThermalService()).thenReturn(mThermalServiceMock);
         mHandler = new Handler(Looper.getMainLooper());
 
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
@@ -1773,11 +1772,12 @@ public class DisplayModeDirectorTest {
 
         ArgumentCaptor<DisplayListener> DisplayCaptor =
                 ArgumentCaptor.forClass(DisplayListener.class);
-        verify(mInjector).registerDisplayListener(DisplayCaptor.capture(), any(Handler.class),
+        verify(mInjector, times(2)).registerDisplayListener(DisplayCaptor.capture(),
+                any(Handler.class),
                 eq(DisplayManager.EVENT_FLAG_DISPLAY_ADDED
                         | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
                         | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED));
-        DisplayListener displayListener = DisplayCaptor.getValue();
+        DisplayListener displayListener = DisplayCaptor.getAllValues().get(0);
 
         // Verify that there is no proximity vote initially
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_PROXIMITY);
@@ -2236,8 +2236,7 @@ public class DisplayModeDirectorTest {
         ArgumentCaptor<IThermalEventListener> thermalEventListener =
                 ArgumentCaptor.forClass(IThermalEventListener.class);
 
-        verify(mThermalServiceMock).registerThermalEventListenerWithType(
-                thermalEventListener.capture(), eq(Temperature.TYPE_SKIN));
+        verify(mInjector).registerThermalServiceListener(thermalEventListener.capture());
         final IThermalEventListener listener = thermalEventListener.getValue();
 
         // Verify that there is no skin temperature vote initially.
@@ -2246,11 +2245,13 @@ public class DisplayModeDirectorTest {
 
         // Set the skin temperature to critical and verify that we added a vote.
         listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_CRITICAL));
+        BackgroundThread.getHandler().runWithScissors(() -> { }, 500 /*timeout*/);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_SKIN_TEMPERATURE);
         assertVoteForRenderFrameRateRange(vote, 0f, 60.f);
 
         // Set the skin temperature to severe and verify that the vote is gone.
         listener.notifyThrottling(getSkinTemp(Temperature.THROTTLING_SEVERE));
+        BackgroundThread.getHandler().runWithScissors(() -> { }, 500 /*timeout*/);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_SKIN_TEMPERATURE);
         assertNull(vote);
     }
@@ -2709,6 +2710,16 @@ public class DisplayModeDirectorTest {
         public void registerDisplayListener(DisplayListener listener, Handler handler, long flag) {}
 
         @Override
+        public Display[] getDisplays() {
+            return new Display[] { createDisplay(DISPLAY_ID) };
+        }
+
+        @Override
+        public boolean getDisplayInfo(int displayId, DisplayInfo displayInfo) {
+            return false;
+        }
+
+        @Override
         public BrightnessInfo getBrightnessInfo(int displayId) {
             return null;
         }
@@ -2719,13 +2730,18 @@ public class DisplayModeDirectorTest {
         }
 
         @Override
-        public IThermalService getThermalService() {
-            return null;
+        public boolean registerThermalServiceListener(IThermalEventListener listener) {
+            return true;
         }
 
         @Override
         public boolean supportsFrameRateOverride() {
             return true;
+        }
+
+        protected Display createDisplay(int id) {
+            return new Display(DisplayManagerGlobal.getInstance(), id, new DisplayInfo(),
+                    ApplicationProvider.getApplicationContext().getResources());
         }
 
         void notifyPeakRefreshRateChanged() {

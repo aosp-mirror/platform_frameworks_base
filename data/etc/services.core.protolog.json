@@ -271,6 +271,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
     },
+    "-1868518158": {
+      "message": "Pending back animation due to another animation is running",
+      "level": "WARN",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-1868124841": {
       "message": "screenOnEarly=%b, awake=%b, currentAppOrientation=%d, orientationSensorEnabled=%b, keyguardDrawComplete=%b, windowManagerDrawComplete=%b",
       "level": "VERBOSE",
@@ -1548,6 +1554,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DragState.java"
+    },
+    "-692907078": {
+      "message": "Handling the deferred animation after transition finished",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-677449371": {
       "message": "moveTaskToRootTask: moving task=%d to rootTaskId=%d toTop=%b",
