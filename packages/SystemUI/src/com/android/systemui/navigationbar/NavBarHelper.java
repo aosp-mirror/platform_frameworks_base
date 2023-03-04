@@ -63,6 +63,7 @@ import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -98,6 +99,7 @@ public final class NavBarHelper implements
         OverviewProxyService.OverviewProxyListener, NavigationModeController.ModeChangedListener,
         Dumpable, CommandQueue.Callbacks {
     private static final String TAG = NavBarHelper.class.getSimpleName();
+
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final AccessibilityManager mAccessibilityManager;
     private final Lazy<AssistManager> mAssistManagerLazy;
@@ -111,6 +113,7 @@ public final class NavBarHelper implements
     private final Context mContext;
     private final CommandQueue mCommandQueue;
     private final ContentResolver mContentResolver;
+    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final IWindowManager mWm;
     private final int mDefaultDisplayId;
     private boolean mAssistantAvailable;
@@ -175,6 +178,7 @@ public final class NavBarHelper implements
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             KeyguardStateController keyguardStateController,
             NavigationModeController navigationModeController,
+            EdgeBackGestureHandler.Factory edgeBackGestureHandlerFactory,
             IWindowManager wm,
             UserTracker userTracker,
             DisplayTracker displayTracker,
@@ -193,6 +197,7 @@ public final class NavBarHelper implements
         mAccessibilityButtonTargetsObserver = accessibilityButtonTargetsObserver;
         mWm = wm;
         mDefaultDisplayId = displayTracker.getDefaultDisplayId();
+        mEdgeBackGestureHandler = edgeBackGestureHandlerFactory.create(context);
 
         mNavBarMode = navigationModeController.addListener(this);
         mCommandQueue.addCallback(this);
@@ -242,6 +247,9 @@ public final class NavBarHelper implements
         } catch (Exception e) {
             Log.w(TAG, "Failed to register wallpaper visibility listener", e);
         }
+
+        // Attach the back handler only when the first bar is registered
+        mEdgeBackGestureHandler.onNavBarAttached();
     }
 
     /**
@@ -270,6 +278,9 @@ public final class NavBarHelper implements
         } catch (Exception e) {
             Log.w(TAG, "Failed to register wallpaper visibility listener", e);
         }
+
+        // No more bars, detach the back handler for now
+        mEdgeBackGestureHandler.onNavBarDetached();
     }
 
     /**
@@ -427,6 +438,10 @@ public final class NavBarHelper implements
 
     public boolean getLongPressHomeEnabled() {
         return mLongPressHomeEnabled;
+    }
+
+    public EdgeBackGestureHandler getEdgeBackGestureHandler() {
+        return mEdgeBackGestureHandler;
     }
 
     @Override

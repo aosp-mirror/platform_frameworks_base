@@ -47,6 +47,7 @@ import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -107,6 +108,10 @@ public class NavBarHelperTest extends SysuiTestCase {
     IWindowManager mWm;
     @Mock
     DisplayTracker mDisplayTracker;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     private AccessibilityManager.AccessibilityServicesStateChangeListener
             mAccessibilityServicesStateChangeListener;
 
@@ -121,6 +126,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         when(mAssistManager.getAssistInfoForUser(anyInt())).thenReturn(mAssistantComponent);
         when(mUserTracker.getUserId()).thenReturn(1);
         when(mDisplayTracker.getDefaultDisplayId()).thenReturn(0);
+        when(mEdgeBackGestureHandlerFactory.create(any())).thenReturn(mEdgeBackGestureHandler);
 
         doAnswer((invocation) -> mAccessibilityServicesStateChangeListener =
                 invocation.getArgument(0)).when(
@@ -129,8 +135,8 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
-                mNavigationModeController, mWm, mUserTracker, mDisplayTracker, mDumpManager,
-                mCommandQueue);
+                mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
+                mDisplayTracker, mDumpManager, mCommandQueue);
 
     }
 
@@ -151,6 +157,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mAssistManager, times(1)).getAssistInfoForUser(anyInt());
         verify(mWm, times(1)).watchRotation(any(), anyInt());
         verify(mWm, times(1)).registerWallpaperVisibilityListener(any(), anyInt());
+        verify(mEdgeBackGestureHandler, times(1)).onNavBarAttached();
     }
 
     @Test
@@ -163,6 +170,7 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mNavBarHelper);
         verify(mWm, times(1)).removeRotationWatcher(any());
         verify(mWm, times(1)).unregisterWallpaperVisibilityListener(any(), anyInt());
+        verify(mEdgeBackGestureHandler, times(1)).onNavBarDetached();
     }
 
     @Test

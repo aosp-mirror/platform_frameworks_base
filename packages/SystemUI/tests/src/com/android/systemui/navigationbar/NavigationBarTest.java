@@ -174,8 +174,6 @@ public class NavigationBarTest extends SysuiTestCase {
     private UiEventLogger mUiEventLogger;
     @Mock
     private ViewTreeObserver mViewTreeObserver;
-    @Mock
-    EdgeBackGestureHandler mEdgeBackGestureHandler;
     NavBarHelper mNavBarHelper;
     @Mock
     private LightBarController mLightBarController;
@@ -207,6 +205,10 @@ public class NavigationBarTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private ViewRootImpl mViewRootImpl;
+    @Mock
+    private EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
+    @Mock
+    private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
     private DeviceConfigProxyFake mDeviceConfigProxyFake = new DeviceConfigProxyFake();
     private TaskStackChangeListeners mTaskStackChangeListeners =
@@ -236,6 +238,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 .thenReturn(mContext);
         when(mNavigationBarView.getResources()).thenReturn(mResources);
         when(mNavigationBarView.getViewRootImpl()).thenReturn(mViewRootImpl);
+        when(mEdgeBackGestureHandlerFactory.create(any())).thenReturn(mEdgeBackGestureHandler);
         setupSysuiDependency();
         // This class inflates views that call Dependency.get, thus these injections are still
         // necessary.
@@ -252,8 +255,9 @@ public class NavigationBarTest extends SysuiTestCase {
                     mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mCentralSurfaces),
                     mKeyguardStateController, mock(NavigationModeController.class),
-                    mock(IWindowManager.class), mock(UserTracker.class), mock(DisplayTracker.class),
-                    mock(DumpManager.class), mock(CommandQueue.class)));
+                    mEdgeBackGestureHandlerFactory, mock(IWindowManager.class),
+                    mock(UserTracker.class), mock(DisplayTracker.class), mock(DumpManager.class),
+                    mock(CommandQueue.class)));
             mNavigationBar = createNavBar(mContext);
             mExternalDisplayNavigationBar = createNavBar(mSysuiTestableContextExternal);
         });
@@ -495,7 +499,6 @@ public class NavigationBarTest extends SysuiTestCase {
                 mDeadZone,
                 mDeviceConfigProxyFake,
                 mNavigationBarTransitions,
-                mEdgeBackGestureHandler,
                 Optional.of(mock(BackAnimation.class)),
                 mUserContextProvider,
                 mWakefulnessLifecycle,

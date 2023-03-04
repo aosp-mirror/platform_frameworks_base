@@ -1093,9 +1093,6 @@ public class NavigationBarView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        // This needs to happen first as it can changed the enabled state which can affect whether
-        // the back button is visible
-        mEdgeBackGestureHandler.onNavBarAttached();
         requestApplyInsets();
         reorient();
         if (mRotationButtonController != null) {
@@ -1115,8 +1112,6 @@ public class NavigationBarView extends FrameLayout {
             mFloatingRotationButton.hide();
             mRotationButtonController.unregisterListeners();
         }
-
-        mEdgeBackGestureHandler.onNavBarDetached();
     }
 
     void dump(PrintWriter pw) {

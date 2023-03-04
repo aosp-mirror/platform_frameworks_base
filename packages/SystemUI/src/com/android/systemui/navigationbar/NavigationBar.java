@@ -208,7 +208,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Optional<Recents> mRecentsOptional;
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final NavigationBarTransitions mNavigationBarTransitions;
-    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final Optional<BackAnimation> mBackAnimation;
     private final Handler mHandler;
     private final UiEventLogger mUiEventLogger;
@@ -220,6 +219,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final DisplayTracker mDisplayTracker;
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
+    private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private NavigationBarFrame mFrame;
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -557,7 +557,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             DeadZone deadZone,
             DeviceConfigProxy deviceConfigProxy,
             NavigationBarTransitions navigationBarTransitions,
-            EdgeBackGestureHandler edgeBackGestureHandler,
             Optional<BackAnimation> backAnimation,
             UserContextProvider userContextProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -587,7 +586,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mDeadZone = deadZone;
         mDeviceConfigProxy = deviceConfigProxy;
         mNavigationBarTransitions = navigationBarTransitions;
-        mEdgeBackGestureHandler = edgeBackGestureHandler;
         mBackAnimation = backAnimation;
         mHandler = mainHandler;
         mUiEventLogger = uiEventLogger;
@@ -603,6 +601,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mTaskStackChangeListeners = taskStackChangeListeners;
         mDisplayTracker = displayTracker;
+        mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
 
         mNavColorSampleMargin = getResources()
                 .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
@@ -722,6 +721,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mCommandQueue.removeCallback(this);
         mWindowManager.removeViewImmediate(mView.getRootView());
         mNavigationModeController.removeListener(mModeChangedListener);
+        mEdgeBackGestureHandler.setStateChangeCallback(null);
 
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mNotificationShadeDepthController.removeListener(mDepthListener);
