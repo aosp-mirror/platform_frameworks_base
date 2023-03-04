@@ -154,6 +154,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private final Intent mOpenBatterySettings = settings(Intent.ACTION_POWER_USAGE_SUMMARY);
     private final Intent mOpenBatterySaverSettings =
             settings(Settings.ACTION_BATTERY_SAVER_SETTINGS);
+    private final boolean mUseExtraSaverConfirmation;
 
     private int mBatteryLevel;
     private int mBucket;
@@ -197,6 +198,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mUiEventLogger = uiEventLogger;
         mUserTracker = userTracker;
+        mUseExtraSaverConfirmation =
+                mContext.getResources().getBoolean(R.bool.config_extra_battery_saver_confirmation);
     }
 
     @Override
@@ -644,7 +647,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private void showStartSaverConfirmation(Bundle extras) {
-        if (mSaverConfirmation != null) return;
+        if (mSaverConfirmation != null || mUseExtraSaverConfirmation) return;
         final SystemUIDialog d = new SystemUIDialog(mContext);
         final boolean confirmOnly = extras.getBoolean(BatterySaverUtils.EXTRA_CONFIRM_TEXT_ONLY);
         final int batterySaverTriggerMode =
@@ -678,6 +681,10 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         Secure.putIntForUser(
                                 resolver,
                                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
+                                1, mUserTracker.getUserId());
+                        Secure.putIntForUser(
+                                resolver,
+                                Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED,
                                 1, mUserTracker.getUserId());
                     });
         } else {

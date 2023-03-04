@@ -116,8 +116,7 @@ public class NetworkProviderInfoTest {
     }
 
     private NetworkProviderInfo.Builder buildNetworkProviderInfoBuilder() {
-        return new NetworkProviderInfo.Builder().setDeviceType(DEVICE_TYPE)
-                .setDeviceName(DEVICE_NAME).setModelName(DEVICE_MODEL)
+        return new NetworkProviderInfo.Builder(DEVICE_NAME, DEVICE_MODEL).setDeviceType(DEVICE_TYPE)
                 .setBatteryPercentage(BATTERY_PERCENTAGE)
                 .setConnectionStrength(CONNECTION_STRENGTH);
     }

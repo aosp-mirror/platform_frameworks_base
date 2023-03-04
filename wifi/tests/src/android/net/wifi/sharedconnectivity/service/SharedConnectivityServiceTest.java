@@ -56,10 +56,9 @@ import java.util.List;
 @SmallTest
 public class SharedConnectivityServiceTest {
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
-            new NetworkProviderInfo.Builder()
-                    .setDeviceType(DEVICE_TYPE_TABLET).setDeviceName("TEST_NAME").setModelName(
-                            "TEST_MODEL")
-                    .setConnectionStrength(2).setBatteryPercentage(50).build();
+            new NetworkProviderInfo.Builder("TEST_NAME", "TEST_MODEL")
+                    .setDeviceType(DEVICE_TYPE_TABLET).setConnectionStrength(2)
+                    .setBatteryPercentage(50).build();
     private static final HotspotNetwork HOTSPOT_NETWORK =
             new HotspotNetwork.Builder().setDeviceId(1).setNetworkProviderInfo(
                             NETWORK_PROVIDER_INFO)

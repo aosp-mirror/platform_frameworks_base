@@ -327,9 +327,12 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
     }
 
     private void commitUidPendingState(int uid) {
-        int pendingUidState = mPendingUidStates.get(uid, MIN_PRIORITY_UID_STATE);
-        int pendingCapability = mPendingCapability.get(uid, PROCESS_CAPABILITY_NONE);
-        boolean pendingVisibleAppWidget = mPendingVisibleAppWidget.get(uid, false);
+        int pendingUidState = mPendingUidStates.get(uid,
+                mUidStates.get(uid, MIN_PRIORITY_UID_STATE));
+        int pendingCapability = mPendingCapability.get(uid,
+                mCapability.get(uid, PROCESS_CAPABILITY_NONE));
+        boolean pendingVisibleAppWidget = mPendingVisibleAppWidget.get(uid,
+                mVisibleAppWidget.get(uid, false));
 
         int uidState = mUidStates.get(uid, MIN_PRIORITY_UID_STATE);
         int capability = mCapability.get(uid, PROCESS_CAPABILITY_NONE);

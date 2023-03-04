@@ -42,6 +42,7 @@ import android.view.DisplayShape;
 import android.view.RoundedCorners;
 import android.view.SurfaceControl;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -675,14 +676,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.flags |= DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
 
                 if (mIsFirstDisplay) {
-                    if (res.getBoolean(com.android.internal.R.bool.config_mainBuiltInDisplayIsRound)
+                    if (res.getBoolean(R.bool.config_mainBuiltInDisplayIsRound)
                             || (Build.IS_EMULATOR
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
                 } else {
-                    if (!res.getBoolean(
-                                com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
+                    if (!res.getBoolean(R.bool.config_localDisplaysMirrorContent)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                     }
 
@@ -711,18 +711,23 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 mInfo.displayShape = DisplayShape.fromResources(
                         res, mInfo.uniqueId, maxWidth, maxHeight, mInfo.width, mInfo.height);
 
+                mInfo.name = getDisplayDeviceConfig().getName();
+
                 if (mStaticDisplayInfo.isInternal) {
                     mInfo.type = Display.TYPE_INTERNAL;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_ROTATES_WITH_CONTENT;
-                    mInfo.name = res.getString(
-                            com.android.internal.R.string.display_manager_built_in_display_name);
+                    if (mInfo.name == null) {
+                        mInfo.name = res.getString(R.string.display_manager_built_in_display_name);
+                    }
                 } else {
                     mInfo.type = Display.TYPE_EXTERNAL;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
-                    mInfo.name = getContext().getResources().getString(
-                            com.android.internal.R.string.display_manager_hdmi_display_name);
+                    if (mInfo.name == null) {
+                        mInfo.name = getContext().getResources().getString(
+                                R.string.display_manager_hdmi_display_name);
+                    }
                 }
                 mInfo.frameRateOverrides = mFrameRateOverrides;
 
@@ -1255,8 +1260,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 return false;
             }
             final Resources res = getOverlayContext().getResources();
-            int[] ports = res.getIntArray(
-                    com.android.internal.R.array.config_localPrivateDisplayPorts);
+            int[] ports = res.getIntArray(R.array.config_localPrivateDisplayPorts);
             if (ports != null) {
                 int port = physicalAddress.getPort();
                 for (int p : ports) {

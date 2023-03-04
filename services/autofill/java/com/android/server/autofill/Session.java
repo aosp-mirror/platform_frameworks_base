@@ -442,6 +442,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private boolean mPreviouslyFillDialogPotentiallyStarted;
 
     /**
+     * Keeps track of if the user entered view, this is used to
+     * distinguish Fill Request that did not have user interaction
+     * with ones that did.
+     *
+     * This is set to true when entering view - after FillDialog FillRequest
+     * or on plain user tap.
+     */
+    @NonNull
+    @GuardedBy("mLock")
+    private boolean mLogViewEntered;
+
+    /**
      * Keeps the fill dialog trigger ids of the last response. This invalidates
      * the trigger ids of the previous response.
      */
@@ -1289,6 +1301,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags));
+        mLogViewEntered = false;
     }
 
     /**
@@ -1412,6 +1425,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         mService.setLastResponse(id, response);
+
+        synchronized (mLock) {
+            if (mLogViewEntered) {
+                mLogViewEntered = false;
+                mService.logViewEntered(id, null);
+            }
+        }
+
 
         final long disableDuration = response.getDisableDuration();
         final boolean autofillDisabled = disableDuration > 0;
@@ -3543,6 +3564,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
                     if (sDebug) Slog.d(TAG, "Ignoring VIEW_ENTERED on URL BAR (id=" + id + ")");
                     return;
+                }
+
+                synchronized (mLock) {
+                    if (!mLogViewEntered) {
+                        // If the current request is for FillDialog (preemptive)
+                        // then this is the first time that the view is entered
+                        // (mLogViewEntered == false) in this case, setLastResponse()
+                        // has already been called, so just log here.
+                        // If the current request is not and (mLogViewEntered == false)
+                        // then the last session is being tracked (setLastResponse not called)
+                        // so this calling logViewEntered will be a nop.
+                        // Calling logViewEntered() twice will only log it once
+                        // TODO(271181979): this is broken for multiple partitions
+                        mService.logViewEntered(this.id, null);
+                    }
+
+                    // If this is the first time view is entered for inline, the last
+                    // session is still being tracked, so logViewEntered() needs
+                    // to be delayed until setLastResponse is called.
+                    // For fill dialog requests case logViewEntered is already called above
+                    // so this will do nothing. Assumption: only one fill dialog per session
+                    mLogViewEntered = true;
                 }
 
                 // Previously, fill request will only start whenever a view is entered.

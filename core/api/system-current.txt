@@ -3247,7 +3247,6 @@ package android.companion.virtual {
     method @NonNull public java.util.Set<android.content.ComponentName> getBlockedCrossTaskNavigations();
     method public int getDefaultActivityPolicy();
     method public int getDefaultNavigationPolicy();
-    method public int getDefaultRecentsPolicy();
     method public int getDevicePolicy(int);
     method public int getLockState();
     method @Nullable public String getName();
@@ -3264,8 +3263,8 @@ package android.companion.virtual {
     field public static final int NAVIGATION_POLICY_DEFAULT_ALLOWED = 0; // 0x0
     field public static final int NAVIGATION_POLICY_DEFAULT_BLOCKED = 1; // 0x1
     field public static final int POLICY_TYPE_AUDIO = 1; // 0x1
+    field public static final int POLICY_TYPE_RECENTS = 2; // 0x2
     field public static final int POLICY_TYPE_SENSORS = 0; // 0x0
-    field public static final int RECENTS_POLICY_ALLOW_IN_HOST_DEVICE_RECENTS = 1; // 0x1
   }
 
   public static final class VirtualDeviceParams.Builder {
@@ -3278,7 +3277,6 @@ package android.companion.virtual {
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAudioRecordingSessionId(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
-    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDefaultRecentsPolicy(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
@@ -9123,8 +9121,7 @@ package android.media.tv.tuner.frontend {
     method public int getProtocolCapability();
   }
 
-  public class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettings.Builder builder();
+  public final class IptvFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @IntRange(from=0) public long getBitrate();
     method @NonNull public String getContentUrl();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
@@ -9145,6 +9142,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public static final class IptvFrontendSettings.Builder {
+    ctor public IptvFrontendSettings.Builder();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setBitrate(@IntRange(from=0) long);
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setContentUrl(@NonNull String);
@@ -9157,8 +9155,7 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettings.Builder setSrcPort(int);
   }
 
-  public class IptvFrontendSettingsFec {
-    method @NonNull public static android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder builder();
+  public final class IptvFrontendSettingsFec {
     method @IntRange(from=0) public int getFecColNum();
     method @IntRange(from=0) public int getFecRowNum();
     method public int getFecType();
@@ -9169,6 +9166,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public static final class IptvFrontendSettingsFec.Builder {
+    ctor public IptvFrontendSettingsFec.Builder();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec build();
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecColNum(@IntRange(from=0) int);
     method @NonNull public android.media.tv.tuner.frontend.IptvFrontendSettingsFec.Builder setFecRowNum(@IntRange(from=0) int);
@@ -10117,7 +10115,7 @@ package android.net.wifi.sharedconnectivity.app {
   }
 
   public static final class NetworkProviderInfo.Builder {
-    ctor public NetworkProviderInfo.Builder();
+    ctor public NetworkProviderInfo.Builder(@NonNull String, @NonNull String);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo build();
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setBatteryPercentage(@IntRange(from=0, to=100) int);
     method @NonNull public android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.Builder setConnectionStrength(@IntRange(from=0, to=3) int);

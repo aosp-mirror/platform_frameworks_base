@@ -2001,7 +2001,7 @@ public final class Bitmap implements Parcelable {
         checkPixelAccess(x, y);
 
         final ColorSpace cs = getColorSpace();
-        if (cs.equals(ColorSpace.get(ColorSpace.Named.SRGB))) {
+        if (cs == null || cs.equals(ColorSpace.get(ColorSpace.Named.SRGB))) {
             return Color.valueOf(nativeGetPixel(mNativePtr, x, y));
         }
         // The returned value is in kRGBA_F16_SkColorType, which is packed as

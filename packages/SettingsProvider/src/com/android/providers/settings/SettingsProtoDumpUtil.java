@@ -1852,6 +1852,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);

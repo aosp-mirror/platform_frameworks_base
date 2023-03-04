@@ -189,7 +189,7 @@ final class LogicalDisplay {
         mTempFrameRateOverride = new SparseArray<>();
         mIsEnabled = true;
         mIsInTransition = false;
-        mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID;
+        mBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -341,6 +341,21 @@ final class LogicalDisplay {
             @Nullable SurfaceControl.RefreshRateRange layoutLimitedRefreshRate) {
         if (!Objects.equals(layoutLimitedRefreshRate, mBaseDisplayInfo.layoutLimitedRefreshRate)) {
             mBaseDisplayInfo.layoutLimitedRefreshRate = layoutLimitedRefreshRate;
+            mInfo.set(null);
+        }
+    }
+    /**
+     * Updates refreshRateThermalThrottling
+     *
+     * @param refreshRanges new refreshRateThermalThrottling ranges limited by layout or default
+     */
+    public void updateRefreshRateThermalThrottling(
+            @Nullable SparseArray<SurfaceControl.RefreshRateRange> refreshRanges) {
+        if (refreshRanges == null) {
+            refreshRanges = new SparseArray<>();
+        }
+        if (!mBaseDisplayInfo.refreshRateThermalThrottling.contentEquals(refreshRanges)) {
+            mBaseDisplayInfo.refreshRateThermalThrottling = refreshRanges;
             mInfo.set(null);
         }
     }

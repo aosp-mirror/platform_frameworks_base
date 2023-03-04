@@ -80,9 +80,11 @@ public final class NetworkProviderInfo implements Parcelable {
             DEVICE_TYPE_WATCH,
             DEVICE_TYPE_AUTO
     })
-    public @interface DeviceType {}
+    public @interface DeviceType {
+    }
 
-    @DeviceType private final int mDeviceType;
+    @DeviceType
+    private final int mDeviceType;
     private final String mDeviceName;
     private final String mModelName;
     private final int mBatteryPercentage;
@@ -98,7 +100,12 @@ public final class NetworkProviderInfo implements Parcelable {
         private int mBatteryPercentage;
         private int mConnectionStrength;
 
-        public Builder() {}
+        public Builder(@NonNull String deviceName, @NonNull String modelName) {
+            Objects.requireNonNull(deviceName);
+            Objects.requireNonNull(modelName);
+            mDeviceName = deviceName;
+            mModelName = modelName;
+        }
 
         /**
          * Sets the device type that provides connectivity.
@@ -120,6 +127,7 @@ public final class NetworkProviderInfo implements Parcelable {
          */
         @NonNull
         public Builder setDeviceName(@NonNull String deviceName) {
+            Objects.requireNonNull(deviceName);
             mDeviceName = deviceName;
             return this;
         }
@@ -132,6 +140,7 @@ public final class NetworkProviderInfo implements Parcelable {
          */
         @NonNull
         public Builder setModelName(@NonNull String modelName) {
+            Objects.requireNonNull(modelName);
             mModelName = modelName;
             return this;
         }
@@ -176,14 +185,8 @@ public final class NetworkProviderInfo implements Parcelable {
             int batteryPercentage, int connectionStrength) {
         if (deviceType != DEVICE_TYPE_UNKNOWN && deviceType != DEVICE_TYPE_PHONE
                 && deviceType != DEVICE_TYPE_TABLET && deviceType != DEVICE_TYPE_LAPTOP
-                && deviceType !=  DEVICE_TYPE_WATCH && deviceType != DEVICE_TYPE_AUTO) {
+                && deviceType != DEVICE_TYPE_WATCH && deviceType != DEVICE_TYPE_AUTO) {
             throw new IllegalArgumentException("Illegal device type");
-        }
-        if (Objects.isNull(deviceName)) {
-            throw new IllegalArgumentException("DeviceName must be set");
-        }
-        if (Objects.isNull(modelName)) {
-            throw new IllegalArgumentException("ModelName must be set");
         }
         if (batteryPercentage < 0 || batteryPercentage > 100) {
             throw new IllegalArgumentException("BatteryPercentage must be in range 0-100");
@@ -269,6 +272,7 @@ public final class NetworkProviderInfo implements Parcelable {
         return Objects.hash(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
                 mConnectionStrength);
     }
+
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mDeviceType);

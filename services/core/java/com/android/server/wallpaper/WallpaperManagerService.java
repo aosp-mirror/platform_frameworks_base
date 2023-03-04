@@ -945,7 +945,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mWindowManagerInternal.removeWindowToken(mToken, false/* removeWindows */,
                     mDisplayId);
             try {
-                connection.mService.detach(mToken);
+                if (connection.mService != null) {
+                    connection.mService.detach(mToken);
+                }
             } catch (RemoteException e) {
                 Slog.w(TAG, "connection.mService.destroy() threw a RemoteException");
             }

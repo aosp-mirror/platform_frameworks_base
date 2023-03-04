@@ -849,6 +849,32 @@ final class AutofillManagerServiceImpl
         }
     }
 
+
+    /**
+     * Updates the last fill response when a view was entered.
+     */
+    void logViewEntered(int sessionId, @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (!isValidEventLocked("logViewEntered", sessionId)) {
+                return;
+            }
+
+            if (mEventHistory.getEvents() != null) {
+                // Do not log this event more than once
+                for (Event event : mEventHistory.getEvents()) {
+                    if (event.getType() == Event.TYPE_VIEW_REQUESTED_AUTOFILL) {
+                        Slog.v(TAG, "logViewEntered: already logged TYPE_VIEW_REQUESTED_AUTOFILL");
+                        return;
+                    }
+                }
+            }
+
+            mEventHistory.addEvent(
+                    new Event(Event.TYPE_VIEW_REQUESTED_AUTOFILL, null, clientState, null,
+                            null, null, null, null, null, null, null));
+        }
+    }
+
     void logAugmentedAutofillAuthenticationSelected(int sessionId, @Nullable String selectedDataset,
             @Nullable Bundle clientState) {
         synchronized (mLock) {

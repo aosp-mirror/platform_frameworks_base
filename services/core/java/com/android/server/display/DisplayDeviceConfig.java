@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.Spline;
 import android.view.DisplayAddress;
 import android.view.SurfaceControl;
@@ -54,6 +55,8 @@ import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateConfigs;
 import com.android.server.display.config.RefreshRateRange;
+import com.android.server.display.config.RefreshRateThrottlingMap;
+import com.android.server.display.config.RefreshRateThrottlingPoint;
 import com.android.server.display.config.RefreshRateZone;
 import com.android.server.display.config.SdrHdrRatioMap;
 import com.android.server.display.config.SdrHdrRatioPoint;
@@ -88,6 +91,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  * <pre>
  *  {@code
  *    <displayConfiguration>
+ *      <name>Built-In Display</name>
  *      <densityMapping>
  *        <density>
  *          <height>480</height>
@@ -149,9 +153,26 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *            <brightness>0.005</brightness>
  *          </brightnessThrottlingPoint>
  *        </concurrentDisplaysBrightnessThrottlingMap>
+ *        <refreshRateThrottlingMap>
+ *            <refreshRateThrottlingPoint>
+ *                <thermalStatus>critical</thermalStatus>
+ *                <refreshRateRange>
+ *                     <minimum>0</minimum>
+ *                     <maximum>60</maximum>
+ *                 </refreshRateRange>
+ *            </refreshRateThrottlingPoint>
+ *        </refreshRateThrottlingMap>
  *      </thermalThrottling>
  *
  *      <refreshRate>
+ *       <refreshRateZoneProfiles>
+ *         <refreshRateZoneProfile id="concurrent">
+ *           <refreshRateRange>
+ *             <minimum>60</minimum>
+ *             <maximum>60</maximum>
+ *            </refreshRateRange>
+ *          </refreshRateZoneProfile>
+ *        </refreshRateZoneProfiles>
  *        <defaultRefreshRateInHbmHdr>75</defaultRefreshRateInHbmHdr>
  *        <defaultRefreshRateInHbmSunlight>75</defaultRefreshRateInHbmSunlight>
  *        <lowerBlockingZoneConfigs>
@@ -417,7 +438,7 @@ public class DisplayDeviceConfig {
 
     public static final String QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC = "canSetBrightnessViaHwc";
 
-    static final String DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID = "default";
+    static final String DEFAULT_ID = "default";
 
     private static final float BRIGHTNESS_DEFAULT = 0.5f;
     private static final String ETC_DIR = "etc";
@@ -478,6 +499,10 @@ public class DisplayDeviceConfig {
 
     private final List<RefreshRateLimitation> mRefreshRateLimitations =
             new ArrayList<>(2 /*initialCapacity*/);
+
+    // Name of the display, if configured.
+    @Nullable
+    private String mName;
 
     // Nits and backlight values that are loaded from either the display device config file, or
     // config.xml. These are the raw values and just used for the dumpsys
@@ -662,7 +687,11 @@ public class DisplayDeviceConfig {
     private int[] mHighDisplayBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
     private int[] mHighAmbientBrightnessThresholds = DEFAULT_BRIGHTNESS_THRESHOLDS;
 
-    private Map<String, BrightnessThrottlingData> mBrightnessThrottlingDataMap = new HashMap();
+    private final Map<String, BrightnessThrottlingData> mBrightnessThrottlingDataMap =
+            new HashMap<>();
+
+    private final Map<String, SparseArray<SurfaceControl.RefreshRateRange>>
+            mRefreshRateThrottlingMap = new HashMap<>();
 
     @Nullable
     private HostUsiVersion mHostUsiVersion;
@@ -806,6 +835,15 @@ public class DisplayDeviceConfig {
         int port = physicalAddress.getPort();
         config = getConfigFromSuffix(context, baseDirectory, PORT_SUFFIX_FORMAT, port);
         return config;
+    }
+
+    /** The name of the display.
+     *
+     * @return The name of the display.
+     */
+    @Nullable
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -1315,6 +1353,17 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * @param id - throttling data id or null for default
+     * @return refresh rate throttling configuration
+     */
+    @Nullable
+    public SparseArray<SurfaceControl.RefreshRateRange> getRefreshRateThrottlingData(
+            @Nullable String id) {
+        String key = id == null ? DEFAULT_ID : id;
+        return mRefreshRateThrottlingMap.get(key);
+    }
+
+    /**
      * @return Auto brightness darkening light debounce
      */
     public long getAutoBrightnessDarkeningLightDebounce() {
@@ -1552,6 +1601,8 @@ public class DisplayDeviceConfig {
                 + ", mRefreshRateZoneProfiles= " + mRefreshRateZoneProfiles
                 + ", mDefaultRefreshRateInHbmHdr= " + mDefaultRefreshRateInHbmHdr
                 + ", mDefaultRefreshRateInHbmSunlight= " + mDefaultRefreshRateInHbmSunlight
+                + ", mRefreshRateThrottlingMap= " + mRefreshRateThrottlingMap
+                + "\n"
                 + ", mLowDisplayBrightnessThresholds= "
                 + Arrays.toString(mLowDisplayBrightnessThresholds)
                 + ", mLowAmbientBrightnessThresholds= "
@@ -1609,11 +1660,12 @@ public class DisplayDeviceConfig {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
             final DisplayConfiguration config = XmlParser.read(in);
             if (config != null) {
+                loadName(config);
                 loadDensityMapping(config);
                 loadBrightnessDefaultFromDdcXml(config);
                 loadBrightnessConstraintsFromConfigXml();
                 loadBrightnessMap(config);
-                loadBrightnessThrottlingMaps(config);
+                loadThermalThrottlingConfig(config);
                 loadHighBrightnessModeData(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
@@ -1678,6 +1730,10 @@ public class DisplayDeviceConfig {
         if (mDensityMapping == null) {
             loadDensityMapping(defaultConfig);
         }
+    }
+
+    private void loadName(DisplayConfiguration config) {
+        mName = config.getName();
     }
 
     private void loadDensityMapping(DisplayConfiguration config) {
@@ -1823,13 +1879,17 @@ public class DisplayDeviceConfig {
         return Spline.createSpline(nits, ratios);
     }
 
-    private void loadBrightnessThrottlingMaps(DisplayConfiguration config) {
+    private void loadThermalThrottlingConfig(DisplayConfiguration config) {
         final ThermalThrottling throttlingConfig = config.getThermalThrottling();
         if (throttlingConfig == null) {
             Slog.i(TAG, "No thermal throttling config found");
             return;
         }
+        loadBrightnessThrottlingMaps(throttlingConfig);
+        loadRefreshRateThermalThrottlingMap(throttlingConfig);
+    }
 
+    private void loadBrightnessThrottlingMaps(ThermalThrottling throttlingConfig) {
         final List<BrightnessThrottlingMap> maps = throttlingConfig.getBrightnessThrottlingMap();
         if (maps == null || maps.isEmpty()) {
             Slog.i(TAG, "No brightness throttling map found");
@@ -1855,7 +1915,7 @@ public class DisplayDeviceConfig {
             }
 
             if (!badConfig) {
-                String id = map.getId() == null ? DEFAULT_BRIGHTNESS_THROTTLING_DATA_ID
+                String id = map.getId() == null ? DEFAULT_ID
                         : map.getId();
                 if (mBrightnessThrottlingDataMap.containsKey(id)) {
                     throw new RuntimeException("Brightness throttling data with ID " + id
@@ -1864,6 +1924,57 @@ public class DisplayDeviceConfig {
                 mBrightnessThrottlingDataMap.put(id,
                         BrightnessThrottlingData.create(throttlingLevels));
             }
+        }
+    }
+
+    private void loadRefreshRateThermalThrottlingMap(ThermalThrottling throttlingConfig) {
+        List<RefreshRateThrottlingMap> maps = throttlingConfig.getRefreshRateThrottlingMap();
+        if (maps == null || maps.isEmpty()) {
+            Slog.w(TAG, "RefreshRateThrottling: map not found");
+            return;
+        }
+
+        for (RefreshRateThrottlingMap map : maps) {
+            List<RefreshRateThrottlingPoint> points = map.getRefreshRateThrottlingPoint();
+            String id = map.getId() == null ? DEFAULT_ID : map.getId();
+
+            if (points == null || points.isEmpty()) {
+                // Expected at lease 1 throttling point for each map
+                Slog.w(TAG, "RefreshRateThrottling: points not found for mapId=" + id);
+                continue;
+            }
+            if (mRefreshRateThrottlingMap.containsKey(id)) {
+                Slog.wtf(TAG, "RefreshRateThrottling: map already exists, mapId=" + id);
+                continue;
+            }
+
+            SparseArray<SurfaceControl.RefreshRateRange> refreshRates = new SparseArray<>();
+            for (RefreshRateThrottlingPoint point : points) {
+                ThermalStatus status = point.getThermalStatus();
+                if (!thermalStatusIsValid(status)) {
+                    Slog.wtf(TAG,
+                            "RefreshRateThrottling: Invalid thermalStatus=" + status.getRawName()
+                                    + ",mapId=" + id);
+                    continue;
+                }
+                int thermalStatusInt = convertThermalStatus(status);
+                if (refreshRates.contains(thermalStatusInt)) {
+                    Slog.wtf(TAG, "RefreshRateThrottling: thermalStatus=" + status.getRawName()
+                            + " is already in the map, mapId=" + id);
+                    continue;
+                }
+
+                refreshRates.put(thermalStatusInt, new SurfaceControl.RefreshRateRange(
+                        point.getRefreshRateRange().getMinimum().floatValue(),
+                        point.getRefreshRateRange().getMaximum().floatValue()
+                ));
+            }
+            if (refreshRates.size() == 0) {
+                Slog.w(TAG, "RefreshRateThrottling: no valid throttling points fond for map, mapId="
+                        + id);
+                continue;
+            }
+            mRefreshRateThrottlingMap.put(id, refreshRates);
         }
     }
 

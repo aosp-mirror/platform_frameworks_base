@@ -18,6 +18,7 @@ package com.android.server.power.stats;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
 import android.content.Context;
 import android.os.Handler;
@@ -49,6 +50,7 @@ public class CpuWakeupStats {
     private static final String TAG = "CpuWakeupStats";
 
     private static final String SUBSYSTEM_ALARM_STRING = "Alarm";
+    private static final String SUBSYSTEM_ALARM_WIFI = "Wifi";
     @VisibleForTesting
     static final long WAKEUP_RETENTION_MS = 3 * 24 * 60 * 60_000; // 3 days.
     @VisibleForTesting
@@ -74,6 +76,8 @@ public class CpuWakeupStats {
         switch (subsystem) {
             case CPU_WAKEUP_SUBSYSTEM_ALARM:
                 return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__ALARM;
+            case CPU_WAKEUP_SUBSYSTEM_WIFI:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__WIFI;
         }
         return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN;
     }
@@ -425,6 +429,8 @@ public class CpuWakeupStats {
         switch (rawSubsystem) {
             case SUBSYSTEM_ALARM_STRING:
                 return CPU_WAKEUP_SUBSYSTEM_ALARM;
+            case SUBSYSTEM_ALARM_WIFI:
+                return CPU_WAKEUP_SUBSYSTEM_WIFI;
         }
         return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
     }
@@ -433,6 +439,8 @@ public class CpuWakeupStats {
         switch (subsystem) {
             case CPU_WAKEUP_SUBSYSTEM_ALARM:
                 return SUBSYSTEM_ALARM_STRING;
+            case CPU_WAKEUP_SUBSYSTEM_WIFI:
+                return SUBSYSTEM_ALARM_WIFI;
             case CPU_WAKEUP_SUBSYSTEM_UNKNOWN:
                 return "Unknown";
         }

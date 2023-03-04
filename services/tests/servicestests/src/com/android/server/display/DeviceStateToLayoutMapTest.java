@@ -157,6 +157,26 @@ public class DeviceStateToLayoutMapTest {
         assertEquals(testLayout, configLayout);
     }
 
+    @Test
+    public void testRefreshRateThermalThrottlingMapId() {
+        Layout configLayout = mDeviceStateToLayoutMap.get(4);
+
+        Layout testLayout = new Layout();
+        Layout.Display display1 = testLayout.createDisplayLocked(
+                DisplayAddress.fromPhysicalDisplayId(345L), /* isDefault= */ true,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
+                /* brightnessThrottlingMapId= */ null,
+                /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
+        display1.setRefreshRateThermalThrottlingMapId("test2");
+        testLayout.createDisplayLocked(
+                DisplayAddress.fromPhysicalDisplayId(678L), /* isDefault= */ false,
+                /* isEnabled= */ true, /* displayGroup= */ null, mDisplayIdProducerMock,
+                /* brightnessThrottlingMapId= */ null,
+                /* leadDisplayId= */ Display.DEFAULT_DISPLAY);
+
+        assertEquals(testLayout, configLayout);
+    }
+
     ////////////////////
     // Helper Methods //
     ////////////////////
@@ -216,6 +236,19 @@ public class DeviceStateToLayoutMapTest {
                 +      "<display enabled=\"true\" defaultDisplay=\"true\" "
                 +                                               "refreshRateZoneId=\"test1\">\n"
                 +        "<address>345</address>\n"
+                +      "</display>\n"
+                +      "<display enabled=\"true\">\n"
+                +        "<address>678</address>\n"
+                +      "</display>\n"
+                +    "</layout>\n"
+
+                +    "<layout>\n"
+                +      "<state>4</state> \n"
+                +      "<display enabled=\"true\" defaultDisplay=\"true\" >\n"
+                +        "<address>345</address>\n"
+                +        "<refreshRateThermalThrottlingMapId>"
+                +          "test2"
+                +        "</refreshRateThermalThrottlingMapId>"
                 +      "</display>\n"
                 +      "<display enabled=\"true\">\n"
                 +        "<address>678</address>\n"
