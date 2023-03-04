@@ -16,6 +16,7 @@
 
 package com.android.keyguard.logging
 
+import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
 import com.android.systemui.log.dagger.KeyguardLog
 import com.android.systemui.plugins.log.LogBuffer
@@ -119,5 +120,30 @@ constructor(
         } else {
             "type=${KeyguardIndicationRotateTextViewController.indicationTypeToString(type)}"
         }
+    }
+
+    fun notShowingUnlockRipple(keyguardNotShowing: Boolean, unlockNotAllowed: Boolean) {
+        buffer.log(
+            AuthRippleController.TAG,
+            LogLevel.DEBUG,
+            {
+                bool1 = keyguardNotShowing
+                bool2 = unlockNotAllowed
+            },
+            { "Not showing unlock ripple: keyguardNotShowing: $bool1, unlockNotAllowed: $bool2" }
+        )
+    }
+
+    fun showingUnlockRippleAt(x: Int, y: Int, context: String) {
+        buffer.log(
+            AuthRippleController.TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = x
+                int2 = y
+                str1 = context
+            },
+            { "Showing unlock ripple with center (x, y): ($int1, $int2), context: $str1" }
+        )
     }
 }
