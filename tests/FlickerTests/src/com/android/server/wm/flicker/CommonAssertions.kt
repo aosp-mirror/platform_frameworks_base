@@ -317,7 +317,8 @@ fun FlickerTest.replacesLayer(
             assertion.then().isVisible(ComponentNameMatcher.SNAPSHOT, isOptional = true)
         }
         if (ignoreSplashscreen) {
-            assertion.then().isSplashScreenVisibleFor(newLayer, isOptional = true)
+            assertion.then().isSplashScreenVisibleFor(
+                    ComponentNameMatcher(newLayer.packageName, className = ""), isOptional = true)
         }
 
         assertion.then().isVisible(newLayer)
