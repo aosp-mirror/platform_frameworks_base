@@ -375,6 +375,7 @@ cc_defaults {
         "jni/text/LineBreaker.cpp",
         "jni/text/MeasuredText.cpp",
         "jni/text/TextShaper.cpp",
+        "jni/text/GraphemeBreak.cpp",
     ],
 
     header_libs: [
