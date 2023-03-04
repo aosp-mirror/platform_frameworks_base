@@ -359,6 +359,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWaitForBroadcastIdle(pw);
                 case "wait-for-broadcast-barrier":
                     return runWaitForBroadcastBarrier(pw);
+                case "wait-for-application-barrier":
+                    return runWaitForApplicationBarrier(pw);
                 case "set-ignore-delivery-group-policy":
                     return runSetIgnoreDeliveryGroupPolicy(pw);
                 case "clear-ignore-delivery-group-policy":
@@ -3332,16 +3334,24 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runWaitForBroadcastBarrier(PrintWriter pw) throws RemoteException {
         boolean flushBroadcastLoopers = false;
+        boolean flushApplicationThreads = false;
         String opt;
         while ((opt = getNextOption()) != null) {
             if (opt.equals("--flush-broadcast-loopers")) {
                 flushBroadcastLoopers = true;
+            } else if (opt.equals("--flush-application-threads")) {
+                flushApplicationThreads = true;
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
             }
         }
-        mInternal.waitForBroadcastBarrier(pw, flushBroadcastLoopers);
+        mInternal.waitForBroadcastBarrier(pw, flushBroadcastLoopers, flushApplicationThreads);
+        return 0;
+    }
+
+    int runWaitForApplicationBarrier(PrintWriter pw) throws RemoteException {
+        mInternal.waitForApplicationBarrier(pw);
         return 0;
     }
 
