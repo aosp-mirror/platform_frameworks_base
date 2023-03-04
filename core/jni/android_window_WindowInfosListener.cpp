@@ -118,7 +118,6 @@ struct WindowInfosListener : public gui::WindowInfosListener {
     }
 
     ~WindowInfosListener() override {
-        SurfaceComposerClient::getDefault()->removeWindowInfosListener(this);
         JNIEnv* env = AndroidRuntime::getJNIEnv();
         env->DeleteWeakGlobalRef(mListener);
     }
