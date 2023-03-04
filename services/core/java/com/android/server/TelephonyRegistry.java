@@ -558,11 +558,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if (VDBG) log("MSG_USER_SWITCHED userId=" + msg.arg1);
                     int numPhones = getTelephonyManager().getActiveModemCount();
                     for (int phoneId = 0; phoneId < numPhones; phoneId++) {
-                        int[] subIds = SubscriptionManager.getSubId(phoneId);
-                        int subId =
-                                (subIds != null) && (subIds.length > 0)
-                                        ? subIds[0]
-                                        : SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                        int subId = SubscriptionManager.getSubscriptionId(phoneId);
+                        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                            subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                        }
                         TelephonyRegistry.this.notifyCellLocationForSubscriber(
                                 subId, mCellIdentity[phoneId], true /* hasUserSwitched */);
                     }
