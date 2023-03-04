@@ -97,8 +97,8 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         }
 
         // Draw predictions. Convert to nanos and hardcode to +20ms into the future
-        val predictionList = predictor.predict(eventTime * 1000000 + 20000000)
-        for (prediction in predictionList) {
+        val prediction = predictor.predict(eventTime * 1000000 + 20000000)
+        if (prediction != null) {
             val realEvents = events.get(prediction.deviceId)!!
             drawLine(canvas, realEvents[realEvents.size - 1], prediction, predictionPaint)
         }
