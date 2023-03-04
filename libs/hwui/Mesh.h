@@ -104,33 +104,31 @@ private:
 
 class Mesh {
 public:
-    Mesh(const sk_sp<SkMeshSpecification>& meshSpec, int mode, const void* vertexBuffer,
-         size_t vertexBufferSize, jint vertexCount, jint vertexOffset,
+    Mesh(const sk_sp<SkMeshSpecification>& meshSpec, int mode,
+         std::vector<uint8_t>&& vertexBufferData, jint vertexCount, jint vertexOffset,
          std::unique_ptr<MeshUniformBuilder> builder, const SkRect& bounds)
             : mMeshSpec(meshSpec)
             , mMode(mode)
+            , mVertexBufferData(std::move(vertexBufferData))
             , mVertexCount(vertexCount)
             , mVertexOffset(vertexOffset)
             , mBuilder(std::move(builder))
-            , mBounds(bounds) {
-        copyToVector(mVertexBufferData, vertexBuffer, vertexBufferSize);
-    }
+            , mBounds(bounds) {}
 
-    Mesh(const sk_sp<SkMeshSpecification>& meshSpec, int mode, const void* vertexBuffer,
-         size_t vertexBufferSize, jint vertexCount, jint vertexOffset, const void* indexBuffer,
-         size_t indexBufferSize, jint indexCount, jint indexOffset,
+    Mesh(const sk_sp<SkMeshSpecification>& meshSpec, int mode,
+         std::vector<uint8_t>&& vertexBufferData, jint vertexCount, jint vertexOffset,
+         std::vector<uint8_t>&& indexBuffer, jint indexCount, jint indexOffset,
          std::unique_ptr<MeshUniformBuilder> builder, const SkRect& bounds)
             : mMeshSpec(meshSpec)
             , mMode(mode)
+            , mVertexBufferData(std::move(vertexBufferData))
             , mVertexCount(vertexCount)
             , mVertexOffset(vertexOffset)
+            , mIndexBufferData(std::move(indexBuffer))
             , mIndexCount(indexCount)
             , mIndexOffset(indexOffset)
             , mBuilder(std::move(builder))
-            , mBounds(bounds) {
-        copyToVector(mVertexBufferData, vertexBuffer, vertexBufferSize);
-        copyToVector(mIndexBufferData, indexBuffer, indexBufferSize);
-    }
+            , mBounds(bounds) {}
 
     Mesh(Mesh&&) = default;
 
@@ -180,13 +178,6 @@ public:
     MeshUniformBuilder* uniformBuilder() { return mBuilder.get(); }
 
 private:
-    void copyToVector(std::vector<uint8_t>& dst, const void* src, size_t srcSize) {
-        if (src) {
-            dst.resize(srcSize);
-            memcpy(dst.data(), src, srcSize);
-        }
-    }
-
     sk_sp<SkMeshSpecification> mMeshSpec;
     int mMode = 0;
 
