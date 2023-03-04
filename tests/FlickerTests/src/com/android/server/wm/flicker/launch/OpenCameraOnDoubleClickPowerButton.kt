@@ -16,9 +16,10 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.os.SystemClock
 import android.platform.test.annotations.Postsubmit
 import android.tools.device.apphelpers.CameraAppHelper
-import android.tools.device.flicker.annotation.FlickerServiceCompatible
+import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -54,13 +55,14 @@ import org.junit.runners.Parameterized
  * ```
  */
 @RequiresDevice
-@FlickerServiceCompatible
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
     OpenAppFromLauncherTransition(flicker) {
     private val cameraApp = CameraAppHelper(instrumentation)
+    override val testApp: StandardAppHelper
+        get() = cameraApp
 
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -70,6 +72,7 @@ class OpenCameraOnDoubleClickPowerButton(flicker: FlickerTest) :
             }
             transitions {
                 device.pressKeyCode(KeyEvent.KEYCODE_POWER)
+                SystemClock.sleep(100)
                 device.pressKeyCode(KeyEvent.KEYCODE_POWER)
                 wmHelper.StateSyncBuilder().withWindowSurfaceAppeared(cameraApp).waitForAndVerify()
             }
