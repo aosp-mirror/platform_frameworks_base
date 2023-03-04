@@ -9,3 +9,6 @@ jmtrivi@google.com
 include platform/frameworks/av:/media/janitors/media_solutions_OWNERS
 
 per-file *Image* = file:/graphics/java/android/graphics/OWNERS
+
+# Haptics team also works on Ringtone
+per-file *Ringtone* = file:/services/core/java/com/android/server/vibrator/OWNERS
