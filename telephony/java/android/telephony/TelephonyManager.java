@@ -17915,6 +17915,97 @@ public class TelephonyManager {
     }
 
     /**
+     * Captures parameters for collection of emergency
+     * call diagnostic data
+     * @hide
+     */
+    public static class EmergencyCallDiagnosticParams {
+
+       private boolean mCollectTelecomDumpSys;
+       private boolean mCollectTelephonyDumpsys;
+       private boolean mCollectLogcat;
+
+        //logcat lines with this time or greater are collected
+        //how much is collected is dependent on internal implementation.
+        //Time represented as milliseconds since January 1, 1970 UTC
+        private long mLogcatStartTimeMillis;
+
+
+        public boolean isTelecomDumpSysCollectionEnabled() {
+            return mCollectTelecomDumpSys;
+        }
+
+        public void setTelecomDumpSysCollection(boolean collectTelecomDumpSys) {
+            mCollectTelecomDumpSys = collectTelecomDumpSys;
+        }
+
+        public boolean isTelephonyDumpSysCollectionEnabled() {
+            return mCollectTelephonyDumpsys;
+        }
+
+        public void setTelephonyDumpSysCollection(boolean collectTelephonyDumpsys) {
+            mCollectTelephonyDumpsys = collectTelephonyDumpsys;
+        }
+
+        public boolean isLogcatCollectionEnabled() {
+            return mCollectLogcat;
+        }
+
+        public long getLogcatStartTime()
+        {
+            return mLogcatStartTimeMillis;
+        }
+
+        public void setLogcatCollection(boolean collectLogcat, long startTimeMillis) {
+            mCollectLogcat = collectLogcat;
+            if(mCollectLogcat)
+            {
+                mLogcatStartTimeMillis = startTimeMillis;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "EmergencyCallDiagnosticParams{" +
+                    "mCollectTelecomDumpSys=" + mCollectTelecomDumpSys +
+                    ", mCollectTelephonyDumpsys=" + mCollectTelephonyDumpsys +
+                    ", mCollectLogcat=" + mCollectLogcat +
+                    ", mLogcatStartTimeMillis=" + mLogcatStartTimeMillis +
+                    '}';
+        }
+    }
+
+    /**
+     * Request telephony to persist state for debugging emergency call failures.
+     *
+     * @param dropboxTag Tag to use when persisting data to dropbox service.
+     *
+     * @see params Parameters controlling what is collected
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DUMP)
+    public void persistEmergencyCallDiagnosticData(@NonNull String dropboxTag,
+            @NonNull EmergencyCallDiagnosticParams params) {
+        try {
+            ITelephony telephony = ITelephony.Stub.asInterface(
+                    TelephonyFrameworkInitializer
+                            .getTelephonyServiceManager()
+                            .getTelephonyServiceRegisterer()
+                            .get());
+            if (telephony != null) {
+                telephony.persistEmergencyCallDiagnosticData(dropboxTag,
+                        params.isLogcatCollectionEnabled(),
+                        params.getLogcatStartTime(),
+                        params.isTelecomDumpSysCollectionEnabled(),
+                        params.isTelephonyDumpSysCollectionEnabled());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error while persistEmergencyCallDiagnosticData: " + e);
+        }
+    }
+
+    /**
      * Set the UE's ability to accept/reject null ciphered and null integrity-protected connections.
      *
      * The modem is required to ignore this in case of an emergency call.

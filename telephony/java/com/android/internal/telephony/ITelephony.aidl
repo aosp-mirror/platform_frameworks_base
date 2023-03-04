@@ -2661,6 +2661,21 @@ interface ITelephony {
     int getSimStateForSlotIndex(int slotIndex);
 
     /**
+     * Request telephony to persist state for debugging emergency call failures.
+     *
+     * @param dropBoxTag Tag to use when persisting data to dropbox service.
+     * @param enableLogcat whether to collect logcat output
+     * @param logcatStartTimestampMillis timestamp from when logcat buffers would be persisted
+     * @param enableTelecomDump whether to collect telecom dumpsys
+     * @param enableTelephonyDump whether to collect telephony dumpsys
+     *
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.DUMP)")
+    void persistEmergencyCallDiagnosticData(String dropboxTag, boolean enableLogcat,
+        long logcatStartTimestampMillis, boolean enableTelecomDump, boolean enableTelephonyDump);
+    /**
      * Set whether the radio is able to connect with null ciphering or integrity
      * algorithms. This is a global setting and will apply to all active subscriptions
      * and all new subscriptions after this.
