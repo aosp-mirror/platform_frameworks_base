@@ -78,7 +78,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         int mAnimType = 0;
         final IBinder mTransition;
 
-        Transitions.TransitionFinishCallback mFinishCallback = null;
         Transitions.TransitionHandler mLeftoversHandler = null;
         WindowContainerTransaction mFinishWCT = null;
 
@@ -241,20 +240,25 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         }
         if (pipChange == null) {
             if (mixed.mLeftoversHandler != null) {
-                return mixed.mLeftoversHandler.startAnimation(mixed.mTransition, info,
-                        startTransaction, finishTransaction, finishCallback);
+                if (mixed.mLeftoversHandler.startAnimation(mixed.mTransition,
+                        info, startTransaction, finishTransaction, (wct, wctCB) -> {
+                            mActiveTransitions.remove(mixed);
+                            finishCallback.onTransitionFinished(wct, wctCB);
+                        })) {
+                    return true;
+                }
             }
+            mActiveTransitions.remove(mixed);
             return false;
         }
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Splitting PIP into a separate"
                         + " animation because remote-animation likely doesn't support it");
-        mixed.mFinishCallback = finishCallback;
         Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
             --mixed.mInFlightSubAnimations;
             mixed.joinFinishArgs(wct, wctCB);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
-            mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
         };
         // Split the transition into 2 parts: the pip part and the rest.
         mixed.mInFlightSubAnimations = 2;
@@ -304,10 +308,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         }
         if (pipChange == null) {
             // um, something probably went wrong.
+            mActiveTransitions.remove(mixed);
             return false;
         }
         final boolean isGoingHome = homeIsOpening;
-        mixed.mFinishCallback = finishCallback;
         Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
             --mixed.mInFlightSubAnimations;
             mixed.joinFinishArgs(wct, wctCB);
@@ -316,7 +320,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
             if (isGoingHome) {
                 mSplitHandler.onTransitionAnimationComplete();
             }
-            mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
         };
         if (isGoingHome) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animation is actually mixed "
@@ -408,7 +412,6 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
         unlinkMissingParents(everythingElse);
         final MixedTransition mixed = new MixedTransition(
                 MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE, transition);
-        mixed.mFinishCallback = finishCallback;
         mActiveTransitions.add(mixed);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animation is a mix of display change "
                 + "and split change.");
@@ -420,7 +423,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
             mixed.joinFinishArgs(wct, wctCB);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
-            mixed.mFinishCallback.onTransitionFinished(mixed.mFinishWCT, null /* wctCB */);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT, null /* wctCB */);
         };
 
         // Dispatch the display change. This will most-likely be taken by the default handler.
