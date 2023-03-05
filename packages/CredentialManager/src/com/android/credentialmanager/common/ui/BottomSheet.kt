@@ -18,7 +18,6 @@ package com.android.credentialmanager.common.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -27,6 +26,7 @@ import com.android.credentialmanager.common.material.ModalBottomSheetLayout
 import com.android.credentialmanager.common.material.ModalBottomSheetValue
 import com.android.credentialmanager.common.material.rememberModalBottomSheetState
 import com.android.credentialmanager.ui.theme.EntryShape
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 /** Draws a modal bottom sheet with the same styles and effects shared by various flows. */
 @Composable
@@ -39,9 +39,7 @@ fun ModalBottomSheet(
         skipHalfExpanded = true
     )
     ModalBottomSheetLayout(
-        sheetBackgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-            ElevationTokens.Level1
-        ),
+        sheetBackgroundColor = LocalAndroidColorScheme.current.colorSurfaceBright,
         modifier = Modifier.background(Color.Transparent),
         sheetState = state,
         sheetContent = sheetContent,

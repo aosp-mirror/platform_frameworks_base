@@ -53,6 +53,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.ui.theme.Shapes
 
 @Composable
@@ -198,9 +199,7 @@ fun Entry(
         },
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                ElevationTokens.Level3
-            ),
+            containerColor = LocalAndroidColorScheme.current.colorSurfaceContainerHigh,
             // TODO: remove?
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             iconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
