@@ -17,10 +17,12 @@
 package com.android.server.companion.transport;
 
 import android.annotation.NonNull;
+import android.companion.IOnMessageReceivedListener;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -45,7 +47,8 @@ public abstract class Transport {
     protected static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    public static final int MESSAGE_REQUEST_PLATFORM_INFO = 0x63807086; // ?PFV
+    public static final int MESSAGE_REQUEST_PLATFORM_INFO = 0x63807073; // ?PFI
+    public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
     static final int MESSAGE_RESPONSE_SUCCESS = 0x33838567; // !SUC
@@ -59,19 +62,14 @@ public abstract class Transport {
     protected final OutputStream mRemoteOut;
     protected final Context mContext;
 
-    /** Message type -> Listener */
-    private final Map<Integer, Listener> mListeners;
-
     /**
-     * Message listener
+     * Message type -> Listener
+     *
+     * For now, the transport only supports 1 listener for each message type. If there's a need in
+     * the future to allow multiple listeners to receive callbacks for the same message type, the
+     * value of the map can be a list.
      */
-    public interface Listener {
-        /**
-         * Called when a message is received
-         * @param data data content in the message
-         */
-        void onDataReceived(byte[] data);
-    }
+    private final Map<Integer, IOnMessageReceivedListener> mListeners;
 
     private static boolean isRequest(int message) {
         return (message & 0xFF000000) == 0x63000000;
@@ -100,7 +98,7 @@ public abstract class Transport {
      * @param message Message type
      * @param listener Execute when a message with the type is received
      */
-    public void addListener(int message, Listener listener) {
+    public void addListener(int message, IOnMessageReceivedListener listener) {
         mListeners.put(message, listener);
     }
 
@@ -116,6 +114,13 @@ public abstract class Transport {
     public abstract void stop();
     protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException;
+
+    /**
+     * Send a message
+     */
+    public void sendMessage(int message, @NonNull byte[] data) throws IOException {
+        sendMessage(message, mNextSequence.incrementAndGet(), data);
+    }
 
     public Future<byte[]> requestForResponse(int message, byte[] data) {
         if (DEBUG) Slog.d(TAG, "Requesting for response");
@@ -165,7 +170,8 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
                 break;
             }
-            case MESSAGE_REQUEST_PLATFORM_INFO: {
+            case MESSAGE_REQUEST_PLATFORM_INFO:
+            case MESSAGE_REQUEST_CONTEXT_SYNC: {
                 callback(message, data);
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);
                 break;
@@ -196,7 +202,13 @@ public abstract class Transport {
 
     private void callback(int message, byte[] data) {
         if (mListeners.containsKey(message)) {
-            mListeners.get(message).onDataReceived(data);
+            try {
+                mListeners.get(message).onMessageReceived(getAssociationId(), data);
+                Slog.i(TAG, "Message 0x" + Integer.toHexString(message)
+                        + " is received from associationId " + mAssociationId
+                        + ", sending data length " + data.length + " to the listener.");
+            } catch (RemoteException ignored) {
+            }
         }
     }
 
