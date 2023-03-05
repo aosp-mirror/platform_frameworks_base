@@ -17,13 +17,10 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 
 import libcore.util.NativeAllocationRegistry;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Calculate motion predictions.
@@ -68,9 +65,12 @@ public final class MotionPredictor {
 
     /**
      * Record a movement so that in the future, a prediction for the current gesture can be
-     * generated. Ensure to add all motions from the gesture of interest to generate correct
-     * predictions.
+     * generated. Only gestures from one input device at a time should be provided to an instance of
+     * MotionPredictor.
+     *
      * @param event The received event
+     *
+     * @throws IllegalArgumentException if an inconsistent MotionEvent stream is sent.
      */
     public void record(@NonNull MotionEvent event) {
         if (!isPredictionEnabled()) {
@@ -80,28 +80,24 @@ public final class MotionPredictor {
     }
 
     /**
-     * Get predicted events for all gestures that have been provided to {@link #record}.
-     * If events from multiple devices were sent to 'record', this will produce a separate
-     * {@link MotionEvent} for each device. The returned list may be empty if no predictions for
-     * any of the added events/devices are available.
+     * Get a predicted event for the gesture that has been provided to {@link #record}.
      * Predictions may not reach the requested timestamp if the confidence in the prediction results
      * is low.
      *
      * @param predictionTimeNanos The time that the prediction should target, in the
      * {@link android.os.SystemClock#uptimeMillis} time base, but in nanoseconds.
      *
-     * @return A list of predicted motion events, with at most one for each device observed by
-     * {@link #record}. Be sure to check the historical data in addition to the latest
-     * ({@link MotionEvent#getX getX()}, {@link MotionEvent#getY getY()}) coordinates for smooth
-     * prediction curves. An empty list is returned if predictions are not supported, or not
-     * possible for the current set of gestures.
+     * @return The predicted motion event, or `null` if predictions are not supported, or not
+     * possible for the current gesture. Be sure to check the historical data in addition to the
+     * latest ({@link MotionEvent#getX getX()}, {@link MotionEvent#getY getY()}) coordinates for
+     * smooth prediction curves.
      */
-    @NonNull
-    public List<MotionEvent> predict(long predictionTimeNanos) {
+    @Nullable
+    public MotionEvent predict(long predictionTimeNanos) {
         if (!isPredictionEnabled()) {
-            return Collections.emptyList();
+            return null;
         }
-        return Arrays.asList(nativePredict(mPtr, predictionTimeNanos));
+        return nativePredict(mPtr, predictionTimeNanos);
     }
 
     private boolean isPredictionEnabled() {
@@ -129,7 +125,7 @@ public final class MotionPredictor {
 
     private static native long nativeInitialize(int offsetNanos);
     private static native void nativeRecord(long nativePtr, MotionEvent event);
-    private static native MotionEvent[] nativePredict(long nativePtr, long predictionTimeNanos);
+    private static native MotionEvent nativePredict(long nativePtr, long predictionTimeNanos);
     private static native boolean nativeIsPredictionAvailable(long nativePtr, int deviceId,
             int source);
     private static native long nativeGetNativeMotionPredictorFinalizer();

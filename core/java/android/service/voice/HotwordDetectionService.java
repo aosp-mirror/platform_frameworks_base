@@ -72,7 +72,7 @@ import java.util.function.IntConsumer;
  */
 @SystemApi
 public abstract class HotwordDetectionService extends Service
-        implements SandboxedDetectionServiceBase {
+        implements SandboxedDetectionInitializer {
     private static final String TAG = "HotwordDetectionService";
     private static final boolean DBG = false;
 
@@ -89,21 +89,23 @@ public abstract class HotwordDetectionService extends Service
     /**
      * Indicates that the updated status is successful.
      *
-     * @deprecated Replaced with {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS}
+     * @deprecated Replaced with
+     * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_SUCCESS}
      */
     @Deprecated
     public static final int INITIALIZATION_STATUS_SUCCESS =
-            SandboxedDetectionServiceBase.INITIALIZATION_STATUS_SUCCESS;
+            SandboxedDetectionInitializer.INITIALIZATION_STATUS_SUCCESS;
 
     /**
      * Indicates that the callback wasn’t invoked within the timeout.
      * This is used by system.
      *
-     * @deprecated Replaced with {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}
+     * @deprecated Replaced with
+     * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_UNKNOWN}
      */
     @Deprecated
     public static final int INITIALIZATION_STATUS_UNKNOWN =
-            SandboxedDetectionServiceBase.INITIALIZATION_STATUS_UNKNOWN;
+            SandboxedDetectionInitializer.INITIALIZATION_STATUS_UNKNOWN;
 
     /**
      * Source for the given audio stream.
@@ -259,7 +261,7 @@ public abstract class HotwordDetectionService extends Service
      *
      * @hide
      * @deprecated Replaced with
-     * {@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()}
+     * {@link SandboxedDetectionInitializer#getMaxCustomInitializationStatus()}
      */
     @SystemApi
     @Deprecated
@@ -368,7 +370,7 @@ public abstract class HotwordDetectionService extends Service
     private void onUpdateStateInternal(@Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory, IRemoteCallback callback) {
         IntConsumer intConsumer =
-                SandboxedDetectionServiceBase.createInitializationStatusConsumer(callback);
+                SandboxedDetectionInitializer.createInitializationStatusConsumer(callback);
         onUpdateState(options, sharedMemory, UPDATE_TIMEOUT_MILLIS, intConsumer);
     }
 

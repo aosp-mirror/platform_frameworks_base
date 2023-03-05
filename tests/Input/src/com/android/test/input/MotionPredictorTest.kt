@@ -124,14 +124,12 @@ class MotionPredictorTest {
         predictor.record(moveEvent)
 
         val predicted = predictor.predict(Duration.ofMillis(8).toNanos())
-        assertEquals(1, predicted.size)
-        val event = predicted[0]
-        assertNotNull(event)
+        assertNotNull(predicted)
 
         // Prediction will happen for t=12 (since it is the next input interval after the requested
         // time, 8, plus the model offset, 1).
-        assertEquals(12, event.eventTime)
-        assertEquals(30f, event.x, /*delta=*/5f)
-        assertEquals(60f, event.y, /*delta=*/15f)
+        assertEquals(12, predicted!!.eventTime)
+        assertEquals(30f, predicted.x, /*delta=*/5f)
+        assertEquals(60f, predicted.y, /*delta=*/15f)
     }
 }

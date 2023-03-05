@@ -69,7 +69,7 @@ class CreateOptionInfo(
     entrySubkey: String,
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
-    val userProviderDisplayName: String?,
+    val userProviderDisplayName: String,
     val profileIcon: Drawable?,
     val passwordCount: Int?,
     val passkeyCount: Int?,
