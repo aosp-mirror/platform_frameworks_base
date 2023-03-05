@@ -21,6 +21,6 @@
         <subsystem>Alarm</subsystem>
     </device>
     <device name="test.wifi.device">
-        <subsystem>undefined</subsystem>
+        <subsystem>Wifi</subsystem>
     </device>
 </irq-device-map>
