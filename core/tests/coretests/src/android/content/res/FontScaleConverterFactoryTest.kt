@@ -28,6 +28,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.random.Random.Default.nextFloat
 
 @Presubmit
 @RunWith(AndroidJUnit4::class)
@@ -124,17 +125,23 @@ class FontScaleConverterFactoryTest {
     @LargeTest
     @Test
     fun allFeasibleScalesAndConversionsDoNotCrash() {
-        generateSequenceOfFractions(-10f..10f, step = 0.01f)
-            .mapNotNull{ FontScaleConverterFactory.forScale(it) }!!
+        generateSequenceOfFractions(-10f..10f, step = 0.1f)
+            .fuzzFractions()
+            .mapNotNull{ FontScaleConverterFactory.forScale(it) }
             .flatMap{ table ->
-                generateSequenceOfFractions(-2000f..2000f, step = 0.01f)
+                generateSequenceOfFractions(-2000f..2000f, step = 0.1f)
+                    .fuzzFractions()
                     .map{ Pair(table, it) }
             }
             .forEach { (table, sp) ->
                 try {
-                    assertWithMessage("convertSpToDp(%s) on table: %s", sp, table)
-                        .that(table.convertSpToDp(sp))
-                        .isFinite()
+                    // Truth is slow because it creates a bunch of
+                    // objects. Don't use it unless we need to.
+                    if (!table.convertSpToDp(sp).isFinite()) {
+                        assertWithMessage("convertSpToDp(%s) on table: %s", sp, table)
+                            .that(table.convertSpToDp(sp))
+                            .isFinite()
+                    }
                 } catch (e: Exception) {
                     throw AssertionError("Exception during convertSpToDp($sp) on table: $table", e)
                 }
@@ -168,6 +175,30 @@ class FontScaleConverterFactoryTest {
         assertThat(fractions).doesNotContain(-.35f)
     }
 
+    @Test
+    fun testFuzzFractions() {
+        val numFuzzedFractions = 6
+        val fractions = generateSequenceOfFractions(-1000f..1000f, step = 0.1f)
+            .fuzzFractions()
+            .toList()
+        fractions.forEach {
+            assertThat(it).isAtLeast(-1000f)
+            assertThat(it).isLessThan(1001f)
+        }
+
+        val numGeneratedFractions = 1000 * 2 * 10 + 1 // Don't forget the 0 in the middle!
+        assertThat(fractions).hasSize(numGeneratedFractions * numFuzzedFractions)
+
+        assertThat(fractions).contains(100f)
+        assertThat(fractions).contains(500.1f)
+        assertThat(fractions).contains(500.2f)
+        assertThat(fractions).contains(0.2f)
+        assertThat(fractions).contains(0f)
+        assertThat(fractions).contains(-10f)
+        assertThat(fractions).contains(-10f)
+        assertThat(fractions).contains(-10.3f)
+    }
+
     companion object {
         private const val CONVERSION_TOLERANCE = 0.05f
     }
@@ -183,4 +214,10 @@ fun generateSequenceOfFractions(
     return generateSequence(start) { it + 1 }
         .takeWhile { it <= endInclusive }
         .map{ it.toFloat() / multiplier }
+}
+
+private fun Sequence<Float>.fuzzFractions(): Sequence<Float> {
+    return flatMap { i ->
+        listOf(i, i + 0.01f, i + 0.054f, i + 0.099f, i + nextFloat(), i + nextFloat())
+    }
 }
