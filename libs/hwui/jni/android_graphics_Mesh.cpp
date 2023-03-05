@@ -14,171 +14,17 @@
  * limitations under the License.
  */
 
-#include <GrDirectContext.h>
 #include <Mesh.h>
 #include <SkMesh.h>
 #include <jni.h>
-#include <log/log.h>
 
 #include <utility>
 
+#include "BufferUtils.h"
 #include "GraphicsJNI.h"
 #include "graphics_jni_helpers.h"
 
 #define gIndexByteSize 2
-
-// A smart pointer that provides read only access to Java.nio.Buffer. This handles both
-// direct and indrect buffers, allowing access to the underlying data in both
-// situations. If passed a null buffer, we will throw NullPointerException,
-// and c_data will return nullptr.
-//
-// This class draws from com_google_android_gles_jni_GLImpl.cpp for Buffer to void *
-// conversion.
-class ScopedJavaNioBuffer {
-public:
-    ScopedJavaNioBuffer(JNIEnv* env, jobject buffer, size_t size, jboolean isDirect)
-            : mEnv(env), mBuffer(buffer) {
-        if (buffer == nullptr) {
-            mDataBase = nullptr;
-            mData = nullptr;
-            jniThrowNullPointerException(env);
-        } else {
-            mArray = (jarray) nullptr;
-            if (isDirect) {
-                mData = getDirectBufferPointer(mEnv, mBuffer);
-            } else {
-                mData = setIndirectData(size);
-            }
-        }
-    }
-
-    ScopedJavaNioBuffer(ScopedJavaNioBuffer&& rhs) noexcept { *this = std::move(rhs); }
-
-    ~ScopedJavaNioBuffer() { reset(); }
-
-    void reset() {
-        if (mDataBase) {
-            releasePointer(mEnv, mArray, mDataBase, JNI_FALSE);
-            mDataBase = nullptr;
-        }
-    }
-
-    ScopedJavaNioBuffer& operator=(ScopedJavaNioBuffer&& rhs) noexcept {
-        if (this != &rhs) {
-            reset();
-
-            mEnv = rhs.mEnv;
-            mBuffer = rhs.mBuffer;
-            mDataBase = rhs.mDataBase;
-            mData = rhs.mData;
-            mArray = rhs.mArray;
-            rhs.mEnv = nullptr;
-            rhs.mData = nullptr;
-            rhs.mBuffer = nullptr;
-            rhs.mArray = nullptr;
-            rhs.mDataBase = nullptr;
-        }
-        return *this;
-    }
-
-    const void* data() const { return mData; }
-
-private:
-    /**
-     * This code is taken and modified from com_google_android_gles_jni_GLImpl.cpp to extract data
-     * from a java.nio.Buffer.
-     */
-    void* getDirectBufferPointer(JNIEnv* env, jobject buffer) {
-        if (buffer == nullptr) {
-            return nullptr;
-        }
-
-        jint position;
-        jint limit;
-        jint elementSizeShift;
-        jlong pointer;
-        pointer = jniGetNioBufferFields(env, buffer, &position, &limit, &elementSizeShift);
-        if (pointer == 0) {
-            jniThrowException(mEnv, "java/lang/IllegalArgumentException",
-                              "Must use a native order direct Buffer");
-            return nullptr;
-        }
-        pointer += position << elementSizeShift;
-        return reinterpret_cast<void*>(pointer);
-    }
-
-    static void releasePointer(JNIEnv* env, jarray array, void* data, jboolean commit) {
-        env->ReleasePrimitiveArrayCritical(array, data, commit ? 0 : JNI_ABORT);
-    }
-
-    static void* getPointer(JNIEnv* env, jobject buffer, jarray* array, jint* remaining,
-                            jint* offset) {
-        jint position;
-        jint limit;
-        jint elementSizeShift;
-
-        jlong pointer;
-        pointer = jniGetNioBufferFields(env, buffer, &position, &limit, &elementSizeShift);
-        *remaining = (limit - position) << elementSizeShift;
-        if (pointer != 0L) {
-            *array = nullptr;
-            pointer += position << elementSizeShift;
-            return reinterpret_cast<void*>(pointer);
-        }
-
-        *array = jniGetNioBufferBaseArray(env, buffer);
-        *offset = jniGetNioBufferBaseArrayOffset(env, buffer);
-        return nullptr;
-    }
-
-    /**
-     * This is a copy of
-     * static void android_glBufferData__IILjava_nio_Buffer_2I
-     * from com_google_android_gles_jni_GLImpl.cpp
-     */
-    void* setIndirectData(size_t size) {
-        jint exception;
-        const char* exceptionType;
-        const char* exceptionMessage;
-        jint bufferOffset = (jint)0;
-        jint remaining;
-        void* tempData;
-
-        if (mBuffer) {
-            tempData =
-                    (void*)getPointer(mEnv, mBuffer, (jarray*)&mArray, &remaining, &bufferOffset);
-            if (remaining < size) {
-                exception = 1;
-                exceptionType = "java/lang/IllegalArgumentException";
-                exceptionMessage = "remaining() < size < needed";
-                goto exit;
-            }
-        }
-        if (mBuffer && tempData == nullptr) {
-            mDataBase = (char*)mEnv->GetPrimitiveArrayCritical(mArray, (jboolean*)0);
-            tempData = (void*)(mDataBase + bufferOffset);
-        }
-        return tempData;
-    exit:
-        if (mArray) {
-            releasePointer(mEnv, mArray, (void*)(mDataBase), JNI_FALSE);
-        }
-        if (exception) {
-            jniThrowException(mEnv, exceptionType, exceptionMessage);
-        }
-        return nullptr;
-    }
-
-    JNIEnv* mEnv;
-
-    // Java Buffer data
-    void* mData;
-    jobject mBuffer;
-
-    // Indirect Buffer Data
-    jarray mArray;
-    char* mDataBase;
-};
 
 namespace android {
 
@@ -187,9 +33,12 @@ static jlong make(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobject verte
                   jfloat right, jfloat bottom) {
     auto skMeshSpec = sk_ref_sp(reinterpret_cast<SkMeshSpecification*>(meshSpec));
     size_t bufferSize = vertexCount * skMeshSpec->stride();
-    auto buff = ScopedJavaNioBuffer(env, vertexBuffer, bufferSize, isDirect);
+    auto buffer = copyJavaNioBufferToVector(env, vertexBuffer, bufferSize, isDirect);
+    if (env->ExceptionCheck()) {
+        return 0;
+    }
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
-    auto meshPtr = new Mesh(skMeshSpec, mode, buff.data(), bufferSize, vertexCount, vertexOffset,
+    auto meshPtr = new Mesh(skMeshSpec, mode, std::move(buffer), vertexCount, vertexOffset,
                             std::make_unique<MeshUniformBuilder>(skMeshSpec), skRect);
     auto [valid, msg] = meshPtr->validate();
     if (!valid) {
@@ -205,11 +54,17 @@ static jlong makeIndexed(JNIEnv* env, jobject, jlong meshSpec, jint mode, jobjec
     auto skMeshSpec = sk_ref_sp(reinterpret_cast<SkMeshSpecification*>(meshSpec));
     auto vertexBufferSize = vertexCount * skMeshSpec->stride();
     auto indexBufferSize = indexCount * gIndexByteSize;
-    auto vBuf = ScopedJavaNioBuffer(env, vertexBuffer, vertexBufferSize, isVertexDirect);
-    auto iBuf = ScopedJavaNioBuffer(env, indexBuffer, indexBufferSize, isIndexDirect);
+    auto vBuf = copyJavaNioBufferToVector(env, vertexBuffer, vertexBufferSize, isVertexDirect);
+    if (env->ExceptionCheck()) {
+        return 0;
+    }
+    auto iBuf = copyJavaNioBufferToVector(env, indexBuffer, indexBufferSize, isIndexDirect);
+    if (env->ExceptionCheck()) {
+        return 0;
+    }
     auto skRect = SkRect::MakeLTRB(left, top, right, bottom);
-    auto meshPtr = new Mesh(skMeshSpec, mode, vBuf.data(), vertexBufferSize, vertexCount,
-                            vertexOffset, iBuf.data(), indexBufferSize, indexCount, indexOffset,
+    auto meshPtr = new Mesh(skMeshSpec, mode, std::move(vBuf), vertexCount, vertexOffset,
+                            std::move(iBuf), indexCount, indexOffset,
                             std::make_unique<MeshUniformBuilder>(skMeshSpec), skRect);
     auto [valid, msg] = meshPtr->validate();
     if (!valid) {

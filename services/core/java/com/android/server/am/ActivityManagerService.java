@@ -344,6 +344,7 @@ import android.util.FeatureFlagUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.Log;
+import android.util.LogWriter;
 import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
@@ -484,9 +485,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
@@ -14503,7 +14506,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             brOptions.setDeferUntilActive(true);
         }
 
-        if (ordered && brOptions != null && brOptions.isDeferUntilActive()) {
+        if (mEnableModernQueue && ordered && brOptions != null && brOptions.isDeferUntilActive()) {
             throw new IllegalArgumentException("Ordered broadcasts can't be deferred until active");
         }
 
@@ -18865,10 +18868,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void waitForBroadcastBarrier() {
-        waitForBroadcastBarrier(/* printWriter= */ null, false);
+        waitForBroadcastBarrier(/* printWriter= */ null, false, false);
     }
 
-    public void waitForBroadcastBarrier(@Nullable PrintWriter pw, boolean flushBroadcastLoopers) {
+    public void waitForBroadcastBarrier(@Nullable PrintWriter pw,
+            boolean flushBroadcastLoopers, boolean flushApplicationThreads) {
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
         if (flushBroadcastLoopers) {
             BroadcastLoopers.waitForBarrier(pw);
@@ -18876,6 +18880,76 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (BroadcastQueue queue : mBroadcastQueues) {
             queue.waitForBarrier(pw);
         }
+        if (flushApplicationThreads) {
+            waitForApplicationBarrier(pw);
+        }
+    }
+
+    /**
+     * Wait for all pending {@link IApplicationThread} events to be processed in
+     * all currently running apps.
+     */
+    public void waitForApplicationBarrier(@Nullable PrintWriter pw) {
+        if (pw == null) {
+            pw = new PrintWriter(new LogWriter(Log.VERBOSE, TAG));
+        }
+
+        final CountDownLatch finishedLatch = new CountDownLatch(1);
+        final AtomicInteger pingCount = new AtomicInteger(0);
+        final AtomicInteger pongCount = new AtomicInteger(0);
+        final RemoteCallback pongCallback = new RemoteCallback((result) -> {
+            if (pongCount.incrementAndGet() == pingCount.get()) {
+                finishedLatch.countDown();
+            }
+        });
+
+        // Insert an extra "ping" as a sentinel value to guard us from finishing
+        // too quickly in parallel below
+        pingCount.incrementAndGet();
+
+        synchronized (mProcLock) {
+            final ArrayMap<String, SparseArray<ProcessRecord>> pmap =
+                    mProcessList.getProcessNamesLOSP().getMap();
+            final int numProc = pmap.size();
+            for (int iProc = 0; iProc < numProc; iProc++) {
+                final SparseArray<ProcessRecord> apps = pmap.valueAt(iProc);
+                for (int iApp = 0, numApps = apps.size(); iApp < numApps; iApp++) {
+                    final ProcessRecord app = apps.valueAt(iApp);
+                    final IApplicationThread thread = app.getOnewayThread();
+                    if (thread != null) {
+                        mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(app,
+                                OomAdjuster.OOM_ADJ_REASON_NONE);
+                        pingCount.incrementAndGet();
+                        try {
+                            thread.schedulePing(pongCallback);
+                        } catch (RemoteException ignored) {
+                            // When we failed to ping remote process, pretend as
+                            // if we received the expected pong
+                            pongCallback.sendResult(null);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Now that we've dispatched all "ping" events above, we can send our
+        // "pong" sentinel value
+        pongCallback.sendResult(null);
+
+        // Wait for any remaining "pong" events to trickle in
+        for (int i = 0; i < 30; i++) {
+            try {
+                if (finishedLatch.await(1, TimeUnit.SECONDS)) {
+                    pw.println("Finished application barriers!");
+                    return;
+                } else {
+                    pw.println("Waiting for application barriers, at " + pongCount.get() + " of "
+                            + pingCount.get() + "...");
+                }
+            } catch (InterruptedException ignored) {
+            }
+        }
+        pw.println("Gave up waiting for application barriers!");
     }
 
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {

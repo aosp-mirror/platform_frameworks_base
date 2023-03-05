@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -119,11 +120,20 @@ fun CreateCredentialScreen(
                             viewModel::createFlowOnDisabledProvidersSelected,
                             onRemoteEntrySelected = viewModel::createFlowOnEntrySelected,
                         )
-                        CreateScreenState.MORE_OPTIONS_ROW_INTRO -> MoreOptionsRowIntroCard(
-                            providerInfo = createCredentialUiState.activeEntry?.activeProvider!!,
-                            onChangeDefaultSelected = viewModel::createFlowOnChangeDefaultSelected,
-                            onUseOnceSelected = viewModel::createFlowOnUseOnceSelected,
-                        )
+                        CreateScreenState.MORE_OPTIONS_ROW_INTRO -> {
+                            if (createCredentialUiState.activeEntry == null) {
+                                viewModel.onIllegalUiState("Expect active entry to be non-null" +
+                                    " upon default provider dialog.")
+                            } else {
+                                MoreOptionsRowIntroCard(
+                                    selectedEntry = createCredentialUiState.activeEntry,
+                                    onIllegalScreenState = viewModel::onIllegalUiState,
+                                    onChangeDefaultSelected =
+                                    viewModel::createFlowOnChangeDefaultSelected,
+                                    onUseOnceSelected = viewModel::createFlowOnUseOnceSelected,
+                                )
+                            }
+                        }
                         CreateScreenState.EXTERNAL_ONLY_SELECTION -> ExternalOnlySelectionCard(
                             requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                             activeRemoteEntry =
@@ -330,7 +340,7 @@ fun MoreOptionsSelectionCard(
         )
     }) {
         item { Divider(thickness = 8.dp, color = Color.Transparent) } // Top app bar has a 8dp
-                                                                      // bottom padding already
+        // bottom padding already
         item {
             CredentialContainerCard {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -375,23 +385,31 @@ fun MoreOptionsSelectionCard(
 
 @Composable
 fun MoreOptionsRowIntroCard(
-    providerInfo: EnabledProviderInfo,
+    selectedEntry: ActiveEntry,
+    onIllegalScreenState: (String) -> Unit,
     onChangeDefaultSelected: () -> Unit,
     onUseOnceSelected: () -> Unit,
 ) {
+    val entryInfo = selectedEntry.activeEntryInfo
+    if (entryInfo !is CreateOptionInfo) {
+        onIllegalScreenState("Encountered unexpected type of entry during the default provider" +
+            " dialog: ${entryInfo::class}")
+        return
+    }
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.NewReleases) }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
             HeadlineText(
                 text = stringResource(
-                    R.string.use_provider_for_all_title,
-                    providerInfo.displayName
-                )
+                    R.string.use_provider_for_all_title, selectedEntry.activeProvider.displayName)
             )
         }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
-        item { BodyMediumText(text = stringResource(R.string.use_provider_for_all_description)) }
+        item {
+            BodyMediumText(text = stringResource(
+                R.string.use_provider_for_all_description, entryInfo.userProviderDisplayName))
+        }
         item {
             CtaButtonRow(
                 leftButton = {
@@ -516,7 +534,7 @@ fun ExternalOnlySelectionCard(
     onConfirm: () -> Unit,
 ) {
     SheetContainerCard {
-        item { HeadlineIcon(painter = painterResource(R.drawable.ic_other_devices)) }
+        item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item { HeadlineText(text = stringResource(R.string.create_passkey_in_other_device_title)) }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
@@ -695,7 +713,7 @@ fun RemoteEntryRow(
 ) {
     Entry(
         onClick = { onRemoteEntrySelected(remoteInfo) },
-        iconPainter = painterResource(R.drawable.ic_other_devices),
+        iconImageVector = Icons.Outlined.QrCodeScanner,
         entryHeadlineText = stringResource(R.string.another_device),
     )
 }
