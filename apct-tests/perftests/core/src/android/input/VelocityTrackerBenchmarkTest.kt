@@ -186,7 +186,7 @@ class VelocityTrackerBenchmarkTest {
     }
 
     @Test
-    fun addMovementTest_planarAxes() {
+    fun addMovement_planarAxes() {
         testAddMovement(PlanarMotionState())
     }
 
