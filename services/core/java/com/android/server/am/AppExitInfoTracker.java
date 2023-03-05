@@ -674,7 +674,7 @@ public final class AppExitInfoTracker {
                         break;
                 }
             }
-        } catch (IOException | IllegalArgumentException | WireTypeMismatchException e) {
+        } catch (Exception e) {
             Slog.w(TAG, "Error in loading historical app exit info from persistent storage: " + e);
         } finally {
             if (fin != null) {
