@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <style name="Theme.CredentialSelector" parent="@android:style/ThemeOverlay.Material">
+  <style name="Theme.CredentialSelector" parent="@*android:style/ThemeOverlay.DeviceDefault.Accent.DayNight">
     <item name="android:windowContentOverlay">@null</item>
     <item name="android:windowNoTitle">true</item>
     <item name="android:windowBackground">@android:color/transparent</item>
