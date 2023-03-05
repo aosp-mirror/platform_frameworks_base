@@ -18199,8 +18199,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     intent.putExtra("reason", reason);
                 }
 
+                final BroadcastOptions options = new BroadcastOptions()
+                        .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                        .setDeferUntilActive(true);
+                if (reason != null) {
+                    options.setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS, reason);
+                }
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                        null, null, OP_NONE, null, false, false, -1, SYSTEM_UID,
+                        null, null, OP_NONE, options.toBundle(), false, false, -1, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
             }
         }
