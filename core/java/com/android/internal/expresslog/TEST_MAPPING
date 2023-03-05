@@ -1,0 +1,12 @@
+{
+  "presubmit": [
+    {
+      "name": "ExpressLogTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        }
+      ]
+    }
+  ]
+}

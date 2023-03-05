@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_AUTHENTICATION_FAILED;
 import static android.net.ipsec.ike.exceptions.IkeProtocolException.ERROR_TYPE_TEMPORARY_FAILURE;
+import static android.net.vcn.VcnGatewayConnectionConfigTest.MIN_UDP_PORT_4500_NAT_TIMEOUT;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_CONFIG_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_INTERNAL_ERROR;
 import static android.net.vcn.VcnManager.VCN_ERROR_CODE_NETWORK_ERROR;
@@ -66,6 +67,7 @@ import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.net.vcn.VcnManager.VcnErrorCode;
+import android.net.vcn.VcnTransportInfo;
 import android.os.PersistableBundle;
 
 import androidx.test.filters.SmallTest;
@@ -424,6 +426,12 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         for (int cap : mConfig.getAllExposedCapabilities()) {
             assertTrue(nc.hasCapability(cap));
         }
+
+        assertTrue(nc.getTransportInfo() instanceof VcnTransportInfo);
+        final VcnTransportInfo vcnTransportInfo = (VcnTransportInfo) nc.getTransportInfo();
+        assertEquals(
+                MIN_UDP_PORT_4500_NAT_TIMEOUT,
+                vcnTransportInfo.getMinUdpPort4500NatTimeoutSeconds());
 
         // Now that Vcn Network is up, notify it as validated and verify the SafeMode alarm is
         // canceled

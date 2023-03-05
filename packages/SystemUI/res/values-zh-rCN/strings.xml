@@ -623,7 +623,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"向右键码"</string>
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加图块"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
@@ -641,19 +641,19 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"显示低优先级的通知图标"</string>
     <string name="other" msgid="429768510980739978">"其他"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除图块"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"将图块添加到末尾"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移动图块"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"添加图块"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除功能块"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"将功能块添加到末尾"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移动功能块"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"添加功能块"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移至 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"添加到位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加卡片"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除卡片"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加功能块"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除功能块"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"快捷设置编辑器。"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"打开设置。"</string>
-    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"开启快捷设置。"</string>
+    <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"打开快捷设置。"</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"关闭快捷设置。"</string>
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"目前登录的用户名为<xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"选择用户"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"无法广播"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"无法保存，请重试。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"必须至少 4 个字符"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"必须少于 16 个字符"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
@@ -919,9 +921,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切换网络，请断开以太网连接"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"为了提升设备的使用体验，即使 WLAN 已关闭，应用和服务仍可以随时扫描 WLAN 网络。您可以在 WLAN 扫描设置中更改此设置。"<annotation id="link">"更改"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"关闭飞行模式"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下图块添加到“快捷设置”"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下功能块添加到“快捷设置”"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加功能块"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加功能块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# 个应用处于活动状态}other{# 个应用处于活动状态}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新信息"</string>

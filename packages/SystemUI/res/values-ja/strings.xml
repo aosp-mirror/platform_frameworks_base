@@ -421,7 +421,7 @@
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"字幕のオーバーレイ"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"有効にする"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"無効にする"</string>
-    <string name="sound_settings" msgid="8874581353127418308">"サウンドとバイブレーション"</string>
+    <string name="sound_settings" msgid="8874581353127418308">"音とバイブレーション"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"アプリは固定されています"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [最近] を同時に押し続けると固定が解除されます。"</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ブロードキャストできません"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"保存できません。もう一度お試しください。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"保存できません。"</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"4 文字以上にしてください"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"使用できる文字数は 16 文字未満です"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
     <string name="basic_status" msgid="2315371112182658176">"空の会話"</string>

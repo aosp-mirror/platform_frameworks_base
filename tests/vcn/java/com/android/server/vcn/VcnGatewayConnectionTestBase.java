@@ -16,6 +16,8 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
@@ -46,6 +48,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.TelephonyNetworkSpecifier;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.ipsec.ike.IkeSessionConfiguration;
@@ -127,7 +130,10 @@ public class VcnGatewayConnectionTestBase {
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             getTestNetworkRecord(
                     mock(Network.class, CALLS_REAL_METHODS),
-                    new NetworkCapabilities(),
+                    new NetworkCapabilities.Builder()
+                            .addTransportType(TRANSPORT_CELLULAR)
+                            .setNetworkSpecifier(new TelephonyNetworkSpecifier(TEST_SUB_ID))
+                            .build(),
                     new LinkProperties(),
                     false /* blocked */);
 

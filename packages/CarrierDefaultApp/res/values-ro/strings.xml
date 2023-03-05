@@ -5,13 +5,13 @@
     <string name="android_system_label" msgid="2797790869522345065">"Operator de telefonie mobilă"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Datele mobile au expirat"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Datele mobile au fost dezactivate"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Atingeți pentru a accesa site-ul %s"</string>
-    <string name="no_data_notification_detail" msgid="3112125343857014825">"Contactați furnizorul de servicii %s"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Atinge pentru a accesa site-ul %s"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"Contactează furnizorul de servicii %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nu există o conexiune de date mobile"</string>
-    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adăugați un plan de date sau de roaming prin %s"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"Adaugă un plan de date sau de roaming prin %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Starea datelor mobile"</string>
-    <string name="action_bar_label" msgid="4290345990334377177">"Conectați-vă la rețeaua mobilă"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"Conectează-te la rețeaua mobilă"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"Rețeaua la care încercați să vă conectați are probleme de securitate."</string>
     <string name="ssl_error_example" msgid="6188711843183058764">"De exemplu, este posibil ca pagina de conectare să nu aparțină organizației afișate."</string>
-    <string name="ssl_error_continue" msgid="1138548463994095584">"Continuați oricum prin browser"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"Continuă oricum prin browser"</string>
 </resources>
