@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
+import static android.view.WindowManager.TRANSIT_SLEEP;
 
 import static com.android.systemui.shared.system.RemoteAnimationTargetCompat.newTarget;
 
@@ -49,6 +50,7 @@ import com.android.systemui.shared.recents.model.ThumbnailData;
 import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Helper class to build {@link RemoteTransition} objects
@@ -210,6 +212,12 @@ public class RemoteTransitionCompat {
 
         @SuppressLint("NewApi")
         boolean merge(TransitionInfo info, SurfaceControl.Transaction t) {
+            if (info.getType() == TRANSIT_SLEEP) {
+                // A sleep event means we need to stop animations immediately, so cancel here.
+                mListener.onAnimationCanceled(new HashMap<>());
+                finish(mWillFinishToHome, false /* userLeaveHint */);
+                return false;
+            }
             ArrayList<TransitionInfo.Change> openingTasks = null;
             ArrayList<TransitionInfo.Change> closingTasks = null;
             mAppearedTargets = null;
