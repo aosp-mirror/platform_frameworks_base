@@ -25,7 +25,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.os.BuildCompat;
-import androidx.window.embedding.SplitController;
+import androidx.window.embedding.ActivityEmbeddingController;
 
 import com.android.settingslib.utils.BuildCompatUtils;
 
@@ -86,7 +86,7 @@ public final class ActivityEmbeddingUtils {
      * @param activity Activity that needs the check
      */
     public static boolean isActivityEmbedded(Activity activity) {
-        return SplitController.getInstance().isActivityEmbedded(activity);
+        return ActivityEmbeddingController.getInstance(activity).isActivityEmbedded(activity);
     }
 
     /**

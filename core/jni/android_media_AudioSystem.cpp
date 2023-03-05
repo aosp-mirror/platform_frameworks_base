@@ -27,7 +27,6 @@
 #include <media/AudioContainers.h>
 #include <media/AudioPolicy.h>
 #include <media/AudioSystem.h>
-#include <media/MicrophoneInfo.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
@@ -2325,7 +2324,7 @@ android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMic
     }
 
     jint jStatus;
-    std::vector<media::MicrophoneInfo> microphones;
+    std::vector<media::MicrophoneInfoFw> microphones;
     status_t status = AudioSystem::getMicrophones(&microphones);
     if (status != NO_ERROR) {
         ALOGE("AudioSystem::getMicrophones error %d", status);

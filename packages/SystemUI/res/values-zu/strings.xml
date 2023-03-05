@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Ayikwazi ukusakaza"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Ayikwazi ukulondoloza. Zama futhi."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Ayikwazi ukulondoloza."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Sebenzisa okungenani izinhlamvu ezi-4"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Sebenzisa isinhlamvu ezimbalwa kuneziyi-16"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Yakha inombolo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Yakha inombolo ekopishelwe kubhodi yokunamathisela."</string>
     <string name="basic_status" msgid="2315371112182658176">"Vula ingxoxo"</string>

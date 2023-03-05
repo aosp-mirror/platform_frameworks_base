@@ -528,8 +528,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             boolean status = true;
             synchronized (mInterfaceLock) {
                 try {
-                    mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
-                    mInitialized = true;
+                    if (mSessionProcessor != null) {
+                        mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
+                        mInitialized = true;
+                    } else {
+                        Log.v(TAG, "Failed to start capture session, session released before " +
+                                "extension start!");
+                        status = false;
+                        mCaptureSession.close();
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to start capture session,"
                             + " extension service does not respond!");

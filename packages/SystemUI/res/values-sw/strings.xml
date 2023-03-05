@@ -819,7 +819,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Cheza <xliff:g id="SONG_NAME">%1$s</xliff:g> ulioimbwa na <xliff:g id="ARTIST_NAME">%2$s</xliff:g> katika <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Cheza <xliff:g id="SONG_NAME">%1$s</xliff:g> katika <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Tendua"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Sogea karibu ili ucheze kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Sogeza karibu ili ucheze kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Sogeza karibu na <xliff:g id="DEVICENAME">%1$s</xliff:g> ili kucheza hapa"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Inacheza kwenye <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Hitilafu fulani imetokea. Jaribu tena."</string>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Imeshindwa kutuma arifa"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Imeshindwa kuhifadhi. Jaribu tena."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Imeshindwa kuhifadhi."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Tumia angalau herufi 4"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Tumia herufi chini ya 16"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nambari ya muundo"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nambari ya muundo imewekwa kwenye ubao wa kunakili."</string>
     <string name="basic_status" msgid="2315371112182658176">"Fungua mazungumzo"</string>

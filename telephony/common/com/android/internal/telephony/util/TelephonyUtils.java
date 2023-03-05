@@ -192,4 +192,22 @@ public final class TelephonyUtils {
         // This is the error case. The well-defined value for UNKNOWN is -1.
         return "UNKNOWN(" + state + ")";
     }
+
+    /**
+     * Convert mobile data policy to string.
+     *
+     * @param mobileDataPolicy The mobile data policy.
+     * @return The mobile data policy in string format.
+     */
+    public static @NonNull String mobileDataPolicyToString(
+            @TelephonyManager.MobileDataPolicy int mobileDataPolicy) {
+        switch (mobileDataPolicy) {
+            case TelephonyManager.MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL:
+                return "DATA_ON_NON_DEFAULT_DURING_VOICE_CALL";
+            case TelephonyManager.MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED:
+                return "MMS_ALWAYS_ALLOWED";
+            default:
+                return "UNKNOWN(" + mobileDataPolicy + ")";
+        }
+    }
 }

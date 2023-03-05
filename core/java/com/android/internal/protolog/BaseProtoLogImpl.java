@@ -255,6 +255,7 @@ public class BaseProtoLogImpl {
             if (writeToFile) {
                 writeProtoLogToFileLocked();
                 logAndPrintln(pw, "Log written to " + mLogFile + ".");
+                mBuffer.resetBuffer();
             }
             if (mProtoLogEnabled) {
                 logAndPrintln(pw, "ERROR: logging was re-enabled while waiting for flush.");

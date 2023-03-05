@@ -1,1 +1,2 @@
+per-file activitymanagerservice.proto = file:/services/core/java/com/android/server/am/OWNERS
 per-file window*.proto = file:/services/core/java/com/android/server/wm/OWNERS

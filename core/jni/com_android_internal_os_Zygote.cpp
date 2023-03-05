@@ -1923,15 +1923,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
 
     const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
     android_mallopt_gwp_asan_options_t gwp_asan_options;
+    const char* kGwpAsanAppRecoverableSysprop =
+            "persist.device_config.memory_safety_native.gwp_asan_recoverable_apps";
     // The system server doesn't have its nice name set by the time SpecializeCommon is called.
     gwp_asan_options.program_name = nice_name_ptr ?: process_name;
     switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
         default:
         case RuntimeFlags::GWP_ASAN_LEVEL_DEFAULT:
-            // TODO(b/247012630): Switch this to Action::TURN_ON_FOR_APP_SAMPLED_NON_CRASHING once
-            // performance and syshealth testing is completed, making the default for non-system
-            // apps that don't specify a `gwpAsanMode` in their manifest to be sampled-recoverable.
-            gwp_asan_options.desire = Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
+            gwp_asan_options.desire = GetBoolProperty(kGwpAsanAppRecoverableSysprop, true)
+                    ? Action::TURN_ON_FOR_APP_SAMPLED_NON_CRASHING
+                    : Action::DONT_TURN_ON_UNLESS_OVERRIDDEN;
             android_mallopt(M_INITIALIZE_GWP_ASAN, &gwp_asan_options, sizeof(gwp_asan_options));
             break;
         case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:

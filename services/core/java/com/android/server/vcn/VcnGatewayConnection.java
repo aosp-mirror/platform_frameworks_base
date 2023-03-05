@@ -2255,12 +2255,18 @@ public class VcnGatewayConnection extends StateMachine {
             if (underlyingCaps.hasTransport(TRANSPORT_WIFI)
                     && underlyingCaps.getTransportInfo() instanceof WifiInfo) {
                 final WifiInfo wifiInfo = (WifiInfo) underlyingCaps.getTransportInfo();
-                builder.setTransportInfo(new VcnTransportInfo(wifiInfo));
+                builder.setTransportInfo(
+                        new VcnTransportInfo(
+                                wifiInfo,
+                                gatewayConnectionConfig.getMinUdpPort4500NatTimeoutSeconds()));
             } else if (underlyingCaps.hasTransport(TRANSPORT_CELLULAR)
                     && underlyingCaps.getNetworkSpecifier() instanceof TelephonyNetworkSpecifier) {
                 final TelephonyNetworkSpecifier telNetSpecifier =
                         (TelephonyNetworkSpecifier) underlyingCaps.getNetworkSpecifier();
-                builder.setTransportInfo(new VcnTransportInfo(telNetSpecifier.getSubscriptionId()));
+                builder.setTransportInfo(
+                        new VcnTransportInfo(
+                                telNetSpecifier.getSubscriptionId(),
+                                gatewayConnectionConfig.getMinUdpPort4500NatTimeoutSeconds()));
             } else {
                 Slog.wtf(
                         TAG,

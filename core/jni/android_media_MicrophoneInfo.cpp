@@ -15,6 +15,9 @@
  */
 
 #include "android_media_MicrophoneInfo.h"
+
+#include <media/AidlConversion.h>
+
 #include "android_media_AudioErrors.h"
 #include "core_jni_helpers.h"
 
@@ -46,8 +49,17 @@ static jmethodID gPairCstor;
 namespace android {
 
 jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
-        const media::MicrophoneInfo *microphoneInfo)
-{
+                                     const media::MicrophoneInfoFw *microphoneInfo) {
+    // The Java object uses the same enum values as the C enum values, which are
+    // generated from HIDL. Thus, we can use the legacy structure as the source for
+    // creating the Java object. Once we start removing legacy types, we can add
+    // direct converters between Java and AIDL, this will eliminate the need
+    // to have JNI code like this one.
+    auto conv = aidl2legacy_MicrophoneInfoFw_audio_microphone_characteristic_t(*microphoneInfo);
+    if (!conv.ok()) {
+        return nativeToJavaStatus(conv.error());
+    }
+
     jint jStatus = (jint)AUDIO_JAVA_SUCCESS;
     jstring jDeviceId = NULL;
     jstring jAddress = NULL;
@@ -56,36 +68,23 @@ jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
     jobject jFrequencyResponses = NULL;
     jobject jChannelMappings = NULL;
 
-    jDeviceId = env->NewStringUTF(microphoneInfo->getDeviceId().c_str());
-    jAddress = env->NewStringUTF(microphoneInfo->getAddress().c_str());
-    if (microphoneInfo->getGeometricLocation().size() != 3 ||
-            microphoneInfo->getOrientation().size() != 3) {
-        jStatus = nativeToJavaStatus(BAD_VALUE);
-        goto exit;
-    }
-    jGeometricLocation = env->NewObject(gMicrophoneInfoCoordinateClass,
-                                        gMicrophoneInfoCoordinateCstor,
-                                        microphoneInfo->getGeometricLocation()[0],
-                                        microphoneInfo->getGeometricLocation()[1],
-                                        microphoneInfo->getGeometricLocation()[2]);
-    jOrientation = env->NewObject(gMicrophoneInfoCoordinateClass,
-                                  gMicrophoneInfoCoordinateCstor,
-                                  microphoneInfo->getOrientation()[0],
-                                  microphoneInfo->getOrientation()[1],
-                                  microphoneInfo->getOrientation()[2]);
+    const auto &micInfo = conv.value();
+    jDeviceId = env->NewStringUTF(micInfo.device_id);
+    jAddress = env->NewStringUTF(micInfo.address);
+    jGeometricLocation =
+            env->NewObject(gMicrophoneInfoCoordinateClass, gMicrophoneInfoCoordinateCstor,
+                           micInfo.geometric_location.x, micInfo.geometric_location.y,
+                           micInfo.geometric_location.z);
+    jOrientation =
+            env->NewObject(gMicrophoneInfoCoordinateClass, gMicrophoneInfoCoordinateCstor,
+                           micInfo.orientation.x, micInfo.orientation.y, micInfo.orientation.z);
     // Create a list of Pair for frequency response.
-    if (microphoneInfo->getFrequencyResponses().size() != 2 ||
-            microphoneInfo->getFrequencyResponses()[0].size() !=
-                    microphoneInfo->getFrequencyResponses()[1].size()) {
-        jStatus = nativeToJavaStatus(BAD_VALUE);
-        goto exit;
-    }
     jFrequencyResponses = env->NewObject(gArrayListClass, gArrayListCstor);
-    for (size_t i = 0; i < microphoneInfo->getFrequencyResponses()[0].size(); i++) {
-        jobject jFrequency = env->NewObject(gFloatClass, gFloatCstor,
-                                            microphoneInfo->getFrequencyResponses()[0][i]);
-        jobject jResponse = env->NewObject(gFloatClass, gFloatCstor,
-                                          microphoneInfo->getFrequencyResponses()[1][i]);
+    for (size_t i = 0; i < micInfo.num_frequency_responses; i++) {
+        jobject jFrequency =
+                env->NewObject(gFloatClass, gFloatCstor, micInfo.frequency_responses[0][i]);
+        jobject jResponse =
+                env->NewObject(gFloatClass, gFloatCstor, micInfo.frequency_responses[1][i]);
         jobject jFrequencyResponse = env->NewObject(gPairClass, gPairCstor, jFrequency, jResponse);
         env->CallBooleanMethod(jFrequencyResponses, gArrayListMethods.add, jFrequencyResponse);
         env->DeleteLocalRef(jFrequency);
@@ -93,13 +92,10 @@ jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
         env->DeleteLocalRef(jFrequencyResponse);
     }
     // Create a list of Pair for channel mapping.
-    if (microphoneInfo->getChannelMapping().size() != AUDIO_CHANNEL_COUNT_MAX) {
-        jStatus = nativeToJavaStatus(BAD_VALUE);
-        goto exit;
-    }
     jChannelMappings = env->NewObject(gArrayListClass, gArrayListCstor);
-    for (size_t i = 0; i < microphoneInfo->getChannelMapping().size(); i++) {
-        int channelMappingType = microphoneInfo->getChannelMapping()[i];
+    const auto &channelMapping = micInfo.channel_mapping;
+    for (size_t i = 0; i < std::size(channelMapping); i++) {
+        int channelMappingType = channelMapping[i];
         if (channelMappingType != AUDIO_MICROPHONE_CHANNEL_MAPPING_UNUSED) {
             jobject jChannelIndex = env->NewObject(gIntegerClass, gIntegerCstor, i);
             jobject jChannelMappingType = env->NewObject(gIntegerClass, gIntegerCstor,
@@ -113,18 +109,11 @@ jint convertMicrophoneInfoFromNative(JNIEnv *env, jobject *jMicrophoneInfo,
         }
     }
     *jMicrophoneInfo = env->NewObject(gMicrophoneInfoClass, gMicrophoneInfoCstor, jDeviceId,
-                                      microphoneInfo->getType(), jAddress,
-                                      microphoneInfo->getDeviceLocation(),
-                                      microphoneInfo->getDeviceGroup(),
-                                      microphoneInfo->getIndexInTheGroup(),
-                                      jGeometricLocation, jOrientation,
-                                      jFrequencyResponses, jChannelMappings,
-                                      microphoneInfo->getSensitivity(),
-                                      microphoneInfo->getMaxSpl(),
-                                      microphoneInfo->getMinSpl(),
-                                      microphoneInfo->getDirectionality());
+                                      micInfo.device, jAddress, micInfo.location, micInfo.group,
+                                      micInfo.index_in_the_group, jGeometricLocation, jOrientation,
+                                      jFrequencyResponses, jChannelMappings, micInfo.sensitivity,
+                                      micInfo.max_spl, micInfo.min_spl, micInfo.directionality);
 
-exit:
     if (jDeviceId != NULL) {
         env->DeleteLocalRef(jDeviceId);
     }
@@ -145,7 +134,6 @@ exit:
     }
     return jStatus;
 }
-
 }
 
 int register_android_media_MicrophoneInfo(JNIEnv *env)

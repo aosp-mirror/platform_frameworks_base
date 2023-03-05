@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"De indtastede pinkoder er ikke ens"</string>
     <string name="invalidPin" msgid="7542498253319440408">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Angiv en PUK-kode på 8 eller flere cifre."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Dit SIM-kort er låst med PUK-koden. Angiv PUK-koden for at låse den op."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Angiv PUK2-koden for at låse op for SIM-kortet."</string>
+    <string name="needPuk" msgid="3503414069503752211">"Dit SIM-kort er låst med PUK-koden. Angiv PUK-koden for at låse det op."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"Angiv PUK2-koden for at fjerne blokeringen fra SIM-kortet."</string>
     <string name="enablePin" msgid="2543771964137091212">"Mislykkedes. Aktivér SIM-/RUIM-lås."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Du har <xliff:g id="NUMBER_1">%d</xliff:g> forsøg tilbage, før SIM-kortet bliver låst.</item>
@@ -211,7 +211,7 @@
     <string name="silent_mode" msgid="8796112363642579333">"Lydløs"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"Slå trådløs til"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Slå trådløs fra"</string>
-    <string name="screen_lock" msgid="2072642720826409809">"Skærmlås"</string>
+    <string name="screen_lock" msgid="2072642720826409809">"Skærm­lås"</string>
     <string name="power_off" msgid="4111692782492232778">"Sluk"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Ringeren er deaktiveret"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Ringervibrering"</string>
@@ -235,7 +235,7 @@
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"Valgmuligheder for tabletcomputeren"</string>
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Valgmuligheder for Android TV"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"Indstillinger for telefon"</string>
-    <string name="global_action_lock" msgid="6949357274257655383">"Skærmlås"</string>
+    <string name="global_action_lock" msgid="6949357274257655383">"Skærm­lås"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Sluk"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Afbryderknap"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Genstart"</string>
@@ -580,11 +580,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Der opstod fejl i forbindelse med godkendelse"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Brug skærmlås"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Angiv din skærmlås for at fortsætte"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Hold fingeren nede på sensoren"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Hold fingeren på sensoren"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Fingeraftrykket kan ikke genkendes. Prøv igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Rengør fingeraftrykssensoren, og prøv igen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Rengør sensoren, og prøv igen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Hold fingeren nede på sensoren"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Hold fingeren på sensoren"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du bevægede fingeren for langsomt. Prøv igen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prøv med et andet fingeraftryk"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Der er for lyst"</string>
@@ -923,14 +923,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Prøv igen"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Lås op for at se alle funktioner og data"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Det maksimale antal forsøg på at bruge ansigtslås er overskredet"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Intet SIM-kort"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Der er ikke noget SIM-kort i tabletcomputeren."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Der er intet SIM-kort i din Android TV-enhed."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Der er ikke noget SIM-kort i telefonen."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Indsæt et SIM-kort."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM-kortet mangler eller kan ikke læses. Indsæt et SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"Ubrugeligt SIM-kort."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"Dit SIM-kort er blevet permanent deaktiveret.\nKontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Intet SIM-kort"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Intet SIM-kort i tabletten."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Intet SIM-kort i din Android TV-enhed."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Intet SIM-kort i telefonen."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Tilføj et SIM-kort."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM-kortet mangler eller kan ikke læses. Tilføj et SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"Deaktiveret SIM-kort."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"Dit SIM-kort er permanent deaktiveret.\n Kontakt din tjenesteudbyder for at få et nyt SIM-kort."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Forrige nummer"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Næste nummer"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Pause"</string>
@@ -940,10 +940,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Spol frem"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Kun nødopkald"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Netværket er låst"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM-kortet er låst med PUK-koden."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM-kortet er låst med PUK-koden."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Se brugervejledningen, eller kontakt kundeservice."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM-kortet er låst."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Låser SIM-kortet op ..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-kortet er låst."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-kortet låses op…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Du har indtastet din adgangskode forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Du har indtastet en forkert pinkode <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. \n\nPrøv igen om <xliff:g id="NUMBER_1">%2$d</xliff:g> sekunder."</string>
@@ -1326,10 +1326,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Du kan altid ændre dette i Indstillinger &gt; Apps"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Tillad altid"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Tillad aldrig"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM-kort blev fjernet"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"SIM-kortet er fjernet"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"Det mobile netværk er utilgængeligt, indtil du genstarter med et gyldigt SIM-kort."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Afslut"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM-kort blev tilføjet"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"SIM-kortet er tilføjet"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Genstart din enhed for at få adgang til mobilnetværket."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Genstart"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Aktivér mobilselskab"</string>
@@ -1641,7 +1641,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM-kortet er nu deaktiveret. Angiv PUK-koden for at fortsætte. Kontakt mobilselskabet for at få flere oplysninger."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Angiv den ønskede pinkode"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Bekræft den ønskede pinkode"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM-kortet låses op…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-kortet låses op…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Forkert pinkode."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Angiv en pinkode på mellem 4 og 8 tal."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-koden skal være på 8 tal."</string>
