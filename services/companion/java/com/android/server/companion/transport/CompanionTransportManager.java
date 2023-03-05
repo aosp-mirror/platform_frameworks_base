@@ -22,25 +22,32 @@ import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_P
 import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PLATFORM_INFO;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManagerInternal;
+import android.companion.AssociationInfo;
+import android.companion.IOnMessageReceivedListener;
+import android.companion.IOnTransportsChangedListener;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+import android.os.RemoteCallbackList;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
-import com.android.server.companion.transport.Transport.Listener;
+import com.android.server.companion.AssociationStore;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -63,27 +70,96 @@ public class CompanionTransportManager {
     }
 
     private final Context mContext;
+    private final AssociationStore mAssociationStore;
 
+    /** Association id -> Transport */
     @GuardedBy("mTransports")
     private final SparseArray<Transport> mTransports = new SparseArray<>();
-
     @NonNull
-    private final Map<Integer, Listener> mListeners = new HashMap<>();
+    private final RemoteCallbackList<IOnTransportsChangedListener> mTransportsListeners =
+            new RemoteCallbackList<>();
+    /** Message type -> IOnMessageReceivedListener */
+    @NonNull
+    private final SparseArray<IOnMessageReceivedListener> mMessageListeners = new SparseArray<>();
 
+
+    @Nullable
     private Transport mTempTransport;
 
-    public CompanionTransportManager(Context context) {
+    public CompanionTransportManager(Context context, AssociationStore associationStore) {
         mContext = context;
+        mAssociationStore = associationStore;
     }
 
     /**
-     * Add a message listener when a message is received for the message type
+     * Add a listener to receive callbacks when a message is received for the message type
      */
     @GuardedBy("mTransports")
-    public void addListener(int message, @NonNull Listener listener) {
-        mListeners.put(message, listener);
+    public void addListener(int message, @NonNull IOnMessageReceivedListener listener) {
+        mMessageListeners.put(message, listener);
         for (int i = 0; i < mTransports.size(); i++) {
             mTransports.valueAt(i).addListener(message, listener);
+        }
+    }
+
+    /**
+     * Add a listener to receive callbacks when any of the transports is changed
+     */
+    @GuardedBy("mTransports")
+    public void addListener(IOnTransportsChangedListener listener) {
+        Slog.i(TAG, "Registering OnTransportsChangedListener");
+        mTransportsListeners.register(listener);
+        List<AssociationInfo> associations = new ArrayList<>();
+        for (int i = 0; i < mTransports.size(); i++) {
+            AssociationInfo association = mAssociationStore.getAssociationById(
+                    mTransports.keyAt(i));
+            if (association != null) {
+                associations.add(association);
+            }
+        }
+        mTransportsListeners.broadcast(listener1 -> {
+            // callback to the current listener with all the associations of the transports
+            // immediately
+            if (listener1 == listener) {
+                try {
+                    listener.onTransportsChanged(associations);
+                } catch (RemoteException ignored) {
+                }
+            }
+        });
+    }
+
+    /**
+     * Remove the listener for receiving callbacks when any of the transports is changed
+     */
+    public void removeListener(IOnTransportsChangedListener listener) {
+        mTransportsListeners.unregister(listener);
+    }
+
+    /**
+     * Remove the listener to stop receiving calbacks when a message is received for the given type
+     */
+    public void removeListener(int messageType, IOnMessageReceivedListener listener) {
+        mMessageListeners.remove(messageType);
+    }
+
+    /**
+     * Send a message to remote devices through the transports
+     */
+    @GuardedBy("mTransports")
+    public void sendMessage(int message, byte[] data, int[] associationIds) {
+        Slog.i(TAG, "Sending message 0x" + Integer.toHexString(message)
+                + " data length " + data.length);
+        for (int i = 0; i < associationIds.length; i++) {
+            if (mTransports.contains(associationIds[i])) {
+                try {
+                    mTransports.get(associationIds[i]).sendMessage(message, data);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Failed to send message 0x" + Integer.toHexString(message)
+                            + " data length " + data.length + " to association "
+                            + associationIds[i]);
+                }
+            }
         }
     }
 
@@ -119,6 +195,8 @@ public class CompanionTransportManager {
             }
 
             initializeTransport(associationId, fd);
+
+            notifyOnTransportsChanged();
         }
     }
 
@@ -130,16 +208,35 @@ public class CompanionTransportManager {
                 mTransports.delete(associationId);
                 transport.stop();
             }
+
+            notifyOnTransportsChanged();
         }
     }
 
     @GuardedBy("mTransports")
+    private void notifyOnTransportsChanged() {
+        List<AssociationInfo> associations = new ArrayList<>();
+        for (int i = 0; i < mTransports.size(); i++) {
+            AssociationInfo association = mAssociationStore.getAssociationById(
+                    mTransports.keyAt(i));
+            if (association != null) {
+                associations.add(association);
+            }
+        }
+        mTransportsListeners.broadcast(listener -> {
+            try {
+                listener.onTransportsChanged(associations);
+            } catch (RemoteException ignored) {
+            }
+        });
+    }
+
+    @GuardedBy("mTransports")
     private void initializeTransport(int associationId, ParcelFileDescriptor fd) {
+        Slog.i(TAG, "Initializing transport");
         if (!isSecureTransportEnabled()) {
             Transport transport = new RawTransport(associationId, fd, mContext);
-            for (Map.Entry<Integer, Listener> entry : mListeners.entrySet()) {
-                transport.addListener(entry.getKey(), entry.getValue());
-            }
+            addMessageListenersToTransport(transport);
             transport.start();
             mTransports.put(associationId, transport);
             Slog.i(TAG, "RawTransport is created");
@@ -148,10 +245,21 @@ public class CompanionTransportManager {
 
         // Exchange platform info to decide which transport should be created
         mTempTransport = new RawTransport(associationId, fd, mContext);
-        for (Map.Entry<Integer, Listener> entry : mListeners.entrySet()) {
-            mTempTransport.addListener(entry.getKey(), entry.getValue());
-        }
-        mTempTransport.addListener(MESSAGE_REQUEST_PLATFORM_INFO, this::onPlatformInfoReceived);
+        addMessageListenersToTransport(mTempTransport);
+        IOnMessageReceivedListener listener = new IOnMessageReceivedListener() {
+            @Override
+            public void onMessageReceived(int associationId, byte[] data) throws RemoteException {
+                synchronized (mTransports) {
+                    onPlatformInfoReceived(associationId, data);
+                }
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+        mTempTransport.addListener(MESSAGE_REQUEST_PLATFORM_INFO, listener);
         mTempTransport.start();
 
         int sdk = Build.VERSION.SDK_INT;
@@ -163,14 +271,21 @@ public class CompanionTransportManager {
                 .put(release.getBytes());
 
         // TODO: it should check if preSharedKey is given
-        mTempTransport.requestForResponse(MESSAGE_REQUEST_PLATFORM_INFO, data.array());
+        try {
+            mTempTransport.sendMessage(MESSAGE_REQUEST_PLATFORM_INFO, data.array());
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to exchange platform info");
+        }
     }
 
     /**
      * Depending on the remote platform info to decide which transport should be created
      */
-    @GuardedBy("mTransports")
-    private void onPlatformInfoReceived(byte[] data) {
+    @GuardedBy("CompanionTransportManager.this.mTransports")
+    private void onPlatformInfoReceived(int associationId, byte[] data) {
+        if (mTempTransport.getAssociationId() != associationId) {
+            return;
+        }
         // TODO: it should check if preSharedKey is given
 
         ByteBuffer buffer = ByteBuffer.wrap(data);
@@ -198,12 +313,11 @@ public class CompanionTransportManager {
             Slog.i(TAG, "Creating a secure channel");
             transport = new SecureTransport(transport.getAssociationId(), transport.getFd(),
                     mContext);
-            for (Map.Entry<Integer, Listener> entry : mListeners.entrySet()) {
-                transport.addListener(entry.getKey(), entry.getValue());
-            }
+            addMessageListenersToTransport(transport);
             transport.start();
         }
         mTransports.put(transport.getAssociationId(), transport);
+        // Doesn't need to notifyTransportsChanged here, it'll be done in attachSystemDataTransport
     }
 
     public Future<?> requestPermissionRestore(int associationId, byte[] data) {
@@ -227,5 +341,11 @@ public class CompanionTransportManager {
         boolean enabled = !Build.IS_DEBUGGABLE || mSecureTransportEnabled;
 
         return enabled;
+    }
+
+    private void addMessageListenersToTransport(Transport transport) {
+        for (int i = 0; i < mMessageListeners.size(); i++) {
+            transport.addListener(mMessageListeners.keyAt(i), mMessageListeners.valueAt(i));
+        }
     }
 }
