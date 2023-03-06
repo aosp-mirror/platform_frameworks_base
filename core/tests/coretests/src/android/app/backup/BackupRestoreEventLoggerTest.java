@@ -23,7 +23,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.fail;
 
-import android.app.backup.BackupRestoreEventLogger.BackupRestoreDataType;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
@@ -78,7 +77,7 @@ public class BackupRestoreEventLoggerTest {
 
         mLogger.logItemsBackedUp(DATA_TYPE_1, /* count */ 5);
         mLogger.logItemsBackupFailed(DATA_TYPE_1, /* count */ 5, ERROR_1);
-        mLogger.logBackupMetaData(DATA_TYPE_1, /* metadata */ "metadata");
+        mLogger.logBackupMetadata(DATA_TYPE_1, /* metadata */ "metadata");
 
         assertThat(getResultForDataTypeIfPresent(mLogger, DATA_TYPE_1)).isEqualTo(Optional.empty());
     }
@@ -91,7 +90,7 @@ public class BackupRestoreEventLoggerTest {
             String dataType = DATA_TYPE_1 + i;
             mLogger.logItemsBackedUp(dataType, /* count */ 5);
             mLogger.logItemsBackupFailed(dataType, /* count */ 5, /* error */ null);
-            mLogger.logBackupMetaData(dataType, METADATA_1);
+            mLogger.logBackupMetadata(dataType, METADATA_1);
 
             assertThat(getResultForDataTypeIfPresent(mLogger, dataType)).isNotEqualTo(
                     Optional.empty());
@@ -127,8 +126,8 @@ public class BackupRestoreEventLoggerTest {
     public void testLogBackupMetadata_repeatedCalls_recordsLatestMetadataHash() {
         mLogger = new BackupRestoreEventLogger(BACKUP);
 
-        mLogger.logBackupMetaData(DATA_TYPE_1, METADATA_1);
-        mLogger.logBackupMetaData(DATA_TYPE_1, METADATA_2);
+        mLogger.logBackupMetadata(DATA_TYPE_1, METADATA_1);
+        mLogger.logBackupMetadata(DATA_TYPE_1, METADATA_2);
 
         byte[] recordedHash = getResultForDataType(mLogger, DATA_TYPE_1).getMetadataHash();
         byte[] expectedHash = getMetaDataHash(METADATA_2);
@@ -315,7 +314,7 @@ public class BackupRestoreEventLoggerTest {
     }
 
     private static DataTypeResult getResultForDataType(
-            BackupRestoreEventLogger logger, @BackupRestoreDataType String dataType) {
+            BackupRestoreEventLogger logger, String dataType) {
         Optional<DataTypeResult> result = getResultForDataTypeIfPresent(logger, dataType);
         if (result.isEmpty()) {
             fail("Failed to find result for data type: " + dataType);
@@ -324,7 +323,7 @@ public class BackupRestoreEventLoggerTest {
     }
 
     private static Optional<DataTypeResult> getResultForDataTypeIfPresent(
-            BackupRestoreEventLogger logger, @BackupRestoreDataType String dataType) {
+            BackupRestoreEventLogger logger, String dataType) {
         List<DataTypeResult> resultList = logger.getLoggingResults();
         return resultList.stream()
                 .filter(dataTypeResult -> dataTypeResult.getDataType().equals(dataType))
