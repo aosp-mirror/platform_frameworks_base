@@ -545,12 +545,13 @@ public final class VirtualDeviceManager {
                 @VirtualDisplayFlag int flags,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
-            VirtualDisplayConfig config = new VirtualDisplayConfig.Builder(
+            VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                     getVirtualDisplayName(), width, height, densityDpi)
-                    .setSurface(surface)
-                    .setFlags(flags)
-                    .build();
-            return createVirtualDisplay(config, executor, callback);
+                    .setFlags(flags);
+            if (surface != null) {
+                builder.setSurface(surface);
+            }
+            return createVirtualDisplay(builder.build(), executor, callback);
         }
 
         /**

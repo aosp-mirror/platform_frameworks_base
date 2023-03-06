@@ -130,7 +130,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -283,7 +282,7 @@ public class VirtualDeviceManagerServiceTest {
         return blockedActivities;
     }
 
-    private Intent createRestrictedActivityBlockedIntent(List displayCategories,
+    private Intent createRestrictedActivityBlockedIntent(Set<String> displayCategories,
             String targetDisplayCategory) {
         when(mDisplayManagerInternalMock.createVirtualDisplay(any(), any(), any(), any(),
                 eq(NONBLOCKED_APP_PACKAGE_NAME))).thenReturn(DISPLAY_ID_1);
@@ -1634,7 +1633,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void nonRestrictedActivityOnRestrictedVirtualDisplay_startBlockedAlertActivity() {
-        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"),
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(Set.of("abc"),
                 /* targetDisplayCategory= */ null);
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
@@ -1642,7 +1641,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void restrictedActivityOnRestrictedVirtualDisplay_doesNotStartBlockedAlertActivity() {
-        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "abc");
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(Set.of("abc"), "abc");
         verify(mContext, never()).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
@@ -1650,14 +1649,14 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void restrictedActivityOnNonRestrictedVirtualDisplay_startBlockedAlertActivity() {
         Intent blockedAppIntent = createRestrictedActivityBlockedIntent(
-                /* displayCategories= */ List.of(), "abc");
+                /* displayCategories= */ Set.of(), "abc");
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
 
     @Test
     public void restrictedActivityNonMatchingRestrictedVirtualDisplay_startBlockedAlertActivity() {
-        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(List.of("abc"), "def");
+        Intent blockedAppIntent = createRestrictedActivityBlockedIntent(Set.of("abc"), "def");
         verify(mContext).startActivityAsUser(argThat(intent ->
                 intent.filterEquals(blockedAppIntent)), any(), any());
     }
