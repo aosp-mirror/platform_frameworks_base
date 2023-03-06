@@ -402,17 +402,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsBlockingHelperShowing_isCorrectlyUpdated() throws Exception {
-        ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-
-        group.setBlockingHelperShowing(true);
-        assertTrue(group.isBlockingHelperShowing());
-
-        group.setBlockingHelperShowing(false);
-        assertFalse(group.isBlockingHelperShowing());
-    }
-
-    @Test
     public void testGetNumUniqueChildren_defaultChannel() throws Exception {
         ExpandableNotificationRow groupRow = mNotificationTestHelper.createGroup();
 
