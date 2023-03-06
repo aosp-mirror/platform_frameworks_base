@@ -2092,6 +2092,17 @@ public final class ActiveServices {
                                 r.appInfo.uid, r.intent.getIntent(), r, r.userId,
                                 BackgroundStartPrivileges.NONE,
                                 false /* isBindService */);
+                        if (r.mAllowStartForeground == REASON_DENIED) {
+                            Slog.w(TAG_SERVICE, "FGS type change to/from SHORT_SERVICE: "
+                                    + " BFSL DENIED.");
+                        } else {
+                            if (DEBUG_SHORT_SERVICE) {
+                                Slog.w(TAG_SERVICE, "FGS type change to/from SHORT_SERVICE: "
+                                        + " BFSL Allowed: "
+                                        + PowerExemptionManager.reasonCodeToString(
+                                                r.mAllowStartForeground));
+                            }
+                        }
 
                         final boolean fgsStartAllowed =
                                 !isBgFgsRestrictionEnabledForService
