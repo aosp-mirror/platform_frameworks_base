@@ -74,6 +74,8 @@ public class CachedBluetoothDeviceTest {
     @Mock
     private HearingAidProfile mHearingAidProfile;
     @Mock
+    private LeAudioProfile mLeAudioProfile;
+    @Mock
     private BluetoothDevice mDevice;
     @Mock
     private BluetoothDevice mSubDevice;
