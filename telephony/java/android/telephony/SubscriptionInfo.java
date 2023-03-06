@@ -649,6 +649,15 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
+     * @return {@code true} if the subscription is from the actively used SIM.
+     *
+     * @hide
+     */
+    public boolean isActive() {
+        return mSimSlotIndex >= 0 || mType == SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM;
+    }
+
+    /**
      * Used in scenarios where different subscriptions are bundled as a group.
      * It's typically a primary and an opportunistic subscription. (see {@link #isOpportunistic()})
      * Such that those subscriptions will have some affiliated behaviors such as opportunistic
