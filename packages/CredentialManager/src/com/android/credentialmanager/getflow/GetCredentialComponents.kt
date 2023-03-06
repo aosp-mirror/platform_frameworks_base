@@ -182,12 +182,14 @@ fun PrimarySelectionCard(
                             CredentialEntryRow(
                                 credentialEntryInfo = it.sortedCredentialEntryList.first(),
                                 onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
                             )
                         }
                         authenticationEntryList.forEach {
                             AuthenticationEntryRow(
                                 authenticationEntryInfo = it,
                                 onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
                             )
                         }
                     } else if (usernameForCredentialSize < 4) {
@@ -195,12 +197,14 @@ fun PrimarySelectionCard(
                             CredentialEntryRow(
                                 credentialEntryInfo = it.sortedCredentialEntryList.first(),
                                 onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
                             )
                         }
                         authenticationEntryList.take(4 - usernameForCredentialSize).forEach {
                             AuthenticationEntryRow(
                                 authenticationEntryInfo = it,
                                 onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
                             )
                         }
                     } else {
@@ -208,6 +212,7 @@ fun PrimarySelectionCard(
                             CredentialEntryRow(
                                 credentialEntryInfo = it.sortedCredentialEntryList.first(),
                                 onEntrySelected = onEntrySelected,
+                                enforceOneLine = true,
                             )
                         }
                     }
@@ -402,6 +407,7 @@ fun PerUserNameCredentials(
 fun CredentialEntryRow(
     credentialEntryInfo: CredentialEntryInfo,
     onEntrySelected: (BaseEntry) -> Unit,
+    enforceOneLine: Boolean = false,
 ) {
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
@@ -426,6 +432,7 @@ fun CredentialEntryRow(
                 separator = stringResource(R.string.get_dialog_sign_in_type_username_separator)
             )
         },
+        enforceOneLine = enforceOneLine,
     )
 }
 
@@ -433,6 +440,7 @@ fun CredentialEntryRow(
 fun AuthenticationEntryRow(
     authenticationEntryInfo: AuthenticationEntryInfo,
     onEntrySelected: (BaseEntry) -> Unit,
+    enforceOneLine: Boolean = false,
 ) {
     Entry(
         onClick = { onEntrySelected(authenticationEntryInfo) },
@@ -444,6 +452,7 @@ fun AuthenticationEntryRow(
             else R.string.locked_credential_entry_label_subtext_tap_to_unlock
         ),
         isLockedAuthEntry = !authenticationEntryInfo.isUnlockedAndEmpty,
+        enforceOneLine = enforceOneLine,
     )
 }
 
