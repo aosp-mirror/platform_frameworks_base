@@ -58,10 +58,10 @@ import java.util.Set;
  *
  * @attr ref android.R.styleable#LocaleConfig_Locale_name
  * @attr ref android.R.styleable#AndroidManifestApplication_localeConfig
- *
- * <p>For more information about the LocaleConfig overridden by the application, see
- * TODO(b/261528306): add link to guide
  */
+// Add following to last Note: when guide is written:
+// For more information about the LocaleConfig overridden by the application, see TODO(b/261528306):
+// add link to guide
 public class LocaleConfig implements Parcelable {
     private static final String TAG = "LocaleConfig";
     public static final String TAG_LOCALE_CONFIG = "locale-config";
