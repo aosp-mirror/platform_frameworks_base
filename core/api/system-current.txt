@@ -3362,7 +3362,7 @@ package android.companion.virtual.sensor {
   }
 
   public static final class VirtualSensorConfig.Builder {
-    ctor public VirtualSensorConfig.Builder(int, @NonNull String);
+    ctor public VirtualSensorConfig.Builder(@IntRange(from=1) int, @NonNull String);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig build();
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setDirectChannelTypesSupported(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setHighestDirectReportRateLevel(int);
