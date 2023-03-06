@@ -62,8 +62,6 @@ constructor(
     BluetoothAdapter.OnMetadataChangedListener {
 
     private val stylusCallbacks: CopyOnWriteArrayList<StylusCallback> = CopyOnWriteArrayList()
-    private val stylusBatteryCallbacks: CopyOnWriteArrayList<StylusBatteryCallback> =
-        CopyOnWriteArrayList()
 
     // This map should only be accessed on the handler
     private val inputDeviceAddressMap: MutableMap<Int, String?> = ArrayMap()
@@ -104,14 +102,6 @@ constructor(
     /** Unregisters a StylusCallback. If StylusCallback is not registered, is a no-op. */
     fun unregisterCallback(callback: StylusCallback) {
         stylusCallbacks.remove(callback)
-    }
-
-    fun registerBatteryCallback(callback: StylusBatteryCallback) {
-        stylusBatteryCallbacks.add(callback)
-    }
-
-    fun unregisterBatteryCallback(callback: StylusBatteryCallback) {
-        stylusBatteryCallbacks.remove(callback)
     }
 
     override fun onInputDeviceAdded(deviceId: Int) {
@@ -195,7 +185,7 @@ constructor(
                     "${device.address}: $isCharging"
             }
 
-            executeStylusBatteryCallbacks { cb ->
+            executeStylusCallbacks { cb ->
                 cb.onStylusBluetoothChargingStateChanged(inputDeviceId, device, isCharging)
             }
         }
@@ -221,7 +211,7 @@ constructor(
                 onStylusUsed()
             }
 
-            executeStylusBatteryCallbacks { cb ->
+            executeStylusCallbacks { cb ->
                 cb.onStylusUsiBatteryStateChanged(deviceId, eventTimeMillis, batteryState)
             }
         }
@@ -329,10 +319,6 @@ constructor(
         stylusCallbacks.forEach(run)
     }
 
-    private fun executeStylusBatteryCallbacks(run: (cb: StylusBatteryCallback) -> Unit) {
-        stylusBatteryCallbacks.forEach(run)
-    }
-
     private fun registerBatteryListener(deviceId: Int) {
         try {
             inputManager.addInputDeviceBatteryListener(deviceId, executor, this)
@@ -378,13 +364,6 @@ constructor(
         fun onStylusBluetoothConnected(deviceId: Int, btAddress: String) {}
         fun onStylusBluetoothDisconnected(deviceId: Int, btAddress: String) {}
         fun onStylusFirstUsed() {}
-    }
-
-    /**
-     * Callback interface to receive stylus battery events from the StylusManager. All callbacks are
-     * runs on the same background handler.
-     */
-    interface StylusBatteryCallback {
         fun onStylusBluetoothChargingStateChanged(
             inputDeviceId: Int,
             btDevice: BluetoothDevice,

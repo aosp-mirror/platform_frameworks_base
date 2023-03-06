@@ -96,7 +96,6 @@ class StylusUsiPowerStartableTest : SysuiTestCase() {
         startable.start()
 
         verify(stylusManager, times(1)).registerCallback(startable)
-        verify(stylusManager, times(1)).registerBatteryCallback(startable)
     }
 
     @Test
