@@ -5049,6 +5049,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
             if (mImePlatformCompatUtils.shouldUseSetInteractiveProtocol(getCurMethodUidLocked())) {
+                // Handle IME visibility when interactive changed before finishing the input to
+                // ensure we preserve the last state as possible.
+                final ImeVisibilityResult imeVisRes = mVisibilityStateComputer.onInteractiveChanged(
+                        mCurFocusedWindow, interactive);
+                if (imeVisRes != null) {
+                    mVisibilityApplier.applyImeVisibility(mCurFocusedWindow, null,
+                            imeVisRes.getState(), imeVisRes.getReason());
+                }
                 // Eligible IME processes use new "setInteractive" protocol.
                 mCurClient.mClient.setInteractive(mIsInteractive, mInFullscreenMode);
             } else {

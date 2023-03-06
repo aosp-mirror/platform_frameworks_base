@@ -29,6 +29,8 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFI
 import static android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputModeToString;
+import static com.android.internal.inputmethod.SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS;
+import static com.android.internal.inputmethod.SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS;
 import static com.android.server.inputmethod.InputMethodManagerService.computeImeDisplayIdForTarget;
 
 import android.accessibilityservice.AccessibilityService;
@@ -100,6 +102,12 @@ public final class ImeVisibilityStateComputer {
      */
     private boolean mInputShown;
 
+    /**
+     * Set if we called
+     * {@link com.android.server.wm.ImeTargetVisibilityPolicy#showImeScreenshot(IBinder, int)}.
+     */
+    private boolean mRequestedImeScreenshot;
+
     /** Represent the invalid IME visibility state */
     public static final int STATE_INVALID = -1;
 
@@ -123,6 +131,10 @@ public final class ImeVisibilityStateComputer {
     public static final int STATE_HIDE_IME_NOT_ALWAYS = 6;
 
     public static final int STATE_SHOW_IME_IMPLICIT = 7;
+
+    /** State to handle removing an IME preview surface when necessary. */
+    public static final int STATE_REMOVE_IME_SNAPSHOT = 8;
+
     @IntDef({
             STATE_INVALID,
             STATE_HIDE_IME,
@@ -133,6 +145,7 @@ public final class ImeVisibilityStateComputer {
             STATE_HIDE_IME_EXPLICIT,
             STATE_HIDE_IME_NOT_ALWAYS,
             STATE_SHOW_IME_IMPLICIT,
+            STATE_REMOVE_IME_SNAPSHOT,
     })
     @interface VisibilityState {}
 
@@ -463,6 +476,21 @@ public final class ImeVisibilityStateComputer {
             if (DEBUG) Slog.v(TAG, "Window without editor will hide input");
             return new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
                     SoftInputShowHideReason.HIDE_WINDOW_GAINED_FOCUS_WITHOUT_EDITOR);
+        }
+        return null;
+    }
+
+    @VisibleForTesting
+    ImeVisibilityResult onInteractiveChanged(IBinder windowToken, boolean interactive) {
+        final ImeTargetWindowState state = getWindowStateOrNull(windowToken);
+        if (state != null && state.isRequestedImeVisible() && mInputShown && !interactive) {
+            mRequestedImeScreenshot = true;
+            return new ImeVisibilityResult(STATE_SHOW_IME_SNAPSHOT, SHOW_IME_SCREENSHOT_FROM_IMMS);
+        }
+        if (interactive && mRequestedImeScreenshot) {
+            mRequestedImeScreenshot = false;
+            return new ImeVisibilityResult(STATE_REMOVE_IME_SNAPSHOT,
+                    REMOVE_IME_SCREENSHOT_FROM_IMMS);
         }
         return null;
     }

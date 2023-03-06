@@ -25,8 +25,10 @@ import static com.android.server.EventLogTags.IMF_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_EXPLICIT;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_NOT_ALWAYS;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_REMOVE_IME_SNAPSHOT;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME_IMPLICIT;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME_SNAPSHOT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -169,6 +171,12 @@ final class DefaultImeVisibilityApplier implements ImeVisibilityApplier {
             case STATE_SHOW_IME_IMPLICIT:
                 mService.showCurrentInputLocked(windowToken, statsToken,
                         InputMethodManager.SHOW_IMPLICIT, null, reason);
+                break;
+            case STATE_SHOW_IME_SNAPSHOT:
+                showImeScreenshot(windowToken, mService.getDisplayIdToShowImeLocked(), null);
+                break;
+            case STATE_REMOVE_IME_SNAPSHOT:
+                removeImeScreenshot(mService.getDisplayIdToShowImeLocked());
                 break;
             default:
                 throw new IllegalArgumentException("Invalid IME visibility state: " + state);
