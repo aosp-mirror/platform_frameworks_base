@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardBouncerViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel;
+import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationInsetsController;
@@ -133,7 +134,8 @@ public class NotificationShadeWindowViewController {
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
             AlternateBouncerInteractor alternateBouncerInteractor,
-            KeyguardTransitionInteractor keyguardTransitionInteractor
+            KeyguardTransitionInteractor keyguardTransitionInteractor,
+            PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel
     ) {
         mLockscreenShadeTransitionController = transitionController;
         mFalsingCollector = falsingCollector;
@@ -160,6 +162,7 @@ public class NotificationShadeWindowViewController {
         KeyguardBouncerViewBinder.bind(
                 mView.findViewById(R.id.keyguard_bouncer_container),
                 keyguardBouncerViewModel,
+                primaryBouncerToGoneTransitionViewModel,
                 keyguardBouncerComponentFactory);
 
         collectFlow(mView, keyguardTransitionInteractor.getLockscreenToDreamingTransition(),
