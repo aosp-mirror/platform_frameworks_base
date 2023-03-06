@@ -226,6 +226,7 @@ class GetFlowUtils {
                             userName = credentialEntry.username.toString(),
                             displayName = credentialEntry.displayName?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
+                            shouldTintIcon = credentialEntry.isDefaultIcon ?: false,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                         ))
                     }
@@ -242,6 +243,7 @@ class GetFlowUtils {
                             userName = credentialEntry.username.toString(),
                             displayName = credentialEntry.displayName?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
+                            shouldTintIcon = credentialEntry.isDefaultIcon,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                         ))
                     }
@@ -258,6 +260,7 @@ class GetFlowUtils {
                             userName = credentialEntry.title.toString(),
                             displayName = credentialEntry.subtitle?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
+                            shouldTintIcon = credentialEntry.isDefaultIcon,
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
                         ))
                     }

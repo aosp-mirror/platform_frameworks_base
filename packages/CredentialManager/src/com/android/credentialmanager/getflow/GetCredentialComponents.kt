@@ -406,6 +406,7 @@ fun CredentialEntryRow(
     Entry(
         onClick = { onEntrySelected(credentialEntryInfo) },
         iconImageBitmap = credentialEntryInfo.icon?.toBitmap()?.asImageBitmap(),
+        shouldApplyIconImageBitmapTint = credentialEntryInfo.shouldTintIcon,
         // Fall back to iconPainter if iconImageBitmap isn't available
         iconPainter =
         if (credentialEntryInfo.icon == null) painterResource(R.drawable.ic_other_sign_in_24)
