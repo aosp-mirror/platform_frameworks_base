@@ -32,6 +32,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.NullPointerException;
 import java.util.concurrent.Executor;
 
 /**
@@ -271,7 +272,12 @@ public class Filter implements AutoCloseable {
                 mExecutor.execute(() -> {
                     synchronized (mCallbackLock) {
                         if (mCallback != null) {
-                            mCallback.onFilterStatusChanged(this, status);
+                            try {
+                                mCallback.onFilterStatusChanged(this, status);
+                            }
+                            catch (NullPointerException e) {
+                                Log.d(TAG, "catch exception:" + e);
+                            }
                         }
                     }
                 });
@@ -285,7 +291,12 @@ public class Filter implements AutoCloseable {
                 mExecutor.execute(() -> {
                     synchronized (mCallbackLock) {
                         if (mCallback != null) {
-                            mCallback.onFilterEvent(this, events);
+                            try {
+                                mCallback.onFilterEvent(this, events);
+                            }
+                            catch (NullPointerException e) {
+                                Log.d(TAG, "catch exception:" + e);
+                            }
                         } else {
                             for (FilterEvent event : events) {
                                 if (event instanceof MediaEvent) {
