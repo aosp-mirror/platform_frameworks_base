@@ -370,6 +370,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for Device State Auto-Rotation logs.
+     */
+    @Provides
+    @SysUISingleton
+    @DeviceStateAutoRotationLog
+    public static LogBuffer provideDeviceStateAutoRotationLogBuffer(LogBufferFactory factory) {
+        return factory.create("DeviceStateAutoRotationLog", 100);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for bluetooth-related logs.
      */
     @Provides
