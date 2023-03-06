@@ -74,10 +74,18 @@ open class EnterPipOnUserLeaveHintTest(flicker: FlickerTest) : EnterPipTransitio
 
     @Presubmit
     @Test
-    override fun pipAppLayerOrOverlayAlwaysVisible() {
+    override fun pipAppLayerAlwaysVisible() {
         // pip layer in gesture nav will disappear during transition
         Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
-        super.pipAppLayerOrOverlayAlwaysVisible()
+        super.pipAppLayerAlwaysVisible()
+    }
+
+    @Presubmit
+    @Test
+    override fun pipOverlayLayerAppearThenDisappear() {
+        // no overlay in gesture nav for non-auto enter PiP transition
+        Assume.assumeFalse(flicker.scenario.isGesturalNavigation)
+        super.pipOverlayLayerAppearThenDisappear()
     }
 
     @Presubmit
