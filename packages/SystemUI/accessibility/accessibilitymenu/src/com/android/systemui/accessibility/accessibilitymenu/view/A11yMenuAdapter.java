@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -146,6 +147,15 @@ public class A11yMenuAdapter extends BaseAdapter {
 
             shortcutIconButton.setBackground(
                     mShortcutDrawableUtils.createAdaptiveIconDrawable(shortcutItem.imageColor));
+
+            shortcutIconButton.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+                @Override
+                public void onInitializeAccessibilityNodeInfo(
+                        View host, AccessibilityNodeInfo info) {
+                    super.onInitializeAccessibilityNodeInfo(host, info);
+                    info.setUniqueId(host.getTag().toString());
+                }
+            });
         }
     }
 }
