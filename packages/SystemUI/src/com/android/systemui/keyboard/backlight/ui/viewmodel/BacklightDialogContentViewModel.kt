@@ -15,10 +15,6 @@
  *
  */
 
-package com.android.systemui.keyboard.data.model
+package com.android.systemui.keyboard.backlight.ui.viewmodel
 
-/**
- * Model for current state of keyboard backlight brightness. [level] indicates current level of
- * backlight brightness and [maxLevel] its max possible value.
- */
-data class BacklightModel(val level: Int, val maxLevel: Int)
+data class BacklightDialogContentViewModel(val currentValue: Int, val maxValue: Int)
