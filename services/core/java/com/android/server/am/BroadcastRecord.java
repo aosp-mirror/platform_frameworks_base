@@ -99,6 +99,7 @@ final class BroadcastRecord extends Binder {
     final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
     final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
+    final @NonNull String[] deliveryReasons; // reasons for delivery state of each receiver
     final boolean[] deferredUntilActive; // whether each receiver is infinitely deferred
     final int[] blockedUntilTerminalCount; // blocked until count of each receiver
     @Nullable ProcessRecord resultToApp; // who receives final result if non-null
@@ -298,7 +299,7 @@ final class BroadcastRecord extends Binder {
                     pw.print(" initialSticky="); pw.println(initialSticky);
         }
         if (nextReceiver != 0) {
-            pw.print(prefix); pw.print("nextReceiver="); pw.print(nextReceiver);
+            pw.print(prefix); pw.print("nextReceiver="); pw.println(nextReceiver);
         }
         if (curFilter != null) {
             pw.print(prefix); pw.print("curFilter="); pw.println(curFilter);
@@ -328,6 +329,7 @@ final class BroadcastRecord extends Binder {
             }
             pw.print(prefix); pw.print("state="); pw.print(state); pw.println(stateStr);
         }
+        pw.print(prefix); pw.print("terminalCount="); pw.println(terminalCount);
         final int N = receivers != null ? receivers.size() : 0;
         String p2 = prefix + "  ";
         PrintWriterPrinter printer = new PrintWriterPrinter(pw);
@@ -346,6 +348,7 @@ final class BroadcastRecord extends Binder {
                 TimeUtils.formatDuration(terminalTime[i] - scheduledTime[i], pw);
                 pw.print(' ');
             }
+            pw.print("("); pw.print(blockedUntilTerminalCount[i]); pw.print(") ");
             pw.print("#"); pw.print(i); pw.print(": ");
             if (o instanceof BroadcastFilter) {
                 pw.println(o);
@@ -355,6 +358,9 @@ final class BroadcastRecord extends Binder {
                 ((ResolveInfo) o).dump(printer, p2, 0);
             } else {
                 pw.println(o);
+            }
+            if (deliveryReasons[i] != null) {
+                pw.print(p2); pw.print("reason: "); pw.println(deliveryReasons[i]);
             }
         }
     }
@@ -393,6 +399,7 @@ final class BroadcastRecord extends Binder {
         options = _options;
         receivers = (_receivers != null) ? _receivers : EMPTY_RECEIVERS;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
+        deliveryReasons = new String[delivery.length];
         deferUntilActive = options != null ? options.isDeferUntilActive() : false;
         deferredUntilActive = new boolean[deferUntilActive ? delivery.length : 0];
         blockedUntilTerminalCount = calculateBlockedUntilTerminalCount(receivers, _serialized);
@@ -448,6 +455,7 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
+        deliveryReasons = from.deliveryReasons;
         deferUntilActive = from.deferUntilActive;
         deferredUntilActive = from.deferredUntilActive;
         blockedUntilTerminalCount = from.blockedUntilTerminalCount;
@@ -609,8 +617,10 @@ final class BroadcastRecord extends Binder {
      * Update the delivery state of the given {@link #receivers} index.
      * Automatically updates any time measurements related to state changes.
      */
-    void setDeliveryState(int index, @DeliveryState int deliveryState) {
+    void setDeliveryState(int index, @DeliveryState int deliveryState,
+            @NonNull String reason) {
         delivery[index] = deliveryState;
+        deliveryReasons[index] = reason;
         if (deferUntilActive) deferredUntilActive[index] = false;
         switch (deliveryState) {
             case DELIVERY_DELIVERED:
@@ -977,7 +987,8 @@ final class BroadcastRecord extends Binder {
             if (label == null) {
                 label = intent.toString();
             }
-            mCachedToShortString = label + "/u" + userId;
+            mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
+                    + ":" + label + "/u" + userId;
         }
         return mCachedToShortString;
     }

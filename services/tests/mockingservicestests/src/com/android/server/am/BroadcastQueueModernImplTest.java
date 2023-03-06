@@ -558,7 +558,7 @@ public final class BroadcastQueueModernImplTest {
 
         // To maximize test coverage, dump current state; we're not worried
         // about the actual output, just that we don't crash
-        queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED);
+        queue.getActive().setDeliveryState(0, BroadcastRecord.DELIVERY_SCHEDULED, "Test-driven");
         queue.dumpLocked(SystemClock.uptimeMillis(),
                 new IndentingPrintWriter(new PrintWriter(new ByteArrayOutputStream())));
 

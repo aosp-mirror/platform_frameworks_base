@@ -90,7 +90,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -602,6 +601,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         r.enqueueTime = SystemClock.uptimeMillis();
         r.enqueueRealTime = SystemClock.elapsedRealtime();
         r.enqueueClockTime = System.currentTimeMillis();
+        mHistory.onBroadcastEnqueuedLocked(r);
 
         ArraySet<BroadcastRecord> replacedBroadcasts = mReplacedBroadcastsCache.getAndSet(null);
         if (replacedBroadcasts == null) {
@@ -825,8 +825,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (app != null && app.isInFullBackup()) {
             return "isInFullBackup";
         }
-        if (mSkipPolicy.shouldSkip(r, receiver)) {
-            return "mSkipPolicy";
+        final String skipReason = mSkipPolicy.shouldSkipMessage(r, receiver);
+        if (skipReason != null) {
+            return skipReason;
         }
         final Intent receiverIntent = r.getReceiverIntent(receiver);
         if (receiverIntent == null) {
@@ -1100,7 +1101,8 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private void setDeliveryState(@Nullable BroadcastProcessQueue queue,
             @Nullable ProcessRecord app, @NonNull BroadcastRecord r, int index,
-            @NonNull Object receiver, @DeliveryState int newDeliveryState, String reason) {
+            @NonNull Object receiver, @DeliveryState int newDeliveryState,
+            @NonNull String reason) {
         final int cookie = traceBegin("setDeliveryState");
         final int oldDeliveryState = getDeliveryState(r, index);
         boolean checkFinished = false;
@@ -1108,7 +1110,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // Only apply state when we haven't already reached a terminal state;
         // this is how we ignore racing timeout messages
         if (!isDeliveryStateTerminal(oldDeliveryState)) {
-            r.setDeliveryState(index, newDeliveryState);
+            r.setDeliveryState(index, newDeliveryState, reason);
             if (oldDeliveryState == BroadcastRecord.DELIVERY_DEFERRED) {
                 r.deferredCount--;
             } else if (newDeliveryState == BroadcastRecord.DELIVERY_DEFERRED) {
@@ -1659,7 +1661,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         mService.notifyBroadcastFinishedLocked(r);
         r.finishTime = SystemClock.uptimeMillis();
         r.nextReceiver = r.receivers.size();
-        mHistory.addBroadcastToHistoryLocked(r);
+        mHistory.onBroadcastFinishedLocked(r);
 
         BroadcastQueueImpl.logBootCompletedBroadcastCompletionLatencyIfPossible(r);
 
@@ -1833,8 +1835,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         if (dumpConstants) {
             mConstants.dump(ipw);
         }
+
         if (dumpHistory) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             needSep = mHistory.dumpLocked(ipw, dumpPackage, mQueueName, sdf, dumpAll, needSep);
         }
         return needSep;
