@@ -2342,9 +2342,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        mTempConfiguration.setTo(getConfiguration());
+        // Get from super to avoid using the updated global config from the override method.
+        final Configuration selfConfiguration = super.getConfiguration();
+        mTempConfiguration.setTo(selfConfiguration);
         super.onConfigurationChanged(newParentConfig);
-        final int diff = getConfiguration().diff(mTempConfiguration);
+        final int diff = selfConfiguration.diff(mTempConfiguration);
         if (diff != 0) {
             mLastConfigReportedToClient = false;
         }
