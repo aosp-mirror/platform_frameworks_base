@@ -415,14 +415,15 @@ fun CredentialEntryRow(
             credentialEntryInfo.credentialType == CredentialType.PASSWORD) {
             "••••••••••••"
         } else {
-            if (TextUtils.isEmpty(credentialEntryInfo.displayName))
-                credentialEntryInfo.credentialTypeDisplayName
-            else
-                credentialEntryInfo.credentialTypeDisplayName +
-                    stringResource(
-                        R.string.get_dialog_sign_in_type_username_separator
-                    ) +
-                    credentialEntryInfo.displayName
+            val itemsToDisplay = listOf(
+                credentialEntryInfo.displayName,
+                credentialEntryInfo.credentialTypeDisplayName,
+                credentialEntryInfo.providerDisplayName
+            ).filterNot(TextUtils::isEmpty)
+            if (itemsToDisplay.isEmpty()) null
+            else itemsToDisplay.joinToString(
+                separator = stringResource(R.string.get_dialog_sign_in_type_username_separator)
+            )
         },
     )
 }
