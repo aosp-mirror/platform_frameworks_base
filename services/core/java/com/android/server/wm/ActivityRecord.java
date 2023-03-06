@@ -5228,8 +5228,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor.mAppVisibilitiesChangedSinceLastPause = true;
     }
 
-    @VisibleForTesting
-    void setVisibility(boolean visible, boolean deferHidingClient) {
+    private void setVisibility(boolean visible, boolean deferHidingClient) {
         final AppTransition appTransition = getDisplayContent().mAppTransition;
 
         // Don't set visibility to false if we were already not visible. This prevents WM from
