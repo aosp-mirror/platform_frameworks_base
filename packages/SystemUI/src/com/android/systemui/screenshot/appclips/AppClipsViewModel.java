@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.appclips;
 
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
-
-import static androidx.annotation.VisibleForTesting.PACKAGE_PRIVATE;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -31,7 +29,6 @@ import android.net.Uri;
 import android.os.Process;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -39,11 +36,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.screenshot.appclips.AppClipsCrossProcessHelper;
+import com.android.systemui.screenshot.ImageExporter;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -52,8 +48,7 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /** A {@link ViewModel} to help with the App Clips screenshot flow. */
-@VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-public final class AppClipsViewModel extends ViewModel {
+final class AppClipsViewModel extends ViewModel {
 
     private final AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
     private final ImageExporter mImageExporter;
@@ -80,8 +75,7 @@ public final class AppClipsViewModel extends ViewModel {
     }
 
     /** Grabs a screenshot and updates the {@link Bitmap} set in screenshot {@link LiveData}. */
-    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-    public void performScreenshot() {
+    void performScreenshot() {
         mBgExecutor.execute(() -> {
             Bitmap screenshot = mAppClipsCrossProcessHelper.takeScreenshot();
             mMainExecutor.execute(() -> {
@@ -95,14 +89,12 @@ public final class AppClipsViewModel extends ViewModel {
     }
 
     /** Returns a {@link LiveData} that holds the captured screenshot. */
-    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-    public LiveData<Bitmap> getScreenshot() {
+    LiveData<Bitmap> getScreenshot() {
         return mScreenshotLiveData;
     }
 
     /** Returns a {@link LiveData} that holds the {@link Uri} where screenshot is saved. */
-    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-    public LiveData<Uri> getResultLiveData() {
+    LiveData<Uri> getResultLiveData() {
         return mResultLiveData;
     }
 
@@ -110,8 +102,7 @@ public final class AppClipsViewModel extends ViewModel {
      * Returns a {@link LiveData} that holds the error codes for
      * {@link Intent#EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE}.
      */
-    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-    public LiveData<Integer> getErrorLiveData() {
+    LiveData<Integer> getErrorLiveData() {
         return mErrorLiveData;
     }
 
@@ -119,8 +110,7 @@ public final class AppClipsViewModel extends ViewModel {
      * Saves the provided {@link Drawable} to storage then informs the result {@link Uri} to
      * {@link LiveData}.
      */
-    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-    public void saveScreenshotThenFinish(Drawable screenshotDrawable, Rect bounds) {
+    void saveScreenshotThenFinish(Drawable screenshotDrawable, Rect bounds) {
         mBgExecutor.execute(() -> {
             // Render the screenshot bitmap in background.
             Bitmap screenshotBitmap = renderBitmap(screenshotDrawable, bounds);
@@ -128,7 +118,7 @@ public final class AppClipsViewModel extends ViewModel {
             // Export and save the screenshot in background.
             // TODO(b/267310185): Save to work profile UserHandle.
             ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
-                    mBgExecutor, UUID.randomUUID(), screenshotBitmap, ZonedDateTime.now(),
+                    mBgExecutor, UUID.randomUUID(), screenshotBitmap,
                     Process.myUserHandle());
 
             // Get the result and update state on main thread.
@@ -160,8 +150,7 @@ public final class AppClipsViewModel extends ViewModel {
     }
 
     /** Helper factory to help with injecting {@link AppClipsViewModel}. */
-    @VisibleForTesting(otherwise = PACKAGE_PRIVATE)
-    public static final class Factory implements ViewModelProvider.Factory {
+    static final class Factory implements ViewModelProvider.Factory {
 
         private final AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
         private final ImageExporter mImageExporter;

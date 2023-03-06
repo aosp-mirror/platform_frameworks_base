@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.appclips;
 
-import static com.android.systemui.screenshot.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
-import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
-import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
-import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
-import static com.android.systemui.screenshot.AppClipsTrampolineActivity.PERMISSION_SELF;
-import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
-import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
+import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_ACCEPTED;
+import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_CANCELLED;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.ACTION_FINISH_FROM_TRAMPOLINE;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_CALLING_PACKAGE_NAME;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_RESULT_RECEIVER;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.PERMISSION_SELF;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -52,6 +52,8 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLogger.UiEventEnum;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.screenshot.CropView;
+import com.android.systemui.screenshot.MagnifierView;
 import com.android.systemui.settings.UserTracker;
 
 import javax.inject.Inject;

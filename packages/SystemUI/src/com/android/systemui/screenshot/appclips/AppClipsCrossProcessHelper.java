@@ -32,12 +32,12 @@ import javax.inject.Inject;
 
 /** An intermediary singleton object to help communicating with the cross process service. */
 @SysUISingleton
-public class AppClipsCrossProcessHelper {
+class AppClipsCrossProcessHelper {
 
     private final ServiceConnector<IAppClipsScreenshotHelperService> mProxyConnector;
 
     @Inject
-    public AppClipsCrossProcessHelper(@Application Context context) {
+    AppClipsCrossProcessHelper(@Application Context context) {
         mProxyConnector = new ServiceConnector.Impl<IAppClipsScreenshotHelperService>(context,
                 new Intent(context, AppClipsScreenshotHelperService.class),
                 Context.BIND_AUTO_CREATE | Context.BIND_WAIVE_PRIORITY
@@ -52,7 +52,7 @@ public class AppClipsCrossProcessHelper {
      * pass around but not a {@link Bitmap}.
      */
     @Nullable
-    public Bitmap takeScreenshot() {
+    Bitmap takeScreenshot() {
         try {
             AndroidFuture<ScreenshotHardwareBufferInternal> future =
                     mProxyConnector.postForResult(
