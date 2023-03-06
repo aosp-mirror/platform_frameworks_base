@@ -17,8 +17,10 @@
 package com.android.server.media;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.os.ServiceManager;
@@ -47,6 +49,19 @@ import android.os.ServiceManager;
                 audioService,
                 onDeviceRouteChangedListener);
     }
+
+    /**
+     * Select the route with the given built-in or wired {@link MediaRoute2Info.Type}.
+     *
+     * <p>If the type is {@code null} then unselects the route and falls back to the default device
+     * route observed from
+     * {@link com.android.server.audio.AudioService#startWatchingRoutes(IAudioRoutesObserver)}.
+     *
+     * @param type device type. May be {@code null} to unselect currently selected route.
+     * @return whether the selection succeeds. If the selection fails the state of the controller
+     * remains intact.
+     */
+    boolean selectRoute(@Nullable @MediaRoute2Info.Type Integer type);
 
     /**
      * Returns currently selected device (built-in or wired) route.
