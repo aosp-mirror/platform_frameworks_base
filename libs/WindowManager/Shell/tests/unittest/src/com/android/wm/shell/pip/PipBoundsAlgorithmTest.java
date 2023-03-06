@@ -55,25 +55,28 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
     private static final float MAX_ASPECT_RATIO = 2f;
     private static final int DEFAULT_MIN_EDGE_SIZE = 100;
 
+    /** The minimum possible size of the override min size's width or height */
+    private static final int OVERRIDABLE_MIN_SIZE = 40;
+
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private DisplayInfo mDefaultDisplayInfo;
-    private PipBoundsState mPipBoundsState;
-    private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipBoundsState mPipBoundsState; private PipSizeSpecHandler mPipSizeSpecHandler;
+    private PipDisplayLayoutState mPipDisplayLayoutState;
 
 
     @Before
     public void setUp() throws Exception {
         initializeMockResources();
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
-        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mPipSizeSpecHandler, mPipDisplayLayoutState);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState,
                 new PipSnapAlgorithm(), new PipKeepClearAlgorithmInterface() {},
                 mPipSizeSpecHandler);
 
         DisplayLayout layout =
                 new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true);
-        mPipBoundsState.setDisplayLayout(layout);
-        mPipSizeSpecHandler.setDisplayLayout(layout);
+        mPipDisplayLayoutState.setDisplayLayout(layout);
     }
 
     private void initializeMockResources() {
@@ -87,6 +90,9 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         res.addOverride(
                 R.dimen.default_minimal_size_pip_resizable_task,
                 DEFAULT_MIN_EDGE_SIZE);
+        res.addOverride(
+                R.dimen.overridable_minimal_size_pip_resizable_task,
+                OVERRIDABLE_MIN_SIZE);
         res.addOverride(
                 R.string.config_defaultPictureInPictureScreenEdgeInsets,
                 "16x16");
