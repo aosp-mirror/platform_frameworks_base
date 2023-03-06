@@ -21,6 +21,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
@@ -33,6 +35,7 @@ import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -43,6 +46,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -79,6 +83,12 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
     private final SyncTransactionQueue mSyncQueue;
     private final DisplayController mDisplayController;
     private final DisplayInsetsController mDisplayInsetsController;
+
+    /**
+     * The value of the {@link R.bool.config_reverseDefaultRotation} property which defines how
+     * {@link Display#getRotation} values are mapped to screen orientations
+     */
+    private final boolean mReverseDefaultRotationEnabled;
 
     @VisibleForTesting
     ActivityManager.RunningTaskInfo mLaunchRootTask;
@@ -168,6 +178,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         mDisplayInsetsController = displayInsetsController;
         mKidsModeSettingsObserver = kidsModeSettingsObserver;
         shellInit.addInitCallback(this::onInit, this);
+        mReverseDefaultRotationEnabled = context.getResources().getBoolean(
+                R.bool.config_reverseDefaultRotation);
     }
 
     public KidsModeTaskOrganizer(
@@ -191,6 +203,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
         shellInit.addInitCallback(this::onInit, this);
+        mReverseDefaultRotationEnabled = context.getResources().getBoolean(
+                R.bool.config_reverseDefaultRotation);
     }
 
     /**
@@ -269,7 +283,14 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         // Needed since many Kids apps aren't optimised to support both orientations and it will be
         // hard for kids to understand the app compat mode.
         // TODO(229961548): Remove ignoreOrientationRequest exception for Kids Mode once possible.
-        setIsIgnoreOrientationRequestDisabled(true);
+        if (mReverseDefaultRotationEnabled) {
+            setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ true,
+                    /* fromOrientations */ new int[]{SCREEN_ORIENTATION_REVERSE_LANDSCAPE},
+                    /* toOrientations */ new int[]{SCREEN_ORIENTATION_LANDSCAPE});
+        } else {
+            setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ true,
+                    /* fromOrientations */ null, /* toOrientations */ null);
+        }
         final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(DEFAULT_DISPLAY);
         if (displayLayout != null) {
             mDisplayWidth = displayLayout.width();
@@ -290,7 +311,8 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
 
     @VisibleForTesting
     void disable() {
-        setIsIgnoreOrientationRequestDisabled(false);
+        setOrientationRequestPolicy(/* isIgnoreOrientationRequestDisabled */ false,
+                /* fromOrientations */ null, /* toOrientations */ null);
         mDisplayInsetsController.removeInsetsChangedListener(DEFAULT_DISPLAY,
                 mOnInsetsChangedListener);
         mDisplayController.removeDisplayWindowListener(mOnDisplaysChangedListener);
