@@ -3302,8 +3302,6 @@ public class Vpn {
             mUnderlyingLinkProperties = null;
             mUnderlyingNetworkCapabilities = null;
             mRetryCount = 0;
-
-            startOrMigrateIkeSession(network);
         }
 
         @NonNull
@@ -3530,11 +3528,11 @@ public class Vpn {
         public void onDefaultNetworkCapabilitiesChanged(@NonNull NetworkCapabilities nc) {
             final NetworkCapabilities oldNc = mUnderlyingNetworkCapabilities;
             mUnderlyingNetworkCapabilities = nc;
-            // The oldNc may be null when it's not assigned yet.
-            final boolean subIdChanged =
-                    (oldNc == null) || !nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds());
-            // Update carrierConfig.
-            if (subIdChanged) {
+            if (oldNc == null) {
+                // A new default network is available.
+                startOrMigrateIkeSession(mActiveNetwork);
+            } else if (!nc.getSubscriptionIds().equals(oldNc.getSubscriptionIds())) {
+                // Renew carrierConfig values.
                 maybeMigrateIkeSession(mActiveNetwork);
             }
         }
