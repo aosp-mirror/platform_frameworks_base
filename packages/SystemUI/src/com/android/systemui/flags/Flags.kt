@@ -74,8 +74,12 @@ object Flags {
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
         releasedFlag(112, "notification_memory_monitor_enabled")
 
+    /**
+     * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
+     * enable it on release builds.
+     */
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-        unreleasedFlag(119, "notification_memory_logging_enabled", teamfood = true)
+        unreleasedFlag(119, "notification_memory_logging_enabled")
 
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
