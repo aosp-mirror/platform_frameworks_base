@@ -50,7 +50,9 @@ import android.telephony.TelephonyManager.EXTRA_SHOW_SPN
 import android.telephony.TelephonyManager.EXTRA_SPN
 import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
+import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
@@ -387,6 +389,24 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val expected = UnknownNetworkType
 
             assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_unknown_hasCorrectKey() =
+        runBlocking(IMMEDIATE) {
+            var latest: ResolvedNetworkType? = null
+            val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
+
+            val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
+            val type = NETWORK_TYPE_UNKNOWN
+            val expected = UnknownNetworkType
+            val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
+            callback.onDisplayInfoChanged(ti)
+
+            assertThat(latest).isEqualTo(expected)
+            assertThat(latest!!.lookupKey).isEqualTo(MobileMappings.toIconKey(type))
 
             job.cancel()
         }

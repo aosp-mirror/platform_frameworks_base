@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.model
 
 import android.telephony.Annotation.NetworkType
+import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.settingslib.SignalIcon
+import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
@@ -38,7 +40,7 @@ sealed interface ResolvedNetworkType : Diffable<ResolvedNetworkType> {
     }
 
     object UnknownNetworkType : ResolvedNetworkType {
-        override val lookupKey: String = "unknown"
+        override val lookupKey: String = MobileMappings.toIconKey(NETWORK_TYPE_UNKNOWN)
 
         override fun toString(): String = "Unknown"
     }
