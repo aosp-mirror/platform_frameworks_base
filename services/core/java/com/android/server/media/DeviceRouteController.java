@@ -16,32 +16,12 @@
 
 package com.android.server.media;
 
-import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
-import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
-import static android.media.MediaRoute2Info.FEATURE_LOCAL_PLAYBACK;
-import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
-import static android.media.MediaRoute2Info.TYPE_DOCK;
-import static android.media.MediaRoute2Info.TYPE_HDMI;
-import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
-import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
-import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.AudioRoutesInfo;
-import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
-import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Slog;
-
-import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.Objects;
 
 /**
  * Controls device routes.
@@ -49,145 +29,52 @@ import java.util.Objects;
  * <p>A device route is a system wired route, for example, built-in speaker, wired
  * headsets and headphones, dock, hdmi, or usb devices.
  *
- * <p>Thread safe.
- *
  * @see SystemMediaRoute2Provider
  */
-/* package */ final class DeviceRouteController {
+/* package */ interface DeviceRouteController {
 
-    private static final String TAG = "WiredRoutesController";
-
-    private static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
-
-    @NonNull
-    private final Context mContext;
-    @NonNull
-    private final AudioManager mAudioManager;
-    @NonNull
-    private final IAudioService mAudioService;
-
-    @NonNull
-    private final OnDeviceRouteChangedListener mOnDeviceRouteChangedListener;
-    @NonNull
-    private final AudioRoutesObserver mAudioRoutesObserver = new AudioRoutesObserver();
-
-    private int mDeviceVolume;
-    private MediaRoute2Info mDeviceRoute;
-
+    /**
+     * Returns a new instance of {@link DeviceRouteController}.
+     */
     /* package */ static DeviceRouteController createInstance(@NonNull Context context,
             @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
         AudioManager audioManager = context.getSystemService(AudioManager.class);
         IAudioService audioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
 
-        return new DeviceRouteController(context,
+        return new LegacyDeviceRouteController(context,
                 audioManager,
                 audioService,
                 onDeviceRouteChangedListener);
     }
 
-    @VisibleForTesting
-    /* package */ DeviceRouteController(@NonNull Context context,
-            @NonNull AudioManager audioManager,
-            @NonNull IAudioService audioService,
-            @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
-        Objects.requireNonNull(context);
-        Objects.requireNonNull(audioManager);
-        Objects.requireNonNull(audioService);
-        Objects.requireNonNull(onDeviceRouteChangedListener);
-
-        mContext = context;
-        mOnDeviceRouteChangedListener = onDeviceRouteChangedListener;
-
-        mAudioManager = audioManager;
-        mAudioService = audioService;
-
-        AudioRoutesInfo newAudioRoutes = null;
-        try {
-            newAudioRoutes = mAudioService.startWatchingRoutes(mAudioRoutesObserver);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Cannot connect to audio service to start listen to routes", e);
-        }
-
-        mDeviceRoute = createRouteFromAudioInfo(newAudioRoutes);
-    }
-
+    /**
+     * Returns currently selected device (built-in or wired) route.
+     *
+     * @return non-null device route.
+     */
     @NonNull
-    /* package */ synchronized MediaRoute2Info getDeviceRoute() {
-        return mDeviceRoute;
-    }
+    MediaRoute2Info getDeviceRoute();
 
-    /* package */ synchronized boolean updateVolume(int volume) {
-        if (mDeviceVolume == volume) {
-            return false;
-        }
+    /**
+     * Updates device route volume.
+     *
+     * @param volume specifies a volume for the device route or 0 for unknown.
+     * @return {@code true} if updated successfully and {@code false} otherwise.
+     */
+    boolean updateVolume(int volume);
 
-        mDeviceVolume = volume;
-        mDeviceRoute = new MediaRoute2Info.Builder(mDeviceRoute)
-                .setVolume(volume)
-                .build();
+    /**
+     * Interface for receiving events when device route has changed.
+     */
+    interface OnDeviceRouteChangedListener {
 
-        return true;
-    }
-
-    private MediaRoute2Info createRouteFromAudioInfo(@Nullable AudioRoutesInfo newRoutes) {
-        int name = R.string.default_audio_route_name;
-        int type = TYPE_BUILTIN_SPEAKER;
-
-        if (newRoutes != null) {
-            if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0) {
-                type = TYPE_WIRED_HEADPHONES;
-                name = com.android.internal.R.string.default_audio_route_name_headphones;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
-                type = TYPE_WIRED_HEADSET;
-                name = com.android.internal.R.string.default_audio_route_name_headphones;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
-                type = TYPE_DOCK;
-                name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HDMI) != 0) {
-                type = TYPE_HDMI;
-                name = com.android.internal.R.string.default_audio_route_name_external_device;
-            } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_USB) != 0) {
-                type = TYPE_USB_DEVICE;
-                name = com.android.internal.R.string.default_audio_route_name_usb;
-            }
-        }
-
-        synchronized (this) {
-            return new MediaRoute2Info.Builder(
-                    DEVICE_ROUTE_ID, mContext.getResources().getText(name).toString())
-                    .setVolumeHandling(mAudioManager.isVolumeFixed()
-                            ? MediaRoute2Info.PLAYBACK_VOLUME_FIXED
-                            : MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
-                    .setVolume(mDeviceVolume)
-                    .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
-                    .setType(type)
-                    .addFeature(FEATURE_LIVE_AUDIO)
-                    .addFeature(FEATURE_LIVE_VIDEO)
-                    .addFeature(FEATURE_LOCAL_PLAYBACK)
-                    .setConnectionState(MediaRoute2Info.CONNECTION_STATE_CONNECTED)
-                    .build();
-        }
-    }
-
-    private void notifyDeviceRouteUpdate(@NonNull MediaRoute2Info deviceRoute) {
-        mOnDeviceRouteChangedListener.onDeviceRouteChanged(deviceRoute);
-    }
-
-    /* package */ interface OnDeviceRouteChangedListener {
+        /**
+         * Called when device route has changed.
+         *
+         * @param deviceRoute non-null device route.
+         */
         void onDeviceRouteChanged(@NonNull MediaRoute2Info deviceRoute);
-    }
-
-    private class AudioRoutesObserver extends IAudioRoutesObserver.Stub {
-
-        @Override
-        public void dispatchAudioRoutesChanged(AudioRoutesInfo newAudioRoutes) {
-            MediaRoute2Info deviceRoute = createRouteFromAudioInfo(newAudioRoutes);
-            synchronized (DeviceRouteController.this) {
-                mDeviceRoute = deviceRoute;
-            }
-            notifyDeviceRouteUpdate(deviceRoute);
-        }
     }
 
 }
