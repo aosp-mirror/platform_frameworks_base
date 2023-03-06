@@ -364,6 +364,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
 
     /** Hides the window immediately until it is drawn in new rotation. */
     void hideImmediately(WindowToken windowToken) {
+        if (isTargetToken(windowToken)) return;
         final boolean original = mHideImmediately;
         mHideImmediately = true;
         final Operation op = new Operation(Operation.ACTION_FADE);
