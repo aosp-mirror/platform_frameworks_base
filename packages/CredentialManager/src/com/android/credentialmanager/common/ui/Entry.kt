@@ -98,7 +98,10 @@ fun Entry(
                 Column(modifier = Modifier.wrapContentSize()) {
                     SmallTitleText(entryHeadlineText)
                     if (passwordValue != null) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             val visualTransformation = remember { PasswordVisualTransformation() }
                             val originalPassword by remember {
                                 mutableStateOf(passwordValue)
@@ -112,7 +115,7 @@ fun Entry(
                             }
                             BodySmallText(displayedPassword.value)
                             ToggleVisibilityButton(
-                                modifier = Modifier.padding(start = 5.dp).size(24.dp),
+                                modifier = Modifier.padding(start = 12.dp, top = 5.dp).size(24.dp),
                                 onToggle = {
                                     if (it) {
                                         displayedPassword.value = originalPassword
