@@ -580,6 +580,13 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
+        if (focusedWin != null) {
+            final InsetsSourceProvider provider = focusedWin.getControllableInsetProvider();
+            if (provider != null && provider.getSource().getType() == Type.navigationBars()) {
+                // Navigation bar has control if it is focused.
+                return focusedWin;
+            }
+        }
         if (mPolicy.isForceShowNavigationBarEnabled() && focusedWin != null
                 && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
             // When "force show navigation bar" is enabled, it means both force visible is true, and
