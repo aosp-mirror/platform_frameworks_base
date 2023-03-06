@@ -1468,7 +1468,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             super.onInitializeAccessibilityNodeInfo(host, info);
             final AccessibilityAction clickAction = new AccessibilityAction(
                     AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
-                    R.string.magnification_mode_switch_click_label));
+                    R.string.magnification_open_settings_click_label));
             info.addAction(clickAction);
             info.setClickable(true);
             info.addAction(
