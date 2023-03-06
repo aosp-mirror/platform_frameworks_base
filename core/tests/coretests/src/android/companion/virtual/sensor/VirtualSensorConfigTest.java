@@ -26,6 +26,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.hardware.Sensor;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 
@@ -64,6 +65,24 @@ public class VirtualSensorConfigTest {
         //   0x800 is SENSOR_FLAG_DIRECT_CHANNEL_GRALLOC (i.e. TYPE_HARDWARE_BUFFER)
         //   7 is SENSOR_FLAG_SHIFT_DIRECT_REPORT
         assertThat(recreatedConfig.getFlags()).isEqualTo(0x400 | RATE_VERY_FAST << 7);
+    }
+
+    @Test
+    public void virtualSensorConfig_invalidName_throwsException() {
+        assertThrows(
+                NullPointerException.class,
+                () -> new VirtualSensorConfig.Builder(TYPE_ACCELEROMETER, null));
+    }
+
+    @Test
+    public void virtualSensorConfig_invalidType_throwsException() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new VirtualSensorConfig.Builder(Sensor.TYPE_ALL, SENSOR_NAME));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new VirtualSensorConfig.Builder(0, SENSOR_NAME));
     }
 
     @Test
