@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.appclips;
 
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
 
@@ -36,7 +36,7 @@ import android.os.UserHandle;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.screenshot.appclips.AppClipsCrossProcessHelper;
+import com.android.systemui.screenshot.ImageExporter;
 
 import com.google.common.util.concurrent.Futures;
 
@@ -46,7 +46,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.time.ZonedDateTime;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -62,7 +61,7 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     @Mock private AppClipsCrossProcessHelper mAppClipsCrossProcessHelper;
     @Mock private ImageExporter mImageExporter;
 
-    private com.android.systemui.screenshot.AppClipsViewModel mViewModel;
+    private AppClipsViewModel mViewModel;
 
     @Before
     public void setUp() {
@@ -99,8 +98,8 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void saveScreenshot_throwsError_shouldUpdateErrorWithFailed() {
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), any(
-                ZonedDateTime.class), any(UserHandle.class))).thenReturn(
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
+                any(UserHandle.class))).thenReturn(
                 Futures.immediateFailedFuture(new ExecutionException(new Throwable())));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT);
@@ -113,9 +112,9 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
 
     @Test
     public void saveScreenshot_failsSilently_shouldUpdateErrorWithFailed() {
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), any(
-                ZonedDateTime.class), any(UserHandle.class))).thenReturn(
-                Futures.immediateFuture(new ImageExporter.Result()));
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
+                any(UserHandle.class))).thenReturn(
+                        Futures.immediateFuture(new ImageExporter.Result()));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT);
         waitForIdleSync();
@@ -129,9 +128,8 @@ public final class AppClipsViewModelTest extends SysuiTestCase {
     public void saveScreenshot_succeeds_shouldUpdateResultWithUri() {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = FAKE_URI;
-        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null), any(
-                ZonedDateTime.class), any(UserHandle.class))).thenReturn(
-                Futures.immediateFuture(result));
+        when(mImageExporter.export(any(Executor.class), any(UUID.class), eq(null),
+                any(UserHandle.class))).thenReturn(Futures.immediateFuture(result));
 
         mViewModel.saveScreenshotThenFinish(FAKE_DRAWABLE, FAKE_RECT);
         waitForIdleSync();
