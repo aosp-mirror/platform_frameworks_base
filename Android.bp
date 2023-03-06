@@ -506,7 +506,7 @@ metalava_framework_docs_args = "" +
     "--hide Todo " +
     "--hide Typo " +
     "--hide UnavailableSymbol " +
-    "--manifest $(location core/res/AndroidManifest.xml) "
+    "--manifest $(location :frameworks-base-core-AndroidManifest.xml) "
 
 packages_to_document = [
     "android",
@@ -543,7 +543,7 @@ stubs_defaults {
     sdk_version: "none",
     system_modules: "none",
     java_version: "1.8",
-    arg_files: ["core/res/AndroidManifest.xml"],
+    arg_files: [":frameworks-base-core-AndroidManifest.xml"],
     aidl: {
         local_include_dirs: [
             "media/aidl",
