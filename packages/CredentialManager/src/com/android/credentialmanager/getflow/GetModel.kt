@@ -77,6 +77,7 @@ class CredentialEntryInfo(
     val credentialType: CredentialType,
     /** Localized type value of this credential used for display purpose. */
     val credentialTypeDisplayName: String,
+    val providerDisplayName: String,
     val userName: String,
     val displayName: String?,
     val icon: Drawable?,

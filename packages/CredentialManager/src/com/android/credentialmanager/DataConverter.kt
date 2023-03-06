@@ -149,7 +149,10 @@ class GetFlowUtils {
                         icon = providerIcon,
                         displayName = providerLabel,
                         credentialEntryList = getCredentialOptionInfoList(
-                            it.providerFlattenedComponentName, it.credentialEntries, context
+                            providerId = it.providerFlattenedComponentName,
+                            providerLabel = providerLabel,
+                            credentialEntries = it.credentialEntries,
+                            context = context
                         ),
                         authenticationEntryList = getAuthenticationEntryList(
                             it.providerFlattenedComponentName,
@@ -202,6 +205,7 @@ class GetFlowUtils {
          */
         private fun getCredentialOptionInfoList(
             providerId: String,
+            providerLabel: String,
             credentialEntries: List<Entry>,
             context: Context,
         ): List<CredentialEntryInfo> {
@@ -212,6 +216,7 @@ class GetFlowUtils {
                     is PasswordCredentialEntry -> {
                         result.add(CredentialEntryInfo(
                             providerId = providerId,
+                            providerDisplayName = providerLabel,
                             entryKey = it.key,
                             entrySubkey = it.subkey,
                             pendingIntent = credentialEntry.pendingIntent,
@@ -227,6 +232,7 @@ class GetFlowUtils {
                     is PublicKeyCredentialEntry -> {
                         result.add(CredentialEntryInfo(
                             providerId = providerId,
+                            providerDisplayName = providerLabel,
                             entryKey = it.key,
                             entrySubkey = it.subkey,
                             pendingIntent = credentialEntry.pendingIntent,
@@ -242,6 +248,7 @@ class GetFlowUtils {
                     is CustomCredentialEntry -> {
                         result.add(CredentialEntryInfo(
                             providerId = providerId,
+                            providerDisplayName = providerLabel,
                             entryKey = it.key,
                             entrySubkey = it.subkey,
                             pendingIntent = credentialEntry.pendingIntent,
