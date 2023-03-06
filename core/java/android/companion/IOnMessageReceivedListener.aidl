@@ -10,20 +10,14 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License for the specific language governing per  missions and
  * limitations under the License.
  */
 
-package com.android.credentialmanager.common.ui
+package android.companion;
 
-import androidx.compose.ui.unit.dp
+/** @hide */
+interface IOnMessageReceivedListener {
 
-/** Copied from androidx.compose.material3.tokens. */
-internal object ElevationTokens {
-    val Level0 = 0.0.dp
-    val Level1 = 1.0.dp
-    val Level2 = 3.0.dp
-    val Level3 = 6.0.dp
-    val Level4 = 8.0.dp
-    val Level5 = 12.0.dp
+    oneway void onMessageReceived(int associationId, in byte[] data);
 }

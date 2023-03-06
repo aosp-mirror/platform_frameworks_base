@@ -25,13 +25,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.ui.theme.Shapes
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 /**
  * Container card for the whole sheet.
@@ -50,9 +50,7 @@ fun SheetContainerCard(
         modifier = modifier.fillMaxWidth().wrapContentHeight(),
         border = null,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                ElevationTokens.Level1
-            ),
+            containerColor = LocalAndroidColorScheme.current.colorSurfaceBright,
         ),
     ) {
         if (topAppBar != null) {
