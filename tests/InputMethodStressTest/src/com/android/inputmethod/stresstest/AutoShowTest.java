@@ -61,14 +61,10 @@ import java.util.List;
 @RunWith(Parameterized.class)
 public final class AutoShowTest {
 
-    @Rule(order = 0) public DisableLockScreenRule mDisableLockScreenRule =
-            new DisableLockScreenRule();
-    @Rule(order = 1) public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
-    @Rule(order = 2) public ScreenOrientationRule mScreenOrientationRule =
-            new ScreenOrientationRule(true /* isPortrait */);
-    @Rule(order = 3) public PressHomeBeforeTestRule mPressHomeBeforeTestRule =
-            new PressHomeBeforeTestRule();
-    @Rule(order = 4) public ScreenCaptureRule mScreenCaptureRule =
+    @Rule(order = 0) public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
+    @Rule(order = 1) public ImeStressTestRule mImeStressTestRule =
+        new ImeStressTestRule(true /* useSimpleTestIme */);
+    @Rule(order = 2) public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
     @Parameterized.Parameters(
             name = "windowFocusFlags={0}, softInputVisibility={1}, softInputAdjustment={2}")

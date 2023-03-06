@@ -68,14 +68,10 @@ public final class ImeOpenCloseStressTest {
     private static final String TAG = "ImeOpenCloseStressTest";
     private static final int NUM_TEST_ITERATIONS = 10;
 
-    @Rule(order = 0) public DisableLockScreenRule mDisableLockScreenRule =
-            new DisableLockScreenRule();
-    @Rule(order = 1) public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
-    @Rule(order = 2) public ScreenOrientationRule mScreenOrientationRule =
-            new ScreenOrientationRule(true /* isPortrait */);
-    @Rule(order = 3) public PressHomeBeforeTestRule mPressHomeBeforeTestRule =
-            new PressHomeBeforeTestRule();
-    @Rule(order = 4) public ScreenCaptureRule mScreenCaptureRule =
+    @Rule(order = 0) public UnlockScreenRule mUnlockScreenRule = new UnlockScreenRule();
+    @Rule(order = 1) public ImeStressTestRule mImeStressTestRule =
+            new ImeStressTestRule(true /* useSimpleTestIme */);
+    @Rule(order = 2) public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
 
     private final Instrumentation mInstrumentation;
@@ -499,8 +495,6 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testRotateScreenWithKeyboardOn() throws Exception {
-        // TODO(b/256739702): Keyboard disappears after rotating screen to landscape mode if
-        // android:configChanges="orientation|screenSize" is not set
         Intent intent =
                 createIntent(
                         mWindowFocusFlags,
