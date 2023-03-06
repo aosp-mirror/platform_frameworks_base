@@ -1,19 +1,22 @@
 package com.android.systemui.biometrics.domain.interactor
 
+import android.hardware.biometrics.AuthenticateOptions
 import android.hardware.biometrics.IBiometricContextListener
 import android.hardware.biometrics.IBiometricContextListener.FoldState
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
 import com.android.systemui.unfold.updates.FoldStateProvider
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,63 +41,122 @@ class LogContextInteractorImplTest : SysuiTestCase() {
 
     private val testScope = TestScope()
 
-    @Mock private lateinit var statusBarStateController: StatusBarStateController
-    @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Mock private lateinit var foldProvider: FoldStateProvider
+
+    private lateinit var keyguardTransitionRepository: FakeKeyguardTransitionRepository
 
     private lateinit var interactor: LogContextInteractorImpl
 
     @Before
     fun setup() {
+        keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         interactor =
             LogContextInteractorImpl(
                 testScope.backgroundScope,
-                statusBarStateController,
-                wakefulnessLifecycle,
-                foldProvider
+                foldProvider,
+                KeyguardTransitionInteractor(
+                    keyguardTransitionRepository,
+                ),
             )
     }
 
     @Test
-    fun isDozingChanges() =
+    fun isAodChanges() =
         testScope.runTest {
-            whenever(statusBarStateController.isDozing).thenReturn(true)
+            val isAod = collectLastValue(interactor.isAod)
 
-            val isDozing = collectLastValue(interactor.isDozing)
-            runCurrent()
-            val listener = statusBarStateController.captureListener()
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.OFF)
+            assertThat(isAod()).isFalse()
 
-            assertThat(isDozing()).isTrue()
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.DOZING)
+            assertThat(isAod()).isFalse()
 
-            listener.onDozingChanged(true)
-            listener.onDozingChanged(true)
-            listener.onDozingChanged(false)
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.DREAMING)
+            assertThat(isAod()).isFalse()
 
-            assertThat(isDozing()).isFalse()
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
+            assertThat(isAod()).isTrue()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(isAod()).isFalse()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(isAod()).isFalse()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.LOCKSCREEN)
+            assertThat(isAod()).isFalse()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.GONE)
+            assertThat(isAod()).isFalse()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.OCCLUDED)
+            assertThat(isAod()).isFalse()
         }
 
     @Test
     fun isAwakeChanges() =
         testScope.runTest {
-            whenever(wakefulnessLifecycle.wakefulness)
-                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE)
-
             val isAwake = collectLastValue(interactor.isAwake)
-            runCurrent()
-            val listener = wakefulnessLifecycle.captureObserver()
 
-            assertThat(isAwake()).isTrue()
-
-            listener.onStartedGoingToSleep()
-            listener.onFinishedGoingToSleep()
-            listener.onStartedWakingUp()
-
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.OFF)
             assertThat(isAwake()).isFalse()
 
-            listener.onFinishedWakingUp()
-            listener.onPostFinishedWakingUp()
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.DOZING)
+            assertThat(isAwake()).isFalse()
 
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.DREAMING)
             assertThat(isAwake()).isTrue()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
+            assertThat(isAwake()).isFalse()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(isAwake()).isTrue()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(isAwake()).isTrue()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.LOCKSCREEN)
+            assertThat(isAwake()).isTrue()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.GONE)
+            assertThat(isAwake()).isTrue()
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.OCCLUDED)
+            assertThat(isAwake()).isTrue()
+        }
+
+    @Test
+    fun displayStateChanges() =
+        testScope.runTest {
+            val displayState = collectLastValue(interactor.displayState)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.OFF)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_NO_UI)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.DOZING)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_NO_UI)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.DREAMING)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_SCREENSAVER)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_AOD)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.LOCKSCREEN)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.GONE)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_UNKNOWN)
+
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.OCCLUDED)
+            assertThat(displayState()).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
         }
 
     @Test
@@ -123,74 +185,66 @@ class LogContextInteractorImplTest : SysuiTestCase() {
     @Test
     fun contextSubscriberChanges() =
         testScope.runTest {
-            whenever(statusBarStateController.isDozing).thenReturn(false)
-            whenever(wakefulnessLifecycle.wakefulness)
-                .thenReturn(WakefulnessLifecycle.WAKEFULNESS_AWAKE)
             runCurrent()
-
             val foldListener = foldProvider.captureListener()
             foldListener.onFoldUpdate(FOLD_UPDATE_START_CLOSING)
             foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_CLOSED)
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
 
-            var dozing: Boolean? = null
+            var aod: Boolean? = null
             var awake: Boolean? = null
             var folded: Int? = null
+            var displayState: Int? = null
             val job =
                 interactor.addBiometricContextListener(
                     object : IBiometricContextListener.Stub() {
-                        override fun onDozeChanged(isDozing: Boolean, isAwake: Boolean) {
-                            dozing = isDozing
+                        override fun onDozeChanged(isAod: Boolean, isAwake: Boolean) {
+                            aod = isAod
                             awake = isAwake
                         }
 
                         override fun onFoldChanged(foldState: Int) {
                             folded = foldState
                         }
+
+                        override fun onDisplayStateChanged(newDisplayState: Int) {
+                            displayState = newDisplayState
+                        }
                     }
                 )
             runCurrent()
 
-            val statusBarStateListener = statusBarStateController.captureListener()
-            val wakefullnessObserver = wakefulnessLifecycle.captureObserver()
-
-            assertThat(dozing).isFalse()
-            assertThat(awake).isTrue()
+            assertThat(aod).isTrue()
+            assertThat(awake).isFalse()
             assertThat(folded).isEqualTo(FoldState.FULLY_CLOSED)
+            assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_AOD)
 
-            statusBarStateListener.onDozingChanged(true)
-            wakefullnessObserver.onStartedGoingToSleep()
             foldListener.onFoldUpdate(FOLD_UPDATE_START_OPENING)
             foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_HALF_OPEN)
-            wakefullnessObserver.onFinishedGoingToSleep()
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.LOCKSCREEN)
             runCurrent()
 
-            assertThat(dozing).isTrue()
-            assertThat(awake).isFalse()
+            assertThat(aod).isFalse()
+            assertThat(awake).isTrue()
             assertThat(folded).isEqualTo(FoldState.HALF_OPENED)
+            assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
 
             job.cancel()
 
             // stale updates should be ignored
-            statusBarStateListener.onDozingChanged(false)
-            wakefullnessObserver.onFinishedWakingUp()
             foldListener.onFoldUpdate(FOLD_UPDATE_FINISH_FULL_OPEN)
+            keyguardTransitionRepository.startTransitionTo(KeyguardState.AOD)
             runCurrent()
 
-            assertThat(dozing).isTrue()
-            assertThat(awake).isFalse()
+            assertThat(aod).isFalse()
+            assertThat(awake).isTrue()
             assertThat(folded).isEqualTo(FoldState.HALF_OPENED)
+            assertThat(displayState).isEqualTo(AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN)
         }
 }
 
-private fun StatusBarStateController.captureListener() =
-    withArgCaptor<StatusBarStateController.StateListener> {
-        verify(this@captureListener).addCallback(capture())
-    }
-
-private fun WakefulnessLifecycle.captureObserver() =
-    withArgCaptor<WakefulnessLifecycle.Observer> {
-        verify(this@captureObserver).addObserver(capture())
-    }
+private suspend fun FakeKeyguardTransitionRepository.startTransitionTo(newState: KeyguardState) =
+    sendTransitionStep(TransitionStep(to = newState, transitionState = TransitionState.STARTED))
 
 private fun FoldStateProvider.captureListener() =
     withArgCaptor<FoldStateProvider.FoldUpdatesListener> {
