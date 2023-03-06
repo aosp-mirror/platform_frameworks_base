@@ -99,6 +99,9 @@ public class SensorController {
 
     private int createSensorInternal(IBinder sensorToken, VirtualSensorConfig config)
             throws SensorCreationException {
+        if (config.getType() <= 0) {
+            throw new SensorCreationException("Received an invalid virtual sensor type.");
+        }
         final int handle = mSensorManagerInternal.createRuntimeSensor(mVirtualDeviceId,
                 config.getType(), config.getName(),
                 config.getVendor() == null ? "" : config.getVendor(), config.getFlags(),
