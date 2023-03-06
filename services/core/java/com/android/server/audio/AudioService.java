@@ -8402,7 +8402,9 @@ public class AudioService extends IAudioService.Stub
                     if (isMutable()) {
                         // For call stream, align mute only when muted, not when index is set to 0
                         mVolumeGroupState.mute(
-                                forceMuteState ? mIsMuted : groupIndex == 0 || mIsMuted);
+                                forceMuteState ? mIsMuted :
+                                        (groupIndex == 0 && !isCallStream(mStreamType))
+                                                || mIsMuted);
                     }
                 }
             }
