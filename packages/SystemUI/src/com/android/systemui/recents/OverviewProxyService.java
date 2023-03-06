@@ -631,7 +631,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
         final NotificationPanelViewController panelController =
-                mCentralSurfacesOptionalLazy.get().get().getNotificationPanelViewController();
+                mCentralSurfacesOptionalLazy.get()
+                        .map(CentralSurfaces::getNotificationPanelViewController)
+                        .orElse(null);
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment
                     + " navBarView=" + navBarView + " panelController=" + panelController);
