@@ -16,6 +16,7 @@
 
 package com.android.internal.statusbar;
 
+import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -31,7 +32,9 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final int mDisabledFlags1;                   // switch[0]
     public final int mAppearance;                       // switch[1]
     public final AppearanceRegion[] mAppearanceRegions; // switch[2]
+    @InputMethodService.ImeWindowVisibility
     public final int mImeWindowVis;                     // switch[3]
+    @InputMethodService.BackDispositionMode
     public final int mImeBackDisposition;               // switch[4]
     public final boolean mShowImeSwitcher;              // switch[5]
     public final int mDisabledFlags2;                   // switch[6]
@@ -44,10 +47,12 @@ public final class RegisterStatusBarResult implements Parcelable {
     public final LetterboxDetails[] mLetterboxDetails;
 
     public RegisterStatusBarResult(ArrayMap<String, StatusBarIcon> icons, int disabledFlags1,
-            int appearance, AppearanceRegion[] appearanceRegions, int imeWindowVis,
-            int imeBackDisposition, boolean showImeSwitcher, int disabledFlags2, IBinder imeToken,
-            boolean navbarColorManagedByIme, int behavior, int requestedVisibleTypes,
-            String packageName, int transientBarTypes, LetterboxDetails[] letterboxDetails) {
+            int appearance, AppearanceRegion[] appearanceRegions,
+            @InputMethodService.ImeWindowVisibility int imeWindowVis,
+            @InputMethodService.BackDispositionMode int imeBackDisposition, boolean showImeSwitcher,
+            int disabledFlags2, IBinder imeToken, boolean navbarColorManagedByIme, int behavior,
+            int requestedVisibleTypes, String packageName, int transientBarTypes,
+            LetterboxDetails[] letterboxDetails) {
         mIcons = new ArrayMap<>(icons);
         mDisabledFlags1 = disabledFlags1;
         mAppearance = appearance;

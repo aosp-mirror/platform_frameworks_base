@@ -339,8 +339,9 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void setImeWindowStatus(int displayId, IBinder token, int vis, int backDisposition,
-            boolean showImeSwitcher) {
+    public void setImeWindowStatus(int displayId, IBinder token,
+            @InputMethodService.ImeWindowVisibility int vis,
+            @InputMethodService.BackDispositionMode int backDisposition, boolean showImeSwitcher) {
         boolean imeShown = mNavBarHelper.isImeShown(vis);
         if (!imeShown) {
             // Count imperceptible changes as visible so we transition taskbar out quickly.
