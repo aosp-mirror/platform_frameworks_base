@@ -233,6 +233,8 @@ constructor(
             // If we don't have a resume action, check if we haven't already
             if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession()) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
+                // Set null action to prevent additional attempts to connect
+                mediaDataManager.setResumeAction(key, null)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager
                 val serviceIntent = Intent(MediaBrowserService.SERVICE_INTERFACE)
@@ -243,9 +245,6 @@ constructor(
                     backgroundExecutor.execute {
                         tryUpdateResumptionList(key, inf!!.get(0).componentInfo.componentName)
                     }
-                } else {
-                    // No service found
-                    mediaDataManager.setResumeAction(key, null)
                 }
             }
         }
@@ -257,8 +256,6 @@ constructor(
      */
     private fun tryUpdateResumptionList(key: String, componentName: ComponentName) {
         Log.d(TAG, "Testing if we can connect to $componentName")
-        // Set null action to prevent additional attempts to connect
-        mediaDataManager.setResumeAction(key, null)
         mediaBrowser =
             mediaBrowserFactory.create(
                 object : ResumeMediaBrowser.Callback() {

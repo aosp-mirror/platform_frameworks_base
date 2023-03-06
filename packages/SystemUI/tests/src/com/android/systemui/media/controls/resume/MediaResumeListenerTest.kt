@@ -282,6 +282,25 @@ class MediaResumeListenerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnLoadTwice_onlyChecksOnce() {
+        // When data is first loaded,
+        setUpMbsWithValidResolveInfo()
+        resumeListener.onMediaDataLoaded(KEY, null, data)
+
+        // We notify the manager to set a null action
+        verify(mediaDataManager).setResumeAction(KEY, null)
+
+        // If we then get another update from the app before the first check completes
+        assertThat(executor.numPending()).isEqualTo(1)
+        var dataWithCheck = data.copy(hasCheckedForResume = true)
+        resumeListener.onMediaDataLoaded(KEY, null, dataWithCheck)
+
+        // We do not try to start another check
+        assertThat(executor.numPending()).isEqualTo(1)
+        verify(mediaDataManager).setResumeAction(KEY, null)
+    }
+
+    @Test
     fun testOnUserUnlock_loadsTracks() {
         // Set up mock service to successfully find valid media
         val description = MediaDescription.Builder().setTitle(TITLE).build()
@@ -361,7 +380,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 assertThat(result.size).isEqualTo(3)
                 assertThat(result[2].toLong()).isEqualTo(currentTime)
             }
-        verify(sharedPrefsEditor, times(1)).apply()
+        verify(sharedPrefsEditor).apply()
     }
 
     @Test
@@ -400,8 +419,8 @@ class MediaResumeListenerTest : SysuiTestCase() {
         resumeListener.userUnlockReceiver.onReceive(mockContext, intent)
 
         // We add its resume controls
-        verify(resumeBrowser, times(1)).findRecentMedia()
-        verify(mediaDataManager, times(1))
+        verify(resumeBrowser).findRecentMedia()
+        verify(mediaDataManager)
             .addResumptionControls(anyInt(), any(), any(), any(), any(), any(), eq(PACKAGE_NAME))
     }
 
@@ -482,7 +501,7 @@ class MediaResumeListenerTest : SysuiTestCase() {
                 assertThat(result.size).isEqualTo(3)
                 assertThat(result[2].toLong()).isEqualTo(currentTime)
             }
-        verify(sharedPrefsEditor, times(1)).apply()
+        verify(sharedPrefsEditor).apply()
     }
 
     @Test
