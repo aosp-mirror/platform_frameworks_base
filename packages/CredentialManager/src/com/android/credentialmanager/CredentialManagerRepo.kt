@@ -42,11 +42,13 @@ import com.android.credentialmanager.createflow.DisabledProviderInfo
 import com.android.credentialmanager.createflow.EnabledProviderInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
 import com.android.credentialmanager.getflow.GetCredentialUiState
+import com.android.credentialmanager.getflow.findAutoSelectEntry
 import androidx.credentials.CreateCredentialRequest.DisplayInfo
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CreatePasswordRequest
 import androidx.credentials.GetPasswordOption
 import androidx.credentials.GetPublicKeyCredentialOption
+import com.android.credentialmanager.common.ProviderActivityState
 
 import java.time.Instant
 
@@ -128,10 +130,20 @@ class CredentialManagerRepo(
                     getCredentialUiState = null,
                 )
             }
-            RequestInfo.TYPE_GET -> UiState(
-                createCredentialUiState = null,
-                getCredentialUiState = getCredentialInitialUiState(originName)!!,
-            )
+            RequestInfo.TYPE_GET -> {
+                val getCredentialInitialUiState = getCredentialInitialUiState(originName)!!
+                val autoSelectEntry =
+                    findAutoSelectEntry(getCredentialInitialUiState.providerDisplayInfo)
+                UiState(
+                    createCredentialUiState = null,
+                    getCredentialUiState = getCredentialInitialUiState,
+                    selectedEntry = autoSelectEntry,
+                    providerActivityState =
+                    if (autoSelectEntry == null) ProviderActivityState.NOT_APPLICABLE
+                    else ProviderActivityState.READY_TO_LAUNCH,
+                    isAutoSelectFlow = autoSelectEntry != null,
+                )
+            }
             else -> throw IllegalStateException("Unrecognized request type: ${requestInfo.type}")
         }
     }
