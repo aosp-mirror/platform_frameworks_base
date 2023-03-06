@@ -2074,6 +2074,14 @@ package android.media.soundtrigger {
 
   public final class SoundTriggerManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public static android.media.soundtrigger.SoundTriggerInstrumentation attachInstrumentation(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.GlobalCallback);
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForModule(@NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties);
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForTestModule();
+    method @NonNull public static java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
+  }
+
+  public static class SoundTriggerManager.Model {
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.SoundModel getSoundModel();
   }
 
 }
