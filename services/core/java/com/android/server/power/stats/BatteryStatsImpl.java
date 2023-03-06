@@ -12688,8 +12688,8 @@ public class BatteryStatsImpl extends BatteryStats {
             energy = info.getControllerEnergyUsed();
             if (!info.getUidTraffic().isEmpty()) {
                 for (UidTraffic traffic : info.getUidTraffic()) {
-                    uidRxBytes.incrementValue(traffic.getUid(), traffic.getRxBytes());
-                    uidTxBytes.incrementValue(traffic.getUid(), traffic.getTxBytes());
+                    uidRxBytes.put(traffic.getUid(), traffic.getRxBytes());
+                    uidTxBytes.put(traffic.getUid(), traffic.getTxBytes());
                 }
             }
         }
