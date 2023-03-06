@@ -19625,7 +19625,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public void setApplicationExemptions(String packageName, int[] exemptions) {
+    public void setApplicationExemptions(String callerPackage, String packageName,
+            int[] exemptions) {
         if (!mHasFeature) {
             return;
         }
@@ -19636,7 +19637,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_POLICY_APP_EXEMPTIONS));
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
         final ApplicationInfo packageInfo;
         packageInfo = getPackageInfoWithNullCheck(packageName, caller);
 
