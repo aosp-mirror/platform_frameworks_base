@@ -322,7 +322,7 @@ fun MoreOptionTopAppBar(
                         contentDescription = stringResource(
                             R.string.accessibility_back_arrow_button
                         ),
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
