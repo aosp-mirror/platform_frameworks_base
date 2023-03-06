@@ -62,7 +62,11 @@ import java.util.Objects;
     private final AudioRoutesObserver mAudioRoutesObserver = new AudioRoutesObserver();
 
     private int mDeviceVolume;
+
+    @NonNull
     private MediaRoute2Info mDeviceRoute;
+    @Nullable
+    private MediaRoute2Info mSelectedRoute;
 
     @VisibleForTesting
     /* package */ AudioPoliciesDeviceRouteController(@NonNull Context context,
@@ -91,14 +95,26 @@ import java.util.Objects;
     }
 
     @Override
-    public boolean selectRoute(@Nullable Integer type) {
-        // No-op as the controller does not support selection from the outside of the class.
-        return false;
+    public synchronized boolean selectRoute(@Nullable Integer type) {
+        if (type == null) {
+            mSelectedRoute = null;
+            return true;
+        }
+
+        if (!isDeviceRouteType(type)) {
+            return false;
+        }
+
+        mSelectedRoute = createRouteFromAudioInfo(type);
+        return true;
     }
 
     @Override
     @NonNull
     public synchronized MediaRoute2Info getDeviceRoute() {
+        if (mSelectedRoute != null) {
+            return mSelectedRoute;
+        }
         return mDeviceRoute;
     }
 
@@ -109,6 +125,13 @@ import java.util.Objects;
         }
 
         mDeviceVolume = volume;
+
+        if (mSelectedRoute != null) {
+            mSelectedRoute = new MediaRoute2Info.Builder(mSelectedRoute)
+                    .setVolume(volume)
+                    .build();
+        }
+
         mDeviceRoute = new MediaRoute2Info.Builder(mDeviceRoute)
                 .setVolume(volume)
                 .build();
@@ -116,27 +139,45 @@ import java.util.Objects;
         return true;
     }
 
+    @NonNull
     private MediaRoute2Info createRouteFromAudioInfo(@Nullable AudioRoutesInfo newRoutes) {
-        int name = R.string.default_audio_route_name;
         int type = TYPE_BUILTIN_SPEAKER;
 
         if (newRoutes != null) {
             if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0) {
                 type = TYPE_WIRED_HEADPHONES;
-                name = R.string.default_audio_route_name_headphones;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
                 type = TYPE_WIRED_HEADSET;
-                name = R.string.default_audio_route_name_headphones;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                 type = TYPE_DOCK;
-                name = R.string.default_audio_route_name_dock_speakers;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HDMI) != 0) {
                 type = TYPE_HDMI;
-                name = R.string.default_audio_route_name_external_device;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_USB) != 0) {
                 type = TYPE_USB_DEVICE;
-                name = R.string.default_audio_route_name_usb;
             }
+        }
+
+        return createRouteFromAudioInfo(type);
+    }
+
+    @NonNull
+    private MediaRoute2Info createRouteFromAudioInfo(@MediaRoute2Info.Type int type) {
+        int name = R.string.default_audio_route_name;
+
+        switch (type) {
+            case TYPE_WIRED_HEADPHONES:
+            case TYPE_WIRED_HEADSET:
+                name = R.string.default_audio_route_name_headphones;
+                break;
+            case TYPE_DOCK:
+                name = R.string.default_audio_route_name_dock_speakers;
+                break;
+            case TYPE_HDMI:
+                name = R.string.default_audio_route_name_external_device;
+                break;
+            case TYPE_USB_DEVICE:
+                name = R.string.default_audio_route_name_usb;
+                break;
         }
 
         synchronized (this) {
@@ -156,19 +197,43 @@ import java.util.Objects;
         }
     }
 
-    private void notifyDeviceRouteUpdate(@NonNull MediaRoute2Info deviceRoute) {
-        mOnDeviceRouteChangedListener.onDeviceRouteChanged(deviceRoute);
+    /**
+     * Checks if the given type is a device route.
+     *
+     * <p>Device route means a route which is either built-in or wired to the current device.
+     *
+     * @param type specifies the type of the device.
+     * @return {@code true} if the device is wired or built-in and {@code false} otherwise.
+     */
+    private boolean isDeviceRouteType(@MediaRoute2Info.Type int type) {
+        switch (type) {
+            case TYPE_BUILTIN_SPEAKER:
+            case TYPE_WIRED_HEADPHONES:
+            case TYPE_WIRED_HEADSET:
+            case TYPE_DOCK:
+            case TYPE_HDMI:
+            case TYPE_USB_DEVICE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     private class AudioRoutesObserver extends IAudioRoutesObserver.Stub {
 
         @Override
         public void dispatchAudioRoutesChanged(AudioRoutesInfo newAudioRoutes) {
+            boolean isDeviceRouteChanged;
             MediaRoute2Info deviceRoute = createRouteFromAudioInfo(newAudioRoutes);
+
             synchronized (AudioPoliciesDeviceRouteController.this) {
                 mDeviceRoute = deviceRoute;
+                isDeviceRouteChanged = mSelectedRoute == null;
             }
-            notifyDeviceRouteUpdate(deviceRoute);
+
+            if (isDeviceRouteChanged) {
+                mOnDeviceRouteChangedListener.onDeviceRouteChanged(deviceRoute);
+            }
         }
     }
 
