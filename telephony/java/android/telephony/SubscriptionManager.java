@@ -155,6 +155,10 @@ public class SubscriptionManager {
     private static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
             "cache_key.telephony.get_slot_index";
 
+    /** The IPC cache key shared by all subscription manager service cacheable properties. */
+    private static final String CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY =
+            "cache_key.telephony.subscription_manager_service";
+
     /** @hide */
     public static final String GET_SIM_SPECIFIC_SETTINGS_METHOD_NAME = "getSimSpecificSettings";
 
@@ -246,9 +250,19 @@ public class SubscriptionManager {
                     CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     private static VoidPropertyInvalidatedCache<Integer> sDefaultDataSubIdCache =
             new VoidPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
                     CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultDataSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
     private static VoidPropertyInvalidatedCache<Integer> sDefaultSmsSubIdCache =
@@ -256,9 +270,19 @@ public class SubscriptionManager {
                     CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultSmsSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     private static VoidPropertyInvalidatedCache<Integer> sActiveDataSubIdCache =
             new VoidPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
                     CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sGetActiveDataSubscriptionIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
     private static IntegerPropertyInvalidatedCache<Integer> sSlotIndexCache =
@@ -266,15 +290,30 @@ public class SubscriptionManager {
                     CACHE_KEY_SLOT_INDEX_PROPERTY,
                     INVALID_SIM_SLOT_INDEX);
 
+    private static IntegerPropertyInvalidatedCache<Integer> sGetSlotIndexCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSlotIndex,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SIM_SLOT_INDEX);
+
     private static IntegerPropertyInvalidatedCache<Integer> sSubIdCache =
             new IntegerPropertyInvalidatedCache<>(ISub::getSubId,
                     CACHE_KEY_SLOT_INDEX_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sGetSubIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
     /** Cache depends on getDefaultSubId, so we use the defaultSubId cache key */
     private static IntegerPropertyInvalidatedCache<Integer> sPhoneIdCache =
             new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
                     CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
+                    INVALID_PHONE_INDEX);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sGetPhoneIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_PHONE_INDEX);
 
     /**
@@ -1275,6 +1314,8 @@ public class SubscriptionManager {
 
     private final Context mContext;
 
+    private static boolean sIsSubscriptionManagerServiceEnabled = false;
+
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
     // the Context and subId.
     private static final Map<Pair<Context, Integer>, Resources> sResourcesCache =
@@ -1360,6 +1401,19 @@ public class SubscriptionManager {
     public SubscriptionManager(Context context) {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
+
+        sIsSubscriptionManagerServiceEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_using_subscription_manager_service);
+    }
+
+    /**
+     * @return {@code true} if the new subscription manager service is used. This is temporary and
+     * will be removed before Android 14 release.
+     *
+     * @hide
+     */
+    public static boolean isSubscriptionManagerServiceEnabled() {
+        return sIsSubscriptionManagerServiceEnabled;
     }
 
     private NetworkPolicyManager getNetworkPolicyManager() {
@@ -2135,6 +2189,7 @@ public class SubscriptionManager {
      * subscriptionId doesn't have an associated slot index.
      */
     public static int getSlotIndex(int subscriptionId) {
+        if (isSubscriptionManagerServiceEnabled()) return sGetSlotIndexCache.query(subscriptionId);
         return sSlotIndexCache.query(subscriptionId);
     }
 
@@ -2184,12 +2239,14 @@ public class SubscriptionManager {
             return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
 
+        if (isSubscriptionManagerServiceEnabled()) return sGetSubIdCache.query(slotIndex);
         return sSubIdCache.query(slotIndex);
     }
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static int getPhoneId(int subId) {
+        if (isSubscriptionManagerServiceEnabled()) return sGetPhoneIdCache.query(subId);
         return sPhoneIdCache.query(subId);
     }
 
@@ -2211,6 +2268,7 @@ public class SubscriptionManager {
      * @return the "system" default subscription id.
      */
     public static int getDefaultSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) return sGetDefaultSubIdCache.query(null);
         return sDefaultSubIdCache.query(null);
     }
 
@@ -2299,6 +2357,7 @@ public class SubscriptionManager {
      * @return the default SMS subscription Id.
      */
     public static int getDefaultSmsSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) return sGetDefaultSmsSubIdCache.query(null);
         return sDefaultSmsSubIdCache.query(null);
     }
 
@@ -2333,6 +2392,7 @@ public class SubscriptionManager {
      * @return the default data subscription Id.
      */
     public static int getDefaultDataSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) return sGetDefaultDataSubIdCache.query(null);
         return sDefaultDataSubIdCache.query(null);
     }
 
@@ -3795,6 +3855,9 @@ public class SubscriptionManager {
      * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) {
+            return sGetActiveDataSubscriptionIdCache.query(null);
+        }
         return sActiveDataSubIdCache.query(null);
     }
 
@@ -3838,6 +3901,11 @@ public class SubscriptionManager {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SLOT_INDEX_PROPERTY);
     }
 
+    /** @hide */
+    public static void invalidateSubscriptionManagerServiceCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY);
+    }
+
     /**
      * Allows a test process to disable client-side caching operations.
      *
@@ -3849,7 +3917,16 @@ public class SubscriptionManager {
         sActiveDataSubIdCache.disableLocal();
         sDefaultSmsSubIdCache.disableLocal();
         sSlotIndexCache.disableLocal();
+        sSubIdCache.disableLocal();
         sPhoneIdCache.disableLocal();
+
+        sGetDefaultSubIdCache.disableLocal();
+        sGetDefaultDataSubIdCache.disableLocal();
+        sGetActiveDataSubscriptionIdCache.disableLocal();
+        sGetDefaultSmsSubIdCache.disableLocal();
+        sGetSlotIndexCache.disableLocal();
+        sGetSubIdCache.disableLocal();
+        sGetPhoneIdCache.disableLocal();
     }
 
     /**
@@ -3862,7 +3939,16 @@ public class SubscriptionManager {
         sActiveDataSubIdCache.clear();
         sDefaultSmsSubIdCache.clear();
         sSlotIndexCache.clear();
+        sSubIdCache.clear();
         sPhoneIdCache.clear();
+
+        sGetDefaultSubIdCache.clear();
+        sGetDefaultDataSubIdCache.clear();
+        sGetActiveDataSubscriptionIdCache.clear();
+        sGetDefaultSmsSubIdCache.clear();
+        sGetSlotIndexCache.clear();
+        sGetSubIdCache.clear();
+        sGetPhoneIdCache.clear();
     }
 
     /**
