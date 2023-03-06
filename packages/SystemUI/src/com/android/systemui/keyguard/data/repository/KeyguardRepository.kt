@@ -80,6 +80,9 @@ interface KeyguardRepository {
      */
     val isKeyguardShowing: Flow<Boolean>
 
+    /** Is the keyguard in a unlocked state? */
+    val isKeyguardUnlocked: Flow<Boolean>
+
     /** Is an activity showing over the keyguard? */
     val isKeyguardOccluded: Flow<Boolean>
 
@@ -272,6 +275,31 @@ constructor(
                     keyguardStateController.isOccluded,
                     TAG,
                     "initial isKeyguardOccluded"
+                )
+
+                awaitClose { keyguardStateController.removeCallback(callback) }
+            }
+            .distinctUntilChanged()
+
+    override val isKeyguardUnlocked: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardStateController.Callback {
+                        override fun onUnlockedChanged() {
+                            trySendWithFailureLogging(
+                                keyguardStateController.isUnlocked,
+                                TAG,
+                                "updated isKeyguardUnlocked"
+                            )
+                        }
+                    }
+
+                keyguardStateController.addCallback(callback)
+                // Adding the callback does not send an initial update.
+                trySendWithFailureLogging(
+                    keyguardStateController.isUnlocked,
+                    TAG,
+                    "initial isKeyguardUnlocked"
                 )
 
                 awaitClose { keyguardStateController.removeCallback(callback) }
