@@ -134,7 +134,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
     private final ArraySet<RunningAppsChangedListener> mRunningAppsChangedListeners =
             new ArraySet<>();
     @Nullable private final SecureWindowCallback mSecureWindowCallback;
-    @Nullable private final List<String> mDisplayCategories;
+    @Nullable private final Set<String> mDisplayCategories;
 
     private final boolean mShowTasksInHostDeviceRecents;
 
@@ -178,7 +178,7 @@ public class GenericWindowPolicyController extends DisplayWindowPolicyController
             @NonNull ActivityBlockedCallback activityBlockedCallback,
             @NonNull SecureWindowCallback secureWindowCallback,
             @NonNull IntentListenerCallback intentListenerCallback,
-            @NonNull List<String> displayCategories,
+            @NonNull Set<String> displayCategories,
             boolean showTasksInHostDeviceRecents) {
         super();
         mAllowedUsers = allowedUsers;
