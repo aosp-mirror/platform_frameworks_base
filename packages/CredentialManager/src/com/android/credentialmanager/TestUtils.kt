@@ -155,21 +155,23 @@ class GetTestUtils {
             userName: String,
             userDisplayName: String?,
             lastUsedTime: Instant?,
+            isAutoSelectAllowed: Boolean = false,
         ): Entry {
-            val intent = Intent("com.androidauth.androidvault.CONFIRM_PASSWORD")
-                .setPackage("com.androidauth.androidvault")
-            intent.putExtra("provider_extra_sample", "testprovider")
-            val pendingIntent = PendingIntent.getActivity(
-                context, 1,
-                intent, (PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                or PendingIntent.FLAG_ONE_SHOT)
+            val intent = Intent(Settings.ACTION_SYNC_SETTINGS)
+            val pendingIntent =
+                PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            val candidateQueryData = Bundle()
+            candidateQueryData.putBoolean(
+                "androidx.credentials.BUNDLE_KEY_IS_AUTO_SELECT_ALLOWED",
+                isAutoSelectAllowed
             )
             val passkeyEntry = PublicKeyCredentialEntry.Builder(
                 context,
                 userName,
                 pendingIntent,
-                BeginGetPublicKeyCredentialOption(Bundle(), "id", "requestjson")
-            ).setDisplayName(userDisplayName).setLastUsedTime(lastUsedTime).build()
+                BeginGetPublicKeyCredentialOption(candidateQueryData, "id", "requestjson")
+            ).setDisplayName(userDisplayName).setLastUsedTime(lastUsedTime)
+                .setAutoSelectAllowed(isAutoSelectAllowed).build()
             return Entry(key, subkey, passkeyEntry.slice, Intent())
         }
     }

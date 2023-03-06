@@ -44,6 +44,9 @@ data class UiState(
     val selectedEntry: BaseEntry? = null,
     val providerActivityState: ProviderActivityState = ProviderActivityState.NOT_APPLICABLE,
     val dialogState: DialogState = DialogState.ACTIVE,
+    // True if the UI has one and onely one auto selectable entry. Its provider activiey will be
+    // launched immediately, and canceling it will cancel the whole UI flow.
+    val isAutoSelectFlow: Boolean = false,
 )
 
 class CredentialSelectorViewModel(
@@ -96,13 +99,20 @@ class CredentialSelectorViewModel(
         val resultCode = providerActivityResult.resultCode
         val resultData = providerActivityResult.data
         if (resultCode == Activity.RESULT_CANCELED) {
-            // Re-display the CredMan UI if the user canceled from the provider UI.
-            Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
-                " re-displaying our UI.")
-            uiState = uiState.copy(
-                selectedEntry = null,
-                providerActivityState = ProviderActivityState.NOT_APPLICABLE,
-            )
+            // Re-display the CredMan UI if the user canceled from the provider UI, or cancel
+            // the UI if this is the auto select flow.
+            if (uiState.isAutoSelectFlow) {
+                Log.d(Constants.LOG_TAG, "The auto selected provider activity was cancelled," +
+                    " ending the credential manager activity.")
+                onUserCancel()
+            } else {
+                Log.d(Constants.LOG_TAG, "The provider activity was cancelled," +
+                    " re-displaying our UI.")
+                uiState = uiState.copy(
+                    selectedEntry = null,
+                    providerActivityState = ProviderActivityState.NOT_APPLICABLE,
+                )
+            }
         } else {
             if (entry != null) {
                 Log.d(
