@@ -51,8 +51,8 @@ constructor(
         )
     }
 
-    fun logOnLost(network: Network) {
-        LoggerHelper.logOnLost(buffer, TAG, network)
+    fun logOnLost(network: Network, isDefaultNetworkCallback: Boolean) {
+        LoggerHelper.logOnLost(buffer, TAG, network, isDefaultNetworkCallback)
     }
 
     fun logOnServiceStateChanged(serviceState: ServiceState, subId: Int) {
