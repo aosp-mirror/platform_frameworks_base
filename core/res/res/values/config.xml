@@ -5873,9 +5873,6 @@
     <!-- Whether changing sensor privacy SW setting requires device to be unlocked -->
     <bool name="config_sensorPrivacyRequiresAuthentication">true</bool>
 
-    <!-- List containing the allowed install sources for accessibility service. -->
-    <string-array name="config_accessibility_allowed_install_source" translatable="false"/>
-
     <!-- Default value for Settings.ASSIST_LONG_PRESS_HOME_ENABLED -->
     <bool name="config_assistLongPressHomeEnabledDefault">true</bool>
     <!-- Default value for Settings.ASSIST_TOUCH_GESTURE_ENABLED -->
