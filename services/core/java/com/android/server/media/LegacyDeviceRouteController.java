@@ -100,6 +100,12 @@ import java.util.Objects;
     }
 
     @Override
+    public boolean selectRoute(@Nullable Integer type) {
+        // No-op as the controller does not support selection from the outside of the class.
+        return false;
+    }
+
+    @Override
     @NonNull
     public synchronized MediaRoute2Info getDeviceRoute() {
         return mDeviceRoute;
