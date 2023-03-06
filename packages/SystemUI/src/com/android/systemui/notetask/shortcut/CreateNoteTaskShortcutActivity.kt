@@ -17,8 +17,10 @@
 package com.android.systemui.notetask.shortcut
 
 import android.app.Activity
+import android.app.role.RoleManager
 import android.content.Intent
 import android.os.Bundle
+import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.annotation.DrawableRes
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -36,7 +38,11 @@ import javax.inject.Inject
  *   href="https://developer.android.com/develop/ui/views/launch/shortcuts/creating-shortcuts#custom-pinned">Creating
  *   a custom shortcut activity</a>
  */
-class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentActivity() {
+class CreateNoteTaskShortcutActivity
+@Inject
+constructor(
+    private val roleManager: RoleManager,
+) : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,12 +65,19 @@ class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentActivity()
         intent: Intent,
         @DrawableRes iconResource: Int,
     ): Intent {
+        val extras = PersistableBundle()
+
+        roleManager.getRoleHoldersAsUser(RoleManager.ROLE_NOTES, user).firstOrNull()?.let { name ->
+            extras.putString(EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE, name)
+        }
+
         val shortcutInfo =
             ShortcutInfoCompat.Builder(this, id)
                 .setIntent(intent)
                 .setShortLabel(shortLabel)
                 .setLongLived(true)
                 .setIcon(IconCompat.createWithResource(this, iconResource))
+                .setExtras(extras)
                 .build()
 
         return ShortcutManagerCompat.createShortcutResultIntent(
@@ -75,5 +88,16 @@ class CreateNoteTaskShortcutActivity @Inject constructor() : ComponentActivity()
 
     private companion object {
         private const val SHORTCUT_ID = "note-task-shortcut-id"
+
+        /**
+         * Shortcut extra which can point to a package name and can be used to indicate an alternate
+         * badge info. Launcher only reads this if the shortcut comes from a system app.
+         *
+         * Duplicated from [com.android.launcher3.icons.IconCache].
+         *
+         * @see com.android.launcher3.icons.IconCache.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
+         */
+        private const val EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE =
+            "extra_shortcut_badge_override_package"
     }
 }
