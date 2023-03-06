@@ -109,6 +109,10 @@ object Flags {
     @JvmField
     val NOTIFICATION_ANIMATE_BIG_PICTURE = unreleasedFlag(120, "notification_animate_big_picture")
 
+    @JvmField
+    val ANIMATED_NOTIFICATION_SHADE_INSETS =
+        unreleasedFlag(270682168, "animated_notification_shade_insets", teamfood = true)
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
