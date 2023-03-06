@@ -143,7 +143,6 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             return;
         }
         if (isSessionCancelled()) {
-            // TODO: Differentiate btw cancelled and false
             logApiCall(ApiName.CREATE_CREDENTIAL, /* apiStatus */
                     ApiStatus.METRICS_API_STATUS_CLIENT_CANCELED);
             finishSession(/*propagateCancellation=*/true);
@@ -168,7 +167,6 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             return;
         }
         if (isSessionCancelled()) {
-            // TODO: Differentiate btw cancelled and false
             logApiCall(ApiName.CREATE_CREDENTIAL, /* apiStatus */
                     ApiStatus.METRICS_API_STATUS_CLIENT_CANCELED);
             finishSession(/*propagateCancellation=*/true);
