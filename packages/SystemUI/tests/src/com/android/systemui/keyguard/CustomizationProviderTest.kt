@@ -45,6 +45,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRenderer
 import com.android.systemui.keyguard.ui.preview.KeyguardPreviewRendererFactory
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
@@ -91,6 +92,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
@@ -184,6 +186,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                logger = logger,
                 devicePolicyManager = devicePolicyManager,
                 backgroundDispatcher = testDispatcher,
             )

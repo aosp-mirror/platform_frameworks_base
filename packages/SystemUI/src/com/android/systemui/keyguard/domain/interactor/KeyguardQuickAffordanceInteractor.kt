@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardPickerFlag
 import com.android.systemui.keyguard.shared.model.KeyguardQuickAffordancePickerRepresentation
 import com.android.systemui.keyguard.shared.model.KeyguardSlotPickerRepresentation
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
@@ -68,6 +69,7 @@ constructor(
     private val featureFlags: FeatureFlags,
     private val repository: Lazy<KeyguardQuickAffordanceRepository>,
     private val launchAnimator: DialogLaunchAnimator,
+    private val logger: KeyguardQuickAffordancesMetricsLogger,
     private val devicePolicyManager: DevicePolicyManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
@@ -122,10 +124,12 @@ constructor(
      * @param configKey The configuration key corresponding to the [KeyguardQuickAffordanceModel] of
      *   the affordance that was clicked
      * @param expandable An optional [Expandable] for the activity- or dialog-launch animation
+     * @param slotId The id of the lockscreen slot that the affordance is in
      */
     fun onQuickAffordanceTriggered(
         configKey: String,
         expandable: Expandable?,
+        slotId: String,
     ) {
         @Suppress("UNCHECKED_CAST")
         val config =
@@ -139,6 +143,7 @@ constructor(
             Log.e(TAG, "Affordance config with key of \"$configKey\" not found!")
             return
         }
+        logger.logOnShortcutTriggered(slotId, configKey)
 
         when (val result = config.onTriggered(expandable)) {
             is KeyguardQuickAffordanceConfig.OnTriggeredResult.StartActivity ->
@@ -191,6 +196,7 @@ constructor(
                 affordanceIds = selections,
             )
 
+        logger.logOnShortcutSelected(slotId, affordanceId)
         return true
     }
 
