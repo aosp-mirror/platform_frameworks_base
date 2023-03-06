@@ -198,6 +198,11 @@ public class DisplayPolicy {
 
     private boolean mCanSystemBarsBeShownByUser;
 
+    /**
+     * Let remote insets controller control system bars regardless of other settings.
+     */
+    private boolean mRemoteInsetsControllerControlsSystemBars;
+
     StatusBarManagerInternal getStatusBarManagerInternal() {
         synchronized (mServiceAcquireLock) {
             if (mStatusBarManagerInternal == null) {
@@ -779,6 +784,17 @@ public class DisplayPolicy {
 
     public ScreenOnListener getScreenOnListener() {
         return mScreenOnListener;
+    }
+
+
+    boolean isRemoteInsetsControllerControllingSystemBars() {
+        return mRemoteInsetsControllerControlsSystemBars;
+    }
+
+    @VisibleForTesting
+    void setRemoteInsetsControllerControlsSystemBars(
+            boolean remoteInsetsControllerControlsSystemBars) {
+        mRemoteInsetsControllerControlsSystemBars = remoteInsetsControllerControlsSystemBars;
     }
 
     public void screenTurnedOn(ScreenOnListener screenOnListener) {
@@ -1664,6 +1680,8 @@ public class DisplayPolicy {
         mRightGestureInset = mGestureNavigationSettingsObserver.getRightSensitivity(res);
         mNavigationBarAlwaysShowOnSideGesture =
                 res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
+        mRemoteInsetsControllerControlsSystemBars = res.getBoolean(
+                R.bool.config_remoteInsetsControllerControlsSystemBars);
 
         updateConfigurationAndScreenSizeDependentBehaviors();
 
@@ -2553,7 +2571,7 @@ public class DisplayPolicy {
         pw.print(mForceShowNavigationBarEnabled);
         pw.print(" mAllowLockscreenWhenOn="); pw.println(mAllowLockscreenWhenOn);
         pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars=");
-        pw.println(mDisplayContent.getInsetsPolicy().getRemoteInsetsControllerControlsSystemBars());
+        pw.println(mRemoteInsetsControllerControlsSystemBars);
         pw.print(prefix); pw.println("mDecorInsetsInfo:");
         for (int rotation = 0; rotation < mDecorInsets.mInfoForRotation.length; rotation++) {
             final DecorInsets.Info info = mDecorInsets.mInfoForRotation[rotation];
