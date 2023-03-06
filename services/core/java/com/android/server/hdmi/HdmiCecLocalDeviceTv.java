@@ -682,20 +682,12 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
-        clearDeviceInfoList();
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
                 new DeviceDiscoveryCallback() {
                     @Override
                     public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
                         for (HdmiDeviceInfo info : deviceInfos) {
                             mService.getHdmiCecNetwork().addCecDevice(info);
-                        }
-
-                        // Since we removed all devices when it starts and
-                        // device discovery action does not poll local devices,
-                        // we should put device info of local device manually here
-                        for (HdmiCecLocalDevice device : mService.getAllCecLocalDevices()) {
-                            mService.getHdmiCecNetwork().addCecDevice(device.getDeviceInfo());
                         }
 
                         mSelectRequestBuffer.process();
