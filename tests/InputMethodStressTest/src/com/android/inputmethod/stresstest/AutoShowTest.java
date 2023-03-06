@@ -32,6 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Instrumentation;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.SystemClock;
 import android.platform.test.annotations.RootPermissionTest;
 import android.platform.test.rule.UnlockScreenRule;
@@ -69,8 +70,6 @@ public final class AutoShowTest {
             new PressHomeBeforeTestRule();
     @Rule(order = 4) public ScreenCaptureRule mScreenCaptureRule =
             new ScreenCaptureRule("/sdcard/InputMethodStressTest");
-
-    // TODO(b/240359838): add test case {@code Configuration.SCREENLAYOUT_SIZE_LARGE}.
     @Parameterized.Parameters(
             name = "windowFocusFlags={0}, softInputVisibility={1}, softInputAdjustment={2}")
     public static List<Object[]> windowAndSoftInputFlagParameters() {
@@ -80,11 +79,14 @@ public final class AutoShowTest {
     private final int mSoftInputFlags;
     private final int mWindowFocusFlags;
     private final Instrumentation mInstrumentation;
+    private final boolean mIsLargeScreen;
 
     public AutoShowTest(int windowFocusFlags, int softInputVisibility, int softInputAdjustment) {
         mSoftInputFlags = softInputVisibility | softInputAdjustment;
         mWindowFocusFlags = windowFocusFlags;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mIsLargeScreen = mInstrumentation.getContext().getResources()
+                .getConfiguration().isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
     }
 
     /**
@@ -322,8 +324,7 @@ public final class AutoShowTest {
         verifyClickBehavior(activity);
     }
 
-    public static void verifyAutoShowBehavior_forwardWithKeyboardOff(TestActivity activity) {
-        // public: also used by ImeOpenCloseStressTest
+    private void verifyAutoShowBehavior_forwardWithKeyboardOff(TestActivity activity) {
         if (hasUnfocusableWindowFlags(activity)) {
             verifyImeAlwaysHiddenWithWindowFlagSet(activity);
             return;
@@ -353,12 +354,12 @@ public final class AutoShowTest {
                 break;
             }
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED: {
-                if (softInputAdjustment
-                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                if ((softInputAdjustment
+                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) || mIsLargeScreen) {
                     // The current system behavior will choose to show IME automatically when
                     // navigating forward to an app that has no visibility state specified
                     // (i.e. SOFT_INPUT_STATE_UNSPECIFIED) with set SOFT_INPUT_ADJUST_RESIZE
-                    // flag.
+                    // flag or running on a large screen device.
                     waitOnMainUntilImeIsShown(editText);
                 } else {
                     verifyImeIsAlwaysHidden(editText);
@@ -370,7 +371,7 @@ public final class AutoShowTest {
         }
     }
 
-    private static void verifyAutoShowBehavior_forwardWithKeyboardOn(TestActivity activity) {
+    private void verifyAutoShowBehavior_forwardWithKeyboardOn(TestActivity activity) {
         int windowFlags = activity.getWindow().getAttributes().flags;
         int softInputMode = activity.getWindow().getAttributes().softInputMode;
         int softInputVisibility = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
@@ -414,12 +415,12 @@ public final class AutoShowTest {
                 break;
             }
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED: {
-                if (softInputAdjustment
-                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) {
+                if ((softInputAdjustment
+                        == WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE) || mIsLargeScreen) {
                     // The current system behavior will choose to show IME automatically when
-                    // navigating
-                    // forward to an app that has no visibility state specified  (i.e.
-                    // SOFT_INPUT_STATE_UNSPECIFIED) with set SOFT_INPUT_ADJUST_RESIZE flag.
+                    // navigating forward to an app that has no visibility state specified  (i.e.
+                    // SOFT_INPUT_STATE_UNSPECIFIED) with set SOFT_INPUT_ADJUST_RESIZE flag or
+                    // running on a large screen device.
                     waitOnMainUntilImeIsShown(editText);
                 } else {
                     verifyImeIsAlwaysHidden(editText);
