@@ -70,7 +70,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final String UNIQUE_ID_PREFIX = "local:";
 
-    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
+    private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
