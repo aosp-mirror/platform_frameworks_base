@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 
 /**
  * The headline for a screen. E.g. "Create a passkey for X", "Choose a saved sign-in for X".
@@ -57,12 +58,14 @@ fun BodyMediumText(text: String, modifier: Modifier = Modifier) {
  * Body-small typography; on-surface-variant color.
  */
 @Composable
-fun BodySmallText(text: String, modifier: Modifier = Modifier) {
+fun BodySmallText(text: String, modifier: Modifier = Modifier, enforceOneLine: Boolean = false) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodySmall,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE
     )
 }
 
@@ -83,12 +86,14 @@ fun LargeTitleText(text: String, modifier: Modifier = Modifier) {
  * Title-small typography; on-surface color.
  */
 @Composable
-fun SmallTitleText(text: String, modifier: Modifier = Modifier) {
+fun SmallTitleText(text: String, modifier: Modifier = Modifier, enforceOneLine: Boolean = false) {
     Text(
         modifier = modifier.wrapContentSize(),
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
         style = MaterialTheme.typography.titleSmall,
+        overflow = TextOverflow.Ellipsis,
+        maxLines = if (enforceOneLine) 1 else Int.MAX_VALUE
     )
 }
 
