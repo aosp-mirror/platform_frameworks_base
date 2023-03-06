@@ -2709,16 +2709,18 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void sendRegisteredOnlyBroadcast(String action) {
-        Intent intent = new Intent(action);
-        getContext().sendBroadcastAsUser(intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY),
-                UserHandle.ALL, null);
+        int[] userIds = mUmInternal.getProfileIds(mAmi.getCurrentUserId(), true);
+        Intent intent = new Intent(action).addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        for (int userId : userIds) {
+            getContext().sendBroadcastAsUser(intent, UserHandle.of(userId), null);
+        }
         // explicitly send the broadcast to all DND packages, even if they aren't currently running
-        intent.setFlags(0);
-        final Set<String> dndApprovedPackages = mConditionProviders.getAllowedPackages();
-        for (String pkg : dndApprovedPackages) {
-            intent.setPackage(pkg);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-            getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
+        for (int userId : userIds) {
+            for (String pkg : mConditionProviders.getAllowedPackages(userId)) {
+                Intent pkgIntent = new Intent(action).setPackage(pkg).setFlags(
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                getContext().sendBroadcastAsUser(pkgIntent, UserHandle.of(userId));
+            }
         }
     }
 
