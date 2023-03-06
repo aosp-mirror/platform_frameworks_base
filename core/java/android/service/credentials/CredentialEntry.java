@@ -97,9 +97,7 @@ public class CredentialEntry implements Parcelable {
      * @param slice the slice containing the metadata to be shown on the UI. Must be
      *              constructed through the androidx.credentials jetpack library.
      *
-     * @hide
      */
-    // TODO: Unhide this constructor when the registry APIs are stable
     public CredentialEntry(@NonNull String type, @NonNull Slice slice) {
         mBeginGetCredentialOption = null;
         mType = requireNonNull(type, "type must not be null");
