@@ -15775,7 +15775,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("setApplicationExemptions");
         if (mService != null) {
             try {
-                mService.setApplicationExemptions(packageName,
+                mService.setApplicationExemptions(mContext.getPackageName(), packageName,
                         ArrayUtils.convertToIntArray(new ArraySet<>(exemptions)));
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
