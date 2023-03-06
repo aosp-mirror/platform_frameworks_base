@@ -74,6 +74,7 @@ fun Entry(
     passwordValue: String? = null,
     /** If true, draws a trailing lock icon. */
     isLockedAuthEntry: Boolean = false,
+    enforceOneLine: Boolean = false,
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -93,10 +94,12 @@ fun Entry(
                     // has 8dp horizontal elements padding
                     horizontal = 8.dp, vertical = 16.dp,
                 ),
+                // Make sure the trailing icon and text column are centered vertically.
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.wrapContentSize()) {
-                    SmallTitleText(entryHeadlineText)
+                // Apply weight so that the trailing icon can always show.
+                Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
+                    SmallTitleText(text = entryHeadlineText, enforceOneLine = enforceOneLine)
                     if (passwordValue != null) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -113,7 +116,8 @@ fun Entry(
                                     ).text.text
                                 )
                             }
-                            BodySmallText(displayedPassword.value)
+                            BodySmallText(
+                                text = displayedPassword.value, enforceOneLine = enforceOneLine)
                             ToggleVisibilityButton(
                                 modifier = Modifier.padding(start = 12.dp, top = 5.dp).size(24.dp),
                                 onToggle = {
@@ -128,14 +132,14 @@ fun Entry(
                             )
                         }
                     } else if (entrySecondLineText != null) {
-                        BodySmallText(entrySecondLineText)
+                        BodySmallText(text = entrySecondLineText, enforceOneLine = enforceOneLine)
                     }
                     if (entryThirdLineText != null) {
-                        BodySmallText(entryThirdLineText)
+                        BodySmallText(text = entryThirdLineText, enforceOneLine = enforceOneLine)
                     }
                 }
                 if (isLockedAuthEntry) {
-                    Box(modifier = Modifier.wrapContentSize()) {
+                    Box(modifier = Modifier.wrapContentSize().padding(start = 16.dp)) {
                         Icon(
                             imageVector = Icons.Outlined.Lock,
                             // Decorative purpose only.
