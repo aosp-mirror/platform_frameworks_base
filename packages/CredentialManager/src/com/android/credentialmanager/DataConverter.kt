@@ -222,6 +222,8 @@ class GetFlowUtils {
                             displayName = credentialEntry.displayName?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
+                            isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
+                                credentialEntry.autoSelectAllowedFromOption,
                         ))
                     }
                     is PublicKeyCredentialEntry -> {
@@ -237,6 +239,8 @@ class GetFlowUtils {
                             displayName = credentialEntry.displayName?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
+                            isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
+                                credentialEntry.autoSelectAllowedFromOption,
                         ))
                     }
                     is CustomCredentialEntry -> {
@@ -252,6 +256,8 @@ class GetFlowUtils {
                             displayName = credentialEntry.subtitle?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
                             lastUsedTimeMillis = credentialEntry.lastUsedTime,
+                            isAutoSelectable = credentialEntry.isAutoSelectAllowed &&
+                                credentialEntry.autoSelectAllowedFromOption,
                         ))
                     }
                     else -> Log.d(

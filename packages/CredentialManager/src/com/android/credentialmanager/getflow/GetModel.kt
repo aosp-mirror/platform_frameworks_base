@@ -41,6 +41,23 @@ internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
             !state.requestDisplayInfo.preferImmediatelyAvailableCredentials)
 }
 
+internal fun findAutoSelectEntry(providerDisplayInfo: ProviderDisplayInfo): CredentialEntryInfo? {
+    if (providerDisplayInfo.authenticationEntryList.isNotEmpty()) {
+        return null
+    }
+    if (providerDisplayInfo.sortedUserNameToCredentialEntryList.size == 1) {
+        val entryList = providerDisplayInfo.sortedUserNameToCredentialEntryList.firstOrNull()
+            ?: return null
+        if (entryList.sortedCredentialEntryList.size == 1) {
+            val entry = entryList.sortedCredentialEntryList.firstOrNull() ?: return null
+            if (entry.isAutoSelectable) {
+                return entry
+            }
+        }
+    }
+    return null
+}
+
 data class ProviderInfo(
     /**
      * Unique id (component name) of this provider.
@@ -81,6 +98,7 @@ class CredentialEntryInfo(
     val displayName: String?,
     val icon: Drawable?,
     val lastUsedTimeMillis: Instant?,
+    val isAutoSelectable: Boolean,
 ) : BaseEntry(
     providerId,
     entryKey,
