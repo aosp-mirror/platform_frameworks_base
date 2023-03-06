@@ -37,6 +37,8 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -401,15 +403,21 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mAnimationController.deleteWindowMagnification(animationCallback);
     }
 
+    void deleteWindowMagnification() {
+        deleteWindowMagnification(/* hideSettingPanel= */ false);
+    }
+
     /**
      * Deletes the magnification window.
      */
-    void deleteWindowMagnification() {
+    void deleteWindowMagnification(boolean hideSettingPanel) {
         if (!isWindowVisible()) {
             return;
         }
 
-        closeMagnificationSettings();
+        if (!hideSettingPanel) {
+            closeMagnificationSettings();
+        }
 
         if (mMirrorSurface != null) {
             mTransaction.remove(mMirrorSurface).apply();
@@ -487,7 +495,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         // Recreate the window again to correct the window appearance due to density or
         // window size changed not caused by rotation.
         if (isWindowVisible() && reCreateWindow) {
-            deleteWindowMagnification();
+            deleteWindowMagnification(/* hideSettingPanel= */ true);
             enableWindowMagnificationInternal(Float.NaN, Float.NaN, Float.NaN);
         }
     }
@@ -1398,6 +1406,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
                     A11Y_ACTION_SCALE_RANGE.clamp(scale));
         }
+
+        @Override
+        public void onSettingsPanelVisibilityChanged(boolean shown) {
+            updateDragHandleResourcesIfNeeded(/* settingsPanelIsShown= */ shown);
+        }
     };
 
     @Override
@@ -1434,6 +1447,20 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mDragView.setLayoutParams(layoutParams);
             mDragView.post(this::applyTapExcludeRegion);
         }
+    }
+
+    private void updateDragHandleResourcesIfNeeded(boolean settingsPanelIsShown) {
+        mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
+                ? R.drawable.accessibility_window_magnification_drag_handle_background_change
+                : R.drawable.accessibility_window_magnification_drag_handle_background));
+
+        PorterDuffColorFilter filter = new PorterDuffColorFilter(
+                mContext.getColor(settingsPanelIsShown
+                        ? R.color.magnification_border_color
+                        : R.color.magnification_drag_handle_stroke),
+                PorterDuff.Mode.SRC_ATOP);
+
+        mDragView.setColorFilter(filter);
     }
 
     private void animateBounceEffect() {

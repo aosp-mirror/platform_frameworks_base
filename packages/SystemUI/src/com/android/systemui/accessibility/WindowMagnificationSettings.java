@@ -230,14 +230,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
     };
 
-    private void applyResourcesValuesWithDensityChanged() {
-        if (mIsVisible) {
-            // Reset button to make its window layer always above the mirror window.
-            hideSettingPanel();
-            showSettingPanel(false);
-        }
-    }
-
     private boolean onTouch(View v, MotionEvent event) {
         if (!mIsVisible) {
             return false;
@@ -323,6 +315,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
 
         mContext.unregisterReceiver(mScreenOffReceiver);
+        mCallback.onSettingsPanelVisibilityChanged(/* shown= */ false);
     }
 
     public void showSettingPanel() {
@@ -361,6 +354,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             // Exclude magnification switch button from system gesture area.
             setSystemGestureExclusion();
             mIsVisible = true;
+            mCallback.onSettingsPanelVisibilityChanged(/* shown= */ true);
         }
         mContext.registerReceiver(mScreenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
@@ -443,7 +437,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     void onConfigurationChanged(int configDiff) {
         if ((configDiff & ActivityInfo.CONFIG_UI_MODE) != 0
-                || (configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0) {
+                || (configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0
+                || (configDiff & ActivityInfo.CONFIG_FONT_SCALE) != 0
+                || (configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
+            // We listen to following config changes to trigger layout inflation:
+            // CONFIG_UI_MODE: theme change
+            // CONFIG_ASSETS_PATHS: wallpaper change
+            // CONFIG_FONT_SCALE: font size change
+            // CONFIG_DENSITY: display size change
+
             boolean showSettingPanelAfterThemeChange = mIsVisible;
             hideSettingPanel(/* resetPosition= */ false);
             inflateView();
@@ -452,6 +454,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             }
             return;
         }
+
         if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
             final Rect previousDraggableBounds = new Rect(mDraggableWindowBounds);
             mDraggableWindowBounds.set(getDraggableWindowBounds());
@@ -463,10 +466,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                     + mDraggableWindowBounds.top;
             return;
         }
-        if ((configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
-            applyResourcesValuesWithDensityChanged();
-            return;
-        }
+
         if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
             updateAccessibilityWindowTitle();
             return;
