@@ -175,7 +175,8 @@ constructor(
                     areQuickAffordancesFullyOpaque,
                     selectedPreviewSlotId,
                 ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId ->
-                    val isSelected = selectedPreviewSlotId == position.toSlotId()
+                    val slotId = position.toSlotId()
+                    val isSelected = selectedPreviewSlotId == slotId
                     model.toViewModel(
                         animateReveal = !previewMode.isInPreviewMode && animateReveal,
                         isClickable = isFullyOpaque && !previewMode.isInPreviewMode,
@@ -187,7 +188,8 @@ constructor(
                             previewMode.isInPreviewMode &&
                                 previewMode.shouldHighlightSelectedAffordance &&
                                 !isSelected,
-                        forceInactive = previewMode.isInPreviewMode
+                        forceInactive = previewMode.isInPreviewMode,
+                        slotId = slotId,
                     )
                 }
                 .distinctUntilChanged()
@@ -200,6 +202,7 @@ constructor(
         isSelected: Boolean,
         isDimmed: Boolean,
         forceInactive: Boolean,
+        slotId: String,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -212,6 +215,7 @@ constructor(
                         quickAffordanceInteractor.onQuickAffordanceTriggered(
                             configKey = parameters.configKey,
                             expandable = parameters.expandable,
+                            slotId = parameters.slotId,
                         )
                     },
                     isClickable = isClickable,
@@ -219,8 +223,11 @@ constructor(
                     isSelected = isSelected,
                     useLongPress = quickAffordanceInteractor.useLongPress,
                     isDimmed = isDimmed,
+                    slotId = slotId,
                 )
-            is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel()
+            is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel(
+                slotId = slotId,
+            )
         }
     }
 

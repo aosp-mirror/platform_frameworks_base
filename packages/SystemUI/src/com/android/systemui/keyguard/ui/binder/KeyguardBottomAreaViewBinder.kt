@@ -502,6 +502,7 @@ object KeyguardBottomAreaViewBinder {
                     KeyguardQuickAffordanceViewModel.OnClickedParameters(
                         configKey = configKey,
                         expandable = Expandable.fromView(view),
+                        slotId = viewModel.slotId,
                     )
                 )
             }
@@ -568,6 +569,7 @@ object KeyguardBottomAreaViewBinder {
                     KeyguardQuickAffordanceViewModel.OnClickedParameters(
                         configKey = viewModel.configKey,
                         expandable = Expandable.fromView(view),
+                        slotId = viewModel.slotId,
                     )
                 )
             }
