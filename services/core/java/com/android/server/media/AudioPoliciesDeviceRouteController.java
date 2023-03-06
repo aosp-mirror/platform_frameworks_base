@@ -42,19 +42,10 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
 
-/**
- * Controls device routes.
- *
- * <p>A device route is a system wired route, for example, built-in speaker, wired
- * headsets and headphones, dock, hdmi, or usb devices.
- *
- * <p>Thread safe.
- *
- * @see SystemMediaRoute2Provider
- */
-/* package */ final class LegacyDeviceRouteController implements DeviceRouteController {
 
-    private static final String TAG = "LDeviceRouteController";
+/* package */ final class AudioPoliciesDeviceRouteController implements DeviceRouteController {
+
+    private static final String TAG = "APDeviceRoutesController";
 
     private static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
 
@@ -74,7 +65,7 @@ import java.util.Objects;
     private MediaRoute2Info mDeviceRoute;
 
     @VisibleForTesting
-    /* package */ LegacyDeviceRouteController(@NonNull Context context,
+    /* package */ AudioPoliciesDeviceRouteController(@NonNull Context context,
             @NonNull AudioManager audioManager,
             @NonNull IAudioService audioService,
             @NonNull OnDeviceRouteChangedListener onDeviceRouteChangedListener) {
@@ -132,19 +123,19 @@ import java.util.Objects;
         if (newRoutes != null) {
             if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADPHONES) != 0) {
                 type = TYPE_WIRED_HEADPHONES;
-                name = com.android.internal.R.string.default_audio_route_name_headphones;
+                name = R.string.default_audio_route_name_headphones;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HEADSET) != 0) {
                 type = TYPE_WIRED_HEADSET;
-                name = com.android.internal.R.string.default_audio_route_name_headphones;
+                name = R.string.default_audio_route_name_headphones;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_DOCK_SPEAKERS) != 0) {
                 type = TYPE_DOCK;
-                name = com.android.internal.R.string.default_audio_route_name_dock_speakers;
+                name = R.string.default_audio_route_name_dock_speakers;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_HDMI) != 0) {
                 type = TYPE_HDMI;
-                name = com.android.internal.R.string.default_audio_route_name_external_device;
+                name = R.string.default_audio_route_name_external_device;
             } else if ((newRoutes.mainType & AudioRoutesInfo.MAIN_USB) != 0) {
                 type = TYPE_USB_DEVICE;
-                name = com.android.internal.R.string.default_audio_route_name_usb;
+                name = R.string.default_audio_route_name_usb;
             }
         }
 
@@ -174,7 +165,7 @@ import java.util.Objects;
         @Override
         public void dispatchAudioRoutesChanged(AudioRoutesInfo newAudioRoutes) {
             MediaRoute2Info deviceRoute = createRouteFromAudioInfo(newAudioRoutes);
-            synchronized (LegacyDeviceRouteController.this) {
+            synchronized (AudioPoliciesDeviceRouteController.this) {
                 mDeviceRoute = deviceRoute;
             }
             notifyDeviceRouteUpdate(deviceRoute);
