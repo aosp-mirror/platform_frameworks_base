@@ -2743,6 +2743,14 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
+        t.traceBegin("RegisterLogMteState");
+        try {
+            LogMteState.register(context);
+        } catch (Throwable e) {
+            reportWtf("RegisterLogMteState", e);
+        }
+        t.traceEnd();
+
         // Emit any pending system_server WTFs
         synchronized (SystemService.class) {
             if (sPendingWtfs != null) {
