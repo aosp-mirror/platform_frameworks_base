@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.screenshot;
+package com.android.systemui.screenshot.appclips;
 
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_BLOCKED_BY_ADMIN;
 import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_FAILED;
@@ -24,7 +24,7 @@ import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 
 import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
-import static com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
+import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
 
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
