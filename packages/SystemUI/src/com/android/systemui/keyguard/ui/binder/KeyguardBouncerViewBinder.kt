@@ -34,7 +34,6 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ActivityStarter
 import kotlinx.coroutines.awaitCancellation
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -112,16 +111,18 @@ object KeyguardBouncerViewBinder {
                     launch {
                         viewModel.show.collect {
                             // Reset Security Container entirely.
-                            view.visibility = View.VISIBLE
-                            securityContainerController.onBouncerVisibilityChanged(
-                                /* isVisible= */ true
-                            )
-                            securityContainerController.reinflateViewFlipper()
-                            securityContainerController.showPrimarySecurityScreen(
-                                /* turningOff= */ false
-                            )
-                            securityContainerController.appear()
-                            securityContainerController.onResume(KeyguardSecurityView.SCREEN_ON)
+                            securityContainerController.reinflateViewFlipper {
+                                // Reset Security Container entirely.
+                                view.visibility = View.VISIBLE
+                                securityContainerController.onBouncerVisibilityChanged(
+                                    /* isVisible= */ true
+                                )
+                                securityContainerController.showPrimarySecurityScreen(
+                                    /* turningOff= */ false
+                                )
+                                securityContainerController.appear()
+                                securityContainerController.onResume(KeyguardSecurityView.SCREEN_ON)
+                            }
                         }
                     }
 
