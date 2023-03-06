@@ -197,7 +197,6 @@ constructor(
 
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
-            var lastOrientation = -1
 
             override fun onDensityOrFontScaleChanged() {
                 // System font changes should only happen when UMO is offscreen or a flicker may
@@ -214,13 +213,6 @@ constructor(
             override fun onConfigChanged(newConfig: Configuration?) {
                 if (newConfig == null) return
                 isRtl = newConfig.layoutDirection == View.LAYOUT_DIRECTION_RTL
-                val newOrientation = newConfig.orientation
-                if (lastOrientation != newOrientation) {
-                    // The players actually depend on the orientation possibly, so we have to
-                    // recreate them (at least on large screen devices)
-                    lastOrientation = newOrientation
-                    updatePlayers(recreateMedia = true)
-                }
             }
 
             override fun onUiModeChanged() {
