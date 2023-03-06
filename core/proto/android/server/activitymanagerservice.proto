@@ -439,6 +439,7 @@ message ServiceRecordProto {
 
         optional int32 id = 1;
         optional .android.app.NotificationProto notification = 2;
+        optional int32 foregroundServiceType = 3;
     }
     optional Foreground foreground = 13;
 
