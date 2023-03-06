@@ -6413,7 +6413,7 @@ public class DevicePolicyManager {
     public void lockNow(@LockNowFlag int flags) {
         if (mService != null) {
             try {
-                mService.lockNow(flags, mParentInstance);
+                mService.lockNow(flags, mContext.getPackageName(), mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
