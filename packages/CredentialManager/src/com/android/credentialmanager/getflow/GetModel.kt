@@ -81,6 +81,7 @@ class CredentialEntryInfo(
     val userName: String,
     val displayName: String?,
     val icon: Drawable?,
+    val shouldTintIcon: Boolean,
     val lastUsedTimeMillis: Instant?,
 ) : BaseEntry(
     providerId,
