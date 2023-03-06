@@ -33,7 +33,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_PIP;
-import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
@@ -2330,7 +2329,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void applySleepTokens(boolean applyToRootTasks) {
-        boolean builtSleepTransition = false;
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
             // Set the sleeping state of the display.
             final DisplayContent display = getChildAt(displayNdx);
@@ -2339,30 +2337,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 continue;
             }
             display.setIsSleeping(displayShouldSleep);
-
-            if (display.mTransitionController.isShellTransitionsEnabled() && !builtSleepTransition
-                    // Only care if there are actual sleep tokens.
-                    && displayShouldSleep && !display.mAllSleepTokens.isEmpty()) {
-                builtSleepTransition = true;
-                // We don't actually care about collecting anything here. We really just want
-                // this as a signal to the transition-player.
-                final Transition transition = new Transition(TRANSIT_SLEEP, 0 /* flags */,
-                        display.mTransitionController, mWmService.mSyncEngine);
-                final Runnable sendSleepTransition = () -> {
-                    display.mTransitionController.requestStartTransition(transition,
-                            null /* trigger */, null /* remote */, null /* display */);
-                    // Force playing immediately so that unrelated ops can't be collected.
-                    transition.playNow();
-                };
-                if (display.mTransitionController.isCollecting()) {
-                    mWmService.mSyncEngine.queueSyncSet(
-                            () -> display.mTransitionController.moveToCollecting(transition),
-                            sendSleepTransition);
-                } else {
-                    display.mTransitionController.moveToCollecting(transition);
-                    sendSleepTransition.run();
-                }
-            }
 
             if (!applyToRootTasks) {
                 continue;
