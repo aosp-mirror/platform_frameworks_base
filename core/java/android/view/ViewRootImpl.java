@@ -7087,7 +7087,11 @@ public final class ViewRootImpl implements ViewParent,
                 final MotionEvent event = (MotionEvent)q.mEvent;
                 final int source = event.getSource();
                 if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
-                    mTrackball.process(event);
+                    // Do not synthesize events for relative mouse movement. If apps opt into
+                    // relative mouse movement they must be prepared to handle the events.
+                    if (!event.isFromSource(InputDevice.SOURCE_MOUSE_RELATIVE)) {
+                        mTrackball.process(event);
+                    }
                     return FINISH_HANDLED;
                 } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
                     mJoystick.process(event);
