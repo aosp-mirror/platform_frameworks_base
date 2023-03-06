@@ -637,6 +637,7 @@ fun PrimaryCreateOptionRow(
         // This subtitle would never be null for create password
             requestDisplayInfo.subtitle ?: ""
         else null,
+        enforceOneLine = true,
     )
 }
 
