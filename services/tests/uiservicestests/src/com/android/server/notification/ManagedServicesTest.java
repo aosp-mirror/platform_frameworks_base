@@ -24,6 +24,8 @@ import static android.service.notification.NotificationListenerService.META_DATA
 import static com.android.server.notification.ManagedServices.APPROVAL_BY_COMPONENT;
 import static com.android.server.notification.ManagedServices.APPROVAL_BY_PACKAGE;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -1201,28 +1203,11 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     mIpm, approvalLevel);
             loadXml(service);
 
-            List<String> allowedPackagesForUser0 = new ArrayList<>();
-            allowedPackagesForUser0.add("this.is.a.package.name");
-            allowedPackagesForUser0.add("another.package");
-            allowedPackagesForUser0.add("secondary");
-
-            List<String> actual = service.getAllowedPackages(0);
-            assertEquals(3, actual.size());
-            for (String pkg : allowedPackagesForUser0) {
-                assertTrue(actual.contains(pkg));
-            }
-
-            List<String> allowedPackagesForUser10 = new ArrayList<>();
-            allowedPackagesForUser10.add("this.is.another.package");
-            allowedPackagesForUser10.add("package");
-            allowedPackagesForUser10.add("this.is.another.package");
-            allowedPackagesForUser10.add("component");
-
-            actual = service.getAllowedPackages(10);
-            assertEquals(4, actual.size());
-            for (String pkg : allowedPackagesForUser10) {
-                assertTrue(actual.contains(pkg));
-            }
+            assertThat(service.getAllowedPackages(0)).containsExactly("this.is.a.package.name",
+                    "another.package", "secondary");
+            assertThat(service.getAllowedPackages(10)).containsExactly("this.is.another.package",
+                    "package", "this.is.another.package", "component");
+            assertThat(service.getAllowedPackages(999)).isEmpty();
         }
     }
 
@@ -1260,31 +1245,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
         loadXml(service);
 
         assertEquals(0, service.getAllowedComponents(10).size());
-    }
-
-    @Test
-    public void testGetAllowedPackages() throws Exception {
-        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
-                mIpm, APPROVAL_BY_COMPONENT);
-        loadXml(service);
-        service.mApprovalLevel = APPROVAL_BY_PACKAGE;
-        loadXml(service);
-
-        List<String> allowedPackages = new ArrayList<>();
-        allowedPackages.add("this.is.a.package.name");
-        allowedPackages.add("another.package");
-        allowedPackages.add("secondary");
-        allowedPackages.add("this.is.another.package");
-        allowedPackages.add("package");
-        allowedPackages.add("component");
-        allowedPackages.add("bananas!");
-        allowedPackages.add("non.user.set.package");
-
-        Set<String> actual = service.getAllowedPackages();
-        assertEquals(allowedPackages.size(), actual.size());
-        for (String pkg : allowedPackages) {
-            assertTrue(actual.contains(pkg));
-        }
     }
 
     @Test
