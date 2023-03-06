@@ -33,7 +33,9 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDoz
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
+import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isWakingOrStartingToWake
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
@@ -95,6 +97,9 @@ constructor(
         awaitClose { commandQueue.removeCallback(callback) }
     }
 
+    /** The device wake/sleep state */
+    val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
+
     /**
      * Dozing and dreaming have overlapping events. If the doze state remains in FINISH, it means
      * that doze mode is not running and DREAMING is ok to commence.
@@ -109,6 +114,12 @@ constructor(
                     isDreaming && isDozeOff(dozeTransitionModel.to)
                 }
             )
+            .sample(
+                wakefulnessModel,
+                { isAbleToDream, wakefulnessModel ->
+                    isAbleToDream && isWakingOrStartingToWake(wakefulnessModel)
+                }
+            )
             .flatMapLatest { isAbleToDream ->
                 flow {
                     delay(50)
@@ -119,6 +130,8 @@ constructor(
 
     /** Whether the keyguard is showing or not. */
     val isKeyguardShowing: Flow<Boolean> = repository.isKeyguardShowing
+    /** Whether the keyguard is unlocked or not. */
+    val isKeyguardUnlocked: Flow<Boolean> = repository.isKeyguardUnlocked
     /** Whether the keyguard is occluded (covered by an activity). */
     val isKeyguardOccluded: Flow<Boolean> = repository.isKeyguardOccluded
     /** Whether the keyguard is going away. */
@@ -127,8 +140,6 @@ constructor(
     val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerVisible
     /** Whether the alternate bouncer is showing or not. */
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
-    /** The device wake/sleep state */
-    val wakefulnessModel: Flow<WakefulnessModel> = repository.wakefulness
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
     /**
