@@ -21,7 +21,8 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.service.credentials.CredentialProviderInfo;
+import android.credentials.CredentialProviderInfo;
+import android.service.credentials.CredentialProviderInfoFactory;
 import android.util.Log;
 import android.util.Slog;
 
@@ -82,7 +83,7 @@ public final class CredentialManagerServiceImpl extends
             Log.i(TAG, "newServiceInfoLocked with null mInfo , "
                     + serviceComponent.getPackageName());
         }
-        mInfo = new CredentialProviderInfo(
+        mInfo = CredentialProviderInfoFactory.create(
                 getContext(), serviceComponent,
                 mUserId, /*isSystemProvider=*/false);
         return mInfo.getServiceInfo();

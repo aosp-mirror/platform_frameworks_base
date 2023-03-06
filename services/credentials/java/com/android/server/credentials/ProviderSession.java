@@ -27,11 +27,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.credentials.Credential;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
 import com.android.server.credentials.metrics.CandidateProviderMetric;
