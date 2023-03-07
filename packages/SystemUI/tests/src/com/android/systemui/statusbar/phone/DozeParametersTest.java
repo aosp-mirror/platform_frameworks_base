@@ -180,6 +180,7 @@ public class DozeParametersTest extends SysuiTestCase {
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
         mDozeParameters.onTuningChanged(Settings.Secure.DOZE_ALWAYS_ON, "1");
 
+        verify(mScreenOffAnimationController).onAlwaysOnChanged(false);
         assertThat(mDozeParameters.getAlwaysOn()).isFalse();
     }
 
@@ -196,13 +197,16 @@ public class DozeParametersTest extends SysuiTestCase {
         mBatteryStateChangeCallback.getValue().onPowerSaveChanged(true);
 
         verify(callback, times(2)).onAlwaysOnChange();
+        verify(mScreenOffAnimationController, times(2)).onAlwaysOnChanged(false);
         assertThat(mDozeParameters.getAlwaysOn()).isFalse();
 
+        reset(mScreenOffAnimationController);
         reset(callback);
         when(mBatteryController.isAodPowerSave()).thenReturn(false);
         mBatteryStateChangeCallback.getValue().onPowerSaveChanged(true);
 
         verify(callback).onAlwaysOnChange();
+        verify(mScreenOffAnimationController).onAlwaysOnChanged(true);
         assertThat(mDozeParameters.getAlwaysOn()).isTrue();
     }
 
