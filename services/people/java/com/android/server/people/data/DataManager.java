@@ -129,7 +129,6 @@ public class DataManager {
     private final List<PeopleService.ConversationsListener> mConversationsListeners =
             new ArrayList<>(1);
     private final Handler mHandler;
-
     private ContentObserver mCallLogContentObserver;
     private ContentObserver mMmsSmsContentObserver;
 
@@ -1106,6 +1105,7 @@ public class DataManager {
                 @NonNull List<ShortcutInfo> shortcuts, @NonNull UserHandle user) {
             mInjector.getBackgroundExecutor().execute(() -> {
                 PackageData packageData = getPackage(packageName, user.getIdentifier());
+                boolean hasCachedShortcut = false;
                 for (ShortcutInfo shortcut : shortcuts) {
                     if (ShortcutHelper.isConversationShortcut(
                             shortcut, mShortcutServiceInternal, user.getIdentifier())) {
@@ -1114,14 +1114,17 @@ public class DataManager {
                                     ? packageData.getConversationInfo(shortcut.getId()) : null;
                             if (conversationInfo == null
                                     || !conversationInfo.isShortcutCachedForNotification()) {
-                                // This is a newly cached shortcut. Clean up the existing cached
-                                // shortcuts to ensure the cache size is under the limit.
-                                cleanupCachedShortcuts(user.getIdentifier(),
-                                        MAX_CACHED_RECENT_SHORTCUTS - 1);
+                                hasCachedShortcut = true;
                             }
                         }
                         addOrUpdateConversationInfo(shortcut);
                     }
+                }
+                // Added at least one new conversation. Uncache older existing cached
+                // shortcuts to ensure the cache size is under the limit.
+                if (hasCachedShortcut) {
+                    cleanupCachedShortcuts(user.getIdentifier(),
+                            MAX_CACHED_RECENT_SHORTCUTS);
                 }
             });
         }
