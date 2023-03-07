@@ -101,7 +101,7 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
@@ -5588,8 +5588,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         boolean isChangeEnabled = CompatChanges.isChangeEnabled(
                                         PendingIntent.BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT,
                                         owningUid);
-                        logUnsafeMutableImplicitPi(packageName, resolvedTypes, owningUid, i, intent,
-                                isChangeEnabled);
+                        String resolvedType = resolvedTypes == null
+                                || i >= resolvedTypes.length ? null : resolvedTypes[i];
+                        ActivityManagerUtils.logUnsafeIntentEvent(
+                                UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED,
+                                owningUid, intent, resolvedType, isChangeEnabled);
                         if (isChangeEnabled) {
                             String msg = packageName + ": Targeting U+ (version "
                                     + Build.VERSION_CODES.UPSIDE_DOWN_CAKE + " and above) disallows"
@@ -5653,24 +5656,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException e) {
             throw new SecurityException(e);
         }
-    }
-
-    private void logUnsafeMutableImplicitPi(String packageName, String[] resolvedTypes,
-            int owningUid, int i, Intent intent, boolean isChangeEnabled) {
-        String[] categories = intent.getCategories() == null ? new String[0]
-                : intent.getCategories().toArray(String[]::new);
-        String resolvedType = resolvedTypes == null || i >= resolvedTypes.length ? null
-                : resolvedTypes[i];
-        FrameworkStatsLog.write(UNSAFE_INTENT_EVENT_REPORTED,
-                UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__NEW_MUTABLE_IMPLICIT_PENDING_INTENT_RETRIEVED,
-                owningUid,
-                null,
-                packageName,
-                intent.getAction(),
-                categories,
-                resolvedType,
-                intent.getScheme(),
-                isChangeEnabled);
     }
 
     @Override
@@ -12912,18 +12897,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean hasToBeExportedToMatch = platformCompat.isChangeEnabledByUid(
                     ActivityManagerService.IMPLICIT_INTENTS_ONLY_MATCH_EXPORTED_COMPONENTS,
                     callingUid);
-            String[] categories = intent.getCategories() == null ? new String[0]
-                    : intent.getCategories().toArray(String[]::new);
-            FrameworkStatsLog.write(UNSAFE_INTENT_EVENT_REPORTED,
-                    FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
-                    callingUid,
-                    componentInfo,
-                    callerPackage,
-                    intent.getAction(),
-                    categories,
-                    resolvedType,
-                    intent.getScheme(),
-                    hasToBeExportedToMatch);
+            ActivityManagerUtils.logUnsafeIntentEvent(
+                    UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH,
+                    callingUid, intent, resolvedType, hasToBeExportedToMatch);
             if (!hasToBeExportedToMatch) {
                 return;
             }
