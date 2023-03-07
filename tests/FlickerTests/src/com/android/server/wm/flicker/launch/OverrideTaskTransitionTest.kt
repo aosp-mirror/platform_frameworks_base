@@ -93,8 +93,7 @@ class OverrideTaskTransitionTest(val flicker: FlickerTest) {
                 .then()
                 // Animation starts, but the app may not be drawn yet which means the Splash
                 // may be visible.
-                .isInvisible(testApp, isOptional = true)
-                .isVisible(ComponentNameMatcher.SPLASH_SCREEN, isOptional = true)
+                .isSplashScreenVisibleFor(testApp, isOptional = true)
                 .then()
                 // App shows up with the custom animation starting at alpha=1.
                 .isVisible(testApp)
