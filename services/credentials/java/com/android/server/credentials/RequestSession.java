@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.os.Binder;
@@ -30,7 +31,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.service.credentials.CallingAppInfo;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
 import com.android.internal.R;

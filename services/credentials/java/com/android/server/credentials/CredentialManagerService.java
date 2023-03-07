@@ -36,15 +36,14 @@ import android.credentials.CreateCredentialRequest;
 import android.credentials.CredentialDescription;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
-import android.credentials.IListEnabledProvidersCallback;
 import android.credentials.ISetEnabledProvidersCallback;
-import android.credentials.ListEnabledProvidersResponse;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
 import android.credentials.ui.IntentFactory;
@@ -56,7 +55,7 @@ import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.credentials.CallingAppInfo;
-import android.service.credentials.CredentialProviderInfo;
+import android.service.credentials.CredentialProviderInfoFactory;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -118,10 +117,11 @@ public final class CredentialManagerService
             int resolvedUserId) {
         List<CredentialManagerServiceImpl> services = new ArrayList<>();
         List<CredentialProviderInfo> serviceInfos =
-                CredentialProviderInfo.getAvailableSystemServices(
+                CredentialProviderInfoFactory.getAvailableSystemServices(
                         mContext,
                         resolvedUserId,
-                        /* disableSystemAppVerificationForTests= */ false);
+                        /* disableSystemAppVerificationForTests= */ false,
+                        new HashSet<>());
         serviceInfos.forEach(
                 info -> {
                     services.add(
@@ -222,10 +222,16 @@ public final class CredentialManagerService
         return hasPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS);
     }
 
-    private void verifyPermission(String permission) throws SecurityException {
-        if (!hasPermission(permission)) {
-            throw new SecurityException("Caller is missing permission: " + permission);
+    private void verifyGetProvidersPermission() throws SecurityException {
+        if (hasPermission(android.Manifest.permission.QUERY_ALL_PACKAGES)) {
+            return;
         }
+
+        if (hasPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)) {
+            return;
+        }
+        
+        throw new SecurityException("Caller is missing permission: QUERY_ALL_PACKAGES or LIST_ENABLED_CREDENTIAL_PROVIDERS");
     }
 
     private boolean hasPermission(String permission) {
@@ -550,40 +556,6 @@ public final class CredentialManagerService
             providerSessions.forEach(ProviderSession::invokeSession);
         }
 
-        @SuppressWarnings("GuardedBy") // ErrorProne requires listEnabledProviders
-        // to be guarded by 'service.mLock', which is the same as mLock.
-        @Override
-        public ICancellationSignal listEnabledProviders(IListEnabledProvidersCallback callback) {
-            Log.i(TAG, "listEnabledProviders");
-            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
-
-            if (!hasWriteSecureSettingsPermission()) {
-                try {
-                    callback.onError(
-                            PERMISSION_DENIED_ERROR, PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Issue with invoking response: " + e.getMessage());
-                }
-                return cancelTransport;
-            }
-
-            List<String> enabledProviders = new ArrayList<>();
-            runForUser(
-                    (service) -> {
-                        enabledProviders.add(service.getComponentName().flattenToString());
-                    });
-
-            // Call the callback.
-            try {
-                callback.onResponse(ListEnabledProvidersResponse.create(enabledProviders));
-            } catch (RemoteException e) {
-                Log.i(TAG, "Issue with invoking response: " + e.getMessage());
-                // TODO: Propagate failure
-            }
-
-            return cancelTransport;
-        }
-
         @Override
         public void setEnabledProviders(
                 List<String> providers, int userId, ISetEnabledProvidersCallback callback) {
@@ -677,20 +649,35 @@ public final class CredentialManagerService
         }
 
         @Override
-        public List<ServiceInfo> getCredentialProviderServices(
-                int userId, boolean disableSystemAppVerificationForTests, int providerFilter) {
+        public List<CredentialProviderInfo> getCredentialProviderServices(
+                int userId, int providerFilter) {
             Log.i(TAG, "getCredentialProviderServices");
-            verifyPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS);
+            verifyGetProvidersPermission();
 
-            List<ServiceInfo> services = new ArrayList<>();
-            List<CredentialProviderInfo> providers =
-                    CredentialProviderInfo.getCredentialProviderServices(
-                            mContext, userId, disableSystemAppVerificationForTests, providerFilter);
-            for (CredentialProviderInfo p : providers) {
-                services.add(p.getServiceInfo());
+            return CredentialProviderInfoFactory.getCredentialProviderServices(
+                    mContext, userId, providerFilter, getEnabledProviders());
+        }
+
+        @Override
+        public List<CredentialProviderInfo> getCredentialProviderServicesForTesting(
+                int providerFilter) {
+            Log.i(TAG, "getCredentialProviderServicesForTesting");
+            verifyGetProvidersPermission();
+
+            final int userId = UserHandle.getCallingUserId();
+            return CredentialProviderInfoFactory.getCredentialProviderServicesForTesting(
+                    mContext, userId, providerFilter, getEnabledProviders());
+        }
+
+        private Set<ServiceInfo> getEnabledProviders() {
+            Set<ServiceInfo> enabledProviders = new HashSet<>();
+            synchronized (mLock) {
+                runForUser(
+                        (service) -> {
+                            enabledProviders.add(service.getCredentialProviderInfo().getServiceInfo());
+                        });
             }
-
-            return services;
+            return enabledProviders;
         }
 
         @Override
@@ -828,11 +815,11 @@ public final class CredentialManagerService
         }
 
         private List<CredentialProviderInfo> getServicesForCredentialDescription(int userId) {
-            return CredentialProviderInfo.getCredentialProviderServices(
+            return CredentialProviderInfoFactory.getCredentialProviderServices(
                     mContext,
                     userId,
-                    /* disableSystemAppVerificationForTests= */ false,
-                    CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS);
+                    CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS,
+                    new HashSet<>());
         }
     }
 
