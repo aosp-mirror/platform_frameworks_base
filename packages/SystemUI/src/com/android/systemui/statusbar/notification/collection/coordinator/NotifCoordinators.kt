@@ -31,31 +31,32 @@ interface NotifCoordinators : Coordinator, PipelineDumpable
 
 @CoordinatorScope
 class NotifCoordinatorsImpl @Inject constructor(
-    notifPipelineFlags: NotifPipelineFlags,
-    dataStoreCoordinator: DataStoreCoordinator,
-    hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
-    hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
-    keyguardCoordinator: KeyguardCoordinator,
-    rankingCoordinator: RankingCoordinator,
-    appOpsCoordinator: AppOpsCoordinator,
-    deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
-    bubbleCoordinator: BubbleCoordinator,
-    headsUpCoordinator: HeadsUpCoordinator,
-    gutsCoordinator: GutsCoordinator,
-    conversationCoordinator: ConversationCoordinator,
-    debugModeCoordinator: DebugModeCoordinator,
-    groupCountCoordinator: GroupCountCoordinator,
-    mediaCoordinator: MediaCoordinator,
-    preparationCoordinator: PreparationCoordinator,
-    remoteInputCoordinator: RemoteInputCoordinator,
-    rowAppearanceCoordinator: RowAppearanceCoordinator,
-    stackCoordinator: StackCoordinator,
-    shadeEventCoordinator: ShadeEventCoordinator,
-    smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
-    viewConfigCoordinator: ViewConfigCoordinator,
-    visualStabilityCoordinator: VisualStabilityCoordinator,
-    sensitiveContentCoordinator: SensitiveContentCoordinator,
-    dismissibilityCoordinator: DismissibilityCoordinator
+        notifPipelineFlags: NotifPipelineFlags,
+        dataStoreCoordinator: DataStoreCoordinator,
+        hideLocallyDismissedNotifsCoordinator: HideLocallyDismissedNotifsCoordinator,
+        hideNotifsForOtherUsersCoordinator: HideNotifsForOtherUsersCoordinator,
+        keyguardCoordinator: KeyguardCoordinator,
+        rankingCoordinator: RankingCoordinator,
+        appOpsCoordinator: AppOpsCoordinator,
+        deviceProvisionedCoordinator: DeviceProvisionedCoordinator,
+        bubbleCoordinator: BubbleCoordinator,
+        headsUpCoordinator: HeadsUpCoordinator,
+        gutsCoordinator: GutsCoordinator,
+        conversationCoordinator: ConversationCoordinator,
+        debugModeCoordinator: DebugModeCoordinator,
+        groupCountCoordinator: GroupCountCoordinator,
+        groupWhenCoordinator: GroupWhenCoordinator,
+        mediaCoordinator: MediaCoordinator,
+        preparationCoordinator: PreparationCoordinator,
+        remoteInputCoordinator: RemoteInputCoordinator,
+        rowAppearanceCoordinator: RowAppearanceCoordinator,
+        stackCoordinator: StackCoordinator,
+        shadeEventCoordinator: ShadeEventCoordinator,
+        smartspaceDedupingCoordinator: SmartspaceDedupingCoordinator,
+        viewConfigCoordinator: ViewConfigCoordinator,
+        visualStabilityCoordinator: VisualStabilityCoordinator,
+        sensitiveContentCoordinator: SensitiveContentCoordinator,
+        dismissibilityCoordinator: DismissibilityCoordinator
 ) : NotifCoordinators {
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
@@ -82,6 +83,7 @@ class NotifCoordinatorsImpl @Inject constructor(
         mCoordinators.add(debugModeCoordinator)
         mCoordinators.add(conversationCoordinator)
         mCoordinators.add(groupCountCoordinator)
+        mCoordinators.add(groupWhenCoordinator)
         mCoordinators.add(mediaCoordinator)
         mCoordinators.add(rowAppearanceCoordinator)
         mCoordinators.add(stackCoordinator)
