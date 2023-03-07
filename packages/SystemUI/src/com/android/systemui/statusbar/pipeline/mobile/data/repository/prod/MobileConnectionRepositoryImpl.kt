@@ -28,7 +28,8 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.ERI_OFF
+import android.telephony.TelephonyManager.ERI_FLASH
+import android.telephony.TelephonyManager.ERI_ON
 import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.settingslib.Utils
@@ -282,7 +283,10 @@ class MobileConnectionRepositoryImpl(
 
     override val cdmaRoaming: StateFlow<Boolean> =
         telephonyPollingEvent
-            .mapLatest { telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber != ERI_OFF }
+            .mapLatest {
+                val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
+                cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val networkName: StateFlow<NetworkNameModel> =

@@ -514,6 +514,30 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             job.cancel()
         }
 
+    /**
+     * [TelephonyManager.getCdmaEnhancedRoamingIndicatorDisplayNumber] returns -1 if the service is
+     * not running or if there is an error while retrieving the cdma ERI
+     */
+    @Test
+    fun cdmaRoaming_ignoresNegativeOne() =
+        runBlocking(IMMEDIATE) {
+            var latest: Boolean? = null
+            val job = underTest.cdmaRoaming.onEach { latest = it }.launchIn(this)
+
+            val serviceState = ServiceState()
+            serviceState.roaming = false
+
+            val cb = getTelephonyCallbackForType<ServiceStateListener>()
+
+            // CDMA roaming is unavailable (-1), GSM roaming is off
+            whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(-1)
+            cb.onServiceStateChanged(serviceState)
+
+            assertThat(latest).isFalse()
+
+            job.cancel()
+        }
+
     @Test
     fun `roaming - gsm - queries service state`() =
         runBlocking(IMMEDIATE) {
