@@ -3101,6 +3101,16 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, printWriter)) return;
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            dumpInternal(printWriter);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void dumpInternal(PrintWriter printWriter) {
         IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
 
         pw.println("Current lock settings service state:");
