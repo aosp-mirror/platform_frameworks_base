@@ -50,7 +50,9 @@ public final class SearchTargetEvent implements Parcelable {
             ACTION_LAUNCH_TOUCH,
             ACTION_LAUNCH_KEYBOARD_FOCUS,
             ACTION_DRAGNDROP,
-            ACTION_SURFACE_INVISIBLE
+            ACTION_SURFACE_INVISIBLE,
+            ACTION_DELETE,
+            ACTION_DISMISS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ActionType {}
@@ -113,6 +115,16 @@ public final class SearchTargetEvent implements Parcelable {
      * Search container was closed.
      */
     public static final int ACTION_SURFACE_INVISIBLE = 8;
+
+     /**
+     * Constant that defines user deleted a target.
+     */
+    public static final int ACTION_DELETE = 9;
+
+    /**
+     * Constant that defines user dismissed a target.
+     */
+    public static final int ACTION_DISMISS = 10;
 
     private SearchTargetEvent(@NonNull List<String> targetIds,
             @Nullable String location,
