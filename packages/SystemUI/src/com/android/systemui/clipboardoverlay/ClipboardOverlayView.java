@@ -21,6 +21,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
@@ -284,6 +285,20 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
             mActionContainer.removeView(chip);
         }
         mActionChips.clear();
+    }
+
+    Animator getMinimizedFadeoutAnimation() {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(mMinimizedPreview, "alpha", 1, 0);
+        anim.setDuration(66);
+        anim.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                mMinimizedPreview.setVisibility(View.GONE);
+                mMinimizedPreview.setAlpha(1);
+            }
+        });
+        return anim;
     }
 
     Animator getEnterAnimation() {
