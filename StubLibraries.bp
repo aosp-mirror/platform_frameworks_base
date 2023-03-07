@@ -364,15 +364,15 @@ java_library {
 
 java_library {
     name: "android_system_server_stubs_current",
-    defaults: ["android_stubs_dists_default"],
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
     srcs: [":services-non-updatable-stubs"],
     installable: false,
     static_libs: [
         "android_module_lib_stubs_current",
     ],
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
     dist: {
         dir: "apistubs/android/system-server",
     },
