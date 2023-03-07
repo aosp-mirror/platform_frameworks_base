@@ -21,7 +21,6 @@ import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
 import static com.android.server.power.stats.CpuWakeupStats.WAKEUP_REASON_HALF_WINDOW_MS;
-import static com.android.server.power.stats.CpuWakeupStats.WAKEUP_RETENTION_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -66,6 +65,7 @@ public class CpuWakeupStatsTest {
     public void removesOldWakeups() {
         // The xml resource doesn't matter for this test.
         final CpuWakeupStats obj = new CpuWakeupStats(sContext, R.xml.irq_device_map_1, mHandler);
+        final long retention = obj.mConfig.WAKEUP_STATS_RETENTION_MS;
 
         final Set<Long> timestamps = new HashSet<>();
         final long firstWakeup = 453192;
@@ -73,22 +73,21 @@ public class CpuWakeupStatsTest {
         obj.noteWakeupTimeAndReason(firstWakeup, 32, KERNEL_REASON_UNKNOWN_IRQ);
         timestamps.add(firstWakeup);
         for (int i = 1; i < 1000; i++) {
-            final long delta = mRandom.nextLong(WAKEUP_RETENTION_MS);
+            final long delta = mRandom.nextLong(retention);
             if (timestamps.add(firstWakeup + delta)) {
                 obj.noteWakeupTimeAndReason(firstWakeup + delta, i, KERNEL_REASON_UNKNOWN_IRQ);
             }
         }
         assertThat(obj.mWakeupEvents.size()).isEqualTo(timestamps.size());
 
-        obj.noteWakeupTimeAndReason(firstWakeup + WAKEUP_RETENTION_MS + 1242, 231,
+        obj.noteWakeupTimeAndReason(firstWakeup + retention + 1242, 231,
                 KERNEL_REASON_UNKNOWN_IRQ);
         assertThat(obj.mWakeupEvents.size()).isEqualTo(timestamps.size());
 
         for (int i = 0; i < 100; i++) {
-            final long now = mRandom.nextLong(WAKEUP_RETENTION_MS + 1, 100 * WAKEUP_RETENTION_MS);
+            final long now = mRandom.nextLong(retention + 1, 100 * retention);
             obj.noteWakeupTimeAndReason(now, i, KERNEL_REASON_UNKNOWN_IRQ);
-            assertThat(obj.mWakeupEvents.closestIndexOnOrBefore(now - WAKEUP_RETENTION_MS))
-                    .isLessThan(0);
+            assertThat(obj.mWakeupEvents.closestIndexOnOrBefore(now - retention)).isLessThan(0);
         }
     }
 
