@@ -45,7 +45,6 @@ constructor(
 
     override fun start() {
         listenForOccludedToLockscreen()
-        listenForOccludedToGone()
         listenForOccludedToDreaming()
         listenForOccludedToAodOrDozing()
     }
@@ -73,60 +72,17 @@ constructor(
     private fun listenForOccludedToLockscreen() {
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
-                .sample(
-                    combine(
-                        keyguardInteractor.isKeyguardShowing,
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isOccluded, lastStartedKeyguardState) ->
                     // Occlusion signals come from the framework, and should interrupt any
                     // existing transition
-                    if (
-                        !isOccluded &&
-                            isShowing &&
-                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
-                    ) {
+                    if (!isOccluded && lastStartedKeyguardState.to == KeyguardState.OCCLUDED) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
                                 KeyguardState.OCCLUDED,
                                 KeyguardState.LOCKSCREEN,
                                 getAnimator(TO_LOCKSCREEN_DURATION),
-                            )
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun listenForOccludedToGone() {
-        scope.launch {
-            keyguardInteractor.isKeyguardOccluded
-                .sample(
-                    combine(
-                        keyguardInteractor.isKeyguardShowing,
-                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
-                    // Occlusion signals come from the framework, and should interrupt any
-                    // existing transition
-                    if (
-                        !isOccluded &&
-                            !isShowing &&
-                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
-                    ) {
-                        keyguardTransitionRepository.startTransition(
-                            TransitionInfo(
-                                name,
-                                KeyguardState.OCCLUDED,
-                                KeyguardState.GONE,
-                                getAnimator(),
                             )
                         )
                     }
