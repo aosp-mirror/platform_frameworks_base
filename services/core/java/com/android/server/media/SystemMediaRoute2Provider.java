@@ -16,11 +16,14 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.MediaRoute2Info;
 import android.media.MediaRoute2ProviderInfo;
@@ -37,6 +40,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -71,6 +75,26 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private final AudioManagerBroadcastReceiver mAudioReceiver =
             new AudioManagerBroadcastReceiver();
 
+    private final AudioManager.OnDevicesForAttributesChangedListener
+            mOnDevicesForAttributesChangedListener =
+            new AudioManager.OnDevicesForAttributesChangedListener() {
+                @Override
+                public void onDevicesForAttributesChanged(@NonNull AudioAttributes attributes,
+                        @NonNull List<AudioDeviceAttributes> devices) {
+                    if (attributes.getUsage() != AudioAttributes.USAGE_MEDIA) {
+                        return;
+                    }
+
+                    mHandler.post(() -> {
+                        updateSelectedAudioDevice(devices);
+                        notifyProviderState();
+                        if (updateSessionInfosIfNeeded()) {
+                            notifySessionInfoUpdated();
+                        }
+                    });
+                }
+            };
+
     private final Object mRequestLock = new Object();
     @GuardedBy("mRequestLock")
     private volatile SessionCreationRequest mPendingSessionCreationRequest;
@@ -100,8 +124,15 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             });
         });
 
+        mAudioManager.addOnDevicesForAttributesChangedListener(
+                AudioAttributesUtils.ATTRIBUTES_MEDIA, mContext.getMainExecutor(),
+                mOnDevicesForAttributesChangedListener);
+
         // These methods below should be called after all fields are initialized, as they
         // access the fields inside.
+        List<AudioDeviceAttributes> devices =
+                mAudioManager.getDevicesForAttributes(AudioAttributesUtils.ATTRIBUTES_MEDIA);
+        updateSelectedAudioDevice(devices);
         updateProviderState();
         updateSessionInfosIfNeeded();
     }
@@ -236,6 +267,26 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 builder.addTransferableRoute(route.getId());
             }
             return builder.setProviderId(mUniqueId).build();
+        }
+    }
+
+    private void updateSelectedAudioDevice(@NonNull List<AudioDeviceAttributes> devices) {
+        if (devices.isEmpty()) {
+            Slog.w(TAG, "The list of preferred devices was empty.");
+            return;
+        }
+
+        AudioDeviceAttributes audioDeviceAttributes = devices.get(0);
+
+        if (AudioAttributesUtils.isDeviceOutputAttributes(audioDeviceAttributes)) {
+            mDeviceRouteController.selectRoute(
+                    AudioAttributesUtils.mapToMediaRouteType(audioDeviceAttributes));
+            mBluetoothRouteController.selectRoute(null);
+        } else if (AudioAttributesUtils.isBluetoothOutputAttributes(audioDeviceAttributes)) {
+            mDeviceRouteController.selectRoute(null);
+            mBluetoothRouteController.selectRoute(audioDeviceAttributes.getAddress());
+        } else {
+            Slog.w(TAG, "Unknown audio attributes: " + audioDeviceAttributes);
         }
     }
 
