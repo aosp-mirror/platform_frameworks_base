@@ -44,10 +44,22 @@ import android.os.ServiceManager;
         IAudioService audioService = IAudioService.Stub.asInterface(
                 ServiceManager.getService(Context.AUDIO_SERVICE));
 
-        return new LegacyDeviceRouteController(context,
-                audioManager,
-                audioService,
-                onDeviceRouteChangedListener);
+        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
+        boolean isUsingLegacyController = flagManager.getBoolean(
+                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
+                true);
+
+        if (isUsingLegacyController) {
+            return new LegacyDeviceRouteController(context,
+                    audioManager,
+                    audioService,
+                    onDeviceRouteChangedListener);
+        } else {
+            return new AudioPoliciesDeviceRouteController(context,
+                    audioManager,
+                    audioService,
+                    onDeviceRouteChangedListener);
+        }
     }
 
     /**
