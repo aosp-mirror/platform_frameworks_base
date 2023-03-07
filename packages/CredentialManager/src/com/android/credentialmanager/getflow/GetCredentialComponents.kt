@@ -295,13 +295,6 @@ fun AllSignInOptionCard(
                 )
             }
         }
-        item {
-            Divider(
-                thickness = 1.dp,
-                color = Color.LightGray,
-                modifier = Modifier.padding(top = 16.dp)
-            )
-        }
         // Manage sign-ins (action chips)
         item {
             ActionChips(
