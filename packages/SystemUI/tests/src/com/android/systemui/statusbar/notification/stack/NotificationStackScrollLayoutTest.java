@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack;
 
 import static android.view.View.GONE;
+import static android.view.WindowInsets.Type.ime;
 
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -54,6 +56,8 @@ import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowInsetsAnimation;
 import android.widget.TextView;
 
 import androidx.test.annotation.UiThreadTest;
@@ -90,6 +94,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.ArrayList;
 
 /**
  * Tests for {@link NotificationStackScrollLayout}.
@@ -841,6 +847,19 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.updateEmptyShadeView(true, false);
 
         verify(mEmptyShadeView).setFooterText(not(0));
+    }
+
+    @Test
+    public void testWindowInsetAnimationProgress_updatesBottomInset() {
+        int bottomImeInset = 100;
+        mStackScrollerInternal.setAnimatedInsetsEnabled(true);
+        WindowInsets windowInsets = new WindowInsets.Builder()
+                .setInsets(ime(), Insets.of(0, 0, 0, bottomImeInset)).build();
+        ArrayList<WindowInsetsAnimation> windowInsetsAnimations = new ArrayList<>();
+        mStackScrollerInternal
+                .dispatchWindowInsetsAnimationProgress(windowInsets, windowInsetsAnimations);
+
+        assertEquals(bottomImeInset, mStackScrollerInternal.mBottomInset);
     }
 
     private void setBarStateForTest(int state) {
