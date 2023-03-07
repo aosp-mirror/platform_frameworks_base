@@ -301,6 +301,14 @@ public final class AutofillManager {
     public static final String EXTRA_AUGMENTED_AUTOFILL_CLIENT =
             "android.view.autofill.extra.AUGMENTED_AUTOFILL_CLIENT";
 
+    /**
+     * Autofill Hint to indicate that it can match any field.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String ANY_HINT = "any";
+
     private static final String SESSION_ID_TAG = "android:sessionId";
     private static final String STATE_TAG = "android:state";
     private static final String LAST_AUTOFILLED_DATA_TAG = "android:lastAutoFilledData";
