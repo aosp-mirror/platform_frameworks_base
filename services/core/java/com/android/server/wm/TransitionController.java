@@ -209,6 +209,12 @@ class TransitionController {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transition collection not supported.");
         }
+        if (mTransitionPlayer == null) {
+            // If sysui has been killed (by a test) or crashed, we can temporarily have no player
+            // In this case, abort the transition.
+            transition.abort();
+            return;
+        }
         mCollectingTransition = transition;
         // Distinguish change type because the response time is usually expected to be not too long.
         final long timeoutMs =
@@ -509,6 +515,14 @@ class TransitionController {
             transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
             mAtm.mH.post(() -> mAtm.mWindowOrganizerController.startTransition(
                     transition.getToken(), null));
+            return transition;
+        }
+        if (mTransitionPlayer == null || transition.isAborted()) {
+            // Apparently, some tests will kill(and restart) systemui, so there is a chance that
+            // the player might be transiently null.
+            if (transition.isCollecting()) {
+                transition.abort();
+            }
             return transition;
         }
         try {
