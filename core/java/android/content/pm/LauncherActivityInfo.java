@@ -34,7 +34,6 @@ import android.util.DisplayMetrics;
  */
 public class LauncherActivityInfo {
     private final PackageManager mPm;
-    private UserHandle mUser;
     private final LauncherActivityInfoInternal mInternal;
 
     /**
@@ -43,9 +42,8 @@ public class LauncherActivityInfo {
      * @param context The context for fetching resources.
 
      */
-    LauncherActivityInfo(Context context, UserHandle user, LauncherActivityInfoInternal internal) {
+    LauncherActivityInfo(Context context, LauncherActivityInfoInternal internal) {
         mPm = context.getPackageManager();
-        mUser = user;
         mInternal = internal;
     }
 
@@ -70,7 +68,7 @@ public class LauncherActivityInfo {
      * @return The UserHandle of the profile.
      */
     public UserHandle getUser() {
-        return mUser;
+        return mInternal.getUser();
     }
 
     /**
@@ -180,6 +178,6 @@ public class LauncherActivityInfo {
     public Drawable getBadgedIcon(int density) {
         Drawable originalIcon = getIcon(density);
 
-        return mPm.getUserBadgedIcon(originalIcon, mUser);
+        return mPm.getUserBadgedIcon(originalIcon, mInternal.getUser());
     }
 }
