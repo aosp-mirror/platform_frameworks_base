@@ -31,39 +31,17 @@ internal class NoteTaskInfoTest : SysuiTestCase() {
         NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID)
 
     @Test
-    fun launchMode_notInMultiWindowModeAndKeyguardUnlocked_launchModeAppBubble() {
-        val underTest =
-            createNoteTaskInfo()
-                .copy(
-                    isKeyguardLocked = false,
-                    isInMultiWindowMode = false,
-                )
+    fun launchMode_keyguardLocked_launchModeActivity() {
+        val underTest = createNoteTaskInfo().copy(isKeyguardLocked = true)
+
+        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
+    }
+
+    @Test
+    fun launchMode_keyguardUnlocked_launchModeActivity() {
+        val underTest = createNoteTaskInfo().copy(isKeyguardLocked = false)
 
         assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.AppBubble)
-    }
-
-    @Test
-    fun launchMode_inMultiWindowMode_launchModeActivity() {
-        val underTest =
-            createNoteTaskInfo()
-                .copy(
-                    isKeyguardLocked = false,
-                    isInMultiWindowMode = true,
-                )
-
-        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
-    }
-
-    @Test
-    fun launchMode_keyguardLocked_launchModeActivity() {
-        val underTest =
-            createNoteTaskInfo()
-                .copy(
-                    isKeyguardLocked = true,
-                    isInMultiWindowMode = false,
-                )
-
-        assertThat(underTest.launchMode).isEqualTo(NoteTaskLaunchMode.Activity)
     }
 
     private companion object {
