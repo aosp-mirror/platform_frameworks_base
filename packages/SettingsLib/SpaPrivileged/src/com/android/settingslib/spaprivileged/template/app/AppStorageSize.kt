@@ -19,6 +19,7 @@ package com.android.settingslib.spaprivileged.template.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.text.format.Formatter
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
@@ -30,18 +31,26 @@ import com.android.settingslib.spaprivileged.model.app.userHandle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+private const val TAG = "AppStorageSize"
+
 @Composable
 fun ApplicationInfo.getStorageSize(): State<String> {
     val context = LocalContext.current
     return produceState(initialValue = stringResource(R.string.summary_placeholder)) {
         withContext(Dispatchers.IO) {
-            value = Formatter.formatFileSize(context, calculateSizeBytes(context))
+            val sizeBytes = calculateSizeBytes(context)
+            value = if (sizeBytes != null) Formatter.formatFileSize(context, sizeBytes) else ""
         }
     }
 }
 
-private fun ApplicationInfo.calculateSizeBytes(context: Context): Long {
+private fun ApplicationInfo.calculateSizeBytes(context: Context): Long? {
     val storageStatsManager = context.storageStatsManager
-    val stats = storageStatsManager.queryStatsForPackage(storageUuid, packageName, userHandle)
-    return stats.codeBytes + stats.dataBytes
+    return try {
+        val stats = storageStatsManager.queryStatsForPackage(storageUuid, packageName, userHandle)
+        stats.codeBytes + stats.dataBytes
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to query stats: $e")
+        null
+    }
 }
