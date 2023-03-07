@@ -21,6 +21,7 @@ import android.util.Log
 import android.util.Log.TerribleFailure
 import android.util.Log.TerribleFailureHandler
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Interpolators
@@ -47,6 +48,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@FlakyTest(bugId = 270760395)
 class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardTransitionRepository
