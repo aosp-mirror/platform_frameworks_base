@@ -82,6 +82,19 @@ class TableLogBuffer(
 
     private val buffer = RingBuffer(maxSize) { TableChange() }
 
+    // Stores the most recently evicted value for each column name (indexed on column name).
+    //
+    // Why it's necessary: Because we use a RingBuffer of a fixed size, it's possible that a column
+    // that's logged infrequently will eventually get pushed out by a different column that's
+    // logged more frequently. Then, that infrequently-logged column isn't present in the RingBuffer
+    // at all and we have no logs that the column ever existed. This is a problem because the
+    // column's information is still relevant, valid, and may be critical to debugging issues.
+    //
+    // Fix: When a change is being evicted from the RingBuffer, we store it in this map (based on
+    // its [TableChange.getName()]. This ensures that we always have at least one value for every
+    // column ever logged. See b/272016422 for more details.
+    private val lastEvictedValues = mutableMapOf<String, TableChange>()
+
     // A [TableRowLogger] object, re-used each time [logDiffs] is called.
     // (Re-used to avoid object allocation.)
     private val tempRow = TableRowLoggerImpl(0, columnPrefix = "", this)
@@ -164,6 +177,9 @@ class TableLogBuffer(
     private fun obtain(timestamp: Long, prefix: String, columnName: String): TableChange {
         verifyValidName(prefix, columnName)
         val tableChange = buffer.advance()
+        if (tableChange.hasData()) {
+            saveEvictedValue(tableChange)
+        }
         tableChange.reset(timestamp, prefix, columnName)
         return tableChange
     }
@@ -179,10 +195,23 @@ class TableLogBuffer(
         }
     }
 
+    private fun saveEvictedValue(change: TableChange) {
+        Trace.beginSection("TableLogBuffer#saveEvictedValue")
+        val name = change.getName()
+        val previouslyEvicted =
+            lastEvictedValues[name] ?: TableChange().also { lastEvictedValues[name] = it }
+        // For recycling purposes, update the existing object in the map with the new information
+        // instead of creating a new object.
+        previouslyEvicted.updateTo(change)
+        Trace.endSection()
+    }
+
     @Synchronized
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println(HEADER_PREFIX + name)
         pw.println("version $VERSION")
+
+        lastEvictedValues.values.sortedBy { it.timestamp }.forEach { it.dump(pw) }
         for (i in 0 until buffer.size) {
             buffer[i].dump(pw)
         }
