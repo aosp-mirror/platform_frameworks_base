@@ -115,6 +115,9 @@ message SystemSettingsProto {
         optional SettingProto sound_cache = 2;
         optional SettingProto light_pulse = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto vibration_intensity = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto camera_flash_notification = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto screen_flash_notification = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto screen_flash_notification_color_global = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Notification notification = 17;
 
