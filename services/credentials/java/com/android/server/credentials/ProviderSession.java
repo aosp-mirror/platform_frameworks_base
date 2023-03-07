@@ -19,10 +19,13 @@ package com.android.server.credentials;
 import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_QUERY_FAILURE;
 import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_QUERY_SUCCESS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.credentials.Credential;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
@@ -226,6 +229,39 @@ public abstract class ProviderSession<T, R>
     /** Update the response state stored with the provider session. */
     @Nullable protected R getProviderResponse() {
         return mProviderResponse;
+    }
+
+    protected boolean enforceRemoteEntryRestrictions(
+            @Nullable ComponentName expectedRemoteEntryProviderService) {
+        // Check if the service is the one set by the OEM. If not silently reject this entry
+        if (!mComponentName.equals(expectedRemoteEntryProviderService)) {
+            Log.i(TAG, "Remote entry being dropped as it is not from the service "
+                    + "configured by the OEM.");
+            return false;
+        }
+        // Check if the service has the hybrid permission .If not, silently reject this entry.
+        // This check is in addition to the permission check happening in the provider's process.
+        try {
+            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(
+                    mComponentName.getPackageName(),
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY));
+            if (appInfo != null
+                    && mContext.checkPermission(
+                    Manifest.permission.PROVIDE_REMOTE_CREDENTIALS,
+                    /*pId=*/-1, appInfo.uid) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        } catch (SecurityException e) {
+            Log.i(TAG, "Error getting info for "
+                    + mComponentName.flattenToString() + ": " + e.getMessage());
+            return false;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.i(TAG, "Error getting info for "
+                    + mComponentName.flattenToString() + ": " + e.getMessage());
+            return false;
+        }
+        Log.i(TAG, "In enforceRemoteEntryRestrictions - remote entry checks fail");
+        return false;
     }
 
     /** Should be overridden to prepare, and stores state for {@link ProviderData} to be
