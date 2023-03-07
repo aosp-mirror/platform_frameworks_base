@@ -804,7 +804,7 @@ public class PipTransition extends PipTransitionController {
                 // We use content overlay when there is no source rect hint to enter PiP use bounds
                 // animation.
                 if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", false)) {
+                        "persist.wm.debug.enable_pip_app_icon_overlay", true)) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, taskInfo.topActivityInfo);
                 } else {

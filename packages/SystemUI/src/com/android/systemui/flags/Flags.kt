@@ -74,8 +74,12 @@ object Flags {
     val NOTIFICATION_MEMORY_MONITOR_ENABLED =
         releasedFlag(112, "notification_memory_monitor_enabled")
 
+    /**
+     * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
+     * enable it on release builds.
+     */
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
-        unreleasedFlag(119, "notification_memory_logging_enabled", teamfood = true)
+        unreleasedFlag(119, "notification_memory_logging_enabled")
 
     // TODO(b/254512731): Tracking Bug
     @JvmField val NOTIFICATION_DISMISSAL_FADE = releasedFlag(113, "notification_dismissal_fade")
@@ -108,6 +112,10 @@ object Flags {
     // TODO(b/263414400): Tracking Bug
     @JvmField
     val NOTIFICATION_ANIMATE_BIG_PICTURE = unreleasedFlag(120, "notification_animate_big_picture")
+
+    @JvmField
+    val ANIMATED_NOTIFICATION_SHADE_INSETS =
+        unreleasedFlag(270682168, "animated_notification_shade_insets", teamfood = true)
 
     // 200 - keyguard/lockscreen
     // ** Flag retired **
@@ -472,7 +480,7 @@ object Flags {
     @Keep
     @JvmField
     val ENABLE_PIP_APP_ICON_OVERLAY =
-        sysPropBooleanFlag(1115, "persist.wm.debug.enable_pip_app_icon_overlay", default = false)
+        sysPropBooleanFlag(1115, "persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
     // 1200 - predictive back
     @Keep
