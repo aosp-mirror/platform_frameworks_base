@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Échec de l\'opération. Veuillez activer le verrouillage de la carte SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IMEI"</string>
@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permettre à l\'application de lire les fichiers vidéo de votre espace de stockage partagé."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"lire les fichiers image de l\'espace de stockage partagé"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permettre à l\'application de lire les fichiers image de votre espace de stockage partagé."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"lire les fichiers image et vidéo sélectionnés par l\'utilisateur dans le stockage partagé"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Permet à l\'appli de lire les fichiers image et vidéo que vous sélectionnez dans votre stockage partagé."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modifier/supprimer contenu mémoire stockage partagée"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Permet de modifier le contenu mémoire de stockage partagée."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"effectuer/recevoir des appels SIP"</string>
@@ -1157,8 +1159,8 @@
     <string name="no" msgid="5122037903299899715">"Annuler"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Attention"</string>
     <string name="loading" msgid="3138021523725055037">"Chargement…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"OUI"</string>
-    <string name="capital_off" msgid="7443704171014626777">"NON"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVÉ"</string>
+    <string name="capital_off" msgid="7443704171014626777">"DÉSACTIVÉ"</string>
     <string name="checked" msgid="9179896827054513119">"activé"</string>
     <string name="not_checked" msgid="7972320087569023342">"désactivé"</string>
     <string name="selected" msgid="6614607926197755875">"sélectionné"</string>
@@ -1993,7 +1995,7 @@
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Aucune suggestion de saisie automatique"</string>
     <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggestion de saisie automatique}one{# suggestion de saisie automatique}many{# suggestions de saisie automatique}other{# suggestions de saisie automatique}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Enregistrer dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>
-    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer la <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
+    <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Enregistrer le <xliff:g id="TYPE">%1$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g> et <xliff:g id="TYPE_1">%2$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"Enregistrer <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> et <xliff:g id="TYPE_2">%3$s</xliff:g> dans "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"Mettre à jour cet élément dans "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ?"</string>

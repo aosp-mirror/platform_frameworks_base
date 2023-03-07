@@ -594,10 +594,10 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"다른 지문으로 시도"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"너무 밝음"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"조정 시도"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문을 등록할 때마다 손가락을 조금씩 이동하세요"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"지문이 인식될 때마다 손가락을 조금씩 이동하세요"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않습니다."</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"지문이 인식되지 않았습니다."</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"지문을 인식할 수 없습니다."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"지문이 인증됨"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"얼굴이 인증되었습니다"</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"앱이 공유 저장소에서 동영상 파일을 읽도록 허용합니다."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"공유 저장소에서 이미지 파일 읽기"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"공유 저장소에서 사용자가 선택한 이미지 및 동영상 파일 읽기"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"앱이 공유 저장소에서 내가 선택한 이미지와 동영상 파일을 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP 통화 발신/수신"</string>
@@ -2037,7 +2039,7 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"제거"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
-    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 모든 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="log_access_confirmation_title" msgid="2343578467290592708">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>에서 전체 기기 로그에 액세스하도록 허용하시겠습니까?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"일회성 액세스 허용"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"허용 안함"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"기기 로그에는 기기에서 발생한 상황이 기록됩니다. 앱은 문제를 찾고 해결하는 데 이 로그를 사용할 수 있습니다.\n\n일부 로그는 민감한 정보를 포함할 수 있으므로 신뢰할 수 있는 앱만 모든 기기 로그에 액세스하도록 허용하세요. \n\n앱에 전체 기기 로그에 대한 액세스 권한을 부여하지 않아도, 앱이 자체 로그에는 액세스할 수 있습니다. 기기 제조업체에서 일부 로그 또는 기기 내 정보에 액세스할 수도 있습니다. 자세히 알아보세요."</string>

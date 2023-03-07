@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Membenarkan apl membaca fail video daripada storan kongsi anda."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"baca fail imej daripada storan kongsi"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Membenarkan apl membaca fail imej daripada storan kongsi anda."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"baca fail imej dan video yang dipilih oleh pengguna daripada storan kongsi"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Membenarkan apl membaca fail imej dan video yang anda pilih daripada storan kongsi anda."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"mengubah suai atau memadamkan kandungan storan kongsi anda"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Membenarkan apl menulis kandungan storan kongsi anda."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"buat/terima panggilan SIP"</string>

@@ -51,7 +51,7 @@
     <string name="needPuk2" msgid="7032612093451537186">"Escribir PUK2 para desbloquear la tarjeta SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Error; habilita el bloqueo de SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
       <item quantity="other">Tienes <xliff:g id="NUMBER_1">%d</xliff:g> intentos más antes de que se bloquee la tarjeta SIM.</item>
       <item quantity="one">Tienes <xliff:g id="NUMBER_0">%d</xliff:g> un intento más antes de que se bloquee la tarjeta SIM.</item>
     </plurals>
@@ -447,7 +447,7 @@
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acceder a la ubicación en segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esta aplicación puede acceder a la ubicación en cualquier momento, aunque no la estés usando."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"cambiar tu configuración de audio"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y el altavoz de salida."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite que la aplicación modifique la configuración de audio global, por ejemplo, el volumen y la bocina de salida."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"grabar audio"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Esta app puede grabar audio con el micrófono mientras está en uso."</string>
     <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"grabar audio en segundo plano"</string>
@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite que la app lea los archivos de video del almacenamiento compartido."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"leer los archivos de imagen del almacenamiento compartido"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permite que la app lea los archivos de imagen del almacenamiento compartido."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"leer los archivos de imagen y video que el usuario haya seleccionado del almacenamiento compartido"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Permite que la app lea los archivos de imagen y video que selecciones del almacenamiento compartido."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"cambiar o borrar contenido de almacenamiento compartido"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Editar almacen. compartido"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"realizar/recibir llamadas SIP"</string>
@@ -1157,8 +1159,8 @@
     <string name="no" msgid="5122037903299899715">"Cancelar"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Atención"</string>
     <string name="loading" msgid="3138021523725055037">"Cargando…"</string>
-    <string name="capital_on" msgid="2770685323900821829">"Sí"</string>
-    <string name="capital_off" msgid="7443704171014626777">"No"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVADO"</string>
+    <string name="capital_off" msgid="7443704171014626777">"Desactivado"</string>
     <string name="checked" msgid="9179896827054513119">"activado"</string>
     <string name="not_checked" msgid="7972320087569023342">"desactivado"</string>
     <string name="selected" msgid="6614607926197755875">"seleccionado"</string>
@@ -2041,7 +2043,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"¿Quieres permitir que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> acceda a todos los registros del dispositivo?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permitir acceso por única vez"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permitir"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo permiten documentar lo que sucede en él. Las apps pueden usar estos registros para encontrar y solucionar problemas.\n\nEs posible que algunos registros del dispositivo contengan información sensible, por lo que solo debes permitir que accedan a todos los registros las apps que sean de tu confianza. \n\n Ten en cuenta que la app puede acceder a sus propios registros aun si no permites que acceda a todos los registros del dispositivo. También es posible que el fabricante del dispositivo acceda a algunos registros o información en tu dispositivo. Más información"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Los registros del dispositivo permiten documentar lo que sucede en él. Las apps pueden usar estos registros para encontrar y solucionar problemas.\n\nEs posible que algunos registros del dispositivo contengan información sensible, por lo que solo debes permitir que accedan a ellos las apps que sean de tu confianza. \n\n Ten en cuenta que la app puede acceder a sus propios registros aun si no permites que acceda a todos los registros del dispositivo. También es posible que el fabricante del dispositivo acceda a algunos registros o información en tu dispositivo. Más información"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No volver a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> quiere mostrar fragmentos de <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editar"</string>

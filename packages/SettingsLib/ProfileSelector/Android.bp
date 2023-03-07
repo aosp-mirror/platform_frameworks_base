@@ -1,0 +1,27 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_library {
+    name: "SettingsLibProfileSelector",
+
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+
+    static_libs: [
+        "com.google.android.material_material",
+        "SettingsLibSettingsTheme",
+    ],
+
+    sdk_version: "system_current",
+    min_sdk_version: "23",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.mediaprovider",
+    ],
+}

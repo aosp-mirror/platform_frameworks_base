@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
       <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite que o app leia arquivos de vídeo do armazenamento compartilhado."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ler arquivos de imagem do armazenamento compartilhado"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permite que o app leia arquivos de imagem do armazenamento compartilhado."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ler arquivos de imagem e vídeo selecionados pelo usuário no armazenamento compartilhado"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Permite que o app leia arquivos de imagem e vídeo que você selecionar no armazenamento compartilhado."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"alterar ou excluir conteúdo do armaz. compartilhado"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Permite que o app grave o conteúdo do armaz. compartilhado."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"fazer/receber chamadas SIP"</string>
@@ -887,7 +889,7 @@
     <string name="relationTypeFriend" msgid="3192092625893980574">"Amigo(a)"</string>
     <string name="relationTypeManager" msgid="2272860813153171857">"Gerente"</string>
     <string name="relationTypeMother" msgid="2331762740982699460">"Mãe"</string>
-    <string name="relationTypeParent" msgid="4177920938333039882">"Pai/Mãe"</string>
+    <string name="relationTypeParent" msgid="4177920938333039882">"familiar responsável"</string>
     <string name="relationTypePartner" msgid="4018017075116766194">"Parceiro"</string>
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"Indicado por"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Parente"</string>
@@ -1525,7 +1527,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Diminuir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e mantenha pressionado."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e pressione."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Deslize para cima para aumentar e para baixo para diminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Aumentar minuto"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Diminuir minuto"</string>

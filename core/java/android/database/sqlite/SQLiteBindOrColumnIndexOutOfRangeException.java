@@ -17,7 +17,7 @@
 package android.database.sqlite;
 
 /**
- * Thrown if the the bind or column parameter index is out of range
+ * Thrown if the bind or column parameter index is out of range.
  */
 public class SQLiteBindOrColumnIndexOutOfRangeException extends SQLiteException {
     public SQLiteBindOrColumnIndexOutOfRangeException() {}

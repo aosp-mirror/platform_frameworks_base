@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Opération infructueuse. Activez le verrouillage SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IIEM"</string>
@@ -692,6 +692,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permet à l\'application de lire les fichiers vidéo de votre espace de stockage partagé."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"lire des fichiers d\'image à partir de l\'espace de stockage partagé"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Permet à l\'application de lire les fichiers d\'image de votre espace de stockage partagé."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"lire les fichiers d\'images et de vidéos sélectionnés par l\'utilisateur dans l\'espace de stockage partagé"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Permet à l\'application de lire les fichiers d\'images et de vidéos que vous sélectionnez dans votre espace de stockage partagé."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"modifier ou supprimer le contenu de votre espace de stockage partagé"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Autorise l\'application à écrire le contenu de votre espace de stockage partagé."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"faire et recevoir des appels SIP"</string>
@@ -1157,8 +1159,8 @@
     <string name="no" msgid="5122037903299899715">"Annuler"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Attention"</string>
     <string name="loading" msgid="3138021523725055037">"Chargement en cours..."</string>
-    <string name="capital_on" msgid="2770685323900821829">"OUI"</string>
-    <string name="capital_off" msgid="7443704171014626777">"NON"</string>
+    <string name="capital_on" msgid="2770685323900821829">"ACTIVÉ"</string>
+    <string name="capital_off" msgid="7443704171014626777">"DÉSACTIVÉ"</string>
     <string name="checked" msgid="9179896827054513119">"coché"</string>
     <string name="not_checked" msgid="7972320087569023342">"non coché"</string>
     <string name="selected" msgid="6614607926197755875">"sélectionné"</string>
@@ -2111,7 +2113,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Notifications"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Paramètres rapides"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Boîte de dialogue sur l\'alimentation"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Écran de verrouillage"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Verrouiller l\'écran"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Capture d\'écran"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Crochet de casque d\'écoute"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Raccourci d\'accessibilité à l\'écran"</string>

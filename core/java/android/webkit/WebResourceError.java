@@ -19,7 +19,7 @@ package android.webkit;
 import android.annotation.SystemApi;
 
 /**
- * Encapsulates information about errors occured during loading of web resources. See
+ * Encapsulates information about errors that occurred during loading of web resources. See
  * {@link WebViewClient#onReceivedError(WebView, WebResourceRequest, WebResourceError) WebViewClient.onReceivedError(WebView, WebResourceRequest, WebResourceError)}
  */
 public abstract class WebResourceError {

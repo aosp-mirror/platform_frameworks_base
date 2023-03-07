@@ -296,7 +296,7 @@
     <string name="safeMode" msgid="8974401416068943888">"حالت ایمن"</string>
     <string name="android_system_label" msgid="5974767339591067210">"‏سیستم Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"جابه‌جا شدن به نمایه شخصی"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"جابه‌جا شدن به نمایه کاری"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"رفتن به نمایه کاری"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"مخاطبین"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"دسترسی به مخاطبین شما"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"مکان"</string>
@@ -574,7 +574,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"به برنامه اجازه می‌دهد فایل‌های ویدیویی موجود در فضای ذخیره‌سازی هم‌رسانی‌شده را بخواند."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"خواندن فایل‌های تصویری موجود در فضای ذخیره‌سازی مشترک"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"به برنامه اجازه می‌دهد فایل‌های تصویری موجود در فضای ذخیره‌سازی مشترک را بخواند."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"خواندن فایل‌های تصویری و ویدیویی انتخابی کاربر از فضای ذخیره‌سازی مشترک"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"به برنامه جازه می‌دهد فایل‌های تصویری و ویدیویی‌ای را که از فضای ذخیره‌سازی مشترکتان انتخاب می‌کنید بخواند."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"تغییر یا حذف محتوای فضای ذخیره‌سازی مشترک"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"به برنامه اجازه می‌دهد محتوای فضای ذخیره‌سازی مشترکتان را بنویسد."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‏تماس گرفتن/دریافت تماس از طریق SIP"</string>
