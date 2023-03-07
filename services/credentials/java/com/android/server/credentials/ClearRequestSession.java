@@ -20,13 +20,13 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.credentials.ClearCredentialStateRequest;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
 import com.android.server.credentials.metrics.ApiName;

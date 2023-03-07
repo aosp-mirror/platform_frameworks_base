@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 import android.app.slice.Slice;
 import android.content.Context;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -47,6 +48,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -58,6 +60,17 @@ public class CredentialManagerTest {
 
     @Mock
     private Activity mMockActivity;
+
+    private static final int TEST_USER_ID = 1;
+    private static final CredentialProviderInfo TEST_CREDENTIAL_PROVIDER_INFO =
+                new CredentialProviderInfo.Builder(new ServiceInfo())
+                        .setSystemProvider(true)
+                        .setOverrideLabel("test")
+                        .addCapabilities(Arrays.asList("passkey"))
+                        .setEnabled(true)
+                        .build();
+    private static final List<CredentialProviderInfo> TEST_CREDENTIAL_PROVIDER_INFO_LIST =
+                Arrays.asList(TEST_CREDENTIAL_PROVIDER_INFO);
 
     private GetCredentialRequest mGetRequest;
     private CreateCredentialRequest mCreateRequest;
@@ -438,95 +451,53 @@ public class CredentialManagerTest {
     }
 
     @Test
-    public void testListEnabledProviders_nullExecutor() {
-        assertThrows(NullPointerException.class,
-                () -> mCredentialManager.listEnabledProviders(null, null, result -> {
-                }));
-
+    public void testGetCredentialProviderServices_allProviders() throws RemoteException {
+        verifyGetCredentialProviderServices(CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS);
     }
 
     @Test
-    public void testListEnabledProviders_nullCallback() {
-        assertThrows(NullPointerException.class,
-                () -> mCredentialManager.listEnabledProviders(null, mExecutor, null));
-
+    public void testGetCredentialProviderServices_userProviders() throws RemoteException {
+        verifyGetCredentialProviderServices(CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY);
     }
 
     @Test
-    public void testListEnabledProviders_alreadyCancelled() throws RemoteException {
-        final CancellationSignal cancellation = new CancellationSignal();
-        cancellation.cancel();
-
-        mCredentialManager.listEnabledProviders(cancellation, mExecutor, result -> {
-        });
-
-        verify(mMockCredentialManagerService, never()).listEnabledProviders(any());
+    public void testGetCredentialProviderServices_systemProviders() throws RemoteException {
+        verifyGetCredentialProviderServices(CredentialManager.PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY);
     }
 
     @Test
-    public void testListEnabledProviders_cancel() throws RemoteException {
-        final ICancellationSignal serviceSignal = mock(ICancellationSignal.class);
-        final CancellationSignal cancellation = new CancellationSignal();
-
-        OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException> callback =
-                mock(OutcomeReceiver.class);
-
-        when(mMockCredentialManagerService.listEnabledProviders(any())).thenReturn(serviceSignal);
-
-        mCredentialManager.listEnabledProviders(cancellation, mExecutor, callback);
-
-        verify(mMockCredentialManagerService).listEnabledProviders(any());
-
-        cancellation.cancel();
-        verify(serviceSignal).cancel();
+    public void testGetCredentialProviderServicesForTesting_allProviders() throws RemoteException {
+        verifyGetCredentialProviderServicesForTesting(CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS);
     }
 
     @Test
-    public void testListEnabledProviders_failed() throws RemoteException {
-        ArgumentCaptor<IListEnabledProvidersCallback> callbackCaptor = ArgumentCaptor.forClass(
-                IListEnabledProvidersCallback.class);
-        ArgumentCaptor<ListEnabledProvidersException> errorCaptor = ArgumentCaptor.forClass(
-                ListEnabledProvidersException.class);
-
-        OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException> callback =
-                mock(OutcomeReceiver.class);
-
-        when(mMockCredentialManagerService.listEnabledProviders(
-                callbackCaptor.capture())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.listEnabledProviders(null, mExecutor, callback);
-        verify(mMockCredentialManagerService).listEnabledProviders(any());
-
-        final String errorType = "type";
-        callbackCaptor.getValue().onError("type", "unknown error");
-        verify(callback).onError(errorCaptor.capture());
-
-        assertThat(errorCaptor.getValue().getType()).isEqualTo(errorType);
+    public void testGetCredentialProviderServicesForTesting_userProviders() throws RemoteException {
+        verifyGetCredentialProviderServicesForTesting(CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY);
     }
 
     @Test
-    public void testListEnabledProviders_success() throws RemoteException {
-        ListEnabledProvidersResponse response = ListEnabledProvidersResponse.create(
-                List.of("foo", "bar", "baz"));
+    public void testGetCredentialProviderServicesForTesting_systemProviders() throws RemoteException {
+        verifyGetCredentialProviderServicesForTesting(CredentialManager.PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY);
+    }
 
-        OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException> callback =
-                mock(OutcomeReceiver.class);
+    private void verifyGetCredentialProviderServices(int testFilter) throws RemoteException {
+        when(mMockCredentialManagerService.getCredentialProviderServices(
+                TEST_USER_ID, testFilter)).thenReturn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
 
-        ArgumentCaptor<IListEnabledProvidersCallback> callbackCaptor = ArgumentCaptor.forClass(
-                IListEnabledProvidersCallback.class);
-        ArgumentCaptor<ListEnabledProvidersResponse> responseCaptor = ArgumentCaptor.forClass(
-                ListEnabledProvidersResponse.class);
+        List<CredentialProviderInfo> output =
+                mCredentialManager.getCredentialProviderServices(TEST_USER_ID, testFilter);
 
-        when(mMockCredentialManagerService.listEnabledProviders(
-                callbackCaptor.capture())).thenReturn(mock(ICancellationSignal.class));
-        mCredentialManager.listEnabledProviders(null, mExecutor, callback);
+        assertThat(output).containsExactlyElementsIn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
+    }
 
-        verify(mMockCredentialManagerService).listEnabledProviders(any());
+    private void verifyGetCredentialProviderServicesForTesting(int testFilter) throws RemoteException {
+        when(mMockCredentialManagerService.getCredentialProviderServicesForTesting(
+                testFilter)).thenReturn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
 
-        callbackCaptor.getValue().onResponse(response);
+        List<CredentialProviderInfo> output =
+                mCredentialManager.getCredentialProviderServicesForTesting(testFilter);
 
-        verify(callback).onResult(responseCaptor.capture());
-        assertThat(responseCaptor.getValue().getProviderComponentNames()).containsExactlyElementsIn(
-                response.getProviderComponentNames());
+        assertThat(output).containsExactlyElementsIn(TEST_CREDENTIAL_PROVIDER_INFO_LIST);
     }
 
     @Test
