@@ -97,6 +97,10 @@ object KeyguardBouncerViewBinder {
                 override fun willDismissWithActions(): Boolean {
                     return securityContainerController.hasDismissActions()
                 }
+
+                override fun willRunDismissFromKeyguard(): Boolean {
+                    return securityContainerController.willRunDismissFromKeyguard()
+                }
             }
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
