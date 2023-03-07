@@ -38,7 +38,6 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUICallback;
-import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 
 import java.util.function.Consumer;
 
