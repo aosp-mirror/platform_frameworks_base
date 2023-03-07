@@ -18,19 +18,34 @@ package com.android.server.credentials.metrics;
 
 /**
  * This handles metrics collected prior to any remote calls to providers.
+ * Some types are redundant across these metric collectors, but that has debug use-cases as
+ * these data-types are available at different moments of the flow (and typically, one can feed
+ * into the next).
  * TODO(b/270403549) - iterate on this in V3+
  */
-public class PreCandidateMetric {
-
+public class InitialPhaseMetric {
     private static final String TAG = "PreCandidateMetric";
+
+    // The api being called, default set to unknown
+    private int mApiName = ApiName.UNKNOWN.getMetricCode();
+    // The caller uid of the calling application, default to -1
+    private int mCallerUid = -1;
+    // The session id to unite multiple atom emits, default to -1
+    private long mSessionId = -1;
+    // A sequence id to order united emits, default to -1
+    private int mSequenceId = -1;
+    private int mCountRequestClassType = -1;
 
     // Raw timestamps in nanoseconds, *the only* one logged as such (i.e. 64 bits) since it is a
     // reference point.
-
     private long mCredentialServiceStartedTimeNanoseconds = -1;
+
+    // A reference point to give this object utility to capture latency. Can be directly handed
+    // over to the next latency object.
     private long mCredentialServiceBeginQueryTimeNanoseconds = -1;
 
-    public PreCandidateMetric() {
+
+    public InitialPhaseMetric() {
     }
 
     /* ---------- Latencies ---------- */
@@ -61,5 +76,55 @@ public class PreCandidateMetric {
 
     public long getCredentialServiceBeginQueryTimeNanoseconds() {
         return mCredentialServiceBeginQueryTimeNanoseconds;
+    }
+
+    /* ------ ApiName ------ */
+
+    public void setApiName(int apiName) {
+        mApiName = apiName;
+    }
+
+    public int getApiName() {
+        return mApiName;
+    }
+
+    /* ------ CallerUid ------ */
+
+    public void setCallerUid(int callerUid) {
+        mCallerUid = callerUid;
+    }
+
+    public int getCallerUid() {
+        return mCallerUid;
+    }
+
+    /* ------ SessionId ------ */
+
+    public void setSessionId(long sessionId) {
+        mSessionId = sessionId;
+    }
+
+    public long getSessionId() {
+        return mSessionId;
+    }
+
+    /* ------ SequenceId ------ */
+
+    public void setSequenceId(int sequenceId) {
+        mSequenceId = sequenceId;
+    }
+
+    public int getSequenceId() {
+        return mSequenceId;
+    }
+
+    /* ------ Count Request Class Types ------ */
+
+    public void setCountRequestClassType(int countRequestClassType) {
+        mCountRequestClassType = countRequestClassType;
+    }
+
+    public int getCountRequestClassType() {
+        return mCountRequestClassType;
     }
 }
