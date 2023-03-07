@@ -53,7 +53,16 @@ import java.util.Objects;
             return new NoOpBluetoothRouteController();
         }
 
-        return new LegacyBluetoothRouteController(context, btAdapter, listener);
+        MediaFeatureFlagManager flagManager = MediaFeatureFlagManager.getInstance();
+        boolean isUsingLegacyController = flagManager.getBoolean(
+                MediaFeatureFlagManager.FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER,
+                true);
+
+        if (isUsingLegacyController) {
+            return new LegacyBluetoothRouteController(context, btAdapter, listener);
+        } else {
+            return new AudioPoliciesBluetoothRouteController(context, btAdapter, listener);
+        }
     }
 
     /**
