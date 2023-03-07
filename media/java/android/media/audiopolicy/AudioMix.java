@@ -252,10 +252,10 @@ public class AudioMix {
         if (o == null || getClass() != o.getClass()) return false;
 
         final AudioMix that = (AudioMix) o;
-        return (this.mRouteFlags == that.mRouteFlags)
-                && (this.mRule == that.mRule)
-                && (this.mMixType == that.mMixType)
-                && (this.mFormat == that.mFormat);
+        return (mRouteFlags == that.mRouteFlags)
+                && (mMixType == that.mMixType)
+                && Objects.equals(mRule, that.mRule)
+                && Objects.equals(mFormat, that.mFormat);
     }
 
     /** @hide */
