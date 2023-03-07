@@ -9,7 +9,7 @@ package {
 
 java_binary_host {
     name: "codegen_cli",
-    manifest: "manifest.txt",
+    main_class: "com.android.codegen.MainKt",
     srcs: [
         "src/**/*.kt",
     ],
