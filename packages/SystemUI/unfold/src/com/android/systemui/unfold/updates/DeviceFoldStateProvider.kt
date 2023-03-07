@@ -119,7 +119,7 @@ constructor(
                     "lastHingeAngle: $lastHingeAngle, " +
                     "lastHingeAngleBeforeTransition: $lastHingeAngleBeforeTransition"
             )
-            Trace.traceCounter(Trace.TRACE_TAG_APP, "hinge_angle", angle.toInt())
+            Trace.setCounter( "hinge_angle", angle.toLong())
         }
 
         val currentDirection =
