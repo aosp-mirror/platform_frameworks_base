@@ -59,7 +59,7 @@ final class CompanionDeviceResources {
         map.put(DEVICE_PROFILE_COMPUTER, R.string.title_computer);
         map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING, R.string.title_nearby_device_streaming);
         map.put(DEVICE_PROFILE_WATCH, R.string.confirmation_title);
-        map.put(DEVICE_PROFILE_GLASSES, R.string.confirmation_title);
+        map.put(DEVICE_PROFILE_GLASSES, R.string.confirmation_title_glasses);
         map.put(null, R.string.confirmation_title);
 
         TITLES = unmodifiableMap(map);
@@ -97,7 +97,7 @@ final class CompanionDeviceResources {
     static {
         final Map<String, Integer> map = new ArrayMap<>();
         map.put(DEVICE_PROFILE_WATCH, R.string.summary_watch);
-        map.put(DEVICE_PROFILE_GLASSES, R.string.summary_glasses);
+        map.put(DEVICE_PROFILE_GLASSES, R.string.summary_glasses_multi_device);
         map.put(null, R.string.summary_generic);
 
         MULTI_DEVICES_SUMMARIES = unmodifiableMap(map);
@@ -111,6 +111,16 @@ final class CompanionDeviceResources {
         map.put(null, R.string.profile_name_generic);
 
         PROFILES_NAME = unmodifiableMap(map);
+    }
+
+    static final Map<String, Integer> PROFILES_NAME_MULTI;
+    static {
+        final Map<String, Integer> map = new ArrayMap<>();
+        map.put(DEVICE_PROFILE_GLASSES, R.string.profile_name_generic);
+        map.put(DEVICE_PROFILE_WATCH, R.string.profile_name_watch);
+        map.put(null, R.string.profile_name_generic);
+
+        PROFILES_NAME_MULTI = unmodifiableMap(map);
     }
 
     static final Map<String, Integer> PROFILE_ICON;
@@ -133,7 +143,6 @@ final class CompanionDeviceResources {
         SUPPORTED_PROFILES = unmodifiableSet(set);
     }
 
-
     static final Set<String> SUPPORTED_SELF_MANAGED_PROFILES;
     static {
         final Set<String> set = new ArraySet<>();
@@ -145,6 +154,4 @@ final class CompanionDeviceResources {
 
         SUPPORTED_SELF_MANAGED_PROFILES = unmodifiableSet(set);
     }
-
-
 }
