@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
     private static final String NAMESPACE_MEDIA_BETTER_TOGETHER = "media_better_together";
 
     @StringDef(prefix = "FEATURE_", value = {
-        FEATURE_IS_USING_LEGACY_BLUETOOTH_CONTROLLER
+            FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER
     })
     @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
     @Retention(RetentionPolicy.SOURCE)
@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
      * 'Audio Strategies'-aware controller.
      */
     /* package */ static final @MediaFeatureFlag String
-            FEATURE_IS_USING_LEGACY_BLUETOOTH_CONTROLLER =
+            FEATURE_AUDIO_STRATEGIES_IS_USING_LEGACY_CONTROLLER =
             "BluetoothRouteController__enable_legacy_bluetooth_routes_controller";
 
     private static final MediaFeatureFlagManager sInstance = new MediaFeatureFlagManager();
@@ -52,7 +52,7 @@ import java.lang.annotation.Target;
         // Empty to prevent instantiation.
     }
 
-    /* package */ MediaFeatureFlagManager getInstance() {
+    /* package */ static MediaFeatureFlagManager getInstance() {
         return sInstance;
     }
 
