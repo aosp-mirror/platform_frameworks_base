@@ -2629,14 +2629,26 @@ package android.service.autofill {
     method @Nullable public android.content.IntentSender getAuthentication();
     method @Nullable public java.util.ArrayList<java.lang.String> getAutofillDatatypes();
     method @Nullable public android.content.ClipData getFieldContent();
+    method @Nullable public android.widget.RemoteViews getFieldDialogPresentation(int);
     method @Nullable public java.util.ArrayList<android.view.autofill.AutofillId> getFieldIds();
+    method @Nullable public android.service.autofill.InlinePresentation getFieldInlinePresentation(int);
+    method @Nullable public android.service.autofill.InlinePresentation getFieldInlineTooltipPresentation(int);
+    method @Nullable public android.widget.RemoteViews getFieldPresentation(int);
     method @Nullable public java.util.ArrayList<android.view.autofill.AutofillValue> getFieldValues();
+    method @Nullable public android.service.autofill.Dataset.DatasetFieldFilter getFilter(int);
     method @Nullable public String getId();
     method public boolean isEmpty();
   }
 
   public static final class Dataset.Builder {
     method @NonNull public android.service.autofill.Dataset.Builder setContent(@NonNull android.view.autofill.AutofillId, @Nullable android.content.ClipData);
+  }
+
+  public static final class Dataset.DatasetFieldFilter implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.regex.Pattern getPattern();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.Dataset.DatasetFieldFilter> CREATOR;
   }
 
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -3419,6 +3431,7 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
+    field public static final String ANY_HINT = "any";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
