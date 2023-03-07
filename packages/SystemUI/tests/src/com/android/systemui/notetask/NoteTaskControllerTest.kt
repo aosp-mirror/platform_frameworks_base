@@ -20,12 +20,17 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+import android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager
+import android.os.UserHandle
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
+import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -57,8 +62,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardManager: KeyguardManager
     @Mock lateinit var userManager: UserManager
     @Mock lateinit var eventLogger: NoteTaskEventLogger
-    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    private val userTracker: UserTracker = FakeUserTracker()
 
     private val noteTaskInfo = NoteTaskInfo(packageName = NOTES_PACKAGE_NAME, uid = NOTES_UID)
 
@@ -81,16 +86,14 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     private fun createNoteTaskController(
         isEnabled: Boolean = true,
         bubbles: Bubbles? = this.bubbles,
-        keyguardManager: KeyguardManager? = this.keyguardManager,
-        userManager: UserManager? = this.userManager,
     ): NoteTaskController =
         NoteTaskController(
             context = context,
             resolver = resolver,
             eventLogger = eventLogger,
             optionalBubbles = Optional.ofNullable(bubbles),
-            optionalUserManager = Optional.ofNullable(userManager),
-            optionalKeyguardManager = Optional.ofNullable(keyguardManager),
+            userManager = userManager,
+            keyguardManager = keyguardManager,
             isEnabled = isEnabled,
             devicePolicyManager = devicePolicyManager,
             userTracker = userTracker,
@@ -225,13 +228,19 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
 
         val intentCaptor = argumentCaptor<Intent>()
-        verify(context).startActivity(capture(intentCaptor))
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
+                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
+                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
+        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)
     }
@@ -259,7 +268,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
         verifyZeroInteractions(eventLogger)
@@ -283,13 +292,22 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
 
         val intentCaptor = argumentCaptor<Intent>()
-        verify(context).startActivity(capture(intentCaptor))
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+
+        (intentCaptor.value.flags and FLAG_ACTIVITY_NEW_TASK) == FLAG_ACTIVITY_NEW_TASK
+
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
+                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
+                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
+        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
         verify(eventLogger).logNoteTaskOpened(expectedInfo)
         verifyZeroInteractions(bubbles)
     }
@@ -297,28 +315,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     @Test
     fun showNoteTask_bubblesIsNull_shouldDoNothing() {
         createNoteTaskController(bubbles = null)
-            .showNoteTask(
-                entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
-            )
-
-        verifyZeroInteractions(context, bubbles, eventLogger)
-    }
-
-    @Test
-    fun showNoteTask_keyguardManagerIsNull_shouldDoNothing() {
-        createNoteTaskController(keyguardManager = null)
-            .showNoteTask(
-                entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
-            )
-
-        verifyZeroInteractions(context, bubbles, eventLogger)
-    }
-
-    @Test
-    fun showNoteTask_userManagerIsNull_shouldDoNothing() {
-        createNoteTaskController(userManager = null)
             .showNoteTask(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
                 isInMultiWindowMode = false,
@@ -460,7 +456,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
     }
@@ -487,7 +483,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(NoteTaskController.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags).isEqualTo(Intent.FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
             assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
         }
     }
