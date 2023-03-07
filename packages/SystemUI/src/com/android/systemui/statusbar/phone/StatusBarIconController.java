@@ -569,7 +569,10 @@ public interface StatusBarIconController {
             mGroup.addView(view, index, onCreateLayoutParams());
 
             if (mIsInDemoMode) {
-                mDemoStatusIcons.addModernMobileView(mContext, subId);
+                mDemoStatusIcons.addModernMobileView(
+                        mContext,
+                        mMobileIconsViewModel.getLogger(),
+                        subId);
             }
 
             return view;
@@ -601,6 +604,7 @@ public interface StatusBarIconController {
             return ModernStatusBarMobileView
                     .constructAndBind(
                             mobileContext,
+                            mMobileIconsViewModel.getLogger(),
                             slot,
                             mMobileIconsViewModel.viewModelForSub(subId, mLocation)
                         );
