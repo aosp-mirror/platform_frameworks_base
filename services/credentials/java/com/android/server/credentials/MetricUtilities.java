@@ -115,9 +115,7 @@ public class MetricUtilities {
                 /* chosen_provider_round_trip_time_overall_microseconds */
                 chosenProviderMetric.getEntireProviderLatencyMicroseconds(),
                 /* chosen_provider_final_phase_microseconds (backwards compat only) */
-                getMetricTimestampDifferenceMicroseconds(chosenProviderMetric
-                                .getFinalFinishTimeNanoseconds(),
-                        chosenProviderMetric.getUiCallEndTimeNanoseconds()),
+                DEFAULT_INT_32,
                 /* chosen_provider_status */ chosenProviderMetric.getChosenProviderStatus());
     }
 
