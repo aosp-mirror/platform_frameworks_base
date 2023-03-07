@@ -32,12 +32,15 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -63,7 +66,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -145,6 +147,12 @@ public class MediaControlPanel {
     // Event types logged by smartspace
     private static final int SMARTSPACE_CARD_CLICK_EVENT = 760;
     protected static final int SMARTSPACE_CARD_DISMISS_EVENT = 761;
+
+    private static final float REC_MEDIA_COVER_SCALE_FACTOR = 1.25f;
+    private static final float MEDIA_SCRIM_START_ALPHA = 0.25f;
+    private static final float MEDIA_REC_SCRIM_START_ALPHA = 0.15f;
+    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 0.9f;
+    private static final float MEDIA_REC_SCRIM_END_ALPHA = 1.0f;
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
@@ -779,7 +787,7 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, width, height);
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -869,8 +877,9 @@ public class MediaControlPanel {
         Trace.beginAsyncSection(traceName, traceCookie);
 
         // Capture width & height from views in foreground for artwork scaling in background
-        int width = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredWidth();
-        int height = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredHeight();
+        int width = mContext.getResources().getDimensionPixelSize(R.dimen.qs_media_rec_album_width);
+        int height = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_media_rec_album_height_expanded);
 
         mBackgroundExecutor.execute(() -> {
             // Album art
@@ -880,7 +889,8 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToRecommendationAlbum(artworkIcon, mutableColorScheme, width,
+                        height);
             } else {
                 artwork = new ColorDrawable(Color.TRANSPARENT);
             }
@@ -889,6 +899,11 @@ public class MediaControlPanel {
                 // Bind the artwork drawable to media cover.
                 ImageView mediaCover =
                         mRecommendationViewHolder.getMediaCoverItems().get(itemIndex);
+                // Rescale media cover
+                Matrix coverMatrix = new Matrix(mediaCover.getImageMatrix());
+                coverMatrix.postScale(REC_MEDIA_COVER_SCALE_FACTOR, REC_MEDIA_COVER_SCALE_FACTOR,
+                        0.5f * width, 0.5f * height);
+                mediaCover.setImageMatrix(coverMatrix);
                 mediaCover.setImageDrawable(artwork);
 
                 // Set up the app icon.
@@ -910,7 +925,8 @@ public class MediaControlPanel {
     // This method should be called from a background thread. WallpaperColors.fromBitmap takes a
     // good amount of time. We do that work on the background executor to avoid stalling animations
     // on the UI Thread.
-    private WallpaperColors getWallpaperColor(Icon artworkIcon) {
+    @VisibleForTesting
+    protected WallpaperColors getWallpaperColor(Icon artworkIcon) {
         if (artworkIcon != null) {
             if (artworkIcon.getType() == Icon.TYPE_BITMAP
                     || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
@@ -928,22 +944,40 @@ public class MediaControlPanel {
         return null;
     }
 
-    private LayerDrawable addGradientToIcon(
-            Icon artworkIcon,
-            ColorScheme mutableColorScheme,
-            int width,
-            int height
-    ) {
+    @VisibleForTesting
+    protected LayerDrawable addGradientToPlayerAlbum(Icon artworkIcon,
+            ColorScheme mutableColorScheme, int width, int height) {
         Drawable albumArt = getScaledBackground(artworkIcon, width, height);
-        GradientDrawable gradient = (GradientDrawable) AppCompatResources
-                .getDrawable(mContext, R.drawable.qs_media_scrim);
+        GradientDrawable gradient = (GradientDrawable) mContext.getDrawable(
+                R.drawable.qs_media_scrim).mutate();
+        return setupGradientColorOnDrawable(albumArt, gradient, mutableColorScheme,
+                MEDIA_SCRIM_START_ALPHA, MEDIA_PLAYER_SCRIM_END_ALPHA);
+    }
+
+    @VisibleForTesting
+    protected LayerDrawable addGradientToRecommendationAlbum(Icon artworkIcon,
+            ColorScheme mutableColorScheme, int width, int height) {
+        // First try scaling rec card using bitmap drawable.
+        // If returns null, set drawable bounds.
+        Drawable albumArt = getScaledRecommendationCover(artworkIcon, width, height);
+        if (albumArt == null) {
+            albumArt = getScaledBackground(artworkIcon, width, height);
+        }
+        GradientDrawable gradient = (GradientDrawable) mContext.getDrawable(
+                R.drawable.qs_media_rec_scrim).mutate();
+        return setupGradientColorOnDrawable(albumArt, gradient, mutableColorScheme,
+                MEDIA_REC_SCRIM_START_ALPHA, MEDIA_REC_SCRIM_END_ALPHA);
+    }
+
+    private LayerDrawable setupGradientColorOnDrawable(Drawable albumArt, GradientDrawable gradient,
+            ColorScheme mutableColorScheme, float startAlpha, float endAlpha) {
         gradient.setColors(new int[] {
                 ColorUtilKt.getColorWithAlpha(
                         MediaColorSchemesKt.backgroundStartFromScheme(mutableColorScheme),
-                        0.25f),
+                        startAlpha),
                 ColorUtilKt.getColorWithAlpha(
                         MediaColorSchemesKt.backgroundEndFromScheme(mutableColorScheme),
-                        0.9f),
+                        endAlpha),
         });
         return new LayerDrawable(new Drawable[] { albumArt, gradient });
     }
@@ -1586,6 +1620,29 @@ public class MediaControlPanel {
         }
         drawable.setBounds(bounds);
         return drawable;
+    }
+
+    /**
+     * Scale artwork to fill the background of media covers in recommendation card.
+     */
+    @UiThread
+    private Drawable getScaledRecommendationCover(Icon artworkIcon, int width, int height) {
+        if (width == 0 || height == 0) {
+            return null;
+        }
+        if (artworkIcon != null) {
+            Bitmap bitmap;
+            if (artworkIcon.getType() == Icon.TYPE_BITMAP
+                    || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                Bitmap artworkBitmap = artworkIcon.getBitmap();
+                if (artworkBitmap != null) {
+                    bitmap = Bitmap.createScaledBitmap(artworkIcon.getBitmap(), width,
+                            height, false);
+                    return new BitmapDrawable(mContext.getResources(), bitmap);
+                }
+            }
+        }
+        return null;
     }
 
     /**
