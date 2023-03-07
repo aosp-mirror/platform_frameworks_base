@@ -363,15 +363,15 @@ public class ClipboardOverlayController implements ClipboardListener.ClipboardOv
 
     private void classifyText(ClipboardModel model) {
         mBgExecutor.execute(() -> {
-            Optional<RemoteAction> remoteAction = mClipboardUtils.getAction(
-                            model.getText(), model.getTextLinks(), model.getSource());
+            Optional<RemoteAction> remoteAction =
+                    mClipboardUtils.getAction(model.getTextLinks(), model.getSource());
             if (model.equals(mClipboardModel)) {
                 remoteAction.ifPresent(action -> {
                     mClipboardLogger.logUnguarded(CLIPBOARD_OVERLAY_ACTION_SHOWN);
-                    mView.setActionChip(action, () -> {
+                    mView.post(() -> mView.setActionChip(action, () -> {
                         mClipboardLogger.logSessionComplete(CLIPBOARD_OVERLAY_ACTION_TAPPED);
                         animateOut();
-                    });
+                    }));
                 });
             }
         });
