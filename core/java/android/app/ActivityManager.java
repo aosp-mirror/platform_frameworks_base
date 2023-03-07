@@ -4208,8 +4208,8 @@ public class ActivityManager {
      * processes to reclaim memory; the system will take care of restarting
      * these processes in the future as needed.
      *
-     * <p class="note">On devices with a {@link Build.VERSION#SECURITY_PATCH} of 2023-08-01 or
-     * greater, third party applications can only use this API to kill their own processes.
+     * <p class="note">On devices that run Android 14 or higher,
+     * third party applications can only use this API to kill their own processes.
      * </p>
      *
      * @param packageName The name of the package whose processes are to
