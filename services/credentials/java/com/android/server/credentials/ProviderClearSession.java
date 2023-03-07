@@ -119,8 +119,8 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
     @Override
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
+            mCandidateProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
             mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
-            mCandidateProviderMetric.setStartTimeNanoseconds(System.nanoTime());
         }
     }
 }
