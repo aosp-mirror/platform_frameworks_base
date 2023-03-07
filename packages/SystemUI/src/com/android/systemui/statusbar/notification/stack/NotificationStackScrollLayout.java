@@ -5223,7 +5223,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setIsFullWidth(boolean isFullWidth) {
-        mAmbientState.setPanelFullWidth(isFullWidth);
+        mAmbientState.setSmallScreen(isFullWidth);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
