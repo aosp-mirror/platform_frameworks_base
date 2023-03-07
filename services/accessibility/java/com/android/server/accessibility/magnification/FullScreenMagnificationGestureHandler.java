@@ -32,6 +32,7 @@ import static java.lang.Math.abs;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 
+import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
@@ -40,6 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PointF;
+import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -129,6 +131,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @VisibleForTesting final FullScreenMagnificationController mFullScreenMagnificationController;
 
+    private final FullScreenMagnificationController.MagnificationInfoChangedCallback
+            mMagnificationInfoChangedCallback;
     @VisibleForTesting final DelegatingState mDelegatingState;
     @VisibleForTesting final DetectingState mDetectingState;
     @VisibleForTesting final PanningScalingState mPanningScalingState;
@@ -158,6 +162,40 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
         mFullScreenMagnificationController = fullScreenMagnificationController;
+        mMagnificationInfoChangedCallback =
+                new FullScreenMagnificationController.MagnificationInfoChangedCallback() {
+                    @Override
+                    public void onRequestMagnificationSpec(int displayId, int serviceId) {
+                        return;
+                    }
+
+                    @Override
+                    public void onFullScreenMagnificationActivationState(int displayId,
+                            boolean activated) {
+                        if (displayId != mDisplayId) {
+                            return;
+                        }
+
+                        if (!activated) {
+                            clearAndTransitionToStateDetecting();
+                        }
+                    }
+
+                    @Override
+                    public void onImeWindowVisibilityChanged(int displayId, boolean shown) {
+                        return;
+                    }
+
+                    @Override
+                    public void onFullScreenMagnificationChanged(int displayId,
+                            @NonNull Region region,
+                            @NonNull MagnificationConfig config) {
+                        return;
+                    }
+                };
+        mFullScreenMagnificationController.addInfoChangedCallback(
+                mMagnificationInfoChangedCallback);
+
         mPromptController = promptController;
 
         mDelegatingState = new DelegatingState();
@@ -217,6 +255,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         // Check if need to reset when MagnificationGestureHandler is the last magnifying service.
         mFullScreenMagnificationController.resetIfNeeded(
                 mDisplayId, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+        mFullScreenMagnificationController.removeInfoChangedCallback(
+                mMagnificationInfoChangedCallback);
         clearAndTransitionToStateDetecting();
     }
 
