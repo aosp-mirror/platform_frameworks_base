@@ -30,6 +30,7 @@ import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService
 import static com.android.companiondevicemanager.CompanionDeviceResources.MULTI_DEVICES_SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PERMISSION_TYPES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME_MULTI;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICON;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
@@ -571,6 +572,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final String deviceProfile = mRequest.getDeviceProfile();
 
         final String profileName;
+        final String profileNameMulti;
         final Spanned summary;
         final Drawable profileIcon;
         final int summaryResourceId;
@@ -580,6 +582,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         profileName = getString(PROFILES_NAME.get(deviceProfile));
+        profileNameMulti = getString(PROFILES_NAME_MULTI.get(deviceProfile));
         profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
         summaryResourceId = MULTI_DEVICES_SUMMARIES.get(deviceProfile);
 
@@ -590,7 +593,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         final Spanned title = getHtmlFromResources(
-                this, R.string.chooser_title, profileName, appLabel);
+                this, R.string.chooser_title, profileNameMulti, appLabel);
 
         mTitle.setText(title);
         mSummary.setText(summary);
