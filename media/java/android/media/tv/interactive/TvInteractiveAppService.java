@@ -923,7 +923,7 @@ public abstract class TvInteractiveAppService extends Service {
          * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
          * @param data The raw data of the message
          */
-        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
         }
 
@@ -1768,7 +1768,7 @@ public abstract class TvInteractiveAppService extends Service {
             onAdResponse(response);
         }
 
-        void notifyTvMessage(String type, Bundle data) {
+        void notifyTvMessage(int type, Bundle data) {
             if (DEBUG) {
                 Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
             }

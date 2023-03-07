@@ -1117,7 +1117,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void notifyTvMessage(IBinder sessionToken, String type, Bundle data, int userId) {
+        public void notifyTvMessage(IBinder sessionToken, int type, Bundle data, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,

@@ -78,5 +78,5 @@ oneway interface ITvInputSession {
     void notifyAdBufferReady(in AdBuffer buffer);
 
     // For TV messages
-    void notifyTvMessage(in String type, in Bundle data);
+    void notifyTvMessage(int type, in Bundle data);
 }
