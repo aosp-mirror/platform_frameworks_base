@@ -138,8 +138,6 @@ class DeviceStateToLayoutMap {
                         display.setPosition(POSITION_UNKNOWN);
                     }
                     display.setRefreshRateZoneId(d.getRefreshRateZoneId());
-                    display.setRefreshRateThermalThrottlingMapId(
-                            d.getRefreshRateThermalThrottlingMapId());
                 }
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
