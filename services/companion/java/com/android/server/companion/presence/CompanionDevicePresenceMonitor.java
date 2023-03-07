@@ -281,6 +281,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         mConnectedBtDevices.remove(id);
         mNearbyBleDevices.remove(id);
         mReportedSelfManagedDevices.remove(id);
+        mSimulated.remove(id);
 
         // Do NOT call mCallback.onDeviceDisappeared()!
         // CompanionDeviceManagerService will know that the association is removed, and will do

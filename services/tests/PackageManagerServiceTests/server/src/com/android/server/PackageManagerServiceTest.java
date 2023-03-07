@@ -66,8 +66,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 // atest PackageManagerServiceTest
-// runtest -c com.android.server.pm.PackageManagerServiceTest frameworks-services
-// bit FrameworksServicesTests:com.android.server.pm.PackageManagerServiceTest
 @Postsubmit
 @RunWith(AndroidJUnit4.class)
 public class PackageManagerServiceTest {

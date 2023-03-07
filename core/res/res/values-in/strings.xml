@@ -623,15 +623,15 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Terjadi error. Coba lagi."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Ikon sidik jari"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Face Unlock"</string>
-    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Masalah pada Face Unlock"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Buka dengan Wajah"</string>
+    <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Masalah pada Buka dengan Wajah"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Ketuk untuk menghapus model wajah, lalu tambahkan wajah Anda lagi"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Face Unlock"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Siapkan Buka dengan Wajah"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Buka kunci ponsel dengan melihat ke ponsel"</string>
-    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Face Unlock, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
+    <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Untuk menggunakan Buka dengan Wajah, aktifkan "<b>"Akses kamera"</b>" di Setelan &gt; Privasi"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Siapkan lebih banyak cara untuk membuka kunci"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Ketuk untuk menambahkan sidik jari"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Fingerprint Unlock"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Buka dengan Sidik Jari"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Tidak dapat menggunakan sensor sidik jari"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Kunjungi penyedia reparasi."</string>
     <string name="face_acquired_insufficient" msgid="2150805835949162453">"Tidak bisa mengambil data wajah akurat. Coba lagi."</string>
@@ -657,19 +657,19 @@
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
-    <string name="face_error_timeout" msgid="2598544068593889762">"Coba Face Unlock lagi"</string>
+    <string name="face_error_timeout" msgid="2598544068593889762">"Coba Buka dengan Wajah lagi"</string>
     <string name="face_error_no_space" msgid="5649264057026021723">"Tidak dapat menyimpan data wajah. Hapus dahulu data lama."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Pemrosesan wajah dibatalkan."</string>
-    <string name="face_error_user_canceled" msgid="5766472033202928373">"Face Unlock dibatalkan oleh pengguna"</string>
+    <string name="face_error_user_canceled" msgid="5766472033202928373">"Buka dengan Wajah dibatalkan oleh pengguna"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Terlalu banyak percobaan. Coba lagi nanti."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak upaya gagal. Face Unlock dinonaktifkan."</string>
+    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Terlalu banyak upaya gagal. Buka dengan Wajah dinonaktifkan."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Terlalu banyak upaya gagal. Masukkan kunci layar."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Tidak dapat memverifikasi wajah. Coba lagi."</string>
-    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyiapkan Face Unlock"</string>
-    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Face Unlock tidak didukung di perangkat ini"</string>
+    <string name="face_error_not_enrolled" msgid="1134739108536328412">"Anda belum menyiapkan Buka dengan Wajah"</string>
+    <string name="face_error_hw_not_present" msgid="7940978724978763011">"Buka dengan Wajah tidak didukung di perangkat ini"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor dinonaktifkan untuk sementara."</string>
     <string name="face_name_template" msgid="3877037340223318119">"<xliff:g id="FACEID">%d</xliff:g> wajah"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Gunakan Face Unlock"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Gunakan Buka dengan Wajah"</string>
     <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Gunakan face lock atau kunci layar"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Gunakan wajah untuk melanjutkan"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Gunakan face lock atau kunci layar untuk melanjutkan"</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Mengizinkan aplikasi membaca file video dari penyimpanan bersama."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"membaca file gambar dari penyimpanan bersama"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Mengizinkan aplikasi membaca file gambar dari penyimpanan bersama."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"membaca file gambar dan video yang dipilih dari penyimpanan bersama"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Mengizinkan aplikasi membaca file gambar dan video yang Anda pilih dari penyimpanan bersama."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"memodifikasi atau menghapus konten penyimpanan bersama Anda"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Mengizinkan aplikasi menulis konten penyimpanan bersama Anda."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"lakukan/terima panggilan SIP"</string>
@@ -918,7 +920,7 @@
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Coba lagi"</string>
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Coba lagi"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Membuka kunci untuk semua fitur dan data"</string>
-    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Face Unlock melebihi batas maksimum"</string>
+    <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Percobaan Buka dengan Wajah melebihi batas maksimum"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Tidak ada kartu SIM"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Tidak ada kartu SIM dalam tablet."</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Tidak ada kartu SIM di perangkat Android TV."</string>
@@ -988,7 +990,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"Luaskan area buka kunci."</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"Buka kunci dengan menggeser."</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"Buka kunci dengan pola."</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Face Unlock."</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"Buka dengan Wajah."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"Buka kunci dengan PIN."</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"PIN SIM terbuka."</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"PUK SIM terbuka."</string>

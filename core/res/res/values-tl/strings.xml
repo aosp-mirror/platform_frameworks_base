@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Nagbibigay-daan sa app na magbasa ng mga video file mula sa iyong nakabahaging storage."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"magbasa ng mga image file mula sa nakabahaging storage"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"Nagbibigay-daan sa app na magbasa ng mga image file mula sa iyong nakabahaging storage."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"magbasa ng mga image at video file na pinili ng user mula sa nakabahaging storage"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"Nagbibigay-daan sa app na magbasa ng mga image at video file na pipiliin mo mula sa iyong nakabahaging storage."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"baguhin o i-delete ang content ng nakabahagi mong storage"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Pinapayagan ang app na mag-write sa content ng nakabahagi mong storage."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"magsagawa/tumanggap ng mga tawag sa SIP"</string>

@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ඔබගේ බෙදා ගත් ගබඩාවෙන් වීඩියෝ ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවන්න"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ඔබගේ බෙදා ගත් ගබඩාවෙන් රූප ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"බෙදා ගත් ආචයනයෙන් පරිශීලක තෝරන ලද රූප සහ වීඩියෝ ගොනු කියවන්න"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ඔබේ බෙදා ගත් ආචයනයෙන් ඔබ තෝරන රූප සහ වීඩියෝ ගොනු කියවීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත වෙනස් කරන්න නැතහොත් මකන්න"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"යෙදුමට ඔබේ බෙදා ගත් ගබඩාවේ අන්තර්ගත කියවීමට ඉඩ දෙයි."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ඇමතුම් සිදුකිරීමට/ලබාගැනීමට"</string>

@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ ဗီဒီယိုဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"မျှဝေထားသည့် သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန်"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"သင်၏မျှဝေထားသည့် သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"မျှသုံးသိုလှောင်ခန်းမှ အသုံးပြုသူ ရွေးချယ်ထားသော ပုံနှင့် ဗီဒီယိုဖိုင်များ ဖတ်ခြင်း"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"မျှသုံးသိုလှောင်ခန်းမှ သင်ရွေးချယ်သည့် ပုံနှင့် ဗီဒီယိုဖိုင်များအား အက်ပ်ကို ဖတ်ခွင့်ပြုသည်။"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ပြုပြင်/ဖျက်ခြင်း"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
