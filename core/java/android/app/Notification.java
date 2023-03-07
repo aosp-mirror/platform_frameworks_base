@@ -6969,8 +6969,10 @@ public class Notification implements Parcelable
     /**
      * Returns whether an app can colorize due to the android.permission.USE_COLORIZED_NOTIFICATIONS
      * permission. The permission is checked when a notification is enqueued.
+     *
+     * @hide
      */
-    private boolean hasColorizedPermission() {
+    public boolean hasColorizedPermission() {
         return (flags & Notification.FLAG_CAN_COLORIZE) != 0;
     }
 
