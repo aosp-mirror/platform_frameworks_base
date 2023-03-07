@@ -45,8 +45,8 @@ import org.mockito.MockitoAnnotations;
 public class BroadcastDialogTest extends SysuiTestCase {
 
     private static final String CURRENT_BROADCAST_APP = "Music";
-    private static final String SWITCH_APP = "Files by Google";
-    private static final String TEST_PACKAGE = "com.google.android.apps.nbu.files";
+    private static final String SWITCH_APP = "System UI";
+    private static final String TEST_PACKAGE = "com.android.systemui";
     private BroadcastDialog mBroadcastDialog;
     private View mDialogView;
     private TextView mTitle;
@@ -59,6 +59,7 @@ public class BroadcastDialogTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mBroadcastDialog = new BroadcastDialog(mContext, mock(MediaOutputDialogFactory.class),
                 CURRENT_BROADCAST_APP, TEST_PACKAGE, mock(UiEventLogger.class));
+
         mBroadcastDialog.show();
         mDialogView = mBroadcastDialog.mDialogView;
     }
