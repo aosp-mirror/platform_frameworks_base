@@ -44,7 +44,7 @@ data class UiState(
     val selectedEntry: BaseEntry? = null,
     val providerActivityState: ProviderActivityState = ProviderActivityState.NOT_APPLICABLE,
     val dialogState: DialogState = DialogState.ACTIVE,
-    // True if the UI has one and onely one auto selectable entry. Its provider activiey will be
+    // True if the UI has one and only one auto selectable entry. Its provider activity will be
     // launched immediately, and canceling it will cancel the whole UI flow.
     val isAutoSelectFlow: Boolean = false,
 )
