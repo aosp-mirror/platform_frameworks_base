@@ -502,8 +502,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             String id = generateUniqueId();
             Entry entry = new Entry(CREDENTIAL_ENTRY_KEY,
                     id, credentialEntry.getSlice(),
-                    setUpFillInIntent(credentialEntry
-                            .getBeginGetCredentialOption().getId()));
+                    setUpFillInIntent(credentialEntry.getBeginGetCredentialOptionId()));
             mUiCredentialEntries.put(id, new Pair<>(credentialEntry, entry));
         }
 
