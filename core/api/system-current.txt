@@ -3579,9 +3579,7 @@ package android.content {
   }
 
   public class IntentFilter implements android.os.Parcelable {
-    method @NonNull public final android.os.PersistableBundle getExtras();
     method public final int getOrder();
-    method public final void setExtras(@NonNull android.os.PersistableBundle);
     method public final void setOrder(int);
   }
 
