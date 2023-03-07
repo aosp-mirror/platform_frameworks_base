@@ -27,6 +27,7 @@ import com.android.systemui.unfold.dagger.UnfoldSingleThreadBg
 import com.android.systemui.unfold.progress.RemoteUnfoldTransitionReceiver
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.RotationChangeProvider
+import com.android.systemui.unfold.updates.hinge.HingeAngleProvider
 import com.android.systemui.unfold.updates.screen.ScreenStatusProvider
 import com.android.systemui.unfold.util.CurrentActivityTypeProvider
 import com.android.systemui.unfold.util.UnfoldTransitionATracePrefix
@@ -67,6 +68,7 @@ interface UnfoldSharedComponent {
     }
 
     val unfoldTransitionProvider: Optional<UnfoldTransitionProgressProvider>
+    val hingeAngleProvider: HingeAngleProvider
     val rotationChangeProvider: RotationChangeProvider
 }
 
