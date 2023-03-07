@@ -47,6 +47,7 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
     private static final String TAG = "FaceDetectClient";
 
     private final boolean mIsStrongBiometric;
+    private final FaceAuthenticateOptions mOptions;
     @Nullable private ICancellationSignal mCancellationSignal;
     @Nullable private SensorPrivacyManager mSensorPrivacyManager;
 
@@ -74,6 +75,7 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
         mSensorPrivacyManager = sensorPrivacyManager;
+        mOptions = options;
     }
 
     @Override
@@ -118,7 +120,7 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
 
         if (session.hasContextMethods()) {
             return session.getSession().detectInteractionWithContext(
-                    getOperationContext().toAidlContext());
+                    getOperationContext().toAidlContext(mOptions));
         } else {
             return session.getSession().detectInteraction();
         }
