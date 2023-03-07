@@ -108,6 +108,12 @@ public final class ImeVisibilityStateComputer {
      */
     private boolean mRequestedImeScreenshot;
 
+    /** The window token of the current visible IME layering target overlay. */
+    private IBinder mCurVisibleImeLayeringOverlay;
+
+    /** The window token of the current visible IME input target. */
+    private IBinder mCurVisibleImeInputTarget;
+
     /** Represent the invalid IME visibility state */
     public static final int STATE_INVALID = -1;
 
@@ -190,13 +196,18 @@ public final class ImeVisibilityStateComputer {
             @Override
             public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
                     boolean visible, boolean removed) {
-                // TODO(b/258048231): implement logic to fix IME layering overlay visibility issue.
+                mCurVisibleImeLayeringOverlay = (visible && !removed) ? overlayWindowToken : null;
             }
 
             @Override
             public void onImeInputTargetVisibilityChanged(IBinder imeInputTarget,
                     boolean visibleRequested, boolean removed) {
-                // TODO(b/258048231): implement logic to fix IME input target visibility issue.
+                mCurVisibleImeInputTarget = (visibleRequested && !removed) ? imeInputTarget : null;
+                if (mCurVisibleImeInputTarget == null && mCurVisibleImeLayeringOverlay != null) {
+                    mService.onApplyImeVisibilityFromComputer(imeInputTarget,
+                            new ImeVisibilityResult(STATE_HIDE_IME_EXPLICIT,
+                                    SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE));
+                }
             }
         });
     }

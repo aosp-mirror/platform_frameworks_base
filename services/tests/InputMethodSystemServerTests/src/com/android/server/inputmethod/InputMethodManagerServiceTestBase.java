@@ -218,6 +218,7 @@ public class InputMethodManagerServiceTestBase {
                         false);
         mInputMethodManagerService = new InputMethodManagerService(mContext, mServiceThread,
                 mMockInputMethodBindingController);
+        spyOn(mInputMethodManagerService);
 
         // Start a InputMethodManagerService.Lifecycle to publish and manage the lifecycle of
         // InputMethodManagerService, which is closer to the real situation.

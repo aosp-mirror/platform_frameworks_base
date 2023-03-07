@@ -4813,6 +4813,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    void onApplyImeVisibilityFromComputer(IBinder windowToken,
+            @NonNull ImeVisibilityResult result) {
+        synchronized (ImfLock.class) {
+            mVisibilityApplier.applyImeVisibility(windowToken, null, result.getState(),
+                    result.getReason());
+        }
+    }
+
     @GuardedBy("ImfLock.class")
     void setEnabledSessionLocked(SessionState session) {
         if (mEnabledSession != session) {

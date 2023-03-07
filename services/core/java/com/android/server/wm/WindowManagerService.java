@@ -3349,6 +3349,10 @@ public class WindowManagerService extends IWindowManager.Stub
     void dispatchImeTargetOverlayVisibilityChanged(@NonNull IBinder token, boolean visible,
             boolean removed) {
         if (mImeTargetChangeListener != null) {
+            if (DEBUG_INPUT_METHOD) {
+                Slog.d(TAG, "onImeTargetOverlayVisibilityChanged, win=" + mWindowMap.get(token)
+                        + "visible=" + visible + ", removed=" + removed);
+            }
             mH.post(() -> mImeTargetChangeListener.onImeTargetOverlayVisibilityChanged(token,
                     visible, removed));
         }
@@ -3357,6 +3361,10 @@ public class WindowManagerService extends IWindowManager.Stub
     void dispatchImeInputTargetVisibilityChanged(@NonNull IBinder token, boolean visible,
             boolean removed) {
         if (mImeTargetChangeListener != null) {
+            if (DEBUG_INPUT_METHOD) {
+                Slog.d(TAG, "onImeInputTargetVisibilityChanged, win=" + mWindowMap.get(token)
+                        + "visible=" + visible + ", removed=" + removed);
+            }
             mH.post(() -> mImeTargetChangeListener.onImeInputTargetVisibilityChanged(token,
                     visible, removed));
         }

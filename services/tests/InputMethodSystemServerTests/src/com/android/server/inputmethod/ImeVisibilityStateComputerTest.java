@@ -24,9 +24,13 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.internal.inputmethod.SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.REMOVE_IME_SCREENSHOT_FROM_IMMS;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.SHOW_IME_SCREENSHOT_FROM_IMMS;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeTargetWindowState;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.ImeVisibilityResult;
+import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_EXPLICIT;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_REMOVE_IME_SNAPSHOT;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_SHOW_IME_SNAPSHOT;
 import static com.android.server.inputmethod.InputMethodManagerService.FALLBACK_DISPLAY_ID;
@@ -41,11 +45,13 @@ import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.server.wm.ImeTargetChangeListener;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 /**
  * Test the behavior of {@link ImeVisibilityStateComputer} and {@link ImeVisibilityApplier} when
@@ -57,6 +63,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTestBase {
     private ImeVisibilityStateComputer mComputer;
+    private ImeTargetChangeListener mListener;
     private int mImeDisplayPolicy = DISPLAY_IME_POLICY_LOCAL;
 
     @Before
@@ -73,7 +80,11 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
                 return displayId -> mImeDisplayPolicy;
             }
         };
+        ArgumentCaptor<ImeTargetChangeListener> captor = ArgumentCaptor.forClass(
+                ImeTargetChangeListener.class);
+        verify(mMockWindowManagerInternal).setInputMethodTargetChangeListener(captor.capture());
         mComputer = new ImeVisibilityStateComputer(mInputMethodManagerService, injector);
+        mListener = captor.getValue();
     }
 
     @Test
@@ -223,6 +234,28 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
         assertThat(result).isNotNull();
         assertThat(result.getState()).isEqualTo(STATE_REMOVE_IME_SNAPSHOT);
         assertThat(result.getReason()).isEqualTo(REMOVE_IME_SCREENSHOT_FROM_IMMS);
+    }
+
+    @Test
+    public void testOnApplyImeVisibilityFromComputer() {
+        final IBinder testImeTargetOverlay = new Binder();
+        final IBinder testImeInputTarget = new Binder();
+
+        // Simulate a test IME layering target overlay fully occluded the IME input target.
+        mListener.onImeTargetOverlayVisibilityChanged(testImeTargetOverlay, true, false);
+        mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, false, false);
+        final ArgumentCaptor<IBinder> targetCaptor = ArgumentCaptor.forClass(IBinder.class);
+        final ArgumentCaptor<ImeVisibilityResult> resultCaptor = ArgumentCaptor.forClass(
+                ImeVisibilityResult.class);
+        verify(mInputMethodManagerService).onApplyImeVisibilityFromComputer(targetCaptor.capture(),
+                resultCaptor.capture());
+        final IBinder imeInputTarget = targetCaptor.getValue();
+        final ImeVisibilityResult result = resultCaptor.getValue();
+
+        // Verify the computer will callback hiding IME state to IMMS.
+        assertThat(imeInputTarget).isEqualTo(testImeInputTarget);
+        assertThat(result.getState()).isEqualTo(STATE_HIDE_IME_EXPLICIT);
+        assertThat(result.getReason()).isEqualTo(HIDE_WHEN_INPUT_TARGET_INVISIBLE);
     }
 
     private ImeTargetWindowState initImeTargetWindowState(IBinder windowToken) {
