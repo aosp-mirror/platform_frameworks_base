@@ -32,6 +32,8 @@ import android.os.UserManager
 import android.provider.Settings
 import android.util.Log
 import com.android.internal.util.UserIcons
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.R
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
@@ -90,6 +92,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     telephonyInteractor: TelephonyInteractor,
     broadcastDispatcher: BroadcastDispatcher,
+    keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
@@ -286,6 +289,12 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+    val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onKeyguardGoingAway() {
+                dismissDialog()
+            }
+        }
 
     init {
         refreshUsersScheduler.refreshIfNotPaused()
@@ -316,6 +325,7 @@ constructor(
                 onBroadcastReceived(intent, previousSelectedUser)
             }
             .launchIn(applicationScope)
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
     fun addCallback(callback: UserCallback) {
