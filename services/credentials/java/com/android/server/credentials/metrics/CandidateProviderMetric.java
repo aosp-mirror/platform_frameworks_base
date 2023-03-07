@@ -18,6 +18,9 @@ package com.android.server.credentials.metrics;
 
 /**
  * The central candidate provider metric object that mimics our defined metric setup.
+ * Some types are redundant across these metric collectors, but that has debug use-cases as
+ * these data-types are available at different moments of the flow (and typically, one can feed
+ * into the next).
  * TODO(b/270403549) - iterate on this in V3+
  */
 public class CandidateProviderMetric {
