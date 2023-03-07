@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.pipeline.mobile.shared
+package com.android.systemui.statusbar.pipeline.mobile.data
 
 import android.net.Network
 import android.net.NetworkCapabilities
