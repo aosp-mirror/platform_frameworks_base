@@ -782,6 +782,34 @@ public class AppOpsUidStateTrackerTest {
         assertTrue(mIntf.isUidInForeground(UID));
     }
 
+    @Test
+    public void testAppWidgetVisibleDoesntChangeUidState() {
+        procStateBuilder(UID)
+                .topState()
+                .update();
+
+        SparseArray<String> updatedAppWidgetVisibilities = new SparseArray<>();
+        updatedAppWidgetVisibilities.put(UID, "");
+
+        mIntf.updateAppWidgetVisibility(updatedAppWidgetVisibilities, true);
+
+        assertEquals(UID_STATE_TOP, mIntf.getUidState(UID));
+    }
+
+    @Test
+    public void testAppWidgetNotVisibleDoesntChangeUidState() {
+        SparseArray<String> updatedAppWidgetVisibilities = new SparseArray<>();
+        updatedAppWidgetVisibilities.put(UID, "");
+        mIntf.updateAppWidgetVisibility(updatedAppWidgetVisibilities, true);
+        procStateBuilder(UID)
+                .topState()
+                .update();
+
+        mIntf.updateAppWidgetVisibility(updatedAppWidgetVisibilities, false);
+
+        assertEquals(UID_STATE_TOP, mIntf.getUidState(UID));
+    }
+
     public void testUidStateChangedCallback(int initialState, int finalState) {
         int initialUidState = processStateToUidState(initialState);
         int finalUidState = processStateToUidState(finalState);
