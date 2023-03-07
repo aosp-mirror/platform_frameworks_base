@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
-import android.net.ConnectivityManager.NetworkCallback;
 import android.net.Network;
 import android.os.Binder;
 import android.os.Handler;
@@ -140,20 +139,12 @@ public class NetworkTimeUpdateService extends Binder {
     /** Initialize the receivers and initiate the first NTP request */
     public void systemRunning() {
         // Listen for scheduled refreshes.
-        mContext.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        onPollNetworkTime("scheduled refresh");
-                    }
-                },
-                new IntentFilter(ACTION_POLL),
-                /*broadcastPermission=*/ null,
-                mHandler);
+        ScheduledRefreshBroadcastReceiver receiver = new ScheduledRefreshBroadcastReceiver();
+        mContext.registerReceiver(receiver, new IntentFilter(ACTION_POLL));
 
         // Listen for network connectivity changes.
-        NetworkTimeUpdateCallback networkTimeUpdateCallback = new NetworkTimeUpdateCallback();
-        mCM.registerDefaultNetworkCallback(networkTimeUpdateCallback, mHandler);
+        NetworkConnectivityCallback networkConnectivityCallback = new NetworkConnectivityCallback();
+        mCM.registerDefaultNetworkCallback(networkConnectivityCallback, mHandler);
 
         // Listen for user settings changes.
         ContentResolver resolver = mContext.getContentResolver();
@@ -241,8 +232,25 @@ public class NetworkTimeUpdateService extends Binder {
         }
     }
 
+    private class ScheduledRefreshBroadcastReceiver extends BroadcastReceiver implements Runnable {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // The BroadcastReceiver has to complete quickly or an ANR will be triggered by the
+            // platform regardless of the receiver thread used. Instead of blocking the receiver
+            // thread, the long-running / blocking work is posted to mHandler to allow onReceive()
+            // to return immediately.
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
+            onPollNetworkTime("scheduled refresh");
+        }
+    }
+
     // All callbacks will be invoked using mHandler because of how the callback is registered.
-    private class NetworkTimeUpdateCallback extends NetworkCallback {
+    private class NetworkConnectivityCallback extends ConnectivityManager.NetworkCallback {
         @Override
         public void onAvailable(@NonNull Network network) {
             Log.d(TAG, String.format("New default network %s; checking time.", network));
