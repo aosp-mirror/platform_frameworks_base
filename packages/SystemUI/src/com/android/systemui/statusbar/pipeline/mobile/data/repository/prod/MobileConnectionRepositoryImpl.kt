@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 import android.content.Context
 import android.content.IntentFilter
 import android.telephony.CellSignalStrength
+import android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
@@ -37,7 +38,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState.Disconnected
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.OverrideNetworkType
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierCon
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -62,10 +64,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 
@@ -165,83 +167,100 @@ class MobileConnectionRepositoryImpl(
             }
             .shareIn(scope, SharingStarted.WhileSubscribed())
 
-    private fun updateConnectionState(
-        prevState: MobileConnectionModel,
-        callbackEvent: CallbackEvent,
-    ): MobileConnectionModel =
-        when (callbackEvent) {
-            is CallbackEvent.OnServiceStateChanged -> {
-                val serviceState = callbackEvent.serviceState
-                prevState.copy(
-                    isEmergencyOnly = serviceState.isEmergencyOnly,
-                    isRoaming = serviceState.roaming,
-                    operatorAlphaShort = serviceState.operatorAlphaShort,
-                    isInService = Utils.isInService(serviceState),
-                )
-            }
-            is CallbackEvent.OnSignalStrengthChanged -> {
-                val signalStrength = callbackEvent.signalStrength
-                val cdmaLevel =
-                    signalStrength.getCellSignalStrengths(CellSignalStrengthCdma::class.java).let {
-                        strengths ->
-                        if (!strengths.isEmpty()) {
-                            strengths[0].level
-                        } else {
-                            CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
-                        }
-                    }
-
-                val primaryLevel = signalStrength.level
-
-                prevState.copy(
-                    cdmaLevel = cdmaLevel,
-                    primaryLevel = primaryLevel,
-                    isGsm = signalStrength.isGsm,
-                )
-            }
-            is CallbackEvent.OnDataConnectionStateChanged -> {
-                prevState.copy(dataConnectionState = callbackEvent.dataState.toDataConnectionType())
-            }
-            is CallbackEvent.OnDataActivity -> {
-                prevState.copy(
-                    dataActivityDirection = callbackEvent.direction.toMobileDataActivityModel()
-                )
-            }
-            is CallbackEvent.OnCarrierNetworkChange -> {
-                prevState.copy(carrierNetworkChangeActive = callbackEvent.active)
-            }
-            is CallbackEvent.OnDisplayInfoChanged -> {
-                val telephonyDisplayInfo = callbackEvent.telephonyDisplayInfo
-                val networkType =
-                    if (telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
-                        UnknownNetworkType
-                    } else if (
-                        telephonyDisplayInfo.overrideNetworkType == OVERRIDE_NETWORK_TYPE_NONE
-                    ) {
-                        DefaultNetworkType(
-                            mobileMappingsProxy.toIconKey(telephonyDisplayInfo.networkType)
-                        )
-                    } else {
-                        OverrideNetworkType(
-                            mobileMappingsProxy.toIconKeyOverride(
-                                telephonyDisplayInfo.overrideNetworkType
-                            )
-                        )
-                    }
-                prevState.copy(resolvedNetworkType = networkType)
-            }
-            is CallbackEvent.OnDataEnabledChanged -> {
-                // Not part of this object, handled in a separate flow
-                prevState
-            }
-        }
-
-    override val connectionInfo = run {
-        val initial = MobileConnectionModel()
+    override val isEmergencyOnly =
         callbackEvents
-            .scan(initial, ::updateConnectionState)
-            .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
-    }
+            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .map { it.serviceState.isEmergencyOnly }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isRoaming =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .map { it.serviceState.roaming }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val operatorAlphaShort =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .map { it.serviceState.operatorAlphaShort }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
+    override val isInService =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .map { Utils.isInService(it.serviceState) }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val isGsm =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnSignalStrengthChanged>()
+            .map { it.signalStrength.isGsm }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val cdmaLevel =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnSignalStrengthChanged>()
+            .map {
+                it.signalStrength.getCellSignalStrengths(CellSignalStrengthCdma::class.java).let {
+                    strengths ->
+                    if (strengths.isNotEmpty()) {
+                        strengths[0].level
+                    } else {
+                        CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
+                    }
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+
+    override val primaryLevel =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnSignalStrengthChanged>()
+            .map { it.signalStrength.level }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+
+    override val dataConnectionState =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnDataConnectionStateChanged>()
+            .map { it.dataState.toDataConnectionType() }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), Disconnected)
+
+    override val dataActivityDirection =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnDataActivity>()
+            .map { it.direction.toMobileDataActivityModel() }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                DataActivityModel(hasActivityIn = false, hasActivityOut = false)
+            )
+
+    override val carrierNetworkChangeActive =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnCarrierNetworkChange>()
+            .map { it.active }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+
+    override val resolvedNetworkType =
+        callbackEvents
+            .filterIsInstance<CallbackEvent.OnDisplayInfoChanged>()
+            .map {
+                if (it.telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
+                    UnknownNetworkType
+                } else if (
+                    it.telephonyDisplayInfo.overrideNetworkType == OVERRIDE_NETWORK_TYPE_NONE
+                ) {
+                    DefaultNetworkType(
+                        mobileMappingsProxy.toIconKey(it.telephonyDisplayInfo.networkType)
+                    )
+                } else {
+                    OverrideNetworkType(
+                        mobileMappingsProxy.toIconKeyOverride(
+                            it.telephonyDisplayInfo.overrideNetworkType
+                        )
+                    )
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
 
     override val numberOfLevels =
         systemUiCarrierConfig.shouldInflateSignalStrength
