@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,4 @@
 
 package android.credentials;
 
-import android.credentials.ListEnabledProvidersResponse;
-
-/**
- * Listener for an listEnabledProviders request.
- *
- * @hide
- */
-interface IListEnabledProvidersCallback {
-    oneway void onResponse(in ListEnabledProvidersResponse response);
-    oneway void onError(String errorType, String message);
-}
+parcelable CredentialProviderInfo;
