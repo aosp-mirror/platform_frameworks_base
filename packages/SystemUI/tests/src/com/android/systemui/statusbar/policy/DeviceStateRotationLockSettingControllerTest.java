@@ -38,6 +38,7 @@ import com.android.internal.R;
 import com.android.internal.view.RotationPolicy;
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wrapper.RotationPolicyWrapper;
@@ -55,10 +56,12 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
 
     private static final String[] DEFAULT_SETTINGS = new String[]{"0:1", "2:0:1", "1:2"};
 
+    @Mock private DeviceStateManager mDeviceStateManager;
+    @Mock private DeviceStateRotationLockSettingControllerLogger mLogger;
+    @Mock private DumpManager mDumpManager;
+
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
-    @Mock
-    private DeviceStateManager mDeviceStateManager;
     private final RotationPolicyWrapper mFakeRotationPolicy = new FakeRotationPolicy();
     private DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
     private DeviceStateManager.DeviceStateCallback mDeviceStateCallback;
@@ -78,7 +81,13 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
         mSettingsManager = DeviceStateRotationLockSettingsManager.getInstance(mContext);
         mDeviceStateRotationLockSettingController =
                 new DeviceStateRotationLockSettingController(
-                        mFakeRotationPolicy, mDeviceStateManager, mFakeExecutor, mSettingsManager);
+                        mFakeRotationPolicy,
+                        mDeviceStateManager,
+                        mFakeExecutor,
+                        mSettingsManager,
+                        mLogger,
+                        mDumpManager
+                );
 
         mDeviceStateRotationLockSettingController.setListening(true);
         verify(mDeviceStateManager)
@@ -173,15 +182,11 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
     }
 
     @Test
-    public void whenDeviceStateSwitchedToIgnoredState_usePreviousSetting() {
-        initializeSettingsWith(
-                0, DEVICE_STATE_ROTATION_LOCK_IGNORED, 1, DEVICE_STATE_ROTATION_LOCK_UNLOCKED);
-        mFakeRotationPolicy.setRotationLock(true);
-
-        mDeviceStateCallback.onStateChanged(1);
-        assertThat(mFakeRotationPolicy.isRotationLocked()).isFalse();
-
+    public void whenDeviceStateSwitchedToIgnoredState_useFallbackSetting() {
         mDeviceStateCallback.onStateChanged(0);
+        assertThat(mFakeRotationPolicy.isRotationLocked()).isTrue();
+
+        mDeviceStateCallback.onStateChanged(2);
         assertThat(mFakeRotationPolicy.isRotationLocked()).isFalse();
     }
 
