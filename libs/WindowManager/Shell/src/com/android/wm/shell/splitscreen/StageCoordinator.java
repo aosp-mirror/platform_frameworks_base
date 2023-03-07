@@ -764,17 +764,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (pendingIntent2 == null) {
-            // Launching a solo task.
-            ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
-            activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
-            options1 = activityOptions.toBundle();
-            addActivityOptions(options1, null /* launchTarget */);
-            if (shortcutInfo1 != null) {
-                wct.startShortcut(mContext.getPackageName(), shortcutInfo1, options1);
-            } else {
-                wct.sendPendingIntent(pendingIntent1, fillInIntent1, options1);
-            }
-            mSyncQueue.queue(wct);
+            // Launching a solo intent or shortcut as fullscreen.
+            launchAsFullscreenWithRemoteAnimation(pendingIntent1, fillInIntent1, shortcutInfo1,
+                    options1, adapter, wct);
             return;
         }
 
@@ -797,13 +789,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (taskId == INVALID_TASK_ID) {
-            // Launching a solo task.
-            ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
-            activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
-            options1 = activityOptions.toBundle();
-            addActivityOptions(options1, null /* launchTarget */);
-            wct.sendPendingIntent(pendingIntent, fillInIntent, options1);
-            mSyncQueue.queue(wct);
+            // Launching a solo intent as fullscreen.
+            launchAsFullscreenWithRemoteAnimation(pendingIntent, fillInIntent, null, options1,
+                    adapter, wct);
             return;
         }
 
@@ -822,13 +810,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         if (options1 == null) options1 = new Bundle();
         if (taskId == INVALID_TASK_ID) {
-            // Launching a solo task.
-            ActivityOptions activityOptions = ActivityOptions.fromBundle(options1);
-            activityOptions.update(ActivityOptions.makeRemoteAnimation(adapter));
-            options1 = activityOptions.toBundle();
-            addActivityOptions(options1, null /* launchTarget */);
-            wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
-            mSyncQueue.queue(wct);
+            // Launching a solo shortcut as fullscreen.
+            launchAsFullscreenWithRemoteAnimation(null, null, shortcutInfo, options1, adapter, wct);
             return;
         }
 
@@ -836,6 +819,49 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.startShortcut(mContext.getPackageName(), shortcutInfo, options1);
         startWithLegacyTransition(wct, taskId, options2, splitPosition, splitRatio, adapter,
                 instanceId);
+    }
+
+    private void launchAsFullscreenWithRemoteAnimation(@Nullable PendingIntent pendingIntent,
+            @Nullable Intent fillInIntent, @Nullable ShortcutInfo shortcutInfo,
+            @Nullable Bundle options, RemoteAnimationAdapter adapter,
+            WindowContainerTransaction wct) {
+        LegacyTransitions.ILegacyTransition transition =
+                (transit, apps, wallpapers, nonApps, finishedCallback, t) -> {
+                    if (apps == null || apps.length == 0) {
+                        onRemoteAnimationFinished(apps);
+                        t.apply();
+                        try {
+                            adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Error starting remote animation", e);
+                        }
+                        return;
+                    }
+
+                    for (int i = 0; i < apps.length; ++i) {
+                        if (apps[i].mode == MODE_OPENING) {
+                            t.show(apps[i].leash);
+                        }
+                    }
+                    t.apply();
+
+                    try {
+                        adapter.getRunner().onAnimationStart(
+                                transit, apps, wallpapers, nonApps, finishedCallback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error starting remote animation", e);
+                    }
+                };
+
+        addActivityOptions(options, null /* launchTarget */);
+        if (shortcutInfo != null) {
+            wct.startShortcut(mContext.getPackageName(), shortcutInfo, options);
+        } else if (pendingIntent != null) {
+            wct.sendPendingIntent(pendingIntent, fillInIntent, options);
+        } else {
+            Slog.e(TAG, "Pending intent and shortcut are null is invalid case.");
+        }
+        mSyncQueue.queue(transition, WindowManager.TRANSIT_OPEN, wct);
     }
 
     private void startWithLegacyTransition(WindowContainerTransaction wct,
@@ -894,23 +920,25 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         if (options == null) options = new Bundle();
         addActivityOptions(options, mMainStage);
-        options = wrapAsSplitRemoteAnimation(adapter, options);
 
         updateWindowBounds(mSplitLayout, wct);
-
-        // TODO(b/268008375): Merge APIs to start a split pair into one.
-        if (mainTaskId != INVALID_TASK_ID) {
-            wct.startTask(mainTaskId, options);
-        } else if (mainShortcutInfo != null) {
-            wct.startShortcut(mContext.getPackageName(), mainShortcutInfo, options);
-        } else {
-            wct.sendPendingIntent(mainPendingIntent, mainFillInIntent, options);
-        }
-
         wct.reorder(mRootTaskInfo.token, true);
         wct.setForceTranslucent(mRootTaskInfo.token, false);
 
-        mSyncQueue.queue(wct);
+        // TODO(b/268008375): Merge APIs to start a split pair into one.
+        if (mainTaskId != INVALID_TASK_ID) {
+            options = wrapAsSplitRemoteAnimation(adapter, options);
+            wct.startTask(mainTaskId, options);
+            mSyncQueue.queue(wct);
+        } else {
+            if (mainShortcutInfo != null) {
+                wct.startShortcut(mContext.getPackageName(), mainShortcutInfo, options);
+            } else {
+                wct.sendPendingIntent(mainPendingIntent, mainFillInIntent, options);
+            }
+            mSyncQueue.queue(wrapAsSplitRemoteAnimation(adapter), WindowManager.TRANSIT_OPEN, wct);
+        }
+
         mSyncQueue.runInSync(t -> {
             setDividerVisibility(true, t);
         });
@@ -967,6 +995,54 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return activityOptions.toBundle();
     }
 
+    private LegacyTransitions.ILegacyTransition wrapAsSplitRemoteAnimation(
+            RemoteAnimationAdapter adapter) {
+        LegacyTransitions.ILegacyTransition transition =
+                (transit, apps, wallpapers, nonApps, finishedCallback, t) -> {
+                    if (apps == null || apps.length == 0) {
+                        onRemoteAnimationFinished(apps);
+                        t.apply();
+                        try {
+                            adapter.getRunner().onAnimationCancelled(mKeyguardShowing);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Error starting remote animation", e);
+                        }
+                        return;
+                    }
+
+                    // Wrap the divider bar into non-apps target to animate together.
+                    nonApps = ArrayUtils.appendElement(RemoteAnimationTarget.class, nonApps,
+                            getDividerBarLegacyTarget());
+
+                    for (int i = 0; i < apps.length; ++i) {
+                        if (apps[i].mode == MODE_OPENING) {
+                            t.show(apps[i].leash);
+                            // Reset the surface position of the opening app to prevent offset.
+                            t.setPosition(apps[i].leash, 0, 0);
+                        }
+                    }
+                    t.apply();
+
+                    IRemoteAnimationFinishedCallback wrapCallback =
+                            new IRemoteAnimationFinishedCallback.Stub() {
+                                @Override
+                                public void onAnimationFinished() throws RemoteException {
+                                    onRemoteAnimationFinished(apps);
+                                    finishedCallback.onAnimationFinished();
+                                }
+                            };
+                    Transitions.setRunningRemoteTransitionDelegate(adapter.getCallingApplication());
+                    try {
+                        adapter.getRunner().onAnimationStart(
+                                transit, apps, wallpapers, nonApps, wrapCallback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error starting remote animation", e);
+                    }
+                };
+
+        return transition;
+    }
+
     private void setEnterInstanceId(InstanceId instanceId) {
         if (instanceId != null) {
             mLogger.enterRequested(instanceId, ENTER_REASON_LAUNCHER);
@@ -992,6 +1068,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             });
         }
     }
+
+    private void onRemoteAnimationFinished(RemoteAnimationTarget[] apps) {
+        mIsDividerRemoteAnimating = false;
+        mShouldUpdateRecents = true;
+        mSplitRequest = null;
+        // If any stage has no child after finished animation, that side of the split will display
+        // nothing. This might happen if starting the same app on the both sides while not
+        // supporting multi-instance. Exit the split screen and expand that app to full screen.
+        if (mMainStage.getChildCount() == 0 || mSideStage.getChildCount() == 0) {
+            mMainExecutor.execute(() -> exitSplitScreen(mMainStage.getChildCount() == 0
+                    ? mSideStage : mMainStage, EXIT_REASON_UNKNOWN));
+            mSplitUnsupportedToast.show();
+            return;
+        }
+
+        final WindowContainerTransaction evictWct = new WindowContainerTransaction();
+        prepareEvictNonOpeningChildTasks(SPLIT_POSITION_TOP_OR_LEFT, apps, evictWct);
+        prepareEvictNonOpeningChildTasks(SPLIT_POSITION_BOTTOM_OR_RIGHT, apps, evictWct);
+        mSyncQueue.queue(evictWct);
+    }
+
 
     /**
      * Collects all the current child tasks of a specific split and prepares transaction to evict
