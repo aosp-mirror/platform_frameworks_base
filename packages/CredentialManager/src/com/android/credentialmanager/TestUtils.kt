@@ -32,8 +32,7 @@ import androidx.credentials.provider.BeginGetPublicKeyCredentialOption
 import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
-import androidx.credentials.provider.RemoteCreateEntry
-import androidx.credentials.provider.RemoteCredentialEntry
+import androidx.credentials.provider.RemoteEntry
 
 import java.time.Instant
 
@@ -85,9 +84,7 @@ class GetTestUtils {
             return Entry(
                 key,
                 subkey,
-                RemoteCredentialEntry(pendingIntent, BeginGetPublicKeyCredentialOption(
-                    Bundle(), "id", "requestjson"
-                )).slice
+                RemoteEntry(pendingIntent).slice
             )
         }
 
@@ -244,7 +241,7 @@ class CreateTestUtils {
             return Entry(
                 key,
                 subkey,
-                RemoteCreateEntry(pendingIntent).slice
+                RemoteEntry(pendingIntent).slice
             )
         }
     }
