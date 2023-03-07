@@ -142,4 +142,10 @@ class TestThreadingDomain extends ThreadingDomain {
         mCurrentTimeMillis = queued.executionTimeMillis;
         queued.runnable.run();
     }
+
+    void executeAll() {
+        while (!mQueue.isEmpty()) {
+            executeNext();
+        }
+    }
 }
