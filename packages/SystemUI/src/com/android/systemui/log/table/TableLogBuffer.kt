@@ -16,13 +16,13 @@
 
 package com.android.systemui.log.table
 
+import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.plugins.util.RingBuffer
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.flow.Flow
 
 /**
  * A logger that logs changes in table format.
@@ -138,18 +138,24 @@ class TableLogBuffer(
     // timestamps.)
 
     private fun logChange(timestamp: Long, prefix: String, columnName: String, value: String?) {
+        Trace.beginSection("TableLogBuffer#logChange(string)")
         val change = obtain(timestamp, prefix, columnName)
         change.set(value)
+        Trace.endSection()
     }
 
     private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Boolean) {
+        Trace.beginSection("TableLogBuffer#logChange(boolean)")
         val change = obtain(timestamp, prefix, columnName)
         change.set(value)
+        Trace.endSection()
     }
 
     private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Int?) {
+        Trace.beginSection("TableLogBuffer#logChange(int)")
         val change = obtain(timestamp, prefix, columnName)
         change.set(value)
+        Trace.endSection()
     }
 
     // TODO(b/259454430): Add additional change types here.
