@@ -47,14 +47,14 @@ class MobileInputLoggerTest : SysuiTestCase() {
         val expectedNetId = NET_1_ID.toString()
         val expectedCaps = NET_1_CAPS.toString()
 
-        assertThat(actualString).contains("true")
+        assertThat(actualString).contains("onDefaultCapabilitiesChanged")
         assertThat(actualString).contains(expectedNetId)
         assertThat(actualString).contains(expectedCaps)
     }
 
     @Test
     fun testLogOnLost_bufferHasNetIdOfLostNetwork() {
-        logger.logOnLost(NET_1)
+        logger.logOnLost(NET_1, isDefaultNetworkCallback = false)
 
         val stringWriter = StringWriter()
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
@@ -62,6 +62,7 @@ class MobileInputLoggerTest : SysuiTestCase() {
 
         val expectedNetId = NET_1_ID.toString()
 
+        assertThat(actualString).contains("onLost")
         assertThat(actualString).contains(expectedNetId)
     }
 
