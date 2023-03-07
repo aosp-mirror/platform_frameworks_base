@@ -285,7 +285,7 @@ class FingerprintAuthenticationClient
 
         if (session.hasContextMethods()) {
             return session.getSession().authenticateWithContext(
-                    mOperationId, opContext.toAidlContext());
+                    mOperationId, opContext.toAidlContext(getOptions()));
         } else {
             return session.getSession().authenticate(mOperationId);
         }
