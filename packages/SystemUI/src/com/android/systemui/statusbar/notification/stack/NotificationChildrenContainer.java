@@ -296,6 +296,19 @@ public class NotificationChildrenContainer extends ViewGroup
     }
 
     /**
+     * Set the notification time in the group so that the view can show the latest event in the UI
+     * appropriately.
+     */
+    public void setNotificationGroupWhen(long whenMillis) {
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.setNotificationWhen(whenMillis);
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.setNotificationWhen(whenMillis);
+        }
+    }
+
+    /**
      * Add a child notification to this view.
      *
      * @param row        the row to add
