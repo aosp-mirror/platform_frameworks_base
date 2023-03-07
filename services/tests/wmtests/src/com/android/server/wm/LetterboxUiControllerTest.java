@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FOR
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
+import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
@@ -46,6 +47,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.LetterboxUiController.MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP;
+import static com.android.server.wm.LetterboxUiController.SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -182,6 +185,69 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         prepareActivityThatShouldIgnoreRequestedOrientationDuringRelaunch();
 
         assertFalse(mController.shouldIgnoreRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED));
+    }
+
+    @Test
+    public void testShouldIgnoreOrientationRequestLoop_overrideDisabled_returnsFalse() {
+        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        // Request 3 times to simulate orientation request loop
+        for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
+            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
+                    /* expectedCount */ 0);
+        }
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
+    public void testShouldIgnoreOrientationRequestLoop_isLetterboxed_returnsFalse() {
+        doReturn(true).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        // Request 3 times to simulate orientation request loop
+        for (int i = 0; i <= MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
+            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
+                    /* expectedCount */ i);
+        }
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
+    public void testShouldIgnoreOrientationRequestLoop_noLoop_returnsFalse() {
+        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        // No orientation request loop
+        assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
+                /* expectedCount */ 0);
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
+    public void testShouldIgnoreOrientationRequestLoop_timeout_returnsFalse()
+            throws InterruptedException {
+        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        for (int i = MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i > 0; i--) {
+            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
+                    /* expectedCount */ 0);
+            Thread.sleep(SET_ORIENTATION_REQUEST_COUNTER_TIMEOUT_MS);
+        }
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED})
+    public void testShouldIgnoreOrientationRequestLoop_returnsTrue() {
+        doReturn(false).when(mActivity).isLetterboxedForFixedOrientationAndAspectRatio();
+        for (int i = 0; i < MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP; i++) {
+            assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ false,
+                    /* expectedCount */ i);
+        }
+        assertShouldIgnoreOrientationRequestLoop(/* shouldIgnore */ true,
+                /* expectedCount */ MIN_COUNT_TO_IGNORE_REQUEST_IN_LOOP);
+    }
+
+    private void assertShouldIgnoreOrientationRequestLoop(boolean shouldIgnore, int expectedCount) {
+        if (shouldIgnore) {
+            assertTrue(mController.shouldIgnoreOrientationRequestLoop());
+        } else {
+            assertFalse(mController.shouldIgnoreOrientationRequestLoop());
+        }
+        assertEquals(expectedCount, mController.getSetOrientationRequestCounter());
     }
 
     @Test
