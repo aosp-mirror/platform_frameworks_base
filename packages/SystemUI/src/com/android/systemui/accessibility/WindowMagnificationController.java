@@ -404,18 +404,18 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     void deleteWindowMagnification() {
-        deleteWindowMagnification(/* hideSettingPanel= */ false);
+        deleteWindowMagnification(/* closeSettingPanel= */ true);
     }
 
     /**
      * Deletes the magnification window.
      */
-    void deleteWindowMagnification(boolean hideSettingPanel) {
+    void deleteWindowMagnification(boolean closeSettingPanel) {
         if (!isWindowVisible()) {
             return;
         }
 
-        if (!hideSettingPanel) {
+        if (closeSettingPanel) {
             closeMagnificationSettings();
         }
 
@@ -495,7 +495,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         // Recreate the window again to correct the window appearance due to density or
         // window size changed not caused by rotation.
         if (isWindowVisible() && reCreateWindow) {
-            deleteWindowMagnification(/* hideSettingPanel= */ true);
+            deleteWindowMagnification(/* closeSettingPanel= */ false);
             enableWindowMagnificationInternal(Float.NaN, Float.NaN, Float.NaN);
         }
     }
