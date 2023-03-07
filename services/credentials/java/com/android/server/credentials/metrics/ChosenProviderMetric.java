@@ -22,6 +22,9 @@ import com.android.server.credentials.MetricUtilities;
 
 /**
  * The central chosen provider metric object that mimics our defined metric setup.
+ * Some types are redundant across these metric collectors, but that has debug use-cases as
+ * these data-types are available at different moments of the flow (and typically, one can feed
+ * into the next).
  * TODO(b/270403549) - iterate on this in V3+
  */
 public class ChosenProviderMetric {
@@ -65,12 +68,12 @@ public class ChosenProviderMetric {
 
     /**
      * In order for a chosen provider to be selected, the call must have successfully begun.
-     * Thus, the {@link PreCandidateMetric} can directly pass this initial latency figure into
+     * Thus, the {@link InitialPhaseMetric} can directly pass this initial latency figure into
      * this chosen provider metric.
      *
      * @param preQueryPhaseLatencyMicroseconds the millisecond latency for the service start,
      *                                         typically passed in through the
-     *                                         {@link PreCandidateMetric}
+     *                                         {@link InitialPhaseMetric}
      */
     public void setPreQueryPhaseLatencyMicroseconds(int preQueryPhaseLatencyMicroseconds) {
         mPreQueryPhaseLatencyMicroseconds = preQueryPhaseLatencyMicroseconds;
@@ -112,7 +115,7 @@ public class ChosenProviderMetric {
 
     /**
      * Returns the full (platform invoked to response) latency in microseconds. Expects the
-     * start time to be provided, such as from {@link PreCandidateMetric}.
+     * start time to be provided, such as from {@link InitialPhaseMetric}.
      */
     public int getEntireLatencyMicroseconds() {
         return (int) ((this.mFinalFinishTimeNanoseconds
@@ -123,11 +126,11 @@ public class ChosenProviderMetric {
 
     /**
      * In order for a chosen provider to be selected, the call must have successfully begun.
-     * Thus, the {@link PreCandidateMetric} can directly pass this initial timestamp into this
+     * Thus, the {@link InitialPhaseMetric} can directly pass this initial timestamp into this
      * chosen provider metric.
      *
      * @param serviceBeganTimeNanoseconds the timestamp moment when the platform was called,
-     *                                    typically passed in through the {@link PreCandidateMetric}
+     *                                    typically passed in through the {@link InitialPhaseMetric}
      */
     public void setServiceBeganTimeNanoseconds(long serviceBeganTimeNanoseconds) {
         mServiceBeganTimeNanoseconds = serviceBeganTimeNanoseconds;
@@ -187,8 +190,6 @@ public class ChosenProviderMetric {
         return (int) ((specificTimestamp
                 - this.mServiceBeganTimeNanoseconds) / 1000);
     }
-
-
 
     /* ----------- Provider Status -------------- */
 
