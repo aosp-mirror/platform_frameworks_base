@@ -1343,13 +1343,9 @@ class MediaDataManager(
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaEntries.remove(key) ?: return
-        val isEligibleForResume =
-            removed.isLocalSession() ||
-                (mediaFlags.isRemoteResumeAllowed() &&
-                    removed.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE)
         if (keyguardUpdateMonitor.isUserInLockdown(removed.userId)) {
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
-        } else if (useMediaResumption && removed.resumeAction != null && isEligibleForResume) {
+        } else if (isAbleToResume(removed)) {
             convertToResumePlayer(key, removed)
         } else if (mediaFlags.isRetainingPlayersEnabled()) {
             handlePossibleRemoval(key, removed, notificationRemoved = true)
@@ -1367,6 +1363,14 @@ class MediaDataManager(
         // Clear token since the session is no longer valid
         val updated = entry.copy(token = null)
         handlePossibleRemoval(key, updated)
+    }
+
+    private fun isAbleToResume(data: MediaData): Boolean {
+        val isEligibleForResume =
+            data.isLocalSession() ||
+                (mediaFlags.isRemoteResumeAllowed() &&
+                    data.playbackLocation != MediaData.PLAYBACK_CAST_REMOTE)
+        return useMediaResumption && data.resumeAction != null && isEligibleForResume
     }
 
     /**
@@ -1391,8 +1395,9 @@ class MediaDataManager(
             if (DEBUG) Log.d(TAG, "Session destroyed but using notification actions $key")
             mediaEntries.put(key, removed)
             notifyMediaDataLoaded(key, key, removed)
-        } else if (removed.active) {
-            // This player was still active - it didn't last long enough to time out: remove
+        } else if (removed.active && !isAbleToResume(removed)) {
+            // This player was still active - it didn't last long enough to time out,
+            // and its app doesn't normally support resume: remove
             if (DEBUG) Log.d(TAG, "Removing still-active player $key")
             notifyMediaDataRemoved(key)
             logger.logMediaRemoved(removed.appUid, removed.packageName, removed.instanceId)
