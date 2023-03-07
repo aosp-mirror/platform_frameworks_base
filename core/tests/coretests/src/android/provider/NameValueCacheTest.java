@@ -91,7 +91,7 @@ public class NameValueCacheTest {
         mConfigsCacheGenerationStore = new MemoryIntArray(2);
         mConfigsCacheGenerationStore.set(0, 123);
         mConfigsCacheGenerationStore.set(1, 456);
-        mSettingsCacheGenerationStore = new MemoryIntArray(2);
+        mSettingsCacheGenerationStore = new MemoryIntArray(3);
         mSettingsCacheGenerationStore.set(0, 234);
         mSettingsCacheGenerationStore.set(1, 567);
         mConfigsStorage = new HashMap<>();
@@ -163,6 +163,10 @@ public class NameValueCacheTest {
                     Bundle incomingBundle = invocationOnMock.getArgument(4);
                     String key = invocationOnMock.getArgument(3);
                     String value = incomingBundle.getString(Settings.NameValueTable.VALUE);
+                    boolean newSetting = false;
+                    if (!mSettingsStorage.containsKey(key)) {
+                        newSetting = true;
+                    }
                     mSettingsStorage.put(key, value);
                     int currentGeneration;
                     // Different settings have different generation codes
@@ -173,12 +177,18 @@ public class NameValueCacheTest {
                         currentGeneration = mSettingsCacheGenerationStore.get(1);
                         mSettingsCacheGenerationStore.set(1, ++currentGeneration);
                     }
+                    if (newSetting) {
+                        // Tracking the generation of all unset settings.
+                        // Increment when a new setting is inserted
+                        currentGeneration = mSettingsCacheGenerationStore.get(2);
+                        mSettingsCacheGenerationStore.set(2, ++currentGeneration);
+                    }
                     return null;
                 });
 
         // Returns the value corresponding to a setting, or null if the setting
-        // doesn't have a value stored for it. Returns the generation key if the value isn't null
-        // and the caller asked for the generation key.
+        // doesn't have a value stored for it. Returns the generation key
+        // if the caller asked for the generation key.
         when(mMockIContentProvider.call(any(), eq(Settings.Secure.CONTENT_URI.getAuthority()),
                 eq(Settings.CALL_METHOD_GET_SECURE), any(), any(Bundle.class))).thenAnswer(
                 invocationOnMock -> {
@@ -189,9 +199,15 @@ public class NameValueCacheTest {
                     Bundle bundle = new Bundle();
                     bundle.putSerializable(Settings.NameValueTable.VALUE, value);
 
-                    if (value != null && incomingBundle.containsKey(
+                    if (incomingBundle.containsKey(
                             Settings.CALL_METHOD_TRACK_GENERATION_KEY)) {
-                        int index = key.equals(SETTING) ? 0 : 1;
+                        int index;
+                        if (value != null) {
+                            index = key.equals(SETTING) ? 0 : 1;
+                        } else {
+                            // special index for unset settings
+                            index = 2;
+                        }
                         bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
                                 mSettingsCacheGenerationStore);
                         bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
@@ -361,16 +377,38 @@ public class NameValueCacheTest {
     }
 
     @Test
-    public void testCaching_nullSetting() throws Exception {
+    public void testCaching_unsetSetting() throws Exception {
         String returnedValue = Settings.Secure.getString(mMockContentResolver, SETTING);
         verify(mMockIContentProvider, times(1)).call(any(), any(),
                 eq(Settings.CALL_METHOD_GET_SECURE), any(), any(Bundle.class));
         assertThat(returnedValue).isNull();
 
         String cachedValue = Settings.Secure.getString(mMockContentResolver, SETTING);
-        // Empty list won't be cached
+        // The first unset setting's generation number is cached
+        verifyNoMoreInteractions(mMockIContentProvider);
+        assertThat(cachedValue).isNull();
+
+        String returnedValue2 = Settings.Secure.getString(mMockContentResolver, SETTING2);
         verify(mMockIContentProvider, times(2)).call(any(), any(),
                 eq(Settings.CALL_METHOD_GET_SECURE), any(), any(Bundle.class));
-        assertThat(cachedValue).isNull();
+        assertThat(returnedValue2).isNull();
+
+        String cachedValue2 = Settings.Secure.getString(mMockContentResolver, SETTING);
+        // The second unset setting's generation number is cached
+        verifyNoMoreInteractions(mMockIContentProvider);
+        assertThat(cachedValue2).isNull();
+
+        Settings.Secure.putString(mMockContentResolver, SETTING, "a");
+        // The generation for unset settings should have changed
+        returnedValue2 = Settings.Secure.getString(mMockContentResolver, SETTING2);
+        verify(mMockIContentProvider, times(3)).call(any(), any(),
+                eq(Settings.CALL_METHOD_GET_SECURE), any(), any(Bundle.class));
+        assertThat(returnedValue2).isNull();
+
+        // The generation tracker for the first setting should have change because it's set now
+        returnedValue = Settings.Secure.getString(mMockContentResolver, SETTING);
+        verify(mMockIContentProvider, times(4)).call(any(), any(),
+                eq(Settings.CALL_METHOD_GET_SECURE), any(), any(Bundle.class));
+        assertThat(returnedValue).isEqualTo("a");
     }
 }
