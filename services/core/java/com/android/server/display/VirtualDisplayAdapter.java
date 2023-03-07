@@ -88,7 +88,17 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     // Called with SyncRoot lock held.
     public VirtualDisplayAdapter(DisplayManagerService.SyncRoot syncRoot,
             Context context, Handler handler, Listener listener) {
-        this(syncRoot, context, handler, listener, DisplayControl::createDisplay);
+        this(syncRoot, context, handler, listener, new SurfaceControlDisplayFactory() {
+            @Override
+            public IBinder createDisplay(String name, boolean secure, float requestedRefreshRate) {
+                return DisplayControl.createDisplay(name, secure, requestedRefreshRate);
+            }
+
+            @Override
+            public void destroyDisplay(IBinder displayToken) {
+                DisplayControl.destroyDisplay(displayToken);
+            }
+        });
     }
 
     @VisibleForTesting
@@ -311,7 +321,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mSurface.release();
                 mSurface = null;
             }
-            DisplayControl.destroyDisplay(getDisplayTokenLocked());
+            mSurfaceControlDisplayFactory.destroyDisplay(getDisplayTokenLocked());
             if (mProjection != null && mMediaProjectionCallback != null) {
                 try {
                     mProjection.unregisterCallback(mMediaProjectionCallback);
@@ -653,5 +663,12 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
          * @return The token reference for the display in SurfaceFlinger.
          */
         IBinder createDisplay(String name, boolean secure, float requestedRefreshRate);
+        
+        /**
+         * Destroy a display in SurfaceFlinger.
+         *
+         * @param displayToken The display token for the display to be destroyed.
+         */
+        void destroyDisplay(IBinder displayToken);
     }
 }
