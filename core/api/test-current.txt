@@ -427,7 +427,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getLastSystemKey();
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void handleSystemKey(int);
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void handleSystemKey(@NonNull android.view.KeyEvent);
     method public void sendNotificationFeedback(@Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void togglePanel();
