@@ -1595,9 +1595,9 @@ final class LetterboxUiController {
                 FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
                 mActivityRecord /* boundary */, false /* includeBoundary */,
                 true /* traverseTopToBottom */);
-        if (firstOpaqueActivityBeneath == null) {
+        if (firstOpaqueActivityBeneath == null || firstOpaqueActivityBeneath.isEmbedded()) {
             // We skip letterboxing if the translucent activity doesn't have any opaque
-            // activities beneath
+            // activities beneath or the activity below is embedded which never has letterbox.
             return;
         }
         inheritConfiguration(firstOpaqueActivityBeneath);
