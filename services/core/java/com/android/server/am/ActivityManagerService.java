@@ -18139,8 +18139,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         | Intent.FLAG_RECEIVER_REPLACE_PENDING
                         | Intent.FLAG_RECEIVER_FOREGROUND
                         | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+                final Bundle configChangedOptions = new BroadcastOptions()
+                        .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                        .setDeferUntilActive(true)
+                        .toBundle();
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                        null, null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                        null, null, OP_NONE, configChangedOptions, false, false, MY_PID, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
                 if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
