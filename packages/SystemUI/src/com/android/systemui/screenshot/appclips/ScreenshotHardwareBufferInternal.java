@@ -28,7 +28,7 @@ import android.window.ScreenCapture.ScreenshotHardwareBuffer;
  * An internal version of {@link ScreenshotHardwareBuffer} that helps with parceling the information
  * necessary for creating a {@link Bitmap}.
  */
-public class ScreenshotHardwareBufferInternal implements Parcelable {
+class ScreenshotHardwareBufferInternal implements Parcelable {
 
     public static final Creator<ScreenshotHardwareBufferInternal> CREATOR =
             new Creator<>() {
@@ -45,7 +45,7 @@ public class ScreenshotHardwareBufferInternal implements Parcelable {
     private final HardwareBuffer mHardwareBuffer;
     private final ParcelableColorSpace mParcelableColorSpace;
 
-    public ScreenshotHardwareBufferInternal(
+    ScreenshotHardwareBufferInternal(
             ScreenshotHardwareBuffer screenshotHardwareBuffer) {
         mHardwareBuffer = screenshotHardwareBuffer.getHardwareBuffer();
         mParcelableColorSpace = new ParcelableColorSpace(
@@ -65,7 +65,7 @@ public class ScreenshotHardwareBufferInternal implements Parcelable {
      * {@link Bitmap#wrapHardwareBuffer(HardwareBuffer, ColorSpace)} and
      * {@link HardwareBuffer#close()} for more information.
      */
-    public Bitmap createBitmapThenCloseBuffer() {
+    Bitmap createBitmapThenCloseBuffer() {
         Bitmap bitmap = Bitmap.wrapHardwareBuffer(mHardwareBuffer,
                 mParcelableColorSpace.getColorSpace());
         mHardwareBuffer.close();

@@ -89,7 +89,7 @@ public class VirtualAudioControllerTest {
                         /* activityBlockedCallback= */ null,
                         /* secureWindowCallback= */ null,
                         /* intentListenerCallback= */ null,
-                        /* displayCategories= */ new ArrayList<>(),
+                        /* displayCategories= */ new ArraySet<>(),
                         /* showTasksInHostDeviceRecents= */ true);
     }
 

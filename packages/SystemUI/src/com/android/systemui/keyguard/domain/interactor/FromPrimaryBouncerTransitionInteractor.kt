@@ -17,6 +17,9 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import com.android.keyguard.KeyguardSecurityModel
+import com.android.keyguard.KeyguardSecurityModel.SecurityMode.Password
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -26,6 +29,8 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -37,7 +42,8 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionRepository: KeyguardTransitionRepository,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val keyguardSecurityModel: KeyguardSecurityModel,
 ) : TransitionInteractor(FromPrimaryBouncerTransitionInteractor::class.simpleName!!) {
 
     override fun start() {
@@ -93,31 +99,47 @@ constructor(
     private fun listenForPrimaryBouncerToGone() {
         scope.launch {
             keyguardInteractor.isKeyguardGoingAway
-                .sample(keyguardTransitionInteractor.finishedKeyguardState) { a, b -> Pair(a, b) }
-                .collect { pair ->
-                    val (isKeyguardGoingAway, keyguardState) = pair
-                    if (isKeyguardGoingAway && keyguardState == KeyguardState.PRIMARY_BOUNCER) {
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { (isKeyguardGoingAway, lastStartedTransitionStep) ->
+                    if (
+                        isKeyguardGoingAway &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                    ) {
+                        val securityMode =
+                            keyguardSecurityModel.getSecurityMode(
+                                KeyguardUpdateMonitor.getCurrentUser()
+                            )
+                        // IME for password requires a slightly faster animation
+                        val duration =
+                            if (securityMode == Password) {
+                                TO_GONE_SHORT_DURATION
+                            } else {
+                                TO_GONE_DURATION
+                            }
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 ownerName = name,
                                 from = KeyguardState.PRIMARY_BOUNCER,
                                 to = KeyguardState.GONE,
-                                animator = getAnimator(),
-                            )
+                                animator = getAnimator(duration),
+                            ),
+                            resetIfCanceled = true,
                         )
                     }
                 }
         }
     }
 
-    private fun getAnimator(): ValueAnimator {
+    private fun getAnimator(duration: Duration = DEFAULT_DURATION): ValueAnimator {
         return ValueAnimator().apply {
             setInterpolator(Interpolators.LINEAR)
-            setDuration(TRANSITION_DURATION_MS)
+            setDuration(duration.inWholeMilliseconds)
         }
     }
 
     companion object {
-        private const val TRANSITION_DURATION_MS = 300L
+        private val DEFAULT_DURATION = 300.milliseconds
+        val TO_GONE_DURATION = 250.milliseconds
+        val TO_GONE_SHORT_DURATION = 200.milliseconds
     }
 }

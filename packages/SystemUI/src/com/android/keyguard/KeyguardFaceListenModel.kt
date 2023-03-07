@@ -40,7 +40,7 @@ data class KeyguardFaceListenModel(
     var keyguardGoingAway: Boolean = false,
     var listeningForFaceAssistant: Boolean = false,
     var occludingAppRequestingFaceAuth: Boolean = false,
-    val postureAllowsListening: Boolean = false,
+    var postureAllowsListening: Boolean = false,
     var primaryUser: Boolean = false,
     var secureCameraLaunched: Boolean = false,
     var supportsDetect: Boolean = false,
@@ -70,6 +70,7 @@ data class KeyguardFaceListenModel(
             listeningForFaceAssistant.toString(),
             occludingAppRequestingFaceAuth.toString(),
             primaryUser.toString(),
+            postureAllowsListening.toString(),
             secureCameraLaunched.toString(),
             supportsDetect.toString(),
             switchingUser.toString(),
@@ -109,6 +110,7 @@ data class KeyguardFaceListenModel(
                 listeningForFaceAssistant = model.listeningForFaceAssistant
                 occludingAppRequestingFaceAuth = model.occludingAppRequestingFaceAuth
                 primaryUser = model.primaryUser
+                postureAllowsListening = model.postureAllowsListening
                 secureCameraLaunched = model.secureCameraLaunched
                 supportsDetect = model.supportsDetect
                 switchingUser = model.switchingUser
@@ -152,6 +154,7 @@ data class KeyguardFaceListenModel(
                 "listeningForFaceAssistant",
                 "occludingAppRequestingFaceAuth",
                 "primaryUser",
+                "postureAllowsListening",
                 "secureCameraLaunched",
                 "supportsDetect",
                 "switchingUser",

@@ -213,8 +213,6 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     @Override
     public void updateUidProcState(int uid, int procState, int capability) {
-        mEventLog.logUpdateUidProcState(uid, procState, capability);
-
         int uidState = processStateToUidState(procState);
 
         int prevUidState = mUidStates.get(uid, AppOpsManager.MIN_PRIORITY_UID_STATE);
@@ -226,6 +224,10 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
                 && (uidState != prevUidState || capability != prevCapability))
                 || (pendingStateCommitTime != 0
                 && (uidState != pendingUidState || capability != pendingCapability))) {
+
+            // If this process update results in a capability or uid state change, log it. It's
+            // not interesting otherwise.
+            mEventLog.logUpdateUidProcState(uid, procState, capability);
             mPendingUidStates.put(uid, uidState);
             mPendingCapability.put(uid, capability);
 
@@ -389,10 +391,8 @@ class AppOpsUidStateTrackerImpl implements AppOpsUidStateTracker {
 
     private static class EventLog {
 
-        // These seems a bit too verbose and not as useful, turning off for now.
-        // DCE should be able to remove most associated code.
         // Memory usage: 16 * size bytes
-        private static final int UPDATE_UID_PROC_STATE_LOG_MAX_SIZE = 0;
+        private static final int UPDATE_UID_PROC_STATE_LOG_MAX_SIZE = 200;
         // Memory usage: 20 * size bytes
         private static final int COMMIT_UID_STATE_LOG_MAX_SIZE = 200;
         // Memory usage: 24 * size bytes

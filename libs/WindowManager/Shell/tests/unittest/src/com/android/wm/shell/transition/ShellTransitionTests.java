@@ -563,6 +563,33 @@ public class ShellTransitionTests extends ShellTestCase {
         assertEquals(0, mDefaultHandler.activeCount());
     }
 
+
+    @Test
+    public void testTransitionMergingOnFinish() {
+        final Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        // The current transition.
+        final IBinder transitToken1 = new Binder();
+        requestStartTransition(transitions, transitToken1);
+        onTransitionReady(transitions, transitToken1);
+
+        // The next ready transition.
+        final IBinder transitToken2 = new Binder();
+        requestStartTransition(transitions, transitToken2);
+        onTransitionReady(transitions, transitToken2);
+
+        // The non-ready merge candidate.
+        final IBinder transitTokenNotReady = new Binder();
+        requestStartTransition(transitions, transitTokenNotReady);
+
+        mDefaultHandler.setSimulateMerge(true);
+        mDefaultHandler.mFinishes.get(0).onTransitionFinished(null /* wct */, null /* wctCB */);
+
+        // Make sure that the non-ready transition is not merged.
+        assertEquals(0, mDefaultHandler.mergeCount());
+    }
+
     @Test
     public void testTransitionOrderMatchesCore() {
         Transitions transitions = createTestTransitions();
@@ -1034,6 +1061,21 @@ public class ShellTransitionTests extends ShellTestCase {
         int mergeCount() {
             return mMerged.size();
         }
+    }
+
+    private static void requestStartTransition(Transitions transitions, IBinder token) {
+        transitions.requestStartTransition(token,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+    }
+
+    private static void onTransitionReady(Transitions transitions, IBinder token) {
+        transitions.onTransitionReady(token, createTransitionInfo(),
+                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class));
+    }
+
+    private static TransitionInfo createTransitionInfo() {
+        return new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
     }
 
     private static SurfaceControl createMockSurface(boolean valid) {

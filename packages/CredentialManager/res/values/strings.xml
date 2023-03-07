@@ -110,7 +110,7 @@
   <!-- This is a label for a button that takes user to the next screen. [CHAR LIMIT=20] -->
   <string name="get_dialog_button_label_continue">Continue</string>
   <!-- Separator for sign-in type and username in a sign-in entry. -->
-  <string name="get_dialog_sign_in_type_username_separator" translatable="false">" - "</string>
+  <string name="get_dialog_sign_in_type_username_separator" translatable="false">" • "</string>
   <!-- This text is followed by a list of one or more options. [CHAR LIMIT=80] -->
   <string name="get_dialog_title_sign_in_options">Sign-in options</string>
   <!-- Column heading for displaying sign-ins for a specific username. [CHAR LIMIT=80] -->

@@ -119,7 +119,6 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     private void respondToClientWithResponseAndFinish() {
         Log.i(TAG, "respondToClientWithResponseAndFinish");
         if (isSessionCancelled()) {
-            // TODO: Differentiate btw cancelled and false
             mChosenProviderMetric.setChosenProviderStatus(
                     MetricUtilities.METRICS_PROVIDER_STATUS_FINAL_SUCCESS);
             logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
@@ -144,7 +143,6 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
         Log.i(TAG, "respondToClientWithErrorAndFinish");
         if (isSessionCancelled()) {
-            // TODO: Differentiate btw cancelled and false
             logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
                     ApiStatus.METRICS_API_STATUS_CLIENT_CANCELED);
             finishSession(/*propagateCancellation=*/true);

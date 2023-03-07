@@ -29,6 +29,7 @@ import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationChannel.USER_LOCKED_ALLOW_BUBBLE;
+import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
@@ -50,7 +51,6 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
-
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -237,6 +237,7 @@ import com.android.server.utils.quota.MultiRateLimiter;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
+import com.google.android.collect.Lists;
 import com.google.common.collect.ImmutableList;
 
 import org.junit.After;
@@ -245,10 +246,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.BufferedInputStream;
@@ -440,6 +444,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
         mContext.addMockSystemService(NotificationManager.class, mMockNm);
 
+        doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
         setDpmAppOppsExemptFromDismissal(false);
@@ -7825,6 +7830,75 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // verify that zen mode helper gets passed in the package name from the arg, not the owner
         verify(mockZenModeHelper).addAutomaticZenRule(
                 eq("another.package"), eq(rule), anyString());
+    }
+
+    @Test
+    public void onZenModeChanged_sendsBroadcasts() throws Exception {
+        when(mAmi.getCurrentUserId()).thenReturn(100);
+        when(mUmInternal.getProfileIds(eq(100), anyBoolean())).thenReturn(new int[]{100, 101, 102});
+        when(mConditionProviders.getAllowedPackages(anyInt())).then(new Answer<List<String>>() {
+            @Override
+            public List<String> answer(InvocationOnMock invocation) {
+                int userId = invocation.getArgument(0);
+                switch (userId) {
+                    case 100:
+                        return Lists.newArrayList("a", "b", "c");
+                    case 101:
+                        return Lists.newArrayList();
+                    case 102:
+                        return Lists.newArrayList("b");
+                    default:
+                        throw new IllegalArgumentException(
+                                "Why would you ask for packages of userId " + userId + "?");
+                }
+            }
+        });
+
+        mService.getBinderService().setZenMode(Settings.Global.ZEN_MODE_NO_INTERRUPTIONS, null,
+                "testing!");
+        waitForIdle();
+
+        InOrder inOrder = inOrder(mContext);
+        // Verify broadcasts for registered receivers
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(
+                new Intent(ACTION_INTERRUPTION_FILTER_CHANGED).setFlags(
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY)), eq(UserHandle.of(100)), eq(null));
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(
+                new Intent(ACTION_INTERRUPTION_FILTER_CHANGED).setFlags(
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY)), eq(UserHandle.of(101)), eq(null));
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(
+                new Intent(ACTION_INTERRUPTION_FILTER_CHANGED).setFlags(
+                        Intent.FLAG_RECEIVER_REGISTERED_ONLY)), eq(UserHandle.of(102)), eq(null));
+
+        // Verify broadcast for packages that manage DND.
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(new Intent(
+                ACTION_INTERRUPTION_FILTER_CHANGED).setPackage("a").setFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)), eq(UserHandle.of(100)));
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(new Intent(
+                ACTION_INTERRUPTION_FILTER_CHANGED).setPackage("b").setFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)), eq(UserHandle.of(100)));
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(new Intent(
+                ACTION_INTERRUPTION_FILTER_CHANGED).setPackage("c").setFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)), eq(UserHandle.of(100)));
+        inOrder.verify(mContext).sendBroadcastAsUser(eqIntent(new Intent(
+                ACTION_INTERRUPTION_FILTER_CHANGED).setPackage("b").setFlags(
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT)), eq(UserHandle.of(102)));
+    }
+
+    private static Intent eqIntent(Intent wanted) {
+        return ArgumentMatchers.argThat(
+                new ArgumentMatcher<Intent>() {
+                    @Override
+                    public boolean matches(Intent argument) {
+                        return wanted.filterEquals(argument)
+                                && wanted.getFlags() == argument.getFlags();
+                    }
+
+                    @Override
+                    public String toString() {
+                        return wanted.toString();
+                    }
+                });
     }
 
     @Test

@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.quickaffordance.FakeKeyguardQuickAffordanceRegistry
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
+import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.settings.UserFileManager
@@ -225,6 +226,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
+    @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
     private lateinit var testScope: TestScope
@@ -331,6 +333,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 featureFlags = featureFlags,
                 repository = { quickAffordanceRepository },
                 launchAnimator = launchAnimator,
+                logger = logger,
                 devicePolicyManager = devicePolicyManager,
                 backgroundDispatcher = testDispatcher,
             )
@@ -360,10 +363,11 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                     KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
                 }
 
-            underTest.onQuickAffordanceTriggered(
-                configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
-                expandable = expandable,
-            )
+        underTest.onQuickAffordanceTriggered(
+            configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
+            expandable = expandable,
+            slotId = "",
+        )
 
             if (startActivity) {
                 if (needsToUnlockFirst) {
