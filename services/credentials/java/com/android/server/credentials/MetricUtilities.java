@@ -16,12 +16,6 @@
 
 package com.android.server.credentials;
 
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_FINAL_FAILURE;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_FINAL_SUCCESS;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_QUERY_FAILURE;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_QUERY_SUCCESS;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_UNKNOWN;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -45,18 +39,6 @@ public class MetricUtilities {
 
     public static final int DEFAULT_INT_32 = -1;
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
-
-    // Metrics constants TODO(b/269290341) migrate to enums eventually to improve
-    protected static final int METRICS_PROVIDER_STATUS_FINAL_FAILURE =
-            CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_FINAL_FAILURE;
-    protected static final int METRICS_PROVIDER_STATUS_QUERY_FAILURE =
-            CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_QUERY_FAILURE;
-    protected static final int METRICS_PROVIDER_STATUS_FINAL_SUCCESS =
-            CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_FINAL_SUCCESS;
-    protected static final int METRICS_PROVIDER_STATUS_QUERY_SUCCESS =
-            CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_QUERY_SUCCESS;
-    protected static final int METRICS_PROVIDER_STATUS_UNKNOWN =
-            CREDENTIAL_MANAGER_API_CALLED__CANDIDATE_PROVIDER_STATUS__PROVIDER_UNKNOWN;
 
 
     /**
