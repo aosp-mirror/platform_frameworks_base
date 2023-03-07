@@ -1594,7 +1594,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             // source rect hint to enter PiP use bounds animation.
             if (sourceHintRect == null) {
                 if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", false)) {
+                        "persist.wm.debug.enable_pip_app_icon_overlay", true)) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, mTaskInfo.topActivityInfo);
                 } else {
