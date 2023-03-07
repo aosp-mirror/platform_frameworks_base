@@ -575,20 +575,7 @@ droidstubs {
 
 droidstubs {
     name: "hwbinder-stubs-docs",
-    srcs: [
-        "core/java/android/os/HidlSupport.java",
-        "core/java/android/os/HidlMemory.java",
-        "core/java/android/os/HwBinder.java",
-        "core/java/android/os/HwBlob.java",
-        "core/java/android/os/HwParcel.java",
-        "core/java/android/os/IHwBinder.java",
-        "core/java/android/os/IHwInterface.java",
-        "core/java/android/os/DeadObjectException.java",
-        "core/java/android/os/DeadSystemException.java",
-        "core/java/android/os/NativeHandle.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/util/AndroidException.java",
-    ],
+    srcs: [":hwbinder-stubs-srcs"],
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "core_platform",
