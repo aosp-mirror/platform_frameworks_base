@@ -3221,6 +3221,17 @@ public final class TvInputManager {
         }
 
         /**
+         * Sends TV messages to the service for testing purposes
+         */
+        public void notifyTvMessage(@NonNull @TvMessageType String type, @NonNull Bundle data) {
+            try {
+                mService.notifyTvMessage(mToken, type, data, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Starts TV program recording in the current recording session.
          *
          * @param programUri The URI for the TV program to record as a hint, built by

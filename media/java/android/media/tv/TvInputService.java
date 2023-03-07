@@ -1491,7 +1491,18 @@ public abstract class TvInputService extends Service {
          *                {@code false} otherwise.
          */
         public void onSetTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
-                boolean enabled){
+                boolean enabled) {
+        }
+
+        /**
+         * Called when a TV message is received
+         *
+         * @param type The type of message received, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message
+         */
+        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+                @NonNull Bundle data) {
         }
 
         /**
@@ -2041,6 +2052,10 @@ public abstract class TvInputService extends Service {
 
         void notifyAdBuffer(AdBuffer buffer) {
             onAdBuffer(buffer);
+        }
+
+        void onTvMessageReceived(String type, Bundle data) {
+            onTvMessage(type, data);
         }
 
         /**
