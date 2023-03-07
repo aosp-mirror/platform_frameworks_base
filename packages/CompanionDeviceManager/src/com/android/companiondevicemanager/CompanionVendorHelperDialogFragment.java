@@ -21,6 +21,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_NEARBY_DEVICE_STREAMING;
 
 import static com.android.companiondevicemanager.Utils.getApplicationIcon;
+import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 
 import android.annotation.Nullable;
@@ -105,9 +106,11 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         final String packageName = request.getPackageName();
         final CharSequence displayName = request.getDisplayName();
         final int userId = request.getUserId();
+        final CharSequence appLabel;
 
         try {
             applicationIcon = getApplicationIcon(getContext(), packageName);
+            appLabel = getApplicationLabel(getContext(), packageName, userId);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(TAG, "Package u" + userId + "/" + packageName + " not found.");
             mListener.onShowHelperDialogFailed();
@@ -119,7 +122,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
         mAppIcon = view.findViewById(R.id.app_icon);
         mButton = view.findViewById(R.id.btn_back);
 
-        final Spanned title;
+        final CharSequence title;
         final Spanned summary;
 
         switch (deviceProfile) {
@@ -136,8 +139,7 @@ public class CompanionVendorHelperDialogFragment extends DialogFragment {
                 break;
 
             case DEVICE_PROFILE_NEARBY_DEVICE_STREAMING:
-                title = getHtmlFromResources(getContext(),
-                        R.string.helper_title_nearby_device_streaming);
+                title = appLabel;
                 summary = getHtmlFromResources(
                         getContext(), R.string.helper_summary_nearby_device_streaming, title,
                         displayName);
