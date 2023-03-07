@@ -181,7 +181,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     /** Called when the provider response has been updated by an external source. */
     @Override // Callback from the remote provider
     public void onProviderResponseSuccess(@Nullable BeginGetCredentialResponse response) {
-        Log.i(TAG, "in onProviderResponseSuccess");
         onSetInitialRemoteResponse(response);
     }
 
@@ -393,7 +392,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 .extractResponseContent(providerPendingIntentResponse
                         .getResultData());
         if (response != null && !mProviderResponseDataHandler.isEmptyResponse(response)) {
-            addToInitialRemoteResponse(response);
+            addToInitialRemoteResponse(response, /*isInitialResponse=*/ false);
             // Additional content received is in the form of new response content.
             return true;
         }
@@ -401,7 +400,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return false;
     }
 
-    private void addToInitialRemoteResponse(BeginGetCredentialResponse content) {
+    private void addToInitialRemoteResponse(BeginGetCredentialResponse content,
+            boolean isInitialResponse) {
         if (content == null) {
             return;
         }
@@ -409,7 +409,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 content.getCredentialEntries(),
                 content.getActions(),
                 content.getAuthenticationActions(),
-                content.getRemoteCredentialEntry()
+                content.getRemoteCredentialEntry(),
+                isInitialResponse
         );
     }
 
@@ -424,7 +425,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     /** Updates the response being maintained in state by this provider session. */
     private void onSetInitialRemoteResponse(BeginGetCredentialResponse response) {
         mProviderResponse = response;
-        addToInitialRemoteResponse(response);
+        addToInitialRemoteResponse(response, /*isInitialResponse=*/true);
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
             return;
@@ -463,7 +464,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     }
 
     private class ProviderResponseDataHandler {
-        private final ComponentName mExpectedRemoteEntryProviderService;
+        @Nullable private final ComponentName mExpectedRemoteEntryProviderService;
         @NonNull
         private final Map<String, Pair<CredentialEntry, Entry>> mUiCredentialEntries =
                 new HashMap<>();
@@ -475,19 +476,27 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
 
         @Nullable private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
-        ProviderResponseDataHandler(ComponentName expectedRemoteEntryProviderService) {
+        ProviderResponseDataHandler(@Nullable ComponentName expectedRemoteEntryProviderService) {
             mExpectedRemoteEntryProviderService = expectedRemoteEntryProviderService;
         }
 
         public void addResponseContent(List<CredentialEntry> credentialEntries,
                 List<Action> actions, List<Action> authenticationActions,
-                RemoteEntry remoteEntry) {
+                RemoteEntry remoteEntry, boolean isInitialResponse) {
             credentialEntries.forEach(this::addCredentialEntry);
             actions.forEach(this::addAction);
             authenticationActions.forEach(
                     authenticationAction -> addAuthenticationAction(authenticationAction,
                             AuthenticationEntry.STATUS_LOCKED));
-            setRemoteEntry(remoteEntry);
+            // In the query phase, it is likely most providers will return a null remote entry
+            // so no need to invoke the setter since it adds the overhead of checking for the
+            // hybrid permission, and then sets an already null value to null.
+            // If this is not the query phase, e.g. response after a locked entry is unlocked
+            // then it is valid for the provider to remove the remote entry, and so we allow
+            // them to set it to null.
+            if (remoteEntry != null || !isInitialResponse) {
+                setRemoteEntry(remoteEntry);
+            }
         }
         public void addCredentialEntry(CredentialEntry credentialEntry) {
             String id = generateUniqueId();
@@ -524,12 +533,13 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         }
 
         public void setRemoteEntry(@Nullable RemoteEntry remoteEntry) {
-            if (remoteEntry == null) {
+            if (!enforceRemoteEntryRestrictions(mExpectedRemoteEntryProviderService)) {
+                Log.i(TAG, "Remote entry being dropped as it does not meet the restriction"
+                        + " checks.");
                 return;
             }
-            if (!mComponentName.equals(mExpectedRemoteEntryProviderService)) {
-                Log.i(TAG, "Remote entry being dropped as it is not from the service "
-                        + "configured by the OEM.");
+            if (remoteEntry == null) {
+                mUiRemoteEntry = null;
                 return;
             }
             String id = generateUniqueId();
@@ -537,6 +547,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                     id, remoteEntry.getSlice(), setUpFillInIntentForRemoteEntry());
             mUiRemoteEntry = new Pair<>(generateUniqueId(), new Pair<>(remoteEntry, entry));
         }
+
+
 
         public GetCredentialProviderData toGetCredentialProviderData() {
             return new GetCredentialProviderData.Builder(
@@ -570,7 +582,6 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             }
             return credEntries;
         }
-
 
         private Entry prepareRemoteEntry() {
             if (mUiRemoteEntry == null || mUiRemoteEntry.first == null
