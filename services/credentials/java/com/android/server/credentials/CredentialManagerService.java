@@ -631,7 +631,7 @@ public final class CredentialManagerService
                             // The component name and the package name do not match.
                             MetricUtilities.logApiCalled(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
-                                    ApiStatus.METRICS_API_STATUS_FAILURE, callingUid);
+                                    ApiStatus.FAILURE, callingUid);
                             Log.w(
                                     TAG,
                                     "isEnabledCredentialProviderService: Component name does not"
@@ -639,7 +639,7 @@ public final class CredentialManagerService
                             return false;
                         }
                         MetricUtilities.logApiCalled(ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
-                                ApiStatus.METRICS_API_STATUS_SUCCESS, callingUid);
+                                ApiStatus.SUCCESS, callingUid);
                         return true;
                     }
                 }

@@ -16,9 +16,6 @@
 
 package com.android.server.credentials;
 
-import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_QUERY_FAILURE;
-import static com.android.server.credentials.MetricUtilities.METRICS_PROVIDER_STATUS_QUERY_SUCCESS;
-
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.server.credentials.metrics.CandidateProviderMetric;
+import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.UUID;
 
@@ -205,9 +203,11 @@ public abstract class ProviderSession<T, R>
         mCandidateProviderMetric
                 .setQueryFinishTimeNanoseconds(System.nanoTime());
         if (isTerminatingStatus(status)) {
-            mCandidateProviderMetric.setProviderQueryStatus(METRICS_PROVIDER_STATUS_QUERY_FAILURE);
+            mCandidateProviderMetric.setProviderQueryStatus(ProviderStatusForMetrics.QUERY_FAILURE
+                    .getMetricCode());
         } else if (isCompletionStatus(status)) {
-            mCandidateProviderMetric.setProviderQueryStatus(METRICS_PROVIDER_STATUS_QUERY_SUCCESS);
+            mCandidateProviderMetric.setProviderQueryStatus(ProviderStatusForMetrics.QUERY_SUCCESS
+                    .getMetricCode());
         }
     }
 
