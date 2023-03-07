@@ -263,3 +263,15 @@ genrule {
     out: ["combined-removed-dex.txt"],
     cmd: "$(location gen_combined_removed_dex.sh) $(location metalava) $(genDir) $(in) > $(out)",
 }
+
+java_genrule {
+    name: "api_fingerprint",
+    srcs: [
+        ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-system-current.txt",
+        ":frameworks-base-api-module-lib-current.txt",
+        ":frameworks-base-api-system-server-current.txt",
+    ],
+    out: ["api_fingerprint.txt"],
+    cmd: "cat $(in) | md5sum | cut -d' ' -f1 > $(out)",
+}
