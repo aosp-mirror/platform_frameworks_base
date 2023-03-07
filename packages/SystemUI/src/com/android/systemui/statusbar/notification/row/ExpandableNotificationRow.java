@@ -192,7 +192,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mMaxSmallHeightBeforeS;
     private int mMaxSmallHeight;
     private int mMaxSmallHeightLarge;
-    private int mMaxSmallHeightMedia;
     private int mMaxExpandedHeight;
     private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
@@ -1774,8 +1773,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height);
         mMaxSmallHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_increased);
-        mMaxSmallHeightMedia = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.notification_min_height_media);
         mMaxExpandedHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
