@@ -135,6 +135,30 @@ public class BubbleController implements ConfigurationChangeListener {
     private static final boolean BUBBLE_BAR_ENABLED =
             SystemProperties.getBoolean("persist.wm.debug.bubble_bar", false);
 
+
+    /**
+     * Common interface to send updates to bubble views.
+     */
+    public interface BubbleViewCallback {
+        /** Called when the provided bubble should be removed. */
+        void removeBubble(Bubble removedBubble);
+        /** Called when the provided bubble should be added. */
+        void addBubble(Bubble addedBubble);
+        /** Called when the provided bubble should be updated. */
+        void updateBubble(Bubble updatedBubble);
+        /** Called when the provided bubble should be selected. */
+        void selectionChanged(BubbleViewProvider selectedBubble);
+        /** Called when the provided bubble's suppression state has changed. */
+        void suppressionChanged(Bubble bubble, boolean isSuppressed);
+        /** Called when the expansion state of bubbles has changed. */
+        void expansionChanged(boolean isExpanded);
+        /**
+         * Called when the order of the bubble list has changed. Depending on the expanded state
+         * the pointer might need to be updated.
+         */
+        void bubbleOrderChanged(List<Bubble> bubbleOrder, boolean updatePointer);
+    }
+
     private final Context mContext;
     private final BubblesImpl mImpl = new BubblesImpl();
     private Bubbles.BubbleExpandListener mExpandListener;
@@ -157,7 +181,6 @@ public class BubbleController implements ConfigurationChangeListener {
     // Used to post to main UI thread
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
-
     private final ShellExecutor mBackgroundExecutor;
 
     private BubbleLogger mLogger;
@@ -1285,6 +1308,58 @@ public class BubbleController implements ConfigurationChangeListener {
         });
     }
 
+    private final BubbleViewCallback mBubbleViewCallback = new BubbleViewCallback() {
+        @Override
+        public void removeBubble(Bubble removedBubble) {
+            if (mStackView != null) {
+                mStackView.removeBubble(removedBubble);
+            }
+        }
+
+        @Override
+        public void addBubble(Bubble addedBubble) {
+            if (mStackView != null) {
+                mStackView.addBubble(addedBubble);
+            }
+        }
+
+        @Override
+        public void updateBubble(Bubble updatedBubble) {
+            if (mStackView != null) {
+                mStackView.updateBubble(updatedBubble);
+            }
+        }
+
+        @Override
+        public void bubbleOrderChanged(List<Bubble> bubbleOrder, boolean updatePointer) {
+            if (mStackView != null) {
+                mStackView.updateBubbleOrder(bubbleOrder, updatePointer);
+            }
+        }
+
+        @Override
+        public void suppressionChanged(Bubble bubble, boolean isSuppressed) {
+            if (mStackView != null) {
+                mStackView.setBubbleSuppressed(bubble, isSuppressed);
+            }
+        }
+
+        @Override
+        public void expansionChanged(boolean isExpanded) {
+            if (mStackView != null) {
+                mStackView.setExpanded(isExpanded);
+            }
+        }
+
+        @Override
+        public void selectionChanged(BubbleViewProvider selectedBubble) {
+            if (mStackView != null) {
+                mStackView.setSelectedBubble(selectedBubble);
+            }
+
+        }
+    };
+
     @SuppressWarnings("FieldCanBeLocal")
     private final BubbleData.Listener mBubbleDataListener = new BubbleData.Listener() {
 
@@ -1307,7 +1382,8 @@ public class BubbleController implements ConfigurationChangeListener {
             // Lazy load overflow bubbles from disk
             loadOverflowBubblesFromDisk();
 
-            mStackView.updateOverflowButtonDot();
+            // If bubbles in the overflow have a dot, make sure the overflow shows a dot
+            updateOverflowButtonDot();
 
             // Update bubbles in overflow.
             if (mOverflowListener != null) {
@@ -1322,9 +1398,7 @@ public class BubbleController implements ConfigurationChangeListener {
                 final Bubble bubble = removed.first;
                 @Bubbles.DismissReason final int reason = removed.second;
 
-                if (mStackView != null) {
-                    mStackView.removeBubble(bubble);
-                }
+                mBubbleViewCallback.removeBubble(bubble);
 
                 // Leave the notification in place if we're dismissing due to user switching, or
                 // because DND is suppressing the bubble. In both of those cases, we need to be able
@@ -1354,49 +1428,47 @@ public class BubbleController implements ConfigurationChangeListener {
             }
             mDataRepository.removeBubbles(mCurrentUserId, bubblesToBeRemovedFromRepository);
 
-            if (update.addedBubble != null && mStackView != null) {
+            if (update.addedBubble != null) {
                 mDataRepository.addBubble(mCurrentUserId, update.addedBubble);
-                mStackView.addBubble(update.addedBubble);
+                mBubbleViewCallback.addBubble(update.addedBubble);
             }
 
-            if (update.updatedBubble != null && mStackView != null) {
-                mStackView.updateBubble(update.updatedBubble);
+            if (update.updatedBubble != null) {
+                mBubbleViewCallback.updateBubble(update.updatedBubble);
             }
 
-            if (update.suppressedBubble != null && mStackView != null) {
-                mStackView.setBubbleSuppressed(update.suppressedBubble, true);
+            if (update.suppressedBubble != null) {
+                mBubbleViewCallback.suppressionChanged(update.suppressedBubble, true);
             }
 
-            if (update.unsuppressedBubble != null && mStackView != null) {
-                mStackView.setBubbleSuppressed(update.unsuppressedBubble, false);
+            if (update.unsuppressedBubble != null) {
+                mBubbleViewCallback.suppressionChanged(update.unsuppressedBubble, false);
             }
 
             boolean collapseStack = update.expandedChanged && !update.expanded;
 
             // At this point, the correct bubbles are inflated in the stack.
             // Make sure the order in bubble data is reflected in bubble row.
-            if (update.orderChanged && mStackView != null) {
+            if (update.orderChanged) {
                 mDataRepository.addBubbles(mCurrentUserId, update.bubbles);
                 // if the stack is going to be collapsed, do not update pointer position
                 // after reordering
-                mStackView.updateBubbleOrder(update.bubbles, !collapseStack);
+                mBubbleViewCallback.bubbleOrderChanged(update.bubbles, !collapseStack);
             }
 
             if (collapseStack) {
-                mStackView.setExpanded(false);
+                mBubbleViewCallback.expansionChanged(/* expanded= */ false);
                 mSysuiProxy.requestNotificationShadeTopUi(false, TAG);
             }
 
-            if (update.selectionChanged && mStackView != null) {
-                mStackView.setSelectedBubble(update.selectedBubble);
+            if (update.selectionChanged) {
+                mBubbleViewCallback.selectionChanged(update.selectedBubble);
             }
 
             // Expanding? Apply this last.
             if (update.expandedChanged && update.expanded) {
-                if (mStackView != null) {
-                    mStackView.setExpanded(true);
-                    mSysuiProxy.requestNotificationShadeTopUi(true, TAG);
-                }
+                mBubbleViewCallback.expansionChanged(/* expanded= */ true);
+                mSysuiProxy.requestNotificationShadeTopUi(true, TAG);
             }
 
             mSysuiProxy.notifyInvalidateNotifications("BubbleData.Listener.applyUpdate");
@@ -1406,6 +1478,19 @@ public class BubbleController implements ConfigurationChangeListener {
             mImpl.mCachedState.update(update);
         }
     };
+
+    private void updateOverflowButtonDot() {
+        BubbleOverflow overflow = mBubbleData.getOverflow();
+        if (overflow == null) return;
+
+        for (Bubble b : mBubbleData.getOverflowBubbles()) {
+            if (b.showDot()) {
+                overflow.setShowDot(true);
+                return;
+            }
+        }
+        overflow.setShowDot(false);
+    }
 
     private boolean handleDismissalInterception(BubbleEntry entry,
             @Nullable List<BubbleEntry> children, IntConsumer removeCallback) {
