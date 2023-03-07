@@ -753,6 +753,8 @@ final class LetterboxUiController {
             final Rect innerFrame = hasInheritedLetterboxBehavior()
                     ? mActivityRecord.getBounds() : w.getFrame();
             mLetterbox.layout(spaceToFill, innerFrame, mTmpPoint);
+            // We need to notify Shell that letterbox position has changed.
+            mActivityRecord.getTask().dispatchTaskInfoChangedIfNeeded(true /* force */);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
@@ -885,6 +887,20 @@ final class LetterboxUiController {
         return mActivityRecord.mWmService.mContext.getResources();
     }
 
+    @LetterboxConfiguration.LetterboxVerticalReachabilityPosition
+    int getLetterboxPositionForVerticalReachability() {
+        final boolean isInFullScreenTabletopMode = isDisplayFullScreenAndSeparatingHinge();
+        return mLetterboxConfiguration.getLetterboxPositionForVerticalReachability(
+                isInFullScreenTabletopMode);
+    }
+
+    @LetterboxConfiguration.LetterboxHorizontalReachabilityPosition
+    int getLetterboxPositionForHorizontalReachability() {
+        final boolean isInFullScreenBookMode = isDisplayFullScreenAndSeparatingHinge();
+        return mLetterboxConfiguration.getLetterboxPositionForHorizontalReachability(
+                isInFullScreenBookMode);
+    }
+
     @VisibleForTesting
     void handleHorizontalDoubleTap(int x) {
         if (!isHorizontalReachabilityEnabled() || mActivityRecord.isInTransition()) {
@@ -990,6 +1006,10 @@ final class LetterboxUiController {
     @VisibleForTesting
     boolean isHorizontalReachabilityEnabled() {
         return isHorizontalReachabilityEnabled(mActivityRecord.getParent().getConfiguration());
+    }
+
+    boolean isLetterboxDoubleTapEducationEnabled() {
+        return isHorizontalReachabilityEnabled() || isVerticalReachabilityEnabled();
     }
 
     /**

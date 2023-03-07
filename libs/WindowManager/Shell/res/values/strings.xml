@@ -214,6 +214,17 @@
     <!-- Checkbox text for asking to not show the restart confirmation dialog again. [CHAR LIMIT=NONE] -->
     <string name="letterbox_restart_dialog_checkbox_title">Don\u2019t show again</string>
 
+    <!-- When an app is letterboxed, it is initially centered on the screen but the user can
+         double tap to move the app to a different position. With a double-tap on the right,
+         the app moves the right of the screen and with a double-tap on the left the app moves
+         on the left. The same happens if the app has space to be moved to the top or bottom of
+         the screen. This time the double-tap can happen on the top or bottom of the screen.
+         To teach the user about this feature, we display an education explaining how the double-tap
+         works and how the app can be moved on the screen.
+         This is the text we show to the user below an animated icon visualizing the double-tap
+         action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_reachability_reposition_text">Double-tap to move this app</string>
+
     <!-- Freeform window caption strings -->
     <!-- Accessibility text for the maximize window button [CHAR LIMIT=NONE] -->
     <string name="maximize_button_text">Maximize</string>
