@@ -160,6 +160,7 @@ import com.android.systemui.shared.system.TaskStackChangeListeners;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
+import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.settings.SecureSettings;
@@ -368,7 +369,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final FaceManager mFaceManager;
     private final LockPatternUtils mLockPatternUtils;
     @VisibleForTesting
-    @DevicePostureController.DevicePostureInt
+    @DevicePostureInt
     protected int mConfigFaceAuthSupportedPosture;
 
     private KeyguardBypassController mKeyguardBypassController;
@@ -876,7 +877,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
     private void reportSuccessfulBiometricUnlock(boolean isStrongBiometric, int userId) {
         mBackgroundExecutor.execute(
-                () -> mLockPatternUtils.reportSuccessfulBiometricUnlock(isStrongBiometric, userId));
+                () -> {
+                    mLogger.logReportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+                    mLockPatternUtils.reportSuccessfulBiometricUnlock(isStrongBiometric, userId);
+                });
     }
 
     private void handleFingerprintAuthFailed() {
@@ -1862,10 +1866,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     final DevicePostureController.Callback mPostureCallback =
             new DevicePostureController.Callback() {
                 @Override
-                public void onPostureChanged(int posture) {
+                public void onPostureChanged(@DevicePostureInt int posture) {
+                    boolean currentPostureAllowsFaceAuth = doesPostureAllowFaceAuth(mPostureState);
+                    boolean newPostureAllowsFaceAuth = doesPostureAllowFaceAuth(posture);
                     mPostureState = posture;
-                    updateFaceListeningState(BIOMETRIC_ACTION_UPDATE,
-                            FACE_AUTH_UPDATED_POSTURE_CHANGED);
+                    if (currentPostureAllowsFaceAuth && !newPostureAllowsFaceAuth) {
+                        mLogger.d("New posture does not allow face auth, stopping it");
+                        updateFaceListeningState(BIOMETRIC_ACTION_STOP,
+                                FACE_AUTH_UPDATED_POSTURE_CHANGED);
+                    }
                 }
             };
 
@@ -2524,11 +2533,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // If this message exists, we should not authenticate again until this message is
         // consumed by the handler
         if (mHandler.hasMessages(MSG_BIOMETRIC_AUTHENTICATION_CONTINUE)) {
+            mLogger.logHandlerHasAuthContinueMsgs(action);
             return;
         }
 
         // don't start running fingerprint until they're registered
         if (!mAuthController.areAllFingerprintAuthenticatorsRegistered()) {
+            mLogger.d("All FP authenticators not registered, skipping FP listening state update");
             return;
         }
         final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsSupported());
@@ -2901,9 +2912,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean biometricEnabledForUser = mBiometricEnabledForUser.get(user);
         final boolean shouldListenForFaceAssistant = shouldListenForFaceAssistant();
         final boolean isUdfpsFingerDown = mAuthController.isUdfpsFingerDown();
-        final boolean isPostureAllowedForFaceAuth =
-                mConfigFaceAuthSupportedPosture == 0 /* DEVICE_POSTURE_UNKNOWN */ ? true
-                        : (mPostureState == mConfigFaceAuthSupportedPosture);
+        final boolean isPostureAllowedForFaceAuth = doesPostureAllowFaceAuth(mPostureState);
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
         final boolean shouldListen =
@@ -2950,6 +2959,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     userNotTrustedOrDetectionIsNeeded));
 
         return shouldListen;
+    }
+
+    private boolean doesPostureAllowFaceAuth(@DevicePostureInt int posture) {
+        return mConfigFaceAuthSupportedPosture == DEVICE_POSTURE_UNKNOWN
+                || (posture == mConfigFaceAuthSupportedPosture);
     }
 
     private void logListenerModelData(@NonNull KeyguardListenModel model) {

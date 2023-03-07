@@ -27,7 +27,7 @@
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/magnifier_outer_corner_radius" />
             <stroke
-                android:color="@android:color/black"
+                android:color="@color/magnification_drag_handle_stroke"
                 android:width="@dimen/magnifier_stroke_width"/>
         </shape>
     </item>

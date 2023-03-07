@@ -191,7 +191,7 @@ public final class MediaProjection {
             } else {
                 session = ContentRecordingSession.createTaskSession(launchCookie);
             }
-            virtualDisplayConfig.setWindowManagerMirroring(true);
+            virtualDisplayConfig.setWindowManagerMirroringEnabled(true);
             final DisplayManager dm = mContext.getSystemService(DisplayManager.class);
             final VirtualDisplay virtualDisplay = dm.createVirtualDisplay(this,
                     virtualDisplayConfig.build(), callback, handler, windowContext);

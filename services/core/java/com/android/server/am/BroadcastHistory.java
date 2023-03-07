@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.TimeUtils;
@@ -26,6 +27,7 @@ import dalvik.annotation.optimization.NeverCompile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -46,6 +48,11 @@ public class BroadcastHistory {
         mSummaryHistoryDispatchTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
         mSummaryHistoryFinishTime = new long[MAX_BROADCAST_SUMMARY_HISTORY];
     }
+
+    /**
+     * List of broadcasts which are being delivered or yet to be delivered.
+     */
+    private final ArrayList<BroadcastRecord> mPendingBroadcasts = new ArrayList<>();
 
     /**
      * Historical data of past broadcasts, for debugging.  This is a ring buffer
@@ -70,7 +77,16 @@ public class BroadcastHistory {
     final long[] mSummaryHistoryDispatchTime;
     final long[] mSummaryHistoryFinishTime;
 
-    public void addBroadcastToHistoryLocked(BroadcastRecord original) {
+    void onBroadcastEnqueuedLocked(@NonNull BroadcastRecord r) {
+        mPendingBroadcasts.add(r);
+    }
+
+    void onBroadcastFinishedLocked(@NonNull BroadcastRecord r) {
+        mPendingBroadcasts.remove(r);
+        addBroadcastToHistoryLocked(r);
+    }
+
+    public void addBroadcastToHistoryLocked(@NonNull BroadcastRecord original) {
         // Note sometimes (only for sticky broadcasts?) we reuse BroadcastRecords,
         // So don't change the incoming record directly.
         final BroadcastRecord historyRecord = original.maybeStripForHistory();
@@ -93,7 +109,12 @@ public class BroadcastHistory {
     }
 
     @NeverCompile
-    public void dumpDebug(ProtoOutputStream proto) {
+    public void dumpDebug(@NonNull ProtoOutputStream proto) {
+        for (int i = 0; i < mPendingBroadcasts.size(); ++i) {
+            final BroadcastRecord r = mPendingBroadcasts.get(i);
+            r.dumpDebug(proto, BroadcastQueueProto.PENDING_BROADCASTS);
+        }
+
         int lastIndex = mHistoryNext;
         int ringIndex = lastIndex;
         do {
@@ -127,8 +148,20 @@ public class BroadcastHistory {
     }
 
     @NeverCompile
-    public boolean dumpLocked(PrintWriter pw, String dumpPackage, String queueName,
-            SimpleDateFormat sdf, boolean dumpAll, boolean needSep) {
+    public boolean dumpLocked(@NonNull PrintWriter pw, @Nullable String dumpPackage,
+            @NonNull String queueName, @NonNull SimpleDateFormat sdf,
+            boolean dumpAll, boolean needSep) {
+        pw.println("  Pending broadcasts:");
+        if (mPendingBroadcasts.isEmpty()) {
+            pw.println("    <empty>");
+        } else {
+            for (int idx = mPendingBroadcasts.size() - 1; idx >= 0; --idx) {
+                final BroadcastRecord r = mPendingBroadcasts.get(idx);
+                pw.print("  Broadcast #"); pw.print(idx); pw.println(":");
+                r.dump(pw, "    ", sdf);
+            }
+        }
+
         int i;
         boolean printed = false;
 

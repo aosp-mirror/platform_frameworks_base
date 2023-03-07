@@ -4746,8 +4746,7 @@
     <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
-    <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
+    <string name="accessibility_shortcut_spoken_feedback">Release the volume keys. To turn on <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g>, press and hold both volume keys again for 3 seconds.</string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
     <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>

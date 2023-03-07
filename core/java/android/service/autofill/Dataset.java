@@ -29,6 +29,7 @@ import android.content.IntentSender;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 import android.widget.RemoteViews;
 
@@ -283,24 +284,28 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
-    public RemoteViews getFieldPresentation(int index) {
+    @TestApi
+    public @Nullable RemoteViews getFieldPresentation(int index) {
         final RemoteViews customPresentation = mFieldPresentations.get(index);
         return customPresentation != null ? customPresentation : mPresentation;
     }
 
     /** @hide */
-    public RemoteViews getFieldDialogPresentation(int index) {
+    @TestApi
+    public @Nullable RemoteViews getFieldDialogPresentation(int index) {
         final RemoteViews customPresentation = mFieldDialogPresentations.get(index);
         return customPresentation != null ? customPresentation : mDialogPresentation;
     }
 
     /** @hide */
+    @TestApi
     public @Nullable InlinePresentation getFieldInlinePresentation(int index) {
         final InlinePresentation inlinePresentation = mFieldInlinePresentations.get(index);
         return inlinePresentation != null ? inlinePresentation : mInlinePresentation;
     }
 
     /** @hide */
+    @TestApi
     public @Nullable InlinePresentation getFieldInlineTooltipPresentation(int index) {
         final InlinePresentation inlineTooltipPresentation =
                 mFieldInlineTooltipPresentations.get(index);
@@ -309,6 +314,7 @@ public final class Dataset implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public @Nullable DatasetFieldFilter getFilter(int index) {
         return mFieldFilters.get(index);
     }
@@ -388,6 +394,9 @@ public final class Dataset implements Parcelable {
         }
         if (mAuthentication != null) {
             builder.append(", hasAuthentication");
+        }
+        if (mAutofillDatatypes != null) {
+            builder.append(", autofillDatatypes=").append(mAutofillDatatypes);
         }
         return builder.append(']').toString();
     }
@@ -1090,8 +1099,7 @@ public final class Dataset implements Parcelable {
          *
          * @return this builder.
          */
-        public @NonNull Dataset.Builder setField(
-                @NonNull String hint, @NonNull Field field) {
+        public @NonNull Dataset.Builder setField(@NonNull String hint, @NonNull Field field) {
             throwIfDestroyed();
 
             final DatasetFieldFilter filter = field.getDatasetFieldFilter();
@@ -1108,6 +1116,23 @@ public final class Dataset implements Parcelable {
             }
 
             return this;
+        }
+
+        /**
+         * Adds a field to this Dataset that is relevant to all applicable hints. This is used to
+         * provide field information when autofill with platform detections is enabled.
+         * Platform detections are on when receiving a populated list from
+         * FillRequest#getHints().
+         *
+         * @param field the fill information about the field.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called
+         * or this builder also contains AutofillId information
+         *
+         * @return this builder.
+         */
+        public @NonNull Dataset.Builder setFieldForAllHints(@NonNull Field field) {
+            return setField(AutofillManager.ANY_HINT, field);
         }
 
         /**
@@ -1304,7 +1329,7 @@ public final class Dataset implements Parcelable {
                     parcel.createTypedArrayList(InlinePresentation.CREATOR);
             final ArrayList<DatasetFieldFilter> filters =
                     parcel.createTypedArrayList(DatasetFieldFilter.CREATOR);
-            final ArrayList<String> datatypes =
+            final ArrayList<String> autofillDatatypes =
                     parcel.createStringArrayList();
             final ClipData fieldContent = parcel.readParcelable(null,
                     android.content.ClipData.class);
@@ -1341,9 +1366,9 @@ public final class Dataset implements Parcelable {
             }
             final int inlinePresentationsSize = inlinePresentations.size();
 
-            if (ids.size() == 0 && datatypes.size() > 0) {
-                for (int i = 0; i < ids.size(); i++) {
-                    final String datatype = datatypes.get(i);
+            if (ids.size() == 0 && autofillDatatypes.size() > 0) {
+                for (int i = 0; i < autofillDatatypes.size(); i++) {
+                    final String datatype = autofillDatatypes.get(i);
                     final AutofillValue value = values.get(i);
                     final RemoteViews fieldPresentation = presentations.get(i);
                     final RemoteViews fieldDialogPresentation = dialogPresentations.get(i);
@@ -1393,13 +1418,19 @@ public final class Dataset implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     public static final class DatasetFieldFilter implements Parcelable {
 
+        /** @hide */
         @Nullable
         public final Pattern pattern;
 
         DatasetFieldFilter(@Nullable Pattern pattern) {
             this.pattern = pattern;
+        }
+
+        public @Nullable Pattern getPattern() {
+            return pattern;
         }
 
         @Override
@@ -1416,7 +1447,7 @@ public final class Dataset implements Parcelable {
         }
 
         @Override
-        public void writeToParcel(Parcel parcel, int flags) {
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
             parcel.writeSerializable(pattern);
         }
 

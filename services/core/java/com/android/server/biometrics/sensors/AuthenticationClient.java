@@ -74,6 +74,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
     @Nullable
     private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
+    private final O mOptions;
     private final boolean mIsRestricted;
     private final boolean mAllowBackgroundAuthentication;
     // TODO: This is currently hard to maintain, as each AuthenticationClient subclass must update
@@ -110,6 +111,7 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
         mAllowBackgroundAuthentication = allowBackgroundAuthentication;
         mShouldUseLockoutTracker = lockoutTracker != null;
         mSensorStrength = sensorStrength;
+        mOptions = options;
     }
 
     @LockoutTracker.LockoutMode
@@ -149,6 +151,11 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
 
     private boolean isSettings() {
         return Utils.isSettings(getContext(), getOwnerString());
+    }
+
+    /** The options requested at the start of the operation. */
+    protected O getOptions() {
+        return mOptions;
     }
 
     @Override

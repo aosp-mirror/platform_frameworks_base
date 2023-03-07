@@ -888,8 +888,11 @@ public class AppTransition implements Dump {
         } else {
             int animAttr = mapOpenCloseTransitTypes(transit, enter);
             if (animAttr != 0) {
-                a = loadCustomActivityAnimation(animAttr, enter, container);
-                if (a == null) {
+                final CustomAppTransition customAppTransition =
+                        getCustomAppTransition(animAttr, container);
+                if (customAppTransition != null) {
+                    a = loadCustomActivityAnimation(customAppTransition, enter, container);
+                } else {
                     if (canCustomizeAppTransition) {
                         a = loadAnimationAttr(lp, animAttr, transit);
                     } else {
@@ -911,7 +914,7 @@ public class AppTransition implements Dump {
         return a;
     }
 
-    Animation loadCustomActivityAnimation(int animAttr, boolean enter, WindowContainer container) {
+    CustomAppTransition getCustomAppTransition(int animAttr, WindowContainer container) {
         ActivityRecord customAnimationSource = container.asActivityRecord();
         if (customAnimationSource == null) {
             return null;
@@ -927,30 +930,27 @@ public class AppTransition implements Dump {
                 return null;
             }
         }
-        final CustomAppTransition custom;
         switch (animAttr) {
             case WindowAnimation_activityOpenEnterAnimation:
             case WindowAnimation_activityOpenExitAnimation:
-                custom = customAnimationSource.getCustomAnimation(true /* open */);
-                break;
+                return customAnimationSource.getCustomAnimation(true /* open */);
             case WindowAnimation_activityCloseEnterAnimation:
             case WindowAnimation_activityCloseExitAnimation:
-                custom = customAnimationSource.getCustomAnimation(false /* open */);
-                break;
-            default:
-                return null;
-        }
-        if (custom != null) {
-            final Animation a = mTransitionAnimation.loadAppTransitionAnimation(
-                    customAnimationSource.packageName, enter
-                            ? custom.mEnterAnim : custom.mExitAnim);
-            if (a != null && custom.mBackgroundColor != 0) {
-                a.setBackdropColor(custom.mBackgroundColor);
-                a.setShowBackdrop(true);
-            }
-            return a;
+                return customAnimationSource.getCustomAnimation(false /* open */);
         }
         return null;
+    }
+    private Animation loadCustomActivityAnimation(@NonNull CustomAppTransition custom,
+            boolean enter, WindowContainer container) {
+        final ActivityRecord customAnimationSource = container.asActivityRecord();
+        final Animation a = mTransitionAnimation.loadAppTransitionAnimation(
+                customAnimationSource.packageName, enter
+                        ? custom.mEnterAnim : custom.mExitAnim);
+        if (a != null && custom.mBackgroundColor != 0) {
+            a.setBackdropColor(custom.mBackgroundColor);
+            a.setShowBackdrop(true);
+        }
+        return a;
     }
 
     int getAppRootTaskClipMode() {
