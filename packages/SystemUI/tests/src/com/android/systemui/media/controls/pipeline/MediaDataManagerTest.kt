@@ -2031,7 +2031,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testRetain_sessionPlayer_destroyedWhileActive_fullyRemoved() {
+    fun testRetain_sessionPlayer_destroyedWhileActive_noResume_fullyRemoved() {
         whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
         whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
         addPlaybackStateAction()
@@ -2048,6 +2048,40 @@ class MediaDataManagerTest : SysuiTestCase() {
         verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
         verify(listener, never())
             .onMediaDataLoaded(eq(PACKAGE_NAME), any(), any(), anyBoolean(), anyInt(), anyBoolean())
+    }
+
+    @Test
+    fun testRetain_sessionPlayer_canResume_destroyedWhileActive_setToResume() {
+        whenever(mediaFlags.isRetainingPlayersEnabled()).thenReturn(true)
+        whenever(mediaFlags.areMediaSessionActionsEnabled(any(), any())).thenReturn(true)
+        addPlaybackStateAction()
+
+        // When a media control using session actions and that does allow resumption is added,
+        addNotificationAndLoad()
+        val dataResumable = mediaDataCaptor.value.copy(resumeAction = Runnable {})
+        mediaDataManager.onMediaDataLoaded(KEY, null, dataResumable)
+
+        // And then the session is destroyed without timing out first
+        sessionCallbackCaptor.value.invoke(KEY)
+
+        // It is converted to a resume player
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(PACKAGE_NAME),
+                eq(KEY),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        assertThat(mediaDataCaptor.value.resumption).isTrue()
+        assertThat(mediaDataCaptor.value.active).isFalse()
+        verify(logger)
+            .logActiveConvertedToResume(
+                anyInt(),
+                eq(PACKAGE_NAME),
+                eq(mediaDataCaptor.value.instanceId)
+            )
     }
 
     @Test
