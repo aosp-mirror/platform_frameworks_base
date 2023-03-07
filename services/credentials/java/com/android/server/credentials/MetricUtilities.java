@@ -43,8 +43,8 @@ public class MetricUtilities {
 
     private static final String TAG = "MetricUtilities";
 
-    private static final int DEFAULT_INT_32 = -1;
-    private static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
+    public static final int DEFAULT_INT_32 = -1;
+    public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
 
     // Metrics constants TODO(b/269290341) migrate to enums eventually to improve
     protected static final int METRICS_PROVIDER_STATUS_FINAL_FAILURE =
@@ -80,6 +80,21 @@ public class MetricUtilities {
     }
 
     /**
+     * Given any two timestamps in nanoseconds, this gets the difference and converts to
+     * milliseconds. Assumes the difference is not larger than the maximum int size.
+     *
+     * @param t2 the final timestamp
+     * @param t1 the initial timestamp
+     * @return the timestamp difference converted to microseconds
+     */
+    protected static int getMetricTimestampDifferenceMicroseconds(long t2, long t1) {
+        if (t2 - t1 > Integer.MAX_VALUE) {
+            throw new ArithmeticException("Input timestamps are too far apart and unsupported");
+        }
+        return (int) ((t2 - t1) / 1000);
+    }
+
+    /**
      * The most common logging helper, handles the overall status of the API request with the
      * provider status and latencies. Other versions of this method may be more useful depending
      * on the situation, as this is geared towards the logging of {@link ProviderSession} types.
@@ -102,7 +117,7 @@ public class MetricUtilities {
         for (var session : providerSessions) {
             CandidateProviderMetric metric = session.mCandidateProviderMetric;
             candidateUidList[index] = metric.getCandidateUid();
-            candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMs();
+            candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
             candidateStatusList[index] = metric.getProviderQueryStatus();
             index++;
         }
@@ -116,9 +131,11 @@ public class MetricUtilities {
                 /* repeated_candidate_provider_status */ candidateStatusList,
                 /* chosen_provider_uid */ chosenProviderMetric.getChosenUid(),
                 /* chosen_provider_round_trip_time_overall_microseconds */
-                chosenProviderMetric.getEntireProviderLatencyMs(),
-                /* chosen_provider_final_phase_microseconds */
-                chosenProviderMetric.getFinalPhaseLatencyMs(),
+                chosenProviderMetric.getEntireProviderLatencyMicroseconds(),
+                /* chosen_provider_final_phase_microseconds (backwards compat only) */
+                getMetricTimestampDifferenceMicroseconds(chosenProviderMetric
+                                .getFinalFinishTimeNanoseconds(),
+                        chosenProviderMetric.getUiCallEndTimeNanoseconds()),
                 /* chosen_provider_status */ chosenProviderMetric.getChosenProviderStatus());
     }
 
