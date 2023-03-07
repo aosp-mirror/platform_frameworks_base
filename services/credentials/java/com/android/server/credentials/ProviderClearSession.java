@@ -20,11 +20,11 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.ClearCredentialStateRequest;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 import android.util.Slog;
 
