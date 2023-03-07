@@ -177,10 +177,12 @@ public class KeyguardIndicationController {
     private boolean mVisible;
     private boolean mOrganizationOwnedDevice;
 
+    // these all assume the device is plugged in (wired/wireless/docked) AND chargingOrFull:
     private boolean mPowerPluggedIn;
     private boolean mPowerPluggedInWired;
     private boolean mPowerPluggedInWireless;
     private boolean mPowerPluggedInDock;
+
     private boolean mPowerCharged;
     private boolean mBatteryOverheated;
     private boolean mEnableBatteryDefender;
@@ -499,6 +501,7 @@ public class KeyguardIndicationController {
                 powerIndication += ",  " + (mChargingWattage / 1000) + " mW";
             }
 
+            mKeyguardLogger.logUpdateBatteryIndication(powerIndication, mPowerPluggedIn);
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_BATTERY,
                     new KeyguardIndication.Builder()
@@ -507,6 +510,7 @@ public class KeyguardIndicationController {
                             .build(),
                     animate);
         } else {
+            mKeyguardLogger.log(TAG, LogLevel.DEBUG, "hide battery indication");
             // don't show the charging information if device isn't plugged in
             mRotateTextViewController.hideIndication(INDICATION_TYPE_BATTERY);
         }
@@ -885,6 +889,9 @@ public class KeyguardIndicationController {
         updateLockScreenIndications(animate, getCurrentUser());
     }
 
+    /**
+     * Assumption: device is charging
+     */
     protected String computePowerIndication() {
         int chargingId;
         if (mBatteryOverheated) {
@@ -1035,6 +1042,12 @@ public class KeyguardIndicationController {
             }
         }
 
+        /**
+         * KeyguardUpdateMonitor only sends "interesting" battery updates
+         * {@link KeyguardUpdateMonitor#isBatteryUpdateInteresting}.
+         * Therefore, make sure to always check plugged in state along with any charging status
+         * change, or else we could end up with stale state.
+         */
         @Override
         public void onRefreshBatteryInfo(BatteryStatus status) {
             boolean isChargingOrFull = status.status == BatteryManager.BATTERY_STATUS_CHARGING
@@ -1050,7 +1063,9 @@ public class KeyguardIndicationController {
             mBatteryLevel = status.level;
             mBatteryPresent = status.present;
             mBatteryOverheated = status.isOverheated();
+            // when the battery is overheated, device doesn't charge so only guard on pluggedIn:
             mEnableBatteryDefender = mBatteryOverheated && status.isPluggedIn();
+
             try {
                 mChargingTimeRemaining = mPowerPluggedIn
                         ? mBatteryInfo.computeChargeTimeRemaining() : -1;
@@ -1058,14 +1073,10 @@ public class KeyguardIndicationController {
                 mKeyguardLogger.log(TAG, ERROR, "Error calling IBatteryStats", e);
                 mChargingTimeRemaining = -1;
             }
+
+            mKeyguardLogger.logRefreshBatteryInfo(isChargingOrFull, mPowerPluggedIn, mBatteryLevel,
+                    mBatteryOverheated);
             updateDeviceEntryIndication(!wasPluggedIn && mPowerPluggedInWired);
-            if (mDozing) {
-                if (!wasPluggedIn && mPowerPluggedIn) {
-                    showTransientIndication(computePowerIndication());
-                } else if (wasPluggedIn && !mPowerPluggedIn) {
-                    hideTransientIndication();
-                }
-            }
         }
 
         @Override
@@ -1315,6 +1326,10 @@ public class KeyguardIndicationController {
             showTransientIndication(mContext.getString(R.string.require_unlock_for_nfc));
             hideTransientIndicationDelayed(DEFAULT_HIDE_DELAY_MS);
         }
+    }
+
+    protected boolean isPluggedInAndCharging() {
+        return mPowerPluggedIn;
     }
 
     private boolean isCurrentUser(int userId) {

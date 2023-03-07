@@ -1031,24 +1031,6 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onRefreshBatteryInfo_pluggedWithOverheat_presentChargingLimited() {
-        createController();
-        BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_DISCHARGING,
-                80 /* level */, BatteryManager.BATTERY_PLUGGED_AC,
-                BatteryManager.BATTERY_HEALTH_OVERHEAT, 0 /* maxChargingWattage */,
-                true /* present */);
-
-        mController.getKeyguardCallback().onRefreshBatteryInfo(status);
-        mController.setVisible(true);
-
-        verifyIndicationMessage(
-                INDICATION_TYPE_BATTERY,
-                mContext.getString(
-                        R.string.keyguard_plugged_in_charging_limited,
-                        NumberFormat.getPercentInstance().format(80 / 100f)));
-    }
-
-    @Test
     public void onRefreshBatteryInfo_fullChargedWithOverheat_presentChargingLimited() {
         createController();
         BatteryStatus status = new BatteryStatus(BatteryManager.BATTERY_STATUS_CHARGING,
