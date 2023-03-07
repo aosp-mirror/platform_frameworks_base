@@ -6198,9 +6198,10 @@ public class WindowManagerService extends IWindowManager.Stub
             waitingForConfig = waitingForRemoteDisplayChange = false;
             numOpeningApps = 0;
         }
-        if (waitingForConfig || waitingForRemoteDisplayChange || mAppsFreezingScreen > 0
-                || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
-                || mClientFreezingScreen || numOpeningApps > 0) {
+        final boolean waitingForApps = mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT
+                && (mAppsFreezingScreen > 0 || numOpeningApps > 0);
+        if (waitingForConfig || waitingForRemoteDisplayChange || waitingForApps
+                || mClientFreezingScreen) {
             ProtoLog.d(WM_DEBUG_ORIENTATION, "stopFreezingDisplayLocked: Returning "
                     + "waitingForConfig=%b, waitingForRemoteDisplayChange=%b, "
                     + "mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, "
