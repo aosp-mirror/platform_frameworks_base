@@ -931,13 +931,16 @@ public class MediaControlPanel {
             if (artworkIcon.getType() == Icon.TYPE_BITMAP
                     || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
                 // Avoids extra processing if this is already a valid bitmap
-                return WallpaperColors
-                        .fromBitmap(artworkIcon.getBitmap());
+                Bitmap artworkBitmap = artworkIcon.getBitmap();
+                if (artworkBitmap.isRecycled()) {
+                    Log.d(TAG, "Cannot load wallpaper color from a recycled bitmap");
+                    return null;
+                }
+                return WallpaperColors.fromBitmap(artworkBitmap);
             } else {
                 Drawable artworkDrawable = artworkIcon.loadDrawable(mContext);
                 if (artworkDrawable != null) {
-                    return WallpaperColors
-                            .fromDrawable(artworkIcon.loadDrawable(mContext));
+                    return WallpaperColors.fromDrawable(artworkDrawable);
                 }
             }
         }
