@@ -55,12 +55,12 @@ private const val PX_PER_MS = 1
 
 internal const val MIN_DURATION_ACTIVE_ANIMATION = 300L
 private const val MIN_DURATION_CANCELLED_ANIMATION = 200L
-private const val MIN_DURATION_COMMITTED_ANIMATION = 200L
+private const val MIN_DURATION_COMMITTED_ANIMATION = 120L
 private const val MIN_DURATION_INACTIVE_BEFORE_FLUNG_ANIMATION = 50L
 private const val MIN_DURATION_CONSIDERED_AS_FLING = 100L
 
 private const val FAILSAFE_DELAY_MS = 350L
-private const val POP_ON_FLING_DELAY = 160L
+private const val POP_ON_FLING_DELAY = 140L
 
 internal val VIBRATE_ACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
@@ -148,8 +148,6 @@ class BackPanelController internal constructor(
     private var gestureSinceActionDown = 0L
     private var gestureEntryTime = 0L
     private var gestureActiveTime = 0L
-    private var gestureInactiveOrEntryTime = 0L
-    private var gestureArrowStrokeVisibleTime = 0L
 
     private val elapsedTimeSinceActionDown
         get() = SystemClock.uptimeMillis() - gestureSinceActionDown
@@ -441,32 +439,42 @@ class BackPanelController internal constructor(
 
         updateArrowStateOnMove(yTranslation, xTranslation)
 
-        when (currentState) {
-            GestureState.ACTIVE -> {
-                stretchActiveBackIndicator(fullScreenProgress(xTranslation))
-            }
-            GestureState.ENTRY -> {
-                val progress = staticThresholdProgress(xTranslation)
-                stretchEntryBackIndicator(progress)
-
-                params.arrowStrokeAlphaSpring.get(progress).takeIf { it.isNewState }?.let {
-                    mView.popArrowAlpha(0f, it.value)
-                }
-            }
-            GestureState.INACTIVE -> {
-                val progress = reactivationThresholdProgress(totalTouchDelta)
-                stretchInactiveBackIndicator(progress)
-
-                params.arrowStrokeAlphaSpring.get(progress).takeIf { it.isNewState }?.let {
-                    gestureArrowStrokeVisibleTime = SystemClock.uptimeMillis()
-                    mView.popArrowAlpha(0f, it.value)
-                }
-            }
-            else -> {}
+        val gestureProgress = when (currentState) {
+            GestureState.ACTIVE -> fullScreenProgress(xTranslation)
+            GestureState.ENTRY -> staticThresholdProgress(xTranslation)
+            GestureState.INACTIVE -> reactivationThresholdProgress(totalTouchDelta)
+            else -> null
         }
 
-        // set y translation
+        gestureProgress?.let {
+            when (currentState) {
+                GestureState.ACTIVE -> stretchActiveBackIndicator(gestureProgress)
+                GestureState.ENTRY -> stretchEntryBackIndicator(gestureProgress)
+                GestureState.INACTIVE -> stretchInactiveBackIndicator(gestureProgress)
+                else -> {}
+            }
+        }
+
+        setArrowStrokeAlpha(gestureProgress)
         setVerticalTranslation(yOffset)
+    }
+
+    private fun setArrowStrokeAlpha(gestureProgress: Float?) {
+        val strokeAlphaProgress = when (currentState) {
+            GestureState.ENTRY -> gestureProgress
+            GestureState.INACTIVE -> gestureProgress
+            GestureState.ACTIVE,
+            GestureState.FLUNG,
+            GestureState.COMMITTED -> 1f
+            GestureState.CANCELLED,
+            GestureState.GONE -> 0f
+        }
+
+        strokeAlphaProgress?.let { progress ->
+            params.arrowStrokeAlphaSpring.get(progress).takeIf { it.isNewState }?.let {
+                mView.popArrowAlpha(0f, it.value)
+            }
+        }
     }
 
     private fun setVerticalTranslation(yOffset: Float) {
@@ -599,7 +607,7 @@ class BackPanelController internal constructor(
 
     private fun isFlungAwayFromEdge(endX: Float, startX: Float = touchDeltaStartX): Boolean {
         val minDistanceConsideredForFling = ViewConfiguration.get(context).scaledTouchSlop
-        val flingDistance = abs(endX - startX)
+        val flingDistance = if (mView.isLeftPanel) endX - startX else startX - endX
         val isPastFlingVelocity = isDragAwayFromEdge(
                 velocityPxPerSecThreshold =
                 ViewConfiguration.get(context).scaledMinimumFlingVelocity)
@@ -764,7 +772,7 @@ class BackPanelController internal constructor(
                             GestureState.ENTRY,
                             GestureState.INACTIVE -> params.entryIndicator.arrowDimens
                             GestureState.ACTIVE -> params.activeIndicator.arrowDimens
-                            GestureState.FLUNG,
+                            GestureState.FLUNG -> params.flungIndicator.arrowDimens
                             GestureState.COMMITTED -> params.committedIndicator.arrowDimens
                             GestureState.CANCELLED -> params.cancelledIndicator.arrowDimens
                         },
@@ -825,7 +833,6 @@ class BackPanelController internal constructor(
 
                 updateRestingArrowDimens()
                 gestureEntryTime = SystemClock.uptimeMillis()
-                gestureInactiveOrEntryTime = SystemClock.uptimeMillis()
             }
             GestureState.ACTIVE -> {
                 previousXTranslationOnActiveOffset = previousXTranslation
@@ -857,7 +864,13 @@ class BackPanelController internal constructor(
             }
 
             GestureState.INACTIVE -> {
-                gestureInactiveOrEntryTime = SystemClock.uptimeMillis()
+
+                // Typically entering INACTIVE means
+                // totalTouchDelta <= deactivationSwipeTriggerThreshold
+                // but because we can also independently enter this state
+                // if touch Y >> touch X, we force it to deactivationSwipeTriggerThreshold
+                // so that gesture progress in this state is consistent regardless of entry
+                totalTouchDelta = params.deactivationSwipeTriggerThreshold
 
                 val startingVelocity = convertVelocityToSpringStartingVelocity(
                         valueOnFastVelocity = -1.05f,
