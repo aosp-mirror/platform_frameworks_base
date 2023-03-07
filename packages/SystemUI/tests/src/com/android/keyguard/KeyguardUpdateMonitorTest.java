@@ -2210,6 +2210,32 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPostureChangeToUnsupported_stopsFaceListeningState() {
+        // GIVEN device is listening for face
+        mKeyguardUpdateMonitor.mConfigFaceAuthSupportedPosture = DEVICE_POSTURE_CLOSED;
+        deviceInPostureStateClosed();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+        keyguardIsVisible();
+
+        verifyFaceAuthenticateCall();
+
+        final CancellationSignal faceCancel = spy(mKeyguardUpdateMonitor.mFaceCancelSignal);
+        mKeyguardUpdateMonitor.mFaceCancelSignal = faceCancel;
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(callback);
+
+        // WHEN device is opened
+        deviceInPostureStateOpened();
+        mTestableLooper.processAllMessages();
+
+        // THEN face listening is stopped.
+        verify(faceCancel).cancel();
+        verify(callback).onBiometricRunningStateChanged(
+                eq(false), eq(BiometricSourceType.FACE));
+    }
+
+    @Test
     public void testShouldListenForFace_withLockedDown_returnsFalse()
             throws RemoteException {
         keyguardNotGoingAway();

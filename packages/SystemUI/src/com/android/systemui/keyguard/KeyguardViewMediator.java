@@ -966,13 +966,24 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
                         RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
                         IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
+                    if (!handleOnAnimationStart(
+                                transit, apps, wallpapers, nonApps, finishedCallback)) {
+                        // Usually we rely on animation completion to synchronize occluded status,
+                        // but there was no animation to play, so just update it now.
+                        setOccluded(true /* isOccluded */, false /* animate */);
+                    }
+                }
+
+                private boolean handleOnAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                        RemoteAnimationTarget[] wallpapers, RemoteAnimationTarget[] nonApps,
+                        IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
                     if (apps == null || apps.length == 0 || apps[0] == null) {
                         if (DEBUG) {
                             Log.d(TAG, "No apps provided to the OccludeByDream runner; "
                                     + "skipping occluding animation.");
                         }
                         finishedCallback.onAnimationFinished();
-                        return;
+                        return false;
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
@@ -982,7 +993,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                         Log.w(TAG, "The occluding app isn't Dream; "
                                 + "finishing up. Please check that the config is correct.");
                         finishedCallback.onAnimationFinished();
-                        return;
+                        return false;
                     }
 
                     final SyncRtSurfaceTransactionApplier applier =
@@ -1031,6 +1042,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
                         mOccludeByDreamAnimator.start();
                     });
+                    return true;
                 }
             };
 
@@ -1917,24 +1929,20 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
         // If the keyguard is already showing, see if we don't need to bother re-showing it. Check
         // flags in both files to account for the hiding animation which results in a delay and
-        // discrepancy between flags. If we're in the middle of hiding, do not short circuit so that
-        // we explicitly re-set state.
+        // discrepancy between flags.
         if (mShowing && mKeyguardStateController.isShowing()) {
-            if (mPM.isInteractive() && !mHiding) {
+            if (mPM.isInteractive()) {
                 // It's already showing, and we're not trying to show it while the screen is off.
                 // We can simply reset all of the views.
-                if (DEBUG) Log.d(TAG, "doKeyguard: not showing (instead, resetting) because it is "
-                        + "already showing, we're interactive, and we were not previously hiding. "
-                        + "It should be safe to short-circuit here.");
+                if (DEBUG) Log.d(TAG, "doKeyguard: not showing because it is already showing");
                 resetStateLocked();
                 return;
             } else {
-                // We are trying to show the keyguard while the screen is off or while we were in
-                // the middle of hiding - this results from race conditions involving locking while
-                // unlocking. Don't short-circuit here and ensure the keyguard is fully re-shown.
+                // We are trying to show the keyguard while the screen is off - this results from
+                // race conditions involving locking while unlocking. Don't short-circuit here and
+                // ensure the keyguard is fully re-shown.
                 Log.e(TAG,
-                        "doKeyguard: already showing, but re-showing because we're interactive or "
-                                + "were in the middle of hiding.");
+                        "doKeyguard: already showing, but re-showing since we're not interactive");
             }
         }
 
@@ -2428,19 +2436,11 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 if (DEBUG) Log.d(TAG, "handleShow");
             }
 
+            mHiding = false;
             mKeyguardExitAnimationRunner = null;
             mWakeAndUnlocking = false;
             setPendingLock(false);
-
-            // Force if we we're showing in the middle of hiding, to ensure we end up in the correct
-            // state.
-            setShowingLocked(true, mHiding /* force */);
-            if (mHiding) {
-                Log.d(TAG, "Forcing setShowingLocked because mHiding=true, which means we're "
-                        + "showing in the middle of hiding.");
-            }
-            mHiding = false;
-
+            setShowingLocked(true);
             mKeyguardViewControllerLazy.get().show(options);
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;

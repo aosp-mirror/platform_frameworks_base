@@ -25,7 +25,8 @@ import static android.content.Intent.CAPTURE_CONTENT_FOR_NOTE_WINDOW_MODE_UNSUPP
 import static android.content.Intent.EXTRA_CAPTURE_CONTENT_FOR_NOTE_STATUS_CODE;
 
 import static com.android.systemui.flags.Flags.SCREENSHOT_APP_CLIPS;
-import static com.android.systemui.screenshot.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
+import static com.android.systemui.screenshot.appclips.AppClipsEvent.SCREENSHOT_FOR_NOTE_TRIGGERED;
+import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity.EXTRA_SCREENSHOT_URI;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -59,8 +60,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.notetask.NoteTaskController;
-import com.android.systemui.screenshot.AppClipsTrampolineActivity;
-import com.android.systemui.screenshot.ScreenshotEvent;
 import com.android.systemui.settings.UserTracker;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -262,8 +261,7 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
         mActivityRule.launchActivity(mActivityIntent);
         waitForIdleSync();
 
-        verify(mUiEventLogger).log(ScreenshotEvent.SCREENSHOT_FOR_NOTE_TRIGGERED, TEST_UID,
-                TEST_CALLING_PACKAGE);
+        verify(mUiEventLogger).log(SCREENSHOT_FOR_NOTE_TRIGGERED, TEST_UID, TEST_CALLING_PACKAGE);
     }
 
     private void mockToSatisfyAllPrerequisites() throws NameNotFoundException {

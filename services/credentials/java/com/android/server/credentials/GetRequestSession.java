@@ -119,7 +119,6 @@ public final class GetRequestSession extends RequestSession<GetCredentialRequest
             return;
         }
         if (isSessionCancelled()) {
-            // TODO: Differentiate btw cancelled and false
             logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
                     ApiStatus.METRICS_API_STATUS_CLIENT_CANCELED);
             finishSession(/*propagateCancellation=*/true);

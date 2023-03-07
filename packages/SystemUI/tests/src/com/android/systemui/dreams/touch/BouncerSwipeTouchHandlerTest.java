@@ -450,6 +450,15 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
         swipeToPosition(0f, Direction.DOWN, 0);
     }
 
+    @Test
+    public void testTouchSessionOnRemovedCalledTwice() {
+        mTouchHandler.onSessionStart(mTouchSession);
+        ArgumentCaptor<DreamTouchHandler.TouchSession.Callback> onRemovedCallbackCaptor =
+                ArgumentCaptor.forClass(DreamTouchHandler.TouchSession.Callback.class);
+        verify(mTouchSession).registerCallback(onRemovedCallbackCaptor.capture());
+        onRemovedCallbackCaptor.getValue().onRemoved();
+        onRemovedCallbackCaptor.getValue().onRemoved();
+    }
 
     private void swipeToPosition(float percent, Direction direction, float velocityY) {
         Mockito.clearInvocations(mTouchSession);

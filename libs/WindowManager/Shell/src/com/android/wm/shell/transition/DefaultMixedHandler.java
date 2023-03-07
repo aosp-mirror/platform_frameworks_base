@@ -450,9 +450,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 // Already done, so no need to end it.
                 return;
             }
-            if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
-                // queue since no actual animation.
-            } else if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
+            if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
                 if (mixed.mAnimType == MixedTransition.ANIM_TYPE_GOING_HOME) {
                     boolean ended = mSplitHandler.end();
                     // If split couldn't end (because it is remote), then don't end everything else
@@ -466,12 +464,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 } else {
                     mPipHandler.end();
                 }
-            } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
-                mPipHandler.end();
-                if (mixed.mLeftoversHandler != null) {
-                    mixed.mLeftoversHandler.mergeAnimation(transition, info, t, mergeTarget,
-                            finishCallback);
-                }
+            } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
+                // queue
             } else {
                 throw new IllegalStateException("Playing a mixed transition with unknown type? "
                         + mixed.mType);

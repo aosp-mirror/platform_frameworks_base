@@ -429,6 +429,7 @@ public class DozeParameters implements
         }
 
         dispatchAlwaysOnEvent();
+        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
     }
 
     @Override
@@ -468,7 +469,6 @@ public class DozeParameters implements
         for (Callback callback : mCallbacks) {
             callback.onAlwaysOnChange();
         }
-        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
     }
 
     private boolean getPostureSpecificBool(

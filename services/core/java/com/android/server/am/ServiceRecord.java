@@ -468,6 +468,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             long fgToken = proto.start(ServiceRecordProto.FOREGROUND);
             proto.write(ServiceRecordProto.Foreground.ID, foregroundId);
             foregroundNoti.dumpDebug(proto, ServiceRecordProto.Foreground.NOTIFICATION);
+            proto.write(ServiceRecordProto.Foreground.FOREGROUND_SERVICE_TYPE,
+                    foregroundServiceType);
             proto.end(fgToken);
         }
         ProtoUtils.toDuration(proto, ServiceRecordProto.CREATE_REAL_TIME, createRealTime, nowReal);

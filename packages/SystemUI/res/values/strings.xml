@@ -2337,6 +2337,8 @@
     <string name="magnification_mode_switch_state_window">Magnify part of screen</string>
     <!-- Click action label for magnification switch. [CHAR LIMIT=NONE] -->
     <string name="magnification_mode_switch_click_label">Switch</string>
+    <!-- Click action label for magnification settings panel. [CHAR LIMIT=NONE] -->
+    <string name="magnification_open_settings_click_label">Open magnification settings</string>
     <!-- Label of the corner of a rectangle that you can tap and drag to resize the magnification area. [CHAR LIMIT=NONE] -->
     <string name="magnification_drag_corner_to_resize">Drag corner to resize</string>
 
@@ -2358,6 +2360,8 @@
     <!-- Description of the window magnification Bottom handle [CHAR LIMIT=NONE]-->
     <string name="accessibility_magnification_bottom_handle">Bottom handle</string>
 
+    <!-- Description of the window magnification panel [CHAR LIMIT=NONE]-->
+    <string name="accessibility_magnification_settings_panel_description">Magnification settings</string>
     <!-- Title of the window magnification panel option Magnifier size [CHAR LIMIT=NONE]-->
     <string name="accessibility_magnifier_size">Magnifier size</string>
     <!-- Title of the window magnification panel option Zoom [CHAR LIMIT=NONE]-->

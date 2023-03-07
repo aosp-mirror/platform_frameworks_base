@@ -914,15 +914,15 @@ public class WindowStateTests extends WindowTestsBase {
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app", uid);
         app.mActivityRecord.setVisible(false);
-        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(false);
         assertFalse(mAtm.hasActiveVisibleWindow(uid));
 
-        app.mActivityRecord.setVisibility(true /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(true);
         assertTrue(mAtm.hasActiveVisibleWindow(uid));
 
         // Make the activity invisible and add a visible toast. The uid should have no active
         // visible window because toast can be misused by legacy app to bypass background check.
-        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(false);
         final WindowState overlay = createWindow(null, TYPE_APPLICATION_OVERLAY, "overlay", uid);
         final WindowState toast = createWindow(null, TYPE_TOAST, app.mToken, "toast", uid);
         toast.onSurfaceShownChanged(true);
@@ -1157,12 +1157,12 @@ public class WindowStateTests extends WindowTestsBase {
     public void testRequestedVisibility() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mActivityRecord.setVisible(false);
-        app.mActivityRecord.setVisibility(false /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(false);
         assertFalse(app.isVisibleRequested());
 
         // It doesn't have a surface yet, but should still be visible requested.
         app.setHasSurface(false);
-        app.mActivityRecord.setVisibility(true /* visible */, false /* deferHidingClient */);
+        app.mActivityRecord.setVisibility(true);
 
         assertFalse(app.isVisible());
         assertTrue(app.isVisibleRequested());

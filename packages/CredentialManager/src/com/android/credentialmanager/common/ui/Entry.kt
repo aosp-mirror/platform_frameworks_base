@@ -53,6 +53,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.credentialmanager.ui.theme.Shapes
 
 @Composable
@@ -73,6 +74,7 @@ fun Entry(
     passwordValue: String? = null,
     /** If true, draws a trailing lock icon. */
     isLockedAuthEntry: Boolean = false,
+    enforceOneLine: Boolean = false,
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -92,12 +94,17 @@ fun Entry(
                     // has 8dp horizontal elements padding
                     horizontal = 8.dp, vertical = 16.dp,
                 ),
+                // Make sure the trailing icon and text column are centered vertically.
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Column(modifier = Modifier.wrapContentSize()) {
-                    SmallTitleText(entryHeadlineText)
+                // Apply weight so that the trailing icon can always show.
+                Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
+                    SmallTitleText(text = entryHeadlineText, enforceOneLine = enforceOneLine)
                     if (passwordValue != null) {
-                        Row(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             val visualTransformation = remember { PasswordVisualTransformation() }
                             val originalPassword by remember {
                                 mutableStateOf(passwordValue)
@@ -109,9 +116,10 @@ fun Entry(
                                     ).text.text
                                 )
                             }
-                            BodySmallText(displayedPassword.value)
+                            BodySmallText(
+                                text = displayedPassword.value, enforceOneLine = enforceOneLine)
                             ToggleVisibilityButton(
-                                modifier = Modifier.padding(start = 5.dp).size(24.dp),
+                                modifier = Modifier.padding(start = 12.dp, top = 5.dp).size(24.dp),
                                 onToggle = {
                                     if (it) {
                                         displayedPassword.value = originalPassword
@@ -124,14 +132,14 @@ fun Entry(
                             )
                         }
                     } else if (entrySecondLineText != null) {
-                        BodySmallText(entrySecondLineText)
+                        BodySmallText(text = entrySecondLineText, enforceOneLine = enforceOneLine)
                     }
                     if (entryThirdLineText != null) {
-                        BodySmallText(entryThirdLineText)
+                        BodySmallText(text = entryThirdLineText, enforceOneLine = enforceOneLine)
                     }
                 }
                 if (isLockedAuthEntry) {
-                    Box(modifier = Modifier.wrapContentSize()) {
+                    Box(modifier = Modifier.wrapContentSize().padding(start = 16.dp)) {
                         Icon(
                             imageVector = Icons.Outlined.Lock,
                             // Decorative purpose only.
@@ -198,9 +206,7 @@ fun Entry(
         },
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                ElevationTokens.Level3
-            ),
+            containerColor = LocalAndroidColorScheme.current.colorSurfaceContainerHigh,
             // TODO: remove?
             labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
             iconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -323,7 +329,7 @@ fun MoreOptionTopAppBar(
                         contentDescription = stringResource(
                             R.string.accessibility_back_arrow_button
                         ),
-                        modifier = Modifier.size(16.dp),
+                        modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }

@@ -26,19 +26,39 @@ import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_IN
 import com.android.systemui.statusbar.events.STATUS_BAR_X_MOVE_OUT
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback
 import com.android.systemui.util.animation.AnimationUtil.Companion.frames
+import com.android.systemui.util.doOnCancel
+import com.android.systemui.util.doOnEnd
+
+/**
+ * An implementation of [StatusBarSystemEventDefaultAnimator], applying the onAlphaChanged and
+ * onTranslationXChanged callbacks directly to the provided animatedView.
+ */
+class StatusBarSystemEventAnimator @JvmOverloads constructor(
+        val animatedView: View,
+        resources: Resources,
+        isAnimationRunning: Boolean = false
+) : StatusBarSystemEventDefaultAnimator(
+        resources = resources,
+        onAlphaChanged = animatedView::setAlpha,
+        onTranslationXChanged = animatedView::setTranslationX,
+        isAnimationRunning = isAnimationRunning
+)
 
 /**
  * Tied directly to [SystemStatusAnimationScheduler]. Any StatusBar-like thing (keyguard, collapsed
- * status bar fragment), can just feed this an animatable view to get the default system status
- * animation.
+ * status bar fragment), can use this Animator to get the default system status animation. It simply
+ * needs to implement the onAlphaChanged and onTranslationXChanged callbacks.
  *
  * This animator relies on resources, and should be recreated whenever resources are updated. While
  * this class could be used directly as the animation callback, it's probably best to forward calls
  * to it so that it can be recreated at any moment without needing to remove/add callback.
  */
-class StatusBarSystemEventAnimator(
-    val animatedView: View,
-    resources: Resources
+
+open class StatusBarSystemEventDefaultAnimator @JvmOverloads constructor(
+        resources: Resources,
+        private val onAlphaChanged: (Float) -> Unit,
+        private val onTranslationXChanged: (Float) -> Unit,
+        var isAnimationRunning: Boolean = false
 ) : SystemStatusAnimationCallback {
     private val translationXIn: Int = resources.getDimensionPixelSize(
             R.dimen.ongoing_appops_chip_animation_in_status_bar_translation_x)
@@ -46,18 +66,19 @@ class StatusBarSystemEventAnimator(
             R.dimen.ongoing_appops_chip_animation_out_status_bar_translation_x)
 
     override fun onSystemEventAnimationBegin(): Animator {
+        isAnimationRunning = true
         val moveOut = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 23.frames
             interpolator = STATUS_BAR_X_MOVE_OUT
             addUpdateListener {
-                animatedView.translationX = -(translationXIn * animatedValue as Float)
+                onTranslationXChanged(-(translationXIn * animatedValue as Float))
             }
         }
         val alphaOut = ValueAnimator.ofFloat(1f, 0f).apply {
             duration = 8.frames
             interpolator = null
             addUpdateListener {
-                animatedView.alpha = animatedValue as Float
+                onAlphaChanged(animatedValue as Float)
             }
         }
 
@@ -67,13 +88,13 @@ class StatusBarSystemEventAnimator(
     }
 
     override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
-        animatedView.translationX = translationXOut.toFloat()
+        onTranslationXChanged(translationXOut.toFloat())
         val moveIn = ValueAnimator.ofFloat(1f, 0f).apply {
             duration = 23.frames
             startDelay = 7.frames
             interpolator = STATUS_BAR_X_MOVE_IN
             addUpdateListener {
-                animatedView.translationX = translationXOut * animatedValue as Float
+                onTranslationXChanged(translationXOut * animatedValue as Float)
             }
         }
         val alphaIn = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -81,13 +102,14 @@ class StatusBarSystemEventAnimator(
             startDelay = 11.frames
             interpolator = null
             addUpdateListener {
-                animatedView.alpha = animatedValue as Float
+                onAlphaChanged(animatedValue as Float)
             }
         }
 
         val animatorSet = AnimatorSet()
         animatorSet.playTogether(moveIn, alphaIn)
-
+        animatorSet.doOnEnd { isAnimationRunning = false }
+        animatorSet.doOnCancel { isAnimationRunning = false }
         return animatorSet
     }
 }

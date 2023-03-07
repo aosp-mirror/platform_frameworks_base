@@ -150,6 +150,10 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     @Override
     public void onInputDeviceAdded(int deviceId) {
         onInputDeviceChanged(deviceId);
+        if (useNewSettingsUi()) {
+            // Force native callback to set up keyboard layout overlay for newly added keyboards
+            reloadKeyboardLayouts();
+        }
     }
 
     @Override
@@ -283,7 +287,8 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     public KeyboardLayout[] getKeyboardLayoutsForInputDevice(
             final InputDeviceIdentifier identifier) {
         if (useNewSettingsUi()) {
-            return new KeyboardLayout[0];
+            // Provide all supported keyboard layouts since Ime info is not provided
+            return getKeyboardLayouts();
         }
         final String[] enabledLayoutDescriptors =
                 getEnabledKeyboardLayoutsForInputDevice(identifier);
