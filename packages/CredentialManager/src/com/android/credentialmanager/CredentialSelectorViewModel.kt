@@ -22,6 +22,7 @@ import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -36,6 +37,8 @@ import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
+import com.android.credentialmanager.logging.UIMetrics
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 /** One and only one of create or get state can be active at any given time. */
 data class UiState(
@@ -55,6 +58,8 @@ class CredentialSelectorViewModel(
 ) : ViewModel() {
     var uiState by mutableStateOf(credManRepo.initState())
         private set
+
+    var uiMetrics: UIMetrics = UIMetrics()
 
     /**************************************************************************/
     /*****                       Shared Callbacks                         *****/
@@ -76,6 +81,10 @@ class CredentialSelectorViewModel(
     fun onNewCredentialManagerRepo(credManRepo: CredentialManagerRepo) {
         this.credManRepo = credManRepo
         uiState = credManRepo.initState()
+
+        if (this.credManRepo.requestInfo.token != credManRepo.requestInfo.token) {
+            this.uiMetrics.resetInstanceId()
+        }
     }
 
     fun launchProviderUi(
@@ -373,5 +382,10 @@ class CredentialSelectorViewModel(
                 "Unexpected: confirm is pressed but no active entry exists.")
             onInternalError()
         }
+    }
+
+    @Composable
+    fun logUiEvent(uiEventEnum: UiEventEnum) {
+        this.uiMetrics.log(uiEventEnum, credManRepo.requestInfo.appPackageName)
     }
 }
