@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_LOW;
@@ -1604,8 +1605,8 @@ public class AppProfiler {
             mService.mServices.newServiceDumperLocked(null, catPw, emptyArgs, 0,
                     false, null).dumpLocked();
             catPw.println();
-            mService.mAtmInternal.dump(
-                    DUMP_ACTIVITIES_CMD, null, catPw, emptyArgs, 0, false, false, null);
+            mService.mAtmInternal.dump(DUMP_ACTIVITIES_CMD, null, catPw, emptyArgs, 0, false, false,
+                    null, INVALID_DISPLAY);
             catPw.flush();
         }
         dropBuilder.append(catSw.toString());
