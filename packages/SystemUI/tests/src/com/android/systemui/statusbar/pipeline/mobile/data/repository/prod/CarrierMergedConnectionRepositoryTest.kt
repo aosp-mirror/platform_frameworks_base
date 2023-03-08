@@ -22,7 +22,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
@@ -75,36 +74,48 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun connectionInfo_inactiveWifi_isDefault() =
+    fun inactiveWifi_isDefault() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latestConnState: DataConnectionState? = null
+            var latestNetType: ResolvedNetworkType? = null
+
+            val dataJob =
+                underTest.dataConnectionState.onEach { latestConnState = it }.launchIn(this)
+            val netJob = underTest.resolvedNetworkType.onEach { latestNetType = it }.launchIn(this)
 
             wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
 
-            assertThat(latest).isEqualTo(MobileConnectionModel())
+            assertThat(latestConnState).isEqualTo(DataConnectionState.Disconnected)
+            assertThat(latestNetType).isNotEqualTo(ResolvedNetworkType.CarrierMergedNetworkType)
 
-            job.cancel()
+            dataJob.cancel()
+            netJob.cancel()
         }
 
     @Test
-    fun connectionInfo_activeWifi_isDefault() =
+    fun activeWifi_isDefault() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latestConnState: DataConnectionState? = null
+            var latestNetType: ResolvedNetworkType? = null
+
+            val dataJob =
+                underTest.dataConnectionState.onEach { latestConnState = it }.launchIn(this)
+            val netJob = underTest.resolvedNetworkType.onEach { latestNetType = it }.launchIn(this)
 
             wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = NET_ID, level = 1))
 
-            assertThat(latest).isEqualTo(MobileConnectionModel())
+            assertThat(latestConnState).isEqualTo(DataConnectionState.Disconnected)
+            assertThat(latestNetType).isNotEqualTo(ResolvedNetworkType.CarrierMergedNetworkType)
 
-            job.cancel()
+            dataJob.cancel()
+            netJob.cancel()
         }
 
     @Test
-    fun connectionInfo_carrierMergedWifi_isValidAndFieldsComeFromWifiNetwork() =
+    fun carrierMergedWifi_isValidAndFieldsComeFromWifiNetwork() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latest: Int? = null
+            val job = underTest.primaryLevel.onEach { latest = it }.launchIn(this)
 
             wifiRepository.setIsWifiEnabled(true)
             wifiRepository.setIsWifiDefault(true)
@@ -117,34 +128,16 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 )
             )
 
-            val expected =
-                MobileConnectionModel(
-                    primaryLevel = 3,
-                    cdmaLevel = 3,
-                    dataConnectionState = DataConnectionState.Connected,
-                    dataActivityDirection =
-                        DataActivityModel(
-                            hasActivityIn = false,
-                            hasActivityOut = false,
-                        ),
-                    resolvedNetworkType = ResolvedNetworkType.CarrierMergedNetworkType,
-                    isRoaming = false,
-                    isEmergencyOnly = false,
-                    operatorAlphaShort = null,
-                    isInService = true,
-                    isGsm = false,
-                    carrierNetworkChangeActive = false,
-                )
-            assertThat(latest).isEqualTo(expected)
+            assertThat(latest).isEqualTo(3)
 
             job.cancel()
         }
 
     @Test
-    fun connectionInfo_activity_comesFromWifiActivity() =
+    fun activity_comesFromWifiActivity() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latest: DataActivityModel? = null
+            val job = underTest.dataActivityDirection.onEach { latest = it }.launchIn(this)
 
             wifiRepository.setIsWifiEnabled(true)
             wifiRepository.setIsWifiDefault(true)
@@ -162,8 +155,8 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(latest!!.dataActivityDirection.hasActivityIn).isTrue()
-            assertThat(latest!!.dataActivityDirection.hasActivityOut).isFalse()
+            assertThat(latest!!.hasActivityIn).isTrue()
+            assertThat(latest!!.hasActivityOut).isFalse()
 
             wifiRepository.setWifiActivity(
                 DataActivityModel(
@@ -172,17 +165,19 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(latest!!.dataActivityDirection.hasActivityIn).isFalse()
-            assertThat(latest!!.dataActivityDirection.hasActivityOut).isTrue()
+            assertThat(latest!!.hasActivityIn).isFalse()
+            assertThat(latest!!.hasActivityOut).isTrue()
 
             job.cancel()
         }
 
     @Test
-    fun connectionInfo_carrierMergedWifi_wrongSubId_isDefault() =
+    fun carrierMergedWifi_wrongSubId_isDefault() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latestLevel: Int? = null
+            var latestType: ResolvedNetworkType? = null
+            val levelJob = underTest.primaryLevel.onEach { latestLevel = it }.launchIn(this)
+            val typeJob = underTest.resolvedNetworkType.onEach { latestType = it }.launchIn(this)
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
@@ -192,20 +187,19 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
                 )
             )
 
-            assertThat(latest).isEqualTo(MobileConnectionModel())
-            assertThat(latest!!.primaryLevel).isNotEqualTo(3)
-            assertThat(latest!!.resolvedNetworkType)
-                .isNotEqualTo(ResolvedNetworkType.CarrierMergedNetworkType)
+            assertThat(latestLevel).isNotEqualTo(3)
+            assertThat(latestType).isNotEqualTo(ResolvedNetworkType.CarrierMergedNetworkType)
 
-            job.cancel()
+            levelJob.cancel()
+            typeJob.cancel()
         }
 
     // This scenario likely isn't possible, but write a test for it anyway
     @Test
-    fun connectionInfo_carrierMergedButNotEnabled_isDefault() =
+    fun carrierMergedButNotEnabled_isDefault() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latest: Int? = null
+            val job = underTest.primaryLevel.onEach { latest = it }.launchIn(this)
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
@@ -216,17 +210,17 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
             )
             wifiRepository.setIsWifiEnabled(false)
 
-            assertThat(latest).isEqualTo(MobileConnectionModel())
+            assertThat(latest).isNotEqualTo(3)
 
             job.cancel()
         }
 
     // This scenario likely isn't possible, but write a test for it anyway
     @Test
-    fun connectionInfo_carrierMergedButWifiNotDefault_isDefault() =
+    fun carrierMergedButWifiNotDefault_isDefault() =
         testScope.runTest {
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latest: Int? = null
+            val job = underTest.primaryLevel.onEach { latest = it }.launchIn(this)
 
             wifiRepository.setWifiNetwork(
                 WifiNetworkModel.CarrierMerged(
@@ -237,7 +231,7 @@ class CarrierMergedConnectionRepositoryTest : SysuiTestCase() {
             )
             wifiRepository.setIsWifiDefault(false)
 
-            assertThat(latest).isEqualTo(MobileConnectionModel())
+            assertThat(latest).isNotEqualTo(3)
 
             job.cancel()
         }

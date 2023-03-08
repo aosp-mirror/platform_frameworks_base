@@ -34,6 +34,7 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.FakeSelectedComponentRepository
 import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.settings.UserFileManager
@@ -56,7 +57,6 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.inOrder
@@ -66,6 +66,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.io.File
 import java.util.*
@@ -107,6 +108,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Captor
     private lateinit var listingCallbackCaptor:
             ArgumentCaptor<ControlsListingController.ControlsListingCallback>
+
+    private val preferredPanelRepository = FakeSelectedComponentRepository()
 
     private lateinit var delayableExecutor: FakeExecutor
     private lateinit var controller: ControlsControllerImpl
@@ -168,6 +171,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 wrapper,
                 delayableExecutor,
                 uiController,
+                preferredPanelRepository,
                 bindingController,
                 listingController,
                 userFileManager,
@@ -221,6 +225,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 mContext,
                 delayableExecutor,
                 uiController,
+                preferredPanelRepository,
                 bindingController,
                 listingController,
                 userFileManager,
@@ -240,6 +245,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
                 mContext,
                 delayableExecutor,
                 uiController,
+                preferredPanelRepository,
                 bindingController,
                 listingController,
                 userFileManager,
