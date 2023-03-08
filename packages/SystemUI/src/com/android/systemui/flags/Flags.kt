@@ -670,7 +670,8 @@ object Flags {
 
     // TODO(b/259428678): Tracking Bug
     @JvmField
-    val KEYBOARD_BACKLIGHT_INDICATOR = unreleasedFlag(2601, "keyboard_backlight_indicator")
+    val KEYBOARD_BACKLIGHT_INDICATOR =
+            unreleasedFlag(2601, "keyboard_backlight_indicator", teamfood = true)
 
     // TODO(b/272036292): Tracking Bug
     @JvmField
