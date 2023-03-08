@@ -637,7 +637,10 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
             return nullObjectReturn("Failed to allocate a hardware bitmap");
         }
         if (hasGainmap) {
-            hardwareBitmap->setGainmap(std::move(gainmap));
+            auto gm = uirenderer::Gainmap::allocateHardwareGainmap(gainmap);
+            if (gm) {
+                hardwareBitmap->setGainmap(std::move(gm));
+            }
         }
 
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
