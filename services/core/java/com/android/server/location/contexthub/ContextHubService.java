@@ -1148,7 +1148,7 @@ public class ContextHubService extends IContextHubService.Stub {
         super.getPreloadedNanoAppIds_enforcePermission();
         Objects.requireNonNull(hubInfo, "hubInfo cannot be null");
 
-        long[] nanoappIds = mContextHubWrapper.getPreloadedNanoappIds();
+        long[] nanoappIds = mContextHubWrapper.getPreloadedNanoappIds(hubInfo.getId());
         if (nanoappIds == null) {
             return new long[0];
         }
@@ -1261,13 +1261,19 @@ public class ContextHubService extends IContextHubService.Stub {
             return;
         }
 
-        long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds();
-        if (preloadedNanoappIds == null) {
-            return;
-        }
-        for (long preloadedNanoappId : preloadedNanoappIds) {
-            pw.print("ID: 0x");
-            pw.println(Long.toHexString(preloadedNanoappId));
+        for (int contextHubId: mContextHubIdToInfoMap.keySet()) {
+            long[] preloadedNanoappIds = mContextHubWrapper.getPreloadedNanoappIds(contextHubId);
+            if (preloadedNanoappIds == null) {
+                return;
+            }
+
+            pw.print("Context Hub (id=");
+            pw.print(contextHubId);
+            pw.println("):");
+            for (long preloadedNanoappId : preloadedNanoappIds) {
+                pw.print("  ID: 0x");
+                pw.println(Long.toHexString(preloadedNanoappId));
+            }
         }
     }
 
