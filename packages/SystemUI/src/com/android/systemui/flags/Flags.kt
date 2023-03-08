@@ -578,7 +578,7 @@ object Flags {
     @JvmField
     val LEAVE_SHADE_OPEN_FOR_BUGREPORT = releasedFlag(1800, "leave_shade_open_for_bugreport")
     // TODO(b/265944639): Tracking Bug
-    @JvmField val DUAL_SHADE = releasedFlag(1801, "dual_shade")
+    @JvmField val DUAL_SHADE = unreleasedFlag(1801, "dual_shade")
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag(1900, "keycode_flag")
