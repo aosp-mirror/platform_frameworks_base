@@ -32,7 +32,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.util.ArraySet;
-import android.util.Log;
 
 import com.android.internal.annotations.Immutable;
 
@@ -89,8 +88,6 @@ import java.util.Set;
  */
 @Immutable
 public final class AttributionSource implements Parcelable {
-    private static final String TAG = "AttributionSource";
-
     private static final String DESCRIPTOR = "android.content.AttributionSource";
 
     private static final Binder sDefaultToken = new Binder(DESCRIPTOR);
@@ -158,20 +155,9 @@ public final class AttributionSource implements Parcelable {
     AttributionSource(@NonNull Parcel in) {
         this(AttributionSourceState.CREATOR.createFromParcel(in));
 
-        if (!Binder.isDirectlyHandlingTransaction()) {
-            Log.e(TAG, "Unable to verify calling UID #" + mAttributionSourceState.uid + " PID #"
-                    + mAttributionSourceState.pid + " when not handling Binder transaction; "
-                    + "clearing.");
-            mAttributionSourceState.pid = -1;
-            mAttributionSourceState.uid = -1;
-            mAttributionSourceState.packageName = null;
-            mAttributionSourceState.attributionTag = null;
-            mAttributionSourceState.next = null;
-        } else {
-            // Since we just unpacked this object as part of it transiting a Binder
-            // call, this is the perfect time to enforce that its UID and PID can be trusted
-            enforceCallingUidAndPid();
-        }
+        // Since we just unpacked this object as part of it transiting a Binder
+        // call, this is the perfect time to enforce that its UID and PID can be trusted
+        enforceCallingUidAndPid();
     }
 
     /** @hide */
