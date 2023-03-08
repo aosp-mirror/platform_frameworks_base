@@ -17,6 +17,7 @@
 package com.android.systemui.shade;
 
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 
@@ -305,6 +306,7 @@ public final class NotificationPanelViewController implements Dumpable {
      */
 
     public final boolean mAnimateBack;
+    private final boolean mTrackpadGestureBack;
     /**
      * The minimum scale to "squish" the Shade and associated elements down to, for Back gesture
      */
@@ -849,6 +851,7 @@ public final class NotificationPanelViewController implements Dumpable {
         mLayoutInflater = layoutInflater;
         mFeatureFlags = featureFlags;
         mAnimateBack = mFeatureFlags.isEnabled(Flags.WM_SHADE_ANIMATE_BACK_GESTURE);
+        mTrackpadGestureBack = mFeatureFlags.isEnabled(Flags.TRACKPAD_GESTURE_BACK);
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
         mWakeUpCoordinator = coordinator;
@@ -4763,6 +4766,9 @@ public final class NotificationPanelViewController implements Dumpable {
                     addMovement(event);
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
+                    if (isTrackpadMotionEvent(event)) {
+                        break;
+                    }
                     final int upPointer = event.getPointerId(event.getActionIndex());
                     if (mTrackingPointer == upPointer) {
                         // gesture is ongoing, find a new pointer to track
@@ -4776,7 +4782,8 @@ public final class NotificationPanelViewController implements Dumpable {
                     mShadeLog.logMotionEventStatusBarState(event,
                             mStatusBarStateController.getState(),
                             "onInterceptTouchEvent: pointer down action");
-                    if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+                    if (!isTrackpadMotionEvent(event)
+                            && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         mVelocityTracker.clear();
                     }
@@ -4979,6 +4986,9 @@ public final class NotificationPanelViewController implements Dumpable {
                     break;
 
                 case MotionEvent.ACTION_POINTER_UP:
+                    if (isTrackpadMotionEvent(event)) {
+                        break;
+                    }
                     final int upPointer = event.getPointerId(event.getActionIndex());
                     if (mTrackingPointer == upPointer) {
                         // gesture is ongoing, find a new pointer to track
@@ -4995,7 +5005,8 @@ public final class NotificationPanelViewController implements Dumpable {
                     mShadeLog.logMotionEventStatusBarState(event,
                             mStatusBarStateController.getState(),
                             "handleTouch: pointer down action");
-                    if (mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
+                    if (!isTrackpadMotionEvent(event)
+                            && mStatusBarStateController.getState() == StatusBarState.KEYGUARD) {
                         mMotionAborted = true;
                         endMotionEvent(event, x, y, true /* forceCancel */);
                         return false;
@@ -5068,6 +5079,11 @@ public final class NotificationPanelViewController implements Dumpable {
                     break;
             }
             return !mGestureWaitForTouchSlop || mTracking;
+        }
+
+        private boolean isTrackpadMotionEvent(MotionEvent ev) {
+            return mTrackpadGestureBack
+                    && ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE;
         }
     }
 
