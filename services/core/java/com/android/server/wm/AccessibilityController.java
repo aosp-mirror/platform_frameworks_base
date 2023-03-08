@@ -702,8 +702,8 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + displayId);
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
-            if (magnifying) {
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
                 switch (transition) {
                     case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
@@ -727,8 +727,8 @@ final class AccessibilityController {
                 Slog.i(LOG_TAG, "Window transition: " + WindowManager.transitTypeToString(type)
                         + " displayId: " + displayId);
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
-            if (magnifying) {
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
                 // All opening/closing situations.
                 switch (type) {
                     case WindowManager.TRANSIT_OPEN:
@@ -751,12 +751,12 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + windowState.getDisplayId());
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
             final int type = windowState.mAttrs.type;
             switch (transition) {
                 case WindowManagerPolicy.TRANSIT_ENTER:
                 case WindowManagerPolicy.TRANSIT_SHOW: {
-                    if (!magnifying) {
+                    if (!isMagnifierActivated) {
                         break;
                     }
                     switch (type) {
