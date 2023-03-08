@@ -71,7 +71,7 @@ public class SparseArray<E> implements Cloneable {
      * Creates a new SparseArray containing no mappings.
      */
     public SparseArray() {
-        this(10);
+        this(0);
     }
 
     /**
