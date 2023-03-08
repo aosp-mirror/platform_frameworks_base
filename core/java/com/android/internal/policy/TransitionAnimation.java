@@ -265,6 +265,34 @@ public class TransitionAnimation {
         }
         return null;
     }
+
+    /** Get animation resId by attribute Id from specific LayoutParams */
+    public int getAnimationResId(LayoutParams lp, int animAttr, int transit) {
+        int resId = Resources.ID_NULL;
+        if (animAttr >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations(lp);
+            if (ent != null) {
+                resId = ent.array.getResourceId(animAttr, 0);
+            }
+        }
+        resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        return resId;
+    }
+
+    /** Get default animation resId */
+    public int getDefaultAnimationResId(int animAttr, int transit) {
+        int resId = Resources.ID_NULL;
+        if (animAttr >= 0) {
+            AttributeCache.Entry ent = getCachedAnimations(DEFAULT_PACKAGE,
+                    mDefaultWindowAnimationStyleResId);
+            if (ent != null) {
+                resId = ent.array.getResourceId(animAttr, 0);
+            }
+        }
+        resId = updateToTranslucentAnimIfNeeded(resId, transit);
+        return resId;
+    }
+
     /**
      * Load animation by attribute Id from a specific AnimationStyle resource.
      *

@@ -99,4 +99,8 @@ class BackAnimationRunner {
     boolean isAnimationCancelled() {
         return mAnimationCancelled;
     }
+
+    void resetWaitingAnimation() {
+        mWaitingAnimation = false;
+    }
 }
