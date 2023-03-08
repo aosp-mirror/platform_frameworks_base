@@ -1473,7 +1473,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_PORTRAIT},
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
-    @ScreenOrientation
+    @Configuration.Orientation
     int getRequestedConfigurationOrientation() {
         return getRequestedConfigurationOrientation(false /* forDisplay */);
     }
@@ -1491,7 +1491,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_PORTRAIT},
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
-    @ScreenOrientation
+    @Configuration.Orientation
     int getRequestedConfigurationOrientation(boolean forDisplay) {
         int requestedOrientation = getOverrideOrientation();
         final RootDisplayArea root = getRootDisplayArea();
