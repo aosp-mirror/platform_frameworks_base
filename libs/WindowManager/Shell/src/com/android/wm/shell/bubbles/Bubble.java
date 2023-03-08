@@ -48,6 +48,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
+import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.common.bubbles.BubbleInfo;
 
 import java.io.PrintWriter;
@@ -430,14 +431,16 @@ public class Bubble implements BubbleViewProvider {
      * @param callback the callback to notify one the bubble is ready to be displayed.
      * @param context the context for the bubble.
      * @param controller the bubble controller.
-     * @param stackView the stackView the bubble is eventually added to.
+     * @param stackView the view the bubble is added to, iff showing as floating.
+     * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
      * @param iconFactory the icon factory use to create images for the bubble.
      * @param badgeIconFactory the icon factory to create app badges for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
             BubbleController controller,
-            BubbleStackView stackView,
+            @Nullable BubbleStackView stackView,
+            @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
             BubbleBadgeIconFactory badgeIconFactory,
             boolean skipInflation) {
@@ -448,6 +451,7 @@ public class Bubble implements BubbleViewProvider {
                 context,
                 controller,
                 stackView,
+                layerView,
                 iconFactory,
                 badgeIconFactory,
                 skipInflation,
@@ -479,6 +483,7 @@ public class Bubble implements BubbleViewProvider {
         if (!isInflated()) {
             mIconView = info.imageView;
             mExpandedView = info.expandedView;
+            mBubbleBarExpandedView = info.bubbleBarExpandedView;
         }
 
         mShortcutInfo = info.shortcutInfo;
@@ -489,7 +494,7 @@ public class Bubble implements BubbleViewProvider {
         mFlyoutMessage = info.flyoutMessage;
 
         mBadgeBitmap = info.badgeBitmap;
-        mRawBadgeBitmap = info.mRawBadgeBitmap;
+        mRawBadgeBitmap = info.rawBadgeBitmap;
         mBubbleBitmap = info.bubbleBitmap;
 
         mDotColor = info.dotColor;
