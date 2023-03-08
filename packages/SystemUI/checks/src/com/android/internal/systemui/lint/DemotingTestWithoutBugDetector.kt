@@ -25,6 +25,7 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import java.util.regex.Pattern
 import org.jetbrains.uast.UAnnotation
 import org.jetbrains.uast.UElement
 
@@ -36,22 +37,38 @@ class DemotingTestWithoutBugDetector : Detector(), SourceCodeScanner {
     override fun createUastHandler(context: JavaContext): UElementHandler {
         return object : UElementHandler() {
             override fun visitAnnotation(node: UAnnotation) {
-                if (node.qualifiedName !in DEMOTING_ANNOTATION) {
-                    return
+                // Annotations having int bugId field
+                if (node.qualifiedName in DEMOTING_ANNOTATION_BUG_ID) {
+                    val bugId = node.findAttributeValue("bugId")!!.evaluate() as Int
+                    if (bugId <= 0) {
+                        val location = context.getLocation(node)
+                        val message = "Please attach a bug id to track demoted test"
+                        context.report(ISSUE, node, location, message)
+                    }
                 }
-                val bugId = node.findAttributeValue("bugId")!!.evaluate() as Int
-                if (bugId <= 0) {
-                    val location = context.getLocation(node)
-                    val message = "Please attach a bug id to track demoted test"
-                    context.report(ISSUE, node, location, message)
+                // @Ignore has a String field for reason
+                if (node.qualifiedName == DEMOTING_ANNOTATION_IGNORE) {
+                    val reason = node.findAttributeValue("value")!!.evaluate() as String
+                    val bugPattern = Pattern.compile("b/\\d+")
+                    if (!bugPattern.matcher(reason).find()) {
+                        val location = context.getLocation(node)
+                        val message = "Please attach a bug (e.g. b/123) to track demoted test"
+                        context.report(ISSUE, node, location, message)
+                    }
                 }
             }
         }
     }
 
     companion object {
-        val DEMOTING_ANNOTATION =
-            listOf("androidx.test.filters.FlakyTest", "android.platform.test.annotations.FlakyTest")
+        val DEMOTING_ANNOTATION_BUG_ID =
+            listOf(
+                "androidx.test.filters.FlakyTest",
+                "android.platform.test.annotations.FlakyTest",
+                "android.platform.test.rule.PlatinumRule.Platinum",
+            )
+
+        const val DEMOTING_ANNOTATION_IGNORE = "org.junit.Ignore"
 
         @JvmField
         val ISSUE: Issue =
