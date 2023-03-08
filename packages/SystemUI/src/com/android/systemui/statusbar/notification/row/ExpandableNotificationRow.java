@@ -153,7 +153,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     // We don't correctly track dark mode until the content views are inflated, so always update
     // the background on first content update just in case it happens to be during a theme change.
     private boolean mUpdateSelfBackgroundOnUpdate = true;
-    private boolean mNotificationTranslationFinished = false;
     private boolean mIsSnoozed;
     private boolean mIsFaded;
     private boolean mAnimatePinnedRoundness = false;
@@ -209,11 +208,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * If {@link #mHasUserChangedExpansion}, has the user expanded this row
      */
     private boolean mUserExpanded;
-    /**
-     * Whether the blocking helper is showing on this notification (even if dismissed)
-     */
-    private boolean mIsBlockingHelperShowing;
-
     /**
      * Has this notification been expanded while it was pinned
      */
@@ -1579,18 +1573,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public void setBlockingHelperShowing(boolean isBlockingHelperShowing) {
-        mIsBlockingHelperShowing = isBlockingHelperShowing;
-    }
-
-    public boolean isBlockingHelperShowing() {
-        return mIsBlockingHelperShowing;
-    }
-
-    public boolean isBlockingHelperShowingAndTranslationFinished() {
-        return mIsBlockingHelperShowing && mNotificationTranslationFinished;
-    }
-
     @Override
     public View getShelfTransformationTarget() {
         if (mIsSummaryWithChildren && !shouldShowPublic()) {
@@ -2171,10 +2153,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public void setTranslation(float translationX) {
         invalidate();
-        if (isBlockingHelperShowingAndTranslationFinished()) {
-            mGuts.setTranslationX(translationX);
-            return;
-        } else if (mDismissUsingRowTranslationX) {
+        if (mDismissUsingRowTranslationX) {
             setTranslationX(translationX);
         } else if (mTranslateableViews != null) {
             // Translate the group of views
@@ -2202,20 +2181,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return getTranslationX();
         }
 
-        if (isBlockingHelperShowingAndCanTranslate()) {
-            return mGuts.getTranslationX();
-        }
-
         if (mTranslateableViews != null && mTranslateableViews.size() > 0) {
             // All of the views in the list should have same translation, just use first one.
             return mTranslateableViews.get(0).getTranslationX();
         }
 
         return 0;
-    }
-
-    private boolean isBlockingHelperShowingAndCanTranslate() {
-        return areGutsExposed() && mIsBlockingHelperShowing && mNotificationTranslationFinished;
     }
 
     public Animator getTranslateViewAnimator(final float leftTarget,
@@ -2239,9 +2210,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
             @Override
             public void onAnimationEnd(Animator anim) {
-                if (mIsBlockingHelperShowing) {
-                    mNotificationTranslationFinished = true;
-                }
                 if (!cancelled && leftTarget == 0) {
                     if (mMenuRow != null) {
                         mMenuRow.resetMenu();
