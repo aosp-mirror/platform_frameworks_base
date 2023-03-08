@@ -138,14 +138,6 @@ class InsetsStateController {
     }
 
     /**
-     * @return The provider of a source ID or null if we don't have it.
-     */
-    @Nullable
-    WindowContainerInsetsSourceProvider peekSourceProvider(int id) {
-        return mProviders.get(id);
-    }
-
-    /**
      * Called when a layout pass has occurred.
      */
     void onPostLayout() {
