@@ -230,8 +230,10 @@ public final class CredentialManagerService
         if (hasPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)) {
             return;
         }
-        
-        throw new SecurityException("Caller is missing permission: QUERY_ALL_PACKAGES or LIST_ENABLED_CREDENTIAL_PROVIDERS");
+
+        throw new SecurityException(
+                "Caller is missing permission: QUERY_ALL_PACKAGES or "
+                        + "LIST_ENABLED_CREDENTIAL_PROVIDERS");
     }
 
     private boolean hasPermission(String permission) {
@@ -408,6 +410,7 @@ public final class CredentialManagerService
                 GetCredentialRequest request,
                 IGetCredentialCallback callback,
                 final String callingPackage) {
+            final long timestampBegan = System.nanoTime();
             Log.i(TAG, "starting executeGetCredential with callingPackage: " + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
 
@@ -429,7 +432,8 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            CancellationSignal.fromTransport(cancelTransport));
+                            CancellationSignal.fromTransport(cancelTransport),
+                            timestampBegan);
 
             processGetCredential(request, callback, session);
             return cancelTransport;
@@ -508,6 +512,9 @@ public final class CredentialManagerService
                                     + e.getMessage());
                 }
             }
+
+            finalizeAndEmitInitialPhaseMetric(session);
+            // TODO(b/271135048) - May still be worth emitting in the empty cases above.
             providerSessions.forEach(ProviderSession::invokeSession);
         }
 
@@ -516,6 +523,7 @@ public final class CredentialManagerService
                 CreateCredentialRequest request,
                 ICreateCredentialCallback callback,
                 String callingPackage) {
+            final long timestampBegan = System.nanoTime();
             Log.i(TAG, "starting executeCreateCredential with callingPackage: "
                     + callingPackage);
             ICancellationSignal cancelTransport = CancellationSignal.createTransport();
@@ -538,7 +546,8 @@ public final class CredentialManagerService
                             request,
                             callback,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            CancellationSignal.fromTransport(cancelTransport));
+                            CancellationSignal.fromTransport(cancelTransport),
+                            timestampBegan);
 
             processCreateCredential(request, callback, session);
             return cancelTransport;
@@ -566,8 +575,15 @@ public final class CredentialManagerService
                 }
             }
 
+            finalizeAndEmitInitialPhaseMetric(session);
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(ProviderSession::invokeSession);
+        }
+
+        private void finalizeAndEmitInitialPhaseMetric(RequestSession session) {
+            var initMetric = session.mInitialPhaseMetric;
+            initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
+            MetricUtilities.logApiCalled(initMetric);
         }
 
         @Override
@@ -654,6 +670,7 @@ public final class CredentialManagerService
                         }
                         MetricUtilities.logApiCalled(ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                 ApiStatus.SUCCESS, callingUid);
+                        // TODO(b/271135048) - Update asap to use the new logging types
                         return true;
                     }
                 }
@@ -683,12 +700,15 @@ public final class CredentialManagerService
                     mContext, userId, providerFilter, getEnabledProviders());
         }
 
+        @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
+        // this.mLock
         private Set<ServiceInfo> getEnabledProviders() {
             Set<ServiceInfo> enabledProviders = new HashSet<>();
             synchronized (mLock) {
                 runForUser(
                         (service) -> {
-                            enabledProviders.add(service.getCredentialProviderInfo().getServiceInfo());
+                            enabledProviders.add(
+                                    service.getCredentialProviderInfo().getServiceInfo());
                         });
             }
             return enabledProviders;
@@ -699,6 +719,7 @@ public final class CredentialManagerService
                 ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback,
                 String callingPackage) {
+            final long timestampBegan = System.nanoTime();
             Log.i(TAG, "starting clearCredentialState with callingPackage: " + callingPackage);
             final int userId = UserHandle.getCallingUserId();
             int callingUid = Binder.getCallingUid();
@@ -716,7 +737,8 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, null),
-                            CancellationSignal.fromTransport(cancelTransport));
+                            CancellationSignal.fromTransport(cancelTransport),
+                            timestampBegan);
 
             // Initiate all provider sessions
             // TODO: Determine if provider needs to have clear capability in their manifest
@@ -734,6 +756,8 @@ public final class CredentialManagerService
                                     + e.getMessage());
                 }
             }
+
+            finalizeAndEmitInitialPhaseMetric(session);
 
             // Iterate over all provider sessions and invoke the request
             providerSessions.forEach(ProviderSession::invokeSession);
