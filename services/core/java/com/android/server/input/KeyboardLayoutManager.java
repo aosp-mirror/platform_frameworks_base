@@ -483,15 +483,17 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
         key.append("vendor:").append(identifier.getVendorId()).append(",product:").append(
                 identifier.getProductId());
 
-        InputDevice inputDevice = getInputDevice(identifier);
-        Objects.requireNonNull(inputDevice, "Input device must not be null");
-        // Some keyboards can have same product ID and vendor ID but different Keyboard info like
-        // language tag and layout type.
-        if (!TextUtils.isEmpty(inputDevice.getKeyboardLanguageTag())) {
-            key.append(",languageTag:").append(inputDevice.getKeyboardLanguageTag());
-        }
-        if (!TextUtils.isEmpty(inputDevice.getKeyboardLayoutType())) {
-            key.append(",layoutType:").append(inputDevice.getKeyboardLanguageTag());
+        if (useNewSettingsUi()) {
+            InputDevice inputDevice = getInputDevice(identifier);
+            Objects.requireNonNull(inputDevice, "Input device must not be null");
+            // Some keyboards can have same product ID and vendor ID but different Keyboard info
+            // like language tag and layout type.
+            if (!TextUtils.isEmpty(inputDevice.getKeyboardLanguageTag())) {
+                key.append(",languageTag:").append(inputDevice.getKeyboardLanguageTag());
+            }
+            if (!TextUtils.isEmpty(inputDevice.getKeyboardLayoutType())) {
+                key.append(",layoutType:").append(inputDevice.getKeyboardLanguageTag());
+            }
         }
         return key.toString();
     }
@@ -669,6 +671,12 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
     public String[] getKeyboardLayoutOverlay(InputDeviceIdentifier identifier) {
         String keyboardLayoutDescriptor;
         if (useNewSettingsUi()) {
+            InputDevice inputDevice = getInputDevice(identifier);
+            if (inputDevice == null) {
+                // getKeyboardLayoutOverlay() called before input device added completely. Need
+                // to wait till the device is added which will call reloadKeyboardLayouts()
+                return null;
+            }
             if (mCurrentImeInfo == null) {
                 // Haven't received onInputMethodSubtypeChanged() callback from IMMS. Will reload
                 // keyboard layouts once we receive the callback.
