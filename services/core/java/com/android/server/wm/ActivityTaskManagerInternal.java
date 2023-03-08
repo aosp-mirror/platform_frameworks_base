@@ -473,9 +473,10 @@ public abstract class ActivityTaskManagerInternal {
     /** Writes current activity states to the proto stream. */
     public abstract void writeActivitiesToProto(ProtoOutputStream proto);
 
-    /** Dump the current state based on the command. */
+    /** Dump the current state based on the command and filters. */
     public abstract void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage);
+            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage,
+            int displayIdFilter);
 
     /** Dump the current state for inclusion in process dump. */
     public abstract boolean dumpForProcesses(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
@@ -489,7 +490,8 @@ public abstract class ActivityTaskManagerInternal {
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
             String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId);
+            boolean dumpFocusedRootTaskOnly, boolean dumpVerbose, int displayIdFilter,
+            @UserIdInt int userId);
 
     /** Dump the current state for inclusion in oom dump. */
     public abstract void dumpForOom(PrintWriter pw);
