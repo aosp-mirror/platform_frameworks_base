@@ -156,7 +156,6 @@ package com.android.server.display.config {
     method @NonNull public final java.math.BigDecimal getMinimumLux_all();
     method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate_all();
     method @Nullable public final com.android.server.display.config.SdrHdrRatioMap getSdrHdrRatioMap_all();
-    method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatusLimit_all();
     method public com.android.server.display.config.HbmTiming getTiming_all();
     method @NonNull public final java.math.BigDecimal getTransitionPoint_all();
     method public final void setAllowInLowPowerMode_all(@NonNull boolean);
@@ -165,7 +164,6 @@ package com.android.server.display.config {
     method public final void setMinimumLux_all(@NonNull java.math.BigDecimal);
     method public final void setRefreshRate_all(@Nullable com.android.server.display.config.RefreshRateRange);
     method public final void setSdrHdrRatioMap_all(@Nullable com.android.server.display.config.SdrHdrRatioMap);
-    method public final void setThermalStatusLimit_all(@NonNull com.android.server.display.config.ThermalStatus);
     method public void setTiming_all(com.android.server.display.config.HbmTiming);
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }

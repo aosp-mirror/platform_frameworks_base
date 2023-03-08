@@ -2395,7 +2395,6 @@ public class DisplayDeviceConfig {
             mHbmData.timeWindowMillis = hbmTiming.getTimeWindowSecs_all().longValue() * 1000;
             mHbmData.timeMaxMillis = hbmTiming.getTimeMaxSecs_all().longValue() * 1000;
             mHbmData.timeMinMillis = hbmTiming.getTimeMinSecs_all().longValue() * 1000;
-            mHbmData.thermalStatusLimit = convertThermalStatus(hbm.getThermalStatusLimit_all());
             mHbmData.allowInLowPowerMode = hbm.getAllowInLowPowerMode_all();
             final RefreshRateRange rr = hbm.getRefreshRate_all();
             if (rr != null) {
@@ -2971,9 +2970,6 @@ public class DisplayDeviceConfig {
         /** Brightness level at which we transition from normal to high-brightness. */
         public float transitionPoint;
 
-        /** Enable HBM only if the thermal status is not higher than this. */
-        public @PowerManager.ThermalStatus int thermalStatusLimit;
-
         /** Whether HBM is allowed when {@code Settings.Global.LOW_POWER_MODE} is active. */
         public boolean allowInLowPowerMode;
 
@@ -2992,15 +2988,13 @@ public class DisplayDeviceConfig {
         HighBrightnessModeData() {}
 
         HighBrightnessModeData(float minimumLux, float transitionPoint, long timeWindowMillis,
-                long timeMaxMillis, long timeMinMillis,
-                @PowerManager.ThermalStatus int thermalStatusLimit, boolean allowInLowPowerMode,
+                long timeMaxMillis, long timeMinMillis, boolean allowInLowPowerMode,
                 float minimumHdrPercentOfScreen) {
             this.minimumLux = minimumLux;
             this.transitionPoint = transitionPoint;
             this.timeWindowMillis = timeWindowMillis;
             this.timeMaxMillis = timeMaxMillis;
             this.timeMinMillis = timeMinMillis;
-            this.thermalStatusLimit = thermalStatusLimit;
             this.allowInLowPowerMode = allowInLowPowerMode;
             this.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
         }
@@ -3015,7 +3009,6 @@ public class DisplayDeviceConfig {
             other.timeMaxMillis = timeMaxMillis;
             other.timeMinMillis = timeMinMillis;
             other.transitionPoint = transitionPoint;
-            other.thermalStatusLimit = thermalStatusLimit;
             other.allowInLowPowerMode = allowInLowPowerMode;
             other.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
         }
@@ -3028,7 +3021,6 @@ public class DisplayDeviceConfig {
                     + ", timeWindow: " + timeWindowMillis + "ms"
                     + ", timeMax: " + timeMaxMillis + "ms"
                     + ", timeMin: " + timeMinMillis + "ms"
-                    + ", thermalStatusLimit: " + thermalStatusLimit
                     + ", allowInLowPowerMode: " + allowInLowPowerMode
                     + ", minimumHdrPercentOfScreen: " + minimumHdrPercentOfScreen
                     + "} ";
