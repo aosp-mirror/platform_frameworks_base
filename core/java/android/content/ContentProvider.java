@@ -309,14 +309,30 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             try {
                 if (checkGetTypePermission(attributionSource, uri)
                         == PermissionChecker.PERMISSION_GRANTED) {
-                    final String type = mInterface.getType(uri);
+                    String type;
+                    if (checkPermission(Manifest.permission.GET_ANY_PROVIDER_TYPE,
+                            attributionSource) == PermissionChecker.PERMISSION_GRANTED) {
+                        /*
+                        For calling packages having the special permission for any type,
+                        the calling identity should be cleared before calling getType.
+                         */
+                        final CallingIdentity origId = getContentProvider().clearCallingIdentity();
+                        try {
+                            type = mInterface.getType(uri);
+                        } finally {
+                            getContentProvider().restoreCallingIdentity(origId);
+                        }
+                    } else {
+                        type = mInterface.getType(uri);
+                    }
+
                     if (type != null) {
                         logGetTypeData(Binder.getCallingUid(), uri, type, true);
                     }
                     return type;
                 } else {
                     final int callingUid = Binder.getCallingUid();
-                    final long origId = Binder.clearCallingIdentity();
+                    final CallingIdentity origId = getContentProvider().clearCallingIdentity();
                     try {
                         final String type = getTypeAnonymous(uri);
                         if (type != null) {
@@ -324,7 +340,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                         }
                         return type;
                     } finally {
-                        Binder.restoreCallingIdentity(origId);
+                        getContentProvider().restoreCallingIdentity(origId);
                     }
                 }
             } catch (RemoteException e) {
