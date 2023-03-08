@@ -18,8 +18,6 @@ package com.android.server.wm;
 
 import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.RoundedCorners.NO_ROUNDED_CORNERS;
 import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -180,7 +178,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
         mDisplayContent.setLayoutNeeded();
         mDisplayContent.performLayout(true /* initial */, false /* updateImeWindows */);
 
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
+        final InsetsSource navSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
         navSource.setFrame(mNavBarWindow.getFrame());
         opaqueDarkNavBar.mAboveInsetsState.addSource(navSource);
         opaqueLightNavBar.mAboveInsetsState.addSource(navSource);
@@ -250,15 +249,16 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOverlappingWithNavBar() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
+        final InsetsSource navSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
         navSource.setFrame(new Rect(100, 200, 200, 300));
         testOverlappingWithNavBarType(navSource);
     }
 
     @Test
     public void testOverlappingWithExtraNavBar() {
-        final InsetsSource navSource =
-                new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
+        final InsetsSource navSource = new InsetsSource(
+                InsetsSource.createId(null, 1, navigationBars()), navigationBars());
         navSource.setFrame(new Rect(100, 200, 200, 300));
         testOverlappingWithNavBarType(navSource);
     }
@@ -331,7 +331,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
 
         final InsetsSource imeSource = state.peekSource(ID_IME);
-        final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navBarSource = state.peekSource(
+                mNavBarWindow.getControllableInsetProvider().getSource().getId());
 
         assertNotNull(imeSource);
         assertNotNull(navBarSource);
@@ -358,7 +359,8 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
         displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
+        final InsetsSource navBarSource = state.peekSource(
+                mNavBarWindow.getControllableInsetProvider().getSource().getId());
         assertEquals(attrs.height - 10, navBarSource.getFrame().height());
     }
 
