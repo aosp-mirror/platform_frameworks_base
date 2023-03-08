@@ -52,6 +52,16 @@
     <integer name="config_delay_for_ims_dereg_millis">0</integer>
     <java-symbol type="integer" name="config_delay_for_ims_dereg_millis" />
 
+    <!-- Define the bar of considering the availability of a subscription is stable in milliseconds,
+         where 0 means immediate switch, and negative milliseconds indicates the auto data switch
+         feature is disabled.-->
+    <integer name="auto_data_switch_availability_stability_time_threshold_millis">10000</integer>
+    <java-symbol type="integer" name="auto_data_switch_availability_stability_time_threshold_millis" />
+
+    <!-- Define the maximum retry times when a validation for switching failed.-->
+    <integer name="auto_data_switch_validation_max_retry">7</integer>
+    <java-symbol type="integer" name="auto_data_switch_validation_max_retry" />
+
     <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
          tunnels across service restart. If iwlan tunnels are not persisted across restart,
          Framework will clean up dangling data connections when service restarts -->
