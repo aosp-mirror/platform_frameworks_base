@@ -62,6 +62,8 @@ import com.android.credentialmanager.common.ui.CredentialListSectionHeader
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.common.ui.setTransparentSystemBarsColor
 import com.android.credentialmanager.common.ui.setBottomSheetSystemBarsColor
+import com.android.credentialmanager.logging.GetCredentialEvent
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
 fun GetCredentialScreen(
@@ -75,7 +77,9 @@ fun GetCredentialScreen(
         RemoteCredentialSnackBarScreen(
             onClick = viewModel::getFlowOnMoreOptionOnSnackBarSelected,
             onCancel = viewModel::onUserCancel,
+            onLog = { viewModel.logUiEvent(it) },
         )
+        viewModel.uiMetrics.log(GetCredentialEvent.CREDMAN_GET_CRED_SCREEN_REMOTE_ONLY)
     } else if (getCredentialUiState.currentScreenState
         == GetScreenState.UNLOCKED_AUTH_ENTRIES_ONLY) {
         setTransparentSystemBarsColor(sysUiController)
@@ -84,7 +88,10 @@ fun GetCredentialScreen(
             getCredentialUiState.providerDisplayInfo.authenticationEntryList,
             onCancel = viewModel::silentlyFinishActivity,
             onLastLockedAuthEntryNotFound = viewModel::onLastLockedAuthEntryNotFoundError,
+            onLog = { viewModel.logUiEvent(it) },
         )
+        viewModel.uiMetrics.log(GetCredentialEvent
+                .CREDMAN_GET_CRED_SCREEN_UNLOCKED_AUTH_ENTRIES_ONLY)
     } else {
         setBottomSheetSystemBarsColor(sysUiController)
         ModalBottomSheet(
@@ -104,7 +111,10 @@ fun GetCredentialScreen(
                                 onEntrySelected = viewModel::getFlowOnEntrySelected,
                                 onConfirm = viewModel::getFlowOnConfirmEntrySelected,
                                 onMoreOptionSelected = viewModel::getFlowOnMoreOptionSelected,
+                                onLog = { viewModel.logUiEvent(it) },
                             )
+                            viewModel.uiMetrics.log(GetCredentialEvent
+                                    .CREDMAN_GET_CRED_SCREEN_PRIMARY_SELECTION)
                         } else {
                             AllSignInOptionCard(
                                 providerInfoList = getCredentialUiState.providerInfoList,
@@ -114,7 +124,10 @@ fun GetCredentialScreen(
                                 viewModel::getFlowOnBackToPrimarySelectionScreen,
                                 onCancel = viewModel::onUserCancel,
                                 isNoAccount = getCredentialUiState.isNoAccount,
+                                onLog = { viewModel.logUiEvent(it) },
                             )
+                            viewModel.uiMetrics.log(GetCredentialEvent
+                                    .CREDMAN_GET_CRED_SCREEN_ALL_SIGN_IN_OPTIONS)
                         }
                     }
                     ProviderActivityState.READY_TO_LAUNCH -> {
@@ -123,9 +136,13 @@ fun GetCredentialScreen(
                         LaunchedEffect(viewModel.uiState.providerActivityState) {
                             viewModel.launchProviderUi(providerActivityLauncher)
                         }
+                        viewModel.uiMetrics.log(GetCredentialEvent
+                                .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_READY_TO_LAUNCH)
                     }
                     ProviderActivityState.PENDING -> {
                         // Hide our content when the provider activity is active.
+                        viewModel.uiMetrics.log(GetCredentialEvent
+                                .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_PENDING)
                     }
                 }
             },
@@ -144,6 +161,7 @@ fun PrimarySelectionCard(
     onEntrySelected: (BaseEntry) -> Unit,
     onConfirm: () -> Unit,
     onMoreOptionSelected: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
@@ -248,6 +266,7 @@ fun PrimarySelectionCard(
             )
         }
     }
+    onLog(GetCredentialEvent.CREDMAN_GET_CRED_PRIMARY_SELECTION_CARD)
 }
 
 /** Draws the secondary credential selection page, where all sign-in options are listed. */
@@ -259,6 +278,7 @@ fun AllSignInOptionCard(
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
     isNoAccount: Boolean,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
         providerDisplayInfo.sortedUserNameToCredentialEntryList
@@ -303,6 +323,7 @@ fun AllSignInOptionCard(
             )
         }
     }
+    onLog(GetCredentialEvent.CREDMAN_GET_CRED_ALL_SIGN_IN_OPTION_CARD)
 }
 
 // TODO: create separate rows for primary and secondary pages.
@@ -466,6 +487,7 @@ fun ActionEntryRow(
 fun RemoteCredentialSnackBarScreen(
     onClick: (Boolean) -> Unit,
     onCancel: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     Snackbar(
         action = {
@@ -482,6 +504,7 @@ fun RemoteCredentialSnackBarScreen(
         onDismiss = onCancel,
         contentText = stringResource(R.string.get_dialog_use_saved_passkey_for),
     )
+    onLog(GetCredentialEvent.CREDMAN_GET_CRED_REMOTE_CRED_SNACKBAR_SCREEN)
 }
 
 @Composable
@@ -489,6 +512,7 @@ fun EmptyAuthEntrySnackBarScreen(
     authenticationEntryList: List<AuthenticationEntryInfo>,
     onCancel: () -> Unit,
     onLastLockedAuthEntryNotFound: () -> Unit,
+    onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     val lastLocked = authenticationEntryList.firstOrNull({ it.isLastUnlocked })
     if (lastLocked == null) {
@@ -500,4 +524,5 @@ fun EmptyAuthEntrySnackBarScreen(
         onDismiss = onCancel,
         contentText = stringResource(R.string.no_sign_in_info_in, lastLocked.providerDisplayName),
     )
+    onLog(GetCredentialEvent.CREDMAN_GET_CRED_SCREEN_EMPTY_AUTH_SNACKBAR_SCREEN)
 }
