@@ -9561,14 +9561,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         return retList;
     }
 
-    /* @hide */
     @Override
     public ParceledListSlice<ApplicationStartInfo> getHistoricalProcessStartReasons(
             String packageName, int maxNum, int userId) {
-        if (!mConstants.mFlagApplicationStartInfoEnabled) {
-            return new ParceledListSlice<ApplicationStartInfo>(
-                new ArrayList<ApplicationStartInfo>());
-        }
         enforceNotIsolatedCaller("getHistoricalProcessStartReasons");
 
         final ArrayList<ApplicationStartInfo> results = new ArrayList<ApplicationStartInfo>();
@@ -9577,24 +9572,28 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
 
-    /* @hide */
     @Override
     public void setApplicationStartInfoCompleteListener(
             IApplicationStartInfoCompleteListener listener, int userId) {
-        if (!mConstants.mFlagApplicationStartInfoEnabled) {
-            return;
-        }
         enforceNotIsolatedCaller("setApplicationStartInfoCompleteListener");
     }
 
 
-    /* @hide */
     @Override
-    public void removeApplicationStartInfoCompleteListener(int userId) {
-        if (!mConstants.mFlagApplicationStartInfoEnabled) {
-            return;
+    public void clearApplicationStartInfoCompleteListener(int userId) {
+        enforceNotIsolatedCaller("clearApplicationStartInfoCompleteListener");
+
+        // For the simplification, we don't support USER_ALL nor USER_CURRENT here.
+        if (userId == UserHandle.USER_ALL || userId == UserHandle.USER_CURRENT) {
+            throw new IllegalArgumentException("Unsupported userId");
         }
-        enforceNotIsolatedCaller("removeApplicationStartInfoCompleteListener");
+
+        final int callingUid = Binder.getCallingUid();
+    }
+
+    @Override
+    public void addStartInfoTimestamp(int key, long timestampNs, int userId) {
+        enforceNotIsolatedCaller("addStartInfoTimestamp");
     }
 
     @Override

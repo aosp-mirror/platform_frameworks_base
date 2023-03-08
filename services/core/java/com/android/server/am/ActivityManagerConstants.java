@@ -287,10 +287,6 @@ final class ActivityManagerConstants extends ContentObserver {
       */
     private static final String KEY_LOW_SWAP_THRESHOLD_PERCENT = "low_swap_threshold_percent";
 
-    /** Default value for mFlagApplicationStartInfoEnabled. Defaults to false. */
-    private static final String KEY_DEFAULT_APPLICATION_START_INFO_ENABLED =
-            "enable_app_start_info";
-
     /**
      * Default value for mFlagBackgroundActivityStartsEnabled if not explicitly set in
      * Settings.Global. This allows it to be set experimentally unless it has been
@@ -595,9 +591,6 @@ final class ActivityManagerConstants extends ContentObserver {
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
     volatile boolean mFlagActivityStartsLoggingEnabled;
-
-    // Indicates whether ApplicationStartInfo is enabled.
-    volatile boolean mFlagApplicationStartInfoEnabled;
 
     // Indicates whether the background activity starts is enabled.
     // Controlled by Settings.Global.BACKGROUND_ACTIVITY_STARTS_ENABLED.
@@ -1070,9 +1063,6 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_MAX_CACHED_PROCESSES:
                                 updateMaxCachedProcesses();
                                 break;
-                            case KEY_DEFAULT_APPLICATION_START_INFO_ENABLED:
-                                updateApplicationStartInfoEnabled();
-                                break;
                             case KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED:
                                 updateBackgroundActivityStarts();
                                 break;
@@ -1491,14 +1481,6 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updateActivityStartsLoggingEnabled() {
         mFlagActivityStartsLoggingEnabled = Settings.Global.getInt(mResolver,
                 Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED, 1) == 1;
-    }
-
-    private void updateApplicationStartInfoEnabled() {
-        mFlagApplicationStartInfoEnabled =
-                DeviceConfig.getBoolean(
-                        DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                        KEY_DEFAULT_APPLICATION_START_INFO_ENABLED,
-                        /*defaultValue*/ false);
     }
 
     private void updateBackgroundActivityStarts() {
@@ -2125,10 +2107,6 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(mFgToBgFgsGraceDuration);
         pw.print("  "); pw.print(KEY_FGS_START_FOREGROUND_TIMEOUT); pw.print("=");
         pw.println(mFgsStartForegroundTimeoutMs);
-        pw.print("  ");
-        pw.print(KEY_DEFAULT_APPLICATION_START_INFO_ENABLED);
-        pw.print("=");
-        pw.println(mFlagApplicationStartInfoEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_ACTIVITY_STARTS_ENABLED); pw.print("=");
         pw.println(mFlagBackgroundActivityStartsEnabled);
         pw.print("  "); pw.print(KEY_DEFAULT_BACKGROUND_FGS_STARTS_RESTRICTION_ENABLED);

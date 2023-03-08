@@ -72,6 +72,7 @@ import android.os.PowerExemptionManager.ReasonCode;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -107,6 +108,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -3978,8 +3980,6 @@ public class ActivityManager {
      *
      * @return a list of {@link ApplicationStartInfo} records matching the criteria, sorted in
      *         the order from most recent to least recent.
-     *
-     * @hide
      */
     @NonNull
     public List<ApplicationStartInfo> getHistoricalProcessStartReasons(
@@ -4011,6 +4011,7 @@ public class ActivityManager {
      * @hide
      */
     @NonNull
+    @SystemApi
     @RequiresPermission(Manifest.permission.DUMP)
     public List<ApplicationStartInfo> getExternalHistoricalProcessStartReasons(
             @NonNull String packageName, @IntRange(from = 0) int maxNum) {
@@ -4021,18 +4022,6 @@ public class ActivityManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Callback to receive {@link ApplicationStartInfo} object once recording of startup related
-     * metrics is complete.
-     * Use with {@link #setApplicationStartInfoCompleteListener}.
-     *
-     * @hide
-     */
-    public interface ApplicationStartInfoCompleteListener {
-        /** {@link ApplicationStartInfo} is complete, no more info will be added. */
-        void onApplicationStartInfoComplete(@NonNull ApplicationStartInfo applicationStartInfo);
     }
 
     /**
@@ -4054,19 +4043,16 @@ public class ActivityManager {
      *                    complete. Will replace existing listener if one is already attached.
      *
      * @throws IllegalArgumentException if executor or listener are null.
-     *
-     * @hide
      */
-    public void setApplicationStartInfoCompleteListener(@NonNull final Executor executor,
-            @NonNull final ApplicationStartInfoCompleteListener listener) {
+    public void setApplicationStartInfoCompletionListener(@NonNull final Executor executor,
+            @NonNull final Consumer<ApplicationStartInfo> listener) {
         Preconditions.checkNotNull(executor, "executor cannot be null");
         Preconditions.checkNotNull(listener, "listener cannot be null");
         IApplicationStartInfoCompleteListener callback =
                 new IApplicationStartInfoCompleteListener.Stub() {
             @Override
             public void onApplicationStartInfoComplete(ApplicationStartInfo applicationStartInfo) {
-                executor.execute(() ->
-                        listener.onApplicationStartInfoComplete(applicationStartInfo));
+                executor.execute(() -> listener.accept(applicationStartInfo));
             }
         };
         try {
@@ -4077,13 +4063,42 @@ public class ActivityManager {
     }
 
     /**
-     * Removes the callback set by {@link #setApplicationStartInfoCompleteListener} if there is one.
-     *
-     * @hide
+     * Removes the callback set by {@link #setApplicationStartInfoCompletionListener} if there is one.
      */
-    public void removeApplicationStartInfoCompleteListener() {
+    public void clearApplicationStartInfoCompletionListener() {
         try {
-            getService().removeApplicationStartInfoCompleteListener(mContext.getUserId());
+            getService().clearApplicationStartInfoCompleteListener(mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Adds an optional developer supplied timestamp to the calling apps most recent
+     * {@link ApplicationStartInfo}. This is in addition to system recorded timestamps.
+     *
+     * <p class="note"> Note: timestamps added after {@link Activity#reportFullyDrawn} is called
+     * will be discarded.</p>
+     *
+     * <p class="note"> Note: will overwrite existing timestamp if called with same key.</p>
+     *
+     * @param key         Unique key for timestamp. Must be greater than
+     *                    {@link ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_SYSTEM} and
+     *                    less than or equal to
+     *                    {@link ApplicationStartInfo#START_TIMESTAMP_RESERVED_RANGE_DEVELOPER}.
+     *                    Will thow {@link java.lang.IllegalArgumentException} if not in range.
+     * @param timestampNs Clock monotonic time in nanoseconds of event to be recorded.
+     */
+    public void addStartInfoTimestamp(@IntRange(
+            from = ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER_START,
+            to = ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER) int key,
+            long timestampNs) {
+        if (key <= ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_SYSTEM
+                || key > ApplicationStartInfo.START_TIMESTAMP_RESERVED_RANGE_DEVELOPER) {
+            throw new IllegalArgumentException("Key not in allowed range.");
+        }
+        try {
+            getService().addStartInfoTimestamp(key, timestampNs, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
