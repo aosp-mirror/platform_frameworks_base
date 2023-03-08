@@ -158,7 +158,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @Test
     public void testControlsForDispatch_remoteInsetsControllerControlsBars_appHasNoControl() {
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
-        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(true);
+        mDisplayContent.getDisplayPolicy().setRemoteInsetsControllerControlsSystemBars(true);
         addStatusBar();
         addNavigationBar();
 
