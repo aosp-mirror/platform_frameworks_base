@@ -7218,6 +7218,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * TODO(b/182523293): This should be removed once we finish migration of permission storage.
      */
     void writeSettingsLPrTEMP(boolean sync) {
+        snapshotComputer(false);
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
         mSettings.writeLPr(mLiveComputer, sync);
     }
