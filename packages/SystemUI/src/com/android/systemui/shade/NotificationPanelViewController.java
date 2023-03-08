@@ -4650,13 +4650,8 @@ public final class NotificationPanelViewController implements Dumpable {
              gesture possible. */
             int pointerIndex = event.findPointerIndex(mTrackingPointer);
             if (pointerIndex < 0) {
-                if (mTrackingPointer < 0) {
-                    pointerIndex = 0;
-                    mTrackingPointer = event.getPointerId(pointerIndex);
-                } else {
-                    mShadeLog.logMotionEvent(event, "Skipping intercept of multitouch pointer");
-                    return false;
-                }
+                pointerIndex = 0;
+                mTrackingPointer = event.getPointerId(pointerIndex);
             }
             final float x = event.getX(pointerIndex);
             final float y = event.getY(pointerIndex);
