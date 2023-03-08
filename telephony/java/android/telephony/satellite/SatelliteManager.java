@@ -724,24 +724,24 @@ public class SatelliteManager {
     public @interface SatelliteModemState {}
 
     /**
+     * Datagram type is unknown. This generic datagram type should be used only when the
+     * datagram type cannot be mapped to other specific datagram types.
+     */
+    public static final int DATAGRAM_TYPE_UNKNOWN = 0;
+    /**
      * Datagram type indicating that the datagram to be sent or received is of type SOS message.
      */
-    public static final int DATAGRAM_TYPE_SOS_MESSAGE = 0;
+    public static final int DATAGRAM_TYPE_SOS_MESSAGE = 1;
     /**
      * Datagram type indicating that the datagram to be sent or received is of type
      * location sharing.
      */
-    public static final int DATAGRAM_TYPE_LOCATION_SHARING = 1;
-    /**
-     * Datagram type is unknown. This generic datagram type should be used only when the
-     * datagram type cannot be mapped to other specific datagram types.
-     */
-    public static final int DATAGRAM_TYPE_UNKNOWN = -1;
+    public static final int DATAGRAM_TYPE_LOCATION_SHARING = 2;
 
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
+            DATAGRAM_TYPE_UNKNOWN,
             DATAGRAM_TYPE_SOS_MESSAGE,
-            DATAGRAM_TYPE_LOCATION_SHARING,
-            DATAGRAM_TYPE_UNKNOWN
+            DATAGRAM_TYPE_LOCATION_SHARING
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
