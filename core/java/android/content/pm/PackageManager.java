@@ -4353,19 +4353,26 @@ public abstract class PackageManager {
     public static final String FEATURE_CREDENTIALS = "android.software.credentials";
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device supports locking (for example, by a financing provider in case of a missed
-     * payment).
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports locking (for example, by a financing provider in case of a missed payment).
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_DEVICE_LOCK = "android.software.device_lock";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports showing location-based suggestions for wallet cards provided by the default payment
+     * app.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS =
+            "android.software.wallet_location_based_suggestions";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
     /**
-     * Extra field name for the URI to a verification file. Passed to a package
-     * verifier.
+     * Extra field name for the URI to a verification file. Passed to a package verifier.
      *
      * @hide
      */
