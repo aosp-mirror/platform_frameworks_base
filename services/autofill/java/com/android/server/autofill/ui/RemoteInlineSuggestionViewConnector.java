@@ -54,6 +54,8 @@ final class RemoteInlineSuggestionViewConnector {
     @NonNull
     private final Runnable mOnErrorCallback;
     @NonNull
+    private final Runnable mOnInflateCallback;
+    @NonNull
     private final Consumer<IntentSender> mStartIntentSenderFromClientApp;
 
     RemoteInlineSuggestionViewConnector(
@@ -70,6 +72,7 @@ final class RemoteInlineSuggestionViewConnector {
 
         mOnAutofillCallback = onAutofillCallback;
         mOnErrorCallback = uiCallback::onError;
+        mOnInflateCallback = uiCallback::onInflate;
         mStartIntentSenderFromClientApp = uiCallback::startIntentSender;
     }
 
@@ -101,6 +104,10 @@ final class RemoteInlineSuggestionViewConnector {
      */
     public void onError() {
         mOnErrorCallback.run();
+    }
+
+    public void onRender() {
+        mOnInflateCallback.run();
     }
 
     /**

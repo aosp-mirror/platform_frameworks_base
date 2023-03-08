@@ -98,6 +98,7 @@ public final class AutoFillUI {
         void cancelSession();
         void requestShowSoftInput(AutofillId id);
         void requestFallbackFromFillDialog();
+        void onShown(int uiType);
     }
 
     public AutoFillUI(@NonNull Context context) {
@@ -233,6 +234,13 @@ public final class AutoFillUI {
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED,
                                 response.getAuthentication(), response.getClientState(),
                                 UI_TYPE_MENU);
+                    }
+                }
+
+                @Override
+                public void onShown() {
+                    if (mCallback != null) {
+                        mCallback.onShown(UI_TYPE_MENU);
                     }
                 }
 
@@ -421,6 +429,11 @@ public final class AutoFillUI {
                                         response.getAuthentication(), response.getClientState(),
                                         UI_TYPE_DIALOG);
                             }
+                        }
+
+                        @Override
+                        public void onShown() {
+                            callback.onShown(UI_TYPE_DIALOG);
                         }
 
                         @Override
