@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"您輸入的 PIN 碼不符。"</string>
     <string name="invalidPin" msgid="7542498253319440408">"請輸入一個 4 至 8 位數的 PIN。"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"輸入 8 位數以上的 PUK。"</string>
-    <string name="needPuk" msgid="7321876090152422918">"您的 SIM 卡已鎖定 PUK，請輸入 PUK 碼以解除鎖定。"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"輸入 PUK2 為 SIM 卡解除封鎖。"</string>
+    <string name="needPuk" msgid="3503414069503752211">"SIM 卡已使用 PUK 鎖定，請輸入 PUK 解鎖。"</string>
+    <string name="needPuk2" msgid="3910763547447344963">"請輸入 PUK2 解鎖 SIM 卡。"</string>
     <string name="enablePin" msgid="2543771964137091212">"操作失敗，請啟用「SIM/RUIM 鎖定」。"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">您還有 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會輸入。如果仍然輸入錯誤，SIM 卡將會被鎖定。</item>
@@ -646,9 +646,9 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"請重新註冊面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"無法辨識面孔，請再試一次。"</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"請稍為轉換頭部的位置"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"請正面望向手機"</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"請正面望向手機"</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"請正面望向手機"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"正面望向手機"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"正面望向手機"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"正面望向手機"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"移開遮住面孔的任何物件。"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"請清理螢幕頂部，包括黑色列"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -923,14 +923,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"再試一次"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"解鎖即可使用所有功能和資料"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"已超過面孔解鎖嘗試次數上限"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"找不到 SIM 卡"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"平板電腦中沒有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Android TV 裝置中沒有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"手機中沒有 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"請插入 SIM 卡。"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"找不到 SIM 卡或無法讀取 SIM 卡，請插入 SIM 卡。"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM 卡無法使用。"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"您的 SIM 卡已被永久停用。\n請與您的無線服務供應商聯絡，以取得另一張 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"沒有 SIM 卡"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"平板電腦中沒有 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Android TV 裝置中沒有 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"手機中沒有 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"請新增 SIM 卡。"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"找不到 SIM 卡或 SIM 卡無法讀取，請新增 SIM 卡。"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM 卡無法使用。"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM 卡已永久停用。\n請向無線服務供應商索取其他 SIM 卡。"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"上一首曲目"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"下一首曲目"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"暫停"</string>
@@ -940,10 +940,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"向前快轉"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"只可撥打緊急電話"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"網絡已鎖定"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM 卡處於 PUK 鎖定狀態。"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM 卡已使用 PUK 鎖定。"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"請參閱使用者指南或與客戶服務中心聯絡。"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM 卡處於鎖定狀態。"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"正在解除 SIM 卡鎖定..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM 卡已鎖定。"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"正在解鎖 SIM 卡…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"您已輸入錯誤的密碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"您已輸入錯誤的 PIN 碼 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%2$d</xliff:g> 秒後再試一次。"</string>
@@ -1326,10 +1326,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"您日後可以在 [設定] &gt; [應用程式] 中更改這項設定"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"一律允許"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"絕不允許"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM 卡已移除"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"您必須先以插入有效的 SIM 卡來重新啟動手機，才能使用流動網絡。"</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"已移除 SIM 卡"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"您必須重新啟動並新增有效的 SIM 卡，才能使用流動網絡。"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"完成"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM 卡已新增"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"已新增 SIM 卡"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"重新啟動裝置，才能使用流動網絡。"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"重新啟動"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"啟動流動服務"</string>
@@ -1641,7 +1641,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM 卡現已停用，請輸入 PUK 碼以繼續。詳情請與流動網絡供應商聯絡。"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"輸入所需的 PIN 碼"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"確認所需的 PIN 碼"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"正在解開上鎖的 SIM 卡..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"正在解鎖 SIM 卡…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"PIN 碼不正確。"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"請輸入一個 4 至 8 位數的 PIN 碼。"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK 碼應由 8 位數字組成。"</string>

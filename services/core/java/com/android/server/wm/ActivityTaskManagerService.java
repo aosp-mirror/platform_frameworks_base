@@ -3583,7 +3583,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
                         transition);
                 // Continue the pausing process after entering pip.
-                if (r.isState(PAUSING)) {
+                if (r.isState(PAUSING) && r.mPauseSchedulePendingForPip) {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
                             false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
                 }

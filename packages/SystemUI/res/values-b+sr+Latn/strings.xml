@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Emitovanje nije uspelo"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Čuvanje nije uspelo. Probajte ponovo."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Čuvanje nije uspelo."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Koristite bar 4 znaka"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Koristite manje od 16 znakova"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Broj verzije"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Broj verzije je kopiran u privremenu memoriju."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvorite konverzaciju"</string>

@@ -202,6 +202,11 @@
     <!-- Displayed to tell the user that they cannot change the caller ID setting. -->
     <string name="CLIRPermanent">You can\'t change the caller ID setting.</string>
 
+    <!-- Notification title to tell the user that auto data switch has occurred. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="auto_data_switch_title">Switched data to <xliff:g id="carrierDisplay" example="Verizon">%s</xliff:g></string>
+    <!-- Notification content to tell the user that auto data switch can be disabled at settings. [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="auto_data_switch_content">You can change this anytime in Settings</string>
+
     <!-- Notification title to tell the user that data service is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->
     <string name="RestrictedOnDataTitle">No mobile data service</string>
     <!-- Notification title to tell the user that emergency calling is blocked by access control. [CHAR LIMIT=NOTIF_TITLE] -->

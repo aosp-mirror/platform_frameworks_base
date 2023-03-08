@@ -19,9 +19,9 @@
     <string name="ringtone_default" msgid="798836092118824500">"ఆటోమేటిక్ రింగ్‌టోన్"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"నోటిఫికేషన్ ఆటోమేటిక్ సౌండ్"</string>
     <string name="alarm_sound_default" msgid="4787646764557462649">"అలారం ఆటోమేటిక్ సౌండ్"</string>
-    <string name="add_ringtone_text" msgid="6642389991738337529">"రింగ్‌టోన్‌ను జోడించు"</string>
-    <string name="add_alarm_text" msgid="3545497316166999225">"అలారాన్ని జోడించు"</string>
-    <string name="add_notification_text" msgid="4431129543300614788">"నోటిఫికేషన్‌‌ని జోడించు"</string>
+    <string name="add_ringtone_text" msgid="6642389991738337529">"రింగ్‌టోన్‌ను జోడించండి"</string>
+    <string name="add_alarm_text" msgid="3545497316166999225">"అలారాన్ని జోడించండి"</string>
+    <string name="add_notification_text" msgid="4431129543300614788">"నోటిఫికేషన్‌‌ని జోడించండి"</string>
     <string name="delete_ringtone_text" msgid="201443984070732499">"తొలగించండి"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"అనుకూల రింగ్‌టోన్‌ను జోడించలేకపోయింది"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"అనుకూల రింగ్‌టోన్‌ను తొలగించలేకపోయింది"</string>

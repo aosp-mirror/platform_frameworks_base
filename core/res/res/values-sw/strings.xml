@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"PIN ulizoingiza haziambatani."</string>
     <string name="invalidPin" msgid="7542498253319440408">"Chapisha PIN ambayo ina nambari 4 hadi 8."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"Andika PUK ambayo ina urefu wa nambari 8 au zaidi."</string>
-    <string name="needPuk" msgid="7321876090152422918">"Kadi yako ya SIM imefungwa na PUK. Anika msimbo wa PUK ili kuifungua."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"Chapisha PUK2 ili kufungua SIM kadi."</string>
+    <string name="needPuk" msgid="3503414069503752211">"SIM yako imefungwa kwa PUK. Andika msimbo wa PUK ili kuifungua."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"Andika PUK2 ili uondoe kizuizi kwenye SIM."</string>
     <string name="enablePin" msgid="2543771964137091212">"Imeshindwa, washa ufungaji wa SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">Umebakisha majaribio <xliff:g id="NUMBER_1">%d</xliff:g> kabla SIM haijafungwa.</item>
@@ -923,14 +923,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"Jaribu tena"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"Fungua kifaa ili upate data na vipengele vyote"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"Umepitisha idadi ya juu ya mara ambazo unaweza kujaribu kufungua kwa uso"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"Hakuna SIM kadi"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"Hakuna SIM kadi katika kompyuta ndogo."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"Hakuna SIM kadi kwenye kifaa chako cha Android TV."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"Hakuna SIM kadi kwenye simu."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"Weka SIM kadi."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM kadi haipatikani au haisomeki. Tafadhali weka SIM kadi."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"SIM kadi isiyotumika."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"SIM kadi yako imelemezwa kabisa.\n Wasiliana na mtoa huduma wako wa pasi waya ili upate SIM kadi nyingine."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"Hakuna SIM"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"Hakuna SIM kwenye kompyuta kibao."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"Hakuna SIM kwenye kifaa chako cha Android TV."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"Hakuna SIM kwenye simu."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"Weka SIM."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM haipo au haiwezi kusomwa. Weka SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"SIM haiwezi kutumika."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"SIM kadi yako imefungwa kabisa.\n wasiliana na mtoa huduma wako wa pasi waya ili upate SIM nyingine."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"Wimbo uliotangulia"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"Wimbo unaofuata"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"Sitisha"</string>
@@ -940,10 +940,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"Peleka mbele kwa kasi"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"Simu za dharura pekee"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Mtandao umefungwa"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM kadi imefungwa kwa PUK."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM imefungwa kwa PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Angalia Mwongozo wa Mtumiaji au wasiliana na Huduma ya Wateja."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM kadi imefungwa."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Inafungua SIM kadi..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM imefungwa."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"Inafungua SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Umekosea katika kuchora ruwaza yako ya kufungua mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena kwa sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Umekosea mara <xliff:g id="NUMBER_0">%1$d</xliff:g> katika kuingiza nenosiri lako. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Umekosea katika kuingiza PIN yako mara <xliff:g id="NUMBER_0">%1$d</xliff:g>. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1326,10 +1326,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"Unaweza kubadilisha hii baadaye kwenye Mipangilio &gt; Programu"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"Ruhusu Kila Wakati"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"Usiruhusu Kamwe"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM kadi imeondolewa"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"mtandao wa simu hutapatika hadi uanzishe upya na SIM kadi halali iliyoingizwa."</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"Umeondoa SIM"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"Mtandao wa simu hautapatikana hadi utakapozima kisha uwashe tena kifaa kikiwa na SIM sahihi."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"Nimemaliza"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM kadi imeongezwa"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"Umeweka SIM"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"Anzisha upya kifaa chako ili kufikia mtandao wa simu."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"Washa upya"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"Washa huduma ya simu za mkononi"</string>
@@ -1641,7 +1641,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Weka nambari yako ya PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Thibitisha nambari ya PIN uliyoweka"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Inafungua SIM kadi..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"Inafungua SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Nambari ya PIN uliyoweka si sahihi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Msimbo wa PUK lazima uwe na tarakimu 8."</string>

@@ -600,7 +600,7 @@
     <string name="tile_unavailable" msgid="3095879009136616920">"Tidak tersedia"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"pelajari lebih lanjut"</string>
     <string name="nav_bar" msgid="4642708685386136807">"Bilah navigasi"</string>
-    <string name="nav_bar_layout" msgid="4716392484772899544">"Tata Letak"</string>
+    <string name="nav_bar_layout" msgid="4716392484772899544">"Tata letak"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Jenis tombol ekstra kiri"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Jenis tombol ekstra kanan"</string>
   <string-array name="nav_bar_buttons">
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Tidak dapat menyiarkan"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Tidak dapat menyimpan. Coba lagi."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Tidak dapat menyimpan."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Gunakan minimal 4 karakter"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Gunakan kurang dari 16 karakter"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Nomor build"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Nomor versi disalin ke papan klip."</string>
     <string name="basic_status" msgid="2315371112182658176">"Membuka percakapan"</string>

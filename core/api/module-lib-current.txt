@@ -297,6 +297,30 @@ package android.net.netstats {
 
 }
 
+package android.nfc {
+
+  public class NfcFrameworkInitializer {
+    method public static void registerServiceWrappers();
+    method public static void setNfcServiceManager(@NonNull android.nfc.NfcServiceManager);
+  }
+
+  public class NfcServiceManager {
+    method @NonNull public android.nfc.NfcServiceManager.ServiceRegisterer getNfcManagerServiceRegisterer();
+  }
+
+  public static class NfcServiceManager.ServiceNotFoundException extends java.lang.Exception {
+    ctor public NfcServiceManager.ServiceNotFoundException(@NonNull String);
+  }
+
+  public static final class NfcServiceManager.ServiceRegisterer {
+    method @Nullable public android.os.IBinder get();
+    method @NonNull public android.os.IBinder getOrThrow() throws android.nfc.NfcServiceManager.ServiceNotFoundException;
+    method public void register(@NonNull android.os.IBinder);
+    method @Nullable public android.os.IBinder tryGet();
+  }
+
+}
+
 package android.os {
 
   public final class BatteryStatsManager {

@@ -105,8 +105,9 @@ static jlong Font_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr, jo
         std::move(data), std::string_view(fontPath.c_str(), fontPath.size()),
         fontPtr, fontSize, ttcIndex, builder->axes);
     if (minikinFont == nullptr) {
-        jniThrowException(env, "java/lang/IllegalArgumentException",
-                          "Failed to create internal object. maybe invalid font data.");
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Failed to create internal object. maybe invalid font data. filePath %s",
+                             fontPath.c_str());
         return 0;
     }
     uint32_t localeListId = minikin::registerLocaleList(langTagStr.c_str());

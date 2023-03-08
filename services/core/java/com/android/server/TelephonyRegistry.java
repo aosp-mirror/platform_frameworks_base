@@ -558,11 +558,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if (VDBG) log("MSG_USER_SWITCHED userId=" + msg.arg1);
                     int numPhones = getTelephonyManager().getActiveModemCount();
                     for (int phoneId = 0; phoneId < numPhones; phoneId++) {
-                        int[] subIds = SubscriptionManager.getSubId(phoneId);
-                        int subId =
-                                (subIds != null) && (subIds.length > 0)
-                                        ? subIds[0]
-                                        : SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                        int subId = SubscriptionManager.getSubscriptionId(phoneId);
+                        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                            subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
+                        }
                         TelephonyRegistry.this.notifyCellLocationForSubscriber(
                                 subId, mCellIdentity[phoneId], true /* hasUserSwitched */);
                     }
@@ -873,6 +872,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
+    //helper function to determine if limit on num listeners applies to callingUid
+    private boolean doesLimitApplyForListeners(int callingUid, int exemptUid) {
+        return (callingUid != Process.SYSTEM_UID
+                && callingUid != Process.PHONE_UID
+                && callingUid != exemptUid);
+    }
+
     @Override
     public void addOnSubscriptionsChangedListener(String callingPackage, String callingFeatureId,
             IOnSubscriptionsChangedListener callback) {
@@ -887,7 +893,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
-            Record r = add(b, Binder.getCallingUid(), Binder.getCallingPid(), false);
+            boolean doesLimitApply = doesLimitApplyForListeners(Binder.getCallingUid(),
+                    Process.myUid());
+            Record r = add(b, Binder.getCallingUid(), Binder.getCallingPid(), doesLimitApply); //
 
             if (r == null) {
                 return;
@@ -941,7 +949,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
-            Record r = add(b, Binder.getCallingUid(), Binder.getCallingPid(), false);
+            boolean doesLimitApply = doesLimitApplyForListeners(Binder.getCallingUid(),
+                    Process.myUid());
+            Record r = add(b, Binder.getCallingUid(), Binder.getCallingPid(), doesLimitApply); //
 
             if (r == null) {
                 return;
@@ -1070,10 +1080,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             // register
             IBinder b = callback.asBinder();
-            boolean doesLimitApply =
-                    Binder.getCallingUid() != Process.SYSTEM_UID
-                            && Binder.getCallingUid() != Process.PHONE_UID
-                            && Binder.getCallingUid() != Process.myUid();
+            boolean doesLimitApply = doesLimitApplyForListeners(Binder.getCallingUid(),
+                    Process.myUid());
             Record r = add(b, Binder.getCallingUid(), Binder.getCallingPid(), doesLimitApply);
 
             if (r == null) {
@@ -1417,7 +1425,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .isRegistrationLimitEnabledInPlatformCompat(callingUid)) {
                     throw new IllegalStateException(errorMsg);
                 }
-            } else if (doesLimitApply && numRecordsForPid
+            } else if (numRecordsForPid
                     >= TelephonyCallback.DEFAULT_PER_PID_REGISTRATION_LIMIT / 2) {
                 // Log the warning independently of the dynamically set limit -- apps shouldn't be
                 // doing this regardless of whether we're throwing them an exception for it.
