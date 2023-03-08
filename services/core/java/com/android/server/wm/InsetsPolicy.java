@@ -116,11 +116,6 @@ class InsetsPolicy {
     private @InsetsType int mShowingTransientTypes;
     private boolean mAnimatingShown;
 
-    /**
-     * Let remote insets controller control system bars regardless of other settings.
-     */
-    private boolean mRemoteInsetsControllerControlsSystemBars;
-
     private final boolean mHideNavBarForKeyboard;
     private final float[] mTmpFloat9 = new float[9];
 
@@ -129,22 +124,9 @@ class InsetsPolicy {
         mDisplayContent = displayContent;
         mPolicy = displayContent.getDisplayPolicy();
         final Resources r = mPolicy.getContext().getResources();
-        mRemoteInsetsControllerControlsSystemBars = r.getBoolean(
-                R.bool.config_remoteInsetsControllerControlsSystemBars);
         mHideNavBarForKeyboard = r.getBoolean(R.bool.config_hideNavBarForKeyboard);
     }
 
-    boolean getRemoteInsetsControllerControlsSystemBars() {
-        return mRemoteInsetsControllerControlsSystemBars;
-    }
-
-    /**
-     * Used only for testing.
-     */
-    @VisibleForTesting
-    void setRemoteInsetsControllerControlsSystemBars(boolean controlsSystemBars) {
-        mRemoteInsetsControllerControlsSystemBars = controlsSystemBars;
-    }
 
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
@@ -632,7 +614,8 @@ class InsetsPolicy {
         if (focusedWin == null) {
             return false;
         }
-        if (!mRemoteInsetsControllerControlsSystemBars) {
+
+        if (!mPolicy.isRemoteInsetsControllerControllingSystemBars()) {
             return false;
         }
         if (mDisplayContent == null || mDisplayContent.mRemoteInsetsControlTarget == null) {
