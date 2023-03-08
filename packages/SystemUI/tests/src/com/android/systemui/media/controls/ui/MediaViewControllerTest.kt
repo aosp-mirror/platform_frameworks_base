@@ -16,9 +16,12 @@
 
 package com.android.systemui.media.controls.ui
 
+import android.content.res.Configuration
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -58,6 +61,8 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var mediaSubTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
     @Mock private lateinit var mediaFlags: MediaFlags
+    @Mock private lateinit var expandedLayout: ConstraintSet
+    @Mock private lateinit var collapsedLayout: ConstraintSet
 
     val delta = 0.1F
 
@@ -74,6 +79,19 @@ class MediaViewControllerTest : SysuiTestCase() {
                 logger,
                 mediaFlags,
             )
+    }
+
+    @Test
+    fun testOrientationChanged_layoutsAreLoaded() {
+        mediaViewController.expandedLayout = expandedLayout
+        mediaViewController.collapsedLayout = collapsedLayout
+
+        val newConfig = Configuration()
+        newConfig.orientation = ORIENTATION_LANDSCAPE
+        configurationController.onConfigurationChanged(newConfig)
+
+        verify(expandedLayout).load(context, R.xml.media_session_expanded)
+        verify(collapsedLayout).load(context, R.xml.media_session_collapsed)
     }
 
     @Test

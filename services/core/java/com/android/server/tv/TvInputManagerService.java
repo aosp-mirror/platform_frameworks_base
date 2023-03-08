@@ -2125,6 +2125,26 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void notifyTvMessage(IBinder sessionToken, String type, Bundle data, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "timeShiftEnablePositionTracking");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .notifyTvMessage(type, data);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in timeShiftEnablePositionTracking", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void startRecording(IBinder sessionToken, @Nullable Uri programUri,
                 @Nullable Bundle params, int userId) {
             final int callingUid = Binder.getCallingUid();

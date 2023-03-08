@@ -822,6 +822,8 @@
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_SENT_ACTION" />
     <protected-broadcast android:name="com.android.internal.telephony.cat.SMS_DELIVERY_ACTION" />
     <protected-broadcast android:name="android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED" />
+    <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_START_PREVIEW" />
+    <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_STOP_PREVIEW" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -4482,8 +4484,8 @@
     <!-- Allows an application to be able to store and retrieve credentials from a remote
          device.
          @hide @SystemApi -->
-    <permission android:name="android.permission.PROVIDE_HYBRID_CREDENTIAL_SERVICE"
-                android:protectionLevel="signature|privileged" />
+    <permission android:name="android.permission.PROVIDE_REMOTE_CREDENTIALS"
+                android:protectionLevel="signature|privileged|role" />
 
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->

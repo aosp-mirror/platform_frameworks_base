@@ -72,6 +72,7 @@ public final class LowLightDreamManager {
     public static final int AMBIENT_LIGHT_MODE_LOW_LIGHT = 2;
 
     private final DreamManager mDreamManager;
+    private final LowLightTransitionCoordinator mLowLightTransitionCoordinator;
 
     @Nullable
     private final ComponentName mLowLightDreamComponent;
@@ -81,8 +82,10 @@ public final class LowLightDreamManager {
     @Inject
     public LowLightDreamManager(
             DreamManager dreamManager,
+            LowLightTransitionCoordinator lowLightTransitionCoordinator,
             @Named(LOW_LIGHT_DREAM_COMPONENT) @Nullable ComponentName lowLightDreamComponent) {
         mDreamManager = dreamManager;
+        mLowLightTransitionCoordinator = lowLightTransitionCoordinator;
         mLowLightDreamComponent = lowLightDreamComponent;
     }
 
@@ -111,7 +114,9 @@ public final class LowLightDreamManager {
 
         mAmbientLightMode = ambientLightMode;
 
-        mDreamManager.setSystemDreamComponent(mAmbientLightMode == AMBIENT_LIGHT_MODE_LOW_LIGHT
-                ? mLowLightDreamComponent : null);
+        boolean shouldEnterLowLight = mAmbientLightMode == AMBIENT_LIGHT_MODE_LOW_LIGHT;
+        mLowLightTransitionCoordinator.notifyBeforeLowLightTransition(shouldEnterLowLight,
+                () -> mDreamManager.setSystemDreamComponent(
+                        shouldEnterLowLight ? mLowLightDreamComponent : null));
     }
 }

@@ -16,7 +16,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
     <stroke
-        android:color="@android:color/black"
+        android:color="@color/magnification_drag_handle_stroke"
         android:width="@dimen/magnifier_stroke_width"/>
     <corners android:radius="@dimen/magnifier_corner_radius" />
     <solid android:color="@color/magnification_border_color" />

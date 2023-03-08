@@ -121,8 +121,6 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
             ProviderCallbacks<BeginGetCredentialResponse> callback) {
         Log.i(TAG, "In onGetCredentials in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
-        AtomicReference<CompletableFuture<BeginGetCredentialResponse>> futureRef =
-                new AtomicReference<>();
 
         CompletableFuture<BeginGetCredentialResponse> connectThenExecute = postAsync(service -> {
             CompletableFuture<BeginGetCredentialResponse> getCredentials =
@@ -134,7 +132,6 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                 new IBeginGetCredentialCallback.Stub() {
                                     @Override
                                     public void onSuccess(BeginGetCredentialResponse response) {
-                                        Log.i(TAG, "In onSuccess in RemoteCredentialService");
                                         getCredentials.complete(response);
                                     }
 
@@ -147,22 +144,15 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                                 new GetCredentialException(errorType, errorMsg));
                                     }
                                 });
-                CompletableFuture<BeginGetCredentialResponse> future = futureRef.get();
-                if (future != null && future.isCancelled()) {
-                    dispatchCancellationSignal(cancellationSignal);
-                } else {
-                    cancellationSink.set(cancellationSignal);
-                }
+                cancellationSink.set(cancellationSignal);
                 return getCredentials;
             } finally {
                 Binder.restoreCallingIdentity(originalCallingUidToken);
             }
         }).orTimeout(TIMEOUT_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
 
-        futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
                 handleExecutionResponse(result, error, cancellationSink, callback)));
-
         return cancellationSink.get();
     }
 
@@ -178,8 +168,6 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
             ProviderCallbacks<BeginCreateCredentialResponse> callback) {
         Log.i(TAG, "In onCreateCredential in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
-        AtomicReference<CompletableFuture<BeginCreateCredentialResponse>> futureRef =
-                new AtomicReference<>();
 
         CompletableFuture<BeginCreateCredentialResponse> connectThenExecute =
                 postAsync(service -> {
@@ -205,19 +193,13 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                                 new CreateCredentialException(errorType, errorMsg));
                                     }
                                 });
-                        CompletableFuture<BeginCreateCredentialResponse> future = futureRef.get();
-                        if (future != null && future.isCancelled()) {
-                            dispatchCancellationSignal(cancellationSignal);
-                        } else {
-                            cancellationSink.set(cancellationSignal);
-                        }
+                        cancellationSink.set(cancellationSignal);
                         return createCredentialFuture;
                     } finally {
                         Binder.restoreCallingIdentity(originalCallingUidToken);
                     }
                 }).orTimeout(TIMEOUT_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
 
-        futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
                 handleExecutionResponse(result, error, cancellationSink, callback)));
 
@@ -236,7 +218,6 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
             ProviderCallbacks<Void> callback) {
         Log.i(TAG, "In onClearCredentialState in RemoteCredentialService");
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
-        AtomicReference<CompletableFuture<Void>> futureRef = new AtomicReference<>();
 
         CompletableFuture<Void> connectThenExecute =
                 postAsync(service -> {
@@ -263,19 +244,13 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                                         errorMsg));
                                     }
                                 });
-                        CompletableFuture<Void> future = futureRef.get();
-                        if (future != null && future.isCancelled()) {
-                            dispatchCancellationSignal(cancellationSignal);
-                        } else {
-                            cancellationSink.set(cancellationSignal);
-                        }
+                        cancellationSink.set(cancellationSignal);
                         return clearCredentialFuture;
                     } finally {
                         Binder.restoreCallingIdentity(originalCallingUidToken);
                     }
                 }).orTimeout(TIMEOUT_REQUEST_MILLIS, TimeUnit.MILLISECONDS);
 
-        futureRef.set(connectThenExecute);
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
                 handleExecutionResponse(result, error, cancellationSink, callback)));
 

@@ -584,6 +584,30 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         )
     }
 
+    fun logReportSuccessfulBiometricUnlock(isStrongBiometric: Boolean, userId: Int) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = isStrongBiometric
+                int1 = userId
+            },
+            { "reporting successful biometric unlock: isStrongBiometric: $bool1, userId: $int1" }
+        )
+    }
+
+    fun logHandlerHasAuthContinueMsgs(action: Int) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            { int1 = action },
+            {
+                "MSG_BIOMETRIC_AUTHENTICATION_CONTINUE already queued up, " +
+                    "ignoring updating FP listening state to $int1"
+            }
+        )
+    }
+
     fun logFaceEnrolledUpdated(oldValue: Boolean, newValue: Boolean) {
         logBuffer.log(
             TAG,

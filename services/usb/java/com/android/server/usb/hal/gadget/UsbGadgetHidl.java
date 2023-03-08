@@ -191,9 +191,9 @@ public final class UsbGadgetHidl implements UsbGadgetHal {
     public void reset(long transactionId) {
         try {
             synchronized(mGadgetProxyLock) {
-                if (android.hardware.usb.gadget.V1_2.IUsbGadget.castFrom(mGadgetProxy) != null) {
-                    android.hardware.usb.gadget.V1_2.IUsbGadget gadgetProxy =
-                    android.hardware.usb.gadget.V1_2.IUsbGadget.castFrom(mGadgetProxy);
+                if (android.hardware.usb.gadget.V1_1.IUsbGadget.castFrom(mGadgetProxy) != null) {
+                    android.hardware.usb.gadget.V1_1.IUsbGadget gadgetProxy =
+                    android.hardware.usb.gadget.V1_1.IUsbGadget.castFrom(mGadgetProxy);
                     gadgetProxy.reset();
                 }
             }

@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.os.Binder;
@@ -30,7 +31,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.service.credentials.CallingAppInfo;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -78,7 +78,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
     //TODO improve design to allow grouped metrics per request
     protected final String mHybridService;
 
-    @NonNull protected RequestSessionStatus mRequestSessionStatus =
+    @NonNull
+    protected RequestSessionStatus mRequestSessionStatus =
             RequestSessionStatus.IN_PROGRESS;
 
     /** The status in which a given request session is. */
@@ -213,6 +214,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     /**
      * Called by RequestSession's upon chosen metric determination.
+     *
      * @param componentName the componentName to associate with a provider
      */
     protected void setChosenMetric(ComponentName componentName) {
@@ -220,8 +222,8 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                 .mCandidateProviderMetric;
         mChosenProviderMetric.setChosenUid(metric.getCandidateUid());
         mChosenProviderMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
-        mChosenProviderMetric.setQueryFinishTimeNanoseconds(
-                metric.getQueryFinishTimeNanoseconds());
-        mChosenProviderMetric.setStartTimeNanoseconds(metric.getStartTimeNanoseconds());
+        mChosenProviderMetric.setQueryPhaseLatencyMicroseconds(
+                metric.getQueryLatencyMicroseconds());
+        mChosenProviderMetric.setQueryStartTimeNanoseconds(metric.getStartQueryTimeNanoseconds());
     }
 }

@@ -349,6 +349,15 @@ public class ExpandableNotificationRowController implements NotifViewController 
     }
 
     @Override
+    public void setNotificationGroupWhen(long whenMillis) {
+        if (mView.isSummaryWithChildren()) {
+            mView.setNotificationGroupWhen(whenMillis);
+        } else {
+            Log.w(TAG, "Called setNotificationTime(" + whenMillis + ") on a leaf row");
+        }
+    }
+
+    @Override
     public void setSystemExpanded(boolean systemExpanded) {
         mView.setSystemExpanded(systemExpanded);
     }

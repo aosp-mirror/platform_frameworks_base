@@ -17,6 +17,7 @@
 package android.companion.virtual.sensor;
 
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -167,7 +168,10 @@ public final class VirtualSensorConfig implements Parcelable {
          * @param name The name of the sensor. Must be unique among all sensors with the same type
          *             that belong to the same virtual device.
          */
-        public Builder(int type, @NonNull String name) {
+        public Builder(@IntRange(from = 1) int type, @NonNull String name) {
+            if (type <= 0) {
+                throw new IllegalArgumentException("Virtual sensor type must be positive");
+            }
             mType = type;
             mName = Objects.requireNonNull(name);
         }

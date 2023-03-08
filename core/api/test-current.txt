@@ -899,6 +899,7 @@ package android.content.pm {
     field public static final float OVERRIDE_MIN_ASPECT_RATIO_MEDIUM_VALUE = 1.5f;
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_PORTRAIT_ONLY = 203647190L; // 0xc2368d6L
     field public static final long OVERRIDE_MIN_ASPECT_RATIO_TO_ALIGN_WITH_SPLIT_SCREEN = 208648326L; // 0xc6fb886L
+    field public static final long OVERRIDE_SANDBOX_VIEW_BOUNDS_APIS = 237531167L; // 0xe28701fL
     field public static final int RESIZE_MODE_RESIZEABLE = 2; // 0x2
   }
 
@@ -1067,6 +1068,40 @@ package android.content.rollback {
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void expireRollbackForPackage(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.TEST_MANAGE_ROLLBACKS) public void reloadPersistedData();
     field public static final String PROPERTY_ROLLBACK_LIFETIME_MILLIS = "rollback_lifetime_in_millis";
+  }
+
+}
+
+package android.credentials {
+
+  public final class CredentialManager {
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.QUERY_ALL_PACKAGES, "android.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS"}) public java.util.List<android.credentials.CredentialProviderInfo> getCredentialProviderServicesForTesting(int);
+    method public static boolean isServiceEnabled(@NonNull android.content.Context);
+    field public static final int PROVIDER_FILTER_ALL_PROVIDERS = 0; // 0x0
+    field public static final int PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY = 1; // 0x1
+    field public static final int PROVIDER_FILTER_USER_PROVIDERS_ONLY = 2; // 0x2
+  }
+
+  public final class CredentialProviderInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getCapabilities();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method @Nullable public CharSequence getLabel(@NonNull android.content.Context);
+    method @Nullable public android.graphics.drawable.Drawable getServiceIcon(@NonNull android.content.Context);
+    method @NonNull public android.content.pm.ServiceInfo getServiceInfo();
+    method @NonNull public boolean hasCapability(@NonNull String);
+    method public boolean isEnabled();
+    method public boolean isSystemProvider();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.credentials.CredentialProviderInfo> CREATOR;
+  }
+
+  public static final class CredentialProviderInfo.Builder {
+    ctor public CredentialProviderInfo.Builder(@NonNull android.content.pm.ServiceInfo);
+    method @NonNull public android.credentials.CredentialProviderInfo.Builder addCapabilities(@NonNull java.util.List<java.lang.String>);
+    method @NonNull public android.credentials.CredentialProviderInfo build();
+    method @NonNull public android.credentials.CredentialProviderInfo.Builder setEnabled(boolean);
+    method @NonNull public android.credentials.CredentialProviderInfo.Builder setSystemProvider(boolean);
   }
 
 }
@@ -1921,6 +1956,10 @@ package android.media.tv {
     method public void removeHardwareDevice(int);
   }
 
+  public class TvView extends android.view.ViewGroup {
+    method public void notifyTvMessage(@NonNull String, @NonNull android.os.Bundle);
+  }
+
 }
 
 package android.media.tv.tuner {
@@ -2629,14 +2668,26 @@ package android.service.autofill {
     method @Nullable public android.content.IntentSender getAuthentication();
     method @Nullable public java.util.ArrayList<java.lang.String> getAutofillDatatypes();
     method @Nullable public android.content.ClipData getFieldContent();
+    method @Nullable public android.widget.RemoteViews getFieldDialogPresentation(int);
     method @Nullable public java.util.ArrayList<android.view.autofill.AutofillId> getFieldIds();
+    method @Nullable public android.service.autofill.InlinePresentation getFieldInlinePresentation(int);
+    method @Nullable public android.service.autofill.InlinePresentation getFieldInlineTooltipPresentation(int);
+    method @Nullable public android.widget.RemoteViews getFieldPresentation(int);
     method @Nullable public java.util.ArrayList<android.view.autofill.AutofillValue> getFieldValues();
+    method @Nullable public android.service.autofill.Dataset.DatasetFieldFilter getFilter(int);
     method @Nullable public String getId();
     method public boolean isEmpty();
   }
 
   public static final class Dataset.Builder {
     method @NonNull public android.service.autofill.Dataset.Builder setContent(@NonNull android.view.autofill.AutofillId, @Nullable android.content.ClipData);
+  }
+
+  public static final class Dataset.DatasetFieldFilter implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public java.util.regex.Pattern getPattern();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.Dataset.DatasetFieldFilter> CREATOR;
   }
 
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -3291,7 +3342,9 @@ package android.view {
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+    method public void getBoundsOnScreen(@NonNull android.graphics.Rect, boolean);
     method public android.view.View getTooltipView();
+    method public void getWindowDisplayFrame(@NonNull android.graphics.Rect);
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
@@ -3419,6 +3472,7 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
+    field public static final String ANY_HINT = "any";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
@@ -3921,6 +3975,18 @@ package android.window {
   public abstract class WindowContainerTransactionCallback {
     ctor public WindowContainerTransactionCallback();
     method public abstract void onTransactionReady(int, @NonNull android.view.SurfaceControl.Transaction);
+  }
+
+  public class WindowInfosListenerForTest {
+    ctor public WindowInfosListenerForTest();
+    method @RequiresPermission(android.Manifest.permission.ACCESS_SURFACE_FLINGER) public void addWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+    method public void removeWindowInfosListener(@NonNull java.util.function.Consumer<java.util.List<android.window.WindowInfosListenerForTest.WindowInfo>>);
+  }
+
+  public static class WindowInfosListenerForTest.WindowInfo {
+    field @NonNull public final android.graphics.Rect bounds;
+    field @NonNull public final String name;
+    field @NonNull public final android.os.IBinder windowToken;
   }
 
   public class WindowOrganizer {

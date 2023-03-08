@@ -144,6 +144,13 @@ public final class TvInputManager {
     @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_CLOSED_CAPTION})
     public @interface TvMessageType {}
 
+    /**
+     * This constant is used as a {@link Bundle} key for TV messages. The value of the key
+     * identifies the stream on the TV input source for which the watermark event is relevant to.
+     */
+    public static final String TV_MESSAGE_KEY_STREAM_ID =
+            "android.media.tv.TvInputManager.stream_id";
+
     static final int VIDEO_UNAVAILABLE_REASON_START = 0;
     static final int VIDEO_UNAVAILABLE_REASON_END = 18;
 
@@ -3215,6 +3222,17 @@ public final class TvInputManager {
             }
             try {
                 mService.timeShiftEnablePositionTracking(mToken, enable, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Sends TV messages to the service for testing purposes
+         */
+        public void notifyTvMessage(@NonNull @TvMessageType String type, @NonNull Bundle data) {
+            try {
+                mService.notifyTvMessage(mToken, type, data, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

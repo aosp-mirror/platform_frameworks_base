@@ -29,6 +29,7 @@ import com.android.systemui.R
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.settings.SystemSettings
+import kotlin.math.roundToInt
 
 /** The Dialog that contains a seekbar for changing the font size. */
 class FontScalingDialog(context: Context, private val systemSettings: SystemSettings) :
@@ -55,6 +56,16 @@ class FontScalingDialog(context: Context, private val systemSettings: SystemSett
         title = requireViewById(com.android.internal.R.id.alertTitle)
         doneButton = requireViewById(com.android.internal.R.id.button1)
         seekBarWithIconButtonsView = requireViewById(R.id.font_scaling_slider)
+
+        val labelArray = arrayOfNulls<String>(strEntryValues.size)
+        for (i in strEntryValues.indices) {
+            labelArray[i] =
+                context.resources.getString(
+                    com.android.settingslib.R.string.font_scale_percentage,
+                    (strEntryValues[i].toFloat() * 100).roundToInt()
+                )
+        }
+        seekBarWithIconButtonsView.setProgressStateLabels(labelArray)
 
         seekBarWithIconButtonsView.setMax((strEntryValues).size - 1)
 

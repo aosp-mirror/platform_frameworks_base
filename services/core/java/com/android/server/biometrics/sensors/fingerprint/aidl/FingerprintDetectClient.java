@@ -48,6 +48,7 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
     private static final String TAG = "FingerprintDetectClient";
 
     private final boolean mIsStrongBiometric;
+    private final FingerprintAuthenticateOptions mOptions;
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
@@ -66,6 +67,7 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
         mIsStrongBiometric = isStrongBiometric;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController,
                 null /* sideFpsController*/, udfpsOverlay);
+        mOptions = options;
     }
 
     @Override
@@ -105,7 +107,7 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
 
         if (session.hasContextMethods()) {
             return session.getSession().detectInteractionWithContext(
-                    getOperationContext().toAidlContext());
+                    getOperationContext().toAidlContext(mOptions));
         } else {
             return session.getSession().detectInteraction();
         }

@@ -18,7 +18,6 @@ package com.android.systemui.media.controls.ui
 
 import android.app.PendingIntent
 import android.content.res.ColorStateList
-import android.content.res.Configuration
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
@@ -682,46 +681,6 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         whenever(mediaHostState.squishFraction).thenReturn(1.0F)
         mediaCarouselController.updatePageIndicatorAlpha()
         verify(pageIndicator).alpha = floatThat { abs(it - 1.0F) < delta }
-    }
-
-    @Test
-    fun testOnConfigChanged_playersAreAddedBack() {
-        mediaCarouselController.pageIndicator = pageIndicator
-
-        listener.value.onMediaDataLoaded(
-            "playing local",
-            null,
-            DATA.copy(
-                active = true,
-                isPlaying = true,
-                playbackLocation = MediaData.PLAYBACK_LOCAL,
-                resumption = false
-            )
-        )
-        listener.value.onMediaDataLoaded(
-            "paused local",
-            null,
-            DATA.copy(
-                active = true,
-                isPlaying = false,
-                playbackLocation = MediaData.PLAYBACK_LOCAL,
-                resumption = false
-            )
-        )
-        runAllReady()
-
-        val playersSize = MediaPlayerData.players().size
-
-        configListener.value.onConfigChanged(Configuration())
-        runAllReady()
-
-        verify(pageIndicator).tintList =
-            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
-        assertEquals(playersSize, MediaPlayerData.players().size)
-        assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("playing local"),
-            mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
-        )
     }
 
     @Test
