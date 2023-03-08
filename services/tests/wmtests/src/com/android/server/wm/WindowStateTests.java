@@ -21,8 +21,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.InsetsSource.ID_IME;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -425,15 +423,16 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState app = mAppWindow;
         statusBar.mHasSurface = true;
         assertTrue(statusBar.isVisible());
+        final int statusBarId = InsetsSource.createId(null, 0, statusBars());
         mDisplayContent.getInsetsStateController()
-                .getOrCreateSourceProvider(ITYPE_STATUS_BAR, statusBars())
+                .getOrCreateSourceProvider(statusBarId, statusBars())
                 .setWindowContainer(statusBar, null /* frameProvider */,
                         null /* imeFrameProvider */);
         mDisplayContent.getInsetsStateController().onBarControlTargetChanged(
                 app, null /* fakeTopControlling */, app, null /* fakeNavControlling */);
         app.setRequestedVisibleTypes(0, statusBars());
         mDisplayContent.getInsetsStateController()
-                .getOrCreateSourceProvider(ITYPE_STATUS_BAR, statusBars())
+                .getOrCreateSourceProvider(statusBarId, statusBars())
                 .updateClientVisibility(app);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
@@ -1004,21 +1003,18 @@ public class WindowStateTests extends WindowTestsBase {
     @SetupWindows(addWindows = { W_INPUT_METHOD, W_ACTIVITY })
     @Test
     public void testImeAlwaysReceivesVisibleNavigationBarInsets() {
-        final InsetsSource navSource = new InsetsSource(ITYPE_NAVIGATION_BAR, navigationBars());
+        final int navId = InsetsSource.createId(null, 0, navigationBars());
+        final InsetsSource navSource = new InsetsSource(navId, navigationBars());
         mImeWindow.mAboveInsetsState.addSource(navSource);
         mAppWindow.mAboveInsetsState.addSource(navSource);
 
         navSource.setVisible(false);
-        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
-        assertFalse(mAppWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
+        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
+        assertFalse(mAppWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
 
         navSource.setVisible(true);
-        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
-        assertTrue(mAppWindow.getInsetsState().isSourceOrDefaultVisible(
-                ITYPE_NAVIGATION_BAR, navigationBars()));
+        assertTrue(mImeWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
+        assertTrue(mAppWindow.getInsetsState().isSourceOrDefaultVisible(navId, navigationBars()));
     }
 
     @Test
