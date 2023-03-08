@@ -14281,7 +14281,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Apply permission policy around the use of specific broadcast options
     void enforceBroadcastOptionPermissionsInternal(
             @Nullable Bundle options, int callingUid) {
-        enforceBroadcastOptionPermissionsInternal(BroadcastOptions.fromBundle(options), callingUid);
+        enforceBroadcastOptionPermissionsInternal(BroadcastOptions.fromBundleNullable(options),
+                callingUid);
     }
 
     void enforceBroadcastOptionPermissionsInternal(
@@ -14297,7 +14298,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (options.isInteractive()) {
                 enforceCallingPermission(
-                        android.Manifest.permission.COMPONENT_OPTION_INTERACTIVE,
+                        android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE,
                         "setInteractive");
             }
         }
@@ -14334,9 +14335,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
                 intent, resolvedType, resultToApp, resultTo, resultCode, resultData, resultExtras,
                 requiredPermissions, excludedPermissions, excludedPackages, appOp,
-                BroadcastOptions.fromBundle(bOptions), ordered, sticky, callingPid, callingUid,
-                realCallingUid, realCallingPid, userId, backgroundStartPrivileges,
-                broadcastAllowList, filterExtrasForReceiver);
+                BroadcastOptions.fromBundleNullable(bOptions), ordered, sticky,
+                callingPid, callingUid, realCallingUid, realCallingPid, userId,
+                backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver);
         BroadcastQueue.traceEnd(cookie);
         return res;
     }
