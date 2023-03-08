@@ -142,7 +142,6 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
-import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -10363,15 +10362,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean isAutofillable() {
         if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
 
+        final AutofillManager afm = getAutofillManager();
+        if (afm == null) {
+            return false;
+        }
+
         // Disable triggering autofill if the view is integrated with CredentialManager.
-        if (AutofillFeatureFlags.shouldIgnoreCredentialViews()
-                && isCredential()) return false;
+        if (afm.shouldIgnoreCredentialViews() && isCredential()) {
+            return false;
+        }
 
         if (!isImportantForAutofill()) {
             // If view matches heuristics and is not denied, it will be treated same as view that's
             // important for autofill
-            if (isMatchingAutofillableHeuristics()
-                    && !isActivityDeniedForAutofillForUnimportantView()) {
+            if (afm.isMatchingAutofillableHeuristics(this)
+                    && !afm.isActivityDeniedForAutofillForUnimportantView()) {
                 return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
             }
             // View is not important for "regular" autofill, so we must check if Augmented Autofill
@@ -10380,8 +10385,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
                 return false;
             }
-            final AutofillManager afm = getAutofillManager();
-            if (afm == null) return false;
+
             afm.notifyViewEnteredForAugmentedAutofill(this);
         }
 
