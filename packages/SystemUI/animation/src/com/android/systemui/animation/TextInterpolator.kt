@@ -473,6 +473,7 @@ class TextInterpolator(layout: Layout) {
         // TODO(172943390): Add other interpolation or support custom interpolator.
         out.textSize = MathUtils.lerp(from.textSize, to.textSize, progress)
         out.color = ColorUtils.blendARGB(from.color, to.color, progress)
+        out.strokeWidth = MathUtils.lerp(from.strokeWidth, to.strokeWidth, progress)
     }
 
     // Shape the text and stores the result to out argument.
