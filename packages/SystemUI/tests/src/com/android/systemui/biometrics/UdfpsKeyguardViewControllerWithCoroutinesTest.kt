@@ -138,7 +138,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
 
             // WHEN the bouncer expansion is VISIBLE
             val job = mController.listenForBouncerExpansion(this)
-            keyguardBouncerRepository.setPrimaryVisible(true)
+            keyguardBouncerRepository.setPrimaryShow(true)
             keyguardBouncerRepository.setPanelExpansion(KeyguardBouncerConstants.EXPANSION_VISIBLE)
             yield()
 
