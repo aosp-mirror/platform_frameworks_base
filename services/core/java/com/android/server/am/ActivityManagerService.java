@@ -9878,7 +9878,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpNormalPriority = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
-        boolean dumpVerbose = false;
         int dumpDisplayId = INVALID_DISPLAY;
         String dumpPackage = null;
         int dumpUserId = UserHandle.USER_ALL;
@@ -9937,8 +9936,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return;
                 }
                 dumpClient = true;
-            } else if ("--verbose".equals(opt)) {
-                dumpVerbose = true;
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
@@ -10225,8 +10222,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 // Dumping a single activity?
                 if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
-                        dumpVisibleStacksOnly, dumpFocusedStackOnly, dumpVerbose, dumpDisplayId,
-                        dumpUserId)) {
+                        dumpVisibleStacksOnly, dumpFocusedStackOnly, dumpDisplayId, dumpUserId)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
                     int res = shell.exec(this, null, fd, null, args, null,
                             new ResultReceiver(null));
