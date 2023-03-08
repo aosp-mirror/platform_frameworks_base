@@ -1473,6 +1473,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
         mHandler.removeMessages(H.SHOW);
         if (mIsAnimatingDismiss) {
             Log.d(TAG, "dismissH: isAnimatingDismiss");
+            Trace.endSection();
             return;
         }
         mIsAnimatingDismiss = true;
