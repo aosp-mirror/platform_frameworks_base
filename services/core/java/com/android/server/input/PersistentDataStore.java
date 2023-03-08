@@ -16,6 +16,7 @@
 
 package com.android.server.input;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.input.TouchCalibration;
 import android.util.ArrayMap;
@@ -43,6 +44,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -149,6 +151,16 @@ final class PersistentDataStore {
             String keyboardLayoutDescriptor) {
         InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
         if (state.setKeyboardLayout(key, keyboardLayoutDescriptor)) {
+            setDirty();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setSelectedKeyboardLayouts(String inputDeviceDescriptor,
+            @NonNull Set<String> selectedLayouts) {
+        InputDeviceState state = getOrCreateInputDeviceState(inputDeviceDescriptor);
+        if (state.setSelectedKeyboardLayouts(selectedLayouts)) {
             setDirty();
             return true;
         }
@@ -408,6 +420,8 @@ final class PersistentDataStore {
 
         private final Map<String, String> mKeyboardLayoutMap = new ArrayMap<>();
 
+        private Set<String> mSelectedKeyboardLayouts;
+
         public TouchCalibration getTouchCalibration(int surfaceRotation) {
             try {
                 return mTouchCalibration[surfaceRotation];
@@ -437,6 +451,14 @@ final class PersistentDataStore {
 
         public boolean setKeyboardLayout(String key, String keyboardLayout) {
             return !Objects.equals(mKeyboardLayoutMap.put(key, keyboardLayout), keyboardLayout);
+        }
+
+        public boolean setSelectedKeyboardLayouts(@NonNull Set<String> selectedLayouts) {
+            if (Objects.equals(mSelectedKeyboardLayouts, selectedLayouts)) {
+                return false;
+            }
+            mSelectedKeyboardLayouts = new HashSet<>(selectedLayouts);
+            return true;
         }
 
         @Nullable
@@ -588,6 +610,16 @@ final class PersistentDataStore {
                                 "Missing layout attribute on keyed-keyboard-layout.");
                     }
                     mKeyboardLayoutMap.put(key, layout);
+                } else if (parser.getName().equals("selected-keyboard-layout")) {
+                    String layout = parser.getAttributeValue(null, "layout");
+                    if (layout == null) {
+                        throw new XmlPullParserException(
+                                "Missing layout attribute on selected-keyboard-layout.");
+                    }
+                    if (mSelectedKeyboardLayouts == null) {
+                        mSelectedKeyboardLayouts = new HashSet<>();
+                    }
+                    mSelectedKeyboardLayouts.add(layout);
                 } else if (parser.getName().equals("light-info")) {
                     int lightId = parser.getAttributeInt(null, "light-id");
                     int lightBrightness = parser.getAttributeInt(null, "light-brightness");
@@ -666,6 +698,14 @@ final class PersistentDataStore {
                 serializer.attribute(null, "key", key);
                 serializer.attribute(null, "layout", mKeyboardLayoutMap.get(key));
                 serializer.endTag(null, "keyed-keyboard-layout");
+            }
+
+            if (mSelectedKeyboardLayouts != null) {
+                for (String layout : mSelectedKeyboardLayouts) {
+                    serializer.startTag(null, "selected-keyboard-layout");
+                    serializer.attribute(null, "layout", layout);
+                    serializer.endTag(null, "selected-keyboard-layout");
+                }
             }
 
             for (int i = 0; i < mKeyboardBacklightBrightnessMap.size(); i++) {
