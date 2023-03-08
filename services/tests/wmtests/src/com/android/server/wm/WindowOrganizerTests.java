@@ -1023,7 +1023,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         RunningTaskInfo mInfo;
 
         @Override
-        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) { }
+        public void addStartingWindow(StartingWindowInfo info) { }
         @Override
         public void removeStartingWindow(StartingWindowRemovalInfo removalInfo) { }
         @Override
