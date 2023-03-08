@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
+import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 // TODO(b/261632894): remove this in favor of the real impl or DemoMobileConnectionRepository
@@ -27,8 +29,19 @@ class FakeMobileConnectionRepository(
     override val subId: Int,
     override val tableLogBuffer: TableLogBuffer,
 ) : MobileConnectionRepository {
-    private val _connectionInfo = MutableStateFlow(MobileConnectionModel())
-    override val connectionInfo = _connectionInfo
+    override val isEmergencyOnly = MutableStateFlow(false)
+    override val isRoaming = MutableStateFlow(false)
+    override val operatorAlphaShort: MutableStateFlow<String?> = MutableStateFlow(null)
+    override val isInService = MutableStateFlow(false)
+    override val isGsm = MutableStateFlow(false)
+    override val cdmaLevel = MutableStateFlow(0)
+    override val primaryLevel = MutableStateFlow(0)
+    override val dataConnectionState = MutableStateFlow(DataConnectionState.Disconnected)
+    override val dataActivityDirection =
+        MutableStateFlow(DataActivityModel(hasActivityIn = false, hasActivityOut = false))
+    override val carrierNetworkChangeActive = MutableStateFlow(false)
+    override val resolvedNetworkType: MutableStateFlow<ResolvedNetworkType> =
+        MutableStateFlow(ResolvedNetworkType.UnknownNetworkType)
 
     override val numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
 
@@ -39,10 +52,6 @@ class FakeMobileConnectionRepository(
 
     override val networkName =
         MutableStateFlow<NetworkNameModel>(NetworkNameModel.Default("default"))
-
-    fun setConnectionInfo(model: MobileConnectionModel) {
-        _connectionInfo.value = model
-    }
 
     fun setDataEnabled(enabled: Boolean) {
         _dataEnabled.value = enabled

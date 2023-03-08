@@ -16,18 +16,17 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
+import android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
-import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import javax.inject.Inject
@@ -94,16 +93,6 @@ class CarrierMergedConnectionRepository(
             }
         }
 
-    override val connectionInfo: StateFlow<MobileConnectionModel> =
-        combine(network, wifiRepository.wifiActivity) { network, activity ->
-                if (network == null) {
-                    MobileConnectionModel()
-                } else {
-                    createCarrierMergedConnectionModel(network.level, activity)
-                }
-            }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), MobileConnectionModel())
-
     override val cdmaRoaming: StateFlow<Boolean> = MutableStateFlow(ROAMING).asStateFlow()
 
     override val networkName: StateFlow<NetworkNameModel> =
@@ -129,34 +118,54 @@ class CarrierMergedConnectionRepository(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DEFAULT_NUM_LEVELS)
 
+    override val primaryLevel =
+        network
+            .map { it?.level ?: SIGNAL_STRENGTH_NONE_OR_UNKNOWN }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+
+    override val cdmaLevel =
+        network
+            .map { it?.level ?: SIGNAL_STRENGTH_NONE_OR_UNKNOWN }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
+
+    override val dataActivityDirection = wifiRepository.wifiActivity
+
+    override val resolvedNetworkType =
+        network
+            .map {
+                if (it != null) {
+                    ResolvedNetworkType.CarrierMergedNetworkType
+                } else {
+                    ResolvedNetworkType.UnknownNetworkType
+                }
+            }
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                ResolvedNetworkType.UnknownNetworkType
+            )
+
+    override val dataConnectionState =
+        network
+            .map {
+                if (it != null) {
+                    DataConnectionState.Connected
+                } else {
+                    DataConnectionState.Disconnected
+                }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), DataConnectionState.Disconnected)
+
+    override val isRoaming = MutableStateFlow(false).asStateFlow()
+    override val isEmergencyOnly = MutableStateFlow(false).asStateFlow()
+    override val operatorAlphaShort = MutableStateFlow(null).asStateFlow()
+    override val isInService = MutableStateFlow(true).asStateFlow()
+    override val isGsm = MutableStateFlow(false).asStateFlow()
+    override val carrierNetworkChangeActive = MutableStateFlow(false).asStateFlow()
+
     override val dataEnabled: StateFlow<Boolean> = wifiRepository.isWifiEnabled
 
     companion object {
-        /**
-         * Creates an instance of [MobileConnectionModel] that represents a carrier merged network
-         * with the given [level] and [activity].
-         */
-        fun createCarrierMergedConnectionModel(
-            level: Int,
-            activity: DataActivityModel,
-        ): MobileConnectionModel {
-            return MobileConnectionModel(
-                primaryLevel = level,
-                cdmaLevel = level,
-                dataActivityDirection = activity,
-                // Here and below: These values are always the same for every carrier-merged
-                // connection.
-                resolvedNetworkType = ResolvedNetworkType.CarrierMergedNetworkType,
-                dataConnectionState = DataConnectionState.Connected,
-                isRoaming = ROAMING,
-                isEmergencyOnly = false,
-                operatorAlphaShort = null,
-                isInService = true,
-                isGsm = false,
-                carrierNetworkChangeActive = false,
-            )
-        }
-
         // Carrier merged is never roaming
         private const val ROAMING = false
     }

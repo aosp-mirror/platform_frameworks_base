@@ -24,13 +24,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_EMERGENCY
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_OPERATOR
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel.Companion.COL_PRIMARY_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_EMERGENCY
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_OPERATOR
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Companion.COL_PRIMARY_LEVEL
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.getTelephonyCallbackForType
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
@@ -94,16 +93,16 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun startingIsCarrierMerged_usesCarrierMergedInitially() =
         testScope.runTest {
-            val carrierMergedConnectionInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Carrier Merged Operator",
-                )
-            carrierMergedRepo.setConnectionInfo(carrierMergedConnectionInfo)
+            val carrierMergedOperatorName = "Carrier Merged Operator"
+            val nonCarrierMergedName = "Non-carrier-merged"
+
+            carrierMergedRepo.operatorAlphaShort.value = carrierMergedOperatorName
+            mobileRepo.operatorAlphaShort.value = nonCarrierMergedName
 
             initializeRepo(startingIsCarrierMerged = true)
 
             assertThat(underTest.activeRepo.value).isEqualTo(carrierMergedRepo)
-            assertThat(underTest.connectionInfo.value).isEqualTo(carrierMergedConnectionInfo)
+            assertThat(underTest.operatorAlphaShort.value).isEqualTo(carrierMergedOperatorName)
             verify(mobileFactory, never())
                 .build(
                     SUB_ID,
@@ -116,16 +115,16 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     @Test
     fun startingNotCarrierMerged_usesTypicalInitially() =
         testScope.runTest {
-            val mobileConnectionInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Typical Operator",
-                )
-            mobileRepo.setConnectionInfo(mobileConnectionInfo)
+            val carrierMergedOperatorName = "Carrier Merged Operator"
+            val nonCarrierMergedName = "Typical Operator"
+
+            carrierMergedRepo.operatorAlphaShort.value = carrierMergedOperatorName
+            mobileRepo.operatorAlphaShort.value = nonCarrierMergedName
 
             initializeRepo(startingIsCarrierMerged = false)
 
             assertThat(underTest.activeRepo.value).isEqualTo(mobileRepo)
-            assertThat(underTest.connectionInfo.value).isEqualTo(mobileConnectionInfo)
+            assertThat(underTest.operatorAlphaShort.value).isEqualTo(nonCarrierMergedName)
             verify(carrierMergedFactory, never()).build(SUB_ID, tableLogBuffer)
         }
 
@@ -156,39 +155,40 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             initializeRepo(startingIsCarrierMerged = false)
 
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latestName: String? = null
+            var latestLevel: Int? = null
+
+            val nameJob = underTest.operatorAlphaShort.onEach { latestName = it }.launchIn(this)
+            val levelJob = underTest.primaryLevel.onEach { latestLevel = it }.launchIn(this)
 
             underTest.setIsCarrierMerged(true)
 
-            val info1 =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Carrier Merged Operator",
-                    primaryLevel = 1,
-                )
-            carrierMergedRepo.setConnectionInfo(info1)
+            val operator1 = "Carrier Merged Operator"
+            val level1 = 1
+            carrierMergedRepo.operatorAlphaShort.value = operator1
+            carrierMergedRepo.primaryLevel.value = level1
 
-            assertThat(latest).isEqualTo(info1)
+            assertThat(latestName).isEqualTo(operator1)
+            assertThat(latestLevel).isEqualTo(level1)
 
-            val info2 =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Carrier Merged Operator #2",
-                    primaryLevel = 2,
-                )
-            carrierMergedRepo.setConnectionInfo(info2)
+            val operator2 = "Carrier Merged Operator #2"
+            val level2 = 2
+            carrierMergedRepo.operatorAlphaShort.value = operator2
+            carrierMergedRepo.primaryLevel.value = level2
 
-            assertThat(latest).isEqualTo(info2)
+            assertThat(latestName).isEqualTo(operator2)
+            assertThat(latestLevel).isEqualTo(level2)
 
-            val info3 =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Carrier Merged Operator #3",
-                    primaryLevel = 3,
-                )
-            carrierMergedRepo.setConnectionInfo(info3)
+            val operator3 = "Carrier Merged Operator #3"
+            val level3 = 3
+            carrierMergedRepo.operatorAlphaShort.value = operator3
+            carrierMergedRepo.primaryLevel.value = level3
 
-            assertThat(latest).isEqualTo(info3)
+            assertThat(latestName).isEqualTo(operator3)
+            assertThat(latestLevel).isEqualTo(level3)
 
-            job.cancel()
+            nameJob.cancel()
+            levelJob.cancel()
         }
 
     @Test
@@ -196,39 +196,40 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             initializeRepo(startingIsCarrierMerged = false)
 
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latestName: String? = null
+            var latestLevel: Int? = null
+
+            val nameJob = underTest.operatorAlphaShort.onEach { latestName = it }.launchIn(this)
+            val levelJob = underTest.primaryLevel.onEach { latestLevel = it }.launchIn(this)
 
             underTest.setIsCarrierMerged(false)
 
-            val info1 =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Typical Merged Operator",
-                    primaryLevel = 1,
-                )
-            mobileRepo.setConnectionInfo(info1)
+            val operator1 = "Typical Merged Operator"
+            val level1 = 1
+            mobileRepo.operatorAlphaShort.value = operator1
+            mobileRepo.primaryLevel.value = level1
 
-            assertThat(latest).isEqualTo(info1)
+            assertThat(latestName).isEqualTo(operator1)
+            assertThat(latestLevel).isEqualTo(level1)
 
-            val info2 =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Typical Merged Operator #2",
-                    primaryLevel = 2,
-                )
-            mobileRepo.setConnectionInfo(info2)
+            val operator2 = "Typical Merged Operator #2"
+            val level2 = 2
+            mobileRepo.operatorAlphaShort.value = operator2
+            mobileRepo.primaryLevel.value = level2
 
-            assertThat(latest).isEqualTo(info2)
+            assertThat(latestName).isEqualTo(operator2)
+            assertThat(latestLevel).isEqualTo(level2)
 
-            val info3 =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Typical Merged Operator #3",
-                    primaryLevel = 3,
-                )
-            mobileRepo.setConnectionInfo(info3)
+            val operator3 = "Typical Merged Operator #3"
+            val level3 = 3
+            mobileRepo.operatorAlphaShort.value = operator3
+            mobileRepo.primaryLevel.value = level3
 
-            assertThat(latest).isEqualTo(info3)
+            assertThat(latestName).isEqualTo(operator3)
+            assertThat(latestLevel).isEqualTo(level3)
 
-            job.cancel()
+            nameJob.cancel()
+            levelJob.cancel()
         }
 
     @Test
@@ -236,57 +237,58 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             initializeRepo(startingIsCarrierMerged = false)
 
-            var latest: MobileConnectionModel? = null
-            val job = underTest.connectionInfo.onEach { latest = it }.launchIn(this)
+            var latestName: String? = null
+            var latestLevel: Int? = null
 
-            val carrierMergedInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Carrier Merged Operator",
-                    primaryLevel = 4,
-                )
-            carrierMergedRepo.setConnectionInfo(carrierMergedInfo)
+            val nameJob = underTest.operatorAlphaShort.onEach { latestName = it }.launchIn(this)
+            val levelJob = underTest.primaryLevel.onEach { latestLevel = it }.launchIn(this)
 
-            val mobileInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Typical Operator",
-                    primaryLevel = 2,
-                )
-            mobileRepo.setConnectionInfo(mobileInfo)
+            val carrierMergedOperator = "Carrier Merged Operator"
+            val carrierMergedLevel = 4
+            carrierMergedRepo.operatorAlphaShort.value = carrierMergedOperator
+            carrierMergedRepo.primaryLevel.value = carrierMergedLevel
+
+            val mobileName = "Typical Operator"
+            val mobileLevel = 2
+            mobileRepo.operatorAlphaShort.value = mobileName
+            mobileRepo.primaryLevel.value = mobileLevel
 
             // Start with the mobile info
-            assertThat(latest).isEqualTo(mobileInfo)
+            assertThat(latestName).isEqualTo(mobileName)
+            assertThat(latestLevel).isEqualTo(mobileLevel)
 
             // WHEN isCarrierMerged is set to true
             underTest.setIsCarrierMerged(true)
 
             // THEN the carrier merged info is used
-            assertThat(latest).isEqualTo(carrierMergedInfo)
+            assertThat(latestName).isEqualTo(carrierMergedOperator)
+            assertThat(latestLevel).isEqualTo(carrierMergedLevel)
 
-            val newCarrierMergedInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "New CM Operator",
-                    primaryLevel = 0,
-                )
-            carrierMergedRepo.setConnectionInfo(newCarrierMergedInfo)
+            val newCarrierMergedName = "New CM Operator"
+            val newCarrierMergedLevel = 0
+            carrierMergedRepo.operatorAlphaShort.value = newCarrierMergedName
+            carrierMergedRepo.primaryLevel.value = newCarrierMergedLevel
 
-            assertThat(latest).isEqualTo(newCarrierMergedInfo)
+            assertThat(latestName).isEqualTo(newCarrierMergedName)
+            assertThat(latestLevel).isEqualTo(newCarrierMergedLevel)
 
             // WHEN isCarrierMerged is set to false
             underTest.setIsCarrierMerged(false)
 
             // THEN the typical info is used
-            assertThat(latest).isEqualTo(mobileInfo)
+            assertThat(latestName).isEqualTo(mobileName)
+            assertThat(latestLevel).isEqualTo(mobileLevel)
 
-            val newMobileInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "New Mobile Operator",
-                    primaryLevel = 3,
-                )
-            mobileRepo.setConnectionInfo(newMobileInfo)
+            val newMobileName = "New MobileOperator"
+            val newMobileLevel = 3
+            mobileRepo.operatorAlphaShort.value = newMobileName
+            mobileRepo.primaryLevel.value = newMobileLevel
 
-            assertThat(latest).isEqualTo(newMobileInfo)
+            assertThat(latestName).isEqualTo(newMobileName)
+            assertThat(latestLevel).isEqualTo(newMobileLevel)
 
-            job.cancel()
+            nameJob.cancel()
+            levelJob.cancel()
         }
 
     @Test
@@ -370,7 +372,8 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             initializeRepo(startingIsCarrierMerged = false)
 
-            val job = underTest.connectionInfo.launchIn(this)
+            val emergencyJob = underTest.isEmergencyOnly.launchIn(this)
+            val operatorJob = underTest.operatorAlphaShort.launchIn(this)
 
             // WHEN we set up some mobile connection info
             val serviceState = ServiceState()
@@ -394,7 +397,8 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(dumpBuffer()).contains("$COL_OPERATOR${BUFFER_SEPARATOR}OpDiff")
             assertThat(dumpBuffer()).contains("$COL_EMERGENCY${BUFFER_SEPARATOR}true")
 
-            job.cancel()
+            emergencyJob.cancel()
+            operatorJob.cancel()
         }
 
     @Test
@@ -409,7 +413,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             initializeRepo(startingIsCarrierMerged = true)
 
-            val job = underTest.connectionInfo.launchIn(this)
+            val job = underTest.primaryLevel.launchIn(this)
 
             // WHEN we set up carrier merged info
             val networkId = 2
@@ -452,7 +456,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
 
             initializeRepo(startingIsCarrierMerged = false)
 
-            val job = underTest.connectionInfo.launchIn(this)
+            val job = underTest.primaryLevel.launchIn(this)
 
             // WHEN we set up some mobile connection info
             val signalStrength = mock<SignalStrength>()
@@ -502,12 +506,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             assertThat(bufferAfterCarrierMerged).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}1")
 
             // WHEN the normal network is updated
-            val newMobileInfo =
-                MobileConnectionModel(
-                    operatorAlphaShort = "Mobile Operator 2",
-                    primaryLevel = 0,
-                )
-            mobileRepo.setConnectionInfo(newMobileInfo)
+            mobileRepo.primaryLevel.value = 0
 
             // THEN the new level is logged
             assertThat(dumpBuffer()).contains("$COL_PRIMARY_LEVEL${BUFFER_SEPARATOR}0")
@@ -529,7 +528,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
             // WHEN isCarrierMerged = false
             initializeRepo(startingIsCarrierMerged = false)
 
-            val job = underTest.connectionInfo.launchIn(this)
+            val job = underTest.primaryLevel.launchIn(this)
 
             val signalStrength = mock<SignalStrength>()
             whenever(signalStrength.level).thenReturn(1)
