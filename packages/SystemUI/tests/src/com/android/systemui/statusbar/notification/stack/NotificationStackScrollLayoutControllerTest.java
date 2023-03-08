@@ -52,7 +52,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -135,7 +134,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    @Mock private ShadeTransitionController mShadeTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
@@ -183,7 +181,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotifPipelineFlags,
                 mNotifCollection,
                 mLockscreenShadeTransitionController,
-                mShadeTransitionController,
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
