@@ -419,6 +419,10 @@ public class ScreenshotController {
             return;
         }
 
+        mScreenBitmap = screenshot.getBitmap();
+        String oldPackageName = mPackageName;
+        mPackageName = screenshot.getPackageNameString();
+
         if (!isUserSetupComplete(Process.myUserHandle())) {
             Log.w(TAG, "User setup not complete, displaying toast only");
             // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
@@ -433,10 +437,6 @@ public class ScreenshotController {
         mScreenshotTakenInPortrait =
                 mContext.getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT;
 
-        String oldPackageName = mPackageName;
-        mPackageName = screenshot.getPackageNameString();
-
-        mScreenBitmap = screenshot.getBitmap();
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
