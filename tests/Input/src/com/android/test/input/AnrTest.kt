@@ -151,8 +151,7 @@ class AnrTest {
     private fun triggerAnr() {
         startUnresponsiveActivity()
         val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
-        val obj: UiObject2? = uiDevice.wait(Until.findObject(
-                By.text("Unresponsive gesture monitor")), 10000)
+        val obj: UiObject2? = uiDevice.wait(Until.findObject(By.pkg(PACKAGE_NAME)), 10000)
 
         if (obj == null) {
             fail("Could not find unresponsive activity")
