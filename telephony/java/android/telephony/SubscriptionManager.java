@@ -54,6 +54,7 @@ import android.os.Looper;
 import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
@@ -154,6 +155,10 @@ public class SubscriptionManager {
     private static final String CACHE_KEY_SLOT_INDEX_PROPERTY =
             "cache_key.telephony.get_slot_index";
 
+    /** The IPC cache key shared by all subscription manager service cacheable properties. */
+    private static final String CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY =
+            "cache_key.telephony.subscription_manager_service";
+
     /** @hide */
     public static final String GET_SIM_SPECIFIC_SETTINGS_METHOD_NAME = "getSimSpecificSettings";
 
@@ -245,9 +250,19 @@ public class SubscriptionManager {
                     CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     private static VoidPropertyInvalidatedCache<Integer> sDefaultDataSubIdCache =
             new VoidPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
                     CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultDataSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultDataSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
     private static VoidPropertyInvalidatedCache<Integer> sDefaultSmsSubIdCache =
@@ -255,9 +270,19 @@ public class SubscriptionManager {
                     CACHE_KEY_DEFAULT_SMS_SUB_ID_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
+    private static VoidPropertyInvalidatedCache<Integer> sGetDefaultSmsSubIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getDefaultSmsSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     private static VoidPropertyInvalidatedCache<Integer> sActiveDataSubIdCache =
             new VoidPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
                     CACHE_KEY_ACTIVE_DATA_SUB_ID_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static VoidPropertyInvalidatedCache<Integer> sGetActiveDataSubscriptionIdCache =
+            new VoidPropertyInvalidatedCache<>(ISub::getActiveDataSubscriptionId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_SUBSCRIPTION_ID);
 
     private static IntegerPropertyInvalidatedCache<Integer> sSlotIndexCache =
@@ -265,10 +290,30 @@ public class SubscriptionManager {
                     CACHE_KEY_SLOT_INDEX_PROPERTY,
                     INVALID_SIM_SLOT_INDEX);
 
+    private static IntegerPropertyInvalidatedCache<Integer> sGetSlotIndexCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSlotIndex,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SIM_SLOT_INDEX);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sSubIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSubId,
+                    CACHE_KEY_SLOT_INDEX_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sGetSubIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getSubId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
+                    INVALID_SUBSCRIPTION_ID);
+
     /** Cache depends on getDefaultSubId, so we use the defaultSubId cache key */
     private static IntegerPropertyInvalidatedCache<Integer> sPhoneIdCache =
             new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
                     CACHE_KEY_DEFAULT_SUB_ID_PROPERTY,
+                    INVALID_PHONE_INDEX);
+
+    private static IntegerPropertyInvalidatedCache<Integer> sGetPhoneIdCache =
+            new IntegerPropertyInvalidatedCache<>(ISub::getPhoneId,
+                    CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY,
                     INVALID_PHONE_INDEX);
 
     /**
@@ -486,18 +531,14 @@ public class SubscriptionManager {
     public static final String TP_MESSAGE_REF = SimInfo.COLUMN_TP_MESSAGE_REF;
 
     /**
-     * TelephonyProvider column name data_enabled_override_rules.
-     * It's a list of rules for overriding data enabled settings. The syntax is
-     * For example, "mms=nonDefault" indicates enabling data for mms in non-default subscription.
-     * "default=nonDefault&inVoiceCall" indicates enabling data for internet in non-default
-     * subscription and while is in voice call.
+     * TelephonyProvider column name enabled_mobile_data_policies.
+     * A list of mobile data policies, each of which represented by an integer and joint by ",".
      *
      * Default value is empty string.
-     *
      * @hide
      */
-    public static final String DATA_ENABLED_OVERRIDE_RULES =
-            SimInfo.COLUMN_DATA_ENABLED_OVERRIDE_RULES;
+    public static final String ENABLED_MOBILE_DATA_POLICIES =
+            SimInfo.COLUMN_ENABLED_MOBILE_DATA_POLICIES;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -570,6 +611,12 @@ public class SubscriptionManager {
     public static final String NAME_SOURCE = SimInfo.COLUMN_NAME_SOURCE;
 
     /**
+     * The name_source is unknown. (for initialization)
+     * @hide
+     */
+    public static final int NAME_SOURCE_UNKNOWN = SimInfo.NAME_SOURCE_UNKNOWN;
+
+    /**
      * The name_source is from the carrier id.
      * @hide
      */
@@ -604,6 +651,7 @@ public class SubscriptionManager {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"NAME_SOURCE_"},
             value = {
+                    NAME_SOURCE_UNKNOWN,
                     NAME_SOURCE_CARRIER_ID,
                     NAME_SOURCE_SIM_SPN,
                     NAME_SOURCE_USER_INPUT,
@@ -1266,6 +1314,8 @@ public class SubscriptionManager {
 
     private final Context mContext;
 
+    private static boolean sIsSubscriptionManagerServiceEnabled = false;
+
     // Cache of Resource that has been created in getResourcesForSubId. Key is a Pair containing
     // the Context and subId.
     private static final Map<Pair<Context, Integer>, Resources> sResourcesCache =
@@ -1351,6 +1401,19 @@ public class SubscriptionManager {
     public SubscriptionManager(Context context) {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
+
+        sIsSubscriptionManagerServiceEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_using_subscription_manager_service);
+    }
+
+    /**
+     * @return {@code true} if the new subscription manager service is used. This is temporary and
+     * will be removed before Android 14 release.
+     *
+     * @hide
+     */
+    public static boolean isSubscriptionManagerServiceEnabled() {
+        return sIsSubscriptionManagerServiceEnabled;
     }
 
     private NetworkPolicyManager getNetworkPolicyManager() {
@@ -1631,17 +1694,33 @@ public class SubscriptionManager {
     }
 
     /**
-     * @return List of all SubscriptionInfo records in database,
-     * include those that were inserted before, maybe empty but not null.
+     * Get all subscription info records from SIMs that are inserted now or were inserted before.
+     *
+     * <p>
+     * If the caller does not have {@link Manifest.permission#READ_PHONE_NUMBERS} permission,
+     * {@link SubscriptionInfo#getNumber()} will return empty string.
+     * If the caller does not have {@link Manifest.permission#USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER},
+     * {@link SubscriptionInfo#getIccId()} and {@link SubscriptionInfo#getCardString()} will return
+     * empty string, and {@link SubscriptionInfo#getGroupUuid()} will return {@code null}.
+     *
+     * <p>
+     * The carrier app will always have full {@link SubscriptionInfo} for the subscriptions
+     * that it has carrier privilege.
+     *
+     * @return List of all {@link SubscriptionInfo} records from SIMs that are inserted or
+     * inserted before. Sorted by {@link SubscriptionInfo#getSimSlotIndex()}, then
+     * {@link SubscriptionInfo#getSubscriptionId()}.
+     *
      * @hide
      */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
+    })
     @NonNull
-    @UnsupportedAppUsage
     public List<SubscriptionInfo> getAllSubscriptionInfoList() {
-        if (VDBG) logd("[getAllSubscriptionInfoList]+");
-
         List<SubscriptionInfo> result = null;
-
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
@@ -1887,30 +1966,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * @return the count of all subscriptions in the database, this includes
-     * all subscriptions that have been seen.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public int getAllSubscriptionInfoCount() {
-        if (VDBG) logd("[getAllSubscriptionInfoCount]+");
-
-        int result = 0;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-
-        return result;
-    }
-
-    /**
      *
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
@@ -2134,6 +2189,7 @@ public class SubscriptionManager {
      * subscriptionId doesn't have an associated slot index.
      */
     public static int getSlotIndex(int subscriptionId) {
+        if (isSubscriptionManagerServiceEnabled()) return sGetSlotIndexCache.query(subscriptionId);
         return sSlotIndexCache.query(subscriptionId);
     }
 
@@ -2145,7 +2201,7 @@ public class SubscriptionManager {
      */
     @Nullable
     public int[] getSubscriptionIds(int slotIndex) {
-        return getSubId(slotIndex);
+        return new int[]{getSubscriptionId(slotIndex)};
     }
 
     /** @hide */
@@ -2161,7 +2217,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                subId = iSub.getSubId(slotIndex);
+                subId = iSub.getSubIds(slotIndex);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2170,9 +2226,27 @@ public class SubscriptionManager {
         return subId;
     }
 
+    /**
+     * Get the subscription id for specified slot index.
+     *
+     * @param slotIndex Logical SIM slot index.
+     * @return The subscription id. {@link #INVALID_SUBSCRIPTION_ID} if SIM is absent.
+     *
+     * @hide
+     */
+    public static int getSubscriptionId(int slotIndex) {
+        if (!isValidSlotIndex(slotIndex)) {
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        }
+
+        if (isSubscriptionManagerServiceEnabled()) return sGetSubIdCache.query(slotIndex);
+        return sSubIdCache.query(slotIndex);
+    }
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static int getPhoneId(int subId) {
+        if (isSubscriptionManagerServiceEnabled()) return sGetPhoneIdCache.query(subId);
         return sPhoneIdCache.query(subId);
     }
 
@@ -2194,6 +2268,7 @@ public class SubscriptionManager {
      * @return the "system" default subscription id.
      */
     public static int getDefaultSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) return sGetDefaultSubIdCache.query(null);
         return sDefaultSubIdCache.query(null);
     }
 
@@ -2282,6 +2357,7 @@ public class SubscriptionManager {
      * @return the default SMS subscription Id.
      */
     public static int getDefaultSmsSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) return sGetDefaultSmsSubIdCache.query(null);
         return sDefaultSmsSubIdCache.query(null);
     }
 
@@ -2309,24 +2385,6 @@ public class SubscriptionManager {
     }
 
     /**
-     * Return the SubscriptionInfo for default voice subscription.
-     *
-     * Will return null on data only devices, or on error.
-     *
-     * @return the SubscriptionInfo for the default SMS subscription.
-     * @hide
-     */
-    public SubscriptionInfo getDefaultSmsSubscriptionInfo() {
-        return getActiveSubscriptionInfo(getDefaultSmsSubscriptionId());
-    }
-
-    /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public int getDefaultSmsPhoneId() {
-        return getPhoneId(getDefaultSmsSubscriptionId());
-    }
-
-    /**
      * Returns the system's default data subscription id.
      *
      * On a voice only device or on error, will return INVALID_SUBSCRIPTION_ID.
@@ -2334,6 +2392,7 @@ public class SubscriptionManager {
      * @return the default data subscription Id.
      */
     public static int getDefaultDataSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) return sGetDefaultDataSubIdCache.query(null);
         return sDefaultDataSubIdCache.query(null);
     }
 
@@ -2374,12 +2433,6 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
-    public int getDefaultDataPhoneId() {
-        return getPhoneId(getDefaultDataSubscriptionId());
-    }
-
-    /** @hide */
     public void clearSubscriptionInfo() {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
@@ -2391,21 +2444,6 @@ public class SubscriptionManager {
         }
 
         return;
-    }
-
-    //FIXME this is vulnerable to race conditions
-    /** @hide */
-    public boolean allDefaultsSelected() {
-        if (!isValidSubscriptionId(getDefaultDataSubscriptionId())) {
-            return false;
-        }
-        if (!isValidSubscriptionId(getDefaultSmsSubscriptionId())) {
-            return false;
-        }
-        if (!isValidSubscriptionId(getDefaultVoiceSubscriptionId())) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -2463,9 +2501,9 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
-        int[] subIds = SubscriptionManager.getSubId(phoneId);
-        if (subIds != null && subIds.length > 0) {
-            putPhoneIdAndSubIdExtra(intent, phoneId, subIds[0]);
+        int subId = SubscriptionManager.getSubscriptionId(phoneId);
+        if (isValidSubscriptionId(subId)) {
+            putPhoneIdAndSubIdExtra(intent, phoneId, subId);
         } else {
             logd("putPhoneIdAndSubIdExtra: no valid subs");
             intent.putExtra(PhoneConstants.PHONE_KEY, phoneId);
@@ -3083,7 +3121,7 @@ public class SubscriptionManager {
     @SystemApi
     public boolean canManageSubscription(@NonNull SubscriptionInfo info,
             @NonNull String packageName) {
-        if (info == null || info.getAllAccessRules() == null || packageName == null) {
+        if (info == null || info.getAccessRules() == null || packageName == null) {
             return false;
         }
         PackageManager packageManager = mContext.getPackageManager();
@@ -3095,7 +3133,7 @@ public class SubscriptionManager {
             logd("Unknown package: " + packageName);
             return false;
         }
-        for (UiccAccessRule rule : info.getAllAccessRules()) {
+        for (UiccAccessRule rule : info.getAccessRules()) {
             if (rule.getCarrierPrivilegeStatus(packageInfo)
                     == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 return true;
@@ -3438,7 +3476,6 @@ public class SubscriptionManager {
 
     /**
      * Get subscriptionInfo list of subscriptions that are in the same group of given subId.
-     * See {@link #createSubscriptionGroup(List)} for more details.
      *
      * Caller must have {@link android.Manifest.permission#READ_PHONE_STATE}
      * or carrier privilege permission on the subscription.
@@ -3818,6 +3855,9 @@ public class SubscriptionManager {
      * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
      */
     public static int getActiveDataSubscriptionId() {
+        if (isSubscriptionManagerServiceEnabled()) {
+            return sGetActiveDataSubscriptionIdCache.query(null);
+        }
         return sActiveDataSubIdCache.query(null);
     }
 
@@ -3861,6 +3901,11 @@ public class SubscriptionManager {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SLOT_INDEX_PROPERTY);
     }
 
+    /** @hide */
+    public static void invalidateSubscriptionManagerServiceCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_SUBSCRIPTION_MANAGER_SERVICE_PROPERTY);
+    }
+
     /**
      * Allows a test process to disable client-side caching operations.
      *
@@ -3872,7 +3917,16 @@ public class SubscriptionManager {
         sActiveDataSubIdCache.disableLocal();
         sDefaultSmsSubIdCache.disableLocal();
         sSlotIndexCache.disableLocal();
+        sSubIdCache.disableLocal();
         sPhoneIdCache.disableLocal();
+
+        sGetDefaultSubIdCache.disableLocal();
+        sGetDefaultDataSubIdCache.disableLocal();
+        sGetActiveDataSubscriptionIdCache.disableLocal();
+        sGetDefaultSmsSubIdCache.disableLocal();
+        sGetSlotIndexCache.disableLocal();
+        sGetSubIdCache.disableLocal();
+        sGetPhoneIdCache.disableLocal();
     }
 
     /**
@@ -3885,7 +3939,16 @@ public class SubscriptionManager {
         sActiveDataSubIdCache.clear();
         sDefaultSmsSubIdCache.clear();
         sSlotIndexCache.clear();
+        sSubIdCache.clear();
         sPhoneIdCache.clear();
+
+        sGetDefaultSubIdCache.clear();
+        sGetDefaultDataSubIdCache.clear();
+        sGetActiveDataSubscriptionIdCache.clear();
+        sGetDefaultSmsSubIdCache.clear();
+        sGetSlotIndexCache.clear();
+        sGetSubIdCache.clear();
+        sGetPhoneIdCache.clear();
     }
 
     /**
@@ -4132,6 +4195,162 @@ public class SubscriptionManager {
         setSubscriptionPropertyHelper(subscriptionId, "setUsageSetting",
                 (iSub)-> iSub.setUsageSetting(
                         usageSetting, subscriptionId, mContext.getOpPackageName()));
+    }
+
+    /**
+     * Convert phone number source to string.
+     *
+     * @param source The phone name source.
+     *
+     * @return The phone name source in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String phoneNumberSourceToString(@PhoneNumberSource int source) {
+        switch (source) {
+            case SubscriptionManager.PHONE_NUMBER_SOURCE_UICC: return "UICC";
+            case SubscriptionManager.PHONE_NUMBER_SOURCE_CARRIER: return "CARRIER";
+            case SubscriptionManager.PHONE_NUMBER_SOURCE_IMS: return "IMS";
+            default:
+                return "UNKNOWN(" + source + ")";
+        }
+    }
+
+    /**
+     * Convert display name source to string.
+     *
+     * @param source The display name source.
+     * @return The display name source in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String displayNameSourceToString(
+            @SubscriptionManager.SimDisplayNameSource int source) {
+        switch (source) {
+            case SubscriptionManager.NAME_SOURCE_UNKNOWN: return "UNKNOWN";
+            case SubscriptionManager.NAME_SOURCE_CARRIER_ID: return "CARRIER_ID";
+            case SubscriptionManager.NAME_SOURCE_SIM_SPN: return "SIM_SPN";
+            case SubscriptionManager.NAME_SOURCE_USER_INPUT: return "USER_INPUT";
+            case SubscriptionManager.NAME_SOURCE_CARRIER: return "CARRIER";
+            case SubscriptionManager.NAME_SOURCE_SIM_PNN: return "SIM_PNN";
+            default:
+                return "UNKNOWN(" + source + ")";
+        }
+    }
+
+    /**
+     * Convert subscription type to string.
+     *
+     * @param type The subscription type.
+     * @return The subscription type in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String subscriptionTypeToString(@SubscriptionManager.SubscriptionType int type) {
+        switch (type) {
+            case SubscriptionManager.SUBSCRIPTION_TYPE_LOCAL_SIM: return "LOCAL_SIM";
+            case SubscriptionManager.SUBSCRIPTION_TYPE_REMOTE_SIM: return "REMOTE_SIM";
+            default:
+                return "UNKNOWN(" + type + ")";
+        }
+    }
+
+    /**
+     * Convert usage setting to string.
+     *
+     * @param usageSetting Usage setting.
+     * @return The usage setting in string format.
+     *
+     * @hide
+     */
+    @NonNull
+    public static String usageSettingToString(@SubscriptionManager.UsageSetting int usageSetting) {
+        switch (usageSetting) {
+            case SubscriptionManager.USAGE_SETTING_UNKNOWN: return "UNKNOWN";
+            case SubscriptionManager.USAGE_SETTING_DEFAULT: return "DEFAULT";
+            case SubscriptionManager.USAGE_SETTING_VOICE_CENTRIC: return "VOICE_CENTRIC";
+            case SubscriptionManager.USAGE_SETTING_DATA_CENTRIC: return "DATA_CENTRIC";
+            default:
+                return "UNKNOWN(" + usageSetting + ")";
+        }
+    }
+
+    /**
+     * Set userHandle for a subscription.
+     *
+     * Used to set an association between a subscription and a user on the device so that voice
+     * calling and SMS from that subscription can be associated with that user.
+     * Data services are always shared between users on the device.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @param userHandle the userHandle associated with the subscription.
+     * Pass {@code null} user handle to clear the association.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
+    public void setSubscriptionUserHandle(int subscriptionId, @Nullable UserHandle userHandle) {
+        if (!isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("[setSubscriptionUserHandle]: "
+                    + "Invalid subscriptionId: " + subscriptionId);
+        }
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                iSub.setSubscriptionUserHandle(userHandle, subscriptionId);
+            } else {
+                throw new IllegalStateException("[setSubscriptionUserHandle]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get UserHandle of this subscription.
+     *
+     * Used to get user handle associated with this subscription.
+     *
+     * @param subscriptionId the subId of the subscription.
+     * @return userHandle associated with this subscription
+     * or {@code null} if subscription is not associated with any user.
+     *
+     * @throws IllegalArgumentException if subscription is invalid.
+     * @throws SecurityException if the caller doesn't have permissions required.
+     * @throws IllegalStateException if subscription service is not available.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_SUBSCRIPTION_USER_ASSOCIATION)
+    public @Nullable UserHandle getSubscriptionUserHandle(int subscriptionId) {
+        if (!isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("[getSubscriptionUserHandle]: "
+                    + "Invalid subscriptionId: " + subscriptionId);
+        }
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                return iSub.getSubscriptionUserHandle(subscriptionId);
+            } else {
+                throw new IllegalStateException("[getSubscriptionUserHandle]: "
+                        + "subscription service unavailable");
+            }
+        } catch (RemoteException ex) {
+            ex.rethrowAsRuntimeException();
+        }
+        return null;
     }
 }
 

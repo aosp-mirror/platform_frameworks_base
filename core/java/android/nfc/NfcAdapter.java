@@ -26,6 +26,8 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.app.Activity;
+import android.app.ActivityThread;
+import android.app.OnActivityPausedListener;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -41,7 +43,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -418,12 +419,14 @@ public final class NfcAdapter {
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
     static boolean sHasBeamFeature;
+    static boolean sHasCeFeature;
 
     // Final after first constructor, except for
     // attemptDeadServiceRecovery() when NFC crashes - we accept a best effort
     // recovery
     @UnsupportedAppUsage
     static INfcAdapter sService;
+    static NfcServiceManager.ServiceRegisterer sServiceRegisterer;
     static INfcTag sTagService;
     static INfcCardEmulation sCardEmulationService;
     static INfcFCardEmulation sNfcFCardEmulationService;
@@ -614,14 +617,22 @@ public final class NfcAdapter {
             pm = context.getPackageManager();
             sHasNfcFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC);
             sHasBeamFeature = pm.hasSystemFeature(PackageManager.FEATURE_NFC_BEAM);
-            boolean hasHceFeature =
+            sHasCeFeature =
                     pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
-                    || pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF);
+                    || pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION_NFCF)
+                    || pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC)
+                    || pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE);
             /* is this device meant to have NFC */
-            if (!sHasNfcFeature && !hasHceFeature) {
+            if (!sHasNfcFeature && !sHasCeFeature) {
                 Log.v(TAG, "this device does not have NFC support");
                 throw new UnsupportedOperationException();
             }
+            NfcServiceManager manager = NfcFrameworkInitializer.getNfcServiceManager();
+            if (manager == null) {
+                Log.e(TAG, "NfcServiceManager is null");
+                throw new UnsupportedOperationException();
+            }
+            sServiceRegisterer = manager.getNfcManagerServiceRegisterer();
             sService = getServiceInterface();
             if (sService == null) {
                 Log.e(TAG, "could not retrieve NFC service");
@@ -635,7 +646,7 @@ public final class NfcAdapter {
                     throw new UnsupportedOperationException();
                 }
             }
-            if (hasHceFeature) {
+            if (sHasCeFeature) {
                 try {
                     sNfcFCardEmulationService = sService.getNfcFCardEmulationInterface();
                 } catch (RemoteException e) {
@@ -663,7 +674,7 @@ public final class NfcAdapter {
     /** get handle to NFC service interface */
     private static INfcAdapter getServiceInterface() {
         /* get a handle to NFC service */
-        IBinder b = ServiceManager.getService("nfc");
+        IBinder b = sServiceRegisterer.get();
         if (b == null) {
             return null;
         }
@@ -693,12 +704,13 @@ public final class NfcAdapter {
                     "context not associated with any application (using a mock context?)");
         }
 
-        if (getServiceInterface() == null) {
-            // NFC is not available
-            return null;
+        if (sIsInitialized && sServiceRegisterer.tryGet() == null) {
+            synchronized (NfcAdapter.class) {
+                /* Stale sService pointer */
+                if (sIsInitialized) sIsInitialized = false;
+            }
         }
-
-        /* use getSystemService() for consistency */
+        /* Try to initialize the service */
         NfcManager manager = (NfcManager) context.getSystemService(Context.NFC_SERVICE);
         if (manager == null) {
             // NFC not available
@@ -1568,11 +1580,17 @@ public final class NfcAdapter {
         if (activity == null || intent == null) {
             throw new NullPointerException();
         }
+        if (!activity.isResumed()) {
+            throw new IllegalStateException("Foreground dispatch can only be enabled " +
+                    "when your activity is resumed");
+        }
         try {
             TechListParcel parcel = null;
             if (techLists != null && techLists.length > 0) {
                 parcel = new TechListParcel(techLists);
             }
+            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
+                    mForegroundDispatchListener);
             sService.setForegroundDispatch(intent, filters, parcel);
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
@@ -1600,8 +1618,25 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
         }
+        ActivityThread.currentActivityThread().unregisterOnActivityPausedListener(activity,
+                mForegroundDispatchListener);
+        disableForegroundDispatchInternal(activity, false);
+    }
+
+    OnActivityPausedListener mForegroundDispatchListener = new OnActivityPausedListener() {
+        @Override
+        public void onPaused(Activity activity) {
+            disableForegroundDispatchInternal(activity, true);
+        }
+    };
+
+    void disableForegroundDispatchInternal(Activity activity, boolean force) {
         try {
             sService.setForegroundDispatch(null, null, null);
+            if (!force && !activity.isResumed()) {
+                throw new IllegalStateException("You must disable foreground dispatching " +
+                        "while your activity is still resumed");
+            }
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
@@ -1814,7 +1849,7 @@ public final class NfcAdapter {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public boolean enableSecureNfc(boolean enable) {
-        if (!sHasNfcFeature) {
+        if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -1839,10 +1874,13 @@ public final class NfcAdapter {
      * Checks if the device supports Secure NFC functionality.
      *
      * @return True if device supports Secure NFC, false otherwise
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     * are unavailable
      */
     public boolean isSecureNfcSupported() {
-        if (!sHasNfcFeature) {
+        if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -1868,11 +1906,14 @@ public final class NfcAdapter {
      * such as their relative positioning on the device.
      *
      * @return Information on the nfc antenna(s) on the device.
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     * are unavailable
      */
     @Nullable
     public NfcAntennaInfo getNfcAntennaInfo() {
-        if (!sHasNfcFeature) {
+        if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -1897,12 +1938,15 @@ public final class NfcAdapter {
      * Checks Secure NFC feature is enabled.
      *
      * @return True if Secure NFC is enabled, false otherwise
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     * are unavailable
      * @throws UnsupportedOperationException if device doesn't support
      *         Secure NFC functionality. {@link #isSecureNfcSupported}
      */
     public boolean isSecureNfcEnabled() {
-        if (!sHasNfcFeature) {
+        if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -2249,14 +2293,17 @@ public final class NfcAdapter {
      * always on.
      * @param value if true the NFCC will be kept on (with no RF enabled if NFC adapter is
      * disabled), if false the NFCC will follow completely the Nfc adapter state.
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     * are unavailable
      * @return void
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean setControllerAlwaysOn(boolean value) {
-        if (!sHasNfcFeature) {
+        if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
         try {
@@ -2281,7 +2328,10 @@ public final class NfcAdapter {
      * Checks NFC controller always on feature is enabled.
      *
      * @return True if NFC controller always on is enabled, false otherwise
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     * are unavailable
      * @hide
      */
     @SystemApi
@@ -2309,13 +2359,16 @@ public final class NfcAdapter {
      * Checks if the device supports NFC controller always on functionality.
      *
      * @return True if device supports NFC controller always on, false otherwise
-     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @throws UnsupportedOperationException if FEATURE_NFC,
+     * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
+     * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
+     * are unavailable
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON)
     public boolean isControllerAlwaysOnSupported() {
-        if (!sHasNfcFeature) {
+        if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
         try {

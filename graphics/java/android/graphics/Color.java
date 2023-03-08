@@ -767,7 +767,7 @@ public class Color {
      * Returns the alpha component encoded in the specified color long.
      * The returned value is always in the range \([0..1]\).
      *
-     * @param color The color long whose blue channel to extract
+     * @param color The color long whose alpha channel to extract
      * @return A float value in the range \([0..1]\)
      *
      * @see #colorSpace(long)

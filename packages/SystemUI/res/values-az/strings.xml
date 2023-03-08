@@ -168,7 +168,7 @@
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> üzərindən qoşuldu."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> cihazına qoşulub."</string>
     <string name="accessibility_not_connected" msgid="4061305616351042142">"Qoşulu deyil."</string>
-    <string name="data_connection_roaming" msgid="375650836665414797">"Rominq"</string>
+    <string name="data_connection_roaming" msgid="375650836665414797">"Rouminq"</string>
     <string name="cell_data_off" msgid="4886198950247099526">"Deaktiv"</string>
     <string name="accessibility_airplane_mode" msgid="1899529214045998505">"Uçuş rejimi"</string>
     <string name="accessibility_vpn_on" msgid="8037549696057288731">"VPN aktivdir."</string>
@@ -607,7 +607,7 @@
     <item msgid="2681220472659720036">"Mübadilə buferi"</item>
     <item msgid="4795049793625565683">"Açar kodu"</item>
     <item msgid="80697951177515644">"Çevirin, klaviatura dəyişdirici"</item>
-    <item msgid="7626977989589303588">"Heç bir"</item>
+    <item msgid="7626977989589303588">"Heç biri"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="9156773083127904112">"Normal"</item>
@@ -855,6 +855,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"Yayımlamaq mümkün deyil"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"Yadda saxlamaq mümkün deyil. Yenə cəhd edin."</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"Yadda saxlamaq mümkün deyil."</string>
+    <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"Ən azı 4 simvoldan istifadə edin"</string>
+    <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"Maksimum 16 simvoldan istifadə edin"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Montaj nömrəsi"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Versiya nömrəsi mübadilə buferinə kopyalandı."</string>
     <string name="basic_status" msgid="2315371112182658176">"Açıq söhbət"</string>

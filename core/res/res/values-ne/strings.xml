@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"तपाईंले टाइप गर्नुभएको PIN मेल खाँदैन।"</string>
     <string name="invalidPin" msgid="7542498253319440408">"४ देखि ८ वटा नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"८ वटा नम्बरहरू वा सो भन्दा लामो एउटा PUK टाइप गर्नुहोस्।"</string>
-    <string name="needPuk" msgid="7321876090152422918">"तपाईंको SIM कार्ड PUK-लक छ। यसलाई अनलक गर्न PUK कोड टाइप गर्नुहोस्।"</string>
-    <string name="needPuk2" msgid="7032612093451537186">"SIM कार्ड अनलक गर्न PUK2 टाइप गर्नुहोस्।"</string>
+    <string name="needPuk" msgid="3503414069503752211">"तपाईंको SIM कार्ड PUK प्रयोग गरी लक गरिएको छ। उक्त SIM कार्ड अनलक गर्न PUK कोड टाइप गर्नुहोस्।"</string>
+    <string name="needPuk2" msgid="3910763547447344963">"SIM कार्ड अनब्लक गर्न PUK2 टाइप गर्नुहोस्।"</string>
     <string name="enablePin" msgid="2543771964137091212">"असफल, SIM/RUIM बन्द छ।"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">तपाईंसँग SIM बन्द हुनु अघि <xliff:g id="NUMBER_1">%d</xliff:g> बाँकी प्रयासहरू छन्।</item>
@@ -328,8 +328,8 @@
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"ट्याप गरिएका वस्तुहरू चर्को स्वरमा बोलिने छन् र इसाराहरूको प्रयोग गरेर स्क्रिनमा अन्वेषण गर्न सकिन्छ।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"आफुले टाइप गरेको पाठको निरीक्षण गर्नुहोस्"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"व्यक्तिगत डेटा जस्तै क्रेडिट कार्ड नम्बरहरू र पासवर्डहरू समावेश गर्दछ।"</string>
-    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"प्रदर्शन आवर्धन नियन्त्रण गर्नुहोस्"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"प्रदर्शनको जुम स्तर र स्थिति नियन्त्रण गर्नुहोस्।"</string>
+    <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"डिस्प्ले म्याग्निफिकेसन नियन्त्रण गर्नुहोस्"</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"डिस्प्लेको जुम लेबल र स्थिति नियन्त्रण गर्नुहोस्।"</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"इसाराहरू सम्बन्धी कार्य गर्नुहोस्"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"ट्याप, स्वाइप गर्न, थिच्न र अन्य इसाराहरू सम्बन्धी कार्य गर्न सक्छ"</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"फिंगरप्रिन्टका इसाराहरू"</string>
@@ -923,14 +923,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"फेरि प्रयास गर्नुहोस्"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"सबै सुविधाहरू र डेटाका लागि अनलक गर्नुहोस्"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"फेस अनलक प्रयोग गरी अनलक गर्ने प्रयास अत्याधिक धेरै भयो"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM कार्ड छैन"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ट्याब्लेटमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"तपाईंको Android टिभी डिभाइसमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"फोनमा SIM कार्ड छैन।"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"SIM कार्ड घुसाउनुहोस्"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM कार्ड छैन वा पढ्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"प्रयोग गर्न अयोग्य SIM कार्ड"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"तपाईंको SIM कार्ड स्थायी रूपमा अक्षम भयो।\n अर्को SIM कार्डको लागि आफनो ताररहित सेवा प्रदायकसँग सम्पर्क गर्नुहोस्।"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM कार्ड हालिएको छैन"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"ट्याब्लेटमा SIM कार्ड हालिएको छैन।"</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"तपाईंको Android TV डिभाइसमा SIM कार्ड हालिएको छैन।"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"फोनमा SIM कार्ड हालिएको छैन।"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM कार्ड हाल्नुहोस्।"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM कार्ड हालिएको छैन वा रिड गर्न मिल्दैन। SIM कार्ड हाल्नुहोस्।"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"यो SIM कार्ड प्रयोग गर्न मिल्दैन।"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"तपाईंको SIM कार्ड सदाका लागि डिएक्टिभेट गरिएको छ।\n आफ्नो वायरलेस सेवा प्रदायकलाई सम्पर्क गरी अर्को SIM कार्ड प्राप्त गर्नुहोस्।"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"अघिल्लो ट्रयाक"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"अर्को ट्रयाक"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"रोक्नुहोस्"</string>
@@ -940,10 +940,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"फास्ट फर्वार्ड"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"आपत्‌कालीन कलहरू मात्र"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"नेटवर्क लक छ"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM कार्ड PUK-लक गरिएको छ।"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM कार्ड PUK प्रयोग गरी लक गरिएको छ।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"प्रयोगकर्ता निर्देशक वा ग्राहक सेवा सम्पर्क हर्नुहोस्।"</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM कार्ड लक गरिएको छ।"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM कार्ड अनलक गरिँदै..."</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM कार्ड लक गरिएको छ।"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM कार्ड अनलक गरिँदै छ…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"तपाईँले तपाईँको अनलक प्याटर्न गलत तरिकाले <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक खिच्नु भएको छ। \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि कोसिस गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"तपाईंले गलत तरिकाले आफ्नो पासवर्ड <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नुभयो। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"तपाईँले गलत तरिकाले तपाईँको PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक टाइप गर्नु भएको छ। \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> सेकेन्डमा फेरि प्रयास गर्नुहोस्।"</string>
@@ -1326,10 +1326,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"तपाईं यसलाई पछि सेटिङहरूमा बदल्न सक्नु हुन्छ &gt; एपहरू"</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"सधैँ अनुमति दिनुहोस्"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"कहिल्यै अनुमति नदिनुहोस्"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM कार्ड हटाइयो"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"एउटा मान्य SIM कार्ड राखेर पुनःस्टार्ट नगरेसम्म मोबाइल नेटवर्क उपलब्ध हुने छैन।"</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"SIM कार्ड हटाइयो"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"तपाईंले वैध SIM कार्ड हालेर डिभाइस रिस्टार्ट गरेपछि मात्र मोबाइल नेटवर्क उपलब्ध हुने छ।"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"भयो"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM कार्ड थप गरियो"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"SIM कार्ड हालियो"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"मोबाइल नेटवर्क पहुँच गर्न तपाईँको उपकरण पुनःस्टार्ट गर्नुहोस्।"</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"पुनः सुरु गर्नुहोस्"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"मोबाइल सेवा अन गर्नुहोस्"</string>
@@ -1641,7 +1641,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्।  विवरणको लागि वाहकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित PIN कोड प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"मनपर्दो PIN कोड निश्चित गर्नुहोस्"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM कार्ड अनलक गर्दै…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM कार्ड अनलक गरिँदै छ…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"गलत PIN कोड।"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"४ देखि ८ वाट नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK कोड ८ संख्याको हुनु पर्दछ।"</string>

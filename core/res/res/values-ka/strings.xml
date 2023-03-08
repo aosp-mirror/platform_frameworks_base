@@ -42,8 +42,8 @@
     <string name="mismatchPin" msgid="2929611853228707473">"თქვენ მიერ შეყვანილი PIN კოდები არ შეესატყვისება."</string>
     <string name="invalidPin" msgid="7542498253319440408">"აკრიფეთ PIN, რომელიც შედგება 4-დან 8 ციფრამდე."</string>
     <string name="invalidPuk" msgid="8831151490931907083">"აკრიფეთ PUK, რომელიც რვა ან მეტი ციფრისგან შედგება."</string>
-    <string name="needPuk" msgid="7321876090152422918">"თქვენი SIM ბარათი დაბლოკილია PUK კოდით. განბლოკვისთვის შეიყვანეთ PUK კოდი."</string>
-    <string name="needPuk2" msgid="7032612093451537186">"SIM ბარათის განსაბლოკად აკრიფეთ PUK2."</string>
+    <string name="needPuk" msgid="3503414069503752211">"თქვენი SIM ბარათი დაბლოკილია PUK კოდით. განბლოკვისთვის შეიყვანეთ PUK კოდი."</string>
+    <string name="needPuk2" msgid="3910763547447344963">"აკრიფეთ PUK2 SIM-ის განბლოკვის მიზნით."</string>
     <string name="enablePin" msgid="2543771964137091212">"წარუმატებელი მცდელობა. ჩართეთ SIM/RUIM ჩაკეტვა."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="other">თქვენ დაგრჩათ <xliff:g id="NUMBER_1">%d</xliff:g> მცდელობა, სანამ SIM დაიბლოკება.</item>
@@ -309,7 +309,7 @@
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"მიკროფონი"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"აუდიოს ჩაწერა"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ფიზიკური აქტივობა"</string>
-    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ფიზიკური აქტივობაზე წვდომა"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"ფიზიკურ აქტივობაზე წვდომა"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"კამერა"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ფოტოებისა და ვიდეოების გადაღება"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"ახლომახლო მოწყობილობები"</string>
@@ -923,14 +923,14 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"კიდევ სცადეთ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ყველა ფუნქციისა და მონაცემის განბლოკვა"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"სახით განბლოკვის მცდელობამ დაშვებულ რაოდენობას გადააჭარბა"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"SIM ბარათი არ არის"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="8596805728510570760">"ტაბლეტში არ დევს SIM ბარათი."</string>
-    <string name="lockscreen_missing_sim_message" product="tv" msgid="2582768023352171073">"თქვენს Android TV მოწყობილობაში SIM ბარათი არ არის."</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="1408695081255172556">"არ არის SIM ბარათი ტელეფონში."</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="8473601862688263903">"ჩადეთ SIM ბარათი."</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="3664999892038416334">"SIM ბარათი არ არის ან არ იკითხება. ჩადეთ SIM ბარათი."</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="3812893366715730539">"არამოხმარებადი SIM ბარათი."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="4358929052509450807">"თქვენი SIM ბარათი გამუდმებით გამორთული იყო.\n დაუკავშირდით თქვენი უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"SIM არ არის"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"ტაბლეტში SIM არ არის."</string>
+    <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"თქვენს Android TV მოწყობილობაში SIM ბარათი არ არის."</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"ტელეფონში SIM არ არის."</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"SIM-ის დამატება."</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"SIM აკლია ან არ იკითხება. SIM-ის დამატება."</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"გამოუყენებელი SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"თქვენი SIM სამუდამოდ გამორთულია.\n დაუკავშირდით თქვენს უკაბელო სერვისის პროვაიდერს სხვა SIM ბარათისთვის."</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"წინა ჩანაწერი"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"შემდეგი ჩანაწერი"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"პაუზა"</string>
@@ -940,10 +940,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM ბარათი არის PUK-ით დაბლოკილი."</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM დაბლოკილია PUK-ით."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM ბარათი დაბლოკილია."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM ბარათის განბლოკვა…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"SIM-ბარათი ჩაკეტილია."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"SIM-ის განბლოკვა…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"თქვენ <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ დახატეთ განბლოკვის ნიმუში. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"თქვენ არასწორად დაბეჭდეთ თქვენი პაროლი <xliff:g id="NUMBER_0">%1$d</xliff:g> ჯერ. \n\nხელახლა სცადეთ <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"თქვენ <xliff:g id="NUMBER_0">%1$d</xliff:g>-ჯერ არასწორად შეიყვანეთ PIN კოდი. \n\nსცადეთ ხელახლა <xliff:g id="NUMBER_1">%2$d</xliff:g> წამში."</string>
@@ -1326,10 +1326,10 @@
     <string name="sms_short_code_remember_undo_instruction" msgid="2620984439143080410">"ამის შეცვლა შეგიძლიათ მოგვიანებით აპების პარამეტრებიდან."</string>
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"ნებართვის მიცემა - ყოველთვის"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"არასოდეს მისცე უფლება"</string>
-    <string name="sim_removed_title" msgid="5387212933992546283">"SIM ბარათი ამოღებულია"</string>
-    <string name="sim_removed_message" msgid="9051174064474904617">"მობილური კავშირი არ იქნება ხელმისაწვდომი, ვიდრე არ ჩადებთ ქმედით SIM ბარათს და გადატვირთავთ."</string>
+    <string name="sim_removed_title" msgid="1349026474932481037">"SIM ამოღებულია"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"მობილური ქსელი მიუწვდომელი იქნება, სანამ არ გადატვირთავთ მოქმედი SIM ბარათით."</string>
     <string name="sim_done_button" msgid="6464250841528410598">"დასრულდა"</string>
-    <string name="sim_added_title" msgid="7930779986759414595">"SIM ბარათი დაემატა"</string>
+    <string name="sim_added_title" msgid="2976783426741012468">"SIM დამატებულია"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"გადატვირთეთ თქვენი მოწყობილობა მობილურ ქსელზე წვდომისთვის."</string>
     <string name="sim_restart_button" msgid="8481803851341190038">"გადატვირთვა"</string>
     <string name="install_carrier_app_notification_title" msgid="5712723402213090102">"გაააქტიურეთ მობილური სერვისი"</string>
@@ -1641,7 +1641,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM ამჟამად დეაქტივირებულია. გასაგრძელებლად შეიყვანეთ PUK კოდი. დეტალებისთვის მიმართეთ მობილურ ოპერატორს."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"სასურველი PIN კოდის შეყვანა"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"სასურველი PIN კოდის დადასტურება"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"SIM ბარათის განბლოკვა…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"SIM-ის განბლოკვა…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"არასწორი PIN კოდი."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"აკრიფეთ PIN, რომელიც შედგება 4-დან 8 ციფრამდე."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"PUK-კოდი 8 ციფრისგან უნდა შედგებოდეს."</string>
