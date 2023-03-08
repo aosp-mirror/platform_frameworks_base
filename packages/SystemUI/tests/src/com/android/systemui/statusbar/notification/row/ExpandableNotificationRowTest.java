@@ -100,6 +100,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
         fakeFeatureFlags.set(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE, true);
+        fakeFeatureFlags.set(Flags.SENSITIVE_REVEAL_ANIM, false);
         mNotificationTestHelper.setFeatureFlags(fakeFeatureFlags);
     }
 
