@@ -3159,7 +3159,7 @@
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to query users on the
          device. -->
     <permission android:name="android.permission.QUERY_USERS"
-                android:protectionLevel="signature|role" />
+                android:protectionLevel="signature|privileged|role" />
 
     <!-- Allows an application to access data blobs across users. -->
     <permission android:name="android.permission.ACCESS_BLOBS_ACROSS_USERS"
