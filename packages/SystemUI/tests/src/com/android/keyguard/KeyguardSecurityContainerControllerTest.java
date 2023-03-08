@@ -521,6 +521,38 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testWillRunDismissFromKeyguardIsTrue() {
+        ActivityStarter.OnDismissAction action = mock(ActivityStarter.OnDismissAction.class);
+        when(action.willRunAnimationOnKeyguard()).thenReturn(true);
+        mKeyguardSecurityContainerController.setOnDismissAction(action, null /* cancelAction */);
+
+        mKeyguardSecurityContainerController.finish(false /* strongAuth */, 0 /* currentUser */);
+
+        assertThat(mKeyguardSecurityContainerController.willRunDismissFromKeyguard()).isTrue();
+    }
+
+    @Test
+    public void testWillRunDismissFromKeyguardIsFalse() {
+        ActivityStarter.OnDismissAction action = mock(ActivityStarter.OnDismissAction.class);
+        when(action.willRunAnimationOnKeyguard()).thenReturn(false);
+        mKeyguardSecurityContainerController.setOnDismissAction(action, null /* cancelAction */);
+
+        mKeyguardSecurityContainerController.finish(false /* strongAuth */, 0 /* currentUser */);
+
+        assertThat(mKeyguardSecurityContainerController.willRunDismissFromKeyguard()).isFalse();
+    }
+
+    @Test
+    public void testWillRunDismissFromKeyguardIsFalseWhenNoDismissActionSet() {
+        mKeyguardSecurityContainerController.setOnDismissAction(null /* action */,
+                null /* cancelAction */);
+
+        mKeyguardSecurityContainerController.finish(false /* strongAuth */, 0 /* currentUser */);
+
+        assertThat(mKeyguardSecurityContainerController.willRunDismissFromKeyguard()).isFalse();
+    }
+
+    @Test
     public void testOnStartingToHide() {
         mKeyguardSecurityContainerController.onStartingToHide();
         verify(mInputViewController).onStartingToHide();

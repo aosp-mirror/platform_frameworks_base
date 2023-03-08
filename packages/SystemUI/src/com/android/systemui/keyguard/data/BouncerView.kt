@@ -52,6 +52,7 @@ interface BouncerViewDelegate {
         cancelAction: Runnable?,
     )
     fun willDismissWithActions(): Boolean
+    fun willRunDismissFromKeyguard(): Boolean
     /** @return the {@link OnBackAnimationCallback} to animate Bouncer during a back gesture. */
     fun getBackCallback(): OnBackAnimationCallback
 }
