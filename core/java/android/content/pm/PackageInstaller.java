@@ -2935,13 +2935,14 @@ public class PackageInstaller {
          *             <li>The {@link InstallSourceInfo#getUpdateOwnerPackageName() update owner}
          *             of an existing version of the app (in other words, this install session is
          *             an app update) if the update ownership enforcement is enabled.</li>
-         *             <li>The {@link InstallSourceInfo#getInstallingPackageName() installer of
-         *             record} of an existing version of the app (in other words, this install
+         *             <li>The
+         *             {@link InstallSourceInfo#getInstallingPackageName() installer of record}
+         *             of an existing version of the app (in other words, this install
          *             session is an app update) if the update ownership enforcement isn't
          *             enabled.</li>
          *             <li>Updating itself.</li>
          *         </ul>
-         *     </li>>
+         *     </li>
          *     <li>The installer declares the
          *     {@link android.Manifest.permission#UPDATE_PACKAGES_WITHOUT_USER_ACTION
          *     UPDATE_PACKAGES_WITHOUT_USER_ACTION} permission.</li>

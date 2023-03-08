@@ -316,10 +316,12 @@ public abstract class Context {
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
             BIND_SHARED_ISOLATED_PROCESS,
-            // Intentionally not included, because it'd cause sign-extension.
+            // Intentionally not include BIND_EXTERNAL_SERVICE, because it'd cause sign-extension.
             // This would allow Android Studio to show a warning, if someone tries to use
             // BIND_EXTERNAL_SERVICE BindServiceFlags.
-            BIND_EXTERNAL_SERVICE_LONG
+            BIND_EXTERNAL_SERVICE_LONG,
+            // Make sure no flag uses the sign bit (most significant bit) of the long integer,
+            // to avoid future confusion.
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -338,6 +340,7 @@ public abstract class Context {
 
         /**
          * @return Return flags in 64 bits long integer.
+         * @hide
          */
         public long getValue() {
             return mValue;
@@ -678,13 +681,11 @@ public abstract class Context {
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
 
-
     /**
      * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
      * value that is compatible to {@link BindServiceFlags}.
      */
-    public static final long BIND_EXTERNAL_SERVICE_LONG = 0x8000_0000_0000_0000L;
-
+    public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
 
     /**
      * These bind flags reduce the strength of the binding such that we shouldn't

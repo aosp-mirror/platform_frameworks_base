@@ -254,7 +254,7 @@ package android {
     field public static final String PERFORM_SIM_ACTIVATION = "android.permission.PERFORM_SIM_ACTIVATION";
     field public static final String POWER_SAVER = "android.permission.POWER_SAVER";
     field public static final String PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE = "android.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE";
-    field public static final String PROVIDE_HYBRID_CREDENTIAL_SERVICE = "android.permission.PROVIDE_HYBRID_CREDENTIAL_SERVICE";
+    field public static final String PROVIDE_REMOTE_CREDENTIALS = "android.permission.PROVIDE_REMOTE_CREDENTIALS";
     field public static final String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final String PROVISION_DEMO_DEVICE = "android.permission.PROVISION_DEMO_DEVICE";
@@ -2363,6 +2363,8 @@ package android.app.search {
     method @NonNull public String getTargetId();
     method @NonNull public java.util.List<java.lang.String> getTargetIds();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int ACTION_DELETE = 9; // 0x9
+    field public static final int ACTION_DISMISS = 10; // 0xa
     field public static final int ACTION_DRAGNDROP = 7; // 0x7
     field public static final int ACTION_LAUNCH_KEYBOARD_FOCUS = 6; // 0x6
     field public static final int ACTION_LAUNCH_TOUCH = 5; // 0x5
@@ -3362,7 +3364,7 @@ package android.companion.virtual.sensor {
   }
 
   public static final class VirtualSensorConfig.Builder {
-    ctor public VirtualSensorConfig.Builder(int, @NonNull String);
+    ctor public VirtualSensorConfig.Builder(@IntRange(from=1) int, @NonNull String);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig build();
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setDirectChannelTypesSupported(int);
     method @NonNull public android.companion.virtual.sensor.VirtualSensorConfig.Builder setHighestDirectReportRateLevel(int);

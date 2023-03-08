@@ -24,6 +24,7 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -50,7 +51,8 @@ public class AudioPolicyConfig implements Parcelable {
         mMixes = conf.mMixes;
     }
 
-    AudioPolicyConfig(ArrayList<AudioMix> mixes) {
+    @VisibleForTesting
+    public AudioPolicyConfig(ArrayList<AudioMix> mixes) {
         mMixes = mixes;
     }
 

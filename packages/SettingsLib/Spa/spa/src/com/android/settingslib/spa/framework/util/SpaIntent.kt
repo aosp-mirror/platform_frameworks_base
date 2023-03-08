@@ -22,9 +22,11 @@ import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 
+const val SESSION_UNKNOWN = "unknown"
 const val SESSION_BROWSE = "browse"
 const val SESSION_SEARCH = "search"
 const val SESSION_SLICE = "slice"
+const val SESSION_EXTERNAL = "external"
 
 const val KEY_DESTINATION = "spaActivityDestination"
 const val KEY_HIGHLIGHT_ENTRY = "highlightEntry"

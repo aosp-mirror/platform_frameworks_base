@@ -1648,4 +1648,7 @@
         <item>Move right</item>
         <item>Move up</item>
     </string-array>
+
+    <!-- Formatting states for the scale of font size, in percent. Double "%" is required to represent the symbol "%". [CHAR LIMIT=20] -->
+    <string name="font_scale_percentage"> <xliff:g id="percentage">%1$d</xliff:g> %%</string>
 </resources>

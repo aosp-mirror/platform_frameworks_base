@@ -75,16 +75,17 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     @Test
-    public void test_trackMotionEvents() {
+    public void test_trackMotionEvents_dropUpEvent() {
         mDataProvider.onMotionEvent(appendDownEvent(2, 9));
         mDataProvider.onMotionEvent(appendMoveEvent(4, 7));
-        mDataProvider.onMotionEvent(appendUpEvent(6, 5));
+        mDataProvider.onMotionEvent(appendMoveEvent(6, 5));
+        mDataProvider.onMotionEvent(appendUpEvent(0, 0)); // event will be dropped
         List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
 
         assertThat(motionEventList.size()).isEqualTo(3);
         assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_DOWN);
         assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
-        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_UP);
+        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
         assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
         assertThat(motionEventList.get(1).getEventTime()).isEqualTo(2L);
         assertThat(motionEventList.get(2).getEventTime()).isEqualTo(3L);
@@ -94,6 +95,28 @@ public class FalsingDataProviderTest extends ClassifierTest {
         assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
         assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
         assertThat(motionEventList.get(2).getY()).isEqualTo(5f);
+    }
+
+    @Test
+    public void test_trackMotionEvents_keepUpEvent() {
+        mDataProvider.onMotionEvent(appendDownEvent(2, 9));
+        mDataProvider.onMotionEvent(appendMoveEvent(4, 7));
+        mDataProvider.onMotionEvent(appendUpEvent(0, 0, 100));
+        List<MotionEvent> motionEventList = mDataProvider.getRecentMotionEvents();
+
+        assertThat(motionEventList.size()).isEqualTo(3);
+        assertThat(motionEventList.get(0).getActionMasked()).isEqualTo(MotionEvent.ACTION_DOWN);
+        assertThat(motionEventList.get(1).getActionMasked()).isEqualTo(MotionEvent.ACTION_MOVE);
+        assertThat(motionEventList.get(2).getActionMasked()).isEqualTo(MotionEvent.ACTION_UP);
+        assertThat(motionEventList.get(0).getEventTime()).isEqualTo(1L);
+        assertThat(motionEventList.get(1).getEventTime()).isEqualTo(2L);
+        assertThat(motionEventList.get(2).getEventTime()).isEqualTo(100);
+        assertThat(motionEventList.get(0).getX()).isEqualTo(2f);
+        assertThat(motionEventList.get(1).getX()).isEqualTo(4f);
+        assertThat(motionEventList.get(2).getX()).isEqualTo(0f);
+        assertThat(motionEventList.get(0).getY()).isEqualTo(9f);
+        assertThat(motionEventList.get(1).getY()).isEqualTo(7f);
+        assertThat(motionEventList.get(2).getY()).isEqualTo(0f);
     }
 
     @Test

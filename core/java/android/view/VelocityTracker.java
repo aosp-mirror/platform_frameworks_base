@@ -32,9 +32,10 @@ import java.util.Map;
  *
  * Use {@link #obtain} to retrieve a new instance of the class when you are going
  * to begin tracking.  Put the motion events you receive into it with
- * {@link #addMovement(MotionEvent)}.  When you want to determine the velocity call
- * {@link #computeCurrentVelocity(int)} and then call {@link #getXVelocity(int)}
- * and {@link #getYVelocity(int)} to retrieve the velocity for each pointer id.
+ * {@link #addMovement(MotionEvent)}.  When you want to determine the velocity, call
+ * {@link #computeCurrentVelocity(int)} and then call the velocity-getter methods like
+ * {@link #getXVelocity(int)}, {@link #getYVelocity(int)}, or {@link #getAxisVelocity(int, int)}
+ * to retrieve velocity for different axes and/or pointer IDs.
  */
 public final class VelocityTracker {
     private static final SynchronizedPool<VelocityTracker> sPool =

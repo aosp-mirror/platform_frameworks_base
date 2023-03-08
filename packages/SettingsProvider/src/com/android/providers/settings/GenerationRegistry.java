@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import android.annotation.NonNull;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.ArrayMap;
@@ -59,6 +60,10 @@ final class GenerationRegistry {
     // Maximum size of an individual backing store
     static final int MAX_BACKING_STORE_SIZE = MemoryIntArray.getMaxSize();
 
+    // Use an empty string to track the generation number of all non-predefined, unset settings
+    // The generation number is only increased when a new non-predefined setting is inserted
+    private static final String DEFAULT_MAP_KEY_FOR_UNSET_SETTINGS = "";
+
     public GenerationRegistry(Object lock) {
         mLock = lock;
     }
@@ -72,6 +77,10 @@ final class GenerationRegistry {
                 (SettingsState.getTypeFromKey(key) == SettingsState.SETTINGS_TYPE_CONFIG);
         // Only store the prefix if the mutated setting is a config
         final String indexMapKey = isConfig ? (name.split("/")[0] + "/") : name;
+        incrementGenerationInternal(key, indexMapKey);
+    }
+
+    private void incrementGenerationInternal(int key, @NonNull String indexMapKey) {
         synchronized (mLock) {
             final MemoryIntArray backingStore = getBackingStoreLocked(key,
                     /* createIfNotExist= */ false);
@@ -87,7 +96,8 @@ final class GenerationRegistry {
                 final int generation = backingStore.get(index) + 1;
                 backingStore.set(index, generation);
                 if (DEBUG) {
-                    Slog.i(LOG_TAG, "Incremented generation for setting:" + indexMapKey
+                    Slog.i(LOG_TAG, "Incremented generation for "
+                            + (indexMapKey.isEmpty() ? "unset settings" : "setting:" + indexMapKey)
                             + " key:" + SettingsState.keyToString(key)
                             + " at index:" + index);
                 }
@@ -96,6 +106,18 @@ final class GenerationRegistry {
                 destroyBackingStoreLocked(key);
             }
         }
+    }
+
+    // A new, non-predefined setting has been inserted, increment the tracking number for all unset
+    // settings
+    public void incrementGenerationForUnsetSettings(int key) {
+        final boolean isConfig =
+                (SettingsState.getTypeFromKey(key) == SettingsState.SETTINGS_TYPE_CONFIG);
+        if (isConfig) {
+            // No need to track new settings for configs
+            return;
+        }
+        incrementGenerationInternal(key, DEFAULT_MAP_KEY_FOR_UNSET_SETTINGS);
     }
 
     /**
@@ -124,8 +146,8 @@ final class GenerationRegistry {
                 bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY,
                         backingStore.get(index));
                 if (DEBUG) {
-                    Slog.i(LOG_TAG, "Exported index:" + index
-                            + " for setting:" + indexMapKey
+                    Slog.i(LOG_TAG, "Exported index:" + index + " for "
+                            + (indexMapKey.isEmpty() ? "unset settings" : "setting:" + indexMapKey)
                             + " key:" + SettingsState.keyToString(key));
                 }
             } catch (IOException e) {
@@ -133,6 +155,10 @@ final class GenerationRegistry {
                 destroyBackingStoreLocked(key);
             }
         }
+    }
+
+    public void addGenerationDataForUnsetSettings(Bundle bundle, int key) {
+        addGenerationData(bundle, key, /* indexMapKey= */ DEFAULT_MAP_KEY_FOR_UNSET_SETTINGS);
     }
 
     public void onUserRemoved(int userId) {

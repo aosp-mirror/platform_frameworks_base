@@ -61,4 +61,11 @@ public interface WindowMagnificationSettingsCallback {
      * 1 : ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, 2 : ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
      */
     void onModeSwitch(int newMode);
+
+    /**
+     * Called when the visibility of the magnification settings panel changed.
+     *
+     * @param shown The visibility of the magnification settings panel.
+     */
+    void onSettingsPanelVisibilityChanged(boolean shown);
 }
