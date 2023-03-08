@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#pragma once
-
-#include <SkGainmapInfo.h>
-#include <SkImage.h>
-#include <hwui/Bitmap.h>
-#include <utils/LightRefBase.h>
+#include "Gainmap.h"
 
 namespace android::uirenderer {
 
-class Gainmap : public LightRefBase<Gainmap> {
-public:
-    SkGainmapInfo info;
-    sk_sp<Bitmap> bitmap;
-    static sp<Gainmap> allocateHardwareGainmap(const sp<Gainmap>& srcGainmap);
-};
+sp<Gainmap> Gainmap::allocateHardwareGainmap(const sp<Gainmap>& srcGainmap) {
+    auto gainmap = sp<Gainmap>::make();
+    gainmap->info = srcGainmap->info;
+    const SkBitmap skSrcBitmap = srcGainmap->bitmap->getSkBitmap();
+    sk_sp<Bitmap> skBitmap(Bitmap::allocateHardwareBitmap(skSrcBitmap));
+    if (!skBitmap.get()) {
+        return nullptr;
+    }
+    gainmap->bitmap = std::move(skBitmap);
+    return gainmap;
+}
 
 }  // namespace android::uirenderer
