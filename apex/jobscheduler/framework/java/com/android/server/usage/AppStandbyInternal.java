@@ -146,6 +146,8 @@ public interface AppStandbyInternal {
 
     void setActiveAdminApps(Set<String> adminPkgs, int userId);
 
+    void setAdminProtectedPackages(Set<String> packageNames, int userId);
+
     void onAdminDataAvailable();
 
     void clearCarrierPrivilegedApps();
