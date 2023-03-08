@@ -11996,7 +11996,8 @@ public class DevicePolicyManager {
 
     /**
      * Called by Device owner to disable user control over apps. User will not be able to clear
-     * app data or force-stop packages.
+     * app data or force-stop packages. Packages with user control disabled are exempted from
+     * App Standby Buckets.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param packages The package names for the apps.
