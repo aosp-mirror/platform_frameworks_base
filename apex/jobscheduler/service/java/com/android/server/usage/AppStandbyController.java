@@ -125,7 +125,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.usage.AppIdleHistory.AppUsageHistory;
@@ -592,7 +592,7 @@ public class AppStandbyController
     }
 
     public AppStandbyController(Context context) {
-        this(new Injector(context, JobSchedulerBackgroundThread.get().getLooper()));
+        this(new Injector(context, AppSchedulingModuleThread.get().getLooper()));
     }
 
     AppStandbyController(Injector injector) {
@@ -2761,7 +2761,7 @@ public class AppStandbyController
         void registerDeviceConfigPropertiesChangedListener(
                 @NonNull DeviceConfig.OnPropertiesChangedListener listener) {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_APP_STANDBY,
-                    JobSchedulerBackgroundThread.getExecutor(), listener);
+                    AppSchedulingModuleThread.getExecutor(), listener);
         }
 
         void dump(PrintWriter pw) {

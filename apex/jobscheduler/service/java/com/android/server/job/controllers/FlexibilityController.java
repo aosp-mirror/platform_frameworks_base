@@ -44,7 +44,7 @@ import android.util.SparseArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.utils.AlarmQueue;
 
@@ -183,7 +183,7 @@ public final class FlexibilityController extends StateController {
         mFlexibilityTracker = new FlexibilityTracker(NUM_FLEXIBLE_CONSTRAINTS);
         mFcConfig = new FcConfig();
         mFlexibilityAlarmQueue = new FlexibilityAlarmQueue(
-                mContext, JobSchedulerBackgroundThread.get().getLooper());
+                mContext, AppSchedulingModuleThread.get().getLooper());
         mPercentToDropConstraints =
                 mFcConfig.DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
         mPrefetchController = prefetchController;
@@ -427,7 +427,7 @@ public final class FlexibilityController extends StateController {
     @GuardedBy("mLock")
     public void onConstantsUpdatedLocked() {
         if (mFcConfig.mShouldReevaluateConstraints) {
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 final ArraySet<JobStatus> changedJobs = new ArraySet<>();
                 synchronized (mLock) {
                     final long nowElapsed = sElapsedRealtimeClock.millis();

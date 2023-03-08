@@ -52,7 +52,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
@@ -1347,7 +1347,7 @@ public final class ConnectivityController extends RestrictingController implemen
                 TelephonyManager idTm = telephonyManager.createForSubscriptionId(subId);
                 CellSignalStrengthCallback callback = new CellSignalStrengthCallback();
                 idTm.registerTelephonyCallback(
-                        JobSchedulerBackgroundThread.getExecutor(), callback);
+                        AppSchedulingModuleThread.getExecutor(), callback);
                 mSignalStrengths.put(subId, callback);
 
                 final SignalStrength signalStrength = idTm.getSignalStrength();
