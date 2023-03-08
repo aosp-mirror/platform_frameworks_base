@@ -51,6 +51,8 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSContainerController;
@@ -60,6 +62,7 @@ import com.android.systemui.qs.dagger.QSFragmentComponent;
 import com.android.systemui.qs.footer.ui.binder.FooterActionsViewBinder;
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -112,6 +115,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final MediaHost mQqsMediaHost;
     private final QSFragmentComponent.Factory mQsComponentFactory;
     private final QSFragmentDisableFlagsLogger mQsFragmentDisableFlagsLogger;
+    private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final FeatureFlags mFeatureFlags;
     private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
@@ -159,12 +164,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     // visible;
     private boolean mQsVisible;
 
-    /**
-     * Whether the notification panel uses the full width of the screen.
-     *
-     * Usually {@code true} on small screens, and {@code false} on large screens.
-     */
-    private boolean mIsNotificationPanelFullWidth;
+    private boolean mIsSmallScreen;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -176,13 +176,17 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
             DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
-            FooterActionsViewModel.Factory footerActionsViewModelFactory) {
+            FooterActionsViewModel.Factory footerActionsViewModelFactory,
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            FeatureFlags featureFlags) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
         mQsComponentFactory = qsComponentFactory;
         mQsFragmentDisableFlagsLogger = qsFragmentDisableFlagsLogger;
         mLogger = qsLogger;
+        mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mFeatureFlags = featureFlags;
         commandQueue.observe(getLifecycle(), this);
         mBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
@@ -607,7 +611,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public void setIsNotificationPanelFullWidth(boolean isFullWidth) {
-        mIsNotificationPanelFullWidth = isFullWidth;
+        mIsSmallScreen = isFullWidth;
     }
 
     @Override
@@ -710,7 +714,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     private float calculateAlphaProgress(float panelExpansionFraction) {
-        if (mIsNotificationPanelFullWidth) {
+        if (mIsSmallScreen) {
             // Small screens. QS alpha is not animated.
             return 1;
         }
@@ -745,7 +749,12 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             // Alpha progress should be linear on lockscreen shade expansion.
             return progress;
         }
-        return ShadeInterpolation.getContentAlpha(progress);
+        if (mIsSmallScreen || !mFeatureFlags.isEnabled(
+                Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+            return ShadeInterpolation.getContentAlpha(progress);
+        } else {
+            return mLargeScreenShadeInterpolator.getQsAlpha(progress);
+        }
     }
 
     @VisibleForTesting
