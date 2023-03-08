@@ -384,10 +384,10 @@ public class SplashscreenContentDrawer {
 
     private static int estimateWindowBGColor(Drawable themeBGDrawable) {
         final DrawableColorTester themeBGTester = new DrawableColorTester(
-                themeBGDrawable, DrawableColorTester.TRANSPARENT_FILTER /* filterType */);
-        if (themeBGTester.passFilterRatio() == 0) {
-            // the window background is transparent, unable to draw
-            Slog.w(TAG, "Window background is transparent, fill background with black color");
+                themeBGDrawable, DrawableColorTester.TRANSLUCENT_FILTER /* filterType */);
+        if (themeBGTester.passFilterRatio() != 1) {
+            // the window background is translucent, unable to draw
+            Slog.w(TAG, "Window background is translucent, fill background with black color");
             return getSystemBGColor();
         } else {
             return themeBGTester.getDominateColor();
@@ -870,7 +870,7 @@ public class SplashscreenContentDrawer {
             @Override
             public float passFilterRatio() {
                 final int alpha = mColorDrawable.getAlpha();
-                return (float) (alpha / 255);
+                return alpha / 255.0f;
             }
 
             @Override
