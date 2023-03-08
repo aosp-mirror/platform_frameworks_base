@@ -180,6 +180,10 @@ public final class MediaProjection {
      *                               is registered. If the target SDK is less than
      *                               {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE U}, no
      *                               exception is thrown.
+     * @throws SecurityException If attempting to create a new virtual display associated with this
+     *                           MediaProjection instance after it has been stopped by invoking
+     *                           {@link #stop()}.
+     *
      * @see VirtualDisplay
      * @see VirtualDisplay.Callback
      */
