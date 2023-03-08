@@ -434,14 +434,15 @@ public class SharedConnectivityManager {
     /**
      * Gets the list of hotspot networks the user can select to connect to.
      *
-     * @return Returns a {@link List} of {@link HotspotNetwork} objects, empty list on failure.
+     * @return Returns a {@link List} of {@link HotspotNetwork} objects, null on failure.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
-    @NonNull
+    @SuppressWarnings("NullableCollection")
+    @Nullable
     public List<HotspotNetwork> getHotspotNetworks() {
         if (mService == null) {
-            return List.of();
+            return null;
         }
 
         try {
@@ -449,20 +450,21 @@ public class SharedConnectivityManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in getHotspotNetworks", e);
         }
-        return List.of();
+        return null;
     }
 
     /**
      * Gets the list of known networks the user can select to connect to.
      *
-     * @return Returns a {@link List} of {@link KnownNetwork} objects, empty list on failure.
+     * @return Returns a {@link List} of {@link KnownNetwork} objects, null on failure.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.NETWORK_SETTINGS,
             android.Manifest.permission.NETWORK_SETUP_WIZARD})
-    @NonNull
+    @SuppressWarnings("NullableCollection")
+    @Nullable
     public List<KnownNetwork> getKnownNetworks() {
         if (mService == null) {
-            return List.of();
+            return null;
         }
 
         try {
@@ -470,7 +472,7 @@ public class SharedConnectivityManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in getKnownNetworks", e);
         }
-        return List.of();
+        return null;
     }
 
     /**
