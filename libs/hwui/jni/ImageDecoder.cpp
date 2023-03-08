@@ -354,7 +354,8 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     // cost of RAM
     if (result == SkCodec::kSuccess && !jpostProcess && !preferRamOverQuality) {
         // The gainmap costs RAM to improve quality, so skip this if we're prioritizing RAM instead
-        result = decoder->extractGainmap(nativeBitmap.get());
+        result = decoder->extractGainmap(nativeBitmap.get(),
+                                         allocator == kSharedMemory_Allocator ? true : false);
         jexception = get_and_clear_exception(env);
     }
 
