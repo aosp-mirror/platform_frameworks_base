@@ -1000,7 +1000,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     Activity findActivityBelow(@NonNull Activity activity) {
         Activity activityBelow = null;
         final TaskFragmentContainer container = getContainerWithActivity(activity);
-        if (container != null) {
+        // Looking for the activity below from the information we already have if the container
+        // only embeds activities of the same process because activities of other processes are not
+        // available in this embedding host process for security concern.
+        if (container != null && !container.hasCrossProcessActivities()) {
             final List<Activity> containerActivities = container.collectNonFinishingActivities();
             final int index = containerActivities.indexOf(activity);
             if (index > 0) {
