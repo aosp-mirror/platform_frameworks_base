@@ -2821,9 +2821,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         int intrinsicBefore = getIntrinsicHeight();
         mSensitive = sensitive;
         mSensitiveHiddenInGeneral = hideSensitive;
-        if (intrinsicBefore != getIntrinsicHeight()) {
-            // The animation has a few flaws and is highly visible, so jump cut instead.
-            notifyHeightChanged(false /* needsAnimation */);
+        int intrinsicAfter = getIntrinsicHeight();
+        if (intrinsicBefore != intrinsicAfter) {
+            boolean needsAnimation = mFeatureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
+            notifyHeightChanged(needsAnimation);
         }
     }
 
@@ -2880,13 +2881,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         View[] publicViews = new View[]{mPublicLayout};
         View[] hiddenChildren = showingPublic ? privateViews : publicViews;
         View[] shownChildren = showingPublic ? publicViews : privateViews;
+        // disappear/appear overlap: 10 percent of duration
+        long overlap = duration / 10;
+        // disappear duration: 1/3 of duration + half of overlap
+        long disappearDuration = duration / 3 + overlap / 2;
+        // appear duration: 2/3 of duration + half of overlap
+        long appearDuration = (duration - disappearDuration) + overlap / 2;
         for (final View hiddenView : hiddenChildren) {
             hiddenView.setVisibility(View.VISIBLE);
             hiddenView.animate().cancel();
             hiddenView.animate()
                     .alpha(0f)
                     .setStartDelay(delay)
-                    .setDuration(duration)
+                    .setDuration(disappearDuration)
                     .withEndAction(() -> {
                         hiddenView.setVisibility(View.INVISIBLE);
                         resetAllContentAlphas();
@@ -2898,8 +2905,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             showView.animate().cancel();
             showView.animate()
                     .alpha(1f)
-                    .setStartDelay(delay)
-                    .setDuration(duration);
+                    .setStartDelay(delay + duration - appearDuration)
+                    .setDuration(appearDuration);
         }
     }
 
