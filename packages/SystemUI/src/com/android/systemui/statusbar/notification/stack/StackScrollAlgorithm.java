@@ -29,6 +29,9 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.R;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.LegacySourceType;
@@ -135,7 +138,6 @@ public class StackScrollAlgorithm {
                                   AmbientState ambientState) {
         for (ExpandableView view : algorithmState.visibleChildren) {
             final ViewState viewState = view.getViewState();
-
             final boolean isHunGoingToShade = ambientState.isShadeExpanded()
                     && view == ambientState.getTrackedHeadsUpRow();
 
@@ -148,9 +150,14 @@ public class StackScrollAlgorithm {
             } else if (ambientState.isExpansionChanging()) {
                 // Adjust alpha for shade open & close.
                 float expansion = ambientState.getExpansionFraction();
-                viewState.setAlpha(ambientState.isBouncerInTransit()
-                        ? BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion)
-                        : ShadeInterpolation.getContentAlpha(expansion));
+                if (ambientState.isBouncerInTransit()) {
+                    viewState.setAlpha(
+                            BouncerPanelExpansionCalculator.aboutToShowBouncerProgress(expansion));
+                } else if (view instanceof FooterView) {
+                    viewState.setAlpha(interpolateFooterAlpha(ambientState));
+                } else {
+                    viewState.setAlpha(interpolateNotificationContentAlpha(ambientState));
+                }
             }
 
             // For EmptyShadeView if on keyguard, we need to control the alpha to create
@@ -180,6 +187,28 @@ public class StackScrollAlgorithm {
                 }
             }
         }
+    }
+
+    private float interpolateFooterAlpha(AmbientState ambientState) {
+        float expansion = ambientState.getExpansionFraction();
+        FeatureFlags flags = ambientState.getFeatureFlags();
+        if (ambientState.isSmallScreen()
+                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+            return ShadeInterpolation.getContentAlpha(expansion);
+        }
+        LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
+        return interpolator.getNotificationFooterAlpha(expansion);
+    }
+
+    private float interpolateNotificationContentAlpha(AmbientState ambientState) {
+        float expansion = ambientState.getExpansionFraction();
+        FeatureFlags flags = ambientState.getFeatureFlags();
+        if (ambientState.isSmallScreen()
+                || !flags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+            return ShadeInterpolation.getContentAlpha(expansion);
+        }
+        LargeScreenShadeInterpolator interpolator = ambientState.getLargeScreenShadeInterpolator();
+        return interpolator.getNotificationContentAlpha(expansion);
     }
 
     /**
