@@ -29,8 +29,11 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.SuppressLint;
 import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -86,6 +89,7 @@ public class RotationButtonController {
     private RotationButton mRotationButton;
 
     private boolean mIsRecentsAnimationRunning;
+    private boolean mDocked;
     private boolean mHomeRotationEnabled;
     private int mLastRotationSuggestion;
     private boolean mPendingRotationSuggestion;
@@ -123,6 +127,12 @@ public class RotationButtonController {
             () -> mPendingRotationSuggestion = false;
     private Animator mRotateHideAnimator;
 
+    private final BroadcastReceiver mDockedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateDockedState(intent);
+        }
+    };
 
     private final IRotationWatcher.Stub mRotationWatcher = new IRotationWatcher.Stub() {
         @Override
@@ -136,7 +146,8 @@ public class RotationButtonController {
                 // The isVisible check makes the rotation button disappear when we are not locked
                 // (e.g. for tabletop auto-rotate).
                 if (rotationLocked || mRotationButton.isVisible()) {
-                    if (shouldOverrideUserLockPrefs(rotation) && rotationLocked) {
+                    // Do not allow a change in rotation to set user rotation when docked.
+                    if (shouldOverrideUserLockPrefs(rotation) && rotationLocked && !mDocked) {
                         setRotationLockedAtAngle(rotation);
                     }
                     setRotateSuggestionButtonState(false /* visible */, true /* forced */);
@@ -214,6 +225,10 @@ public class RotationButtonController {
         }
 
         mListenersRegistered = true;
+
+        updateDockedState(mContext.registerReceiver(mDockedReceiver,
+                new IntentFilter(Intent.ACTION_DOCK_EVENT)));
+
         try {
             WindowManagerGlobal.getWindowManagerService()
                     .watchRotation(mRotationWatcher, DEFAULT_DISPLAY);
@@ -234,6 +249,8 @@ public class RotationButtonController {
         }
 
         mListenersRegistered = false;
+
+        mContext.unregisterReceiver(mDockedReceiver);
         try {
             WindowManagerGlobal.getWindowManagerService().removeRotationWatcher(mRotationWatcher);
         } catch (RemoteException e) {
@@ -343,6 +360,15 @@ public class RotationButtonController {
     public void setHomeRotationEnabled(boolean enabled) {
         mHomeRotationEnabled = enabled;
         updateRotationButtonStateInOverview();
+    }
+
+    private void updateDockedState(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        mDocked = intent.getIntExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED)
+                != Intent.EXTRA_DOCK_STATE_UNDOCKED;
     }
 
     private void updateRotationButtonStateInOverview() {
