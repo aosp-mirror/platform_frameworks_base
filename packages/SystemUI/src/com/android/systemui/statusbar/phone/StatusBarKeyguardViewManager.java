@@ -733,7 +733,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             } else {
                 showBouncerOrKeyguard(hideBouncerWhenShowing);
             }
-            hideAlternateBouncer(false);
+            if (hideBouncerWhenShowing) {
+                hideAlternateBouncer(false);
+            }
             mKeyguardUpdateManager.sendKeyguardReset();
             updateStates();
         }
