@@ -75,14 +75,13 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import org.junit.After
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mock
@@ -99,13 +98,15 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var logger: MobileInputLogger
     @Mock private lateinit var tableLogger: TableLogBuffer
 
-    private val scope = CoroutineScope(IMMEDIATE)
     private val mobileMappings = FakeMobileMappingsProxy()
     private val systemUiCarrierConfig =
         SystemUiCarrierConfig(
             SUB_1_ID,
             createTestConfig(),
         )
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setUp() {
@@ -127,18 +128,13 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 IMMEDIATE,
                 logger,
                 tableLogger,
-                scope,
+                testScope.backgroundScope,
             )
-    }
-
-    @After
-    fun tearDown() {
-        scope.cancel()
     }
 
     @Test
     fun emergencyOnly() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isEmergencyOnly.onEach { latest = it }.launchIn(this)
 
@@ -154,7 +150,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun emergencyOnly_toggles() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isEmergencyOnly.onEach { latest = it }.launchIn(this)
 
@@ -174,7 +170,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun cdmaLevelUpdates() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Int? = null
             val job = underTest.cdmaLevel.onEach { latest = it }.launchIn(this)
 
@@ -194,7 +190,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun gsmLevelUpdates() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Int? = null
             val job = underTest.primaryLevel.onEach { latest = it }.launchIn(this)
 
@@ -214,7 +210,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun isGsm() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isGsm.onEach { latest = it }.launchIn(this)
 
@@ -234,7 +230,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_connected() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -249,7 +245,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_connecting() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -264,7 +260,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_disconnected() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -279,7 +275,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_disconnecting() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -294,7 +290,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_suspended() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -309,7 +305,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_handoverInProgress() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -324,7 +320,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_unknown() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -339,7 +335,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataConnectionState_invalid() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataConnectionState? = null
             val job = underTest.dataConnectionState.onEach { latest = it }.launchIn(this)
 
@@ -354,7 +350,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataActivity() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.dataActivityDirection.onEach { latest = it }.launchIn(this)
 
@@ -368,7 +364,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun carrierNetworkChange() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.carrierNetworkChangeActive.onEach { latest = it }.launchIn(this)
 
@@ -382,7 +378,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkType_default() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: ResolvedNetworkType? = null
             val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
 
@@ -395,7 +391,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkType_unknown_hasCorrectKey() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: ResolvedNetworkType? = null
             val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
 
@@ -413,7 +409,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkType_updatesUsingDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: ResolvedNetworkType? = null
             val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
 
@@ -430,7 +426,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkType_updatesUsingOverride() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: ResolvedNetworkType? = null
             val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
 
@@ -451,7 +447,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun dataEnabled_initial_false() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             whenever(telephonyManager.isDataConnectionAllowed).thenReturn(false)
 
             assertThat(underTest.dataEnabled.value).isFalse()
@@ -459,7 +455,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun isDataEnabled_tracksTelephonyCallback() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.dataEnabled.onEach { latest = it }.launchIn(this)
 
@@ -479,7 +475,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun numberOfLevels_isDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Int? = null
             val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
 
@@ -490,7 +486,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun roaming_cdma_queriesTelephonyManager() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.cdmaRoaming.onEach { latest = it }.launchIn(this)
 
@@ -520,7 +516,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
      */
     @Test
     fun cdmaRoaming_ignoresNegativeOne() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.cdmaRoaming.onEach { latest = it }.launchIn(this)
 
@@ -540,7 +536,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun roaming_gsm_queriesServiceState() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
 
@@ -566,7 +562,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun activity_updatesFromCallback() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: DataActivityModel? = null
             val job = underTest.dataActivityDirection.onEach { latest = it }.launchIn(this)
 
@@ -603,7 +599,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkName_default() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
 
@@ -614,7 +610,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkName_usesBroadcastInfo_returnsDerived() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
 
@@ -631,7 +627,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkName_broadcastNotForThisSubId_keepsOldValue() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
 
@@ -656,7 +652,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun networkName_broadcastHasNoData_updatesToDefault() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
 
@@ -683,7 +679,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun operatorAlphaShort_tracked() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: String? = null
 
             val job = underTest.operatorAlphaShort.onEach { latest = it }.launchIn(this)
@@ -705,7 +701,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun isInService_notIwlan() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
@@ -730,7 +726,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun isInService_isIwlan_voiceOutOfService_dataInService() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
@@ -755,7 +751,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     fun numberOfLevels_usesCarrierConfig() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Int? = null
             val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
 
