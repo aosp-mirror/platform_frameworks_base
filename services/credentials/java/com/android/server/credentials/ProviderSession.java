@@ -114,7 +114,7 @@ public abstract class ProviderSession<T, R>
                 @Nullable String message);
     }
 
-    protected ProviderSession(@NonNull Context context, @NonNull CredentialProviderInfo info,
+    protected ProviderSession(@NonNull Context context, @Nullable CredentialProviderInfo info,
             @NonNull T providerRequest,
             @Nullable ProviderInternalCallback callbacks,
             @NonNull int userId,
