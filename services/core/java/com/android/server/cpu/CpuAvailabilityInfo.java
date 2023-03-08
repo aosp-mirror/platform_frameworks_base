@@ -21,6 +21,8 @@ import static com.android.server.cpu.CpuAvailabilityMonitoringConfig.CPUSET_BACK
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Objects;
+
 /** CPU availability information. */
 public final class CpuAvailabilityInfo {
     /** Constant to indicate missing CPU availability percent. */
@@ -35,29 +37,64 @@ public final class CpuAvailabilityInfo {
     @CpuAvailabilityMonitoringConfig.Cpuset
     public final int cpuset;
 
+    /** Uptime (in milliseconds) when the data in this object was captured. */
+    public final long dataTimestampUptimeMillis;
+
     /** The latest average CPU availability percent. */
     public final int latestAvgAvailabilityPercent;
 
-    /** The past N-second average CPU availability percent. */
-    public final int pastNSecAvgAvailabilityPercent;
+    /**
+     * The past N-millisecond average CPU availability percent.
+     *
+     * <p>When there is not enough data to calculate the past N-millisecond average, this field will
+     * contain the value {@link MISSING_CPU_AVAILABILITY_PERCENT}.
+     */
+    public final int pastNMillisAvgAvailabilityPercent;
 
-    /** The duration over which the {@link pastNSecAvgAvailabilityPercent} was calculated. */
-    public final int avgAvailabilityDurationSec;
+    /** The duration over which the {@link pastNMillisAvgAvailabilityPercent} was calculated. */
+    public final long pastNMillisDuration;
 
     @Override
     public String toString() {
-        return "CpuAvailabilityInfo{" + "cpuset=" + cpuset + ", latestAvgAvailabilityPercent="
-                + latestAvgAvailabilityPercent + ", pastNSecAvgAvailabilityPercent="
-                + pastNSecAvgAvailabilityPercent + ", avgAvailabilityDurationSec="
-                + avgAvailabilityDurationSec + '}';
+        return "CpuAvailabilityInfo{" + "cpuset = " + cpuset + ", dataTimestampUptimeMillis = "
+                + dataTimestampUptimeMillis + ", latestAvgAvailabilityPercent = "
+                + latestAvgAvailabilityPercent + ", pastNMillisAvgAvailabilityPercent = "
+                + pastNMillisAvgAvailabilityPercent + ", pastNMillisDuration = "
+                + pastNMillisDuration + '}';
     }
 
-    CpuAvailabilityInfo(int cpuset, int latestAvgAvailabilityPercent,
-            int pastNSecAvgAvailabilityPercent, int avgAvailabilityDurationSec) {
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CpuAvailabilityInfo)) {
+            return false;
+        }
+        CpuAvailabilityInfo info = (CpuAvailabilityInfo) obj;
+        return cpuset == info.cpuset && dataTimestampUptimeMillis == info.dataTimestampUptimeMillis
+                && latestAvgAvailabilityPercent == info.latestAvgAvailabilityPercent
+                && pastNMillisAvgAvailabilityPercent == info.pastNMillisAvgAvailabilityPercent
+                && pastNMillisDuration == info.pastNMillisDuration;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cpuset, dataTimestampUptimeMillis, latestAvgAvailabilityPercent,
+                pastNMillisAvgAvailabilityPercent, pastNMillisDuration);
+    }
+
+    CpuAvailabilityInfo(int cpuset, long dataTimestampUptimeMillis,
+            int latestAvgAvailabilityPercent, int pastNMillisAvgAvailabilityPercent,
+            long pastNMillisDuration) {
         this.cpuset = Preconditions.checkArgumentInRange(cpuset, CPUSET_ALL, CPUSET_BACKGROUND,
                 "cpuset");
-        this.latestAvgAvailabilityPercent = latestAvgAvailabilityPercent;
-        this.pastNSecAvgAvailabilityPercent = pastNSecAvgAvailabilityPercent;
-        this.avgAvailabilityDurationSec = avgAvailabilityDurationSec;
+        this.dataTimestampUptimeMillis =
+                Preconditions.checkArgumentNonnegative(dataTimestampUptimeMillis);
+        this.latestAvgAvailabilityPercent = Preconditions.checkArgumentNonnegative(
+                latestAvgAvailabilityPercent);
+        this.pastNMillisAvgAvailabilityPercent = pastNMillisAvgAvailabilityPercent;
+        this.pastNMillisDuration = Preconditions.checkArgumentNonnegative(
+                pastNMillisDuration);
     }
 }

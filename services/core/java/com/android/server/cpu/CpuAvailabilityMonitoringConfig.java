@@ -90,8 +90,19 @@ public final class CpuAvailabilityMonitoringConfig {
 
     @Override
     public String toString() {
-        return "CpuAvailabilityMonitoringConfig{cpuset=" + cpuset + ", mThresholds=" + mThresholds
-                + ')';
+        return "CpuAvailabilityMonitoringConfig{cpuset=" + toCpusetString(cpuset) + ", mThresholds="
+                + mThresholds + ')';
+    }
+
+    /** Returns the string equivalent of the provided cpuset. */
+    public static String toCpusetString(int cpuset) {
+        switch (cpuset) {
+            case CPUSET_ALL:
+                return "CPUSET_ALL";
+            case CPUSET_BACKGROUND:
+                return "CPUSET_BACKGROUND";
+        }
+        return "Invalid cpuset: " + cpuset;
     }
 
     private CpuAvailabilityMonitoringConfig(Builder builder) {
