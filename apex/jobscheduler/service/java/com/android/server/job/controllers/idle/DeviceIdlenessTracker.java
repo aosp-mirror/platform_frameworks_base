@@ -31,7 +31,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -102,10 +102,10 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
         filter.addAction(Intent.ACTION_DOCK_IDLE);
         filter.addAction(Intent.ACTION_DOCK_ACTIVE);
 
-        context.registerReceiver(this, filter, null, JobSchedulerBackgroundThread.getHandler());
+        context.registerReceiver(this, filter, null, AppSchedulingModuleThread.getHandler());
 
         context.getSystemService(UiModeManager.class).addOnProjectionStateChangedListener(
-                UiModeManager.PROJECTION_TYPE_ALL, JobSchedulerBackgroundThread.getExecutor(),
+                UiModeManager.PROJECTION_TYPE_ALL, AppSchedulingModuleThread.getExecutor(),
                 mOnProjectionStateChangedListener);
     }
 
@@ -226,7 +226,7 @@ public final class DeviceIdlenessTracker extends BroadcastReceiver implements Id
             }
             mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     when, mIdleWindowSlop, "JS idleness",
-                    JobSchedulerBackgroundThread.getExecutor(), mIdleAlarmListener);
+                    AppSchedulingModuleThread.getExecutor(), mIdleAlarmListener);
         }
     }
 
