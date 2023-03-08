@@ -19,7 +19,6 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.os.Bundle;
@@ -53,15 +52,8 @@ public class ComponentOptions {
     public static final String KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION =
             "android.pendingIntent.backgroundActivityAllowedByPermission";
 
-    /**
-     * Corresponds to {@link #setInteractive(boolean)}
-     * @hide
-     */
-    private static final String KEY_INTERACTIVE = "android:component.isInteractive";
-
     private @Nullable Boolean mPendingIntentBalAllowed = null;
     private boolean mPendingIntentBalAllowedByPermission = false;
-    private boolean mIsInteractive = false;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -106,29 +98,6 @@ public class ComponentOptions {
         setPendingIntentBackgroundActivityLaunchAllowedByPermission(
                 opts.getBoolean(
                         KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, false));
-        mIsInteractive = opts.getBoolean(KEY_INTERACTIVE, false);
-    }
-
-    /**
-     * When set, a broadcast will be understood as having originated from
-     * some direct interaction by the user such as a notification tap or button
-     * press.  Only the OS itself may use this option.
-     * @hide
-     * @param interactive
-     * @see #isInteractive()
-     */
-    @RequiresPermission(android.Manifest.permission.COMPONENT_OPTION_INTERACTIVE)
-    public void setInteractive(boolean interactive) {
-        mIsInteractive = interactive;
-    }
-
-    /**
-     * Did this PendingIntent send originate with a direct user interaction?
-     * @return true if this is the result of an interaction, false otherwise
-     * @hide
-     */
-    public boolean isInteractive() {
-        return mIsInteractive;
     }
 
     /**
@@ -231,9 +200,6 @@ public class ComponentOptions {
         if (mPendingIntentBalAllowedByPermission) {
             b.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION,
                     mPendingIntentBalAllowedByPermission);
-        }
-        if (mIsInteractive) {
-            b.putBoolean(KEY_INTERACTIVE, true);
         }
         return b;
     }
