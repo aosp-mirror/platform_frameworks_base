@@ -128,6 +128,7 @@ constructor(
                         }
 
                         override fun onLost(network: Network) {
+                            logger.logOnLost(network, isDefaultNetworkCallback = true)
                             // The system no longer has a default network, so wifi is definitely not
                             // default.
                             trySend(false)
@@ -179,7 +180,7 @@ constructor(
                         }
 
                         override fun onLost(network: Network) {
-                            logger.logOnLost(network)
+                            logger.logOnLost(network, isDefaultNetworkCallback = false)
 
                             wifiNetworkChangeEvents.tryEmit(Unit)
 
