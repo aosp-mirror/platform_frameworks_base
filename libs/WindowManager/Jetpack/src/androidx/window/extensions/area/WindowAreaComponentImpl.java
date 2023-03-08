@@ -263,8 +263,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 return;
             }
             @WindowAreaStatus int currentStatus = getCurrentRearDisplayPresentationModeStatus();
+            DisplayMetrics metrics =
+                    currentStatus == STATUS_UNSUPPORTED ? null : getRearDisplayMetrics();
             consumer.accept(
-                    new RearDisplayPresentationStatus(currentStatus, getRearDisplayMetrics()));
+                    new RearDisplayPresentationStatus(currentStatus, metrics));
         }
     }
 
@@ -408,6 +410,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentRearDisplayModeStatus() {
+        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+            return WindowAreaComponent.STATUS_UNSUPPORTED;
+        }
+
         if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
                 || !ArrayUtils.contains(mCurrentSupportedDeviceStates, mRearDisplayState)
                 || isRearDisplayActive()) {
@@ -441,6 +447,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentRearDisplayPresentationModeStatus() {
+        if (mConcurrentDisplayState == INVALID_DEVICE_STATE) {
+            return WindowAreaComponent.STATUS_UNSUPPORTED;
+        }
+
         if (mCurrentDeviceState == mConcurrentDisplayState
                 || !ArrayUtils.contains(mCurrentSupportedDeviceStates, mConcurrentDisplayState)
                 || isDeviceFolded()) {
