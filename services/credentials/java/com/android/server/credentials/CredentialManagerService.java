@@ -296,6 +296,12 @@ public final class CredentialManagerService
                             mContext,
                             UserHandle.getCallingUserId(),
                             session,
+                            CredentialProviderInfoFactory.getCredentialProviderFromPackageName(
+                                    mContext, UserHandle.getCallingUserId() ,
+                                            result.second.mPackageName,
+                                            CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS,
+                                    new HashSet<>()),
+                            session.mClientAppInfo,
                             result.second.mPackageName,
                             result.first));
         }
@@ -356,6 +362,14 @@ public final class CredentialManagerService
                     }
                 });
         return providerSessions;
+    }
+
+    private List<CredentialProviderInfo> getServicesForCredentialDescription(int userId) {
+        return CredentialProviderInfoFactory.getCredentialProviderServices(
+                mContext,
+                userId,
+                CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS,
+                new HashSet<>());
     }
 
     @Override
@@ -812,14 +826,6 @@ public final class CredentialManagerService
                     CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
 
             session.executeUnregisterRequest(request, callingPackage);
-        }
-
-        private List<CredentialProviderInfo> getServicesForCredentialDescription(int userId) {
-            return CredentialProviderInfoFactory.getCredentialProviderServices(
-                    mContext,
-                    userId,
-                    CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS,
-                    new HashSet<>());
         }
     }
 

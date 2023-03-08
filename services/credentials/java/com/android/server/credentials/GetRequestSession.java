@@ -41,7 +41,7 @@ import java.util.ArrayList;
  * Central session for a single getCredentials request. This class listens to the
  * responses from providers, and the UX app, and updates the provider(S) state.
  */
-public final class GetRequestSession extends RequestSession<GetCredentialRequest,
+public class GetRequestSession extends RequestSession<GetCredentialRequest,
         IGetCredentialCallback>
         implements ProviderSession.ProviderInternalCallback<GetCredentialResponse> {
     private static final String TAG = "GetRequestSession";

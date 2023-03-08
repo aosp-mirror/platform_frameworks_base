@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 /** Contains information on what CredentialProvider has what provisioned Credential. */
-public final class CredentialDescriptionRegistry {
+public class CredentialDescriptionRegistry {
 
     private static final int MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS = 128;
     private static final int MAX_ALLOWED_ENTRIES_PER_PROVIDER = 16;
@@ -54,7 +54,8 @@ public final class CredentialDescriptionRegistry {
         final String mFlattenedRequest;
         final List<CredentialEntry> mCredentialEntries;
 
-        private FilterResult(String packageName,
+        @VisibleForTesting
+        FilterResult(String packageName,
                 String flattenedRequest,
                 List<CredentialEntry> credentialEntries) {
             mPackageName = packageName;
@@ -92,13 +93,26 @@ public final class CredentialDescriptionRegistry {
         }
     }
 
-    /** Clears an existing session for a given user identifier. */
+    /** Clears an existing session for a given user identifier. Used when testing only. */
     @GuardedBy("sLock")
     @VisibleForTesting
-    public static void clearAllSessions() {
+    static void clearAllSessions() {
         sLock.lock();
         try {
             sCredentialDescriptionSessionPerUser.clear();
+        } finally {
+            sLock.unlock();
+        }
+    }
+
+    /** Sets an existing session for a given user identifier. Used when testing only. */
+    @GuardedBy("sLock")
+    @VisibleForTesting
+    static void setSession(int userId, CredentialDescriptionRegistry
+            credentialDescriptionRegistry) {
+        sLock.lock();
+        try {
+            sCredentialDescriptionSessionPerUser.put(userId, credentialDescriptionRegistry);
         } finally {
             sLock.unlock();
         }
