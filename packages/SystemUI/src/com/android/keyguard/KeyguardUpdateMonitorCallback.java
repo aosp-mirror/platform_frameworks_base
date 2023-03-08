@@ -317,4 +317,9 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the non-strong biometric state changed.
      */
     public void onNonStrongBiometricAllowedChanged(int userId) { }
+
+    /**
+     * Called when keyguard is going away or not going away.
+     */
+    public void onKeyguardGoingAway() { }
 }
