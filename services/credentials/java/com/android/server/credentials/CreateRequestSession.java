@@ -83,6 +83,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
+        mChosenProviderFinalPhaseMetric.setUiCallStartTimeNanoseconds(System.nanoTime());
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newCreateRequestInfo(
@@ -90,6 +91,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
+            mChosenProviderFinalPhaseMetric.setUiReturned(false);
             respondToClientWithErrorAndFinish(
                     CreateCredentialException.TYPE_UNKNOWN,
                     "Unable to invoke selector");
@@ -99,14 +101,16 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable CreateCredentialResponse response) {
+        mChosenProviderFinalPhaseMetric.setUiReturned(true);
+        mChosenProviderFinalPhaseMetric.setUiCallEndTimeNanoseconds(System.nanoTime());
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
         setChosenMetric(componentName);
         if (response != null) {
-            mChosenProviderMetric.setChosenProviderStatus(
+            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
             respondToClientWithResponseAndFinish(response);
         } else {
-            mChosenProviderMetric.setChosenProviderStatus(
+            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
             respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,
                     "Invalid response");
@@ -138,6 +142,8 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithResponseAndFinish(CreateCredentialResponse response) {
         Log.i(TAG, "respondToClientWithResponseAndFinish");
+        // TODO immediately add exception bit to chosen provider and do final emits across all
+        // including sequenceCounter!
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Log.i(TAG, "Request has already been completed. This is strange.");
             return;
@@ -162,6 +168,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
         Log.i(TAG, "respondToClientWithErrorAndFinish");
+
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Log.i(TAG, "Request has already been completed. This is strange.");
             return;
