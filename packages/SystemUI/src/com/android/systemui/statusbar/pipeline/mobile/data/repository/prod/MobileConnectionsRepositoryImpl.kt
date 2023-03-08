@@ -266,6 +266,7 @@ constructor(
                 val callback =
                     object : NetworkCallback(FLAG_INCLUDE_LOCATION_INFO) {
                         override fun onLost(network: Network) {
+                            logger.logOnLost(network, isDefaultNetworkCallback = true)
                             // Send a disconnected model when lost. Maybe should create a sealed
                             // type or null here?
                             trySend(MobileConnectivityModel())
@@ -275,6 +276,11 @@ constructor(
                             network: Network,
                             caps: NetworkCapabilities
                         ) {
+                            logger.logOnCapabilitiesChanged(
+                                network,
+                                caps,
+                                isDefaultNetworkCallback = true,
+                            )
                             trySend(
                                 MobileConnectivityModel(
                                     isConnected = caps.hasTransport(TRANSPORT_CELLULAR),
