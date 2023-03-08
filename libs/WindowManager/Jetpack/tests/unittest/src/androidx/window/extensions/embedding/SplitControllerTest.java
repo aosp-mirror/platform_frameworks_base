@@ -1014,6 +1014,25 @@ public class SplitControllerTest {
     }
 
     @Test
+    public void testFindActivityBelow() {
+        // Create a container with two activities
+        final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
+        final Activity pendingAppearedActivity = createMockActivity();
+        container.addPendingAppearedActivity(pendingAppearedActivity);
+
+        // Ensure the activity below matches
+        assertEquals(mActivity,
+                mSplitController.findActivityBelow(pendingAppearedActivity));
+
+        // Ensure that the activity look up won't search for the in-process activities and should
+        // IPC to WM core to get the activity below. It should be `null` for this mock test.
+        spyOn(container);
+        doReturn(true).when(container).hasCrossProcessActivities();
+        assertNotEquals(mActivity,
+                mSplitController.findActivityBelow(pendingAppearedActivity));
+    }
+
+    @Test
     public void testResolveActivityToContainer_inUnknownTaskFragment() {
         doReturn(new Binder()).when(mSplitController)
                 .getTaskFragmentTokenFromActivityClientRecord(mActivity);
