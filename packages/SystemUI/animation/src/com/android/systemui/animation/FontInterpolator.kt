@@ -19,14 +19,15 @@ package com.android.systemui.animation
 import android.graphics.fonts.Font
 import android.graphics.fonts.FontVariationAxis
 import android.util.MathUtils
+import android.util.MathUtils.abs
+import java.lang.Float.max
+import java.lang.Float.min
 
 private const val TAG_WGHT = "wght"
 private const val TAG_ITAL = "ital"
 
-private const val FONT_WEIGHT_MAX = 1000f
-private const val FONT_WEIGHT_MIN = 0f
-private const val FONT_WEIGHT_ANIMATION_STEP = 10f
 private const val FONT_WEIGHT_DEFAULT_VALUE = 400f
+private const val FONT_WEIGHT_ANIMATION_FRAME_COUNT = 100
 
 private const val FONT_ITALIC_MAX = 1f
 private const val FONT_ITALIC_MIN = 0f
@@ -118,14 +119,17 @@ class FontInterpolator {
             lerp(startAxes, endAxes) { tag, startValue, endValue ->
                 when (tag) {
                     // TODO: Good to parse 'fvar' table for retrieving default value.
-                    TAG_WGHT ->
-                        adjustWeight(
+                    TAG_WGHT -> {
+                        adaptiveAdjustWeight(
                             MathUtils.lerp(
                                 startValue ?: FONT_WEIGHT_DEFAULT_VALUE,
                                 endValue ?: FONT_WEIGHT_DEFAULT_VALUE,
                                 progress
-                            )
+                            ),
+                            startValue ?: FONT_WEIGHT_DEFAULT_VALUE,
+                            endValue ?: FONT_WEIGHT_DEFAULT_VALUE,
                         )
+                    }
                     TAG_ITAL ->
                         adjustItalic(
                             MathUtils.lerp(
@@ -205,10 +209,14 @@ class FontInterpolator {
         return result
     }
 
-    // For the performance reasons, we animate weight with FONT_WEIGHT_ANIMATION_STEP. This helps
+    // For the performance reasons, we animate weight with adaptive step. This helps
     // Cache hit ratio in the Skia glyph cache.
-    private fun adjustWeight(value: Float) =
-        coerceInWithStep(value, FONT_WEIGHT_MIN, FONT_WEIGHT_MAX, FONT_WEIGHT_ANIMATION_STEP)
+    // The reason we don't use fix step is because the range of weight axis is not normalized,
+    // some are from 50 to 100, others are from 0 to 1000, so we cannot give a constant proper step
+    private fun adaptiveAdjustWeight(value: Float, start: Float, end: Float): Float {
+        val step = max(abs(end - start) / FONT_WEIGHT_ANIMATION_FRAME_COUNT, 1F)
+        return coerceInWithStep(value, min(start, end), max(start, end), step)
+    }
 
     // For the performance reasons, we animate italic with FONT_ITALIC_ANIMATION_STEP. This helps
     // Cache hit ratio in the Skia glyph cache.
