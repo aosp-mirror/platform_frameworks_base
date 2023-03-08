@@ -39,6 +39,9 @@ import java.util.List;
  *
  * Note that most of the implementation here inherits from
  * {@link com.android.systemui.statusbar.policy.DevicePostureController}.
+ *
+ * Use the {@link TabletopModeController} if you are interested in tabletop mode change only,
+ * which is more common.
  */
 public class DevicePostureController {
     @IntDef(prefix = {"DEVICE_POSTURE_"}, value = {
