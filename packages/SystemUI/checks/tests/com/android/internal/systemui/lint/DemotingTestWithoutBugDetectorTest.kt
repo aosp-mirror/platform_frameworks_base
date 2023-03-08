@@ -20,8 +20,11 @@ import com.android.tools.lint.checks.infrastructure.TestFile
 import com.android.tools.lint.checks.infrastructure.TestFiles
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
+import com.android.tools.lint.detector.api.Scope
+import java.util.EnumSet
 import org.junit.Test
 
+@Suppress("UnstableApiUsage")
 class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
 
     override fun getDetector(): Detector = DemotingTestWithoutBugDetector()
@@ -45,6 +48,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expectClean()
@@ -65,6 +69,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expectClean()
@@ -88,6 +93,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expect(
@@ -115,6 +121,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expect(
@@ -145,6 +152,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expectClean()
@@ -168,6 +176,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expect(
@@ -198,6 +207,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expectClean()
@@ -221,6 +231,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expect(
@@ -248,6 +259,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
                     .indented(),
                 *stubs
             )
+            .customScope(testScope)
             .issues(DemotingTestWithoutBugDetector.ISSUE)
             .run()
             .expect(
@@ -260,6 +272,7 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             )
     }
 
+    private val testScope = EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
     private val filtersFlakyTestStub: TestFile =
         java(
             """
