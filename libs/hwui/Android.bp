@@ -537,6 +537,7 @@ cc_defaults {
         "AnimatorManager.cpp",
         "CanvasTransform.cpp",
         "DamageAccumulator.cpp",
+        "Gainmap.cpp",
         "Interpolator.cpp",
         "LightingInfo.cpp",
         "Matrix.cpp",
