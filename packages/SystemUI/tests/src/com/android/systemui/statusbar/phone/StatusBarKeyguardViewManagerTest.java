@@ -683,4 +683,30 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         // the following call before registering centralSurfaces should NOT throw a NPE:
         mStatusBarKeyguardViewManager.hideAlternateBouncer(true);
     }
+
+    @Test
+    public void testResetHideBouncerWhenShowing_alternateBouncerHides() {
+        // GIVEN the keyguard is showing
+        reset(mAlternateBouncerInteractor);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        // WHEN SBKV is reset with hideBouncerWhenShowing=true
+        mStatusBarKeyguardViewManager.reset(true);
+
+        // THEN alternate bouncer is hidden
+        verify(mAlternateBouncerInteractor).hide();
+    }
+
+    @Test
+    public void testResetHideBouncerWhenShowingIsFalse_alternateBouncerHides() {
+        // GIVEN the keyguard is showing
+        reset(mAlternateBouncerInteractor);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+
+        // WHEN SBKV is reset with hideBouncerWhenShowing=false
+        mStatusBarKeyguardViewManager.reset(false);
+
+        // THEN alternate bouncer is NOT hidden
+        verify(mAlternateBouncerInteractor, never()).hide();
+    }
 }
