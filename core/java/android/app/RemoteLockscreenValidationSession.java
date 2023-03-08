@@ -30,44 +30,45 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class StartLockscreenValidationRequest implements Parcelable {
+public final class RemoteLockscreenValidationSession implements Parcelable {
 
     @LockTypes
-    private int mLockscreenUiType;
+    private int mLockType;
 
     private byte[] mSourcePublicKey;
 
     private int mRemainingAttempts;
 
-    public static final @NonNull Parcelable.Creator<StartLockscreenValidationRequest> CREATOR = new
-            Parcelable.Creator<StartLockscreenValidationRequest>() {
+    public static final @NonNull Parcelable.Creator<RemoteLockscreenValidationSession> CREATOR = new
+            Parcelable.Creator<RemoteLockscreenValidationSession>() {
         @Override
-        public StartLockscreenValidationRequest createFromParcel(Parcel source) {
-            return new StartLockscreenValidationRequest(source);
+        public RemoteLockscreenValidationSession createFromParcel(Parcel source) {
+            return new RemoteLockscreenValidationSession(source);
         }
 
         @Override
-        public StartLockscreenValidationRequest[] newArray(int size) {
-            return new StartLockscreenValidationRequest[size];
+        public RemoteLockscreenValidationSession[] newArray(int size) {
+            return new RemoteLockscreenValidationSession[size];
         }
     };
 
 
     /**
-     * Builder for {@code StartLockscreenValidationRequest}
+     * Builder for {@code RemoteLockscreenValidationSession}
      */
     public static final class Builder {
-        private StartLockscreenValidationRequest mInstance = new StartLockscreenValidationRequest();
+        private RemoteLockscreenValidationSession mInstance =
+                new RemoteLockscreenValidationSession();
 
         /**
          * Sets UI type.
          * Default value is {@code LockTypes.PASSWORD}
          *
-         * @param lockscreenUiType The UI format
+         * @param lockType The UI format
          * @return This builder.
          */
-        public @NonNull Builder setLockscreenUiType(@LockTypes int lockscreenUiType) {
-            mInstance.mLockscreenUiType = lockscreenUiType;
+        public @NonNull Builder setLockType(@LockTypes int lockType) {
+            mInstance.mLockType = lockType;
             return this;
         }
 
@@ -92,11 +93,11 @@ public final class StartLockscreenValidationRequest implements Parcelable {
         }
 
         /**
-         * Creates {@code StartLockscreenValidationRequest}
+         * Creates {@code RemoteLockscreenValidationSession}
          *
          * @throws NullPointerException if required fields are not set.
          */
-        public @NonNull StartLockscreenValidationRequest build() {
+        public @NonNull RemoteLockscreenValidationSession build() {
             Objects.requireNonNull(mInstance.mSourcePublicKey);
             return mInstance;
         }
@@ -105,8 +106,8 @@ public final class StartLockscreenValidationRequest implements Parcelable {
     /**
      * Specifies lock screen credential type.
      */
-    public @LockTypes int getLockscreenUiType() {
-        return mLockscreenUiType;
+    public @LockTypes int getLockType() {
+        return mLockType;
     }
 
     /**
@@ -127,16 +128,16 @@ public final class StartLockscreenValidationRequest implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
-        out.writeInt(mLockscreenUiType);
+        out.writeInt(mLockType);
         out.writeByteArray(mSourcePublicKey);
         out.writeInt(mRemainingAttempts);
     }
 
-    private StartLockscreenValidationRequest() {
+    private RemoteLockscreenValidationSession() {
     }
 
-    private StartLockscreenValidationRequest(Parcel in) {
-        mLockscreenUiType = in.readInt();
+    private RemoteLockscreenValidationSession(Parcel in) {
+        mLockType = in.readInt();
         mSourcePublicKey = in.createByteArray();
         mRemainingAttempts = in.readInt();
     }
