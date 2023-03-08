@@ -64,6 +64,7 @@ import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.SelectedComponentRepository
 import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -73,9 +74,7 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -84,7 +83,7 @@ import com.android.wm.shell.TaskViewFactory
 import dagger.Lazy
 import java.io.PrintWriter
 import java.text.Collator
-import java.util.*
+import java.util.Optional
 import java.util.function.Consumer
 import javax.inject.Inject
 
@@ -98,25 +97,22 @@ class ControlsUiControllerImpl @Inject constructor (
         @Main val uiExecutor: DelayableExecutor,
         @Background val bgExecutor: DelayableExecutor,
         val controlsListingController: Lazy<ControlsListingController>,
-        val controlActionCoordinator: ControlActionCoordinator,
+        private val controlActionCoordinator: ControlActionCoordinator,
         private val activityStarter: ActivityStarter,
         private val iconCache: CustomIconCache,
         private val controlsMetricsLogger: ControlsMetricsLogger,
         private val keyguardStateController: KeyguardStateController,
-        private val userFileManager: UserFileManager,
         private val userTracker: UserTracker,
         private val taskViewFactory: Optional<TaskViewFactory>,
         private val controlsSettingsRepository: ControlsSettingsRepository,
         private val authorizedPanelsRepository: AuthorizedPanelsRepository,
+        private val selectedComponentRepository: SelectedComponentRepository,
         private val featureFlags: FeatureFlags,
         private val dialogsFactory: ControlsDialogsFactory,
         dumpManager: DumpManager
 ) : ControlsUiController, Dumpable {
 
     companion object {
-        private const val PREF_COMPONENT = "controls_component"
-        private const val PREF_STRUCTURE_OR_APP_NAME = "controls_structure"
-        private const val PREF_IS_PANEL = "controls_is_panel"
 
         private const val FADE_IN_MILLIS = 200L
 
@@ -138,12 +134,6 @@ class ControlsUiControllerImpl @Inject constructor (
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
     private var retainCache = false
     private var lastSelections = emptyList<SelectionItem>()
-    private val sharedPreferences
-        get() = userFileManager.getSharedPreferences(
-            fileName = DeviceControlsControllerImpl.PREFS_CONTROLS_FILE,
-            mode = 0,
-            userId = userTracker.userId
-        )
 
     private var taskViewController: PanelTaskViewController? = null
 
@@ -341,20 +331,18 @@ class ControlsUiControllerImpl @Inject constructor (
             if (!controlsController.get().removeFavorites(componentName)) {
                 return@createRemoveAppDialog
             }
-            if (
-                    sharedPreferences.getString(PREF_COMPONENT, "") ==
-                    componentName.flattenToString()
-            ) {
-                sharedPreferences
-                        .edit()
-                        .remove(PREF_COMPONENT)
-                        .remove(PREF_STRUCTURE_OR_APP_NAME)
-                        .remove(PREF_IS_PANEL)
-                        .commit()
+
+            if (selectedComponentRepository.getSelectedComponent()?.componentName ==
+                    componentName) {
+                selectedComponentRepository.removeSelectedComponent()
             }
 
-            allStructures = controlsController.get().getFavorites()
-            selectedItem = getPreferredSelectedItem(allStructures)
+            val selectedItem = getPreferredSelectedItem(controlsController.get().getFavorites())
+            if (selectedItem == SelectedItem.EMPTY_SELECTION) {
+                // User removed the last panel. In this case we start app selection flow and don't
+                // want to auto-add it again
+                selectedComponentRepository.setShouldAddDefaultComponent(false)
+            }
             reload(parent)
         }.apply { show() }
     }
@@ -522,8 +510,7 @@ class ControlsUiControllerImpl @Inject constructor (
                             ADD_APP_ID
                     ))
                 }
-                if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED) &&
-                        controlsController.get().canRemoveFavorites(selectedItem.componentName)) {
+                if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED)) {
                     add(OverflowMenuAdapter.MenuItem(
                             context.getText(R.string.controls_menu_remove),
                             REMOVE_APP_ID,
@@ -569,7 +556,7 @@ class ControlsUiControllerImpl @Inject constructor (
                                 ADD_CONTROLS_ID -> startFavoritingActivity(selectedStructure)
                                 EDIT_CONTROLS_ID -> startEditingActivity(selectedStructure)
                                 REMOVE_APP_ID -> startRemovingApp(
-                                        selectedStructure.componentName, selectionItem.appName
+                                        selectionItem.componentName, selectionItem.appName
                                 )
                             }
                             dismiss()
@@ -714,29 +701,22 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     override fun getPreferredSelectedItem(structures: List<StructureInfo>): SelectedItem {
-        val sp = sharedPreferences
-
-        val component = sp.getString(PREF_COMPONENT, null)?.let {
-            ComponentName.unflattenFromString(it)
-        } ?: EMPTY_COMPONENT
-        val name = sp.getString(PREF_STRUCTURE_OR_APP_NAME, "")!!
-        val isPanel = sp.getBoolean(PREF_IS_PANEL, false)
-        return if (isPanel) {
-            SelectedItem.PanelItem(name, component)
+        val preferredPanel = selectedComponentRepository.getSelectedComponent()
+        val component = preferredPanel?.componentName ?: EMPTY_COMPONENT
+        return if (preferredPanel?.isPanel == true) {
+            SelectedItem.PanelItem(preferredPanel.name, component)
         } else {
             if (structures.isEmpty()) return SelectedItem.EMPTY_SELECTION
             SelectedItem.StructureItem(structures.firstOrNull {
-                component == it.componentName && name == it.structure
-            } ?: structures.get(0))
+                component == it.componentName && preferredPanel?.name == it.structure
+            } ?: structures[0])
         }
     }
 
-    override fun updatePreferences(selectedItem: SelectedItem) {
-        sharedPreferences.edit()
-                .putString(PREF_COMPONENT, selectedItem.componentName.flattenToString())
-                .putString(PREF_STRUCTURE_OR_APP_NAME, selectedItem.name.toString())
-                .putBoolean(PREF_IS_PANEL, selectedItem is SelectedItem.PanelItem)
-                .apply()
+    private fun updatePreferences(selectedItem: SelectedItem) {
+        selectedComponentRepository.setSelectedComponent(
+                SelectedComponentRepository.SelectedComponent(selectedItem)
+        )
     }
 
     private fun maybeUpdateSelectedItem(item: SelectionItem): Boolean {
