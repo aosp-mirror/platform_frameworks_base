@@ -70,6 +70,8 @@ import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolatorImpl;
 import com.android.systemui.smartspace.dagger.SmartspaceModule;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -309,4 +311,8 @@ public abstract class SystemUIModule {
 
     @Binds
     abstract FgsManagerController bindFgsManagerController(FgsManagerControllerImpl impl);
+
+    @Binds
+    abstract LargeScreenShadeInterpolator largeScreensShadeInterpolator(
+            LargeScreenShadeInterpolatorImpl impl);
 }
