@@ -90,33 +90,37 @@ public class MetricUtilities {
     protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
             Map<String, ProviderSession> providers, int callingUid,
             ChosenProviderMetric chosenProviderMetric) {
-        var providerSessions = providers.values();
-        int providerSize = providerSessions.size();
-        int[] candidateUidList = new int[providerSize];
-        int[] candidateQueryRoundTripTimeList = new int[providerSize];
-        int[] candidateStatusList = new int[providerSize];
-        int index = 0;
-        for (var session : providerSessions) {
-            CandidateProviderMetric metric = session.mCandidateProviderMetric;
-            candidateUidList[index] = metric.getCandidateUid();
-            candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
-            candidateStatusList[index] = metric.getProviderQueryStatus();
-            index++;
+        try {
+            var providerSessions = providers.values();
+            int providerSize = providerSessions.size();
+            int[] candidateUidList = new int[providerSize];
+            int[] candidateQueryRoundTripTimeList = new int[providerSize];
+            int[] candidateStatusList = new int[providerSize];
+            int index = 0;
+            for (var session : providerSessions) {
+                CandidateProviderMetric metric = session.mCandidateProviderMetric;
+                candidateUidList[index] = metric.getCandidateUid();
+                candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
+                candidateStatusList[index] = metric.getProviderQueryStatus();
+                index++;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
+                    /* api_name */apiName.getMetricCode(),
+                    /* caller_uid */ callingUid,
+                    /* api_status */ apiStatus.getMetricCode(),
+                    /* repeated_candidate_provider_uid */ candidateUidList,
+                    /* repeated_candidate_provider_round_trip_time_query_microseconds */
+                    candidateQueryRoundTripTimeList,
+                    /* repeated_candidate_provider_status */ candidateStatusList,
+                    /* chosen_provider_uid */ chosenProviderMetric.getChosenUid(),
+                    /* chosen_provider_round_trip_time_overall_microseconds */
+                    chosenProviderMetric.getEntireProviderLatencyMicroseconds(),
+                    /* chosen_provider_final_phase_microseconds (backwards compat only) */
+                    DEFAULT_INT_32,
+                    /* chosen_provider_status */ chosenProviderMetric.getChosenProviderStatus());
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
-                /* api_name */apiName.getMetricCode(),
-                /* caller_uid */ callingUid,
-                /* api_status */ apiStatus.getMetricCode(),
-                /* repeated_candidate_provider_uid */ candidateUidList,
-                /* repeated_candidate_provider_round_trip_time_query_microseconds */
-                candidateQueryRoundTripTimeList,
-                /* repeated_candidate_provider_status */ candidateStatusList,
-                /* chosen_provider_uid */ chosenProviderMetric.getChosenUid(),
-                /* chosen_provider_round_trip_time_overall_microseconds */
-                chosenProviderMetric.getEntireProviderLatencyMicroseconds(),
-                /* chosen_provider_final_phase_microseconds (backwards compat only) */
-                DEFAULT_INT_32,
-                /* chosen_provider_status */ chosenProviderMetric.getChosenProviderStatus());
     }
 
     /**
@@ -131,20 +135,24 @@ public class MetricUtilities {
      */
     protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
             int callingUid) {
-        FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
-                /* api_name */apiName.getMetricCode(),
-                /* caller_uid */ callingUid,
-                /* api_status */ apiStatus.getMetricCode(),
-                /* repeated_candidate_provider_uid */  DEFAULT_REPEATED_INT_32,
-                /* repeated_candidate_provider_round_trip_time_query_microseconds */
-                DEFAULT_REPEATED_INT_32,
-                /* repeated_candidate_provider_status */ DEFAULT_REPEATED_INT_32,
-                /* chosen_provider_uid */ DEFAULT_INT_32,
-                /* chosen_provider_round_trip_time_overall_microseconds */
-                DEFAULT_INT_32,
-                /* chosen_provider_final_phase_microseconds */
-                DEFAULT_INT_32,
-                /* chosen_provider_status */ DEFAULT_INT_32);
+        try {
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
+                    /* api_name */apiName.getMetricCode(),
+                    /* caller_uid */ callingUid,
+                    /* api_status */ apiStatus.getMetricCode(),
+                    /* repeated_candidate_provider_uid */  DEFAULT_REPEATED_INT_32,
+                    /* repeated_candidate_provider_round_trip_time_query_microseconds */
+                    DEFAULT_REPEATED_INT_32,
+                    /* repeated_candidate_provider_status */ DEFAULT_REPEATED_INT_32,
+                    /* chosen_provider_uid */ DEFAULT_INT_32,
+                    /* chosen_provider_round_trip_time_overall_microseconds */
+                    DEFAULT_INT_32,
+                    /* chosen_provider_final_phase_microseconds */
+                    DEFAULT_INT_32,
+                    /* chosen_provider_status */ DEFAULT_INT_32);
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
     }
 
 }
