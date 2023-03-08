@@ -92,9 +92,6 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<Observer<Collection<ComplicationViewModel>>> mObserverCaptor;
 
-    @Captor
-    private ArgumentCaptor<DreamOverlayStateController.Callback> mCallbackCaptor;
-
     @Complication.Category
     static final int COMPLICATION_CATEGORY = Complication.CATEGORY_SYSTEM;
 
@@ -189,8 +186,6 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
         // Dream entry animations finished.
         when(mDreamOverlayStateController.areEntryAnimationsFinished()).thenReturn(true);
-        final DreamOverlayStateController.Callback stateCallback = captureOverlayStateCallback();
-        stateCallback.onStateChanged();
 
         // Add a complication after entry animations are finished.
         final HashSet<ComplicationViewModel> complications = new HashSet<>(
@@ -222,10 +217,5 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
         verify(mComplicationViewModelLiveData).observe(eq(mLifecycleOwner),
                 mObserverCaptor.capture());
         return mObserverCaptor.getValue();
-    }
-
-    private DreamOverlayStateController.Callback captureOverlayStateCallback() {
-        verify(mDreamOverlayStateController).addCallback(mCallbackCaptor.capture());
-        return mCallbackCaptor.getValue();
     }
 }
