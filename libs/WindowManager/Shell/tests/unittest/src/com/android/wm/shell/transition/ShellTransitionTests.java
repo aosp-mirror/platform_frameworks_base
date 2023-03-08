@@ -62,6 +62,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -99,6 +100,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 /**
  * Tests for the shell transitions.
@@ -591,6 +593,68 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testInterleavedMerging() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+
+        Function<Boolean, IBinder> startATransition = (doMerge) -> {
+            IBinder token = new Binder();
+            if (doMerge) {
+                mDefaultHandler.setShouldMerge(token);
+            }
+            transitions.requestStartTransition(token,
+                    new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+            TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                    .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+            transitions.onTransitionReady(token, info, mock(SurfaceControl.Transaction.class),
+                    mock(SurfaceControl.Transaction.class));
+            return token;
+        };
+
+        IBinder transitToken1 = startATransition.apply(false);
+        // merge first one
+        IBinder transitToken2 = startATransition.apply(true);
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, mDefaultHandler.mergeCount());
+
+        // don't merge next one
+        IBinder transitToken3 = startATransition.apply(false);
+        // make sure nothing happened (since it wasn't merged)
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, mDefaultHandler.mergeCount());
+
+        // make a mergable
+        IBinder transitToken4 = startATransition.apply(true);
+        // make sure nothing happened since there is a non-mergable pending.
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, mDefaultHandler.mergeCount());
+
+        // Queue up another mergable
+        IBinder transitToken5 = startATransition.apply(true);
+
+        // Queue up a non-mergable
+        IBinder transitToken6 = startATransition.apply(false);
+
+        // Our active now looks like: [playing, merged]
+        //           and ready queue: [non-mergable, mergable, mergable, non-mergable]
+        // finish the playing one
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+        // Now we should have the non-mergable playing now with 2 merged:
+        //    active: [playing, merged, merged]   queue: [non-mergable]
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(2, mDefaultHandler.mergeCount());
+
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(0, mDefaultHandler.mergeCount());
+
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+    }
+
+    @Test
     public void testTransitionOrderMatchesCore() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
@@ -1016,6 +1080,7 @@ public class ShellTransitionTests extends ShellTestCase {
         ArrayList<Transitions.TransitionFinishCallback> mFinishes = new ArrayList<>();
         final ArrayList<IBinder> mMerged = new ArrayList<>();
         boolean mSimulateMerge = false;
+        final ArraySet<IBinder> mShouldMerge = new ArraySet<>();
 
         @Override
         public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
@@ -1030,7 +1095,7 @@ public class ShellTransitionTests extends ShellTestCase {
         public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            if (!mSimulateMerge) return;
+            if (!(mSimulateMerge || mShouldMerge.contains(transition))) return;
             mMerged.add(transition);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
@@ -1046,12 +1111,23 @@ public class ShellTransitionTests extends ShellTestCase {
             mSimulateMerge = sim;
         }
 
+        void setShouldMerge(IBinder toMerge) {
+            mShouldMerge.add(toMerge);
+        }
+
         void finishAll() {
             final ArrayList<Transitions.TransitionFinishCallback> finishes = mFinishes;
             mFinishes = new ArrayList<>();
             for (int i = finishes.size() - 1; i >= 0; --i) {
                 finishes.get(i).onTransitionFinished(null /* wct */, null /* wctCB */);
             }
+            mShouldMerge.clear();
+        }
+
+        void finishOne() {
+            Transitions.TransitionFinishCallback fin = mFinishes.remove(0);
+            mMerged.clear();
+            fin.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
 
         int activeCount() {
