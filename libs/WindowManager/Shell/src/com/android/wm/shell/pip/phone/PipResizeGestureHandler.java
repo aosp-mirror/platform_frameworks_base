@@ -244,6 +244,7 @@ public class PipResizeGestureHandler {
 
     @VisibleForTesting
     void onInputEvent(InputEvent ev) {
+        // TODO: remove logging once b/269505548 is resolved
         Log.d(TAG, "onInputEvent: " + ev);
         if (!mEnableDragCornerResize && !mEnablePinchResize) {
             // No need to handle anything if neither form of resizing is enabled.
@@ -258,17 +259,6 @@ public class PipResizeGestureHandler {
         if (ev instanceof MotionEvent) {
             MotionEvent mv = (MotionEvent) ev;
             int action = mv.getActionMasked();
-
-            // TODO: remove logging once b/269505548 is resolved
-            if (action == MotionEvent.ACTION_MOVE && mFirstIndex != -1 && mSecondIndex != -1) {
-                float x0 = mv.getRawX(mFirstIndex);
-                float y0 = mv.getRawY(mFirstIndex);
-                float x1 = mv.getRawX(mSecondIndex);
-                float y1 = mv.getRawY(mSecondIndex);
-                Log.d(TAG, "at onInputEvent (" + x0 + ", " + y0 + ")");
-                Log.d(TAG, "at onInputEvent (" + x1 + ", " + y1 + ")");
-            }
-
             final Rect pipBounds = mPipBoundsState.getBounds();
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 if (!pipBounds.contains((int) mv.getRawX(), (int) mv.getRawY())
