@@ -356,6 +356,11 @@ final class RemoteAugmentedAutofillService
                             public void onError() {
                                 onErrorCallback.run();
                             }
+
+                            @Override
+                            public void onInflate() {
+                                /* nothing */
+                            }
                         });
 
         if (inlineSuggestionsCallback.apply(inlineFillUi)) {
