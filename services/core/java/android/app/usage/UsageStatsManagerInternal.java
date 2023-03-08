@@ -199,6 +199,16 @@ public abstract class UsageStatsManagerInternal {
     public abstract void setActiveAdminApps(Set<String> adminApps, int userId);
 
     /**
+     * Called by DevicePolicyManagerService to inform about the protected packages for a user.
+     * User control will be disabled for protected packages.
+     *
+     * @param packageNames the set of protected packages for {@code userId}.
+     * @param userId the userId to which the protected packages belong.
+     */
+    public abstract void setAdminProtectedPackages(@Nullable Set<String> packageNames,
+            @UserIdInt int userId);
+
+    /**
      * Called by DevicePolicyManagerService during boot to inform that admin data is loaded and
      * pushed to UsageStatsService.
      */
