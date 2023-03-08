@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -34,6 +35,7 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -43,10 +45,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.stream.Stream;
 
 /**
  * This class provides access to the system uimode services.  These services
@@ -72,6 +77,10 @@ import java.util.concurrent.Executor;
  */
 @SystemService(Context.UI_MODE_SERVICE)
 public class UiModeManager {
+
+    private static final String TAG = "UiModeManager";
+
+
     /**
      * A listener with a single method that is invoked whenever the packages projecting using the
      * {@link ProjectionType}s for which it is registered change.
@@ -91,7 +100,20 @@ public class UiModeManager {
                 @NonNull Set<String> packageNames);
     }
 
-    private static final String TAG = "UiModeManager";
+    /**
+     * Listener for the UI contrast. To listen for changes to
+     * the UI contrast on the device, implement this interface and
+     * register it with the system by calling {@link #addContrastChangeListener}.
+     */
+    public interface ContrastChangeListener {
+
+        /**
+         * Called when the color contrast enabled state changes.
+         *
+         * @param contrast The color contrast as in {@link #getContrast}
+         */
+        void onContrastChanged(@FloatRange(from = -1.0f, to = 1.0f) float contrast);
+    }
 
     /**
      * Broadcast sent when the device's UI has switched to car mode, either
@@ -319,6 +341,95 @@ public class UiModeManager {
             mOnProjectionStateChangedListenerResourceManager =
             new OnProjectionStateChangedListenerResourceManager();
 
+    /**
+     * Define constants and conversions between {@link ContrastLevel}s and contrast values.
+     * <p>
+     * Contrast values are floats defined in [-1, 1], as defined in {@link #getContrast}.
+     * This is the official data type for contrast;
+     * all methods from the public API return contrast values.
+     * </p>
+     * <p>
+     * {@code ContrastLevel}, on the other hand, is an internal-only enumeration of contrasts that
+     * can be set from the system ui. Each {@code ContrastLevel} has an associated contrast value.
+     * </p>
+     * <p>
+     * Currently, a user chan chose from three contrast levels:
+     * <ul>
+     *     <li>{@link #CONTRAST_LEVEL_STANDARD}, corresponding to the default contrast value 0f</li>
+     *     <li>{@link #CONTRAST_LEVEL_MEDIUM}, corresponding to the contrast value 0.5f</li>
+     *     <li>{@link #CONTRAST_LEVEL_HIGH}, corresponding to the maximum contrast value 1f</li>
+     * </ul>
+     * </p>
+     *
+     * @hide
+     */
+    public static class ContrastUtils {
+
+        private static final float CONTRAST_MIN_VALUE = -1f;
+        private static final float CONTRAST_MAX_VALUE = 1f;
+        public static final float CONTRAST_DEFAULT_VALUE = 0f;
+
+        @IntDef(flag = true, prefix = { "CONTRAST_LEVEL_" }, value = {
+                CONTRAST_LEVEL_STANDARD,
+                CONTRAST_LEVEL_MEDIUM,
+                CONTRAST_LEVEL_HIGH
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ContrastLevel {}
+
+        public static final int CONTRAST_LEVEL_STANDARD = 0;
+        public static final int CONTRAST_LEVEL_MEDIUM = 1;
+        public static final int CONTRAST_LEVEL_HIGH = 2;
+
+        private static Stream<Integer> allContrastLevels() {
+            return Stream.of(CONTRAST_LEVEL_STANDARD, CONTRAST_LEVEL_MEDIUM, CONTRAST_LEVEL_HIGH);
+        }
+
+        /**
+         * Convert a contrast value in [-1, 1] to its associated {@link ContrastLevel}
+         */
+        public static @ContrastLevel int toContrastLevel(float contrast) {
+            if (contrast < CONTRAST_MIN_VALUE || contrast > CONTRAST_MAX_VALUE) {
+                throw new IllegalArgumentException("contrast values should be in [-1, 1]");
+            }
+            return allContrastLevels().min(Comparator.comparingDouble(contrastLevel ->
+                    Math.abs(contrastLevel - 2 * contrast))).orElseThrow();
+        }
+
+        /**
+         * Convert a {@link ContrastLevel} to its associated contrast value in [-1, 1]
+         */
+        public static float fromContrastLevel(@ContrastLevel int contrastLevel) {
+            if (allContrastLevels().noneMatch(level -> level == contrastLevel)) {
+                throw new IllegalArgumentException("unrecognized contrast level: " + contrastLevel);
+            }
+            return contrastLevel / 2f;
+        }
+    }
+
+    /**
+     * Map that stores user provided {@link ContrastChangeListener} callbacks,
+     * and the executors on which these callbacks should be called.
+     */
+    private final ArrayMap<ContrastChangeListener, Executor>
+            mContrastChangeListeners = new ArrayMap<>();
+    private float mContrast;
+
+    private final IUiModeManagerCallback.Stub mCallback = new IUiModeManagerCallback.Stub() {
+        @Override
+        public void notifyContrastChanged(float contrast) {
+            final ArrayMap<ContrastChangeListener, Executor> listeners;
+            synchronized (mLock) {
+                // if value changed in the settings, update the cached value and notify listeners
+                if (Math.abs(mContrast - contrast) < 1e-10) return;
+                mContrast = contrast;
+                listeners = new ArrayMap<>(mContrastChangeListeners);
+            }
+            listeners.forEach((listener, executor) -> executor.execute(
+                    () -> listener.onContrastChanged(mContrast)));
+        }
+    };
+
     @UnsupportedAppUsage
     /*package*/ UiModeManager() throws ServiceNotFoundException {
         this(null /* context */);
@@ -328,6 +439,12 @@ public class UiModeManager {
         mService = IUiModeManager.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.UI_MODE_SERVICE));
         mContext = context;
+        try {
+            mService.addCallback(mCallback);
+            mContrast = mService.getContrast();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Setup failed: UiModeManagerService is dead", e);
+        }
     }
 
     /**
@@ -1065,6 +1182,58 @@ public class UiModeManager {
 
         Executor getExecutor(@NonNull InnerListener innerListener) {
             return mExecutorMap.get(innerListener);
+        }
+    }
+
+    /**
+     * Returns the color contrast for the user.
+     * <p>
+     * <strong>Note:</strong> You need to query this only if your application is
+     * doing its own rendering and does not rely on the material rendering pipeline.
+     * </p>
+     * @return The color contrast, float in [-1, 1] where
+     * <ul>
+     *     <li> &nbsp; 0 corresponds to the default contrast </li>
+     *     <li>       -1 corresponds to the minimum contrast </li>
+     *     <li> &nbsp; 1 corresponds to the maximum contrast </li>
+     * </ul>
+     *
+     *
+     *
+     */
+    @FloatRange(from = -1.0f, to = 1.0f)
+    public float getContrast() {
+        synchronized (mLock) {
+            return mContrast;
+        }
+    }
+
+    /**
+     * Registers a {@link ContrastChangeListener} for the current user.
+     *
+     * @param executor The executor on which the listener should be called back.
+     * @param listener The listener.
+     */
+    public void addContrastChangeListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ContrastChangeListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        synchronized (mLock) {
+            mContrastChangeListeners.put(listener, executor);
+        }
+    }
+
+    /**
+     * Unregisters a {@link ContrastChangeListener} for the current user.
+     * If the listener was not registered, does nothing and returns.
+     *
+     * @param listener The listener to unregister.
+     */
+    public void removeContrastChangeListener(@NonNull ContrastChangeListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mLock) {
+            mContrastChangeListeners.remove(listener);
         }
     }
 }

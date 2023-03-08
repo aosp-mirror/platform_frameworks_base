@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package android.view.accessibility;
+package android.app;
 
 /**
- * Interface a client of the IAccessibilityManager implements to
- * receive information about changes in the manager state.
- *
- * @hide
- */
-oneway interface IAccessibilityManagerClient {
-
-    void setState(int stateFlags);
-
-    void notifyServicesStateChanged(long updatedUiTimeout);
-
-    void setRelevantEventTypes(int eventTypes);
-
-    void setFocusAppearance(int strokeWidth, int color);
+* Implemented by the UiModeManager client to receive information about changes from the service.
+* This is a oneway interface since the server should not block waiting for the client.
+*
+* @hide
+*/
+oneway interface IUiModeManagerCallback {
+  void notifyContrastChanged(float contrast);
 }
