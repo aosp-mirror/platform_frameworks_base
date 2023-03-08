@@ -2251,7 +2251,7 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public boolean isRestricted(@UserIdInt int userId) {
         if (userId != UserHandle.getCallingUserId()) {
-            checkCreateUsersPermission("query isRestricted for user " + userId);
+            checkQueryOrCreateUsersPermission("query isRestricted for user " + userId);
         }
         synchronized (mUsersLock) {
             final UserInfo userInfo = getUserInfoLU(userId);
