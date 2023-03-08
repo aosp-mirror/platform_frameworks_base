@@ -380,6 +380,11 @@ constructor(
         return primaryBouncerView.delegate?.willDismissWithActions() == true
     }
 
+    /** Will the dismissal run from the keyguard layout (instead of from bouncer) */
+    fun willRunDismissFromKeyguard(): Boolean {
+        return primaryBouncerView.delegate?.willRunDismissFromKeyguard() == true
+    }
+
     /** Returns whether the bouncer should be full screen. */
     private fun needsFullscreenBouncer(): Boolean {
         val mode: KeyguardSecurityModel.SecurityMode =

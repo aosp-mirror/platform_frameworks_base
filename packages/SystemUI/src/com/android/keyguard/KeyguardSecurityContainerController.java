@@ -127,6 +127,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private View.OnKeyListener mOnKeyListener = (v, keyCode, event) -> interceptMediaKey(event);
     private ActivityStarter.OnDismissAction mDismissAction;
     private Runnable mCancelAction;
+    private boolean mWillRunDismissFromKeyguard;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -262,8 +263,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             // If there's a pending runnable because the user interacted with a widget
             // and we're leaving keyguard, then run it.
             boolean deferKeyguardDone = false;
+            mWillRunDismissFromKeyguard = false;
             if (mDismissAction != null) {
                 deferKeyguardDone = mDismissAction.onDismiss();
+                mWillRunDismissFromKeyguard = mDismissAction.willRunAnimationOnKeyguard();
                 mDismissAction = null;
                 mCancelAction = null;
             }
@@ -523,6 +526,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
      */
     public boolean hasDismissActions() {
         return mDismissAction != null || mCancelAction != null;
+    }
+
+    /**
+     * @return will the dismissal run from the keyguard layout (instead of from bouncer)
+     */
+    public boolean willRunDismissFromKeyguard() {
+        return mWillRunDismissFromKeyguard;
     }
 
     /**
