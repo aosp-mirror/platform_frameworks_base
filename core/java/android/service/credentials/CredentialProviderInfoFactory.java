@@ -46,6 +46,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.R;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -130,6 +131,26 @@ public final class CredentialProviderInfoFactory {
                 .setSystemProvider(isSystemProvider)
                 .setEnabled(isEnabled)
                 .build();
+    }
+
+    /**
+     * Constructs an information instance of the credential provider for testing purposes. Does
+     * not run any verifications and passes parameters as is.
+     */
+    @VisibleForTesting
+    public static CredentialProviderInfo createForTests(
+            @NonNull ServiceInfo serviceInfo,
+            @NonNull CharSequence overrideLabel,
+            boolean isSystemProvider,
+            boolean isEnabled,
+            @NonNull List<String> capabilities) {
+        return new CredentialProviderInfo.Builder(serviceInfo)
+                .setEnabled(isEnabled)
+                .setOverrideLabel(overrideLabel)
+                .setSystemProvider(isSystemProvider)
+                .addCapabilities(capabilities)
+                .build();
+
     }
 
     private static void verifyProviderPermission(ServiceInfo serviceInfo) throws SecurityException {
@@ -481,6 +502,31 @@ public final class CredentialProviderInfoFactory {
             Log.e(TAG, "Failed to get device policy: " + e);
         }
 
+        return null;
+    }
+
+    /**
+     * Returns a valid credential provider that has the given package name. Returns null if no
+     * match is found.
+     */
+    @Nullable
+    public static CredentialProviderInfo getCredentialProviderFromPackageName(
+            @NonNull Context context,
+            int userId,
+            @NonNull String packageName,
+            int providerFilter,
+            @NonNull Set<ServiceInfo> enabledServices) {
+        requireNonNull(context, "context must not be null");
+        requireNonNull(packageName, "package name must not be null");
+        requireNonNull(enabledServices, "enabledServices must not be null");
+
+        for (CredentialProviderInfo credentialProviderInfo : getCredentialProviderServices(context,
+                userId, providerFilter, enabledServices)) {
+            if (credentialProviderInfo.getServiceInfo()
+                    .packageName.equals(packageName)) {
+                return credentialProviderInfo;
+            }
+        }
         return null;
     }
 

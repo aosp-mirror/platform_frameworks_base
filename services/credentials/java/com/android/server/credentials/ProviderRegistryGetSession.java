@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialOption;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.Entry;
@@ -32,6 +33,8 @@ import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderService;
 import android.telecom.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +55,8 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
         Set<CredentialDescriptionRegistry.FilterResult>> {
 
     private static final String TAG = "ProviderRegistryGetSession";
-    private static final String CREDENTIAL_ENTRY_KEY = "credential_key";
+    @VisibleForTesting
+    static final String CREDENTIAL_ENTRY_KEY = "credential_key";
 
     /** Creates a new provider session to be used by the request session. */
     @Nullable
@@ -60,13 +64,16 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             @NonNull Context context,
             @UserIdInt int userId,
             @NonNull GetRequestSession getRequestSession,
+            @NonNull CredentialProviderInfo credentialProviderInfo,
+            @NonNull CallingAppInfo callingAppInfo,
             @NonNull String credentialProviderPackageName,
             @NonNull CredentialOption requestOption) {
         return new ProviderRegistryGetSession(
                 context,
                 userId,
                 getRequestSession,
-                getRequestSession.mClientAppInfo,
+                credentialProviderInfo,
+                callingAppInfo,
                 credentialProviderPackageName,
                 requestOption);
     }
@@ -81,15 +88,17 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     private final String mCredentialProviderPackageName;
     @NonNull
     private final String mFlattenedRequestOptionString;
-    private List<CredentialEntry> mCredentialEntries;
+    @VisibleForTesting
+    List<CredentialEntry> mCredentialEntries;
 
     protected ProviderRegistryGetSession(@NonNull Context context,
             @NonNull int userId,
             @NonNull GetRequestSession session,
+            @NonNull CredentialProviderInfo credentialProviderInfo,
             @NonNull CallingAppInfo callingAppInfo,
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {
-        super(context, null, requestOption, session, userId, null);
+        super(context, credentialProviderInfo, requestOption, session, userId, null);
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
         mCredentialProviderPackageName = servicePackageName;
@@ -183,7 +192,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                             providerPendingIntentResponse.getResultData());
             if (getCredentialResponse != null) {
                 if (mCallbacks != null) {
-                    mCallbacks.onFinalResponseReceived(mComponentName,
+                    ((GetRequestSession) mCallbacks).onFinalResponseReceived(mComponentName,
                             getCredentialResponse);
                 }
                 return;
