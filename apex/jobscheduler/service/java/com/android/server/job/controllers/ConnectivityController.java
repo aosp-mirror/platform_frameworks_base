@@ -256,7 +256,7 @@ public final class ConnectivityController extends RestrictingController implemen
     public ConnectivityController(JobSchedulerService service,
             @NonNull FlexibilityController flexibilityController) {
         super(service);
-        mHandler = new CcHandler(mContext.getMainLooper());
+        mHandler = new CcHandler(AppSchedulingModuleThread.get().getLooper());
 
         mConnManager = mContext.getSystemService(ConnectivityManager.class);
         mNetPolicyManagerInternal = LocalServices.getService(NetworkPolicyManagerInternal.class);

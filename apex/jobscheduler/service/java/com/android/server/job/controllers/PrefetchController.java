@@ -130,7 +130,7 @@ public class PrefetchController extends StateController {
     public PrefetchController(JobSchedulerService service) {
         super(service);
         mPcConstants = new PcConstants();
-        mHandler = new PcHandler(mContext.getMainLooper());
+        mHandler = new PcHandler(AppSchedulingModuleThread.get().getLooper());
         mThresholdAlarmListener = new ThresholdAlarmListener(
                 mContext, AppSchedulingModuleThread.get().getLooper());
         mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);

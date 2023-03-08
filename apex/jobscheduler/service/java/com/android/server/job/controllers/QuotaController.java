@@ -560,13 +560,14 @@ public final class QuotaController extends StateController {
             @NonNull BackgroundJobsController backgroundJobsController,
             @NonNull ConnectivityController connectivityController) {
         super(service);
-        mHandler = new QcHandler(mContext.getMainLooper());
+        mHandler = new QcHandler(AppSchedulingModuleThread.get().getLooper());
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
         mIsEnabled = !mConstants.USE_TARE_POLICY;
-        mInQuotaAlarmQueue = new InQuotaAlarmQueue(mContext, mContext.getMainLooper());
+        mInQuotaAlarmQueue =
+                new InQuotaAlarmQueue(mContext, AppSchedulingModuleThread.get().getLooper());
 
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
