@@ -294,6 +294,10 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         override fun onDensityOrFontScaleChanged() {
             reinflateView()
         }
+
+        override fun onThemeChanged() {
+            reinflateView()
+        }
     }
 
     private fun addCallbacks() {
