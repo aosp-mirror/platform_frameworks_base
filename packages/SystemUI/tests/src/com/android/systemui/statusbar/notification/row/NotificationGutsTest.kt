@@ -76,7 +76,7 @@ class NotificationGutsTest : SysuiTestCase() {
     fun openControls() {
         guts.gutsContent = gutsContent
 
-        guts.openControls(true, 0, 0, false, null)
+        guts.openControls(0, 0, false, null)
     }
 
     @Test
