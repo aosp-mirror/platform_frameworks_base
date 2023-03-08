@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP
 import com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE
-import com.android.systemui.util.mockito.any
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
@@ -34,37 +33,45 @@ import org.mockito.MockitoAnnotations
  * Be careful with the {FeatureFlagsReleaseRestarter} in this test. It has a call to System.exit()!
  */
 @SmallTest
-class FeatureFlagsDebugRestarterTest : SysuiTestCase() {
-    private lateinit var restarter: FeatureFlagsDebugRestarter
+class ScreenIdleConditionTest : SysuiTestCase() {
+    private lateinit var condition: ScreenIdleCondition
 
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
-    @Mock private lateinit var systemExitRestarter: SystemExitRestarter
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        restarter = FeatureFlagsDebugRestarter(wakefulnessLifecycle, systemExitRestarter)
+        condition = ScreenIdleCondition(wakefulnessLifecycle)
     }
 
     @Test
-    fun testRestart_ImmediateWhenAsleep() {
-        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
-        restarter.restartSystemUI("Restart for test")
-        verify(systemExitRestarter).restartSystemUI(any())
-    }
-
-    @Test
-    fun testRestart_WaitsForSceenOff() {
+    fun testCondition_awake() {
         whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
 
-        restarter.restartSystemUI("Restart for test")
-        verify(systemExitRestarter, never()).restartSystemUI(any())
+        assertThat(condition.canRestartNow {}).isFalse()
+    }
 
+    @Test
+    fun testCondition_asleep() {
+        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
+
+        assertThat(condition.canRestartNow {}).isTrue()
+    }
+
+    @Test
+    fun testCondition_invokesRetry() {
+        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_AWAKE)
+        var retried = false
+        val retryFn = { retried = true }
+
+        // No restart yet, but we do register a listener now.
+        assertThat(condition.canRestartNow(retryFn)).isFalse()
         val captor = ArgumentCaptor.forClass(WakefulnessLifecycle.Observer::class.java)
         verify(wakefulnessLifecycle).addObserver(captor.capture())
 
-        captor.value.onFinishedGoingToSleep()
+        whenever(wakefulnessLifecycle.wakefulness).thenReturn(WAKEFULNESS_ASLEEP)
 
-        verify(systemExitRestarter).restartSystemUI(any())
+        captor.value.onFinishedGoingToSleep()
+        assertThat(retried).isTrue()
     }
 }
