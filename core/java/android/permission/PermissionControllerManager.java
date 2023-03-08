@@ -701,6 +701,8 @@ public final class PermissionControllerManager {
         }, executor);
     }
 
+    // TODO(b/272129940): Remove this API and device profile role description when we drop T
+    //  support.
     /**
      * Gets the description of the privileges associated with the given device profiles
      *
@@ -708,8 +710,11 @@ public final class PermissionControllerManager {
      * @param executor Executor on which to invoke the callback
      * @param callback Callback to receive the result
      *
+     * @deprecated Device profile privilege descriptions have been bundled in CDM APK since T.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void getPrivilegesDescriptionStringForProfile(
             @NonNull String profileName,
