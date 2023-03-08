@@ -348,6 +348,8 @@ public abstract class PermissionControllerService extends Service {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
+    // TODO(b/272129940): Remove this API and device profile role description when we drop T
+    //  support.
     /**
      * Get a user-readable sentence, describing the set of privileges that are to be granted to a
      * companion app managing a device of the given profile.
@@ -355,8 +357,11 @@ public abstract class PermissionControllerService extends Service {
      * @param deviceProfileName the
      *      {@link android.companion.AssociationRequest.DeviceProfile device profile} name
      *
+     * @deprecated Device profile privilege descriptions have been bundled in CDM APK since T.
+     *
      * @hide
      */
+    @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_COMPANION_DEVICES)
     @NonNull
