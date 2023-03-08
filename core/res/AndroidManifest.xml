@@ -5303,12 +5303,12 @@
          {@link android.Manifest.permission#USE_EXACT_ALARM} once it targets API
          {@link android.os.Build.VERSION_CODES#TIRAMISU}. All apps using exact alarms for secondary
          features (which should still be user facing) should continue using this permission.
-         <p>Protection level: appop
+         <p>Protection level: signature|privileged|appop
      -->
     <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:label="@string/permlab_schedule_exact_alarm"
         android:description="@string/permdesc_schedule_exact_alarm"
-        android:protectionLevel="normal|appop"/>
+        android:protectionLevel="signature|privileged|appop"/>
 
     <!-- Allows apps to use exact alarms just like with {@link
          android.Manifest.permission#SCHEDULE_EXACT_ALARM} but without needing to request this
