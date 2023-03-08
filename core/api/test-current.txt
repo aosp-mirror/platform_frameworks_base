@@ -415,6 +415,7 @@ package android.app {
     method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public int getLastSystemKey();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void handleSystemKey(int);
     method public void sendNotificationFeedback(@Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
@@ -2625,6 +2626,7 @@ package android.provider {
     field public static final String SELECTED_SPELL_CHECKER_SUBTYPE = "selected_spell_checker_subtype";
     field public static final String SHOW_FIRST_CRASH_DIALOG_DEV_OPTION = "show_first_crash_dialog_dev_option";
     field public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
+    field public static final String STYLUS_BUTTONS_ENABLED = "stylus_buttons_enabled";
     field @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
     field public static final String VOICE_INTERACTION_SERVICE = "voice_interaction_service";
   }
