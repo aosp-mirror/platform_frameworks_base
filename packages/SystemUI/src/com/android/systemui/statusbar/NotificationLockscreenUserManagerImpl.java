@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar;
 
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
-
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.app.KeyguardManager;
@@ -145,7 +144,10 @@ public class NotificationLockscreenUserManagerImpl implements
                     break;
                 case Intent.ACTION_USER_UNLOCKED:
                     // Start the overview connection to the launcher service
-                    mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    // Connect if user hasn't connected yet
+                    if (mOverviewProxyServiceLazy.get().getProxy() == null) {
+                        mOverviewProxyServiceLazy.get().startConnectionToCurrentUser();
+                    }
                     break;
                 case NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION:
                     final IntentSender intentSender = intent.getParcelableExtra(
