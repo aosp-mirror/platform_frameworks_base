@@ -2009,7 +2009,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mActivityManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
 
-        mHandler = new JobHandler(context.getMainLooper());
+        mHandler = new JobHandler(AppSchedulingModuleThread.get().getLooper());
         mConstants = new Constants();
         mConstantsObserver = new ConstantsObserver();
         mJobSchedulerStub = new JobSchedulerStub();
