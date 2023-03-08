@@ -65,7 +65,7 @@ public class SatelliteProvisionStateCallback {
 
     /**@hide*/
     @NonNull
-    public final ISatelliteProvisionStateCallback getBinder() {
+    final ISatelliteProvisionStateCallback getBinder() {
         return mBinder;
     }
 
