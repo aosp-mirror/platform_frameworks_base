@@ -1427,7 +1427,7 @@ final class LetterboxUiController {
      * the first opaque activity beneath.
      */
     boolean hasInheritedLetterboxBehavior() {
-        return mLetterboxConfigListener != null && !mActivityRecord.matchParentBounds();
+        return mLetterboxConfigListener != null;
     }
 
     /**
