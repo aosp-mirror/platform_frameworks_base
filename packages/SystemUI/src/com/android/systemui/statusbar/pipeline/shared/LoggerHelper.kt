@@ -38,11 +38,24 @@ object LoggerHelper {
                 int1 = network.getNetId()
                 str1 = networkCapabilities.toString()
             },
-            { "onCapabilitiesChanged[default=$bool1]: net=$int1 capabilities=$str1" }
+            { "on${if (bool1) "Default" else ""}CapabilitiesChanged: net=$int1 capabilities=$str1" }
         )
     }
 
-    fun logOnLost(buffer: LogBuffer, tag: String, network: Network) {
-        buffer.log(tag, LogLevel.INFO, { int1 = network.getNetId() }, { "onLost: net=$int1" })
+    fun logOnLost(
+        buffer: LogBuffer,
+        tag: String,
+        network: Network,
+        isDefaultNetworkCallback: Boolean,
+    ) {
+        buffer.log(
+            tag,
+            LogLevel.INFO,
+            {
+                int1 = network.getNetId()
+                bool1 = isDefaultNetworkCallback
+            },
+            { "on${if (bool1) "Default" else ""}Lost: net=$int1" }
+        )
     }
 }
