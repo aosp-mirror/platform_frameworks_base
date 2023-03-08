@@ -36,6 +36,8 @@ import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.controls.management.ControlsRequestDialog
 import com.android.systemui.controls.panels.AuthorizedPanelsRepository
 import com.android.systemui.controls.panels.AuthorizedPanelsRepositoryImpl
+import com.android.systemui.controls.panels.SelectedComponentRepository
+import com.android.systemui.controls.panels.SelectedComponentRepositoryImpl
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.controls.settings.ControlsSettingsDialogManagerImpl
 import com.android.systemui.controls.ui.ControlActionCoordinator
@@ -113,6 +115,11 @@ abstract class ControlsModule {
     abstract fun provideAuthorizedPanelsRepository(
         repository: AuthorizedPanelsRepositoryImpl
     ): AuthorizedPanelsRepository
+
+    @Binds
+    abstract fun providePreferredPanelRepository(
+        repository: SelectedComponentRepositoryImpl
+    ): SelectedComponentRepository
 
     @BindsOptionalOf
     abstract fun optionalPersistenceWrapper(): ControlsFavoritePersistenceWrapper
