@@ -28,7 +28,10 @@ import static android.security.keystore.recovery.RecoveryController.ERROR_SESSIO
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.RemoteLockscreenValidationResult;
+import android.app.StartLockscreenValidationRequest;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -40,11 +43,17 @@ import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.ArrayMap;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternView;
+import com.android.internal.widget.LockscreenCredential;
+import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.security.SecureBox;
+import com.android.server.locksettings.LockSettingsService;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
@@ -55,8 +64,11 @@ import com.android.server.locksettings.recoverablekeystore.storage.CleanupManage
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RemoteLockscreenValidationSessionStorage;
+import com.android.server.locksettings.recoverablekeystore.storage.RemoteLockscreenValidationSessionStorage.LockscreenVerificationSession;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -89,6 +101,7 @@ import javax.crypto.AEADBadTagException;
 public class RecoverableKeyStoreManager {
     private static final String TAG = "RecoverableKeyStoreMgr";
     private static final long SYNC_DELAY_MILLIS = 2000;
+    private static final int INVALID_REMOTE_GUESS_LIMIT = 5;
 
     private static RecoverableKeyStoreManager mInstance;
 
@@ -103,6 +116,9 @@ public class RecoverableKeyStoreManager {
     private final ApplicationKeyStorage mApplicationKeyStorage;
     private final TestOnlyInsecureCertificateHelper mTestCertHelper;
     private final CleanupManager mCleanupManager;
+    // only set if SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API is enabled.
+    @Nullable private final RemoteLockscreenValidationSessionStorage
+            mRemoteLockscreenValidationSessionStorage;
 
     /**
      * Returns a new or existing instance.
@@ -112,7 +128,18 @@ public class RecoverableKeyStoreManager {
     public static synchronized RecoverableKeyStoreManager
             getInstance(Context context) {
         if (mInstance == null) {
-            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
+            RecoverableKeyStoreDb db;
+            RemoteLockscreenValidationSessionStorage lockscreenCheckSessions;
+            if (FeatureFlagUtils.isEnabled(context,
+                    FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
+                // TODO(b/254335492): Remove flag check when feature is launched.
+                db = RecoverableKeyStoreDb.newInstance(context, 7);
+                lockscreenCheckSessions = new RemoteLockscreenValidationSessionStorage();
+            } else {
+                db = RecoverableKeyStoreDb.newInstance(context);
+                lockscreenCheckSessions = null;
+            }
+
             PlatformKeyManager platformKeyManager;
             ApplicationKeyStorage applicationKeyStorage;
             try {
@@ -142,7 +169,8 @@ public class RecoverableKeyStoreManager {
                     platformKeyManager,
                     applicationKeyStorage,
                     new TestOnlyInsecureCertificateHelper(),
-                    cleanupManager);
+                    cleanupManager,
+                    lockscreenCheckSessions);
         }
         return mInstance;
     }
@@ -158,7 +186,8 @@ public class RecoverableKeyStoreManager {
             PlatformKeyManager platformKeyManager,
             ApplicationKeyStorage applicationKeyStorage,
             TestOnlyInsecureCertificateHelper testOnlyInsecureCertificateHelper,
-            CleanupManager cleanupManager) {
+            CleanupManager cleanupManager,
+            RemoteLockscreenValidationSessionStorage remoteLockscreenValidationSessionStorage) {
         mContext = context;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
@@ -177,6 +206,7 @@ public class RecoverableKeyStoreManager {
             Log.wtf(TAG, "AES keygen algorithm not available. AOSP must support this.", e);
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
+        mRemoteLockscreenValidationSessionStorage = remoteLockscreenValidationSessionStorage;
     }
 
     /**
@@ -969,30 +999,153 @@ public class RecoverableKeyStoreManager {
     /**
      * Starts a session to verify lock screen credentials provided by a remote device.
      */
-    public void startRemoteLockscreenValidation() {
+    public StartLockscreenValidationRequest startRemoteLockscreenValidation(
+            LockSettingsService lockSettingsService) {
+        if (mRemoteLockscreenValidationSessionStorage == null) {
+            throw new UnsupportedOperationException("Under development");
+        }
         checkVerifyRemoteLockscreenPermission();
-        // TODO(b/254335492): Create session in memory
-        return;
+        int userId = UserHandle.getCallingUserId();
+        int savedCredentialType;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            savedCredentialType = lockSettingsService.getCredentialType(userId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        int keyguardCredentialsType = lockPatternUtilsToKeyguardType(savedCredentialType);
+        LockscreenVerificationSession session =
+                mRemoteLockscreenValidationSessionStorage.startSession(userId);
+        PublicKey publicKey = session.getKeyPair().getPublic();
+        byte[] encodedPublicKey = SecureBox.encodePublicKey(publicKey);
+        int badGuesses = mDatabase.getBadRemoteGuessCounter(userId);
+        int remainingAttempts = Math.max(INVALID_REMOTE_GUESS_LIMIT - badGuesses, 0);
+        // TODO(b/254335492): Schedule task to remove inactive session
+        return new StartLockscreenValidationRequest.Builder()
+                .setLockscreenUiType(keyguardCredentialsType)
+                .setRemainingAttempts(remainingAttempts)
+                .setSourcePublicKey(encodedPublicKey)
+                .build();
     }
 
     /**
      * Verifies encrypted credentials guess from a remote device.
      */
-    public void validateRemoteLockscreen(@NonNull byte[] encryptedCredential) {
+    public synchronized RemoteLockscreenValidationResult validateRemoteLockscreen(
+            @NonNull byte[] encryptedCredential,
+            LockSettingsService lockSettingsService) {
         checkVerifyRemoteLockscreenPermission();
-        // TODO(b/254335492): Decrypt and verify credentials
-        return;
+        int userId = UserHandle.getCallingUserId();
+        LockscreenVerificationSession session =
+                mRemoteLockscreenValidationSessionStorage.get(userId);
+        int badGuesses = mDatabase.getBadRemoteGuessCounter(userId);
+        int remainingAttempts = INVALID_REMOTE_GUESS_LIMIT - badGuesses;
+        if (remainingAttempts <= 0) {
+            return new RemoteLockscreenValidationResult.Builder()
+                .setResultCode(RemoteLockscreenValidationResult.RESULT_NO_REMAINING_ATTEMPTS)
+                .build();
+        }
+        if (session == null) {
+            throw new IllegalStateException("There is no active lock screen check session");
+        }
+        byte[] decryptedCredentials;
+        try {
+            decryptedCredentials = SecureBox.decrypt(
+                session.getKeyPair().getPrivate(),
+                /* sharedSecret= */ null,
+                LockPatternUtils.ENCRYPTED_REMOTE_CREDENTIALS_HEADER,
+                encryptedCredential);
+        } catch (NoSuchAlgorithmException e) {
+            Log.wtf(TAG, "Missing SecureBox algorithm. AOSP required to support this.", e);
+            throw new IllegalStateException(e);
+        } catch (InvalidKeyException e) {
+            Log.e(TAG, "Got InvalidKeyException during lock screen credentials decryption");
+            throw new IllegalStateException(e);
+        } catch (AEADBadTagException e) {
+            throw new IllegalStateException("Could not decrypt credentials guess", e);
+        }
+        int savedCredentialType;
+        final long token = Binder.clearCallingIdentity();
+        try {
+            savedCredentialType = lockSettingsService.getCredentialType(userId);
+            int keyguardCredentialsType = lockPatternUtilsToKeyguardType(savedCredentialType);
+            try (LockscreenCredential credential =
+                    createLockscreenCredential(keyguardCredentialsType, decryptedCredentials)) {
+                // TODO(b/254335492): remove decryptedCredentials
+                VerifyCredentialResponse verifyResponse =
+                        lockSettingsService.verifyCredential(credential, userId, 0);
+                return handleVerifyCredentialResponse(verifyResponse, userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private RemoteLockscreenValidationResult handleVerifyCredentialResponse(
+            VerifyCredentialResponse response, int userId) {
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+            mDatabase.setBadRemoteGuessCounter(userId, 0);
+            mRemoteLockscreenValidationSessionStorage.finishSession(userId);
+            return new RemoteLockscreenValidationResult.Builder()
+                    .setResultCode(RemoteLockscreenValidationResult.RESULT_GUESS_VALID)
+                    .build();
+        }
+        if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
+            long timeout = (long) response.getTimeout();
+            return new RemoteLockscreenValidationResult.Builder()
+                    .setResultCode(RemoteLockscreenValidationResult.RESULT_LOCKOUT)
+                    .setTimeoutMillis(timeout)
+                    .build();
+        }
+        // Invalid guess
+        int badGuesses = mDatabase.getBadRemoteGuessCounter(userId);
+        mDatabase.setBadRemoteGuessCounter(userId, badGuesses + 1);
+        return new RemoteLockscreenValidationResult.Builder()
+                .setResultCode(RemoteLockscreenValidationResult.RESULT_GUESS_INVALID)
+                .build();
+    }
+
+    private LockscreenCredential createLockscreenCredential(
+            int lockType, byte[] password) {
+        switch (lockType) {
+            case KeyguardManager.PASSWORD:
+                CharSequence passwordStr = new String(password, StandardCharsets.UTF_8);
+                return LockscreenCredential.createPassword(passwordStr);
+            case KeyguardManager.PIN:
+                CharSequence pinStr = new String(password);
+                return LockscreenCredential.createPin(pinStr);
+            case KeyguardManager.PATTERN:
+                List<LockPatternView.Cell> pattern =
+                        LockPatternUtils.byteArrayToPattern(password);
+                return LockscreenCredential.createPattern(pattern);
+            default:
+                throw new IllegalStateException("Lockscreen is not set");
+        }
     }
 
     private void checkVerifyRemoteLockscreenPermission() {
-        // TODO(b/254335492): Check new system permission
         mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.RECOVER_KEYSTORE,
+                Manifest.permission.CHECK_REMOTE_LOCKSCREEN,
                 "Caller " + Binder.getCallingUid()
-                        + " doesn't have verifyRemoteLockscreen permission.");
+                        + " doesn't have CHECK_REMOTE_LOCKSCREEN permission.");
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
         mCleanupManager.registerRecoveryAgent(userId, uid);
+    }
+
+    private int lockPatternUtilsToKeyguardType(int credentialsType) {
+        switch(credentialsType) {
+            case LockPatternUtils.CREDENTIAL_TYPE_NONE:
+                throw new IllegalStateException("Screen lock is not set");
+            case LockPatternUtils.CREDENTIAL_TYPE_PATTERN:
+                return KeyguardManager.PATTERN;
+            case LockPatternUtils.CREDENTIAL_TYPE_PIN:
+                return KeyguardManager.PIN;
+            case LockPatternUtils.CREDENTIAL_TYPE_PASSWORD:
+                return KeyguardManager.PASSWORD;
+            default:
+                throw new IllegalStateException("Screen lock is not set");
+        }
     }
 
     private void checkRecoverKeyStorePermission() {

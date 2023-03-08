@@ -19,12 +19,15 @@ package com.android.systemui.statusbar.pipeline.dagger
 import android.net.wifi.WifiManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigCoreStartable
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileRepositorySwitcher
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupRepository
@@ -82,6 +85,11 @@ abstract class StatusBarPipelineModule {
     @ClassKey(MobileUiAdapter::class)
     abstract fun bindFeature(impl: MobileUiAdapter): CoreStartable
 
+    @Binds
+    @IntoMap
+    @ClassKey(CarrierConfigCoreStartable::class)
+    abstract fun bindCarrierConfigStartable(impl: CarrierConfigCoreStartable): CoreStartable
+
     companion object {
         @Provides
         @SysUISingleton
@@ -101,6 +109,13 @@ abstract class StatusBarPipelineModule {
 
         @Provides
         @SysUISingleton
+        @WifiInputLog
+        fun provideWifiInputLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("WifiInputLog", 50)
+        }
+
+        @Provides
+        @SysUISingleton
         @WifiTableLog
         fun provideWifiTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
             return factory.create("WifiTableLog", 100)
@@ -111,6 +126,41 @@ abstract class StatusBarPipelineModule {
         @AirplaneTableLog
         fun provideAirplaneTableLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
             return factory.create("AirplaneTableLog", 30)
+        }
+
+        @Provides
+        @SysUISingleton
+        @SharedConnectivityInputLog
+        fun provideSharedConnectivityTableLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("SharedConnectivityInputLog", 30)
+        }
+
+        @Provides
+        @SysUISingleton
+        @MobileSummaryLog
+        fun provideMobileSummaryLogBuffer(factory: TableLogBufferFactory): TableLogBuffer {
+            return factory.create("MobileSummaryLog", 100)
+        }
+
+        @Provides
+        @SysUISingleton
+        @MobileInputLog
+        fun provideMobileInputLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("MobileInputLog", 100)
+        }
+
+        @Provides
+        @SysUISingleton
+        @MobileViewLog
+        fun provideMobileViewLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("MobileViewLog", 100)
+        }
+
+        @Provides
+        @SysUISingleton
+        @VerboseMobileViewLog
+        fun provideVerboseMobileViewLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("VerboseMobileViewLog", 100)
         }
     }
 }

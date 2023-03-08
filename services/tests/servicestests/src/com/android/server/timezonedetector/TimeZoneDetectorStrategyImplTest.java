@@ -2001,26 +2001,4 @@ public class TimeZoneDetectorStrategyImplTest {
         return new TelephonyTestCase(matchType, quality, expectedScore);
     }
 
-    private static class TestStateChangeListener implements StateChangeListener {
-
-        private int mNotificationsReceived;
-
-        @Override
-        public void onChange() {
-            mNotificationsReceived++;
-        }
-
-        public void assertNotificationsReceivedAndReset(int expectedCount) {
-            assertNotificationsReceived(expectedCount);
-            resetNotificationsReceivedCount();
-        }
-
-        private void resetNotificationsReceivedCount() {
-            mNotificationsReceived = 0;
-        }
-
-        private void assertNotificationsReceived(int expectedCount) {
-            assertEquals(expectedCount, mNotificationsReceived);
-        }
-    }
 }

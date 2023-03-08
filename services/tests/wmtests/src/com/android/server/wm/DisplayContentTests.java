@@ -34,7 +34,6 @@ import static android.view.Display.FLAG_PRIVATE;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
@@ -105,6 +104,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
@@ -123,6 +123,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.view.ContentRecordingSession;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -1555,15 +1556,16 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mNotificationShadeWindow.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
 
         // If the visibility of insets state is changed, the rotated state should be updated too.
+        final int statusBarId = mStatusBarWindow.getControllableInsetProvider().getSource().getId();
         final InsetsState rotatedState = app.getFixedRotationTransformInsetsState();
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
-                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
-        state.getSource(ITYPE_STATUS_BAR).setVisible(
-                !rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertEquals(state.isSourceOrDefaultVisible(statusBarId, statusBars()),
+                rotatedState.isSourceOrDefaultVisible(statusBarId, statusBars()));
+        state.setSourceVisible(statusBarId,
+                !rotatedState.isSourceOrDefaultVisible(statusBarId, statusBars()));
         mDisplayContent.getInsetsStateController().notifyInsetsChanged();
-        assertEquals(state.getSource(ITYPE_STATUS_BAR).isVisible(),
-                rotatedState.getSource(ITYPE_STATUS_BAR).isVisible());
+        assertEquals(state.isSourceOrDefaultVisible(statusBarId, statusBars()),
+                rotatedState.isSourceOrDefaultVisible(statusBarId, statusBars()));
 
         final Rect outFrame = new Rect();
         final Rect outInsets = new Rect();
@@ -1618,7 +1620,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // If the rotated activity requests to show IME, the IME window should use the
         // transformation from activity to lay out in the same orientation.
-        mDisplayContent.setImeLayeringTarget(mAppWindow);
         LocalServices.getService(WindowManagerInternal.class).onToggleImeRequested(true /* show */,
                 app.token, app.token, mDisplayContent.mDisplayId);
         assertTrue(asyncRotationController.isTargetToken(mImeWindow.mToken));
@@ -1831,16 +1832,120 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSecondaryInternalDisplayRotationFollowsDefaultDisplay() {
+        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
+        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+
+        final DisplayRotationCoordinator coordinator =
+                mRootWindowContainer.getDisplayRotationCoordinator();
+        final DisplayContent defaultDisplayContent = mDisplayContent;
+        final DisplayRotation defaultDisplayRotation = defaultDisplayContent.getDisplayRotation();
+        coordinator.removeDefaultDisplayRotationChangedCallback();
+
+        DeviceStateController deviceStateController = mock(DeviceStateController.class);
+        when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
+                .thenReturn(true);
+
+        // Create secondary display
+        final DisplayContent secondaryDisplayContent =
+                createSecondaryDisplayContent(Display.TYPE_INTERNAL, deviceStateController);
+        final DisplayRotation secondaryDisplayRotation =
+                secondaryDisplayContent.getDisplayRotation();
+        try {
+            // TestDisplayContent bypasses this method but we need it for this test
+            doCallRealMethod().when(secondaryDisplayRotation).updateRotationUnchecked(anyBoolean());
+
+            // TestDisplayContent creates this as a mock. Lets set it up to test our use case.
+            when(secondaryDisplayContent.mDeviceStateController
+                    .shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay()).thenReturn(
+                    true);
+
+            // Check that secondary display registered callback
+            assertEquals(secondaryDisplayRotation.mDefaultDisplayRotationChangedCallback,
+                    coordinator.mDefaultDisplayRotationChangedCallback);
+
+            // Set the default display to a known orientation. This may be a zero or non-zero
+            // rotation since mDisplayInfo.logicalWidth/Height depends on the DUT's default display
+            defaultDisplayRotation.updateOrientation(SCREEN_ORIENTATION_PORTRAIT, false);
+            assertEquals(defaultDisplayRotation.mPortraitRotation,
+                    defaultDisplayRotation.getRotation());
+            assertEquals(defaultDisplayRotation.mPortraitRotation,
+                    coordinator.getDefaultDisplayCurrentRotation());
+
+            // Check that in the initial state, the secondary display is in the right rotation
+            assertRotationsAreCorrectlyReversed(defaultDisplayRotation.getRotation(),
+                    secondaryDisplayRotation.getRotation());
+
+            // Update primary display rotation, check display coordinator rotation is the default
+            // display's landscape rotation, and that the secondary display rotation is correct.
+            defaultDisplayRotation.updateOrientation(SCREEN_ORIENTATION_LANDSCAPE, false);
+            assertEquals(defaultDisplayRotation.mLandscapeRotation,
+                    defaultDisplayRotation.getRotation());
+            assertEquals(defaultDisplayRotation.mLandscapeRotation,
+                    coordinator.getDefaultDisplayCurrentRotation());
+            assertRotationsAreCorrectlyReversed(defaultDisplayRotation.getRotation(),
+                    secondaryDisplayRotation.getRotation());
+        } finally {
+            secondaryDisplayRotation.removeDefaultDisplayRotationChangedCallback();
+        }
+    }
+
+    @Test
+    public void testSecondaryNonInternalDisplayDoesNotFollowDefaultDisplay() {
+        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
+        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+
+        final DisplayRotationCoordinator coordinator =
+                mRootWindowContainer.getDisplayRotationCoordinator();
+        coordinator.removeDefaultDisplayRotationChangedCallback();
+
+        DeviceStateController deviceStateController = mock(DeviceStateController.class);
+        when(deviceStateController.shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay())
+                .thenReturn(true);
+
+        // Create secondary non-internal displays
+        createSecondaryDisplayContent(Display.TYPE_EXTERNAL, deviceStateController);
+        assertNull(coordinator.mDefaultDisplayRotationChangedCallback);
+        createSecondaryDisplayContent(Display.TYPE_VIRTUAL, deviceStateController);
+        assertNull(coordinator.mDefaultDisplayRotationChangedCallback);
+    }
+
+    private DisplayContent createSecondaryDisplayContent(int displayType,
+            @NonNull DeviceStateController deviceStateController) {
+        final DisplayInfo secondaryDisplayInfo = new DisplayInfo();
+        secondaryDisplayInfo.copyFrom(mDisplayInfo);
+        secondaryDisplayInfo.type = displayType;
+
+        return new TestDisplayContent.Builder(mAtm, secondaryDisplayInfo)
+                .setDeviceStateController(deviceStateController)
+                .build();
+    }
+
+    private static void assertRotationsAreCorrectlyReversed(@Surface.Rotation int rotation1,
+            @Surface.Rotation int rotation2) {
+        if (rotation1 == ROTATION_0) {
+            assertEquals(rotation1, rotation2);
+        } else if (rotation1 == ROTATION_180) {
+            assertEquals(rotation1, rotation2);
+        } else if (rotation1 == ROTATION_90) {
+            assertEquals(ROTATION_270, rotation2);
+        } else if (rotation1 == ROTATION_270) {
+            assertEquals(ROTATION_90, rotation2);
+        } else {
+            throw new IllegalArgumentException("Unknown rotation: " + rotation1 + ", " + rotation2);
+        }
+    }
+
+    @Test
     public void testRemoteRotation() {
         final DisplayContent dc = mDisplayContent;
         final DisplayRotation dr = dc.getDisplayRotation();
         spyOn(dr);
-        // Rotate 180 degree so the display doesn't have configuration change. This condition is
-        // used for the later verification of stop-freezing (without setting mWaitingForConfig).
         doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
         doAnswer(invocation -> {
             continued[0] = true;
+            mDisplayContent.mWaitingForConfig = false;
             mAtm.addWindowLayoutReasons(ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
             return true;
         }).when(dc).updateDisplayOverrideConfigurationLocked();
@@ -1913,13 +2018,13 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
 
         // Once transition starts, rotation is applied and transition shows DC rotating.
-        testPlayer.start();
+        testPlayer.startTransition();
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
+        assertTrue(testPlayer.mController.isPlaying());
         WindowContainerToken dcToken = dc.mRemoteToken.toWindowContainerToken();
         assertNotEquals(testPlayer.mLastReady.getChange(dcToken).getEndRotation(),
                 testPlayer.mLastReady.getChange(dcToken).getStartRotation());
-        assertTrue(testPlayer.mLastTransit.applyDisplayChangeIfNeeded());
         testPlayer.finish();
     }
 

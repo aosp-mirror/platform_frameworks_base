@@ -228,7 +228,7 @@ public final class MidiManager {
      * Registers a callback to receive notifications when MIDI 1.0 devices are added and removed.
      * These are devices that do not default to Universal MIDI Packets. To register for a callback
      * for those, call {@link #registerDeviceCallback} instead.
-
+     *
      * The {@link  DeviceCallback#onDeviceStatusChanged} method will be called immediately
      * for any devices that have open ports. This allows applications to know which input
      * ports are already in use and, therefore, unavailable.
@@ -289,7 +289,7 @@ public final class MidiManager {
 
     /**
      * Unregisters a {@link DeviceCallback}.
-      *
+     *
      * @param callback a {@link DeviceCallback} to unregister
      */
     public void unregisterDeviceCallback(DeviceCallback callback) {

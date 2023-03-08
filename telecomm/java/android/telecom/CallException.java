@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * This class defines exceptions that can be thrown when using Telecom APIs with
  * {@link android.os.OutcomeReceiver}s.  Most of these exceptions are thrown when changing a call
- * state with {@link CallControl}s or {@link CallEventCallback}s.
+ * state with {@link CallControl}s or {@link CallControlCallback}s.
  */
 public final class CallException extends RuntimeException implements Parcelable {
     /** @hide **/
@@ -113,17 +113,6 @@ public final class CallException extends RuntimeException implements Parcelable 
             CODE_OPERATION_TIMED_OUT
     })
     public @interface CallErrorCode {
-    }
-
-    /**
-     * Constructor for a new CallException when only message can be specified.
-     * {@code CODE_ERROR_UNKNOWN} will be default code returned when calling {@code getCode}
-     *
-     * @param message related to why the exception was created
-     */
-    public CallException(@Nullable String message) {
-        super(getMessage(message, CODE_ERROR_UNKNOWN));
-        mMessage = message;
     }
 
     /**

@@ -274,6 +274,19 @@ public class WindowMagnificationManagerTest {
     }
 
     @Test
+    public void persistScale_setValueWhenScaleIsOne_nothingChanged() {
+        mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
+        final float persistedScale = mWindowMagnificationManager.getPersistedScale(TEST_DISPLAY);
+
+        mWindowMagnificationManager.setScale(TEST_DISPLAY, 1.0f);
+        mWindowMagnificationManager.persistScale(TEST_DISPLAY);
+
+        assertEquals(Settings.Secure.getFloatForUser(mResolver,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0f,
+                CURRENT_USER_ID), persistedScale);
+    }
+
+    @Test
     public void scaleSetterGetter_enabledOnTestDisplay_expectedValue() {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mWindowMagnificationManager.enableWindowMagnification(TEST_DISPLAY, 2.0f, NaN, NaN);

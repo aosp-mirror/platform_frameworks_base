@@ -570,7 +570,7 @@ public class ConfigurationInternalTest {
                     .setAutoDetectionEnabledSetting(false)
                     .build();
             assertFalse(config.getAutoDetectionEnabledBehavior());
-            assertTrue(config.isGeoDetectionExecutionEnabled());
+            assertFalse(config.isGeoDetectionExecutionEnabled());
             assertEquals(DETECTION_MODE_MANUAL, config.getDetectionMode());
         }
     }

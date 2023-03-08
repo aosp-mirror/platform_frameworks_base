@@ -741,7 +741,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_snoozed_occluding_withStrictRules() throws Exception {
+    public void testShouldNotFullScreen_snoozed_occluding_withStrictRules() throws Exception {
         when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -753,16 +753,41 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mKeyguardStateController.isOccluded()).thenReturn(true);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
-                .isEqualTo(FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED);
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_EXPECTED_TO_HUN);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
-                .isTrue();
-        verify(mLogger, never()).logNoFullscreen(any(), any());
+                .isFalse();
+        verify(mLogger).logNoFullscreen(entry, "Expected to HUN");
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
-        verify(mLogger).logFullscreen(entry, "Expected not to HUN while keyguard occluded");
+        verify(mLogger, never()).logFullscreen(any(), any());
     }
 
     @Test
-    public void testShouldFullScreen_snoozed_lockedShade_withStrictRules() throws Exception {
+    public void testShouldHeadsUp_snoozed_occluding_withStrictRules() throws Exception {
+        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+        when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger).logHeadsUpPackageSnoozeBypassedHasFsi(entry);
+        verify(mLogger, never()).logHeadsUp(any());
+
+        assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1);
+        UiEventLoggerFake.FakeUiEvent fakeUiEvent = mUiEventLoggerFake.get(0);
+        assertThat(fakeUiEvent.eventId).isEqualTo(
+                NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI.getId());
+        assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
+        assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
+    }
+
+    @Test
+    public void testShouldNotFullScreen_snoozed_lockedShade_withStrictRules() throws Exception {
         when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -774,12 +799,37 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
-                .isEqualTo(FullScreenIntentDecision.FSI_LOCKED_SHADE);
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_EXPECTED_TO_HUN);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
-                .isTrue();
-        verify(mLogger, never()).logNoFullscreen(any(), any());
+                .isFalse();
+        verify(mLogger).logNoFullscreen(entry, "Expected to HUN");
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
-        verify(mLogger).logFullscreen(entry, "Keyguard is showing and not occluded");
+        verify(mLogger, never()).logFullscreen(any(), any());
+    }
+
+    @Test
+    public void testShouldHeadsUp_snoozed_lockedShade_withStrictRules() throws Exception {
+        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE_LOCKED);
+        when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger).logHeadsUpPackageSnoozeBypassedHasFsi(entry);
+        verify(mLogger, never()).logHeadsUp(any());
+
+        assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1);
+        UiEventLoggerFake.FakeUiEvent fakeUiEvent = mUiEventLoggerFake.get(0);
+        assertThat(fakeUiEvent.eventId).isEqualTo(
+                NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI.getId());
+        assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
+        assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
     }
 
     @Test
@@ -795,20 +845,40 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         when(mKeyguardStateController.isOccluded()).thenReturn(false);
 
         assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
-                .isEqualTo(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD);
+                .isEqualTo(FullScreenIntentDecision.NO_FSI_EXPECTED_TO_HUN);
         assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
                 .isFalse();
-        verify(mLogger, never()).logNoFullscreen(any(), any());
-        verify(mLogger).logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
+        verify(mLogger).logNoFullscreen(entry, "Expected to HUN");
+        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger, never()).logFullscreen(any(), any());
+    }
+
+    @Test
+    public void testShouldHeadsUp_snoozed_unlocked_withStrictRules() throws Exception {
+        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mPowerManager.isScreenOn()).thenReturn(true);
+        when(mDreamManager.isDreaming()).thenReturn(false);
+        when(mStatusBarStateController.getState()).thenReturn(SHADE);
+        when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+
+        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
+
+        verify(mLogger).logHeadsUpPackageSnoozeBypassedHasFsi(entry);
+        verify(mLogger, never()).logHeadsUp(any());
 
         assertThat(mUiEventLoggerFake.numLogs()).isEqualTo(1);
         UiEventLoggerFake.FakeUiEvent fakeUiEvent = mUiEventLoggerFake.get(0);
         assertThat(fakeUiEvent.eventId).isEqualTo(
-                NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD.getId());
+                NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI.getId());
         assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
         assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
     }
+
+    /* TODO: Verify the FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD UiEvent some other way. */
 
     /**
      * Bubbles can happen.

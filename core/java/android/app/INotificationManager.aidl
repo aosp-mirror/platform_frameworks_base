@@ -80,8 +80,6 @@ interface INotificationManager
     boolean isImportanceLocked(String pkg, int uid);
 
     List<String> getAllowedAssistantAdjustments(String pkg);
-    void allowAssistantAdjustment(String adjustmentType);
-    void disallowAssistantAdjustment(String adjustmentType);
 
     boolean shouldHideSilentStatusIcons(String callingPkg);
     void setHideSilentStatusIcons(boolean hide);
@@ -149,6 +147,7 @@ interface INotificationManager
 
     void requestBindListener(in ComponentName component);
     void requestUnbindListener(in INotificationListener token);
+    void requestUnbindListenerComponent(in ComponentName component);
     void requestBindProvider(in ComponentName component);
     void requestUnbindProvider(in IConditionProvider token);
 

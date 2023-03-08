@@ -132,7 +132,7 @@ class ArgumentPageModel : PageModel() {
             override val title = PAGE_TITLE
             override val summary = stateOf(summaryArray.joinToString(", "))
             override val onClick = navigator(
-                SettingsPageProviderEnum.ARGUMENT.displayName + parameter.navLink(arguments)
+                SettingsPageProviderEnum.ARGUMENT.name + parameter.navLink(arguments)
             )
         }
     }

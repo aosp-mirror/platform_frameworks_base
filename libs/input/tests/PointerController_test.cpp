@@ -35,6 +35,7 @@ enum TestCursorType {
     CURSOR_TYPE_ANCHOR,
     CURSOR_TYPE_ADDITIONAL,
     CURSOR_TYPE_ADDITIONAL_ANIM,
+    CURSOR_TYPE_STYLUS,
     CURSOR_TYPE_CUSTOM = -1,
 };
 
@@ -57,6 +58,7 @@ public:
             std::map<PointerIconStyle, PointerAnimation>* outAnimationResources,
             int32_t displayId) override;
     virtual PointerIconStyle getDefaultPointerIconId() override;
+    virtual PointerIconStyle getDefaultStylusIconId() override;
     virtual PointerIconStyle getCustomPointerIconId() override;
     virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos) override;
 
@@ -105,11 +107,20 @@ void MockPointerControllerPolicyInterface::loadAdditionalMouseResources(
     (*outResources)[static_cast<PointerIconStyle>(cursorType)] = icon;
     (*outAnimationResources)[static_cast<PointerIconStyle>(cursorType)] = anim;
 
+    // CURSOR_TYPE_STYLUS doesn't have animation resource.
+    cursorType = CURSOR_TYPE_STYLUS;
+    loadPointerIconForType(&icon, cursorType);
+    (*outResources)[static_cast<PointerIconStyle>(cursorType)] = icon;
+
     additionalMouseResourcesLoaded = true;
 }
 
 PointerIconStyle MockPointerControllerPolicyInterface::getDefaultPointerIconId() {
     return static_cast<PointerIconStyle>(CURSOR_TYPE_DEFAULT);
+}
+
+PointerIconStyle MockPointerControllerPolicyInterface::getDefaultStylusIconId() {
+    return static_cast<PointerIconStyle>(CURSOR_TYPE_STYLUS);
 }
 
 PointerIconStyle MockPointerControllerPolicyInterface::getCustomPointerIconId() {
@@ -209,6 +220,21 @@ TEST_F(PointerControllerTest, useDefaultCursorTypeByDefault) {
     EXPECT_CALL(*mPointerSprite,
                 setIcon(AllOf(Field(&SpriteIcon::style,
                                     static_cast<PointerIconStyle>(CURSOR_TYPE_DEFAULT)),
+                              Field(&SpriteIcon::hotSpotX, hotspot.first),
+                              Field(&SpriteIcon::hotSpotY, hotspot.second))));
+    mPointerController->reloadPointerResources();
+}
+
+TEST_F(PointerControllerTest, useStylusTypeForStylusHover) {
+    ensureDisplayViewportIsSet();
+    mPointerController->setPresentation(PointerController::Presentation::STYLUS_HOVER);
+    mPointerController->unfade(PointerController::Transition::IMMEDIATE);
+    std::pair<float, float> hotspot = getHotSpotCoordinatesForType(CURSOR_TYPE_STYLUS);
+    EXPECT_CALL(*mPointerSprite, setVisible(true));
+    EXPECT_CALL(*mPointerSprite, setAlpha(1.0f));
+    EXPECT_CALL(*mPointerSprite,
+                setIcon(AllOf(Field(&SpriteIcon::style,
+                                    static_cast<PointerIconStyle>(CURSOR_TYPE_STYLUS)),
                               Field(&SpriteIcon::hotSpotX, hotspot.first),
                               Field(&SpriteIcon::hotSpotY, hotspot.second))));
     mPointerController->reloadPointerResources();

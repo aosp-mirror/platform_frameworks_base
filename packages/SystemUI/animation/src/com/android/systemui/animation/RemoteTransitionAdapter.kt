@@ -182,9 +182,9 @@ class RemoteTransitionAdapter {
          * Represents a TransitionInfo object as an array of old-style targets
          *
          * @param wallpapers If true, this will return wallpaper targets; otherwise it returns
-         * non-wallpaper targets.
+         *   non-wallpaper targets.
          * @param leashMap Temporary map of change leash -> launcher leash. Is an output, so should
-         * be populated by this function. If null, it is ignored.
+         *   be populated by this function. If null, it is ignored.
          */
         fun wrapTargets(
             info: TransitionInfo,

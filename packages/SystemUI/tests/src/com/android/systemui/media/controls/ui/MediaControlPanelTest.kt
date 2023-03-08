@@ -27,6 +27,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
@@ -52,6 +53,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
+import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.internal.widget.CachingIconView
@@ -77,6 +79,8 @@ import com.android.systemui.media.controls.pipeline.EMPTY_SMARTSPACE_MEDIA_DATA
 import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.dialog.MediaOutputDialogFactory
+import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -206,7 +210,14 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var coverContainer3: ViewGroup
     @Mock private lateinit var recAppIconItem: CachingIconView
     @Mock private lateinit var recCardTitle: TextView
+    @Mock private lateinit var recProgressBar1: SeekBar
+    @Mock private lateinit var recProgressBar2: SeekBar
+    @Mock private lateinit var recProgressBar3: SeekBar
+    @Mock private lateinit var recSubtitleMock1: TextView
+    @Mock private lateinit var recSubtitleMock2: TextView
+    @Mock private lateinit var recSubtitleMock3: TextView
     @Mock private lateinit var coverItem: ImageView
+    @Mock private lateinit var matrix: Matrix
     private lateinit var coverItem1: ImageView
     private lateinit var coverItem2: ImageView
     private lateinit var coverItem3: ImageView
@@ -690,6 +701,46 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
         verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
+    }
+
+    @Test
+    fun addTwoPlayerGradients_differentStates() {
+        // Setup redArtwork and its color scheme.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redCanvas = Canvas(redBmp)
+        redCanvas.drawColor(Color.RED)
+        val redArt = Icon.createWithBitmap(redBmp)
+        val redWallpaperColor = player.getWallpaperColor(redArt)
+        val redColorScheme = ColorScheme(redWallpaperColor, true, Style.CONTENT)
+
+        // Setup greenArt and its color scheme.
+        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val greenCanvas = Canvas(greenBmp)
+        greenCanvas.drawColor(Color.GREEN)
+        val greenArt = Icon.createWithBitmap(greenBmp)
+        val greenWallpaperColor = player.getWallpaperColor(greenArt)
+        val greenColorScheme = ColorScheme(greenWallpaperColor, true, Style.CONTENT)
+
+        // Add gradient to both icons.
+        val redArtwork = player.addGradientToPlayerAlbum(redArt, redColorScheme, 10, 10)
+        val greenArtwork = player.addGradientToPlayerAlbum(greenArt, greenColorScheme, 10, 10)
+
+        // They should have different constant states as they have different gradient color.
+        assertThat(redArtwork.getDrawable(1).constantState)
+            .isNotEqualTo(greenArtwork.getDrawable(1).constantState)
+    }
+
+    @Test
+    fun getWallpaperColor_recycledBitmap_notCrashing() {
+        // Setup redArt icon.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redArt = Icon.createWithBitmap(redBmp)
+
+        // Recycle bitmap of redArt icon.
+        redArt.bitmap.recycle()
+
+        // get wallpaperColor without illegal exception.
+        player.getWallpaperColor(redArt)
     }
 
     @Test
@@ -2081,6 +2132,11 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
         whenever(recommendationViewHolder.mediaCoverItems)
             .thenReturn(listOf(coverItem, coverItem, coverItem))
+        whenever(recommendationViewHolder.mediaProgressBars)
+            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
+        whenever(recommendationViewHolder.mediaSubtitles)
+            .thenReturn(listOf(recSubtitleMock1, recSubtitleMock2, recSubtitleMock3))
+        whenever(coverItem.imageMatrix).thenReturn(matrix)
 
         val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
@@ -2116,6 +2172,94 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(recCardTitle).setTextColor(any<Int>())
         verify(recAppIconItem, times(3)).setImageDrawable(any(Drawable::class.java))
         verify(coverItem, times(3)).setImageDrawable(any(Drawable::class.java))
+        verify(coverItem, times(3)).imageMatrix = any()
+    }
+
+    @Test
+    fun bindRecommendationWithProgressBars() {
+        fakeFeatureFlag.set(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE, true)
+        whenever(recommendationViewHolder.mediaAppIcons)
+            .thenReturn(listOf(recAppIconItem, recAppIconItem, recAppIconItem))
+        whenever(recommendationViewHolder.cardTitle).thenReturn(recCardTitle)
+        whenever(recommendationViewHolder.mediaCoverItems)
+            .thenReturn(listOf(coverItem, coverItem, coverItem))
+        whenever(recommendationViewHolder.mediaProgressBars)
+            .thenReturn(listOf(recProgressBar1, recProgressBar2, recProgressBar3))
+        whenever(recommendationViewHolder.mediaSubtitles)
+            .thenReturn(listOf(recSubtitleMock1, recSubtitleMock2, recSubtitleMock3))
+
+        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+        canvas.drawColor(Color.RED)
+        val albumArt = Icon.createWithBitmap(bmp)
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_STATUS,
+                    MediaConstants.DESCRIPTION_EXTRAS_VALUE_COMPLETION_STATUS_PARTIALLY_PLAYED
+                )
+                putDouble(MediaConstants.DESCRIPTION_EXTRAS_KEY_COMPLETION_PERCENTAGE, 0.5)
+            }
+        val data =
+            smartspaceData.copy(
+                recommendations =
+                    listOf(
+                        SmartspaceAction.Builder("id1", "title1")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(bundle)
+                            .build(),
+                        SmartspaceAction.Builder("id2", "title2")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build(),
+                        SmartspaceAction.Builder("id3", "title3")
+                            .setSubtitle("subtitle1")
+                            .setIcon(albumArt)
+                            .setExtras(Bundle.EMPTY)
+                            .build()
+                    )
+            )
+
+        player.attachRecommendation(recommendationViewHolder)
+        player.bindRecommendation(data)
+
+        verify(recProgressBar1).setProgress(50)
+        verify(recProgressBar1).visibility = View.VISIBLE
+        verify(recProgressBar2).visibility = View.GONE
+        verify(recProgressBar3).visibility = View.GONE
+        verify(recSubtitleMock1).visibility = View.GONE
+        verify(recSubtitleMock2).visibility = View.VISIBLE
+        verify(recSubtitleMock3).visibility = View.VISIBLE
+    }
+
+    @Test
+    fun addTwoRecommendationGradients_differentStates() {
+        // Setup redArtwork and its color scheme.
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redCanvas = Canvas(redBmp)
+        redCanvas.drawColor(Color.RED)
+        val redArt = Icon.createWithBitmap(redBmp)
+        val redWallpaperColor = player.getWallpaperColor(redArt)
+        val redColorScheme = ColorScheme(redWallpaperColor, true, Style.CONTENT)
+
+        // Setup greenArt and its color scheme.
+        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val greenCanvas = Canvas(greenBmp)
+        greenCanvas.drawColor(Color.GREEN)
+        val greenArt = Icon.createWithBitmap(greenBmp)
+        val greenWallpaperColor = player.getWallpaperColor(greenArt)
+        val greenColorScheme = ColorScheme(greenWallpaperColor, true, Style.CONTENT)
+
+        // Add gradient to both icons.
+        val redArtwork = player.addGradientToRecommendationAlbum(redArt, redColorScheme, 10, 10)
+        val greenArtwork =
+            player.addGradientToRecommendationAlbum(greenArt, greenColorScheme, 10, 10)
+
+        // They should have different constant states as they have different gradient color.
+        assertThat(redArtwork.getDrawable(1).constantState)
+            .isNotEqualTo(greenArtwork.getDrawable(1).constantState)
     }
 
     @Test

@@ -106,6 +106,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             updateDoubleLineClock();
         }
     };
+    private final ContentObserver mShowWeatherObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean change) {
+            setWeatherVisibility();
+        }
+    };
 
     private final KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener
             mKeyguardUnlockAnimationListener =
@@ -145,8 +151,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mLogBuffer = logBuffer;
         mView.setLogBuffer(mLogBuffer);
 
-        mClockChangedListener = () -> {
-            setClock(mClockRegistry.createCurrentClock());
+        mClockChangedListener = new ClockRegistry.ClockChangeListener() {
+            @Override
+            public void onCurrentClockChanged() {
+                setClock(mClockRegistry.createCurrentClock());
+            }
+            @Override
+            public void onAvailableClocksChanged() { }
         };
     }
 
@@ -216,7 +227,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 UserHandle.USER_ALL
         );
 
+        mSecureSettings.registerContentObserverForUser(
+                Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
+                false, /* notifyForDescendants */
+                mShowWeatherObserver,
+                UserHandle.USER_ALL
+        );
+
         updateDoubleLineClock();
+        setWeatherVisibility();
 
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
@@ -344,7 +363,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
         ClockController clock = getClock();
         if (clock != null) {
-            clock.getEvents().onTimeTick();
+            clock.getSmallClock().getEvents().onTimeTick();
+            clock.getLargeClock().getEvents().onTimeTick();
         }
     }
 
@@ -389,6 +409,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             int clockHeight = clock.getLargeClock().getView().getHeight();
             return frameHeight / 2 + clockHeight / 2 + mKeyguardLargeClockTopMargin / -2;
         } else {
+            // This is only called if we've never shown the large clock as the frame is inflated
+            // with 'gone', but then the visibility is never set when it is animated away by
+            // KeyguardClockSwitch, instead it is removed from the view hierarchy.
+            // TODO(b/261755021): Cleanup Large Frame Visibility
             int clockHeight = clock.getSmallClock().getView().getHeight();
             return clockHeight + statusBarHeaderHeight + mKeyguardSmallClockTopMargin;
         }
@@ -406,11 +430,15 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (mLargeClockFrame.getVisibility() == View.VISIBLE) {
             return clock.getLargeClock().getView().getHeight();
         } else {
+            // Is not called except in certain edge cases, see comment in getClockBottom
+            // TODO(b/261755021): Cleanup Large Frame Visibility
             return clock.getSmallClock().getView().getHeight();
         }
     }
 
     boolean isClockTopAligned() {
+        // Returns false except certain edge cases, see comment in getClockBottom
+        // TODO(b/261755021): Cleanup Large Frame Visibility
         return mLargeClockFrame.getVisibility() != View.VISIBLE;
     }
 
@@ -445,6 +473,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (!mCanShowDoubleLineClock) {
             mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL, /* animate */ true));
+        }
+    }
+
+    private void setWeatherVisibility() {
+        if (mWeatherView != null) {
+            mUiExecutor.execute(
+                    () -> mWeatherView.setVisibility(
+                        mSmartspaceController.isWeatherEnabled() ? View.VISIBLE : View.GONE));
         }
     }
 

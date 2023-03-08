@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
-import android.provider.Settings
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
@@ -35,8 +34,14 @@ interface MobileConnectionsRepository {
     /** Observable list of current mobile subscriptions */
     val subscriptions: StateFlow<List<SubscriptionModel>>
 
-    /** Observable for the subscriptionId of the current mobile data connection */
-    val activeMobileDataSubscriptionId: StateFlow<Int>
+    /**
+     * Observable for the subscriptionId of the current mobile data connection. Null if we don't
+     * have a valid subscription id
+     */
+    val activeMobileDataSubscriptionId: StateFlow<Int?>
+
+    /** Repo that tracks the current [activeMobileDataSubscriptionId] */
+    val activeMobileDataRepository: StateFlow<MobileConnectionRepository?>
 
     /**
      * Observable event for when the active data sim switches but the group stays the same. E.g.,
@@ -52,9 +57,6 @@ interface MobileConnectionsRepository {
 
     /** Get or create a repository for the line of service for the given subscription ID */
     fun getRepoForSubId(subId: Int): MobileConnectionRepository
-
-    /** Observe changes to the [Settings.Global.MOBILE_DATA] setting */
-    val globalMobileDataSettingChangedEvent: Flow<Unit>
 
     /**
      * [Config] is an object that tracks relevant configuration flags for a given subscription ID.

@@ -21,4 +21,5 @@
     android:intro="@string/accessibility_menu_intro"
     android:animatedImageDrawable="@drawable/a11ymenu_intro"
     android:isAccessibilityTool="true"
+    android:settingsActivity="com.android.systemui.accessibility.accessibilitymenu.activity.A11yMenuSettingsActivity"
 />

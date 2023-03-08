@@ -27,6 +27,7 @@ import android.annotation.UserIdInt;
 import android.app.role.RoleManager;
 import android.companion.AssociationInfo;
 import android.content.Context;
+import android.os.Binder;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -84,7 +85,9 @@ final class RolesUtils {
 
         Slog.i(TAG, "Removing CDM role holder, role=" + deviceProfile
                 + ", package=u" + userId + "\\" + packageName);
-        roleManager.removeRoleHolderAsUser(deviceProfile, packageName,
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            roleManager.removeRoleHolderAsUser(deviceProfile, packageName,
                 MANAGE_HOLDERS_FLAG_DONT_KILL_APP, userHandle, context.getMainExecutor(),
                 success -> {
                     if (!success) {
@@ -92,6 +95,9 @@ final class RolesUtils {
                                 + " from the list of " + deviceProfile + " holders.");
                     }
                 });
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private RolesUtils() {};

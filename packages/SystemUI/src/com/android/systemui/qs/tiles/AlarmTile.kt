@@ -118,4 +118,8 @@ class AlarmTile @Inject constructor(
     override fun getLongClickIntent(): Intent? {
         return null
     }
+
+    companion object {
+        const val TILE_SPEC = "alarm"
+    }
 }

@@ -220,7 +220,7 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
         }
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
         ScreenCapture.ScreenshotHardwareBuffer imeBuffer = null;
-        if (imeWindow != null && imeWindow.isWinVisibleLw()) {
+        if (imeWindow != null && imeWindow.isVisible()) {
             final Rect bounds = imeWindow.getParentFrame();
             bounds.offsetTo(0, 0);
             imeBuffer = ScreenCapture.captureLayersExcluding(imeWindow.getSurfaceControl(),

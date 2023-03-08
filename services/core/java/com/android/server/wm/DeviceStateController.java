@@ -17,13 +17,13 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.devicestate.DeviceStateManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -46,17 +46,26 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     private final int[] mFoldedDeviceStates;
     @NonNull
     private final int[] mRearDisplayDeviceStates;
+    private final int mConcurrentDisplayDeviceState;
     @NonNull
     private final int[] mReverseRotationAroundZAxisStates;
+    @GuardedBy("this")
     @NonNull
     private final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
 
-    @Nullable
-    private DeviceState mLastDeviceState;
+    private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
+
+    @NonNull
+    private DeviceState mCurrentDeviceState = DeviceState.UNKNOWN;
     private int mCurrentState;
 
     public enum DeviceState {
-        UNKNOWN, OPEN, FOLDED, HALF_FOLDED, REAR,
+        UNKNOWN,
+        OPEN,
+        FOLDED,
+        HALF_FOLDED,
+        REAR,
+        CONCURRENT,
     }
 
     DeviceStateController(@NonNull Context context, @NonNull Handler handler) {
@@ -70,22 +79,23 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
                 .getIntArray(R.array.config_foldedDeviceStates);
         mRearDisplayDeviceStates = context.getResources()
                 .getIntArray(R.array.config_rearDisplayDeviceStates);
+        mConcurrentDisplayDeviceState = context.getResources()
+                .getInteger(R.integer.config_deviceStateConcurrentRearDisplay);
         mReverseRotationAroundZAxisStates = context.getResources()
                 .getIntArray(R.array.config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis);
+        mMatchBuiltInDisplayOrientationToDefaultDisplay = context.getResources()
+                .getBoolean(R.bool
+                        .config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay);
 
         if (mDeviceStateManager != null) {
             mDeviceStateManager.registerCallback(new HandlerExecutor(handler), this);
         }
     }
 
-    void unregisterFromDeviceStateManager() {
-        if (mDeviceStateManager != null) {
-            mDeviceStateManager.unregisterCallback(this);
-        }
-    }
-
     void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
-        mDeviceStateCallbacks.add(callback);
+        synchronized (this) {
+            mDeviceStateCallbacks.add(callback);
+        }
     }
 
     /**
@@ -93,6 +103,15 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
      */
     boolean shouldReverseRotationDirectionAroundZAxis() {
         return ArrayUtils.contains(mReverseRotationAroundZAxisStates, mCurrentState);
+    }
+
+    /**
+     * @return true if non-default built-in displays should match the default display's rotation.
+     */
+    boolean shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay() {
+        // TODO(b/265991392): This should come from display_settings.xml once it's easier to
+        //  extend with complex configurations.
+        return mMatchBuiltInDisplayOrientationToDefaultDisplay;
     }
 
     @Override
@@ -108,15 +127,19 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
             deviceState = DeviceState.REAR;
         } else if (ArrayUtils.contains(mOpenDeviceStates, state)) {
             deviceState = DeviceState.OPEN;
+        } else if (state == mConcurrentDisplayDeviceState) {
+            deviceState = DeviceState.CONCURRENT;
         } else {
             deviceState = DeviceState.UNKNOWN;
         }
 
-        if (mLastDeviceState == null || !mLastDeviceState.equals(deviceState)) {
-            mLastDeviceState = deviceState;
+        if (mCurrentDeviceState == null || !mCurrentDeviceState.equals(deviceState)) {
+            mCurrentDeviceState = deviceState;
 
-            for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
-                callback.accept(mLastDeviceState);
+            synchronized (this) {
+                for (Consumer<DeviceState> callback : mDeviceStateCallbacks) {
+                    callback.accept(mCurrentDeviceState);
+                }
             }
         }
     }

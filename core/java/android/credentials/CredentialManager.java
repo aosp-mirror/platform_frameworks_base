@@ -16,15 +16,20 @@
 
 package android.credentials;
 
+import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
+
 import static java.util.Objects.requireNonNull;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentSender;
 import android.os.CancellationSignal;
@@ -34,6 +39,8 @@ import android.os.RemoteException;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -50,6 +57,39 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CREDENTIAL_SERVICE)
 public final class CredentialManager {
     private static final String TAG = "CredentialManager";
+
+    /** @hide */
+    @IntDef(
+            flag = true,
+            prefix = {"PROVIDER_FILTER_"},
+            value = {
+                PROVIDER_FILTER_ALL_PROVIDERS,
+                PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY,
+                PROVIDER_FILTER_USER_PROVIDERS_ONLY,
+            })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProviderFilter {}
+
+    /**
+     * Returns both system and user credential providers.
+     *
+     * @hide
+     */
+    @TestApi public static final int PROVIDER_FILTER_ALL_PROVIDERS = 0;
+
+    /**
+     * Returns system credential providers only.
+     *
+     * @hide
+     */
+    @TestApi public static final int PROVIDER_FILTER_SYSTEM_PROVIDERS_ONLY = 1;
+
+    /**
+     * Returns user credential providers only.
+     *
+     * @hide
+     */
+    @TestApi public static final int PROVIDER_FILTER_USER_PROVIDERS_ONLY = 2;
 
     private final Context mContext;
     private final ICredentialManager mService;
@@ -83,6 +123,10 @@ public final class CredentialManager {
      *
      * <p>The execution can potentially launch UI flows to collect user consent to using a
      * credential, display a picker when multiple credentials exist, etc.
+     * Callers (e.g. browsers) may optionally set origin in {@link GetCredentialRequest} for an
+     * app different from their own, to be able to get credentials on behalf of that app. They would
+     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * to use this functionality
      *
      * @param request the request specifying type(s) of credentials to get from the user
      * @param activity the activity used to launch any UI needed
@@ -127,6 +171,10 @@ public final class CredentialManager {
      *
      * <p>The execution can potentially launch UI flows to collect user consent to creating or
      * storing the new credential, etc.
+     * Callers (e.g. browsers) may optionally set origin in {@link CreateCredentialRequest} for an
+     * app different from their own, to be able to get credentials on behalf of that app. They would
+     * need additional permission {@link CREDENTIAL_MANAGER_SET_ORIGIN}
+     * to use this functionality
      *
      * @param request the request specifying type(s) of credentials to get from the user
      * @param activity the activity used to launch any UI needed
@@ -189,6 +237,7 @@ public final class CredentialManager {
             @Nullable CancellationSignal cancellationSignal,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<Void, ClearCredentialStateException> callback) {
+        requireNonNull(request, "request must not be null");
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
 
@@ -204,44 +253,6 @@ public final class CredentialManager {
                             request,
                             new ClearCredentialStateTransport(executor, callback),
                             mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
-
-        if (cancellationSignal != null && cancelRemote != null) {
-            cancellationSignal.setRemote(cancelRemote);
-        }
-    }
-
-    /**
-     * Gets a list of all user configurable credential providers registered on the system. This API
-     * is intended for browsers and settings apps.
-     *
-     * @param cancellationSignal an optional signal that allows for cancelling this call
-     * @param executor the callback will take place on this {@link Executor}
-     * @param callback the callback invoked when the request succeeds or fails
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS)
-    public void listEnabledProviders(
-            @Nullable CancellationSignal cancellationSignal,
-            @CallbackExecutor @NonNull Executor executor,
-            @NonNull
-                    OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException>
-                            callback) {
-        requireNonNull(executor, "executor must not be null");
-        requireNonNull(callback, "callback must not be null");
-
-        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            Log.w(TAG, "listEnabledProviders already canceled");
-            return;
-        }
-
-        ICancellationSignal cancelRemote = null;
-        try {
-            cancelRemote =
-                    mService.listEnabledProviders(
-                            new ListEnabledProvidersTransport(executor, callback));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -280,13 +291,77 @@ public final class CredentialManager {
     }
 
     /**
+     * Returns {@code true} if the calling application provides a CredentialProviderService that is
+     * enabled for the current user, or {@code false} otherwise. CredentialProviderServices are
+     * enabled on a per-service basis so the individual component name of the service should be
+     * passed in here.
+     *
+     * @param componentName the component name to check is enabled
+     */
+    public boolean isEnabledCredentialProviderService(@NonNull ComponentName componentName) {
+        requireNonNull(componentName, "componentName must not be null");
+
+        try {
+            return mService.isEnabledCredentialProviderService(
+                    componentName, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of CredentialProviderInfo for all discovered credential providers on this
+     * device but will include test system providers as well.
+     *
+     * @hide
+     */
+    @NonNull
+    @TestApi
+    @RequiresPermission(
+      anyOf = {
+        android.Manifest.permission.QUERY_ALL_PACKAGES,
+        android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS
+      })
+    public List<CredentialProviderInfo> getCredentialProviderServicesForTesting(
+             @ProviderFilter int providerFilter) {
+        try {
+            return mService.getCredentialProviderServicesForTesting(providerFilter);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the list of CredentialProviderInfo for all discovered credential providers on this
+     * device.
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(
+      anyOf = {
+        android.Manifest.permission.QUERY_ALL_PACKAGES,
+        android.Manifest.permission.LIST_ENABLED_CREDENTIAL_PROVIDERS
+      })
+    public List<CredentialProviderInfo> getCredentialProviderServices(
+            int userId, @ProviderFilter int providerFilter) {
+        try {
+            return mService.getCredentialProviderServices(userId, providerFilter);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns whether the service is enabled.
      *
      * @hide
      */
-    public static boolean isServiceEnabled(Context context) {
+    @TestApi
+    public static boolean isServiceEnabled(@NonNull Context context) {
+        requireNonNull(context, "context must not be null");
         if (context == null) {
-	    return false;
+            return false;
         }
         CredentialManager credentialManager =
                 (CredentialManager) context.getSystemService(Context.CREDENTIAL_SERVICE);
@@ -298,8 +373,7 @@ public final class CredentialManager {
 
     private boolean isServiceEnabled() {
         return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER,
-                true);
+                DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_MANAGER, true);
     }
 
     /**
@@ -307,36 +381,40 @@ public final class CredentialManager {
      *
      * @hide
      */
-    public static boolean isCredentialDescriptionApiEnabled() {
+    public static boolean isCredentialDescriptionApiEnabled(Context context) {
+        if (context == null) {
+            return false;
+        }
+        CredentialManager credentialManager =
+                (CredentialManager) context.getSystemService(Context.CREDENTIAL_SERVICE);
+        if (credentialManager != null) {
+            return credentialManager.isCredentialDescriptionApiEnabled();
+        }
+        return false;
+    }
+
+    private boolean isCredentialDescriptionApiEnabled() {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_CREDENTIAL, DEVICE_CONFIG_ENABLE_CREDENTIAL_DESC_API, false);
     }
 
     /**
-     * Registers a {@link CredentialDescription} for an actively provisioned {@link Credential}
-     * a CredentialProvider has. This registry will then be used to determine where to
-     * fetch the requested {@link Credential} from. Not all credential types will be supported.
-     * The distinction will be made by the JetPack layer. For the types that are supported,
-     * JetPack will add a new key-value pair into {@link GetCredentialRequest}. These will not
-     * be persistent on the device. The Credential Providers will need to call this API again
-     * upon device reboot.
+     * Registers a {@link CredentialDescription} for an actively provisioned {@link Credential} a
+     * CredentialProvider has. This registry will then be used to determine where to fetch the
+     * requested {@link Credential} from. Not all credential types will be supported. The
+     * distinction will be made by the JetPack layer. For the types that are supported, JetPack will
+     * add a new key-value pair into {@link GetCredentialRequest}. These will not be persistent on
+     * the device. The Credential Providers will need to call this API again upon device reboot.
      *
      * @param request the request data
-     *
-     * @throws {@link  UnsupportedOperationException} if the feature has not been enabled.
-     * @throws {@link  com.android.server.credentials.NonCredentialProviderCallerException}
-     * if the calling package name is not also listed as a Credential Provider.
-     * @throws {@link  IllegalArgumentException} if the calling Credential Provider can not handle
-     * one or more of the Credential Types that are sent for registration.
-     *
+     * @throws {@link UnsupportedOperationException} if the feature has not been enabled.
+     * @throws {@link com.android.server.credentials.NonCredentialProviderCallerException} if the
+     *     calling package name is not also listed as a Credential Provider.
+     * @throws {@link IllegalArgumentException} if the calling Credential Provider can not handle
+     *     one or more of the Credential Types that are sent for registration.
      */
     public void registerCredentialDescription(
             @NonNull RegisterCredentialDescriptionRequest request) {
-
-        if (!isCredentialDescriptionApiEnabled()) {
-            throw new UnsupportedOperationException("This API is not currently supported.");
-        }
-
         requireNonNull(request, "request must not be null");
 
         try {
@@ -346,24 +424,15 @@ public final class CredentialManager {
         }
     }
 
-
     /**
-     *  Unregisters a {@link CredentialDescription} for an actively provisioned {@link Credential}
+     * Unregisters a {@link CredentialDescription} for an actively provisioned {@link Credential}
      * that has been registered previously.
      *
-     *
      * @param request the request data
-     *
-     * @throws {@link  UnsupportedOperationException} if the feature has not been enabled.
-     *
+     * @throws {@link UnsupportedOperationException} if the feature has not been enabled.
      */
     public void unregisterCredentialDescription(
             @NonNull UnregisterCredentialDescriptionRequest request) {
-
-        if (!isCredentialDescriptionApiEnabled()) {
-            throw new UnsupportedOperationException("This API is not currently supported.");
-        }
-
         requireNonNull(request, "request must not be null");
 
         try {
@@ -371,7 +440,6 @@ public final class CredentialManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-
     }
 
     private static class GetCredentialTransport extends IGetCredentialCallback.Stub {
@@ -478,33 +546,6 @@ public final class CredentialManager {
         public void onError(String errorType, String message) {
             mExecutor.execute(
                     () -> mCallback.onError(new ClearCredentialStateException(errorType, message)));
-        }
-    }
-
-    private static class ListEnabledProvidersTransport extends IListEnabledProvidersCallback.Stub {
-        // TODO: listen for cancellation to release callback.
-
-        private final Executor mExecutor;
-        private final OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException>
-                mCallback;
-
-        private ListEnabledProvidersTransport(
-                Executor executor,
-                OutcomeReceiver<ListEnabledProvidersResponse, ListEnabledProvidersException>
-                        callback) {
-            mExecutor = executor;
-            mCallback = callback;
-        }
-
-        @Override
-        public void onResponse(ListEnabledProvidersResponse response) {
-            mExecutor.execute(() -> mCallback.onResult(response));
-        }
-
-        @Override
-        public void onError(String errorType, String message) {
-            mExecutor.execute(
-                    () -> mCallback.onError(new ListEnabledProvidersException(errorType, message)));
         }
     }
 

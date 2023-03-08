@@ -117,4 +117,7 @@ interface ITelephonyRegistry {
             String pkg, String featureId);
     void removeCarrierConfigChangeListener(ICarrierConfigChangeListener listener, String pkg);
     void notifyCarrierConfigChanged(int phoneId, int subId, int carrierId, int specificCarrierId);
+
+    void notifyCallbackModeStarted(int phoneId, int subId, int type);
+    void notifyCallbackModeStopped(int phoneId, int subId, int type, int reason);
 }

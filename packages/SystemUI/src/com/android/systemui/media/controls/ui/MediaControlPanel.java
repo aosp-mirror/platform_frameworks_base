@@ -32,12 +32,15 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -57,12 +60,12 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -145,6 +148,12 @@ public class MediaControlPanel {
     private static final int SMARTSPACE_CARD_CLICK_EVENT = 760;
     protected static final int SMARTSPACE_CARD_DISMISS_EVENT = 761;
 
+    private static final float REC_MEDIA_COVER_SCALE_FACTOR = 1.25f;
+    private static final float MEDIA_SCRIM_START_ALPHA = 0.25f;
+    private static final float MEDIA_REC_SCRIM_START_ALPHA = 0.15f;
+    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 0.9f;
+    private static final float MEDIA_REC_SCRIM_END_ALPHA = 1.0f;
+
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
     // Buttons to show in small player when using semantic actions
@@ -226,7 +235,7 @@ public class MediaControlPanel {
     private final BroadcastDialogController mBroadcastDialogController;
     private boolean mIsCurrentBroadcastedApp = false;
     private boolean mShowBroadcastDialogButton = false;
-    private String mSwitchBroadcastApp;
+    private String mCurrentBroadcastApp;
     private MultiRippleController mMultiRippleController;
     private TurbulenceNoiseController mTurbulenceNoiseController;
     private final FeatureFlags mFeatureFlags;
@@ -344,6 +353,11 @@ public class MediaControlPanel {
      */
     public void setListening(boolean listening) {
         mSeekBarViewModel.setListening(listening);
+    }
+
+    @VisibleForTesting
+    public boolean getListening() {
+        return mSeekBarViewModel.getListening();
     }
 
     /** Sets whether the user is touching the seek bar to change the track position. */
@@ -567,9 +581,8 @@ public class MediaControlPanel {
             // TODO(b/233698402): Use the package name instead of app label to avoid the
             // unexpected result.
             mIsCurrentBroadcastedApp = device != null
-                    && TextUtils.equals(device.getName(),
-                    MediaDataUtils.getAppLabel(mContext, mPackageName, mContext.getString(
-                            R.string.bt_le_audio_broadcast_dialog_unknown_name)));
+                && TextUtils.equals(device.getName(),
+                    mContext.getString(R.string.broadcasting_description_is_broadcasting));
             useDisabledAlpha = !mIsCurrentBroadcastedApp;
             // Always be enabled if the broadcast button is shown
             isTapEnabled = true;
@@ -624,8 +637,8 @@ public class MediaControlPanel {
                         // media output dialog.
                         if (!mIsCurrentBroadcastedApp) {
                             mLogger.logOpenBroadcastDialog(mUid, mPackageName, mInstanceId);
-                            mSwitchBroadcastApp = device.getName().toString();
-                            mBroadcastDialogController.createBroadcastDialog(mSwitchBroadcastApp,
+                            mCurrentBroadcastApp = device.getName().toString();
+                            mBroadcastDialogController.createBroadcastDialog(mCurrentBroadcastApp,
                                     mPackageName, true, mMediaViewHolder.getSeamlessButton());
                         } else {
                             mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
@@ -736,9 +749,14 @@ public class MediaControlPanel {
             contentDescription =
                     mRecommendationViewHolder.getGutsViewHolder().getGutsText().getText();
         } else if (data != null) {
-            contentDescription = mContext.getString(
-                    R.string.controls_media_smartspace_rec_description,
-                    data.getAppName(mContext));
+            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+                contentDescription = mContext.getString(
+                        R.string.controls_media_smartspace_rec_header);
+            } else {
+                contentDescription = mContext.getString(
+                        R.string.controls_media_smartspace_rec_description,
+                        data.getAppName(mContext));
+            }
         } else {
             contentDescription = null;
         }
@@ -769,7 +787,7 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToPlayerAlbum(artworkIcon, mutableColorScheme, width, height);
                 isArtworkBound = true;
             } else {
                 // If there's no artwork, use colors from the app icon
@@ -859,8 +877,9 @@ public class MediaControlPanel {
         Trace.beginAsyncSection(traceName, traceCookie);
 
         // Capture width & height from views in foreground for artwork scaling in background
-        int width = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredWidth();
-        int height = mRecommendationViewHolder.getMediaCoverContainers().get(0).getMeasuredHeight();
+        int width = mContext.getResources().getDimensionPixelSize(R.dimen.qs_media_rec_album_width);
+        int height = mContext.getResources().getDimensionPixelSize(
+                R.dimen.qs_media_rec_album_height_expanded);
 
         mBackgroundExecutor.execute(() -> {
             // Album art
@@ -870,7 +889,8 @@ public class MediaControlPanel {
             WallpaperColors wallpaperColors = getWallpaperColor(artworkIcon);
             if (wallpaperColors != null) {
                 mutableColorScheme = new ColorScheme(wallpaperColors, true, Style.CONTENT);
-                artwork = addGradientToIcon(artworkIcon, mutableColorScheme, width, height);
+                artwork = addGradientToRecommendationAlbum(artworkIcon, mutableColorScheme, width,
+                        height);
             } else {
                 artwork = new ColorDrawable(Color.TRANSPARENT);
             }
@@ -879,6 +899,11 @@ public class MediaControlPanel {
                 // Bind the artwork drawable to media cover.
                 ImageView mediaCover =
                         mRecommendationViewHolder.getMediaCoverItems().get(itemIndex);
+                // Rescale media cover
+                Matrix coverMatrix = new Matrix(mediaCover.getImageMatrix());
+                coverMatrix.postScale(REC_MEDIA_COVER_SCALE_FACTOR, REC_MEDIA_COVER_SCALE_FACTOR,
+                        0.5f * width, 0.5f * height);
+                mediaCover.setImageMatrix(coverMatrix);
                 mediaCover.setImageDrawable(artwork);
 
                 // Set up the app icon.
@@ -900,40 +925,62 @@ public class MediaControlPanel {
     // This method should be called from a background thread. WallpaperColors.fromBitmap takes a
     // good amount of time. We do that work on the background executor to avoid stalling animations
     // on the UI Thread.
-    private WallpaperColors getWallpaperColor(Icon artworkIcon) {
+    @VisibleForTesting
+    protected WallpaperColors getWallpaperColor(Icon artworkIcon) {
         if (artworkIcon != null) {
             if (artworkIcon.getType() == Icon.TYPE_BITMAP
                     || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
                 // Avoids extra processing if this is already a valid bitmap
-                return WallpaperColors
-                        .fromBitmap(artworkIcon.getBitmap());
+                Bitmap artworkBitmap = artworkIcon.getBitmap();
+                if (artworkBitmap.isRecycled()) {
+                    Log.d(TAG, "Cannot load wallpaper color from a recycled bitmap");
+                    return null;
+                }
+                return WallpaperColors.fromBitmap(artworkBitmap);
             } else {
                 Drawable artworkDrawable = artworkIcon.loadDrawable(mContext);
                 if (artworkDrawable != null) {
-                    return WallpaperColors
-                            .fromDrawable(artworkIcon.loadDrawable(mContext));
+                    return WallpaperColors.fromDrawable(artworkDrawable);
                 }
             }
         }
         return null;
     }
 
-    private LayerDrawable addGradientToIcon(
-            Icon artworkIcon,
-            ColorScheme mutableColorScheme,
-            int width,
-            int height
-    ) {
+    @VisibleForTesting
+    protected LayerDrawable addGradientToPlayerAlbum(Icon artworkIcon,
+            ColorScheme mutableColorScheme, int width, int height) {
         Drawable albumArt = getScaledBackground(artworkIcon, width, height);
-        GradientDrawable gradient = (GradientDrawable) AppCompatResources
-                .getDrawable(mContext, R.drawable.qs_media_scrim);
+        GradientDrawable gradient = (GradientDrawable) mContext.getDrawable(
+                R.drawable.qs_media_scrim).mutate();
+        return setupGradientColorOnDrawable(albumArt, gradient, mutableColorScheme,
+                MEDIA_SCRIM_START_ALPHA, MEDIA_PLAYER_SCRIM_END_ALPHA);
+    }
+
+    @VisibleForTesting
+    protected LayerDrawable addGradientToRecommendationAlbum(Icon artworkIcon,
+            ColorScheme mutableColorScheme, int width, int height) {
+        // First try scaling rec card using bitmap drawable.
+        // If returns null, set drawable bounds.
+        Drawable albumArt = getScaledRecommendationCover(artworkIcon, width, height);
+        if (albumArt == null) {
+            albumArt = getScaledBackground(artworkIcon, width, height);
+        }
+        GradientDrawable gradient = (GradientDrawable) mContext.getDrawable(
+                R.drawable.qs_media_rec_scrim).mutate();
+        return setupGradientColorOnDrawable(albumArt, gradient, mutableColorScheme,
+                MEDIA_REC_SCRIM_START_ALPHA, MEDIA_REC_SCRIM_END_ALPHA);
+    }
+
+    private LayerDrawable setupGradientColorOnDrawable(Drawable albumArt, GradientDrawable gradient,
+            ColorScheme mutableColorScheme, float startAlpha, float endAlpha) {
         gradient.setColors(new int[] {
                 ColorUtilKt.getColorWithAlpha(
                         MediaColorSchemesKt.backgroundStartFromScheme(mutableColorScheme),
-                        0.25f),
+                        startAlpha),
                 ColorUtilKt.getColorWithAlpha(
                         MediaColorSchemesKt.backgroundEndFromScheme(mutableColorScheme),
-                        0.9f),
+                        endAlpha),
         });
         return new LayerDrawable(new Drawable[] { albumArt, gradient });
     }
@@ -1133,8 +1180,10 @@ public class MediaControlPanel {
                         /* pixelDensity= */ getContext().getResources().getDisplayMetrics().density,
                         mColorSchemeTransition.getAccentPrimary().getCurrentColor(),
                         /* opacity= */ 100,
-                        /* shouldFillRipple= */ false,
                         /* sparkleStrength= */ 0f,
+                        /* baseRingFadeParams= */ null,
+                        /* sparkleRingFadeParams= */ null,
+                        /* centerFillFadeParams= */ null,
                         /* shouldDistort= */ false
                 )
         );
@@ -1369,6 +1418,24 @@ public class MediaControlPanel {
             hasSubtitle |= !TextUtils.isEmpty(subtitle);
             TextView subtitleView = mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
             subtitleView.setText(subtitle);
+
+            // Set up progress bar
+            if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+                SeekBar mediaProgressBar =
+                        mRecommendationViewHolder.getMediaProgressBars().get(itemIndex);
+                TextView mediaSubtitle =
+                        mRecommendationViewHolder.getMediaSubtitles().get(itemIndex);
+                // show progress bar if the recommended album is played.
+                Double progress = MediaDataUtils.getDescriptionProgress(recommendation.getExtras());
+                if (progress == null || progress <= 0.0) {
+                    mediaProgressBar.setVisibility(View.GONE);
+                    mediaSubtitle.setVisibility(View.VISIBLE);
+                } else {
+                    mediaProgressBar.setProgress((int) (progress * 100));
+                    mediaProgressBar.setVisibility(View.VISIBLE);
+                    mediaSubtitle.setVisibility(View.GONE);
+                }
+            }
         }
         mSmartspaceMediaItemsCount = NUM_REQUIRED_RECOMMENDATIONS;
 
@@ -1443,6 +1510,12 @@ public class MediaControlPanel {
                 (title) -> title.setTextColor(textPrimaryColor));
         mRecommendationViewHolder.getMediaSubtitles().forEach(
                 (subtitle) -> subtitle.setTextColor(textSecondaryColor));
+        if (mFeatureFlags.isEnabled(Flags.MEDIA_RECOMMENDATION_CARD_UPDATE)) {
+            mRecommendationViewHolder.getMediaProgressBars().forEach(
+                    (progressBar) -> progressBar.setProgressTintList(
+                            ColorStateList.valueOf(textPrimaryColor))
+            );
+        }
 
         mRecommendationViewHolder.getGutsViewHolder().setColors(colorScheme);
     }
@@ -1550,6 +1623,29 @@ public class MediaControlPanel {
         }
         drawable.setBounds(bounds);
         return drawable;
+    }
+
+    /**
+     * Scale artwork to fill the background of media covers in recommendation card.
+     */
+    @UiThread
+    private Drawable getScaledRecommendationCover(Icon artworkIcon, int width, int height) {
+        if (width == 0 || height == 0) {
+            return null;
+        }
+        if (artworkIcon != null) {
+            Bitmap bitmap;
+            if (artworkIcon.getType() == Icon.TYPE_BITMAP
+                    || artworkIcon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                Bitmap artworkBitmap = artworkIcon.getBitmap();
+                if (artworkBitmap != null) {
+                    bitmap = Bitmap.createScaledBitmap(artworkIcon.getBitmap(), width,
+                            height, false);
+                    return new BitmapDrawable(mContext.getResources(), bitmap);
+                }
+            }
+        }
+        return null;
     }
 
     /**

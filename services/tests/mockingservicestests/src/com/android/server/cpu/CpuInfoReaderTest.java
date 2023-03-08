@@ -29,7 +29,7 @@ import android.content.res.AssetManager;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExpectableTestCase;
 
 import libcore.io.Streams;
 
@@ -44,7 +44,7 @@ import java.io.OutputStream;
 import java.util.Objects;
 
 /** This class contains unit tests for the {@link CpuInfoReader}. */
-public final class CpuInfoReaderTest extends ExtendedMockitoTestCase {
+public final class CpuInfoReaderTest extends ExpectableTestCase {
     private static final String TAG = CpuInfoReaderTest.class.getSimpleName();
     private static final String ROOT_DIR_NAME = "CpuInfoReaderTest";
     private static final String VALID_CPUSET_DIR = "valid_cpuset";
@@ -426,7 +426,7 @@ public final class CpuInfoReaderTest extends ExtendedMockitoTestCase {
                 .isNull();
     }
 
-    private static void compareCpuInfos(String message,
+    private void compareCpuInfos(String message,
             SparseArray<CpuInfoReader.CpuInfo> expected,
             SparseArray<CpuInfoReader.CpuInfo> actual) {
         assertWithMessage("%s. Total CPU infos", message).that(actual.size())
@@ -435,7 +435,7 @@ public final class CpuInfoReaderTest extends ExtendedMockitoTestCase {
             int cpuCoreId = expected.keyAt(i);
             CpuInfoReader.CpuInfo expectedCpuInfo = expected.valueAt(i);
             CpuInfoReader.CpuInfo actualCpuInfo = actual.get(cpuCoreId);
-            assertWithMessage("%s. Core %d's CPU info", message, cpuCoreId).that(actualCpuInfo)
+            expectWithMessage("%s. Core %s's CPU info", message, cpuCoreId).that(actualCpuInfo)
                     .isEqualTo(expectedCpuInfo);
         }
     }

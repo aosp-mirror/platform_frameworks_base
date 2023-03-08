@@ -44,7 +44,7 @@ constructor(
 
     /**
      * @return a populated WorkProfileFirstRunData object if a work profile first run message should
-     * be shown
+     *   be shown
      */
     fun onScreenshotTaken(userHandle: UserHandle?): WorkProfileFirstRunData? {
         if (userHandle == null) return null

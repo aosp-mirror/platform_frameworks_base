@@ -855,6 +855,10 @@ NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_DISAB
     New setting keys are not allowed (Field: DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_ENABLED:
     New setting keys are not allowed (Field: DYNAMIC_POWER_SAVINGS_ENABLED); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Global#HDR_CONVERSION_MODE:
+    New setting keys are not allowed (Field: HDR_CONVERSION_MODE); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Global#HDR_FORCE_CONVERSION_TYPE:
+    New setting keys are not allowed (Field: HDR_FORCE_CONVERSION_TYPE); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_BLACKLIST_EXEMPTIONS:
     New setting keys are not allowed (Field: HIDDEN_API_BLACKLIST_EXEMPTIONS); use getters/setters in relevant manager class
 NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_POLICY:

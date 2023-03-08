@@ -16,6 +16,7 @@
 
 package com.android.server.devicestate;
 
+import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -103,7 +104,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
             showNotification(
                     info.name, info.activeNotificationTitle,
                     String.format(info.activeNotificationContent, requesterApplicationLabel),
-                    true /* ongoing */
+                    true /* ongoing */, R.drawable.ic_dual_screen
             );
         } else {
             Slog.e(TAG, "Cannot determine the requesting app name when showing state active "
@@ -124,7 +125,8 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         }
         showNotification(
                 info.name, info.thermalCriticalNotificationTitle,
-                info.thermalCriticalNotificationContent, false /* ongoing */
+                info.thermalCriticalNotificationContent, false /* ongoing */,
+                R.drawable.ic_thermostat
         );
     }
 
@@ -158,11 +160,12 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param ongoing if true, display an ongoing (sticky) notification with a turn off button.
      */
     private void showNotification(
-            @NonNull String name, @NonNull String title, @NonNull String content, boolean ongoing) {
+            @NonNull String name, @NonNull String title, @NonNull String content, boolean ongoing,
+            @DrawableRes int iconRes) {
         final NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH);
         final Notification.Builder builder = new Notification.Builder(mContext, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_lock) // TODO(b/266833171) update icons when available.
+                .setSmallIcon(iconRes)
                 .setContentTitle(title)
                 .setContentText(content)
                 .setSubText(name)

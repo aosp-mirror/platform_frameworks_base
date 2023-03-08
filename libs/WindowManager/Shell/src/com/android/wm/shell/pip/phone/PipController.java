@@ -570,8 +570,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
                             return;
                         }
-                        mTouchHandler.getMotionHelper().expandLeavePip(
-                                clearedTask /* skipAnimation */);
+                        if (mPipTaskOrganizer.isLaunchToSplit(task)) {
+                            mTouchHandler.getMotionHelper().expandIntoSplit();
+                        } else {
+                            mTouchHandler.getMotionHelper().expandLeavePip(
+                                    clearedTask /* skipAnimation */);
+                        }
                     }
                 });
 
@@ -711,6 +715,12 @@ public class PipController implements PipTransitionController.PipTransitionCallb
 
     private void onDisplayChanged(DisplayLayout layout, boolean saveRestoreSnapFraction) {
         if (!mPipBoundsState.getDisplayLayout().isSameGeometry(layout)) {
+            PipAnimationController.PipTransitionAnimator animator =
+                    mPipAnimationController.getCurrentAnimator();
+            if (animator != null && animator.isRunning()) {
+                // cancel any running animator, as it is using stale display layout information
+                PipAnimationController.quietCancel(animator);
+            }
             onDisplayChangedUncheck(layout, saveRestoreSnapFraction);
         }
     }
@@ -1032,7 +1042,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     private void onDisplayRotationChangedNotInPip(Context context, int toRotation) {
         // Update the display layout, note that we have to do this on every rotation even if we
         // aren't in PIP since we need to update the display layout to get the right resources
-        mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
+        DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+        layoutCopy.rotateTo(context.getResources(), toRotation);
+        mPipBoundsState.setDisplayLayout(layoutCopy);
+        mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
     }
 
     /**
@@ -1069,7 +1083,11 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                         mPipBoundsState.getStashedState());
 
         // Update the display layout
-        mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
+        DisplayLayout layoutCopy = mPipBoundsState.getDisplayLayout();
+
+        layoutCopy.rotateTo(context.getResources(), toRotation);
+        mPipBoundsState.setDisplayLayout(layoutCopy);
+        mPipSizeSpecHandler.setDisplayLayout(layoutCopy);
 
         // Calculate the stack bounds in the new orientation based on same fraction along the
         // rotated movement bounds.
@@ -1203,6 +1221,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         @Override
         public void stopSwipePipToHome(int taskId, ComponentName componentName,
                 Rect destinationBounds, SurfaceControl overlay) {
+            if (overlay != null) {
+                overlay.setUnreleasedWarningCallSite("PipController.stopSwipePipToHome");
+            }
             executeRemoteCallWithTaskPermission(mController, "stopSwipePipToHome",
                     (controller) -> {
                         controller.stopSwipePipToHome(taskId, componentName, destinationBounds,

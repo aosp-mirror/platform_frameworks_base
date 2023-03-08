@@ -28,6 +28,7 @@ import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.IFace;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
@@ -56,7 +57,7 @@ import java.util.function.Supplier;
 /**
  * Face-specific authentication client for the {@link IFace} AIDL HAL interface.
  */
-class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
+class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAuthenticateOptions>
         implements LockoutConsumer {
     private static final String TAG = "FaceAuthenticationClient";
 
@@ -80,16 +81,16 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener, long operationId,
+            boolean restricted, @NonNull FaceAuthenticateOptions options, int cookie,
+            boolean requireConfirmation,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled, @Authenticators.Types int sensorStrength) {
-        this(context, lazyDaemon, token, requestId, listener, targetUserId, operationId,
-                restricted, owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
-                isStrongBiometric, usageStats, lockoutCache /* lockoutCache */,
-                allowBackgroundAuthentication, isKeyguardBypassEnabled,
+            @Authenticators.Types int sensorStrength) {
+        this(context, lazyDaemon, token, requestId, listener, operationId,
+                restricted, options, cookie, requireConfirmation, logger, biometricContext,
+                isStrongBiometric, usageStats, lockoutCache, allowBackgroundAuthentication,
                 context.getSystemService(SensorPrivacyManager.class), sensorStrength);
     }
 
@@ -97,18 +98,19 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
     FaceAuthenticationClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull ClientMonitorCallbackConverter listener, long operationId,
+            boolean restricted, @NonNull FaceAuthenticateOptions options, int cookie,
+            boolean requireConfirmation,
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
-            boolean isKeyguardBypassEnabled, SensorPrivacyManager sensorPrivacyManager,
+            SensorPrivacyManager sensorPrivacyManager,
             @Authenticators.Types int biometricStrength) {
-        super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
-                owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
+        super(context, lazyDaemon, token, listener, operationId, restricted,
+                options, cookie, requireConfirmation, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */, null /* lockoutCache */,
                 allowBackgroundAuthentication, false /* shouldVibrate */,
-                isKeyguardBypassEnabled, biometricStrength);
+                biometricStrength);
         setRequestId(requestId);
         mUsageStats = usageStats;
         mNotificationManager = context.getSystemService(NotificationManager.class);
@@ -164,7 +166,7 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
 
         if (session.hasContextMethods()) {
             return session.getSession().authenticateWithContext(
-                    mOperationId, getOperationContext().toAidlContext());
+                    mOperationId, getOperationContext().toAidlContext(getOptions()));
         } else {
             return session.getSession().authenticate(mOperationId);
         }

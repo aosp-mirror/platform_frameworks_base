@@ -42,6 +42,7 @@ import com.android.systemui.settings.UserContextProvider
 /** Dialog to select screen recording options */
 class ScreenRecordPermissionDialog(
     context: Context?,
+    private val hostUserHandle: UserHandle,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
@@ -79,11 +80,9 @@ class ScreenRecordPermissionDialog(
                     CaptureTargetResultReceiver()
                 )
 
-                // Send SystemUI's user handle as the host app user handle because SystemUI
-                // is the 'host app' (the app that receives screen capture data)
                 intent.putExtra(
                     MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
-                    UserHandle.of(UserHandle.myUserId())
+                    hostUserHandle
                 )
 
                 val animationController = dialogLaunchAnimator.createActivityLaunchController(v!!)
@@ -125,8 +124,9 @@ class ScreenRecordPermissionDialog(
 
     /**
      * Starts screen capture after some countdown
+     *
      * @param captureTarget target to capture (could be e.g. a task) or null to record the whole
-     * screen
+     *   screen
      */
     private fun requestScreenCapture(captureTarget: MediaProjectionCaptureTarget?) {
         val userContext = userContextProvider.userContext

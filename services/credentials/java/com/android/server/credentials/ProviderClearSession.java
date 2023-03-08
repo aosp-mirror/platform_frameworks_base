@@ -20,11 +20,11 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.credentials.ClearCredentialStateException;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.ClearCredentialStateRequest;
-import android.service.credentials.CredentialProviderInfo;
 import android.util.Log;
 import android.util.Slog;
 
@@ -33,7 +33,7 @@ import android.util.Slog;
  *
  * @hide
  */
-public final class ProviderClearSession extends ProviderSession<ClearCredentialStateRequest,
+public final class  ProviderClearSession extends ProviderSession<ClearCredentialStateRequest,
         Void>
         implements
         RemoteCredentialService.ProviderCallbacks<Void> {
@@ -114,5 +114,13 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     protected void onUiEntrySelected(String entryType, String entryId,
             ProviderPendingIntentResponse providerPendingIntentResponse) {
         //Not applicable for clearCredential as response is not picked by the user
+    }
+
+    @Override
+    protected void invokeSession() {
+        if (mRemoteCredentialService != null) {
+            mCandidateProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
+            mRemoteCredentialService.onClearCredentialState(mProviderRequest, this);
+        }
     }
 }

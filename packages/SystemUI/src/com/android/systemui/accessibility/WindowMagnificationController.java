@@ -37,6 +37,8 @@ import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -1398,6 +1400,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mWindowMagnifierCallback.onPerformScaleAction(mDisplayId,
                     A11Y_ACTION_SCALE_RANGE.clamp(scale));
         }
+
+        @Override
+        public void onSettingsPanelVisibilityChanged(boolean shown) {
+            updateDragHandleResourcesIfNeeded(/* settingsPanelIsShown= */ shown);
+        }
     };
 
     @Override
@@ -1436,6 +1443,20 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
     }
 
+    private void updateDragHandleResourcesIfNeeded(boolean settingsPanelIsShown) {
+        mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
+                ? R.drawable.accessibility_window_magnification_drag_handle_background_change
+                : R.drawable.accessibility_window_magnification_drag_handle_background));
+
+        PorterDuffColorFilter filter = new PorterDuffColorFilter(
+                mContext.getColor(settingsPanelIsShown
+                        ? R.color.magnification_border_color
+                        : R.color.magnification_drag_handle_stroke),
+                PorterDuff.Mode.SRC_ATOP);
+
+        mDragView.setColorFilter(filter);
+    }
+
     private void animateBounceEffect() {
         final ObjectAnimator scaleAnimator = ObjectAnimator.ofPropertyValuesHolder(mMirrorView,
                 PropertyValuesHolder.ofFloat(View.SCALE_X, 1, mBounceEffectAnimationScale, 1),
@@ -1468,7 +1489,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             super.onInitializeAccessibilityNodeInfo(host, info);
             final AccessibilityAction clickAction = new AccessibilityAction(
                     AccessibilityAction.ACTION_CLICK.getId(), mContext.getResources().getString(
-                    R.string.magnification_mode_switch_click_label));
+                    R.string.magnification_open_settings_click_label));
             info.addAction(clickAction);
             info.setClickable(true);
             info.addAction(

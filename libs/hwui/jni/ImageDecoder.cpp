@@ -18,11 +18,16 @@
 
 #include <FrontBufferedStream.h>
 #include <HardwareBitmapUploader.h>
+#include <SkAlphaType.h>
 #include <SkAndroidCodec.h>
 #include <SkBitmap.h>
+#include <SkCodec.h>
+#include <SkCodecAnimation.h>
 #include <SkColorSpace.h>
+#include <SkColorType.h>
 #include <SkImageInfo.h>
 #include <SkRect.h>
+#include <SkSize.h>
 #include <SkStream.h>
 #include <SkString.h>
 #include <androidfw/Asset.h>
@@ -464,8 +469,10 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             if (hwBitmap) {
                 hwBitmap->setImmutable();
                 if (nativeBitmap->hasGainmap()) {
-                    // TODO: Also convert to a HW gainmap image
-                    hwBitmap->setGainmap(nativeBitmap->gainmap());
+                    auto gm = uirenderer::Gainmap::allocateHardwareGainmap(nativeBitmap->gainmap());
+                    if (gm) {
+                        hwBitmap->setGainmap(std::move(gm));
+                    }
                 }
                 return bitmap::createBitmap(env, hwBitmap.release(), bitmapCreateFlags,
                                             ninePatchChunk, ninePatchInsets);

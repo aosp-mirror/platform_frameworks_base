@@ -66,6 +66,8 @@ option java_package com.android.server.wm
 # bootanim finished:
 31007 wm_boot_animation_done (time|2|3)
 
+# Back navigation.
+31100 wm_back_navi_canceled (Reason|3)
 
 # IME surface parent is updated.
 32003 imf_update_ime_parent (surface name|3)

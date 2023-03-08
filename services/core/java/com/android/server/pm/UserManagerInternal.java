@@ -166,6 +166,18 @@ public abstract class UserManagerInternal {
     public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
             @Nullable Bundle global, @Nullable RestrictionsSet local, boolean isDeviceOwner);
 
+    /**
+     * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set a
+     * user restriction.
+     *
+     * @param userId user id to apply the restriction to. {@link com.android.os.UserHandle.USER_ALL}
+     *               will apply the restriction to all users globally.
+     * @param key    The key of the restriction.
+     * @param value  The value of the restriction.
+     */
+    public abstract void setUserRestriction(@UserIdInt int userId, @NonNull String key,
+            boolean value);
+
     /** Return a user restriction. */
     public abstract boolean getUserRestriction(int userId, String key);
 
@@ -263,8 +275,9 @@ public abstract class UserManagerInternal {
      * the user is created (as it will be passed back to it through
      * {@link UserLifecycleListener#onUserCreated(UserInfo, Object)});
      */
-    public abstract UserInfo createUserEvenWhenDisallowed(String name, String userType,
-            int flags, String[] disallowedPackages, @Nullable Object token)
+    public abstract @NonNull UserInfo createUserEvenWhenDisallowed(
+            @Nullable String name, @NonNull String userType, @UserInfo.UserInfoFlag int flags,
+            @Nullable String[] disallowedPackages, @Nullable Object token)
             throws UserManager.CheckedUserOperationException;
 
     /**
@@ -553,11 +566,12 @@ public abstract class UserManagerInternal {
      * switched to.
      *
      * <p>Otherwise, in {@link UserManager#isHeadlessSystemUserMode() headless system user mode},
-     * this will be the user who was last in the foreground on this device. If there is no
-     * switchable user on the device, a new user will be created and its id will be returned.
+     * this will be the user who was last in the foreground on this device.
      *
-     * <p>In non-headless system user mode, the return value will be {@link UserHandle#USER_SYSTEM}.
+     * <p>In non-headless system user mode, the return value will be
+     * {@link android.os.UserHandle#USER_SYSTEM}.
+
+     * @throws UserManager.CheckedUserOperationException if no switchable user can be found
      */
-    public abstract @UserIdInt int getBootUser()
-            throws UserManager.CheckedUserOperationException;
+    public abstract @UserIdInt int getBootUser() throws UserManager.CheckedUserOperationException;
 }

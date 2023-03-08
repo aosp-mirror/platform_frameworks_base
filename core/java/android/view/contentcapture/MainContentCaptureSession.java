@@ -458,8 +458,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
             case ContentCaptureEvent.TYPE_SESSION_FINISHED:
                 flushReason = FLUSH_REASON_SESSION_FINISHED;
                 break;
+            case ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING:
+                flushReason = FLUSH_REASON_VIEW_TREE_APPEARING;
+                break;
+            case ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED:
+                flushReason = FLUSH_REASON_VIEW_TREE_APPEARED;
+                break;
             default:
-                flushReason = FLUSH_REASON_FULL;
+                flushReason = forceFlush ? FLUSH_REASON_FORCE_FLUSH : FLUSH_REASON_FULL;
         }
 
         flush(flushReason);
@@ -555,8 +561,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
         final int numberEvents = mEvents.size();
         final String reasonString = getFlushReasonAsString(reason);
-        if (sDebug) {
-            Log.d(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason));
+
+        if (sVerbose) {
+            ContentCaptureEvent event = mEvents.get(numberEvents - 1);
+            String forceString = (reason == FLUSH_REASON_FORCE_FLUSH) ? ". The force flush event "
+                    + ContentCaptureEvent.getTypeAsString(event.getType()) : "";
+            Log.v(TAG, "Flushing " + numberEvents + " event(s) for " + getDebugState(reason)
+                    + forceString);
         }
         if (mFlushHistory != null) {
             // Logs reason, size, max size, idle timeout
@@ -769,7 +780,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /** Public because is also used by ViewRootImpl */
     public void notifyViewTreeEvent(int sessionId, boolean started) {
         final int type = started ? TYPE_VIEW_TREE_APPEARING : TYPE_VIEW_TREE_APPEARED;
-        mHandler.post(() -> sendEvent(new ContentCaptureEvent(sessionId, type), FORCE_FLUSH));
+        final boolean disableFlush = mManager.getFlushViewTreeAppearingEventDisabled();
+
+        mHandler.post(() -> sendEvent(
+                new ContentCaptureEvent(sessionId, type),
+                disableFlush ? !started : FORCE_FLUSH));
     }
 
     void notifySessionResumed(int sessionId) {

@@ -571,6 +571,10 @@ import java.util.concurrent.locks.ReentrantLock;
    void onError(&hellip;) {
      &hellip;
    }
+   {@literal @Override}
+   void onCryptoError(&hellip;) {
+     &hellip;
+   }
  });
  codec.configure(format, &hellip;);
  mOutputFormat = codec.getOutputFormat(); // option B
@@ -1774,6 +1778,7 @@ final public class MediaCodec {
     private static final int CB_OUTPUT_FORMAT_CHANGE = 4;
     private static final String EOS_AND_DECODE_ONLY_ERROR_MESSAGE = "An input buffer cannot have "
             + "both BUFFER_FLAG_END_OF_STREAM and BUFFER_FLAG_DECODE_ONLY flags";
+    private static final int CB_CRYPTO_ERROR = 6;
 
     private class EventHandler extends Handler {
         private MediaCodec mCodec;
@@ -1898,6 +1903,12 @@ final public class MediaCodec {
                 case CB_ERROR:
                 {
                     mCallback.onError(mCodec, (MediaCodec.CodecException) msg.obj);
+                    break;
+                }
+
+                case CB_CRYPTO_ERROR:
+                {
+                    mCallback.onCryptoError(mCodec, (MediaCodec.CryptoException) msg.obj);
                     break;
                 }
 
@@ -2104,12 +2115,25 @@ final public class MediaCodec {
      */
     public static final int CONFIGURE_FLAG_USE_BLOCK_MODEL = 2;
 
+    /**
+     * This flag should be used on a secure decoder only. MediaCodec configured with this
+     * flag does decryption in a separate thread. The flag requires MediaCodec to operate
+     * asynchronously and will throw CryptoException if any, in the onCryptoError()
+     * callback. Applications should override the default implementation of
+     * onCryptoError() and access the associated CryptoException.
+     *
+     * CryptoException thrown will contain {@link MediaCodec.CryptoInfo}
+     * This can be accessed using getCryptoInfo()
+     */
+    public static final int CONFIGURE_FLAG_USE_CRYPTO_ASYNC = 4;
+
     /** @hide */
     @IntDef(
         flag = true,
         value = {
             CONFIGURE_FLAG_ENCODE,
             CONFIGURE_FLAG_USE_BLOCK_MODEL,
+            CONFIGURE_FLAG_USE_CRYPTO_ASYNC,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigureFlag {}
@@ -2523,19 +2547,20 @@ final public class MediaCodec {
     public final static class CryptoException extends RuntimeException
             implements MediaDrmThrowable {
         public CryptoException(int errorCode, @Nullable String detailMessage) {
-            this(detailMessage, errorCode, 0, 0, 0);
+            this(detailMessage, errorCode, 0, 0, 0, null);
         }
 
         /**
          * @hide
          */
         public CryptoException(String message, int errorCode, int vendorError, int oemError,
-                int errorContext) {
+                int errorContext, @Nullable CryptoInfo cryptoInfo) {
             super(message);
             mErrorCode = errorCode;
             mVendorError = vendorError;
             mOemError = oemError;
             mErrorContext = errorContext;
+            mCryptoInfo = cryptoInfo;
         }
 
         /**
@@ -2654,6 +2679,16 @@ final public class MediaCodec {
             return mErrorCode;
         }
 
+        /**
+         * Returns CryptoInfo associated with this {@link CryptoException}
+         * if any
+         *
+         * @return CryptoInfo object if any. {@link MediaCodec.CryptoException}
+         */
+        public @Nullable CryptoInfo getCryptoInfo() {
+            return mCryptoInfo;
+        }
+
         @Override
         public int getVendorError() {
             return mVendorError;
@@ -2670,6 +2705,7 @@ final public class MediaCodec {
         }
 
         private final int mErrorCode, mVendorError, mOemError, mErrorContext;
+        private CryptoInfo mCryptoInfo;
     }
 
     /**
@@ -5086,6 +5122,25 @@ final public class MediaCodec {
          * @param e The {@link MediaCodec.CodecException} object describing the error.
          */
         public abstract void onError(@NonNull MediaCodec codec, @NonNull CodecException e);
+
+        /**
+         * Called only when MediaCodec encountered a crypto(decryption) error when using
+         * a decoder configured with CONFIGURE_FLAG_USE_CRYPTO_ASYNC flag along with crypto
+         * or descrambler object.
+         *
+         * @param codec The MediaCodec object
+         * @param e The {@link MediaCodec.CryptoException} object with error details.
+         */
+        public void onCryptoError(@NonNull MediaCodec codec, @NonNull CryptoException e) {
+            /*
+             * A default implementation for backward compatibility.
+             * Use of CONFIGURE_FLAG_USE_CRYPTO_ASYNC requires override of this callback
+             * to receive CrytoInfo. Without an orverride an exception is thrown.
+             */
+            throw new IllegalStateException(
+                    "Client must override onCryptoError when the codec is " +
+                    "configured with CONFIGURE_FLAG_USE_CRYPTO_ASYNC.", e);
+        }
 
         /**
          * Called when the output format has changed

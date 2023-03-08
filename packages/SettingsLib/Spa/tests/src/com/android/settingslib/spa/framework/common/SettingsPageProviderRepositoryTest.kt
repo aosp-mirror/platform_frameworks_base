@@ -17,6 +17,7 @@
 package com.android.settingslib.spa.framework.common
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.tests.testutils.createSettingsPage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,13 +30,14 @@ class SettingsPageProviderRepositoryTest {
         assertThat(sppRepoEmpty.getDefaultStartPage()).isEqualTo("")
         assertThat(sppRepoEmpty.getAllRootPages()).isEmpty()
 
+        val nullPage = NullPageProvider.createSettingsPage()
         val sppRepoNull =
-            SettingsPageProviderRepository(emptyList(), listOf(SettingsPage.createNull()))
+            SettingsPageProviderRepository(emptyList(), listOf(nullPage))
         assertThat(sppRepoNull.getDefaultStartPage()).isEqualTo("NULL")
-        assertThat(sppRepoNull.getAllRootPages()).contains(SettingsPage.createNull())
+        assertThat(sppRepoNull.getAllRootPages()).contains(nullPage)
 
-        val rootPage1 = SettingsPage.create(name = "Spp1", displayName = "Spp1")
-        val rootPage2 = SettingsPage.create(name = "Spp2", displayName = "Spp2")
+        val rootPage1 = createSettingsPage(sppName = "Spp1", displayName = "Spp1")
+        val rootPage2 = createSettingsPage(sppName = "Spp2", displayName = "Spp2")
         val sppRepo = SettingsPageProviderRepository(emptyList(), listOf(rootPage1, rootPage2))
         val allRoots = sppRepo.getAllRootPages()
         assertThat(sppRepo.getDefaultStartPage()).isEqualTo("Spp1")

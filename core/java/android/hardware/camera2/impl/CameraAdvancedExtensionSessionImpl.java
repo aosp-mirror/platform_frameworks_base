@@ -62,8 +62,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
 import android.util.Log;
-import android.util.Pair;
-import android.util.Range;
 import android.util.Size;
 import android.view.Surface;
 
@@ -270,6 +268,10 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 }
             }
 
+            // The extension processing logic needs to be able to match images to capture results via
+            // image and result timestamps.
+            cameraOutput.setTimestampBase(OutputConfiguration.TIMESTAMP_BASE_SENSOR);
+            cameraOutput.setReadoutTimestampEnabled(false);
             cameraOutput.setPhysicalCameraId(output.physicalCameraId);
             outputList.add(cameraOutput);
             mCameraConfigMap.put(cameraOutput.getSurface(), output);
@@ -614,8 +616,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
             boolean status = true;
             synchronized (mInterfaceLock) {
                 try {
-                    mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
-                    mInitialized = true;
+                    if (mSessionProcessor != null) {
+                        mSessionProcessor.onCaptureSessionStart(mRequestProcessor);
+                        mInitialized = true;
+                    } else {
+                        Log.v(TAG, "Failed to start capture session, session released before " +
+                                "extension start!");
+                        status = false;
+                        mCaptureSession.close();
+                    }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failed to start capture session,"
                             + " extension service does not respond!");

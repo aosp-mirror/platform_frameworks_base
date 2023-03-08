@@ -18,10 +18,13 @@ package com.android.server.power.stats;
 
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_ALARM;
 import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
+import static android.os.BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_WIFI;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
 import android.util.LongSparseArray;
@@ -39,6 +42,8 @@ import com.android.internal.util.IntPair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,14 +54,15 @@ public class CpuWakeupStats {
     private static final String TAG = "CpuWakeupStats";
 
     private static final String SUBSYSTEM_ALARM_STRING = "Alarm";
-    @VisibleForTesting
-    static final long WAKEUP_RETENTION_MS = 3 * 24 * 60 * 60_000; // 3 days.
+    private static final String SUBSYSTEM_ALARM_WIFI = "Wifi";
     @VisibleForTesting
     static final long WAKEUP_REASON_HALF_WINDOW_MS = 500;
-    private static final long WAKEUP_WRITE_DELAY_MS = 2 * 60 * 1000;  // 2 minutes.
+    private static final long WAKEUP_WRITE_DELAY_MS = TimeUnit.MINUTES.toMillis(2);
 
     private final Handler mHandler;
     private final IrqDeviceMap mIrqDeviceMap;
+    @VisibleForTesting
+    final Config mConfig = new Config();
     private final WakingActivityHistory mRecentWakingActivity = new WakingActivityHistory();
 
     @VisibleForTesting
@@ -70,10 +76,20 @@ public class CpuWakeupStats {
         mHandler = handler;
     }
 
+    /**
+     * Called on the boot phase SYSTEM_SERVICES_READY.
+     * This ensures that DeviceConfig is ready for calls to read properties.
+     */
+    public synchronized void systemServicesReady() {
+        mConfig.register(new HandlerExecutor(mHandler));
+    }
+
     private static int subsystemToStatsReason(int subsystem) {
         switch (subsystem) {
             case CPU_WAKEUP_SUBSYSTEM_ALARM:
                 return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__ALARM;
+            case CPU_WAKEUP_SUBSYSTEM_WIFI:
+                return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__WIFI;
         }
         return FrameworkStatsLog.KERNEL_WAKEUP_ATTRIBUTED__REASON__UNKNOWN;
     }
@@ -122,21 +138,25 @@ public class CpuWakeupStats {
     /** Notes a wakeup reason as reported by SuspendControlService to battery stats. */
     public synchronized void noteWakeupTimeAndReason(long elapsedRealtime, long uptime,
             String rawReason) {
-        final Wakeup parsedWakeup = new Wakeup(rawReason, elapsedRealtime, uptime);
+        final Wakeup parsedWakeup = Wakeup.parseWakeup(rawReason, elapsedRealtime, uptime);
+        if (parsedWakeup == null) {
+            return;
+        }
         mWakeupEvents.put(elapsedRealtime, parsedWakeup);
         attemptAttributionFor(parsedWakeup);
         // Assuming that wakeups always arrive in monotonically increasing elapsedRealtime order,
         // we can delete all history that will not be useful in attributing future wakeups.
         mRecentWakingActivity.clearAllBefore(elapsedRealtime - WAKEUP_REASON_HALF_WINDOW_MS);
 
-        // Limit history of wakeups and their attribution to the last WAKEUP_RETENTION_MS. Note that
+        // Limit history of wakeups and their attribution to the last retentionDuration. Note that
         // the last wakeup and its attribution (if computed) is always stored, even if that wakeup
-        // had occurred before WAKEUP_RETENTION_MS.
-        int lastIdx = mWakeupEvents.closestIndexOnOrBefore(elapsedRealtime - WAKEUP_RETENTION_MS);
+        // had occurred before retentionDuration.
+        final long retentionDuration = mConfig.WAKEUP_STATS_RETENTION_MS;
+        int lastIdx = mWakeupEvents.closestIndexOnOrBefore(elapsedRealtime - retentionDuration);
         for (int i = lastIdx; i >= 0; i--) {
             mWakeupEvents.removeAt(i);
         }
-        lastIdx = mWakeupAttribution.closestIndexOnOrBefore(elapsedRealtime - WAKEUP_RETENTION_MS);
+        lastIdx = mWakeupAttribution.closestIndexOnOrBefore(elapsedRealtime - retentionDuration);
         for (int i = lastIdx; i >= 0; i--) {
             mWakeupAttribution.removeAt(i);
         }
@@ -219,6 +239,9 @@ public class CpuWakeupStats {
         pw.println("CPU wakeup stats:");
         pw.increaseIndent();
 
+        mConfig.dump(pw);
+        pw.println();
+
         mIrqDeviceMap.dump(pw);
         pw.println();
 
@@ -289,7 +312,8 @@ public class CpuWakeupStats {
     }
 
     private static final class WakingActivityHistory {
-        private static final long WAKING_ACTIVITY_RETENTION_MS = 3 * 60 * 60_000; // 3 hours.
+        private static final long WAKING_ACTIVITY_RETENTION_MS = TimeUnit.MINUTES.toMillis(10);
+
         private SparseArray<TimeSparseArray<SparseBooleanArray>> mWakingActivity =
                 new SparseArray<>();
 
@@ -425,6 +449,8 @@ public class CpuWakeupStats {
         switch (rawSubsystem) {
             case SUBSYSTEM_ALARM_STRING:
                 return CPU_WAKEUP_SUBSYSTEM_ALARM;
+            case SUBSYSTEM_ALARM_WIFI:
+                return CPU_WAKEUP_SUBSYSTEM_WIFI;
         }
         return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
     }
@@ -433,6 +459,8 @@ public class CpuWakeupStats {
         switch (subsystem) {
             case CPU_WAKEUP_SUBSYSTEM_ALARM:
                 return SUBSYSTEM_ALARM_STRING;
+            case CPU_WAKEUP_SUBSYSTEM_WIFI:
+                return SUBSYSTEM_ALARM_WIFI;
             case CPU_WAKEUP_SUBSYSTEM_UNKNOWN:
                 return "Unknown";
         }
@@ -443,28 +471,25 @@ public class CpuWakeupStats {
         private static final String PARSER_TAG = "CpuWakeupStats.Wakeup";
         private static final String ABORT_REASON_PREFIX = "Abort";
         private static final Pattern sIrqPattern = Pattern.compile("^(\\d+)\\s+(\\S+)");
-
-        String mRawReason;
         long mElapsedMillis;
         long mUptimeMillis;
         IrqDevice[] mDevices;
 
-        Wakeup(String rawReason, long elapsedMillis, long uptimeMillis) {
-            mRawReason = rawReason;
+        private Wakeup(IrqDevice[] devices, long elapsedMillis, long uptimeMillis) {
             mElapsedMillis = elapsedMillis;
             mUptimeMillis = uptimeMillis;
-            mDevices = parseIrqDevices(rawReason);
+            mDevices = devices;
         }
 
-        private static IrqDevice[] parseIrqDevices(String rawReason) {
+        static Wakeup parseWakeup(String rawReason, long elapsedMillis, long uptimeMillis) {
             final String[] components = rawReason.split(":");
             if (ArrayUtils.isEmpty(components) || components[0].startsWith(ABORT_REASON_PREFIX)) {
-                // We don't support parsing aborts yet.
+                // Accounting of aborts is not supported yet.
                 return null;
             }
 
             int parsedDeviceCount = 0;
-            IrqDevice[] parsedDevices = new IrqDevice[components.length];
+            final IrqDevice[] parsedDevices = new IrqDevice[components.length];
 
             for (String component : components) {
                 final Matcher matcher = sIrqPattern.matcher(component.trim());
@@ -482,14 +507,17 @@ public class CpuWakeupStats {
                     parsedDevices[parsedDeviceCount++] = new IrqDevice(line, device);
                 }
             }
-            return (parsedDeviceCount > 0) ? Arrays.copyOf(parsedDevices, parsedDeviceCount) : null;
+            if (parsedDeviceCount == 0) {
+                return null;
+            }
+            return new Wakeup(Arrays.copyOf(parsedDevices, parsedDeviceCount), elapsedMillis,
+                    uptimeMillis);
         }
 
         @Override
         public String toString() {
             return "Wakeup{"
-                    + "mRawReason='" + mRawReason + '\''
-                    + ", mElapsedMillis=" + mElapsedMillis
+                    + "mElapsedMillis=" + mElapsedMillis
                     + ", mUptimeMillis=" + TimeUtils.formatDuration(mUptimeMillis)
                     + ", mDevices=" + Arrays.toString(mDevices)
                     + '}';
@@ -506,8 +534,56 @@ public class CpuWakeupStats {
 
             @Override
             public String toString() {
-                return "IrqDevice{" + "mLine=" + mLine + ", mDevice='" + mDevice + '\'' + '}';
+                return "IrqDevice{" + "mLine=" + mLine + ", mDevice=\'" + mDevice + '\'' + '}';
             }
+        }
+    }
+
+    static final class Config implements DeviceConfig.OnPropertiesChangedListener {
+        static final String KEY_WAKEUP_STATS_RETENTION_MS = "wakeup_stats_retention_ms";
+
+        private static final String[] PROPERTY_NAMES = {
+                KEY_WAKEUP_STATS_RETENTION_MS,
+        };
+
+        static final long DEFAULT_WAKEUP_STATS_RETENTION_MS = TimeUnit.DAYS.toMillis(3);
+
+        /**
+         * Wakeup stats are retained only for this duration.
+         */
+        public volatile long WAKEUP_STATS_RETENTION_MS = DEFAULT_WAKEUP_STATS_RETENTION_MS;
+
+        void register(Executor executor) {
+            DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                    executor, this);
+            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_BATTERY_STATS,
+                    PROPERTY_NAMES));
+        }
+
+        @Override
+        public void onPropertiesChanged(DeviceConfig.Properties properties) {
+            for (String name : properties.getKeyset()) {
+                if (name == null) {
+                    continue;
+                }
+                switch (name) {
+                    case KEY_WAKEUP_STATS_RETENTION_MS:
+                        WAKEUP_STATS_RETENTION_MS = properties.getLong(
+                                KEY_WAKEUP_STATS_RETENTION_MS, DEFAULT_WAKEUP_STATS_RETENTION_MS);
+                        break;
+                }
+            }
+        }
+
+        void dump(IndentingPrintWriter pw) {
+            pw.println("Config:");
+
+            pw.increaseIndent();
+
+            pw.print(KEY_WAKEUP_STATS_RETENTION_MS, WAKEUP_STATS_RETENTION_MS);
+            pw.println();
+
+            pw.decreaseIndent();
         }
     }
 }

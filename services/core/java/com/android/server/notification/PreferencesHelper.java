@@ -22,6 +22,7 @@ import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
@@ -861,11 +862,11 @@ public class PreferencesHelper implements RankingConfig {
             if (r == null) {
                 throw new IllegalArgumentException("Invalid package");
             }
+            if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
+                throw new IllegalStateException("Limit exceed; cannot create more groups");
+            }
             if (fromTargetApp) {
                 group.setBlocked(false);
-                if (r.groups.size() >= NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT) {
-                    throw new IllegalStateException("Limit exceed; cannot create more groups");
-                }
             }
             final NotificationChannelGroup oldGroup = r.groups.get(group.getId());
             if (oldGroup != null) {
@@ -905,6 +906,9 @@ public class PreferencesHelper implements RankingConfig {
         Objects.requireNonNull(channel);
         Objects.requireNonNull(channel.getId());
         Preconditions.checkArgument(!TextUtils.isEmpty(channel.getName()));
+        Preconditions.checkArgument(channel.getImportance() >= IMPORTANCE_NONE
+                && channel.getImportance() <= IMPORTANCE_MAX, "Invalid importance level");
+
         boolean needsPolicyFileChange = false, wasUndeleted = false, needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
@@ -992,11 +996,6 @@ public class PreferencesHelper implements RankingConfig {
                 }
 
                 needsPolicyFileChange = true;
-
-                if (channel.getImportance() < IMPORTANCE_NONE
-                        || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
-                    throw new IllegalArgumentException("Invalid importance level");
-                }
 
                 // Reset fields that apps aren't allowed to set.
                 if (fromTargetApp && !hasDndAccess) {

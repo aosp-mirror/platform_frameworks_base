@@ -71,6 +71,8 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.udfps.UdfpsOverlayParams;
+import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -187,8 +189,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsView mUdfpsView;
     @Mock
-    private UdfpsEnrollView mEnrollView;
-    @Mock
     private UdfpsBpView mBpView;
     @Mock
     private UdfpsFpmEmptyView mFpmEmptyView;
@@ -230,22 +230,21 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ScreenLifecycle.Observer mScreenObserver;
     private FingerprintSensorPropertiesInternal mOpticalProps;
     private FingerprintSensorPropertiesInternal mUltrasonicProps;
+    private UdfpsUtils mUdfpsUtils;
 
     @Before
     public void setUp() {
         Execution execution = new FakeExecution();
+        mUdfpsUtils = new UdfpsUtils();
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
                 .thenReturn(mUdfpsView);
-        when(mLayoutInflater.inflate(R.layout.udfps_enroll_view, null))
-                .thenReturn(mEnrollView); // for showOverlay REASON_ENROLL_ENROLLING
         when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
         when(mLayoutInflater.inflate(R.layout.udfps_bp_view, null))
                 .thenReturn(mBpView);
         when(mLayoutInflater.inflate(R.layout.udfps_fpm_empty_view, null))
                 .thenReturn(mFpmEmptyView);
-        when(mEnrollView.getContext()).thenReturn(mContext);
         when(mKeyguardUpdateMonitor.isFingerprintDetectionRunning()).thenReturn(true);
         when(mSessionTracker.getSessionId(anyInt())).thenReturn(
                 (new InstanceIdSequence(1 << 20)).newInstanceId());
@@ -305,7 +304,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
                 mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
-                mAlternateBouncerInteractor, mSecureSettings);
+                mAlternateBouncerInteractor, mSecureSettings, mUdfpsUtils);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());

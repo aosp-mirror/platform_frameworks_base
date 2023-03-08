@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
-import static android.view.InsetsState.containsType;
-
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
@@ -36,8 +33,8 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
 import android.util.Slog;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.KeyEvent;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowInsetsController.Behavior;
@@ -53,10 +50,12 @@ import com.android.systemui.camera.CameraIntents;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QSPanelController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -104,6 +103,8 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     private final VibrationEffect mCameraLaunchGestureVibrationEffect;
     private final SystemBarAttributesListener mSystemBarAttributesListener;
     private final Lazy<CameraLauncher> mCameraLauncherLazy;
+    private final QuickSettingsController mQsController;
+    private final QSHost mQSHost;
 
     private static final VibrationAttributes HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES =
             VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK);
@@ -111,6 +112,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     @Inject
     CentralSurfacesCommandQueueCallbacks(
             CentralSurfaces centralSurfaces,
+            QuickSettingsController quickSettingsController,
             Context context,
             @Main Resources resources,
             ShadeController shadeController,
@@ -135,8 +137,10 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
             @DisplayId int displayId,
             SystemBarAttributesListener systemBarAttributesListener,
             Lazy<CameraLauncher> cameraLauncherLazy,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            QSHost qsHost) {
         mCentralSurfaces = centralSurfaces;
+        mQsController = quickSettingsController;
         mContext = context;
         mShadeController = shadeController;
         mCommandQueue = commandQueue;
@@ -160,6 +164,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
         mDisplayId = displayId;
         mCameraLauncherLazy = cameraLauncherLazy;
         mUserTracker = userTracker;
+        mQSHost = qsHost;
 
         mVibrateOnOpening = resources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mCameraLaunchGestureVibrationEffect = getCameraGestureVibrationEffect(
@@ -168,11 +173,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void abortTransient(int displayId, @InternalInsetsType int[] types) {
+    public void abortTransient(int displayId, @InsetsType int types) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_STATUS_BAR)) {
+        if ((types & WindowInsets.Type.statusBars()) == 0) {
             return;
         }
         mCentralSurfaces.clearTransient();
@@ -180,22 +185,17 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
 
     @Override
     public void addQsTile(ComponentName tile) {
-        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
-        if (qsPanelController != null && qsPanelController.getHost() != null) {
-            qsPanelController.getHost().addTile(tile);
-        }
+        mQSHost.addTile(tile);
     }
 
     @Override
     public void remQsTile(ComponentName tile) {
-        QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
-        if (qsPanelController != null && qsPanelController.getHost() != null) {
-            qsPanelController.getHost().removeTileByUser(tile);
-        }
+        mQSHost.removeTileByUser(tile);
     }
 
     @Override
     public void clickTile(ComponentName tile) {
+        // Can't inject this because it changes with the QS fragment
         QSPanelController qsPanelController = mCentralSurfaces.getQSPanelController();
         if (qsPanelController != null) {
             qsPanelController.clickTile(tile);
@@ -334,9 +334,9 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mNotificationStackScrollLayoutController.setWillExpand(true);
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);
-            } else if (!mNotificationPanelViewController.isInSettings()
+            } else if (!mQsController.getExpanded()
                     && !mNotificationPanelViewController.isExpanding()) {
-                mNotificationPanelViewController.flingSettings(0 /* velocity */,
+                mQsController.flingQs(0 /* velocity */,
                         NotificationPanelViewController.FLING_EXPAND);
                 mMetricsLogger.count("panel_open_qs", 1);
             }
@@ -489,12 +489,11 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
     }
 
     @Override
-    public void showTransient(int displayId, @InternalInsetsType int[] types,
-            boolean isGestureOnSystemBar) {
+    public void showTransient(int displayId, @InsetsType int types, boolean isGestureOnSystemBar) {
         if (displayId != mDisplayId) {
             return;
         }
-        if (!containsType(types, ITYPE_STATUS_BAR)) {
+        if ((types & WindowInsets.Type.statusBars()) == 0) {
             return;
         }
         mCentralSurfaces.showTransientUnchecked();

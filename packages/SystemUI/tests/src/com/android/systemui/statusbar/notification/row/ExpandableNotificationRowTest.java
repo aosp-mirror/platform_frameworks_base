@@ -16,12 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.Notification.FLAG_NO_CLEAR;
-import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
-import static com.android.systemui.statusbar.NotificationEntryHelper.modifySbn;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -478,26 +475,24 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCanDismissNoClear() throws Exception {
+    public void testCanDismiss() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        modifySbn(row.getEntry())
-                .setFlag(mContext, FLAG_NO_CLEAR, true)
-                .build();
+        when(mNotificationTestHelper.getDismissibilityProvider().isDismissable(row.getEntry()))
+                .thenReturn(true);
         row.performDismiss(false);
-        verify(mNotificationTestHelper.mOnUserInteractionCallback)
+        verify(mNotificationTestHelper.getOnUserInteractionCallback())
                 .registerFutureDismissal(any(), anyInt());
     }
 
     @Test
-    public void testCannotDismissOngoing() throws Exception {
+    public void testCannotDismiss() throws Exception {
         ExpandableNotificationRow row =
                 mNotificationTestHelper.createRow(mNotificationTestHelper.createNotification());
-        modifySbn(row.getEntry())
-                .setFlag(mContext, FLAG_ONGOING_EVENT, true)
-                .build();
+        when(mNotificationTestHelper.getDismissibilityProvider().isDismissable(row.getEntry()))
+                .thenReturn(false);
         row.performDismiss(false);
-        verify(mNotificationTestHelper.mOnUserInteractionCallback, never())
+        verify(mNotificationTestHelper.getOnUserInteractionCallback(), never())
                 .registerFutureDismissal(any(), anyInt());
     }
 

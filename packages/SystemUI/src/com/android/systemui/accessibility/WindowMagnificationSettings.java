@@ -50,6 +50,7 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 
+import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.R;
@@ -139,8 +140,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             float scale = progress * A11Y_CHANGE_SCALE_DIFFERENCE + A11Y_SCALE_MIN_VALUE;
-            // update persisted scale only when scale >= 2.0
-            if (scale >= 2.0f) {
+            // Update persisted scale only when scale >= PERSISTED_SCALE_MIN_VALUE const.
+            // We assume if the scale is lower than the PERSISTED_SCALE_MIN_VALUE, there will be
+            // no obvious magnification effect.
+            if (scale >= MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
                 Settings.Secure.putFloatForUser(mContext.getContentResolver(),
                         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, scale,
                         UserHandle.USER_CURRENT);
@@ -212,9 +215,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
         private boolean performA11yAction(View view, int action) {
             final Rect windowBounds = mWindowManager.getCurrentWindowMetrics().getBounds();
-            if (action == AccessibilityAction.ACTION_CLICK.getId()) {
-                handleSingleTap(view);
-            } else if (action == R.id.accessibility_action_move_up) {
+            if (action == R.id.accessibility_action_move_up) {
                 moveButton(0, -windowBounds.height());
             } else if (action == R.id.accessibility_action_move_down) {
                 moveButton(0, windowBounds.height());
@@ -261,8 +262,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             } else if (id == R.id.magnifier_full_button) {
                 hideSettingPanel();
                 toggleMagnificationMode();
-            } else {
-                hideSettingPanel();
             }
         }
     };
@@ -270,7 +269,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     @Override
     public boolean onSingleTap(View view) {
         mSingleTapDetected = true;
-        handleSingleTap(view);
         return true;
     }
 
@@ -325,6 +323,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
 
         mContext.unregisterReceiver(mScreenOffReceiver);
+        mCallback.onSettingsPanelVisibilityChanged(/* shown= */ false);
     }
 
     public void showSettingPanel() {
@@ -355,10 +354,15 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             }
 
             mWindowManager.addView(mSettingView, mParams);
+            if (resetPosition) {
+                // Request focus on the settings panel when position of the panel is reset.
+                mSettingView.requestFocus();
+            }
 
             // Exclude magnification switch button from system gesture area.
             setSystemGestureExclusion();
             mIsVisible = true;
+            mCallback.onSettingsPanelVisibilityChanged(/* shown= */ true);
         }
         mContext.registerReceiver(mScreenOffReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
     }
@@ -382,8 +386,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mSettingView = (LinearLayout) View.inflate(mContext,
                 R.layout.window_magnification_settings_view, null);
 
-        mSettingView.setClickable(true);
         mSettingView.setFocusable(true);
+        mSettingView.setFocusableInTouchMode(true);
         mSettingView.setOnTouchListener(this::onTouch);
 
         mPanelView = mSettingView.findViewById(R.id.magnifier_panel_view);
@@ -395,13 +399,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
-
-        mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
-
         float scale = mSecureSettings.getFloatForUser(
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 0,
                 UserHandle.USER_CURRENT);
         setSeekbarProgress(scale);
+        mZoomSeekbar.setOnSeekBarChangeListener(new ZoomSeekbarChangeListener());
+
         mAllowDiagonalScrollingSwitch =
                 (Switch) mSettingView.findViewById(R.id.magnifier_horizontal_lock_switch);
         mAllowDiagonalScrollingSwitch.setChecked(mAllowDiagonalScrolling);
@@ -497,22 +500,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         }
     }
 
-    private void handleSingleTap(View view) {
-        int id = view.getId();
-        if (id == R.id.magnifier_small_button) {
-            setMagnifierSize(MagnificationSize.SMALL);
-        } else if (id == R.id.magnifier_medium_button) {
-            setMagnifierSize(MagnificationSize.MEDIUM);
-        } else if (id == R.id.magnifier_large_button) {
-            setMagnifierSize(MagnificationSize.LARGE);
-        } else if (id == R.id.magnifier_full_button) {
-            hideSettingPanel();
-            toggleMagnificationMode();
-        } else {
-            hideSettingPanel();
-        }
-    }
-
     public void editMagnifierSizeMode(boolean enable) {
         setEditMagnifierSizeMode(enable);
         updateSelectedButton(MagnificationSize.NONE);
@@ -549,7 +536,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                LayoutParams.FLAG_NOT_FOCUSABLE,
+                /* _flags= */ 0,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.START;
         params.accessibilityTitle = getAccessibilityWindowTitle(context);

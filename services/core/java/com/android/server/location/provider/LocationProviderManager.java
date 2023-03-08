@@ -2105,6 +2105,11 @@ public class LocationProviderManager extends
     @Override
     protected boolean registerWithService(ProviderRequest request,
             Collection<Registration> registrations) {
+        if (!request.isActive()) {
+            // the default request is already an empty request, no need to register this
+            return true;
+        }
+
         return reregisterWithService(ProviderRequest.EMPTY_REQUEST, request, registrations);
     }
 
@@ -2179,6 +2184,9 @@ public class LocationProviderManager extends
         }
 
         EVENT_LOG.logProviderUpdateRequest(mName, request);
+        if (D) {
+            Log.d(TAG, mName + " provider request changed to " + request);
+        }
         mProvider.getController().setRequest(request);
 
         FgThread.getHandler().post(() -> {

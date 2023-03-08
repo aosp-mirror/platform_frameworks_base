@@ -904,37 +904,46 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      * starting (about to be visible) activity that is fullscreen (opaque).
      * @param starting The currently starting activity or null if there is none.
      */
-    @VisibleForTesting
-    boolean isTranslucent(ActivityRecord starting) {
+    boolean isTranslucent(@Nullable ActivityRecord starting) {
         if (!isAttached() || isForceHidden() || isForceTranslucent()) {
             return true;
         }
         final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,
-                PooledLambda.__(ActivityRecord.class), starting);
+                PooledLambda.__(ActivityRecord.class), starting, false /* including*/);
         final ActivityRecord opaque = getActivity(p);
         p.recycle();
         return opaque == null;
     }
 
-    private static boolean isOpaqueActivity(ActivityRecord r, ActivityRecord starting) {
-        if (r.finishing) {
-            // We don't factor in finishing activities when determining translucency since
-            // they will be gone soon.
-            return false;
+    /**
+     * Whether the TaskFragment should be treated as translucent for the current transition.
+     * This is different from {@link #isTranslucent(ActivityRecord)} as this function also checks
+     * finishing activities when the TaskFragment itself is becoming invisible.
+     */
+    boolean isTranslucentForTransition() {
+        if (!isAttached() || isForceHidden() || isForceTranslucent()) {
+            return true;
         }
+        // Including finishing Activity if the TaskFragment is becoming invisible in the transition.
+        final boolean includingFinishing = !isVisibleRequested();
+        final PooledPredicate p = PooledLambda.obtainPredicate(TaskFragment::isOpaqueActivity,
+                PooledLambda.__(ActivityRecord.class), null /* starting */, includingFinishing);
+        final ActivityRecord opaque = getActivity(p);
+        p.recycle();
+        return opaque == null;
+    }
 
+    private static boolean isOpaqueActivity(@NonNull ActivityRecord r,
+            @Nullable ActivityRecord starting, boolean includingFinishing) {
         if (!r.visibleIgnoringKeyguard && r != starting) {
             // Also ignore invisible activities that are not the currently starting
             // activity (about to be visible).
             return false;
         }
 
-        if (r.occludesParent()) {
-            // Root task isn't translucent if it has at least one fullscreen activity
-            // that is visible.
-            return true;
-        }
-        return false;
+        // TaskFragment isn't translucent if it has at least one fullscreen activity that is
+        // visible.
+        return r.occludesParent(includingFinishing);
     }
 
     ActivityRecord getTopNonFinishingActivity() {
@@ -1628,6 +1637,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
         if (prev.attachedToProcess()) {
             if (shouldAutoPip) {
+                prev.mPauseSchedulePendingForPip = true;
                 boolean didAutoPip = mAtmService.enterPictureInPictureMode(
                         prev, prev.pictureInPictureArgs, false /* fromClient */);
                 ProtoLog.d(WM_DEBUG_STATES, "Auto-PIP allowed, entering PIP mode "
@@ -1691,6 +1701,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             boolean pauseImmediately, boolean autoEnteringPip, String reason) {
         ProtoLog.v(WM_DEBUG_STATES, "Enqueueing pending pause: %s", prev);
         try {
+            prev.mPauseSchedulePendingForPip = false;
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
@@ -1924,7 +1935,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         1f);
                 mBackScreenshots.put(r.mActivityComponent.flattenToString(), backBuffer);
             }
-            child.asActivityRecord().inHistory = true;
+            addingActivity.inHistory = true;
             task.onDescendantActivityAdded(taskHadActivity, activityType, addingActivity);
         }
     }
@@ -2565,6 +2576,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     TaskFragmentInfo getTaskFragmentInfo() {
         List<IBinder> childActivities = new ArrayList<>();
+        List<IBinder> inRequestedTaskFragmentActivities = new ArrayList<>();
         for (int i = 0; i < getChildCount(); i++) {
             final WindowContainer<?> wc = getChildAt(i);
             final ActivityRecord ar = wc.asActivityRecord();
@@ -2573,6 +2585,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                     && ar.getUid() == mTaskFragmentOrganizerUid && !ar.finishing) {
                 // Only includes Activities that belong to the organizer process for security.
                 childActivities.add(ar.token);
+                if (ar.mRequestedLaunchingTaskFragmentToken == mFragmentToken) {
+                    inRequestedTaskFragmentActivities.add(ar.token);
+                }
             }
         }
         final Point positionInParent = new Point();
@@ -2584,6 +2599,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 getNonFinishingActivityCount(),
                 shouldBeVisible(null /* starting */),
                 childActivities,
+                inRequestedTaskFragmentActivities,
                 positionInParent,
                 mClearedTaskForReuse,
                 mClearedTaskFragmentForPip,
@@ -2813,7 +2829,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void removeImmediately() {
         mIsRemovalRequested = false;
         resetAdjacentTaskFragment();
-        cleanUp();
+        cleanUpEmbeddedTaskFragment();
         final boolean shouldExecuteAppTransition =
                 mClearedTaskFragmentForPip && isTaskVisibleRequested();
         super.removeImmediately();
@@ -2830,10 +2846,20 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     /** Called on remove to cleanup. */
-    private void cleanUp() {
-        if (mIsEmbedded) {
-            mAtmService.mWindowOrganizerController.cleanUpEmbeddedTaskFragment(this);
+    private void cleanUpEmbeddedTaskFragment() {
+        if (!mIsEmbedded) {
+            return;
         }
+        mAtmService.mWindowOrganizerController.cleanUpEmbeddedTaskFragment(this);
+        final Task task = getTask();
+        if (task == null) {
+            return;
+        }
+        task.forAllLeafTaskFragments(taskFragment -> {
+            if (taskFragment.getCompanionTaskFragment() == this) {
+                taskFragment.setCompanionTaskFragment(null /* companionTaskFragment */);
+            }
+        }, false /* traverseTopToBottom */);
     }
 
     @Override

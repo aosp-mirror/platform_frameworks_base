@@ -24,4 +24,7 @@ java_library_static {
         "app-compat-annotations",
         "services.core",
     ],
+    static_libs: [
+        "ukey2_jni",
+    ],
 }

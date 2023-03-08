@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.os.Trace.TRACE_TAG_DALVIK;
 
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.ApexManager.ActiveApexInfo;
@@ -40,8 +40,11 @@ import static dalvik.system.DexFile.isProfileGuidedCompilerFilter;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
+import android.app.role.RoleManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.dex.ArtManager;
@@ -270,7 +273,6 @@ public final class DexOptHelper {
      * compiles it if needed.
      */
     private void checkAndDexOptSystemUi(int reason) throws LegacyDexoptDisabledException {
-        Installer.checkLegacyDexoptDisabled();
         Computer snapshot = mPm.snapshotComputer();
         String sysUiPackageName =
                 mPm.mContext.getString(com.android.internal.R.string.config_systemUi);
@@ -286,7 +288,7 @@ public final class DexOptHelper {
         String compilerFilter;
 
         if (isProfileGuidedCompilerFilter(targetCompilerFilter)) {
-            compilerFilter = defaultCompilerFilter;
+            compilerFilter = "verify";
             File profileFile = new File(getPrebuildProfilePath(pkg));
 
             // Copy the profile to the reference profile path if it exists. Installd can only use a
@@ -310,7 +312,26 @@ public final class DexOptHelper {
             compilerFilter = targetCompilerFilter;
         }
 
-        // We don't expect updates in current profiles to be significant here, but
+        performDexoptPackage(sysUiPackageName, reason, compilerFilter);
+    }
+
+    private void dexoptLauncher(int reason) throws LegacyDexoptDisabledException {
+        Computer snapshot = mPm.snapshotComputer();
+        RoleManager roleManager = mPm.mContext.getSystemService(RoleManager.class);
+        for (var packageName : roleManager.getRoleHolders(RoleManager.ROLE_HOME)) {
+            AndroidPackage pkg = snapshot.getPackage(packageName);
+            if (pkg == null) {
+                Log.w(TAG, "Launcher package " + packageName + " is not found for dexopting");
+            } else {
+                performDexoptPackage(packageName, reason, "speed-profile");
+            }
+        }
+    }
+
+    private void performDexoptPackage(@NonNull String packageName, int reason,
+            @NonNull String compilerFilter) throws LegacyDexoptDisabledException {
+        Installer.checkLegacyDexoptDisabled();
+
         // DEXOPT_CHECK_FOR_PROFILES_UPDATES is set to replicate behaviour that will be
         // unconditionally enabled for profile guided filters when ART Service is called instead of
         // the legacy PackageDexOptimizer implementation.
@@ -318,8 +339,8 @@ public final class DexOptHelper {
                 ? DexoptOptions.DEXOPT_CHECK_FOR_PROFILES_UPDATES
                 : 0;
 
-        performDexOptTraced(new DexoptOptions(pkg.getPackageName(), REASON_BOOT_AFTER_OTA,
-                compilerFilter, null /* splitName */, dexoptFlags));
+        performDexOptTraced(new DexoptOptions(
+                packageName, reason, compilerFilter, null /* splitName */, dexoptFlags));
     }
 
     /**
@@ -341,6 +362,10 @@ public final class DexOptHelper {
             return;
         }
 
+        Log.i(TAG,
+                "Starting boot dexopt for reason "
+                        + DexoptOptions.convertToArtServiceDexoptReason(reason));
+
         final long startTime = System.nanoTime();
 
         if (useArtService()) {
@@ -349,9 +374,10 @@ public final class DexOptHelper {
                     null /* progressCallbackExecutor */, null /* progressCallback */);
         } else {
             try {
-                // System UI is important to user experience, so we check it after a mainline update
-                // or an OTA. It may need to be re-compiled in these cases.
+                // System UI and the launcher are important to user experience, so we check them
+                // after a mainline update or OTA. They may need to be re-compiled in these cases.
                 checkAndDexOptSystemUi(reason);
+                dexoptLauncher(reason);
 
                 if (reason != REASON_BOOT_AFTER_OTA && reason != REASON_FIRST_BOOT) {
                     return;
@@ -444,11 +470,11 @@ public final class DexOptHelper {
 
     @DexOptResult
     private int performDexOptTraced(DexoptOptions options) {
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_DALVIK, "dexopt");
         try {
             return performDexOptInternal(options);
         } finally {
-            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            Trace.traceEnd(TRACE_TAG_DALVIK);
         }
     }
 
@@ -564,7 +590,10 @@ public final class DexOptHelper {
                 mPm.getDexManager().getPackageUseInfoOrDefault(p.getPackageName()), options);
     }
 
-    public void forceDexOpt(@NonNull Computer snapshot, String packageName) {
+    /** @deprecated For legacy shell command only. */
+    @Deprecated
+    public void forceDexOpt(@NonNull Computer snapshot, String packageName)
+            throws LegacyDexoptDisabledException {
         PackageManagerServiceUtils.enforceSystemOrRoot("forceDexOpt");
 
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
@@ -576,7 +605,7 @@ public final class DexOptHelper {
             throw new IllegalArgumentException("Can't dexopt APEX package: " + packageName);
         }
 
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+        Trace.traceBegin(TRACE_TAG_DALVIK, "dexopt");
 
         // Whoever is calling forceDexOpt wants a compiled package.
         // Don't use profiles since that may cause compilation to be skipped.
@@ -584,21 +613,9 @@ public final class DexOptHelper {
                 getDefaultCompilerFilter(), null /* splitName */,
                 DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE);
 
-        @DexOptResult int res;
-        if (useArtService()) {
-            // performDexOptWithArtService ignores the snapshot and takes its own, so it can race
-            // with the package checks above, but at worst the effect is only a bit less friendly
-            // error below.
-            res = performDexOptWithArtService(options, ArtFlags.FLAG_SHOULD_INCLUDE_DEPENDENCIES);
-        } else {
-            try {
-                res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
-            } catch (LegacyDexoptDisabledException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        @DexOptResult int res = performDexOptInternalWithDependenciesLI(pkg, packageState, options);
 
-        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        Trace.traceEnd(TRACE_TAG_DALVIK);
         if (res != PackageDexOptimizer.DEX_OPT_PERFORMED) {
             throw new IllegalStateException("Failed to dexopt: " + res);
         }
@@ -1019,7 +1036,15 @@ public final class DexOptHelper {
                 pm.getDexOptHelper().new DexoptDoneHandler());
         LocalManagerRegistry.addManager(ArtManagerLocal.class, artManager);
 
-        artManager.scheduleBackgroundDexoptJob();
+        // Schedule the background job when boot is complete. This decouples us from when
+        // JobSchedulerService is initialized.
+        systemContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                context.unregisterReceiver(this);
+                artManager.scheduleBackgroundDexoptJob();
+            }
+        }, new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
     }
 
     /**

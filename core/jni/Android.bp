@@ -40,6 +40,12 @@ cc_library_shared {
 
     cppflags: ["-Wno-conversion-null"],
 
+    product_variables: {
+        eng: {
+            cflags: ["-DNO_RESET_STACK_PROTECTOR"],
+        },
+    },
+
     cpp_std: "gnu++20",
 
     srcs: [
@@ -326,11 +332,8 @@ cc_library_shared {
                 "libdl",
                 "libdl_android",
                 "libtimeinstate",
-                "libtflite",
                 "server_configurable_flags",
                 "libimage_io",
-                "libjpegdecoder",
-                "libjpegencoder",
                 "libjpegrecoverymap",
             ],
             export_shared_lib_headers: [

@@ -1892,15 +1892,11 @@ public class AppProfiler {
     }
 
     long getCpuTimeForPid(int pid) {
-        synchronized (mProcessCpuTracker) {
-            return mProcessCpuTracker.getCpuTimeForPid(pid);
-        }
+        return mProcessCpuTracker.getCpuTimeForPid(pid);
     }
 
     long getCpuDelayTimeForPid(int pid) {
-        synchronized (mProcessCpuTracker) {
-            return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
-        }
+        return mProcessCpuTracker.getCpuDelayTimeForPid(pid);
     }
 
     List<ProcessCpuTracker.Stats> getCpuStats(Predicate<ProcessCpuTracker.Stats> predicate) {
@@ -2055,7 +2051,7 @@ public class AppProfiler {
                 }
             } else if (instr != null && instr.mProfileFile != null) {
                 profilerInfo = new ProfilerInfo(instr.mProfileFile, null, 0, false, false,
-                        null, false);
+                        null, false, 0);
             }
             if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
                 // We need to do a debuggable check here. See setAgentApp for why the check is
@@ -2065,7 +2061,7 @@ public class AppProfiler {
                     // Do not overwrite already requested agent.
                     if (profilerInfo == null) {
                         profilerInfo = new ProfilerInfo(null, null, 0, false, false,
-                                mAppAgentMap.get(processName), true);
+                                mAppAgentMap.get(processName), true, 0);
                     } else if (profilerInfo.agent == null) {
                         profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
                     }
@@ -2197,7 +2193,9 @@ public class AppProfiler {
                             + " mAutoStopProfiler="
                             + mProfileData.getProfilerInfo().autoStopProfiler
                             + " mStreamingOutput="
-                            + mProfileData.getProfilerInfo().streamingOutput);
+                            + mProfileData.getProfilerInfo().streamingOutput
+                            + " mClockType="
+                            + mProfileData.getProfilerInfo().clockType);
                     pw.println("  mProfileType=" + mProfileType);
                 }
             }

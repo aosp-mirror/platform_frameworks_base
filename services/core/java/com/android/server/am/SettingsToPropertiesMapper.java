@@ -80,6 +80,7 @@ public class SettingsToPropertiesMapper {
     @VisibleForTesting
     static final String[] sDeviceConfigScopes = new String[] {
         DeviceConfig.NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_CAMERA_NATIVE,
         DeviceConfig.NAMESPACE_CONFIGURATION,
         DeviceConfig.NAMESPACE_CONNECTIVITY,
         DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
@@ -103,6 +104,7 @@ public class SettingsToPropertiesMapper {
         DeviceConfig.NAMESPACE_VENDOR_SYSTEM_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_VIRTUALIZATION_FRAMEWORK_NATIVE,
         DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
+        DeviceConfig.NAMESPACE_MEMORY_SAFETY_NATIVE_BOOT,
         DeviceConfig.NAMESPACE_MEMORY_SAFETY_NATIVE,
         DeviceConfig.NAMESPACE_HDMI_CONTROL
     };

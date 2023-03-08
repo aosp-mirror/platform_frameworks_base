@@ -149,6 +149,8 @@
         app:layout_constraintTop_toBottomOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_max="450dp"
+        app:layout_constraintHorizontal_bias="0"
         >
         <include layout="@layout/screenshot_work_profile_first_run" />
         <include layout="@layout/screenshot_detection_notice" />

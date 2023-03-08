@@ -17,7 +17,7 @@
 package com.android.systemui.biometrics.udfps
 
 import android.view.MotionEvent
-import com.android.systemui.biometrics.UdfpsOverlayParams
+import com.android.settingslib.udfps.UdfpsOverlayParams
 
 /**
  * Determines whether a finger entered or left the area of the under-display fingerprint sensor

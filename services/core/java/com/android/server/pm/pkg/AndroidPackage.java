@@ -116,7 +116,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_banner
      */
     @DrawableRes
-    int getBannerRes();
+    int getBannerResourceId();
 
     /**
      * @see PackageInfo#baseRevisionCode
@@ -149,21 +149,21 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_dataExtractionRules
      */
     @XmlRes
-    int getDataExtractionRulesRes();
+    int getDataExtractionRulesResourceId();
 
     /**
      * @see ApplicationInfo#descriptionRes
      * @see R.styleable#AndroidManifestApplication_description
      */
     @StringRes // This is actually format="reference"
-    int getDescriptionRes();
+    int getDescriptionResourceId();
 
     /**
      * @see ApplicationInfo#fullBackupContent
      * @see R.styleable#AndroidManifestApplication_fullBackupContent
      */
     @XmlRes
-    int getFullBackupContentRes();
+    int getFullBackupContentResourceId();
 
     /**
      * @see ApplicationInfo#getGwpAsanMode()
@@ -177,14 +177,14 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_icon
      */
     @DrawableRes
-    int getIconRes();
+    int getIconResourceId();
 
     /**
      * @see ApplicationInfo#labelRes
      * @see R.styleable#AndroidManifestApplication_label
      */
     @StringRes
-    int getLabelRes();
+    int getLabelResourceId();
 
     /**
      * @see ApplicationInfo#largestWidthLimitDp
@@ -206,7 +206,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_logo
      */
     @DrawableRes
-    int getLogoRes();
+    int getLogoResourceId();
 
     /**
      * The resource ID used to provide the application's locales configuration.
@@ -214,7 +214,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_localeConfig
      */
     @XmlRes
-    int getLocaleConfigRes();
+    int getLocaleConfigResourceId();
 
     /**
      * @see PackageInfo#getLongVersionCode()
@@ -247,7 +247,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_networkSecurityConfig
      */
     @XmlRes
-    int getNetworkSecurityConfigRes();
+    int getNetworkSecurityConfigResourceId();
 
     /**
      * @see PackageInfo#requiredAccountType
@@ -277,7 +277,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_roundIcon
      */
     @DrawableRes
-    int getRoundIconRes();
+    int getRoundIconResourceId();
 
     /**
      * @see R.styleable#AndroidManifestSdkLibrary_name
@@ -297,7 +297,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifest_sharedUserLabel
      */
     @StringRes
-    int getSharedUserLabelRes();
+    int getSharedUserLabelResourceId();
 
     /**
      * @return List of all splits for a package. Note that base.apk is considered a
@@ -336,7 +336,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestApplication_theme
      */
     @StyleRes
-    int getThemeRes();
+    int getThemeResourceId();
 
     /**
      * @see ApplicationInfo#uiOptions
@@ -367,19 +367,19 @@ public interface AndroidPackage {
      * @see ApplicationInfo#FLAG_ALLOW_BACKUP
      * @see R.styleable#AndroidManifestApplication_allowBackup
      */
-    boolean isAllowBackup();
+    boolean isBackupAllowed();
 
     /**
      * @see ApplicationInfo#FLAG_ALLOW_CLEAR_USER_DATA
      * @see R.styleable#AndroidManifestApplication_allowClearUserData
      */
-    boolean isAllowClearUserData();
+    boolean isClearUserDataAllowed();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_CLEAR_USER_DATA_ON_FAILED_RESTORE
      * @see R.styleable#AndroidManifestApplication_allowClearUserDataOnFailedRestore
      */
-    boolean isAllowClearUserDataOnFailedRestore();
+    boolean isClearUserDataOnFailedRestoreAllowed();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING
@@ -391,7 +391,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#FLAG_ALLOW_TASK_REPARENTING
      * @see R.styleable#AndroidManifestApplication_allowTaskReparenting
      */
-    boolean isAllowTaskReparenting();
+    boolean isTaskReparentingAllowed();
 
     /**
      * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
@@ -424,7 +424,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#PRIVATE_FLAG_CANT_SAVE_STATE
      * @see R.styleable#AndroidManifestApplication_cantSaveState
      */
-    boolean isCantSaveState();
+    boolean isSaveStateDisallowed();
 
     /**
      * @see PackageInfo#coreApp
@@ -459,7 +459,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#FLAG_EXTRACT_NATIVE_LIBS
      * @see R.styleable#AndroidManifestApplication_extractNativeLibs
      */
-    boolean isExtractNativeLibs();
+    boolean isExtractNativeLibrariesRequested();
 
     /**
      * @see ApplicationInfo#FLAG_FACTORY_TEST
@@ -481,13 +481,13 @@ public interface AndroidPackage {
      * @see ApplicationInfo#FLAG_HAS_CODE
      * @see R.styleable#AndroidManifestApplication_hasCode
      */
-    boolean isHasCode();
+    boolean isDeclaredHavingCode();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_HAS_FRAGILE_USER_DATA
      * @see R.styleable#AndroidManifestApplication_hasFragileUserData
      */
-    boolean isHasFragileUserData();
+    boolean isUserDataFragile();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_ISOLATED_SPLIT_LOADING
@@ -499,7 +499,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#FLAG_KILL_AFTER_RESTORE
      * @see R.styleable#AndroidManifestApplication_killAfterRestore
      */
-    boolean isKillAfterRestore();
+    boolean isKillAfterRestoreAllowed();
 
     /**
      * @see ApplicationInfo#FLAG_LARGE_HEAP
@@ -596,7 +596,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestSupportsScreens_xlargeScreens
      * @see ApplicationInfo#FLAG_SUPPORTS_XLARGE_SCREENS
      */
-    boolean isSupportsExtraLargeScreens();
+    boolean isExtraLargeScreensSupported();
 
     /**
      * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
@@ -605,7 +605,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestSupportsScreens_largeScreens
      * @see ApplicationInfo#FLAG_SUPPORTS_LARGE_SCREENS
      */
-    boolean isSupportsLargeScreens();
+    boolean isLargeScreensSupported();
 
     /**
      * If omitted from manifest, returns true.
@@ -613,13 +613,13 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestSupportsScreens_normalScreens
      * @see ApplicationInfo#FLAG_SUPPORTS_NORMAL_SCREENS
      */
-    boolean isSupportsNormalScreens();
+    boolean isNormalScreensSupported();
 
     /**
      * @see ApplicationInfo#FLAG_SUPPORTS_RTL
      * @see R.styleable#AndroidManifestApplication_supportsRtl
      */
-    boolean isSupportsRtl();
+    boolean isRtlSupported();
 
     /**
      * If omitted from manifest, returns true if {@link #getTargetSdkVersion()} >= {@link
@@ -628,7 +628,7 @@ public interface AndroidPackage {
      * @see R.styleable#AndroidManifestSupportsScreens_smallScreens
      * @see ApplicationInfo#FLAG_SUPPORTS_SMALL_SCREENS
      */
-    boolean isSupportsSmallScreens();
+    boolean isSmallScreensSupported();
 
     /**
      * @see ApplicationInfo#FLAG_TEST_ONLY
@@ -643,13 +643,13 @@ public interface AndroidPackage {
      *
      * @see R.attr#use32bitAbi
      */
-    boolean isUse32BitAbi();
+    boolean is32BitAbiPreferred();
 
     /**
      * @see ApplicationInfo#FLAG_USES_CLEARTEXT_TRAFFIC
      * @see R.styleable#AndroidManifestApplication_usesCleartextTraffic
      */
-    boolean isUsesCleartextTraffic();
+    boolean isCleartextTrafficAllowed();
 
     /**
      * @see ApplicationInfo#PRIVATE_FLAG_USE_EMBEDDED_DEX
@@ -661,7 +661,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#PRIVATE_FLAG_USES_NON_SDK_API
      * @see R.styleable#AndroidManifestApplication_usesNonSdkApi
      */
-    boolean isUsesNonSdkApi();
+    boolean isNonSdkApiRequested();
 
     /**
      * @see ApplicationInfo#FLAG_VM_SAFE_MODE
@@ -892,7 +892,7 @@ public interface AndroidPackage {
 
     /**
      * If {@link R.styleable#AndroidManifestApplication_label} is a string literal, this is it.
-     * Otherwise, it's stored as {@link #getLabelRes()}.
+     * Otherwise, it's stored as {@link #getLabelResourceId()}.
      *
      * @see ApplicationInfo#nonLocalizedLabel
      * @see R.styleable#AndroidManifestApplication_label

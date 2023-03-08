@@ -36,7 +36,7 @@ open class ModernStatusBarView(context: Context, attrs: AttributeSet?) :
     BaseStatusBarFrameLayout(context, attrs) {
 
     private lateinit var slot: String
-    private lateinit var binding: ModernStatusBarViewBinding
+    internal lateinit var binding: ModernStatusBarViewBinding
 
     @StatusBarIconView.VisibleState
     private var iconVisibleState: Int = STATE_HIDDEN

@@ -127,7 +127,7 @@ public class InputMethodManagerServiceTestBase {
                 mockitoSession()
                         .initMocks(this)
                         .strictness(Strictness.LENIENT)
-                        .mockStatic(LocalServices.class)
+                        .spyStatic(LocalServices.class)
                         .mockStatic(ServiceManager.class)
                         .mockStatic(SystemServerInitThreadPool.class)
                         .startMocking();
@@ -212,6 +212,7 @@ public class InputMethodManagerServiceTestBase {
                 new InputMethodManagerService.Lifecycle(mContext, mInputMethodManagerService);
 
         // Public local InputMethodManagerService.
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
         lifecycle.onStart();
         try {
             // After this boot phase, services can broadcast Intents.
@@ -237,6 +238,7 @@ public class InputMethodManagerServiceTestBase {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+        LocalServices.removeServiceForTest(InputMethodManagerInternal.class);
     }
 
     protected void verifyShowSoftInput(boolean setVisible, boolean showSoftInput)

@@ -53,6 +53,7 @@ interface KeyguardBouncerRepository {
     val primaryBouncerScrimmed: StateFlow<Boolean>
     /**
      * Set how much of the notification panel is showing on the screen.
+     *
      * ```
      *      0f = panel fully hidden = bouncer fully showing
      *      1f = panel fully showing = bouncer fully hidden
@@ -60,7 +61,6 @@ interface KeyguardBouncerRepository {
      */
     val panelExpansionAmount: StateFlow<Float>
     val keyguardPosition: StateFlow<Float>
-    val onScreenTurnedOff: StateFlow<Boolean>
     val isBackButtonEnabled: StateFlow<Boolean?>
     /** Determines if user is already unlocked */
     val keyguardAuthenticated: StateFlow<Boolean?>
@@ -68,8 +68,10 @@ interface KeyguardBouncerRepository {
     val resourceUpdateRequests: StateFlow<Boolean>
     val bouncerPromptReason: Int
     val bouncerErrorMessage: CharSequence?
-    val isAlternateBouncerVisible: StateFlow<Boolean>
-    val isAlternateBouncerUIAvailable: StateFlow<Boolean>
+    val alternateBouncerVisible: StateFlow<Boolean>
+    val alternateBouncerUIAvailable: StateFlow<Boolean>
+    val sideFpsShowing: StateFlow<Boolean>
+
     var lastAlternateBouncerVisibleTime: Long
 
     fun setPrimaryScrimmed(isScrimmed: Boolean)
@@ -98,11 +100,11 @@ interface KeyguardBouncerRepository {
 
     fun setIsBackButtonEnabled(isBackButtonEnabled: Boolean)
 
-    fun setOnScreenTurnedOff(onScreenTurnedOff: Boolean)
-
     fun setAlternateVisible(isVisible: Boolean)
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean)
+
+    fun setSideFpsShowing(isShowing: Boolean)
 }
 
 @SysUISingleton
@@ -133,6 +135,7 @@ constructor(
     override val primaryBouncerScrimmed = _primaryBouncerScrimmed.asStateFlow()
     /**
      * Set how much of the notification panel is showing on the screen.
+     *
      * ```
      *      0f = panel fully hidden = bouncer fully showing
      *      1f = panel fully showing = bouncer fully hidden
@@ -142,8 +145,6 @@ constructor(
     override val panelExpansionAmount = _panelExpansionAmount.asStateFlow()
     private val _keyguardPosition = MutableStateFlow(0f)
     override val keyguardPosition = _keyguardPosition.asStateFlow()
-    private val _onScreenTurnedOff = MutableStateFlow(false)
-    override val onScreenTurnedOff = _onScreenTurnedOff.asStateFlow()
     private val _isBackButtonEnabled = MutableStateFlow<Boolean?>(null)
     override val isBackButtonEnabled = _isBackButtonEnabled.asStateFlow()
     private val _keyguardAuthenticated = MutableStateFlow<Boolean?>(null)
@@ -159,12 +160,14 @@ constructor(
         get() = viewMediatorCallback.consumeCustomMessage()
 
     /** Values associated with the AlternateBouncer */
-    private val _isAlternateBouncerVisible = MutableStateFlow(false)
-    override val isAlternateBouncerVisible = _isAlternateBouncerVisible.asStateFlow()
+    private val _alternateBouncerVisible = MutableStateFlow(false)
+    override val alternateBouncerVisible = _alternateBouncerVisible.asStateFlow()
     override var lastAlternateBouncerVisibleTime: Long = NOT_VISIBLE
-    private val _isAlternateBouncerUIAvailable = MutableStateFlow<Boolean>(false)
-    override val isAlternateBouncerUIAvailable: StateFlow<Boolean> =
-        _isAlternateBouncerUIAvailable.asStateFlow()
+    private val _alternateBouncerUIAvailable = MutableStateFlow(false)
+    override val alternateBouncerUIAvailable: StateFlow<Boolean> =
+        _alternateBouncerUIAvailable.asStateFlow()
+    private val _sideFpsShowing = MutableStateFlow(false)
+    override val sideFpsShowing: StateFlow<Boolean> = _sideFpsShowing.asStateFlow()
 
     init {
         setUpLogging()
@@ -179,16 +182,16 @@ constructor(
     }
 
     override fun setAlternateVisible(isVisible: Boolean) {
-        if (isVisible && !_isAlternateBouncerVisible.value) {
+        if (isVisible && !_alternateBouncerVisible.value) {
             lastAlternateBouncerVisibleTime = clock.uptimeMillis()
         } else if (!isVisible) {
             lastAlternateBouncerVisibleTime = NOT_VISIBLE
         }
-        _isAlternateBouncerVisible.value = isVisible
+        _alternateBouncerVisible.value = isVisible
     }
 
     override fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
-        _isAlternateBouncerUIAvailable.value = isAvailable
+        _alternateBouncerUIAvailable.value = isAvailable
     }
 
     override fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?) {
@@ -235,8 +238,8 @@ constructor(
         _isBackButtonEnabled.value = isBackButtonEnabled
     }
 
-    override fun setOnScreenTurnedOff(onScreenTurnedOff: Boolean) {
-        _onScreenTurnedOff.value = onScreenTurnedOff
+    override fun setSideFpsShowing(isShowing: Boolean) {
+        _sideFpsShowing.value = isShowing
     }
 
     /** Sets up logs for state flows. */
@@ -276,9 +279,6 @@ constructor(
             .map { it.toInt() }
             .logDiffsForTable(buffer, "", "KeyguardPosition", -1)
             .launchIn(applicationScope)
-        onScreenTurnedOff
-            .logDiffsForTable(buffer, "", "OnScreenTurnedOff", false)
-            .launchIn(applicationScope)
         isBackButtonEnabled
             .filterNotNull()
             .logDiffsForTable(buffer, "", "IsBackButtonEnabled", false)
@@ -289,6 +289,12 @@ constructor(
             .launchIn(applicationScope)
         resourceUpdateRequests
             .logDiffsForTable(buffer, "", "ResourceUpdateRequests", false)
+            .launchIn(applicationScope)
+        alternateBouncerUIAvailable
+            .logDiffsForTable(buffer, "", "IsAlternateBouncerUIAvailable", false)
+            .launchIn(applicationScope)
+        sideFpsShowing
+            .logDiffsForTable(buffer, "", "isSideFpsShowing", false)
             .launchIn(applicationScope)
     }
 

@@ -161,7 +161,7 @@ final class SetAmplitudeVibratorStep extends AbstractVibratorStep {
         }
         long vibratorOnResult = controller.on(duration, getVibration().id);
         handleVibratorOnResult(vibratorOnResult);
-        getVibration().stats().reportVibratorOn(vibratorOnResult);
+        getVibration().stats.reportVibratorOn(vibratorOnResult);
         return vibratorOnResult;
     }
 

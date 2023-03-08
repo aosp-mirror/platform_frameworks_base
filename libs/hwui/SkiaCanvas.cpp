@@ -39,21 +39,22 @@
 #include <SkShader.h>
 #include <SkTextBlob.h>
 #include <SkVertices.h>
+#include <log/log.h>
+#include <ui/FatVector.h>
 
 #include <memory>
 #include <optional>
 #include <utility>
 
 #include "CanvasProperty.h"
+#include "Mesh.h"
 #include "NinePatchUtils.h"
 #include "VectorDrawable.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
 #include "hwui/PaintFilter.h"
-#include <log/log.h>
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/HolePunch.h"
-#include <ui/FatVector.h>
 
 namespace android {
 
@@ -572,8 +573,14 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
     applyLooper(&paint, [&](const SkPaint& p) { mCanvas->drawVertices(vertices, mode, p); });
 }
 
-void SkiaCanvas::drawMesh(const SkMesh& mesh, sk_sp<SkBlender> blender, const SkPaint& paint) {
-    mCanvas->drawMesh(mesh, blender, paint);
+void SkiaCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Paint& paint) {
+    GrDirectContext* context = nullptr;
+    auto recordingContext = mCanvas->recordingContext();
+    if (recordingContext) {
+        context = recordingContext->asDirectContext();
+    }
+    mesh.updateSkMesh(context);
+    mCanvas->drawMesh(mesh.getSkMesh(), blender, paint);
 }
 
 // ----------------------------------------------------------------------------

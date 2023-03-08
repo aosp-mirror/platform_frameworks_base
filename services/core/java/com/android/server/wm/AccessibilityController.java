@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CALLBACK;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOWS_FOR_ACCESSIBILITY_CALLBACK;
 import static android.os.Build.IS_USER;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
@@ -85,7 +84,6 @@ import android.util.SparseBooleanArray;
 import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.InsetsSource;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -338,6 +336,18 @@ final class AccessibilityController {
         final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
         if (displayMagnifier != null) {
             displayMagnifier.onAppWindowTransition(displayId, transition);
+        }
+        // Not relevant for the window observer.
+    }
+
+    void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+        if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+            mAccessibilityTracing.logTrace(TAG + ".onAppWindowTransition",
+                    FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+        }
+        final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.get(displayId);
+        if (displayMagnifier != null) {
+            displayMagnifier.onWMTransition(displayId, type);
         }
         // Not relevant for the window observer.
     }
@@ -692,8 +702,8 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + displayId);
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
-            if (magnifying) {
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
                 switch (transition) {
                     case WindowManager.TRANSIT_OLD_ACTIVITY_OPEN:
                     case WindowManager.TRANSIT_OLD_TASK_FRAGMENT_OPEN:
@@ -704,6 +714,28 @@ final class AccessibilityController {
                     case WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN: {
                         mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                     }
+                }
+            }
+        }
+
+        void onWMTransition(int displayId, @WindowManager.TransitionType int type) {
+            if (mAccessibilityTracing.isTracingEnabled(FLAGS_MAGNIFICATION_CALLBACK)) {
+                mAccessibilityTracing.logTrace(LOG_TAG + ".onWMTransition",
+                        FLAGS_MAGNIFICATION_CALLBACK, "displayId=" + displayId + "; type=" + type);
+            }
+            if (DEBUG_WINDOW_TRANSITIONS) {
+                Slog.i(LOG_TAG, "Window transition: " + WindowManager.transitTypeToString(type)
+                        + " displayId: " + displayId);
+            }
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
+            if (isMagnifierActivated) {
+                // All opening/closing situations.
+                switch (type) {
+                    case WindowManager.TRANSIT_OPEN:
+                    case WindowManager.TRANSIT_TO_FRONT:
+                    case WindowManager.TRANSIT_CLOSE:
+                    case WindowManager.TRANSIT_TO_BACK:
+                        mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                 }
             }
         }
@@ -719,12 +751,12 @@ final class AccessibilityController {
                         + AppTransition.appTransitionOldToString(transition)
                         + " displayId: " + windowState.getDisplayId());
             }
-            final boolean magnifying = mMagnifedViewport.isMagnifying();
+            final boolean isMagnifierActivated = isForceShowingMagnifiableBounds();
             final int type = windowState.mAttrs.type;
             switch (transition) {
                 case WindowManagerPolicy.TRANSIT_ENTER:
                 case WindowManagerPolicy.TRANSIT_SHOW: {
-                    if (!magnifying) {
+                    if (!isMagnifierActivated) {
                         break;
                     }
                     switch (type) {
@@ -960,7 +992,7 @@ final class AccessibilityController {
                     // navigation bar insets into nonMagnifiedBounds. It happens when
                     // navigation mode is gestural.
                     if (isUntouchableNavigationBar(windowState, mTempRegion3)) {
-                        final Rect navBarInsets = getNavBarInsets(mDisplayContent);
+                        final Rect navBarInsets = getSystemBarInsetsFrame(windowState);
                         nonMagnifiedBounds.op(navBarInsets, Region.Op.UNION);
                         availableBounds.op(navBarInsets, Region.Op.DIFFERENCE);
                     }
@@ -1425,10 +1457,12 @@ final class AccessibilityController {
         return touchableRegion.isEmpty();
     }
 
-    static Rect getNavBarInsets(DisplayContent displayContent) {
-        final InsetsSource source = displayContent.getInsetsStateController().getRawInsetsState()
-                .peekSource(ITYPE_NAVIGATION_BAR);
-        return source != null ? source.getFrame() : EMPTY_RECT;
+    static Rect getSystemBarInsetsFrame(WindowState win) {
+        if (win == null) {
+            return EMPTY_RECT;
+        }
+        final InsetsSourceProvider provider = win.getControllableInsetProvider();
+        return provider != null ? provider.getSource().getFrame() : EMPTY_RECT;
     }
 
     /**
@@ -1581,7 +1615,10 @@ final class AccessibilityController {
                         // region of navigation bar inset because all touch events from this region
                         // would be received by launcher, i.e. this region is a un-touchable one
                         // for the application.
-                        unaccountedSpace.op(getNavBarInsets(dc), unaccountedSpace,
+                        unaccountedSpace.op(
+                                getSystemBarInsetsFrame(
+                                        mService.mWindowMap.get(a11yWindow.getWindowInfo().token)),
+                                unaccountedSpace,
                                 Region.Op.REVERSE_DIFFERENCE);
                     }
 

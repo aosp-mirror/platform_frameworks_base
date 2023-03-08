@@ -19,6 +19,7 @@ package android.view.autofill;
 import static android.service.autofill.FillRequest.FLAG_IME_SHOWING;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
+import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
@@ -299,6 +300,14 @@ public final class AutofillManager {
      */
     public static final String EXTRA_AUGMENTED_AUTOFILL_CLIENT =
             "android.view.autofill.extra.AUGMENTED_AUTOFILL_CLIENT";
+
+    /**
+     * Autofill Hint to indicate that it can match any field.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final String ANY_HINT = "any";
 
     private static final String SESSION_ID_TAG = "android:sessionId";
     private static final String STATE_TAG = "android:state";
@@ -898,9 +907,10 @@ public final class AutofillManager {
 
         // 3. Get the activity names substring between the indexes
         final int activityStringStartIndex = packageInStringIndex + packageName.length() + 1;
-        if (activityStringStartIndex < firstNextSemicolonIndex) {
+        if (activityStringStartIndex >= firstNextSemicolonIndex) {
             Log.e(TAG, "Failed to get denied activity names from denylist because it's wrongly "
                     + "formatted");
+            return;
         }
         final String activitySubstring =
                 denyListString.substring(activityStringStartIndex, firstNextSemicolonIndex);
@@ -1310,6 +1320,22 @@ public final class AutofillManager {
         // Skip if the fill request has been performed for a view.
         if (mIsFillRequested.get()) {
             return;
+        }
+
+        // Start session with PCC flag to get assist structure and send field classification request
+        // to PCC classification service.
+        if (AutofillFeatureFlags.isAutofillPccClassificationEnabled()) {
+            synchronized (mLock) {
+                final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+                if (clientAdded){
+                    startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID,
+                        /* bounds= */ null, /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
+                } else {
+                    if (sVerbose) {
+                        Log.v(TAG, "not starting session: no service client");
+                    }
+                }
+            }
         }
 
         if (mIsFillDialogEnabled

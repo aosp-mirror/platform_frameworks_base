@@ -58,4 +58,10 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
 
     /** Check whether to get progress information for resume players */
     fun isResumeProgressEnabled() = featureFlags.isEnabled(Flags.MEDIA_RESUME_PROGRESS)
+
+    /** If true, do not automatically dismiss the recommendation card */
+    fun isPersistentSsCardEnabled() = featureFlags.isEnabled(Flags.MEDIA_RETAIN_RECOMMENDATIONS)
+
+    /** Check whether we allow remote media to generate resume controls */
+    fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
 }

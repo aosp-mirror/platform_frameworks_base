@@ -32,7 +32,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.wm.shell.bubbles.Bubbles;
 
@@ -62,7 +62,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
     @Mock
     DozeParameters mDozeParameters;
     @Mock
-    CommonNotifCollection mNotifCollection;
+    SectionStyleProvider mSectionStyleProvider;
     @Mock
     DarkIconDispatcher mDarkIconDispatcher;
     @Mock
@@ -87,6 +87,7 @@ public class NotificationIconAreaControllerTest extends SysuiTestCase {
                 mNotificationMediaManager,
                 mListener,
                 mDozeParameters,
+                mSectionStyleProvider,
                 Optional.of(mBubbles),
                 mDemoModeController,
                 mDarkIconDispatcher,

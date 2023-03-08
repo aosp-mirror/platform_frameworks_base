@@ -119,6 +119,5 @@ public class MockSyntheticPasswordManager extends SyntheticPasswordManager {
 
     public void enableWeaver() {
         mWeaverService = new MockWeaverService();
-        initWeaverService();
     }
 }

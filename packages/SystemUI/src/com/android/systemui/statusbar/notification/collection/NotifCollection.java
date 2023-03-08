@@ -96,6 +96,7 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingAppliedEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.RankingUpdatedEvent;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -151,6 +152,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     private final LogBufferEulogizer mEulogizer;
     private final DumpManager mDumpManager;
     private final NotifCollectionInconsistencyTracker mInconsistencyTracker;
+    private final NotificationDismissibilityProvider mDismissibilityProvider;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -164,6 +166,11 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
 
 
     private Queue<NotifEvent> mEventQueue = new ArrayDeque<>();
+    private final Runnable mRebuildListRunnable = () -> {
+        if (mBuildListener != null) {
+            mBuildListener.onBuildList(mReadOnlyNotificationSet, "asynchronousUpdate");
+        }
+    };
 
     private boolean mAttached = false;
     private boolean mAmDispatchingToOtherCode;
@@ -178,7 +185,8 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             @Main Handler mainHandler,
             @Background Executor bgExecutor,
             LogBufferEulogizer logBufferEulogizer,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            NotificationDismissibilityProvider dismissibilityProvider) {
         mStatusBarService = statusBarService;
         mClock = clock;
         mNotifPipelineFlags = notifPipelineFlags;
@@ -188,6 +196,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
         mEulogizer = logBufferEulogizer;
         mDumpManager = dumpManager;
         mInconsistencyTracker = new NotifCollectionInconsistencyTracker(mLogger);
+        mDismissibilityProvider = dismissibilityProvider;
     }
 
     /** Initializes the NotifCollection and registers it to receive notification events. */
@@ -458,7 +467,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             int modificationType) {
         Assert.isMainThread();
         mEventQueue.add(new ChannelChangedEvent(pkgName, user, channel, modificationType));
-        dispatchEventsAndRebuildList("onNotificationChannelModified");
+        dispatchEventsAndAsynchronouslyRebuildList();
     }
 
     private void onNotificationsInitialized() {
@@ -554,6 +563,10 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
                 .findFirst().orElse(null);
     }
 
+    private boolean isDismissable(NotificationEntry entry) {
+        return mDismissibilityProvider.isDismissable(entry);
+    }
+
     /**
      * Checks if the entry is the only child in the logical group;
      * it need not have a summary to qualify
@@ -613,15 +626,39 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
 
     private void dispatchEventsAndRebuildList(String reason) {
         Trace.beginSection("NotifCollection.dispatchEventsAndRebuildList");
+        if (mMainHandler.hasCallbacks(mRebuildListRunnable)) {
+            mMainHandler.removeCallbacks(mRebuildListRunnable);
+        }
+
+        dispatchEvents();
+
+        if (mBuildListener != null) {
+            mBuildListener.onBuildList(mReadOnlyNotificationSet, reason);
+        }
+        Trace.endSection();
+    }
+
+    private void dispatchEventsAndAsynchronouslyRebuildList() {
+        Trace.beginSection("NotifCollection.dispatchEventsAndAsynchronouslyRebuildList");
+
+        dispatchEvents();
+
+        if (!mMainHandler.hasCallbacks(mRebuildListRunnable)) {
+            mMainHandler.postDelayed(mRebuildListRunnable, 1000L);
+        }
+
+        Trace.endSection();
+    }
+
+    private void dispatchEvents() {
+        Trace.beginSection("NotifCollection.dispatchEvents");
+
         mAmDispatchingToOtherCode = true;
         while (!mEventQueue.isEmpty()) {
             mEventQueue.remove().dispatchTo(mNotifCollectionListeners);
         }
         mAmDispatchingToOtherCode = false;
 
-        if (mBuildListener != null) {
-            mBuildListener.onBuildList(mReadOnlyNotificationSet, reason);
-        }
         Trace.endSection();
     }
 
@@ -1006,6 +1043,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
     public class FutureDismissal implements Runnable {
         private final NotificationEntry mEntry;
         private final DismissedByUserStatsCreator mStatsCreator;
+
         @Nullable
         private final NotificationEntry mSummaryToDismiss;
         private final String mLabel;
@@ -1030,7 +1068,7 @@ public class NotifCollection implements Dumpable, PipelineDumpable {
             if (isOnlyChildInGroup(entry)) {
                 String group = entry.getSbn().getGroupKey();
                 NotificationEntry summary = getGroupSummary(group);
-                if (summary != null && summary.isDismissable()) return summary;
+                if (summary != null && isDismissable(summary)) return summary;
             }
             return null;
         }

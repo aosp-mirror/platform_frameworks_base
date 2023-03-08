@@ -249,6 +249,21 @@ public class ConditionMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void addCallback_preCondition_noConditions_reportAllConditionsMet() {
+        final Monitor
+                monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(mCondition1)));
+        final Monitor.Callback callback = mock(
+                Monitor.Callback.class);
+
+        monitor.addSubscription(new Monitor.Subscription.Builder(callback).build());
+        mExecutor.runAllReady();
+        verify(callback, never()).onConditionsChanged(true);
+        mCondition1.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+        verify(callback).onConditionsChanged(true);
+    }
+
+    @Test
     public void removeCallback_noFailureOnDoubleRemove() {
         final Condition condition = mock(
                 Condition.class);
@@ -470,5 +485,143 @@ public class ConditionMonitorTest extends SysuiTestCase {
         overridingCondition.fakeUpdateCondition(true);
         mExecutor.runAllReady();
         verify(callback).onConditionsChanged(true);
+    }
+
+    /**
+     * Ensures that the result of a condition being true leads to its nested condition being
+     * activated.
+     */
+    @Test
+    public void testNestedCondition() {
+        mCondition1.fakeUpdateCondition(false);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mCondition2.fakeUpdateCondition(false);
+
+        // Create a nested condition
+        mConditionMonitor.addSubscription(new Monitor.Subscription.Builder(
+                new Monitor.Subscription.Builder(callback)
+                        .addCondition(mCondition2)
+                        .build())
+                .addCondition(mCondition1)
+                .build());
+
+        mExecutor.runAllReady();
+
+        // Ensure the nested condition callback is not called at all.
+        verify(callback, never()).onActiveChanged(anyBoolean());
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+
+        // Update the inner condition to true and ensure that the nested condition is not triggered.
+        mCondition2.fakeUpdateCondition(true);
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+        mCondition2.fakeUpdateCondition(false);
+
+        // Set outer condition and make sure the inner condition becomes active and reports that
+        // conditions aren't met
+        mCondition1.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+
+        verify(callback).onActiveChanged(eq(true));
+        verify(callback).onConditionsChanged(eq(false));
+
+        Mockito.clearInvocations(callback);
+
+        // Update the inner condition and make sure the callback is updated.
+        mCondition2.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+
+        verify(callback).onConditionsChanged(true);
+
+        Mockito.clearInvocations(callback);
+        // Invalidate outer condition and make sure callback is informed, but the last state is
+        // not affected.
+        mCondition1.fakeUpdateCondition(false);
+        mExecutor.runAllReady();
+
+        verify(callback).onActiveChanged(eq(false));
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+    }
+
+    /**
+     * Ensures a subscription is predicated on its precondition.
+     */
+    @Test
+    public void testPrecondition() {
+        mCondition1.fakeUpdateCondition(false);
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mCondition2.fakeUpdateCondition(false);
+
+        // Create a nested condition
+        mConditionMonitor.addSubscription(new Monitor.Subscription.Builder(callback)
+                .addPrecondition(mCondition1)
+                .addCondition(mCondition2)
+                .build());
+
+        mExecutor.runAllReady();
+
+        // Ensure the nested condition callback is not called at all.
+        verify(callback, never()).onActiveChanged(anyBoolean());
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+
+        // Update the condition to true and ensure that the nested condition is not triggered.
+        mCondition2.fakeUpdateCondition(true);
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+        mCondition2.fakeUpdateCondition(false);
+
+        // Set precondition and make sure the inner condition becomes active and reports that
+        // conditions aren't met
+        mCondition1.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+
+        verify(callback).onActiveChanged(eq(true));
+        verify(callback).onConditionsChanged(eq(false));
+
+        Mockito.clearInvocations(callback);
+
+        // Update the condition and make sure the callback is updated.
+        mCondition2.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+
+        verify(callback).onConditionsChanged(true);
+
+        Mockito.clearInvocations(callback);
+        // Invalidate precondition and make sure callback is informed, but the last state is
+        // not affected.
+        mCondition1.fakeUpdateCondition(false);
+        mExecutor.runAllReady();
+
+        verify(callback).onActiveChanged(eq(false));
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+    }
+
+    /**
+     * Ensure preconditions are applied to every subscription added to a monitor.
+     */
+    @Test
+    public void testPreconditionMonitor() {
+        final Monitor.Callback callback =
+                mock(Monitor.Callback.class);
+
+        mCondition2.fakeUpdateCondition(true);
+        final Monitor monitor = new Monitor(mExecutor, new HashSet<>(Arrays.asList(mCondition1)));
+
+        monitor.addSubscription(new Monitor.Subscription.Builder(callback)
+                .addCondition(mCondition2)
+                .build());
+
+        mExecutor.runAllReady();
+
+        verify(callback, never()).onActiveChanged(anyBoolean());
+        verify(callback, never()).onConditionsChanged(anyBoolean());
+
+        mCondition1.fakeUpdateCondition(true);
+        mExecutor.runAllReady();
+
+        verify(callback).onActiveChanged(eq(true));
+        verify(callback).onConditionsChanged(eq(true));
     }
 }

@@ -24,12 +24,15 @@ import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
 import com.android.systemui.screenshot.LongScreenshotActivity;
+import com.android.systemui.screenshot.appclips.AppClipsActivity;
+import com.android.systemui.screenshot.appclips.AppClipsTrampolineActivity;
 import com.android.systemui.sensorprivacy.SensorUseStartedActivity;
 import com.android.systemui.sensorprivacy.television.TvSensorPrivacyChangedActivity;
 import com.android.systemui.sensorprivacy.television.TvUnblockSensorActivity;
 import com.android.systemui.settings.brightness.BrightnessDialog;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationPanelActivity;
 import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.usb.UsbAccessoryUriActivity;
 import com.android.systemui.usb.UsbConfirmActivity;
 import com.android.systemui.usb.UsbDebuggingActivity;
 import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
@@ -95,6 +98,12 @@ public abstract class DefaultActivityBinder {
     @ClassKey(UsbConfirmActivity.class)
     public abstract Activity bindUsbConfirmActivity(UsbConfirmActivity activity);
 
+    /** Inject into UsbAccessoryUriActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbAccessoryUriActivity.class)
+    public abstract Activity bindUsbAccessoryUriActivity(UsbAccessoryUriActivity activity);
+
     /** Inject into CreateUserActivity. */
     @Binds
     @IntoMap
@@ -118,6 +127,18 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(LongScreenshotActivity.class)
     public abstract Activity bindLongScreenshotActivity(LongScreenshotActivity activity);
+
+    /** Inject into AppClipsTrampolineActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsTrampolineActivity.class)
+    public abstract Activity bindAppClipsTrampolineActivity(AppClipsTrampolineActivity activity);
+
+    /** Inject into AppClipsActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(AppClipsActivity.class)
+    public abstract Activity bindAppClipsActivity(AppClipsActivity activity);
 
     /** Inject into LaunchConversationActivity. */
     @Binds

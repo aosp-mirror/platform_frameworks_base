@@ -79,12 +79,10 @@ import android.service.notification.NotificationStats;
 import android.service.quicksettings.TileService;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsController.Appearance;
@@ -152,6 +150,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
     static final long REQUEST_LISTENING_MUST_MATCH_PACKAGE = 172251878L;
+
+    /**
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    static final long REQUEST_LISTENING_OTHER_USER_NOOP = 242194868L;
 
     private final Context mContext;
 
@@ -420,6 +425,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
+        public void toggleTaskbar() {
+            if (mBar != null) {
+                try {
+                    mBar.toggleTaskbar();
+                } catch (RemoteException ex) {}
+            }
+        }
+
+        @Override
         public void toggleRecentApps() {
             if (mBar != null) {
                 try {
@@ -645,7 +659,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void showTransient(int displayId, @InternalInsetsType int[] types,
+        public void showTransient(int displayId, @InsetsType int types,
                 boolean isGestureOnSystemBar) {
             getUiState(displayId).showTransient(types);
             if (mBar != null) {
@@ -656,7 +670,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public void abortTransient(int displayId, @InternalInsetsType int[] types) {
+        public void abortTransient(int displayId, @InsetsType int types) {
             getUiState(displayId).clearTransient(types);
             if (mBar != null) {
                 try {
@@ -1258,7 +1272,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private static class UiState {
         private @Appearance int mAppearance = 0;
         private AppearanceRegion[] mAppearanceRegions = new AppearanceRegion[0];
-        private final ArraySet<Integer> mTransientBarTypes = new ArraySet<>();
+        private @InsetsType int mTransientBarTypes;
         private boolean mNavbarColorManagedByIme = false;
         private @Behavior int mBehavior;
         private @InsetsType int mRequestedVisibleTypes = WindowInsets.Type.defaultVisible();
@@ -1285,16 +1299,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mLetterboxDetails = letterboxDetails;
         }
 
-        private void showTransient(@InternalInsetsType int[] types) {
-            for (int type : types) {
-                mTransientBarTypes.add(type);
-            }
+        private void showTransient(@InsetsType int types) {
+            mTransientBarTypes |= types;
         }
 
-        private void clearTransient(@InternalInsetsType int[] types) {
-            for (int type : types) {
-                mTransientBarTypes.remove(type);
-            }
+        private void clearTransient(@InsetsType int types) {
+            mTransientBarTypes &= ~types;
         }
 
         private int getDisabled1() {
@@ -1410,16 +1420,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             // TODO(b/118592525): Currently, status bar only works on the default display.
             // Make it aware of multi-display if needed.
             final UiState state = mDisplayUiState.get(DEFAULT_DISPLAY);
-            final int[] transientBarTypes = new int[state.mTransientBarTypes.size()];
-            for (int i = 0; i < transientBarTypes.length; i++) {
-                transientBarTypes[i] = state.mTransientBarTypes.valueAt(i);
-            }
             return new RegisterStatusBarResult(icons, gatherDisableActionsLocked(mCurrentUserId, 1),
                     state.mAppearance, state.mAppearanceRegions, state.mImeWindowVis,
                     state.mImeBackDisposition, state.mShowImeSwitcher,
                     gatherDisableActionsLocked(mCurrentUserId, 2), state.mImeToken,
                     state.mNavbarColorManagedByIme, state.mBehavior, state.mRequestedVisibleTypes,
-                    state.mPackageName, transientBarTypes, state.mLetterboxDetails);
+                    state.mPackageName, state.mTransientBarTypes, state.mLetterboxDetails);
         }
     }
 
@@ -1889,7 +1895,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
             // Check current user
             if (userId != currentUser) {
-                throw new IllegalArgumentException("User " + userId + " is not the current user.");
+                if (CompatChanges.isChangeEnabled(REQUEST_LISTENING_OTHER_USER_NOOP, callingUid)) {
+                    return;
+                } else {
+                    throw new IllegalArgumentException(
+                            "User " + userId + " is not the current user.");
+                }
             }
         }
         if (mBar != null) {

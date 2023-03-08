@@ -24,10 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
 import com.android.systemui.qs.QSFooterView;
@@ -37,7 +35,6 @@ import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QuickQSPanel;
 import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
-import com.android.systemui.statusbar.phone.StatusIconContainer;
 
 import javax.inject.Named;
 
@@ -106,12 +103,6 @@ public interface QSFragmentModule {
 
     /** */
     @Provides
-    static BatteryMeterView providesBatteryMeterView(QuickStatusBarHeader quickStatusBarHeader) {
-        return quickStatusBarHeader.findViewById(R.id.batteryRemainingIcon);
-    }
-
-    /** */
-    @Provides
     static QSFooterView providesQSFooterView(@RootView View view) {
         return view.findViewById(R.id.qs_footer);
     }
@@ -143,19 +134,5 @@ public interface QSFragmentModule {
     @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
     static boolean providesQSUsingCollapsedLandscapeMedia(Context context) {
         return useCollapsedMediaInLandscape(context.getResources());
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    static OngoingPrivacyChip providesPrivacyChip(QuickStatusBarHeader qsHeader) {
-        return qsHeader.findViewById(R.id.privacy_chip);
-    }
-
-    /** */
-    @Provides
-    @QSScope
-    static StatusIconContainer providesStatusIconContainer(QuickStatusBarHeader qsHeader) {
-        return qsHeader.findViewById(R.id.statusIcons);
     }
 }

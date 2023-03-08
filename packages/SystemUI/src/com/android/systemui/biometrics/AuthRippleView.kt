@@ -75,7 +75,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
     private var radius: Float = 0f
         set(value) {
-            rippleShader.setMaxSize(value * 2f, value * 2f)
+            rippleShader.rippleSize.setMaxSize(value * 2f, value * 2f)
             field = value
         }
     private var origin: Point = Point()
@@ -88,6 +88,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         rippleShader.color = 0xffffffff.toInt() // default color
         rippleShader.rawProgress = 0f
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
+        setupRippleFadeParams()
         ripplePaint.shader = rippleShader
 
         dwellShader.color = 0xffffffff.toInt() // default color
@@ -294,7 +295,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             )
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
-                    rippleShader.rippleFill = false
                     drawRipple = true
                     visibility = VISIBLE
                 }
@@ -339,6 +339,18 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         )
     }
 
+    private fun setupRippleFadeParams() {
+        with(rippleShader) {
+            baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
+            baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+
+            centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
+            centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
+            centerFillFadeParams.fadeOutStart = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_START
+            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_END
+        }
+    }
+
     override fun onDraw(canvas: Canvas?) {
         // To reduce overdraw, we mask the effect to a circle whose radius is big enough to cover
         // the active effect area. Values here should be kept in sync with the
@@ -352,7 +364,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
         if (drawRipple) {
             canvas?.drawCircle(origin.x.toFloat(), origin.y.toFloat(),
-                    rippleShader.currentWidth, ripplePaint)
+                    rippleShader.rippleSize.currentWidth, ripplePaint)
         }
     }
 }

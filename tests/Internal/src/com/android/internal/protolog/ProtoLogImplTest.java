@@ -86,7 +86,7 @@ public class ProtoLogImplTest {
         mFile = testContext.getFileStreamPath("tracing_test.dat");
         //noinspection ResultOfMethodCallIgnored
         mFile.delete();
-        mProtoLog = new ProtoLogImpl(mFile, 1024 * 1024, mReader);
+        mProtoLog = new ProtoLogImpl(mFile, 1024 * 1024, mReader, 1024);
     }
 
     @After

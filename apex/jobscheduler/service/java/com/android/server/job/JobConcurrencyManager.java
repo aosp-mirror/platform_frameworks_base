@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.BackgroundStartPrivileges;
 import android.app.UserSwitchObserver;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -129,6 +130,10 @@ class JobConcurrencyManager {
     static final String KEY_ENABLE_MAX_WAIT_TIME_BYPASS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "enable_max_wait_time_bypass";
     private static final boolean DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS = true;
+    @VisibleForTesting
+    static final String KEY_MAX_WAIT_UI_MS = CONFIG_KEY_PREFIX_CONCURRENCY + "max_wait_ui_ms";
+    @VisibleForTesting
+    static final long DEFAULT_MAX_WAIT_UI_MS = 5 * MINUTE_IN_MILLIS;
     private static final String KEY_MAX_WAIT_EJ_MS =
             CONFIG_KEY_PREFIX_CONCURRENCY + "max_wait_ej_ms";
     @VisibleForTesting
@@ -384,6 +389,12 @@ class JobConcurrencyManager {
     private final ArrayList<ContextAssignment> mRecycledPreferredUidOnly = new ArrayList<>();
     private final ArrayList<ContextAssignment> mRecycledStoppable = new ArrayList<>();
     private final AssignmentInfo mRecycledAssignmentInfo = new AssignmentInfo();
+    private final SparseIntArray mRecycledPrivilegedState = new SparseIntArray();
+
+    private static final int PRIVILEGED_STATE_UNDEFINED = 0;
+    private static final int PRIVILEGED_STATE_NONE = 1;
+    private static final int PRIVILEGED_STATE_BAL = 2;
+    private static final int PRIVILEGED_STATE_TOP = 3;
 
     private final Pools.Pool<ContextAssignment> mContextAssignmentPool =
             new Pools.SimplePool<>(MAX_RETAINED_OBJECTS);
@@ -431,6 +442,12 @@ class JobConcurrencyManager {
     private int mPkgConcurrencyLimitRegular = DEFAULT_PKG_CONCURRENCY_LIMIT_REGULAR;
 
     private boolean mMaxWaitTimeBypassEnabled = DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS;
+
+    /**
+     * The maximum time a user-initiated job would have to be potentially waiting for an available
+     * slot before we would consider creating a new slot for it.
+     */
+    private long mMaxWaitUIMs = DEFAULT_MAX_WAIT_UI_MS;
 
     /**
      * The maximum time an expedited job would have to be potentially waiting for an available
@@ -782,7 +799,7 @@ class JobConcurrencyManager {
 
         cleanUpAfterAssignmentChangesLocked(
                 mRecycledChanged, mRecycledIdle, mRecycledPreferredUidOnly, mRecycledStoppable,
-                mRecycledAssignmentInfo);
+                mRecycledAssignmentInfo, mRecycledPrivilegedState);
 
         noteConcurrency();
     }
@@ -824,6 +841,13 @@ class JobConcurrencyManager {
                 assignment.workType = jsc.getRunningJobWorkType();
                 if (js.startedWithImmediacyPrivilege) {
                     info.numRunningImmediacyPrivileged++;
+                }
+                if (js.shouldTreatAsUserInitiatedJob()) {
+                    info.numRunningUi++;
+                } else if (js.startedAsExpeditedJob) {
+                    info.numRunningEj++;
+                } else {
+                    info.numRunningReg++;
                 }
             }
 
@@ -880,6 +904,13 @@ class JobConcurrencyManager {
         JobStatus nextPending;
         int projectedRunningCount = activeServices.size();
         long minChangedWaitingTimeMs = Long.MAX_VALUE;
+        // Only allow the Context creation bypass for each type if one of that type isn't already
+        // running. That way, we don't run into issues (creating too many additional contexts)
+        // if new jobs become ready to run in rapid succession and we end up going through this
+        // loop many times before running jobs have had a decent chance to finish.
+        boolean allowMaxWaitContextBypassUi = info.numRunningUi == 0;
+        boolean allowMaxWaitContextBypassEj = info.numRunningEj == 0;
+        boolean allowMaxWaitContextBypassOthers = info.numRunningReg == 0;
         while ((nextPending = pendingJobQueue.next()) != null) {
             if (mRunningJobs.contains(nextPending)) {
                 // Should never happen.
@@ -891,7 +922,8 @@ class JobConcurrencyManager {
                 continue;
             }
 
-            final boolean hasImmediacyPrivilege = hasImmediacyPrivilegeLocked(nextPending);
+            final boolean hasImmediacyPrivilege =
+                    hasImmediacyPrivilegeLocked(nextPending, mRecycledPrivilegedState);
             if (DEBUG && isSimilarJobRunningLocked(nextPending)) {
                 Slog.w(TAG, "Already running similar job to: " + nextPending);
             }
@@ -957,7 +989,9 @@ class JobConcurrencyManager {
                                         > (mWorkTypeConfig.getMaxTotal() / 2);
                     }
                     if (!canReplace && mMaxWaitTimeBypassEnabled) { // Case 5
-                        if (nextPending.shouldTreatAsExpeditedJob()) {
+                        if (nextPending.shouldTreatAsUserInitiatedJob()) {
+                            canReplace = minWaitingTimeMs >= mMaxWaitUIMs;
+                        } else if (nextPending.shouldTreatAsExpeditedJob()) {
                             canReplace = minWaitingTimeMs >= mMaxWaitEjMs;
                         } else {
                             canReplace = minWaitingTimeMs >= mMaxWaitRegularMs;
@@ -1055,9 +1089,25 @@ class JobConcurrencyManager {
                             (workType != WORK_TYPE_NONE) ? workType : WORK_TYPE_TOP;
                 }
             } else if (selectedContext == null && mMaxWaitTimeBypassEnabled) {
-                final boolean wouldBeWaitingTooLong = nextPending.shouldTreatAsExpeditedJob()
-                        ? minWaitingTimeMs >= mMaxWaitEjMs
-                        : minWaitingTimeMs >= mMaxWaitRegularMs;
+                final boolean wouldBeWaitingTooLong;
+                if (nextPending.shouldTreatAsUserInitiatedJob() && allowMaxWaitContextBypassUi) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitUIMs;
+                    // We want to create at most one additional context for each type.
+                    allowMaxWaitContextBypassUi = !wouldBeWaitingTooLong;
+                } else if (nextPending.shouldTreatAsExpeditedJob() && allowMaxWaitContextBypassEj) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitEjMs;
+                    // We want to create at most one additional context for each type.
+                    allowMaxWaitContextBypassEj = !wouldBeWaitingTooLong;
+                } else if (allowMaxWaitContextBypassOthers) {
+                    // The way things are set up a UIJ or EJ could end up here and create a 2nd
+                    // context as if it were a "regular" job. That's fine for now since they would
+                    // still be subject to the higher waiting time threshold here.
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitRegularMs;
+                    // We want to create at most one additional context for each type.
+                    allowMaxWaitContextBypassOthers = !wouldBeWaitingTooLong;
+                } else {
+                    wouldBeWaitingTooLong = false;
+                }
                 if (wouldBeWaitingTooLong) {
                     if (DEBUG) {
                         Slog.d(TAG, "Allowing additional context because job would wait too long");
@@ -1141,7 +1191,8 @@ class JobConcurrencyManager {
             final ArraySet<ContextAssignment> idle,
             final List<ContextAssignment> preferredUidOnly,
             final List<ContextAssignment> stoppable,
-            final AssignmentInfo assignmentInfo) {
+            final AssignmentInfo assignmentInfo,
+            final SparseIntArray privilegedState) {
         for (int s = stoppable.size() - 1; s >= 0; --s) {
             final ContextAssignment assignment = stoppable.get(s);
             assignment.clear();
@@ -1163,20 +1214,58 @@ class JobConcurrencyManager {
         stoppable.clear();
         preferredUidOnly.clear();
         assignmentInfo.clear();
+        privilegedState.clear();
         mWorkCountTracker.resetStagingCount();
         mActivePkgStats.forEach(mPackageStatsStagingCountClearer);
     }
 
     @VisibleForTesting
     @GuardedBy("mLock")
-    boolean hasImmediacyPrivilegeLocked(@NonNull JobStatus job) {
+    boolean hasImmediacyPrivilegeLocked(@NonNull JobStatus job,
+            @NonNull SparseIntArray cachedPrivilegedState) {
+        if (!job.shouldTreatAsExpeditedJob() && !job.shouldTreatAsUserInitiatedJob()) {
+            return false;
+        }
         // EJs & user-initiated jobs for the TOP app should run immediately.
         // However, even for user-initiated jobs, if the app has not recently been in TOP or BAL
         // state, we don't give the immediacy privilege so that we can try and maintain
         // reasonably concurrency behavior.
-        return job.lastEvaluatedBias == JobInfo.BIAS_TOP_APP
-                // TODO(): include BAL state for user-initiated jobs
-                && (job.shouldTreatAsExpeditedJob() || job.shouldTreatAsUserInitiatedJob());
+        if (job.lastEvaluatedBias == JobInfo.BIAS_TOP_APP) {
+            return true;
+        }
+        final int uid = job.getSourceUid();
+        final int privilegedState = cachedPrivilegedState.get(uid, PRIVILEGED_STATE_UNDEFINED);
+        switch (privilegedState) {
+            case PRIVILEGED_STATE_TOP:
+                return true;
+            case PRIVILEGED_STATE_BAL:
+                return job.shouldTreatAsUserInitiatedJob();
+            case PRIVILEGED_STATE_NONE:
+                return false;
+            case PRIVILEGED_STATE_UNDEFINED:
+            default:
+                final ActivityManagerInternal activityManagerInternal =
+                        LocalServices.getService(ActivityManagerInternal.class);
+                final int procState = activityManagerInternal.getUidProcessState(uid);
+                if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                    cachedPrivilegedState.put(uid, PRIVILEGED_STATE_TOP);
+                    return true;
+                }
+                if (job.shouldTreatAsExpeditedJob()) {
+                    // EJs only get the TOP privilege.
+                    return false;
+                }
+
+                final BackgroundStartPrivileges bsp =
+                        activityManagerInternal.getBackgroundStartPrivileges(uid);
+                final boolean balAllowed = bsp.allowsBackgroundActivityStarts();
+                if (DEBUG) {
+                    Slog.d(TAG, "Job " + job.toShortString() + " bal state: " + bsp);
+                }
+                cachedPrivilegedState.put(uid,
+                        balAllowed ? PRIVILEGED_STATE_BAL : PRIVILEGED_STATE_NONE);
+                return balAllowed;
+        }
     }
 
     @GuardedBy("mLock")
@@ -1282,17 +1371,20 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    void stopUserVisibleJobsLocked(int userId, @NonNull String packageName,
-            @JobParameters.StopReason int reason, int internalReasonCode) {
+    void markJobsForUserStopLocked(int userId, @NonNull String packageName,
+            @Nullable String debugReason) {
         for (int i = mActiveServices.size() - 1; i >= 0; --i) {
             final JobServiceContext jsc = mActiveServices.get(i);
             final JobStatus jobStatus = jsc.getRunningJobLocked();
 
-            if (jobStatus != null && userId == jobStatus.getSourceUserId()
-                    && jobStatus.getSourcePackageName().equals(packageName)
-                    && jobStatus.isUserVisibleJob()) {
-                jsc.cancelExecutingJobLocked(reason, internalReasonCode,
-                        JobParameters.getInternalReasonCodeDescription(internalReasonCode));
+            // Normally, we handle jobs primarily using the source package and userId,
+            // however, user-visible jobs are shown as coming from the calling app, so we
+            // need to operate on the jobs from that perspective here.
+            if (jobStatus != null && userId == jobStatus.getUserId()
+                    && jobStatus.getServiceComponent().getPackageName().equals(packageName)) {
+                jsc.markForProcessDeathLocked(JobParameters.STOP_REASON_USER,
+                        JobParameters.INTERNAL_STOP_REASON_USER_UI_STOP,
+                        debugReason);
             }
         }
     }
@@ -1490,10 +1582,14 @@ class JobConcurrencyManager {
                     minWaitingTimeMs = Math.min(minWaitingTimeMs,
                             mActiveServices.get(i).getRemainingGuaranteedTimeMs(nowElapsed));
                 }
-                final boolean wouldBeWaitingTooLong =
-                        mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0
-                                ? minWaitingTimeMs >= mMaxWaitEjMs
-                                : minWaitingTimeMs >= mMaxWaitRegularMs;
+                final boolean wouldBeWaitingTooLong;
+                if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_UI) > 0) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitUIMs;
+                } else if (mWorkCountTracker.getPendingJobCount(WORK_TYPE_EJ) > 0) {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitEjMs;
+                } else {
+                    wouldBeWaitingTooLong = minWaitingTimeMs >= mMaxWaitRegularMs;
+                }
                 respectConcurrencyLimit = !wouldBeWaitingTooLong;
             }
             if (respectConcurrencyLimit) {
@@ -1767,15 +1863,17 @@ class JobConcurrencyManager {
     }
 
     @GuardedBy("mLock")
-    boolean executeTimeoutCommandLocked(PrintWriter pw, String pkgName, int userId,
-            @Nullable String namespace, boolean hasJobId, int jobId) {
+    boolean executeStopCommandLocked(PrintWriter pw, String pkgName, int userId,
+            @Nullable String namespace, boolean matchJobId, int jobId,
+            int stopReason, int internalStopReason) {
         boolean foundSome = false;
         for (int i = 0; i < mActiveServices.size(); i++) {
             final JobServiceContext jc = mActiveServices.get(i);
             final JobStatus js = jc.getRunningJobLocked();
-            if (jc.timeoutIfExecutingLocked(pkgName, userId, namespace, hasJobId, jobId, "shell")) {
+            if (jc.stopIfExecutingLocked(pkgName, userId, namespace, matchJobId, jobId,
+                    stopReason, internalStopReason)) {
                 foundSome = true;
-                pw.print("Timing out: ");
+                pw.print("Stopping job: ");
                 js.printUniqueId(pw);
                 pw.print(" ");
                 pw.println(js.getServiceComponent().flattenToShortString());
@@ -1908,8 +2006,11 @@ class JobConcurrencyManager {
 
         mMaxWaitTimeBypassEnabled = properties.getBoolean(
                 KEY_ENABLE_MAX_WAIT_TIME_BYPASS, DEFAULT_ENABLE_MAX_WAIT_TIME_BYPASS);
-        // EJ max wait must be in the range [0, infinity).
-        mMaxWaitEjMs = Math.max(0, properties.getLong(KEY_MAX_WAIT_EJ_MS, DEFAULT_MAX_WAIT_EJ_MS));
+        // UI max wait must be in the range [0, infinity).
+        mMaxWaitUIMs = Math.max(0, properties.getLong(KEY_MAX_WAIT_UI_MS, DEFAULT_MAX_WAIT_UI_MS));
+        // EJ max wait must be in the range [UI max wait, infinity).
+        mMaxWaitEjMs = Math.max(mMaxWaitUIMs,
+                properties.getLong(KEY_MAX_WAIT_EJ_MS, DEFAULT_MAX_WAIT_EJ_MS));
         // Regular max wait must be in the range [EJ max wait, infinity).
         mMaxWaitRegularMs = Math.max(mMaxWaitEjMs,
                 properties.getLong(KEY_MAX_WAIT_REGULAR_MS, DEFAULT_MAX_WAIT_REGULAR_MS));
@@ -1928,6 +2029,7 @@ class JobConcurrencyManager {
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_EJ, mPkgConcurrencyLimitEj).println();
             pw.print(KEY_PKG_CONCURRENCY_LIMIT_REGULAR, mPkgConcurrencyLimitRegular).println();
             pw.print(KEY_ENABLE_MAX_WAIT_TIME_BYPASS, mMaxWaitTimeBypassEnabled).println();
+            pw.print(KEY_MAX_WAIT_UI_MS, mMaxWaitUIMs).println();
             pw.print(KEY_MAX_WAIT_EJ_MS, mMaxWaitEjMs).println();
             pw.print(KEY_MAX_WAIT_REGULAR_MS, mMaxWaitRegularMs).println();
             pw.println();
@@ -2790,10 +2892,16 @@ class JobConcurrencyManager {
     static final class AssignmentInfo {
         public long minPreferredUidOnlyWaitingTimeMs;
         public int numRunningImmediacyPrivileged;
+        public int numRunningUi;
+        public int numRunningEj;
+        public int numRunningReg;
 
         void clear() {
             minPreferredUidOnlyWaitingTimeMs = 0;
             numRunningImmediacyPrivileged = 0;
+            numRunningUi = 0;
+            numRunningEj = 0;
+            numRunningReg = 0;
         }
     }
 

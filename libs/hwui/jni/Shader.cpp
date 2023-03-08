@@ -52,12 +52,7 @@ static void Color_RGBToHSV(JNIEnv* env, jobject, jint red, jint green, jint blue
 static jint Color_HSVToColor(JNIEnv* env, jobject, jint alpha, jfloatArray hsvArray)
 {
     AutoJavaFloatArray  autoHSV(env, hsvArray, 3);
-#ifdef SK_SCALAR_IS_FLOAT
-    SkScalar*   hsv = autoHSV.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
-
+    SkScalar* hsv = autoHSV.ptr();
     return static_cast<jint>(SkHSVToColor(alpha, hsv));
 }
 
@@ -71,11 +66,9 @@ static jlong Shader_getNativeFinalizer(JNIEnv*, jobject) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Shader_safeUnref));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
-                                      jint tileModeX, jint tileModeY, bool filter,
-                                      bool isDirectSampled) {
+static jlong createBitmapShaderHelper(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
+                                      jint tileModeX, jint tileModeY, bool isDirectSampled,
+                                      const SkSamplingOptions& sampling) {
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
     sk_sp<SkImage> image;
     if (bitmapHandle) {
@@ -88,8 +81,7 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
         SkBitmap bitmap;
         image = SkMakeImageFromRasterBitmap(bitmap, kNever_SkCopyPixelsMode);
     }
-    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
-                               SkMipmapMode::kNone);
+
     sk_sp<SkShader> shader;
     if (isDirectSampled) {
         shader = image->makeRawShader((SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
@@ -103,6 +95,26 @@ static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, j
     }
 
     return reinterpret_cast<jlong>(shader.release());
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+static jlong BitmapShader_constructor(JNIEnv* env, jobject o, jlong matrixPtr, jlong bitmapHandle,
+                                      jint tileModeX, jint tileModeY, bool filter,
+                                      bool isDirectSampled) {
+    SkSamplingOptions sampling(filter ? SkFilterMode::kLinear : SkFilterMode::kNearest,
+                               SkMipmapMode::kNone);
+    return createBitmapShaderHelper(env, o, matrixPtr, bitmapHandle, tileModeX, tileModeY,
+                                    isDirectSampled, sampling);
+}
+
+static jlong BitmapShader_constructorWithMaxAniso(JNIEnv* env, jobject o, jlong matrixPtr,
+                                                  jlong bitmapHandle, jint tileModeX,
+                                                  jint tileModeY, jint maxAniso,
+                                                  bool isDirectSampled) {
+    auto sampling = SkSamplingOptions::Aniso(static_cast<int>(maxAniso));
+    return createBitmapShaderHelper(env, o, matrixPtr, bitmapHandle, tileModeX, tileModeY,
+                                    isDirectSampled, sampling);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -132,11 +144,7 @@ static jlong LinearGradient_create(JNIEnv* env, jobject, jlong matrixPtr,
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
     AutoJavaFloatArray autoPos(env, posArray, colors.size());
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* pos = autoPos.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     sk_sp<SkShader> shader(SkGradientShader::MakeLinear(pts, &colors[0],
                 GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
@@ -176,11 +184,7 @@ static jlong RadialGradient_create(JNIEnv* env,
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
     AutoJavaFloatArray autoPos(env, posArray, colors.size());
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* pos = autoPos.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     auto colorSpace = GraphicsJNI::getNativeColorSpace(colorSpaceHandle);
     auto skTileMode = static_cast<SkTileMode>(tileMode);
@@ -208,11 +212,7 @@ static jlong SweepGradient_create(JNIEnv* env, jobject, jlong matrixPtr, jfloat 
     std::vector<SkColor4f> colors = convertColorLongs(env, colorArray);
 
     AutoJavaFloatArray autoPos(env, jpositions, colors.size());
-#ifdef SK_SCALAR_IS_FLOAT
     SkScalar* pos = autoPos.ptr();
-#else
-    #error Need to convert float array to SkScalar array before calling the following function.
-#endif
 
     sk_sp<SkShader> shader = SkGradientShader::MakeSweep(x, y, &colors[0],
             GraphicsJNI::getNativeColorSpace(colorSpaceHandle), pos, colors.size(),
@@ -408,6 +408,8 @@ static const JNINativeMethod gShaderMethods[] = {
 
 static const JNINativeMethod gBitmapShaderMethods[] = {
         {"nativeCreate", "(JJIIZZ)J", (void*)BitmapShader_constructor},
+        {"nativeCreateWithMaxAniso", "(JJIIIZ)J", (void*)BitmapShader_constructorWithMaxAniso},
+
 };
 
 static const JNINativeMethod gLinearGradientMethods[] = {

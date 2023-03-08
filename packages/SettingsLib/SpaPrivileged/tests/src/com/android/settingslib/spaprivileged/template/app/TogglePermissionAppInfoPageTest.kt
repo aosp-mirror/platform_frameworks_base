@@ -81,7 +81,7 @@ class TogglePermissionAppInfoPageTest {
         val entryList = appInfoPageProvider.buildEntry(null)
 
         assertThat(entryList).hasSize(1)
-        assertThat(entryList[0].displayName).isEqualTo("AllowControl")
+        assertThat(entryList[0].label).isEqualTo("AllowControl")
     }
 
     @Test

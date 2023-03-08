@@ -33,6 +33,17 @@ import java.util.Objects;
  */
 public class ProfilerInfo implements Parcelable {
 
+    // CLOCK_TYPE_DEFAULT chooses the default used by ART. ART uses CLOCK_TYPE_DUAL by default (see
+    // kDefaultTraceClockSource in art/runtime/runtime_globals.h).
+    public static final int CLOCK_TYPE_DEFAULT = 0x000;
+    // The values of these constants are chosen such that they correspond to the flags passed to
+    // VMDebug.startMethodTracing to choose the corresponding clock type (see
+    // core/java/android/app/ActivityThread.java).
+    // The flag values are defined in ART (see TraceFlag in art/runtime/trace.h).
+    public static final int CLOCK_TYPE_WALL = 0x010;
+    public static final int CLOCK_TYPE_THREAD_CPU = 0x100;
+    public static final int CLOCK_TYPE_DUAL = 0x110;
+
     private static final String TAG = "ProfilerInfo";
 
     /* Name of profile output file. */
@@ -66,13 +77,20 @@ public class ProfilerInfo implements Parcelable {
      */
     public final boolean attachAgentDuringBind;
 
+    /**
+     * Indicates the clock source to be used for profiling. The source could be wallclock, thread
+     * cpu or both
+     */
+    public final int clockType;
+
     public ProfilerInfo(String filename, ParcelFileDescriptor fd, int interval, boolean autoStop,
-            boolean streaming, String agent, boolean attachAgentDuringBind) {
+            boolean streaming, String agent, boolean attachAgentDuringBind, int clockType) {
         profileFile = filename;
         profileFd = fd;
         samplingInterval = interval;
         autoStopProfiler = autoStop;
         streamingOutput = streaming;
+        this.clockType = clockType;
         this.agent = agent;
         this.attachAgentDuringBind = attachAgentDuringBind;
     }
@@ -85,6 +103,25 @@ public class ProfilerInfo implements Parcelable {
         streamingOutput = in.streamingOutput;
         agent = in.agent;
         attachAgentDuringBind = in.attachAgentDuringBind;
+        clockType = in.clockType;
+    }
+
+    /**
+     * Get the value for the clock type corresponding to the option string passed to the activity
+     * manager. am profile start / am start-activity start-profiler commands accept clock-type
+     * option to choose the source of timestamps when profiling. This function maps the option
+     * string to the value of flags that is used when calling VMDebug.startMethodTracing
+     */
+    public static int getClockTypeFromString(String type) {
+        if ("thread-cpu".equals(type)) {
+            return CLOCK_TYPE_THREAD_CPU;
+        } else if ("wall".equals(type)) {
+            return CLOCK_TYPE_WALL;
+        } else if ("dual".equals(type)) {
+            return CLOCK_TYPE_DUAL;
+        } else {
+            return CLOCK_TYPE_DEFAULT;
+        }
     }
 
     /**
@@ -93,7 +130,8 @@ public class ProfilerInfo implements Parcelable {
      */
     public ProfilerInfo setAgent(String agent, boolean attachAgentDuringBind) {
         return new ProfilerInfo(this.profileFile, this.profileFd, this.samplingInterval,
-                this.autoStopProfiler, this.streamingOutput, agent, attachAgentDuringBind);
+                this.autoStopProfiler, this.streamingOutput, agent, attachAgentDuringBind,
+                this.clockType);
     }
 
     /**
@@ -133,6 +171,7 @@ public class ProfilerInfo implements Parcelable {
         out.writeInt(streamingOutput ? 1 : 0);
         out.writeString(agent);
         out.writeBoolean(attachAgentDuringBind);
+        out.writeInt(clockType);
     }
 
     /** @hide */
@@ -146,6 +185,7 @@ public class ProfilerInfo implements Parcelable {
         proto.write(ProfilerInfoProto.AUTO_STOP_PROFILER, autoStopProfiler);
         proto.write(ProfilerInfoProto.STREAMING_OUTPUT, streamingOutput);
         proto.write(ProfilerInfoProto.AGENT, agent);
+        proto.write(ProfilerInfoProto.CLOCK_TYPE, clockType);
         proto.end(token);
     }
 
@@ -170,6 +210,7 @@ public class ProfilerInfo implements Parcelable {
         streamingOutput = in.readInt() != 0;
         agent = in.readString();
         attachAgentDuringBind = in.readBoolean();
+        clockType = in.readInt();
     }
 
     @Override
@@ -186,7 +227,8 @@ public class ProfilerInfo implements Parcelable {
                 && autoStopProfiler == other.autoStopProfiler
                 && samplingInterval == other.samplingInterval
                 && streamingOutput == other.streamingOutput
-                && Objects.equals(agent, other.agent);
+                && Objects.equals(agent, other.agent)
+                && clockType == other.clockType;
     }
 
     @Override
@@ -197,6 +239,7 @@ public class ProfilerInfo implements Parcelable {
         result = 31 * result + (autoStopProfiler ? 1 : 0);
         result = 31 * result + (streamingOutput ? 1 : 0);
         result = 31 * result + Objects.hashCode(agent);
+        result = 31 * result + clockType;
         return result;
     }
 }

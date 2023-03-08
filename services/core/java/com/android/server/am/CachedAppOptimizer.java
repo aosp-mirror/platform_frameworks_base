@@ -742,9 +742,6 @@ public final class CachedAppOptimizer {
                         "compactApp " + app.mOptRecord.getReqCompactSource().name() + " "
                                 + app.mOptRecord.getReqCompactProfile().name() + " " + processName);
             }
-            Trace.instantForTrack(Trace.TRACE_TAG_ACTIVITY_MANAGER, ATRACE_COMPACTION_TRACK,
-                    "compactApp " + app.mOptRecord.getReqCompactSource().name() + " "
-                            + app.mOptRecord.getReqCompactProfile().name() + " " + processName);
             app.mOptRecord.setHasPendingCompact(true);
             app.mOptRecord.setForceCompact(force);
             mPendingCompactionProcesses.add(app);
@@ -1820,7 +1817,8 @@ public final class CachedAppOptimizer {
                     try {
                         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                                 "Compact " + resolvedAction.name() + ": " + name
-                                        + " lastOomAdjReason: " + oomAdjReason);
+                                        + " lastOomAdjReason: " + oomAdjReason
+                                        + " source: " + compactSource.name());
                         long zramUsedKbBefore = getUsedZramMemory();
                         long startCpuTime = threadCpuTimeNs();
                         mProcessDependencies.performCompaction(resolvedAction, pid);
@@ -1923,9 +1921,26 @@ public final class CachedAppOptimizer {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SET_FROZEN_PROCESS_MSG:
+                {
+                    ProcessRecord proc = (ProcessRecord) msg.obj;
+                    int pid = proc.getPid();
+                    final String name = proc.processName;
                     synchronized (mAm) {
-                        freezeProcess((ProcessRecord) msg.obj);
+                        freezeProcess(proc);
                     }
+                    try {
+                        // post-check to prevent deadlock
+                        mProcLocksReader.handleBlockingFileLocks(this);
+                    } catch (Exception e) {
+                        Slog.e(TAG_AM, "Unable to check file locks for "
+                                + name + "(" + pid + "): " + e);
+                        synchronized (mAm) {
+                            synchronized (mProcLock) {
+                                unfreezeAppLSP(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
+                            }
+                        }
+                    }
+                }
                     break;
                 case REPORT_UNFREEZE_MSG:
                     int pid = msg.arg1;
@@ -2059,16 +2074,6 @@ public final class CachedAppOptimizer {
                     }
                 });
             }
-
-            try {
-                // post-check to prevent deadlock
-                mProcLocksReader.handleBlockingFileLocks(this);
-            } catch (Exception e) {
-                Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
-                synchronized (mProcLock) {
-                    unfreezeAppLSP(proc, OomAdjuster.OOM_ADJ_REASON_NONE);
-                }
-            }
         }
 
         private void reportUnfreeze(int pid, int frozenDuration, String processName,
@@ -2125,22 +2130,25 @@ public final class CachedAppOptimizer {
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "Blocking file lock found: " + pids);
             }
-            synchronized (mProcLock) {
-                int pid = pids.get(0);
-                ProcessRecord app = mFrozenProcesses.get(pid);
-                ProcessRecord pr;
-                if (app != null) {
-                    for (int i = 1; i < pids.size(); i++) {
-                        int blocked = pids.get(i);
-                        synchronized (mAm.mPidsSelfLocked) {
-                            pr = mAm.mPidsSelfLocked.get(blocked);
-                        }
-                        if (pr != null && pr.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ) {
-                            Slog.d(TAG_AM, app.processName + " (" + pid + ") blocks "
-                                    + pr.processName + " (" + blocked + ")");
-                            // Found at least one blocked non-cached process
-                            unfreezeAppLSP(app, OomAdjuster.OOM_ADJ_REASON_NONE);
-                            break;
+            synchronized (mAm) {
+                synchronized (mProcLock) {
+                    int pid = pids.get(0);
+                    ProcessRecord app = mFrozenProcesses.get(pid);
+                    ProcessRecord pr;
+                    if (app != null) {
+                        for (int i = 1; i < pids.size(); i++) {
+                            int blocked = pids.get(i);
+                            synchronized (mAm.mPidsSelfLocked) {
+                                pr = mAm.mPidsSelfLocked.get(blocked);
+                            }
+                            if (pr != null
+                                    && pr.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ) {
+                                Slog.d(TAG_AM, app.processName + " (" + pid + ") blocks "
+                                        + pr.processName + " (" + blocked + ")");
+                                // Found at least one blocked non-cached process
+                                unfreezeAppLSP(app, OomAdjuster.OOM_ADJ_REASON_NONE);
+                                break;
+                            }
                         }
                     }
                 }

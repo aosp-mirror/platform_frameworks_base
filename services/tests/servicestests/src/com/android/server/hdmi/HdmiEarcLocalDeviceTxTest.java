@@ -69,7 +69,7 @@ public class HdmiEarcLocalDeviceTxTest {
     private HdmiEarcLocalDevice mHdmiEarcLocalDeviceTx;
     private FakeNativeWrapper mNativeWrapper;
     private HdmiEarcController mHdmiEarcController;
-    private FakeEArcNativeWrapper mEArcNativeWrapper;
+    private FakeEarcNativeWrapper mEarcNativeWrapper;
     private FakePowerManagerWrapper mPowerManager;
     private byte[] mEarcCapabilities = new byte[]{
             0x01, 0x01, 0x1a, 0x35, 0x0f, 0x7f, 0x07, 0x15, 0x07, 0x50, 0x3d, 0x1f, (byte) 0xc0,
@@ -128,9 +128,9 @@ public class HdmiEarcLocalDeviceTxTest {
         mHdmiCecController = HdmiCecController.createWithNativeWrapper(
                 mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(mHdmiCecController);
-        mEArcNativeWrapper = new FakeEArcNativeWrapper();
+        mEarcNativeWrapper = new FakeEarcNativeWrapper();
         mHdmiEarcController = HdmiEarcController.createWithNativeWrapper(
-                mHdmiControlService, mEArcNativeWrapper);
+                mHdmiControlService, mEarcNativeWrapper);
         mHdmiControlService.setEarcController(mHdmiEarcController);
         mHdmiControlService.setHdmiMhlController(HdmiMhlControllerStub.create(mHdmiControlService));
         mHdmiControlService.initService();

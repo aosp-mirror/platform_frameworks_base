@@ -485,18 +485,22 @@ public class AppDataHelper {
             String packageName, int userId) throws PackageManagerException {
         final PackageStateInternal packageState = snapshot.getPackageStateInternal(packageName);
         if (packageState == null) {
-            throw new PackageManagerException("Package " + packageName + " is unknown");
+            throw PackageManagerException.ofInternalError("Package " + packageName + " is unknown",
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_PACKAGE_UNKNOWN);
         } else if (!TextUtils.equals(volumeUuid, packageState.getVolumeUuid())) {
-            throw new PackageManagerException(
+            throw PackageManagerException.ofInternalError(
                     "Package " + packageName + " found on unknown volume " + volumeUuid
-                            + "; expected volume " + packageState.getVolumeUuid());
+                            + "; expected volume " + packageState.getVolumeUuid(),
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_VOLUME_UNKNOWN);
         } else if (!packageState.getUserStateOrDefault(userId).isInstalled()) {
-            throw new PackageManagerException(
-                    "Package " + packageName + " not installed for user " + userId);
+            throw PackageManagerException.ofInternalError(
+                    "Package " + packageName + " not installed for user " + userId,
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_NOT_INSTALLED_FOR_USER);
         } else if (packageState.getPkg() != null
                 && !shouldHaveAppStorage(packageState.getPkg())) {
-            throw new PackageManagerException(
-                    "Package " + packageName + " shouldn't have storage");
+            throw PackageManagerException.ofInternalError(
+                    "Package " + packageName + " shouldn't have storage",
+                    PackageManagerException.INTERNAL_ERROR_STORAGE_INVALID_SHOULD_NOT_HAVE_STORAGE);
         }
     }
 

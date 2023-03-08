@@ -77,6 +77,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     private static final int DO_NOTIFY_AD_BUFFER = 28;
     private static final int DO_SELECT_AUDIO_PRESENTATION = 29;
     private static final int DO_TIME_SHIFT_SET_MODE = 30;
+    private static final int DO_SET_TV_MESSAGE_ENABLED = 31;
+    private static final int DO_NOTIFY_TV_MESSAGE = 32;
 
     private final boolean mIsRecordingSession;
     private final HandlerCaller mCaller;
@@ -263,12 +265,22 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 mTvInputSessionImpl.setInteractiveAppNotificationEnabled((Boolean) msg.obj);
                 break;
             }
+            case DO_SET_TV_MESSAGE_ENABLED: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.setTvMessageEnabled((String) args.arg1, (Boolean) args.arg2);
+                break;
+            }
             case DO_REQUEST_AD: {
                 mTvInputSessionImpl.requestAd((AdRequest) msg.obj);
                 break;
             }
             case DO_NOTIFY_AD_BUFFER: {
                 mTvInputSessionImpl.notifyAdBuffer((AdBuffer) msg.obj);
+                break;
+            }
+            case DO_NOTIFY_TV_MESSAGE: {
+                SomeArgs args = (SomeArgs) msg.obj;
+                mTvInputSessionImpl.onTvMessageReceived((String) args.arg1, (Bundle) args.arg2);
                 break;
             }
             default: {
@@ -455,6 +467,11 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     @Override
     public void notifyAdBuffer(AdBuffer buffer) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER, buffer));
+    }
+
+    @Override
+    public void notifyTvMessage(String type, Bundle data) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

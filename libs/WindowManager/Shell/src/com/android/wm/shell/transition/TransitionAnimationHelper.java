@@ -54,6 +54,7 @@ import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.util.TransitionUtil;
 
 /** The helper class that provides methods for adding styles to transition animations. */
 public class TransitionAnimationHelper {
@@ -66,7 +67,7 @@ public class TransitionAnimationHelper {
         final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
-        final boolean enter = Transitions.isOpeningType(changeMode);
+        final boolean enter = TransitionUtil.isOpeningType(changeMode);
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
@@ -142,9 +143,16 @@ public class TransitionAnimationHelper {
         Animation a = null;
         if (animAttr != 0) {
             if (overrideType == ANIM_FROM_STYLE && !isTask) {
-                a = transitionAnimation
-                        .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
-                                animAttr, translucent);
+                final TransitionInfo.AnimationOptions.CustomActivityTransition customTransition =
+                        getCustomActivityTransition(animAttr, options);
+                if (customTransition != null) {
+                    a = loadCustomActivityTransition(
+                            customTransition, options, enter, transitionAnimation);
+                } else {
+                    a = transitionAnimation
+                            .loadAnimationAttr(options.getPackageName(), options.getAnimations(),
+                                    animAttr, translucent);
+                }
             } else {
                 a = transitionAnimation.loadDefaultAnimationAttr(animAttr, translucent);
             }
@@ -154,6 +162,37 @@ public class TransitionAnimationHelper {
                 "loadAnimation: anim=%s animAttr=0x%x type=%s isEntrance=%b", a, animAttr,
                 transitTypeToString(type),
                 enter);
+        return a;
+    }
+
+    static TransitionInfo.AnimationOptions.CustomActivityTransition getCustomActivityTransition(
+            int animAttr, TransitionInfo.AnimationOptions options) {
+        boolean isOpen = false;
+        switch (animAttr) {
+            case R.styleable.WindowAnimation_activityOpenEnterAnimation:
+            case R.styleable.WindowAnimation_activityOpenExitAnimation:
+                isOpen = true;
+                break;
+            case R.styleable.WindowAnimation_activityCloseEnterAnimation:
+            case R.styleable.WindowAnimation_activityCloseExitAnimation:
+                break;
+            default:
+                return null;
+        }
+
+        return options.getCustomActivityTransition(isOpen);
+    }
+
+    static Animation loadCustomActivityTransition(
+            @NonNull TransitionInfo.AnimationOptions.CustomActivityTransition transitionAnim,
+            TransitionInfo.AnimationOptions options, boolean enter,
+            TransitionAnimation transitionAnimation) {
+        final Animation a = transitionAnimation.loadAppTransitionAnimation(options.getPackageName(),
+                enter ? transitionAnim.getCustomEnterResId()
+                        : transitionAnim.getCustomExitResId());
+        if (a != null && transitionAnim.getCustomBackgroundColor() != 0) {
+            a.setBackdropColor(transitionAnim.getCustomBackgroundColor());
+        }
         return a;
     }
 

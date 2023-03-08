@@ -342,7 +342,13 @@ object KeyguardBottomAreaViewBinder {
         if (viewModel.isClickable) {
             if (viewModel.useLongPress) {
                 view.setOnTouchListener(
-                    OnTouchListener(view, viewModel, messageDisplayer, vibratorHelper)
+                    OnTouchListener(
+                        view,
+                        viewModel,
+                        messageDisplayer,
+                        vibratorHelper,
+                        falsingManager,
+                    )
                 )
             } else {
                 view.setOnClickListener(OnClickListener(viewModel, checkNotNull(falsingManager)))
@@ -371,6 +377,7 @@ object KeyguardBottomAreaViewBinder {
         private val viewModel: KeyguardQuickAffordanceViewModel,
         private val messageDisplayer: (Int) -> Unit,
         private val vibratorHelper: VibratorHelper?,
+        private val falsingManager: FalsingManager?,
     ) : View.OnTouchListener {
 
         private val longPressDurationMs = ViewConfiguration.getLongPressTimeout().toLong()
@@ -381,82 +388,95 @@ object KeyguardBottomAreaViewBinder {
             return when (event?.actionMasked) {
                 MotionEvent.ACTION_DOWN ->
                     if (viewModel.configKey != null) {
-                        longPressAnimator =
-                            view
-                                .animate()
-                                .scaleX(PRESSED_SCALE)
-                                .scaleY(PRESSED_SCALE)
-                                .setDuration(longPressDurationMs)
-                                .withEndAction {
-                                    view.setOnClickListener {
-                                        vibratorHelper?.vibrate(
-                                            if (viewModel.isActivated) {
-                                                Vibrations.Activated
-                                            } else {
-                                                Vibrations.Deactivated
-                                            }
-                                        )
-                                        viewModel.onClicked(
-                                            KeyguardQuickAffordanceViewModel.OnClickedParameters(
-                                                configKey = viewModel.configKey,
-                                                expandable = Expandable.fromView(view),
-                                            )
-                                        )
+                        if (isUsingAccurateTool(event)) {
+                            // For accurate tool types (stylus, mouse, etc.), we don't require a
+                            // long-press.
+                        } else {
+                            // When not using a stylus, we require a long-press to activate the
+                            // quick affordance, mostly to do "falsing" (e.g. protect from false
+                            // clicks in the pocket/bag).
+                            longPressAnimator =
+                                view
+                                    .animate()
+                                    .scaleX(PRESSED_SCALE)
+                                    .scaleY(PRESSED_SCALE)
+                                    .setDuration(longPressDurationMs)
+                                    .withEndAction {
+                                        if (
+                                            falsingManager
+                                                ?.isFalseLongTap(
+                                                    FalsingManager.MODERATE_PENALTY
+                                                ) == false
+                                        ) {
+                                            dispatchClick(viewModel.configKey)
+                                        }
+                                        cancel()
                                     }
-                                    view.performClick()
-                                    view.setOnClickListener(null)
-                                    cancel()
-                                }
+                        }
                         true
                     } else {
                         false
                     }
                 MotionEvent.ACTION_MOVE -> {
-                    if (event.historySize > 0) {
-                        val distance =
-                            sqrt(
-                                (event.y - event.getHistoricalY(0)).pow(2) +
-                                    (event.x - event.getHistoricalX(0)).pow(2)
-                            )
-                        if (distance > ViewConfiguration.getTouchSlop()) {
+                    if (!isUsingAccurateTool(event)) {
+                        // Moving too far while performing a long-press gesture cancels that
+                        // gesture.
+                        val distanceMoved = distanceMoved(event)
+                        if (distanceMoved > ViewConfiguration.getTouchSlop()) {
                             cancel()
                         }
                     }
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    cancel(
-                        onAnimationEnd =
-                            if (event.eventTime - event.downTime < longPressDurationMs) {
-                                Runnable {
-                                    messageDisplayer.invoke(
-                                        R.string.keyguard_affordance_press_too_short
-                                    )
-                                    val amplitude =
-                                        view.context.resources
-                                            .getDimensionPixelSize(
-                                                R.dimen.keyguard_affordance_shake_amplitude
-                                            )
-                                            .toFloat()
-                                    val shakeAnimator =
-                                        ObjectAnimator.ofFloat(
-                                            view,
-                                            "translationX",
-                                            -amplitude / 2,
-                                            amplitude / 2,
+                    if (isUsingAccurateTool(event)) {
+                        // When using an accurate tool type (stylus, mouse, etc.), we don't require
+                        // a long-press gesture to activate the quick affordance. Therefore, lifting
+                        // the pointer performs a click.
+                        if (
+                            viewModel.configKey != null &&
+                                distanceMoved(event) <= ViewConfiguration.getTouchSlop() &&
+                                falsingManager?.isFalseTap(FalsingManager.NO_PENALTY) == false
+                        ) {
+                            dispatchClick(viewModel.configKey)
+                        }
+                    } else {
+                        // When not using a stylus, lifting the finger/pointer will actually cancel
+                        // the long-press gesture. Calling cancel after the quick affordance was
+                        // already long-press activated is a no-op, so it's safe to call from here.
+                        cancel(
+                            onAnimationEnd =
+                                if (event.eventTime - event.downTime < longPressDurationMs) {
+                                    Runnable {
+                                        messageDisplayer.invoke(
+                                            R.string.keyguard_affordance_press_too_short
                                         )
-                                    shakeAnimator.duration =
-                                        ShakeAnimationDuration.inWholeMilliseconds
-                                    shakeAnimator.interpolator =
-                                        CycleInterpolator(ShakeAnimationCycles)
-                                    shakeAnimator.start()
+                                        val amplitude =
+                                            view.context.resources
+                                                .getDimensionPixelSize(
+                                                    R.dimen.keyguard_affordance_shake_amplitude
+                                                )
+                                                .toFloat()
+                                        val shakeAnimator =
+                                            ObjectAnimator.ofFloat(
+                                                view,
+                                                "translationX",
+                                                -amplitude / 2,
+                                                amplitude / 2,
+                                            )
+                                        shakeAnimator.duration =
+                                            ShakeAnimationDuration.inWholeMilliseconds
+                                        shakeAnimator.interpolator =
+                                            CycleInterpolator(ShakeAnimationCycles)
+                                        shakeAnimator.start()
 
-                                    vibratorHelper?.vibrate(Vibrations.Shake)
+                                        vibratorHelper?.vibrate(Vibrations.Shake)
+                                    }
+                                } else {
+                                    null
                                 }
-                            } else {
-                                null
-                            }
-                    )
+                        )
+                    }
                     true
                 }
                 MotionEvent.ACTION_CANCEL -> {
@@ -467,6 +487,29 @@ object KeyguardBottomAreaViewBinder {
             }
         }
 
+        private fun dispatchClick(
+            configKey: String,
+        ) {
+            view.setOnClickListener {
+                vibratorHelper?.vibrate(
+                    if (viewModel.isActivated) {
+                        Vibrations.Activated
+                    } else {
+                        Vibrations.Deactivated
+                    }
+                )
+                viewModel.onClicked(
+                    KeyguardQuickAffordanceViewModel.OnClickedParameters(
+                        configKey = configKey,
+                        expandable = Expandable.fromView(view),
+                        slotId = viewModel.slotId,
+                    )
+                )
+            }
+            view.performClick()
+            view.setOnClickListener(null)
+        }
+
         private fun cancel(onAnimationEnd: Runnable? = null) {
             longPressAnimator?.cancel()
             longPressAnimator = null
@@ -475,6 +518,40 @@ object KeyguardBottomAreaViewBinder {
 
         companion object {
             private const val PRESSED_SCALE = 1.5f
+
+            /**
+             * Returns `true` if the tool type at the given pointer index is an accurate tool (like
+             * stylus or mouse), which means we can trust it to not be a false click; `false`
+             * otherwise.
+             */
+            private fun isUsingAccurateTool(
+                event: MotionEvent,
+                pointerIndex: Int = 0,
+            ): Boolean {
+                return when (event.getToolType(pointerIndex)) {
+                    MotionEvent.TOOL_TYPE_STYLUS -> true
+                    MotionEvent.TOOL_TYPE_MOUSE -> true
+                    else -> false
+                }
+            }
+
+            /**
+             * Returns the amount of distance the pointer moved since the historical record at the
+             * [since] index.
+             */
+            private fun distanceMoved(
+                event: MotionEvent,
+                since: Int = 0,
+            ): Float {
+                return if (event.historySize > 0) {
+                    sqrt(
+                        (event.y - event.getHistoricalY(since)).pow(2) +
+                            (event.x - event.getHistoricalX(since)).pow(2)
+                    )
+                } else {
+                    0f
+                }
+            }
         }
     }
 
@@ -492,6 +569,7 @@ object KeyguardBottomAreaViewBinder {
                     KeyguardQuickAffordanceViewModel.OnClickedParameters(
                         configKey = viewModel.configKey,
                         expandable = Expandable.fromView(view),
+                        slotId = viewModel.slotId,
                     )
                 )
             }

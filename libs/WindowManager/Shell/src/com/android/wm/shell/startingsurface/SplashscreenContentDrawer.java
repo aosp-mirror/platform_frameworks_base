@@ -24,9 +24,6 @@ import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_LEGACY_SPLA
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SOLID_COLOR_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 
-import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MAX_ANIMATION_DURATION;
-import static com.android.wm.shell.startingsurface.StartingSurfaceDrawer.MINIMAL_ANIMATION_DURATION;
-
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -95,6 +92,25 @@ import java.util.function.UnaryOperator;
  */
 public class SplashscreenContentDrawer {
     private static final String TAG = StartingWindowController.TAG;
+
+    /**
+     * The minimum duration during which the splash screen is shown when the splash screen icon is
+     * animated.
+     */
+    static final long MINIMAL_ANIMATION_DURATION = 400L;
+
+    /**
+     * Allow the icon style splash screen to be displayed for longer to give time for the animation
+     * to finish, i.e. the extra buffer time to keep the splash screen if the animation is slightly
+     * longer than the {@link #MINIMAL_ANIMATION_DURATION} duration.
+     */
+    static final long TIME_WINDOW_DURATION = 100L;
+
+    /**
+     * The maximum duration during which the splash screen will be shown if the application is ready
+     * to show before the icon animation finishes.
+     */
+    static final long MAX_ANIMATION_DURATION = MINIMAL_ANIMATION_DURATION + TIME_WINDOW_DURATION;
 
     // The acceptable area ratio of foreground_icon_area/background_icon_area, if there is an
     // icon which it's non-transparent foreground area is similar to it's background area, then
@@ -368,10 +384,10 @@ public class SplashscreenContentDrawer {
 
     private static int estimateWindowBGColor(Drawable themeBGDrawable) {
         final DrawableColorTester themeBGTester = new DrawableColorTester(
-                themeBGDrawable, DrawableColorTester.TRANSPARENT_FILTER /* filterType */);
-        if (themeBGTester.passFilterRatio() == 0) {
-            // the window background is transparent, unable to draw
-            Slog.w(TAG, "Window background is transparent, fill background with black color");
+                themeBGDrawable, DrawableColorTester.TRANSLUCENT_FILTER /* filterType */);
+        if (themeBGTester.passFilterRatio() != 1) {
+            // the window background is translucent, unable to draw
+            Slog.w(TAG, "Window background is translucent, fill background with black color");
             return getSystemBGColor();
         } else {
             return themeBGTester.getDominateColor();
@@ -854,7 +870,7 @@ public class SplashscreenContentDrawer {
             @Override
             public float passFilterRatio() {
                 final int alpha = mColorDrawable.getAlpha();
-                return (float) (alpha / 255);
+                return alpha / 255.0f;
             }
 
             @Override

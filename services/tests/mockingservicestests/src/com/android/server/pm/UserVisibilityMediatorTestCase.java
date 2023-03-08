@@ -44,7 +44,8 @@ import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Log;
 
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.DumpableDumperRule;
+import com.android.server.ExpectableTestCase;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -63,7 +64,7 @@ import java.util.Arrays;
  * is visible, display associated to the user, etc...) for each scenario (full user started on fg,
  * profile user started on bg, etc...).
  */
-abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
+abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
 
     private static final String TAG = UserVisibilityMediatorTestCase.class.getSimpleName();
 
@@ -123,6 +124,8 @@ abstract class UserVisibilityMediatorTestCase extends ExtendedMockitoTestCase {
         mBackgroundUsersOnDisplaysEnabled = backgroundUsersOnDisplaysEnabled;
         mBackgroundUserOnDefaultDisplayAllowed = backgroundUserOnDefaultDisplayAllowed;
     }
+
+    protected final DumpableDumperRule mDumpableDumperRule = new DumpableDumperRule();
 
     @Before
     public final void setFixtures() {

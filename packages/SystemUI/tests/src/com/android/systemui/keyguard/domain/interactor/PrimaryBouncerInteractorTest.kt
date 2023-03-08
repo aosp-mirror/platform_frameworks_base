@@ -19,11 +19,13 @@ package com.android.systemui.keyguard.domain.interactor
 import android.os.Looper
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.testing.TestableResources
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.DejankUtils
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.keyguard.DismissCallbackRegistry
@@ -69,6 +71,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     private val mainHandler = FakeHandler(Looper.getMainLooper())
     private lateinit var underTest: PrimaryBouncerInteractor
+    private lateinit var resources: TestableResources
 
     @Before
     fun setUp() {
@@ -84,25 +87,26 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 mPrimaryBouncerCallbackInteractor,
                 falsingCollector,
                 dismissCallbackRegistry,
-                keyguardBypassController,
+                context,
                 keyguardUpdateMonitor,
+                keyguardBypassController,
             )
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         `when`(repository.primaryBouncerShow.value).thenReturn(null)
         `when`(bouncerView.delegate).thenReturn(bouncerViewDelegate)
+        resources = context.orCreateTestableResources
     }
 
     @Test
     fun testShow_isScrimmed() {
         underTest.show(true)
-        verify(repository).setOnScreenTurnedOff(false)
         verify(repository).setKeyguardAuthenticated(null)
         verify(repository).setPrimaryHide(false)
         verify(repository).setPrimaryStartingToHide(false)
         verify(repository).setPrimaryScrimmed(true)
         verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
         verify(repository).setPrimaryShowingSoon(true)
-        verify(keyguardStateController).notifyBouncerShowing(true)
+        verify(keyguardStateController).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor).dispatchStartingToShow()
         verify(repository).setPrimaryVisible(true)
         verify(repository).setPrimaryShow(any(KeyguardBouncerModel::class.java))
@@ -118,7 +122,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun testShow_keyguardIsDone() {
         `when`(bouncerView.delegate?.showNextSecurityScreenOrFinish()).thenReturn(true)
-        verify(keyguardStateController, never()).notifyBouncerShowing(true)
+        verify(keyguardStateController, never()).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor, never()).dispatchStartingToShow()
     }
 
@@ -126,7 +130,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testHide() {
         underTest.hide()
         verify(falsingCollector).onBouncerHidden()
-        verify(keyguardStateController).notifyBouncerShowing(false)
+        verify(keyguardStateController).notifyPrimaryBouncerShowing(false)
         verify(repository).setPrimaryShowingSoon(false)
         verify(repository).setPrimaryVisible(false)
         verify(repository).setPrimaryHide(true)
@@ -207,12 +211,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnScreenTurnedOff() {
-        underTest.onScreenTurnedOff()
-        verify(repository).setOnScreenTurnedOff(true)
-    }
-
-    @Test
     fun testSetKeyguardPosition() {
         underTest.setKeyguardPosition(0f)
         verify(repository).setKeyguardPosition(0f)
@@ -285,5 +283,99 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         assertThat(underTest.willDismissWithAction()).isTrue()
         `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(false)
         assertThat(underTest.willDismissWithAction()).isFalse()
+    }
+
+    @Test
+    fun testSideFpsVisibility() {
+        updateSideFpsVisibilityParameters(
+            isVisible = true,
+            sfpsEnabled = true,
+            fpsDetectionRunning = true,
+            isUnlockingWithFpAllowed = true,
+            isAnimatingAway = false
+        )
+        underTest.updateSideFpsVisibility()
+        verify(repository).setSideFpsShowing(true)
+    }
+
+    @Test
+    fun testSideFpsVisibility_notVisible() {
+        updateSideFpsVisibilityParameters(
+            isVisible = false,
+            sfpsEnabled = true,
+            fpsDetectionRunning = true,
+            isUnlockingWithFpAllowed = true,
+            isAnimatingAway = false
+        )
+        underTest.updateSideFpsVisibility()
+        verify(repository).setSideFpsShowing(false)
+    }
+
+    @Test
+    fun testSideFpsVisibility_sfpsNotEnabled() {
+        updateSideFpsVisibilityParameters(
+            isVisible = true,
+            sfpsEnabled = false,
+            fpsDetectionRunning = true,
+            isUnlockingWithFpAllowed = true,
+            isAnimatingAway = false
+        )
+        underTest.updateSideFpsVisibility()
+        verify(repository).setSideFpsShowing(false)
+    }
+
+    @Test
+    fun testSideFpsVisibility_fpsDetectionNotRunning() {
+        updateSideFpsVisibilityParameters(
+            isVisible = true,
+            sfpsEnabled = true,
+            fpsDetectionRunning = false,
+            isUnlockingWithFpAllowed = true,
+            isAnimatingAway = false
+        )
+        underTest.updateSideFpsVisibility()
+        verify(repository).setSideFpsShowing(false)
+    }
+
+    @Test
+    fun testSideFpsVisibility_UnlockingWithFpNotAllowed() {
+        updateSideFpsVisibilityParameters(
+            isVisible = true,
+            sfpsEnabled = true,
+            fpsDetectionRunning = true,
+            isUnlockingWithFpAllowed = false,
+            isAnimatingAway = false
+        )
+        underTest.updateSideFpsVisibility()
+        verify(repository).setSideFpsShowing(false)
+    }
+
+    @Test
+    fun testSideFpsVisibility_AnimatingAway() {
+        updateSideFpsVisibilityParameters(
+            isVisible = true,
+            sfpsEnabled = true,
+            fpsDetectionRunning = true,
+            isUnlockingWithFpAllowed = true,
+            isAnimatingAway = true
+        )
+        underTest.updateSideFpsVisibility()
+        verify(repository).setSideFpsShowing(false)
+    }
+
+    private fun updateSideFpsVisibilityParameters(
+        isVisible: Boolean,
+        sfpsEnabled: Boolean,
+        fpsDetectionRunning: Boolean,
+        isUnlockingWithFpAllowed: Boolean,
+        isAnimatingAway: Boolean
+    ) {
+        `when`(repository.primaryBouncerVisible.value).thenReturn(isVisible)
+        resources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer, sfpsEnabled)
+        `when`(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(fpsDetectionRunning)
+        `when`(keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
+            .thenReturn(isUnlockingWithFpAllowed)
+        `when`(repository.primaryBouncerStartingDisappearAnimation.value)
+            .thenReturn(if (isAnimatingAway) Runnable {} else null)
     }
 }

@@ -23,6 +23,7 @@ import static android.companion.CompanionDeviceManager.COMPANION_DEVICE_DISCOVER
 import static android.content.ComponentName.createRelative;
 
 import static com.android.server.companion.Utils.prepareForIpc;
+import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_PERMISSION_RESTORE;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -30,6 +31,7 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.DeviceNotAssociatedException;
+import android.companion.IOnMessageReceivedListener;
 import android.companion.ISystemDataTransferCallback;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.companion.datatransfer.SystemDataTransferRequest;
@@ -39,6 +41,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
@@ -91,7 +94,18 @@ public class SystemDataTransferProcessor {
         mAssociationStore = associationStore;
         mSystemDataTransferRequestStore = systemDataTransferRequestStore;
         mTransportManager = transportManager;
-        mTransportManager.setListener(this::onReceivePermissionRestore);
+        IOnMessageReceivedListener messageListener = new IOnMessageReceivedListener() {
+            @Override
+            public void onMessageReceived(int associationId, byte[] data) throws RemoteException {
+                onReceivePermissionRestore(data);
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+        mTransportManager.addListener(MESSAGE_REQUEST_PERMISSION_RESTORE, messageListener);
         mPermissionControllerManager = mContext.getSystemService(PermissionControllerManager.class);
         mExecutor = Executors.newSingleThreadExecutor();
     }

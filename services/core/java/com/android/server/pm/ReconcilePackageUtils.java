@@ -82,8 +82,10 @@ final class ReconcilePackageUtils {
                 for (SharedLibraryInfo info : allowedSharedLibInfos) {
                     if (!SharedLibraryUtils.addSharedLibraryToPackageVersionMap(
                             incomingSharedLibraries, info)) {
-                        throw new ReconcileFailure("Shared Library " + info.getName()
-                                + " is being installed twice in this set!");
+                        throw ReconcileFailure.ofInternalError(
+                                "Shared Library " + info.getName()
+                                + " is being installed twice in this set!",
+                                PackageManagerException.INTERNAL_ERROR_SHARED_LIB_INSTALLED_TWICE);
                     }
                 }
             }

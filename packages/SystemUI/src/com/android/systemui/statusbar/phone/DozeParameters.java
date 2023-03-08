@@ -352,7 +352,7 @@ public class DozeParameters implements
     }
 
     private boolean willAnimateFromLockScreenToAod() {
-        return getAlwaysOn() && mKeyguardVisible;
+        return shouldControlScreenOff() && mKeyguardVisible;
     }
 
     private boolean getBoolean(String propName, int resId) {
@@ -429,7 +429,6 @@ public class DozeParameters implements
         }
 
         dispatchAlwaysOnEvent();
-        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
     }
 
     @Override
@@ -469,6 +468,7 @@ public class DozeParameters implements
         for (Callback callback : mCallbacks) {
             callback.onAlwaysOnChange();
         }
+        mScreenOffAnimationController.onAlwaysOnChanged(getAlwaysOn());
     }
 
     private boolean getPostureSpecificBool(

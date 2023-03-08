@@ -4937,4 +4937,66 @@ public final class Telephony {
             return ALL_COLUMNS;
         }
     }
+
+    /**
+     * Stores incoming satellite datagrams.
+     * @hide
+     */
+    public static final class SatelliteDatagrams {
+        /**
+         * Not instantiable.
+         * @hide
+         */
+        private SatelliteDatagrams() {}
+
+        /**
+         * Provider name for Satellite Datagrams table.
+         */
+        public static final String PROVIDER_NAME = "satellite";
+
+        /**
+         * Table name for Satellite Datagrams table.
+         */
+        public static final String TABLE_NAME = "incoming_datagrams";
+
+        /**
+         * URL for satellite incoming datagrams table.
+         */
+        private static final String URL = "content://" + PROVIDER_NAME + "/" + TABLE_NAME;
+
+        /**
+         * The {@code content://} style URI for this provider.
+         * @hide
+         */
+        public static final Uri CONTENT_URI = Uri.parse(URL);
+
+        /**
+         * SatelliteProvider unique key column name is the datagram id.
+         * <P>Type: INTEGER (int)</P>
+         * @hide
+         */
+        public static final String COLUMN_UNIQUE_KEY_DATAGRAM_ID = "datagram_id";
+
+        /**
+         * SatelliteProvider column name for storing datagram.
+         * <p>TYPE: BLOB
+         * @hide
+         */
+        public static final String COLUMN_DATAGRAM = "datagram";
+
+        /** All columns in {@link SatelliteDatagrams} table. */
+        private static final List<String> ALL_COLUMNS = List.of(
+                COLUMN_UNIQUE_KEY_DATAGRAM_ID,
+                COLUMN_DATAGRAM
+        );
+
+        /**
+         * @return All columns in {@link SatelliteDatagrams} table.
+         * @hide
+         */
+        @NonNull
+        public static List<String> getAllColumns() {
+            return ALL_COLUMNS;
+        }
+    }
 }

@@ -32,6 +32,8 @@ import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.SrvccState;
 import android.telephony.TelephonyManager.DataEnabledReason;
+import android.telephony.TelephonyManager.EmergencyCallbackModeStopReason;
+import android.telephony.TelephonyManager.EmergencyCallbackModeType;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
@@ -1304,8 +1306,6 @@ public class PhoneStateListener {
         // default implementation empty
     }
 
-
-
     /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
@@ -1667,6 +1667,18 @@ public class PhoneStateListener {
         }
 
         public final void onMediaQualityStatusChanged(MediaQualityStatus mediaQualityStatus) {
+            // not support. Can't override. Use TelephonyCallback.
+        }
+
+        /** @hide */
+        public final void onCallBackModeStarted(
+                @TelephonyManager.EmergencyCallbackModeType int type) {
+            // not support. Can't override. Use TelephonyCallback.
+        }
+
+        /** @hide */
+        public final void onCallBackModeStopped(@EmergencyCallbackModeType int type,
+                @EmergencyCallbackModeStopReason int reason) {
             // not support. Can't override. Use TelephonyCallback.
         }
     }

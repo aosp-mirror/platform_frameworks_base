@@ -100,7 +100,7 @@ public final class BrightnessEvent {
      * A utility to reset the BrightnessEvent to default values
      */
     public void reset() {
-        mReason.set(null);
+        mReason = new BrightnessReason();
         mTime = SystemClock.uptimeMillis();
         mPhysicalDisplayId = "";
         // Lux values

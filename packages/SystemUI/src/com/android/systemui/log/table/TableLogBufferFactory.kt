@@ -38,7 +38,6 @@ constructor(
      *
      * @param name a unique table name
      * @param maxSize the buffer max size. See [adjustMaxSize]
-     *
      * @return a new [TableLogBuffer] registered with [DumpManager]
      */
     fun create(

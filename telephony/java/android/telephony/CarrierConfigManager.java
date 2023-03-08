@@ -248,7 +248,8 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
-     * @hide
+     *
+     * The default value is true.
      */
     public static final String KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL =
             "additional_settings_caller_id_visibility_bool";
@@ -256,7 +257,8 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if the "Call Waiting" item is visible in the Additional Settings menu.
      * true means visible. false means gone.
-     * @hide
+     *
+     * The default value is true.
      */
     public static final String KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL =
             "additional_settings_call_waiting_visibility_bool";
@@ -535,10 +537,9 @@ public class CarrierConfigManager {
 
     /**
      * CDMA activation goes through OTASP.
-     * <p>
-     * TODO: This should be combined with config_use_hfa_for_provisioning and implemented as an enum
-     * (NONE, HFA, OTASP).
      */
+    // TODO: This should be combined with config_use_hfa_for_provisioning and implemented as an enum
+    // (NONE, HFA, OTASP).
     public static final String KEY_USE_OTASP_FOR_PROVISIONING_BOOL =
             "use_otasp_for_provisioning_bool";
 
@@ -6990,11 +6991,11 @@ public class CarrierConfigManager {
 
         /**
          * Maximum Retry Count for SMS over IMS on Failure, If the Retry Count exceeds this value,
-         * and if the retry count is less than KEY_SMS_MAX_RETRY_COUNT_INT
+         * and if the retry count is less than {@link #KEY_SMS_MAX_RETRY_COUNT_INT}
          * sending SMS should fallback to CS
          */
-        public static final String KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT =
-                KEY_PREFIX + "sms_max_retry_count_over_ims_int";
+        public static final String KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT =
+                KEY_PREFIX + "sms_max_retry_over_ims_count_int";
 
         /**
          * Delay Timer Value in milliseconds
@@ -7062,7 +7063,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_SMS_OVER_IMS_FORMAT_INT, SMS_FORMAT_3GPP);
 
             defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_INT, 3);
-            defaults.putInt(KEY_SMS_MAX_RETRY_COUNT_OVER_IMS_INT, 3);
+            defaults.putInt(KEY_SMS_MAX_RETRY_OVER_IMS_COUNT_INT, 3);
             defaults.putInt(KEY_SMS_OVER_IMS_SEND_RETRY_DELAY_MILLIS_INT,
                     2000);
             defaults.putInt(KEY_SMS_TR1_TIMER_MILLIS_INT, 130000);
@@ -7607,6 +7608,55 @@ public class CarrierConfigManager {
         public static final String KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL =
                 KEY_PREFIX + "emergency_requires_volte_enabled_bool";
 
+        /**
+         * This values indicates that the cross SIM redialing timer shall be disabled.
+         *
+         * @see #KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT
+         * @see #KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT
+         * @hide
+         */
+        public static final int REDIAL_TIMER_DISABLED = 0;
+
+        /**
+         * A timer to guard the max attempting time on current SIM slot so that modem will not
+         * stuck in current SIM slot for long time. On timer expiry, if emergency call on the
+         * other SIM slot is preferable, telephony shall cancel the emergency call and place the
+         * call on the other SIM slot. If this value is set to {@link #REDIAL_TIMER_DISABLED}, then
+         * the timer will never be started and domain selection continues on the current SIM slot.
+         * This value should be greater than the value of {@link #KEY_EMERGENCY_SCAN_TIMER_SEC_INT}.
+         *
+         * The default value for the timer is 120 seconds.
+         * @hide
+         */
+        public static final String KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT =
+                KEY_PREFIX + "cross_stack_redial_timer_sec_int";
+
+        /**
+         * If emergency calls are only allowed with normal-registered service and UE should get
+         * normal service in a short time with acquired band information, telephony
+         * expects dialing emergency call will be completed in a short time.
+         * If dialing is not completed with in a certain timeout, telephony shall place on
+         * another SIM slot. If this value is set to {@link #REDIAL_TIMER_DISABLED}, then the timer
+         * will never be started and domain selection continues on the current SIM slot.
+         * The timer shall be started for the first trial of each subscription and shall be ignored
+         * in the roaming networks and non-domestic networks.
+         *
+         * The default value for the timer is {@link #REDIAL_TIMER_DISABLED}.
+         * @hide
+         */
+        public static final String KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT =
+                KEY_PREFIX + "quick_cross_stack_redial_timer_sec_int";
+
+        /**
+         * Indicates whether the quick cross stack redial timer will be triggered only when
+         * the device is registered to the network.
+         *
+         * The default value is {@code true}.
+         * @hide
+         */
+        public static final String KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL =
+                KEY_PREFIX + "start_quick_cross_stack_redial_timer_when_registered_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL, false);
@@ -7673,6 +7723,10 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_EMERGENCY_REQUIRES_VOLTE_ENABLED_BOOL, false);
             defaults.putStringArray(KEY_EMERGENCY_CDMA_PREFERRED_NUMBERS_STRING_ARRAY,
                     new String[0]);
+            defaults.putInt(KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT, 120);
+            defaults.putInt(KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT, REDIAL_TIMER_DISABLED);
+            defaults.putBoolean(KEY_START_QUICK_CROSS_STACK_REDIAL_TIMER_WHEN_REGISTERED_BOOL,
+                    true);
 
             return defaults;
         }
@@ -8989,8 +9043,9 @@ public class CarrierConfigManager {
             "carrier_certificate_string_array";
 
     /**
-     * Flag specifying whether the incoming call number should be formatted to national number
-     * for Japan. @return {@code true} convert to the national format, {@code false} otherwise.
+     * Flag specifying whether the incoming call number and the conference participant number
+     * should be formatted to national number for Japan.
+     * @return {@code true} convert to the national format, {@code false} otherwise.
      * e.g. "+819012345678" -> "09012345678"
      * @hide
      */
@@ -10059,7 +10114,7 @@ public class CarrierConfigManager {
         sDefaults.putAll(Bsf.getDefaults());
         sDefaults.putAll(Iwlan.getDefaults());
         sDefaults.putStringArray(KEY_CARRIER_CERTIFICATE_STRING_ARRAY, new String[0]);
-         sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
+        sDefaults.putBoolean(KEY_FORMAT_INCOMING_NUMBER_TO_NATIONAL_FOR_JP_BOOL, false);
         sDefaults.putIntArray(KEY_DISCONNECT_CAUSE_PLAY_BUSYTONE_INT_ARRAY,
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
@@ -10692,5 +10747,39 @@ public class CarrierConfigManager {
             throw new IllegalStateException("Telephony registry service is null");
         }
         trm.removeCarrierConfigChangedListener(listener);
+    }
+
+    /**
+     * Get subset of specified carrier configuration if available or empty bundle, without throwing
+     * {@link RuntimeException} to caller.
+     *
+     * <p>This is a system internally used only utility to reduce the repetitive logic.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}, or the calling app
+     * has carrier privileges on the specified subscription (see
+     * {@link TelephonyManager#hasCarrierPrivileges()}).
+     *
+     * @param context Context used to get the CarrierConfigManager service.
+     * @param subId The subscription ID to get the config from.
+     * @param keys The config keys the client is interested in.
+     * @return Config bundle with key/value for the specified keys or empty bundle when failed
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            "carrier privileges",
+    })
+    @NonNull
+    public static PersistableBundle getCarrierConfigSubset(
+            @NonNull Context context, int subId, @NonNull String... keys) {
+        PersistableBundle configs = null;
+        CarrierConfigManager ccm = context.getSystemService(CarrierConfigManager.class);
+        try {
+            configs = ccm.getConfigForSubId(subId, keys);
+        } catch (RuntimeException exception) {
+            Rlog.w(TAG, "CarrierConfigLoader is not available.");
+        }
+        return configs != null ? configs : new PersistableBundle();
     }
 }

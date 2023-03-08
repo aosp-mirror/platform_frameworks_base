@@ -18,8 +18,10 @@ package com.android.keyguard
 
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
@@ -30,6 +32,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
@@ -37,6 +40,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -76,7 +80,9 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     Mockito.`when`(keyguardPasswordView.findViewById<EditText>(R.id.passwordEntry))
         .thenReturn(passwordEntry)
     `when`(keyguardPasswordView.resources).thenReturn(context.resources)
-    keyguardPasswordViewController =
+    `when`(keyguardPasswordView.findViewById<ImageView>(R.id.switch_ime_button))
+        .thenReturn(mock(ImageView::class.java))
+     keyguardPasswordViewController =
         KeyguardPasswordViewController(
             keyguardPasswordView,
             keyguardUpdateMonitor,
@@ -113,6 +119,18 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
   }
 
   @Test
+  fun onApplyWindowInsetsListener_onApplyWindowInsets() {
+      `when`(keyguardViewController.isBouncerShowing).thenReturn(false)
+      val argumentCaptor = ArgumentCaptor.forClass(View.OnApplyWindowInsetsListener::class.java)
+
+      keyguardPasswordViewController.onViewAttached()
+      verify(keyguardPasswordView).setOnApplyWindowInsetsListener(argumentCaptor.capture())
+      argumentCaptor.value.onApplyWindowInsets(keyguardPasswordView, null)
+
+      verify(keyguardPasswordView).hideKeyboard()
+  }
+
+  @Test
   fun testHideKeyboardWhenOnPause() {
     keyguardPasswordViewController.onPause()
     keyguardPasswordView.post {
@@ -133,5 +151,11 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     `when`(mKeyguardMessageAreaController.message).thenReturn("Unlock to continue.")
     keyguardPasswordViewController.startAppearAnimation()
     verify(mKeyguardMessageAreaController, never()).setMessage(anyString(), anyBoolean())
+  }
+
+  @Test
+  fun testMessageIsSetWhenReset() {
+    keyguardPasswordViewController.resetState()
+    verify(mKeyguardMessageAreaController).setMessage(R.string.keyguard_enter_your_password)
   }
 }

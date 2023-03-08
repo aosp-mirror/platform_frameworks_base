@@ -26,6 +26,10 @@
     <xs:element name="displayConfiguration">
         <xs:complexType>
             <xs:sequence>
+                <xs:element type ="xs:string" name="name">
+                    <xs:annotation name="nullable"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="densityMapping" name="densityMapping" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nullable"/>
                     <xs:annotation name="final"/>
@@ -209,6 +213,32 @@
     <xs:complexType name="thermalThrottling">
         <xs:sequence>
             <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="refreshRateThrottlingMap" name="refreshRateThrottlingMap" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateThrottlingMap">
+        <xs:attribute name="id" type="xs:string" />
+        <xs:sequence>
+            <xs:element name="refreshRateThrottlingPoint" type="refreshRateThrottlingPoint" maxOccurs="unbounded">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="refreshRateRange" name="refreshRateRange">
+                <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
@@ -469,12 +499,48 @@
     </xs:complexType>
 
     <xs:complexType name="refreshRateConfigs">
+        <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="defaultPeakRefreshRate" type="xs:nonNegativeInteger"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="refreshRateZoneProfiles" type="refreshRateZoneProfiles"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="defaultRefreshRateInHbmHdr" type="xs:nonNegativeInteger"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="defaultRefreshRateInHbmSunlight" type="xs:nonNegativeInteger"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="lowerBlockingZoneConfigs" type="blockingZoneConfig"
                     minOccurs="0" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
         <xs:element name="higherBlockingZoneConfigs" type="blockingZoneConfig"
                     minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateZoneProfiles">
+        <xs:sequence>
+            <xs:element name="refreshRateZoneProfile" type="refreshRateZone"
+                        minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateZone">
+        <xs:attribute name="id" use="required" type="xs:string" />
+        <xs:element name="refreshRateRange" type="refreshRateRange">
             <xs:annotation name="final"/>
         </xs:element>
     </xs:complexType>

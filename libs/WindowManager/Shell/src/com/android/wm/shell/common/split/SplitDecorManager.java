@@ -114,7 +114,8 @@ public class SplitDecorManager extends WindowlessWindowManager {
         context = context.createWindowContext(context.getDisplay(), TYPE_APPLICATION_OVERLAY,
                 null /* options */);
         mHostLeash = rootLeash;
-        mViewHost = new SurfaceControlViewHost(context, context.getDisplay(), this);
+        mViewHost = new SurfaceControlViewHost(context, context.getDisplay(), this,
+                "SplitDecorManager");
 
         mIconSize = context.getResources().getDimensionPixelSize(R.dimen.split_icon_size);
         final FrameLayout rootLayout = (FrameLayout) LayoutInflater.from(context)
@@ -247,11 +248,11 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
     /** Stops showing resizing hint. */
     public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
-        if (mScreenshot != null) {
-            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
-                mScreenshotAnimator.cancel();
-            }
+        if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+            mScreenshotAnimator.cancel();
+        }
 
+        if (mScreenshot != null) {
             t.setPosition(mScreenshot, mOffsetX, mOffsetY);
 
             final SurfaceControl.Transaction animT = new SurfaceControl.Transaction();
@@ -321,6 +322,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
     /** Screenshot host leash and attach on it if meet some conditions */
     public void screenshotIfNeeded(SurfaceControl.Transaction t) {
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            }
+
             mTempRect.set(mOldBounds);
             mTempRect.offsetTo(0, 0);
             mScreenshot = ScreenshotUtils.takeScreenshot(t, mHostLeash, mTempRect,
@@ -333,6 +338,10 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (screenshot == null || !screenshot.isValid()) return;
 
         if (!mShown && mIsResizing && !mOldBounds.equals(mResizingBounds)) {
+            if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
+                mScreenshotAnimator.cancel();
+            }
+
             mScreenshot = screenshot;
             t.reparent(screenshot, mHostLeash);
             t.setLayer(screenshot, Integer.MAX_VALUE - 1);

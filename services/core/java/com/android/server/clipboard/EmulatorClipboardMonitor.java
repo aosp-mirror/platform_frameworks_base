@@ -111,7 +111,7 @@ class EmulatorClipboardMonitor implements Consumer<ClipData> {
         bb.order(ByteOrder.LITTLE_ENDIAN);
         final int msgLen = bb.getInt();
 
-        if (msgLen <= 0 || msgLen > MAX_CLIPBOARD_BYTES) {
+        if (msgLen < 0 || msgLen > MAX_CLIPBOARD_BYTES) {
             throw new ProtocolException("Clipboard message length: " + msgLen + " out of bounds.");
         }
 

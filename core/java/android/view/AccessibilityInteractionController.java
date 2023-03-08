@@ -172,7 +172,7 @@ public final class AccessibilityInteractionController {
 
     private boolean isVisibleToAccessibilityService(View view) {
         return view != null && (mA11yManager.isRequestFromAccessibilityTool()
-                || !view.isAccessibilityDataPrivate());
+                || !view.isAccessibilityDataSensitive());
     }
 
     public void findAccessibilityNodeInfoByAccessibilityIdClientThread(

@@ -32,6 +32,14 @@ import java.io.PrintWriter;
 abstract class NetworkTimeHelper {
 
     /**
+     * This compile-time value can be changed to switch between new and old ways to obtain network
+     * time for GNSS. If you have to turn this from {@code true} to {@code false} then please create
+     * a platform bug. This switch will be removed in a future release. If there are problems with
+     * the new impl we'd like to hear about them.
+     */
+    static final boolean USE_TIME_DETECTOR_IMPL = false;
+
+    /**
      * The callback interface used by {@link NetworkTimeHelper} to report the time to {@link
      * GnssLocationProvider}. The callback can happen at any time using the thread associated with
      * the looper passed to {@link #create(Context, Looper, InjectTimeCallback)}.
@@ -47,7 +55,13 @@ abstract class NetworkTimeHelper {
     static NetworkTimeHelper create(
             @NonNull Context context, @NonNull Looper looper,
             @NonNull InjectTimeCallback injectTimeCallback) {
-        return new NtpNetworkTimeHelper(context, looper, injectTimeCallback);
+        if (USE_TIME_DETECTOR_IMPL) {
+            TimeDetectorNetworkTimeHelper.Environment environment =
+                    new TimeDetectorNetworkTimeHelper.EnvironmentImpl(looper);
+            return new TimeDetectorNetworkTimeHelper(environment, injectTimeCallback);
+        } else {
+            return new NtpNetworkTimeHelper(context, looper, injectTimeCallback);
+        }
     }
 
     /**
@@ -74,7 +88,9 @@ abstract class NetworkTimeHelper {
      * Notifies that network connectivity has been established.
      *
      * <p>Called by {@link GnssLocationProvider} when the device establishes a data network
-     * connection.
+     * connection. This call should be removed eventually because it should be handled by the {@link
+     * NetworkTimeHelper} implementation itself, but has been retained for compatibility while
+     * switching implementations.
      */
     abstract void onNetworkAvailable();
 
@@ -82,4 +98,5 @@ abstract class NetworkTimeHelper {
      * Dumps internal state during bugreports useful for debugging.
      */
     abstract void dump(@NonNull PrintWriter pw);
+
 }

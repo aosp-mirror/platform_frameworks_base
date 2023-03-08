@@ -28,6 +28,7 @@ import android.os.OutcomeReceiver;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.text.TextUtils;
 
 import com.android.internal.telecom.ClientTransactionalServiceRepository;
 import com.android.internal.telecom.ICallControl;
@@ -67,7 +68,7 @@ public final class CallControl {
 
     /**
      * @return the callId Telecom assigned to this CallControl object which should be attached to
-     *  an individual call.
+     * an individual call.
      */
     @NonNull
     public ParcelUuid getCallId() {
@@ -75,12 +76,15 @@ public final class CallControl {
     }
 
     /**
-     * Request Telecom set the call state to active.
+     * Request Telecom set the call state to active. This method should be called when either an
+     * outgoing call is ready to go active or a held call is ready to go active again. For incoming
+     * calls that are ready to be answered, use
+     * {@link CallControl#answer(int, Executor, OutcomeReceiver)}.
      *
      * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
-     *                will be called on.
+     *                 will be called on.
      * @param callback that will be completed on the Telecom side that details success or failure
-     *                of the requested operation.
+     *                 of the requested operation.
      *
      *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
      *                 switched the call state to active
@@ -105,13 +109,50 @@ public final class CallControl {
     }
 
     /**
+     * Request Telecom answer an incoming call.  For outgoing calls and calls that have been placed
+     * on hold, use {@link CallControl#setActive(Executor, OutcomeReceiver)}.
+     *
+     * @param videoState to report to Telecom. Telecom will store VideoState in the event another
+     *                   service/device requests it in order to continue the call on another screen.
+     * @param executor   The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                   will be called on.
+     * @param callback   that will be completed on the Telecom side that details success or failure
+     *                   of the requested operation.
+     *
+     *                   {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
+     *                   switched the call state to active
+     *
+     *                   {@link OutcomeReceiver#onError} will be called if Telecom has failed to set
+     *                   the call state to active.  A {@link CallException} will be passed
+     *                   that details why the operation failed.
+     */
+    public void answer(@android.telecom.CallAttributes.CallType int videoState,
+            @CallbackExecutor @NonNull Executor executor,
+            @NonNull OutcomeReceiver<Void, CallException> callback) {
+        validateVideoState(videoState);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.answer(videoState, mCallId,
+                        new CallControlResultReceiver("answer", executor, callback));
+
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
      * Request Telecom set the call state to inactive. This the same as hold for two call endpoints
      * but can be extended to setting a meeting to inactive.
      *
      * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
-     *                will be called on.
+     *                 will be called on.
      * @param callback that will be completed on the Telecom side that details success or failure
-     *                of the requested operation.
+     *                 of the requested operation.
      *
      *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
      *                 switched the call state to inactive
@@ -136,56 +177,44 @@ public final class CallControl {
     }
 
     /**
-     * Request Telecom set the call state to disconnect.
+     * Request Telecom disconnect the call and remove the call from telecom tracking.
      *
-     * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
-     *                will be called on.
-     * @param callback that will be completed on the Telecom side that details success or failure
-     *                of the requested operation.
+     * @param disconnectCause represents the cause for disconnecting the call.  The only valid
+     *                        codes for the {@link  android.telecom.DisconnectCause} passed in are:
+     *                        <ul>
+     *                        <li>{@link DisconnectCause#LOCAL}</li>
+     *                        <li>{@link DisconnectCause#REMOTE}</li>
+     *                        <li>{@link DisconnectCause#REJECTED}</li>
+     *                        <li>{@link DisconnectCause#MISSED}</li>
+     *                        </ul>
+     * @param executor        The {@link Executor} on which the {@link OutcomeReceiver} callback
+     *                        will be called on.
+     * @param callback        That will be completed on the Telecom side that details success or
+     *                        failure of the requested operation.
      *
-     *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
-     *                 disconnected the call.
+     *                        {@link OutcomeReceiver#onResult} will be called if Telecom has
+     *                        successfully disconnected the call.
      *
-     *                 {@link OutcomeReceiver#onError} will be called if Telecom has failed to
-     *                 disconnect the call.  A {@link CallException} will be passed
-     *                 that details why the operation failed.
+     *                        {@link OutcomeReceiver#onError} will be called if Telecom has failed
+     *                        to disconnect the call.  A {@link CallException} will be passed
+     *                        that details why the operation failed.
+     *
+     * <p>
+     * Note: After the call has been successfully disconnected, calling any CallControl API will
+     * result in the {@link OutcomeReceiver#onError} with
+     * {@link CallException#CODE_CALL_IS_NOT_BEING_TRACKED}.
      */
     public void disconnect(@NonNull DisconnectCause disconnectCause,
             @CallbackExecutor @NonNull Executor executor,
             @NonNull OutcomeReceiver<Void, CallException> callback) {
+        Objects.requireNonNull(disconnectCause);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        validateDisconnectCause(disconnectCause);
         if (mServerInterface != null) {
             try {
                 mServerInterface.disconnect(mCallId, disconnectCause,
                         new CallControlResultReceiver("disconnect", executor, callback));
-            } catch (RemoteException e) {
-                throw e.rethrowAsRuntimeException();
-            }
-        } else {
-            throw new IllegalStateException(INTERFACE_ERROR_MSG);
-        }
-    }
-
-    /**
-     * Request Telecom reject the incoming call.
-     *
-     * @param executor The {@link Executor} on which the {@link OutcomeReceiver} callback
-     *                will be called on.
-     * @param callback that will be completed on the Telecom side that details success or failure
-     *                of the requested operation.
-     *
-     *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
-     *                 rejected the incoming call.
-     *
-     *                 {@link OutcomeReceiver#onError} will be called if Telecom has failed to
-     *                 reject the incoming call.  A {@link CallException} will be passed
-     *                 that details why the operation failed.
-     */
-    public void rejectCall(@CallbackExecutor @NonNull Executor executor,
-            @NonNull OutcomeReceiver<Void, CallException> callback) {
-        if (mServerInterface != null) {
-            try {
-                mServerInterface.rejectCall(mCallId,
-                        new CallControlResultReceiver("rejectCall", executor, callback));
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
@@ -206,10 +235,10 @@ public final class CallControl {
      *                 of the requested operation.
      *
      *                 {@link OutcomeReceiver#onResult} will be called if Telecom has successfully
-     *                 rejected the incoming call.
+     *                 started the call streaming.
      *
      *                 {@link OutcomeReceiver#onError} will be called if Telecom has failed to
-     *                 reject the incoming call.  A {@link CallException} will be passed that
+     *                 start the call streaming. A {@link CallException} will be passed that
      *                 details why the operation failed.
      */
     public void startCallStreaming(@CallbackExecutor @NonNull Executor executor,
@@ -231,10 +260,10 @@ public final class CallControl {
      * requesting a change. Instead, the new endpoint should be one of the valid endpoints provided
      * by {@link CallEventCallback#onAvailableCallEndpointsChanged(List)}.
      *
-     * @param callEndpoint ; The {@link CallEndpoint} to change to.
-     * @param executor     ; The {@link Executor} on which the {@link OutcomeReceiver} callback
+     * @param callEndpoint The {@link CallEndpoint} to change to.
+     * @param executor     The {@link Executor} on which the {@link OutcomeReceiver} callback
      *                     will be called on.
-     * @param callback     ; The {@link OutcomeReceiver} that will be completed on the Telecom side
+     * @param callback     The {@link OutcomeReceiver} that will be completed on the Telecom side
      *                     that details success or failure of the requested operation.
      *
      *                     {@link OutcomeReceiver#onResult} will be called if Telecom has
@@ -263,10 +292,45 @@ public final class CallControl {
     }
 
     /**
+     * Raises an event to the {@link android.telecom.InCallService} implementations tracking this
+     * call via {@link android.telecom.Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * These events and the associated extra keys for the {@code Bundle} parameter are mutually
+     * defined by a VoIP application and {@link android.telecom.InCallService}. This API is used to
+     * relay additional information about a call other than what is specified in the
+     * {@link android.telecom.CallAttributes} to {@link android.telecom.InCallService}s. This might
+     * include, for example, a change to the list of participants in a meeting, or the name of the
+     * speakers who have their hand raised. Where appropriate, the {@link InCallService}s tracking
+     * this call may choose to render this additional information about the call. An automotive
+     * calling UX, for example may have enough screen real estate to indicate the number of
+     * participants in a meeting, but to prevent distractions could suppress the list of
+     * participants.
+     *
+     * @param event a string event identifier agreed upon between a VoIP application and an
+     *              {@link android.telecom.InCallService}
+     * @param extras a {@link android.os.Bundle} containing information about the event, as agreed
+     *              upon between a VoIP application and {@link android.telecom.InCallService}.
+     */
+    public void sendEvent(@NonNull String event, @NonNull Bundle extras) {
+        Objects.requireNonNull(event);
+        Objects.requireNonNull(extras);
+        if (mServerInterface != null) {
+            try {
+                mServerInterface.sendEvent(mCallId, event, extras);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        } else {
+            throw new IllegalStateException(INTERFACE_ERROR_MSG);
+        }
+    }
+
+    /**
      * Since {@link OutcomeReceiver}s cannot be passed via AIDL, a ResultReceiver (which can) must
      * wrap the Clients {@link OutcomeReceiver} passed in and await for the Telecom Server side
      * response in {@link ResultReceiver#onReceiveResult(int, Bundle)}.
-     * @hide */
+     *
+     * @hide
+     */
     private class CallControlResultReceiver extends ResultReceiver {
         private final String mCallingMethod;
         private final Executor mExecutor;
@@ -307,5 +371,28 @@ public final class CallControl {
                     CallException.class);
         }
         return new CallException(message, CallException.CODE_ERROR_UNKNOWN);
+    }
+
+    /** @hide */
+    private void validateDisconnectCause(DisconnectCause disconnectCause) {
+        final int code = disconnectCause.getCode();
+        if (code != DisconnectCause.LOCAL && code != DisconnectCause.REMOTE
+                && code != DisconnectCause.MISSED && code != DisconnectCause.REJECTED) {
+            throw new IllegalArgumentException(TextUtils.formatSimple(
+                    "The DisconnectCause code provided, %d , is not a valid Disconnect code. Valid "
+                            + "DisconnectCause codes are limited to [DisconnectCause.LOCAL, "
+                            + "DisconnectCause.REMOTE, DisconnectCause.MISSED, or "
+                            + "DisconnectCause.REJECTED]", disconnectCause.getCode()));
+        }
+    }
+
+    /** @hide */
+    private void validateVideoState(@android.telecom.CallAttributes.CallType int videoState) {
+        if (videoState != CallAttributes.AUDIO_CALL && videoState != CallAttributes.VIDEO_CALL) {
+            throw new IllegalArgumentException(TextUtils.formatSimple(
+                    "The VideoState argument passed in, %d , is not a valid VideoState. The "
+                            + "VideoState choices are limited to CallAttributes.AUDIO_CALL or"
+                            + "CallAttributes.VIDEO_CALL", videoState));
+        }
     }
 }

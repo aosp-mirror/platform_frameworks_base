@@ -1832,6 +1832,29 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED,
                 SecureSettingsProto.Accessibility
                         .ACCESSIBILITY_MAGNIFICATION_FOLLOW_TYPING_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_ALWAYS_ON_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED,
+                SecureSettingsProto.Accessibility
+                        .ACCESSIBILITY_MAGNIFICATION_JOYSTICK_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_RINGTONE_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_RINGTONE_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_CALL_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_CALL_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_MEDIA_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
@@ -2812,6 +2835,15 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 SystemSettingsProto.Notification.VIBRATION_INTENSITY);
+        dumpSetting(s, p,
+                Settings.System.CAMERA_FLASH_NOTIFICATION,
+                SystemSettingsProto.Notification.CAMERA_FLASH_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_FLASH_NOTIFICATION,
+                SystemSettingsProto.Notification.SCREEN_FLASH_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_FLASH_NOTIFICATION_COLOR,
+                SystemSettingsProto.Notification.SCREEN_FLASH_NOTIFICATION_COLOR_GLOBAL);
         // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
         p.end(notificationToken);
 

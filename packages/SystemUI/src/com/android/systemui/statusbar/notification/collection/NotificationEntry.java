@@ -181,6 +181,44 @@ public final class NotificationEntry extends ListEntry {
     private boolean mBlockable;
 
     /**
+     * The {@link SystemClock#elapsedRealtime()} when this notification entry was created.
+     */
+    public long mCreationElapsedRealTime;
+
+    /**
+     * Whether this notification has ever been a non-sticky HUN.
+     */
+    private boolean mIsDemoted = false;
+
+    /**
+     * True if both
+     *  1) app provided full screen intent but does not have the permission to send it
+     *  2) this notification has never been demoted before
+     */
+    public boolean isStickyAndNotDemoted() {
+
+        final boolean fsiRequestedButDenied =  (getSbn().getNotification().flags
+                & Notification.FLAG_FSI_REQUESTED_BUT_DENIED) != 0;
+
+        if (!fsiRequestedButDenied && !mIsDemoted) {
+            demoteStickyHun();
+        }
+        return fsiRequestedButDenied && !mIsDemoted;
+    }
+
+    @VisibleForTesting
+    public boolean isDemoted() {
+        return mIsDemoted;
+    }
+
+    /**
+     * Make sticky HUN not sticky.
+     */
+    public void demoteStickyHun() {
+        mIsDemoted = true;
+    }
+
+    /**
      * @param sbn the StatusBarNotification from system server
      * @param ranking also from system server
      * @param creationTime SystemClock.uptimeMillis of when we were created
@@ -197,8 +235,13 @@ public final class NotificationEntry extends ListEntry {
         mKey = sbn.getKey();
         setSbn(sbn);
         setRanking(ranking);
+        mCreationElapsedRealTime = SystemClock.elapsedRealtime();
     }
 
+    @VisibleForTesting
+    public void setCreationElapsedRealTime(long time) {
+        mCreationElapsedRealTime = time;
+    }
     @Override
     public NotificationEntry getRepresentativeEntry() {
         return this;
@@ -576,14 +619,6 @@ public final class NotificationEntry extends ListEntry {
         return row.isMediaRow();
     }
 
-    /**
-     * We are a top level child if our parent is the list of notifications duh
-     * @return {@code true} if we're a top level notification
-     */
-    public boolean isTopLevelChild() {
-        return row != null && row.isTopLevelChild();
-    }
-
     public void resetUserExpansion() {
         if (row != null) row.resetUserExpansion();
     }
@@ -731,12 +766,28 @@ public final class NotificationEntry extends ListEntry {
     }
 
     /**
+     * Determines whether the NotificationEntry is dismissable based on the Notification flags and
+     * the given state. It doesn't recurse children or depend on the view attach state.
+     *
+     * @param isLocked if the device is locked or unlocked
+     * @return true if this NotificationEntry is dismissable.
+     */
+    public boolean isDismissableForState(boolean isLocked) {
+        if (mSbn.isNonDismissable()) {
+            // don't dismiss exempted Notifications
+            return false;
+        }
+        // don't dismiss ongoing Notifications when the device is locked
+        return !mSbn.isOngoing() || !isLocked;
+    }
+
+    /**
      * @return Can the underlying notification be individually dismissed?
      * @see #canViewBeDismissed()
      */
     // TODO: This logic doesn't belong on NotificationEntry. It should be moved to a controller
     // that can be added as a dependency to any class that needs to answer this question.
-    public boolean isDismissable() {
+    public boolean legacyIsDismissableRecursive() {
         if  (mSbn.isOngoing()) {
             return false;
         }

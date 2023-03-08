@@ -26,16 +26,21 @@ import android.animation.TypeEvaluator;
 import android.annotation.NonNull;
 import android.app.TaskInfo;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.SparseArray;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets;
 
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.sysui.ConfigurationChangeListener;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
@@ -51,7 +56,7 @@ import com.android.wm.shell.unfold.UnfoldBackgroundController;
  * instances of FullscreenUnfoldTaskAnimator.
  */
 public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
-        DisplayInsetsController.OnInsetsChangedListener {
+        DisplayInsetsController.OnInsetsChangedListener, ConfigurationChangeListener {
 
     private static final float[] FLOAT_9 = new float[9];
     private static final TypeEvaluator<Rect> RECT_EVALUATOR = new RectEvaluator(new Rect());
@@ -62,34 +67,54 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
     private static final float START_SCALE = END_SCALE - VERTICAL_START_MARGIN * 2;
 
     private final SparseArray<AnimationContext> mAnimationContextByTaskId = new SparseArray<>();
-    private final int mExpandedTaskBarHeight;
-    private final float mWindowCornerRadiusPx;
     private final DisplayInsetsController mDisplayInsetsController;
     private final UnfoldBackgroundController mBackgroundController;
+    private final Context mContext;
+    private final ShellController mShellController;
 
-    private InsetsSource mTaskbarInsetsSource;
+    private InsetsSource mExpandedTaskbarInsetsSource;
+    private float mWindowCornerRadiusPx;
 
     public FullscreenUnfoldTaskAnimator(Context context,
             @NonNull UnfoldBackgroundController backgroundController,
-            DisplayInsetsController displayInsetsController) {
+            ShellController shellController, DisplayInsetsController displayInsetsController) {
+        mContext = context;
         mDisplayInsetsController = displayInsetsController;
         mBackgroundController = backgroundController;
-        mExpandedTaskBarHeight = context.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.taskbar_frame_height);
+        mShellController = shellController;
         mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
     public void init() {
         mDisplayInsetsController.addInsetsChangedListener(DEFAULT_DISPLAY, this);
+        mShellController.addConfigurationChangeListener(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfiguration) {
+        Trace.beginSection("FullscreenUnfoldTaskAnimator#onConfigurationChanged");
+        mWindowCornerRadiusPx = ScreenDecorationsUtils.getWindowCornerRadius(mContext);
+        Trace.endSection();
     }
 
     @Override
     public void insetsChanged(InsetsState insetsState) {
-        mTaskbarInsetsSource = insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        mExpandedTaskbarInsetsSource = getExpandedTaskbarSource(insetsState);
         for (int i = mAnimationContextByTaskId.size() - 1; i >= 0; i--) {
             AnimationContext context = mAnimationContextByTaskId.valueAt(i);
-            context.update(mTaskbarInsetsSource, context.mTaskInfo);
+            context.update(mExpandedTaskbarInsetsSource, context.mTaskInfo);
         }
+    }
+
+    private static InsetsSource getExpandedTaskbarSource(InsetsState state) {
+        for (int i = state.sourceSize() - 1; i >= 0; i--) {
+            final InsetsSource source = state.sourceAt(i);
+            if (source.getType() == WindowInsets.Type.navigationBars()
+                    && source.insetsRoundedCornerFrame()) {
+                return source;
+            }
+        }
+        return null;
     }
 
     public boolean hasActiveTasks() {
@@ -98,8 +123,8 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
 
     @Override
     public void onTaskAppeared(TaskInfo taskInfo, SurfaceControl leash) {
-        AnimationContext animationContext = new AnimationContext(leash, mTaskbarInsetsSource,
-                taskInfo);
+        AnimationContext animationContext = new AnimationContext(
+                leash, mExpandedTaskbarInsetsSource, taskInfo);
         mAnimationContextByTaskId.put(taskInfo.taskId, animationContext);
     }
 
@@ -107,7 +132,7 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
     public void onTaskChanged(TaskInfo taskInfo) {
         AnimationContext animationContext = mAnimationContextByTaskId.get(taskInfo.taskId);
         if (animationContext != null) {
-            animationContext.update(mTaskbarInsetsSource, taskInfo);
+            animationContext.update(mExpandedTaskbarInsetsSource, taskInfo);
         }
     }
 
@@ -206,11 +231,7 @@ public class FullscreenUnfoldTaskAnimator implements UnfoldTaskAnimator,
             mStartCropRect.set(mTaskInfo.getConfiguration().windowConfiguration.getBounds());
 
             if (taskBarInsetsSource != null) {
-                // Only insets the cropping window with task bar when it's expanded
-                if (taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
-                    mStartCropRect.inset(taskBarInsetsSource
-                            .calculateVisibleInsets(mStartCropRect));
-                }
+                mStartCropRect.inset(taskBarInsetsSource.calculateVisibleInsets(mStartCropRect));
             }
 
             mEndCropRect.set(mStartCropRect);

@@ -18,6 +18,8 @@ package com.android.server.display.layout;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.display.layout.Layout.Display.POSITION_UNKNOWN;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Slog;
@@ -34,8 +36,14 @@ import java.util.Objects;
  * a foldable device is folded, and a second instance for when the device is unfolded.
  */
 public class Layout {
+    public static final String DEFAULT_DISPLAY_GROUP_NAME = "";
+
     private static final String TAG = "Layout";
     private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
+
+    // Lead display Id is set to this if this is not a follower display, and therefore
+    // has no lead.
+    public static final int NO_LEAD_DISPLAY = -1;
 
     private final List<Display> mDisplays = new ArrayList<>(2);
 
@@ -73,11 +81,41 @@ public class Layout {
      * @param address Address of the device.
      * @param isDefault Indicates if the device is meant to be the default display.
      * @param isEnabled Indicates if this display is usable and can be switched on
-     * @return The new layout.
+     * @param displayGroupName Name of the display group to which the display is assigned.
+     * @param idProducer Produces the logical display id.
+     * @param brightnessThrottlingMapId Name of which throttling policy should be used.
+     * @param leadDisplayId Display that this one follows (-1 if none).
+     * @exception IllegalArgumentException When a default display owns a display group other than
+     *            DEFAULT_DISPLAY_GROUP.
+     * @return The new Display.
      */
     public Display createDisplayLocked(
             @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
-            DisplayIdProducer idProducer, String brightnessThrottlingMapId) {
+            String displayGroupName, DisplayIdProducer idProducer, String brightnessThrottlingMapId,
+            int leadDisplayId) {
+        return createDisplayLocked(address, isDefault, isEnabled, displayGroupName, idProducer,
+                brightnessThrottlingMapId, POSITION_UNKNOWN, leadDisplayId);
+    }
+
+    /**
+     * Creates a simple 1:1 LogicalDisplay mapping for the specified DisplayDevice.
+     *
+     * @param address Address of the device.
+     * @param isDefault Indicates if the device is meant to be the default display.
+     * @param isEnabled Indicates if this display is usable and can be switched on
+     * @param displayGroupName Name of the display group to which the display is assigned.
+     * @param idProducer Produces the logical display id.
+     * @param brightnessThrottlingMapId Name of which throttling policy should be used.
+     * @param position Indicates the position this display is facing in this layout.
+     * @param leadDisplayId Display that this one follows (-1 if none).
+     * @exception IllegalArgumentException When a default display owns a display group other than
+     *            DEFAULT_DISPLAY_GROUP.
+     * @return The new Display.
+     */
+    public Display createDisplayLocked(
+            @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
+            String displayGroupName, DisplayIdProducer idProducer, String brightnessThrottlingMapId,
+            int position, int leadDisplayId) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
             return null;
@@ -93,9 +131,15 @@ public class Layout {
         // Note that the logical display ID is saved into the layout, so when switching between
         // different layouts, a logical display can be destroyed and later recreated with the
         // same logical display ID.
+        if (displayGroupName == null) {
+            displayGroupName = DEFAULT_DISPLAY_GROUP_NAME;
+        }
+        if (isDefault && !displayGroupName.equals(DEFAULT_DISPLAY_GROUP_NAME)) {
+            throw new IllegalArgumentException("Default display should own DEFAULT_DISPLAY_GROUP");
+        }
         final int logicalDisplayId = idProducer.getId(isDefault);
-        final Display display = new Display(address, logicalDisplayId, isEnabled,
-                brightnessThrottlingMapId);
+        final Display display = new Display(address, logicalDisplayId, isEnabled, displayGroupName,
+                brightnessThrottlingMapId, position, leadDisplayId);
 
         mDisplays.add(display);
         return display;
@@ -191,6 +235,9 @@ public class Layout {
         // Indicates if this display is usable and can be switched on
         private final boolean mIsEnabled;
 
+        // Name of display group to which the display is assigned
+        private final String mDisplayGroupName;
+
         // The direction the display faces
         // {@link DeviceStateToLayoutMap.POSITION_FRONT} or
         // {@link DeviceStateToLayoutMap.POSITION_REAR}.
@@ -203,13 +250,32 @@ public class Layout {
         @Nullable
         private final String mBrightnessThrottlingMapId;
 
+        // The ID of the lead display that this display will follow in a layout. -1 means no lead.
+        private int mLeadDisplayId;
+
+        // Refresh rate zone id for specific layout
+        @Nullable
+        private String mRefreshRateZoneId;
+
+        @Nullable
+        private String mRefreshRateThermalThrottlingMapId;
+
         Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
-                String brightnessThrottlingMapId) {
+                @NonNull String displayGroupName, String brightnessThrottlingMapId, int position,
+                int leadDisplayId) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
             mIsEnabled = isEnabled;
-            mPosition = POSITION_UNKNOWN;
+            mDisplayGroupName = displayGroupName;
+            mPosition = position;
             mBrightnessThrottlingMapId = brightnessThrottlingMapId;
+
+            if (leadDisplayId == mLogicalDisplayId) {
+                mLeadDisplayId = NO_LEAD_DISPLAY;
+            } else {
+                mLeadDisplayId = leadDisplayId;
+            }
+
         }
 
         @Override
@@ -217,9 +283,13 @@ public class Layout {
             return "{"
                     + "dispId: " + mLogicalDisplayId
                     + "(" + (mIsEnabled ? "ON" : "OFF") + ")"
+                    + ", displayGroupName: " + mDisplayGroupName
                     + ", addr: " + mAddress
                     +  ((mPosition == POSITION_UNKNOWN) ? "" : ", position: " + mPosition)
                     + ", brightnessThrottlingMapId: " + mBrightnessThrottlingMapId
+                    + ", mRefreshRateZoneId: " + mRefreshRateZoneId
+                    + ", mLeadDisplayId: " + mLeadDisplayId
+                    + ", mRefreshRateThermalThrottlingMapId: " + mRefreshRateThermalThrottlingMapId
                     + "}";
         }
 
@@ -234,9 +304,14 @@ public class Layout {
             return otherDisplay.mIsEnabled == this.mIsEnabled
                     && otherDisplay.mPosition == this.mPosition
                     && otherDisplay.mLogicalDisplayId == this.mLogicalDisplayId
+                    && this.mDisplayGroupName.equals(otherDisplay.mDisplayGroupName)
                     && this.mAddress.equals(otherDisplay.mAddress)
                     && Objects.equals(mBrightnessThrottlingMapId,
-                    otherDisplay.mBrightnessThrottlingMapId);
+                    otherDisplay.mBrightnessThrottlingMapId)
+                    && Objects.equals(otherDisplay.mRefreshRateZoneId, this.mRefreshRateZoneId)
+                    && this.mLeadDisplayId == otherDisplay.mLeadDisplayId
+                    && Objects.equals(mRefreshRateThermalThrottlingMapId,
+                    otherDisplay.mRefreshRateThermalThrottlingMapId);
         }
 
         @Override
@@ -245,8 +320,12 @@ public class Layout {
             result = 31 * result + Boolean.hashCode(mIsEnabled);
             result = 31 * result + mPosition;
             result = 31 * result + mLogicalDisplayId;
+            result = 31 * result + mDisplayGroupName.hashCode();
             result = 31 * result + mAddress.hashCode();
             result = 31 * result + mBrightnessThrottlingMapId.hashCode();
+            result = 31 * result + Objects.hashCode(mRefreshRateZoneId);
+            result = 31 * result + mLeadDisplayId;
+            result = 31 * result + Objects.hashCode(mRefreshRateThermalThrottlingMapId);
             return result;
         }
 
@@ -262,6 +341,23 @@ public class Layout {
             return mIsEnabled;
         }
 
+        public String getDisplayGroupName() {
+            return mDisplayGroupName;
+        }
+
+        public void setRefreshRateZoneId(@Nullable String refreshRateZoneId) {
+            mRefreshRateZoneId = refreshRateZoneId;
+        }
+
+        @Nullable
+        public String getRefreshRateZoneId() {
+            return mRefreshRateZoneId;
+        }
+
+        /**
+         * Sets the position that this display is facing.
+         * @param position the display is facing.
+         */
         public void setPosition(int position) {
             mPosition = position;
         }
@@ -271,6 +367,41 @@ public class Layout {
          */
         public String getBrightnessThrottlingMapId() {
             return mBrightnessThrottlingMapId;
+        }
+
+        /**
+         *
+         * @return the position that this display is facing.
+         */
+        public int getPosition() {
+            return mPosition;
+        }
+
+        /**
+         * Set the display that this display should follow certain properties of, for example,
+         * brightness
+         * @param displayId of the lead display.
+         */
+        public void setLeadDisplay(int displayId) {
+            if (displayId != mLogicalDisplayId) {
+                mLeadDisplayId = displayId;
+            }
+        }
+
+        /**
+         *
+         * @return logical displayId of the display that this one follows.
+         */
+        public int getLeadDisplayId() {
+            return mLeadDisplayId;
+        }
+
+        public void setRefreshRateThermalThrottlingMapId(String refreshRateThermalThrottlingMapId) {
+            mRefreshRateThermalThrottlingMapId = refreshRateThermalThrottlingMapId;
+        }
+
+        public String getRefreshRateThermalThrottlingMapId() {
+            return mRefreshRateThermalThrottlingMapId;
         }
     }
 }

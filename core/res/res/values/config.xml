@@ -465,12 +465,6 @@
     <string-array translatable="false" name="config_cdma_dun_supported_types">
     </string-array>
 
-    <!-- Package name of the system app that implements the shared connectivity service -->
-    <string translatable="false" name="sharedconnectivity_service_package"></string>
-
-     <!-- Class name in the system app that implements the shared connectivity service -->
-    <string translatable="false" name="sharedconnectivity_service_class"></string>
-
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
     <bool name="config_automatic_brightness_available">false</bool>
@@ -983,6 +977,13 @@
     <integer-array name="config_deviceStatesToReverseDefaultDisplayRotationAroundZAxis">
     </integer-array>
 
+    <!-- Boolean indicating whether secondary built-in displays should have their orientation
+         match the active default display. This config assumes that the secondary display only
+         requires swapping ROTATION_90 and ROTATION_270.
+         TODO(b/265991392): This should eventually be configured and parsed in
+          display_settings.xml -->
+    <bool name="config_matchSecondaryInternalDisplaysOrientationToReverseDefaultDisplay">true</bool>
+
     <!-- Indicate available ColorDisplayManager.COLOR_MODE_xxx. -->
     <integer-array name="config_availableColorModes">
         <!-- Example:
@@ -1157,13 +1158,24 @@
     <integer name="config_triplePressOnStemPrimaryBehavior">0</integer>
 
     <!-- Control the behavior when the user short presses the stem primary button.
-        Stem primary button is only used on watch form factor. If a device is not
-        a watch, setting this config is no-op.
-           0 - Nothing
-           1 - Go to launch all apps
+         Stem primary button is only used on watch form factor. If a device is not
+         a watch, setting this config is no-op.
+            0 - Nothing
+            1 - Go to launch all apps
     -->
     <integer name="config_shortPressOnStemPrimaryBehavior">0</integer>
 
+
+    <!-- Control the behavior of the search key.
+            0 - Launch default search activity
+            1 - Launch target activity defined by config_searchKeyTargetActivity
+    -->
+    <integer name="config_searchKeyBehavior">0</integer>
+
+    <!-- Component name for the default target activity to be launched when user
+         presses the global search key. [DO NOT TRANSLATE]
+    -->
+    <string name="config_searchKeyTargetActivity" translatable="false"></string>
 
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
@@ -1303,13 +1315,20 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">2000</integer>
 
+    <!-- LED behavior when battery is low.
+         Color for solid is taken from config_notificationsBatteryLowARGB
+          0 - default, solid when charging, flashing when not charging
+          1 - always solid when battery is low
+          2 - always flashing when battery is low -->
+    <integer name="config_notificationsBatteryLowBehavior">0</integer>
+
     <!-- Default value for led color when battery is low on charge -->
     <integer name="config_notificationsBatteryLowARGB">0xFFFF0000</integer>
 
     <!-- Default value for led color when battery is medium charged -->
     <integer name="config_notificationsBatteryMediumARGB">0xFFFFFF00</integer>
 
-    <!-- Default value for led color when battery is fully charged -->
+    <!-- Default value for led color when battery is fully or nearly fully charged -->
     <integer name="config_notificationsBatteryFullARGB">0xFF00FF00</integer>
 
     <!-- Default value for LED on time when the battery is low on charge in miliseconds -->
@@ -1323,6 +1342,9 @@
 
     <!-- Default value for LED off time when the battery is low on charge in miliseconds -->
     <integer name="config_notificationsBatteryLedOff">2875</integer>
+
+    <!-- Battery level percent that is treated as nearly full. -->
+    <integer name="config_notificationsBatteryNearlyFullLevel">90</integer>
 
     <!-- If true, only colorized CallStyle notifications will apply custom colors -->
     <bool name="config_callNotificationActionColorsRequireColorized">true</bool>
@@ -2185,6 +2207,11 @@
     <bool name="config_enableDefaultNotesForWorkProfile">false</bool>
     <!-- The name of the package that will hold the system financed device controller role. -->
     <string name="config_systemFinancedDeviceController" translatable="false">com.android.devicelockcontroller</string>
+    <!-- The name of the package that will hold the call streaming role. -->
+    <string name="config_systemCallStreaming" translatable="false"></string>
+
+    <!-- The component name of the wear service class that will be started by the system server. -->
+    <string name="config_wearServiceComponent" translatable="false"></string>
 
     <!-- The name of the package that will handle updating the device management role. -->
     <string name="config_devicePolicyManagementUpdater" translatable="false"></string>
@@ -2771,8 +2798,14 @@
     <integer name="config_userTypePackageWhitelistMode">13</integer> <!-- 1+4+8 -->
 
     <!-- Whether the main user is a permanent admin user. If the main user is a permanent admin user
-     it can't be deleted or downgraded to non-admin status. -->
-    <bool name="config_isMainUserPermanentAdmin">false</bool>
+     it can't be deleted or downgraded to non-admin status.
+     This is generally only relevant on headless system user mode devices; on other devices, the
+     main user is the system user which is always a permanent admin anyway. -->
+    <bool name="config_isMainUserPermanentAdmin">true</bool>
+
+    <!-- Whether switch to headless system user is allowed. If allowed,
+    headless system user can run in the foreground even though it is not a full user. -->
+    <bool name="config_canSwitchToHeadlessSystemUser">false</bool>
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
@@ -2986,6 +3019,12 @@
     <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
 
+    <!-- Package name of the system service that implements the shared connectivity service -->
+    <string translatable="false" name="shared_connectivity_service_package"></string>
+
+    <!-- Intent action used when binding to the shared connectivity service -->
+    <string translatable="false" name="shared_connectivity_service_intent_action"></string>
+
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbContaminantActivity</string>
@@ -3045,6 +3084,10 @@
     <!-- Name of the dialog that is used to get or save an app credential -->
     <string name="config_credentialManagerDialogComponent" translatable="false"
             >com.android.credentialmanager/com.android.credentialmanager.CredentialSelectorActivity</string>
+
+    <!-- Name of the broadcast receiver that is used to receive provider change events -->
+    <string name="config_credentialManagerReceiverComponent" translatable="false"
+            >com.android.credentialmanager/com.android.credentialmanager.CredentialProviderReceiver</string>
 
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
@@ -3232,6 +3275,12 @@
          activity transition.  We just want to start the dream. -->
     <string name="config_somnambulatorComponent" translatable="false"
             >com.android.systemui/com.android.systemui.Somnambulator</string>
+
+    <!-- The component name of the screenshot App Clips service that communicates with SystemUI to
+         evaluate certain aspects of App Clips flow such as whether a calling activity can launch
+         capture content for note activity. -->
+    <string name="config_screenshotAppClipsServiceComponent" translatable="false"
+            >com.android.systemui/com.android.systemui.screenshot.appclips.AppClipsService</string>
 
     <!-- The component name of a special dock app that merely launches a dream.
          We don't want to launch this app when docked because it causes an unnecessary
@@ -3853,6 +3902,10 @@
          This should only be set when the device has gestural navigation enabled by default. -->
     <bool name="config_showGesturalNavigationHints">false</bool>
 
+    <!-- Controls whether the navigation bar background color provided by the app is transparent by
+         default. This should be controlled in developer options. -->
+    <bool name="config_navBarDefaultTransparent">false</bool>
+
     <!-- Controls the free snap mode for the docked stack divider. In this mode, the divider can be
          snapped to any position between the first target and the last target. -->
     <bool name="config_dockedStackDividerFreeSnapMode">false</bool>
@@ -3935,7 +3988,7 @@
     <!-- Whether the device supports non-resizable activity in multi windowing modes.
          -1: The device doesn't support non-resizable in multi windowing modes.
           0: The device supports non-resizable in multi windowing modes only if this is a large
-             screen (smallest width >= {@link config_largeScreenSmallestScreenWidthDp}).
+             screen (smallest width >= {@link WindowManager#LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP}).
           1: The device always supports non-resizable in multi windowing modes.
     -->
     <integer name="config_supportsNonResizableMultiWindow">0</integer>
@@ -3945,9 +3998,9 @@
          -1: The device ignores the activity min width/height when determining if it can be shown in
              multi windowing modes.
           0: If this is a small screen (smallest width <
-             {@link config_largeScreenSmallestScreenWidthDp}), the device compares the activity min
-             width/height with the min multi windowing modes dimensions the device supports to
-             determine if the activity can be shown in multi windowing modes
+             {@link WindowManager#LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP}), the device compares the
+             activity min width/height with the min multi windowing modes dimensions the device
+             supports to determine if the activity can be shown in multi windowing modes
           1: The device always compare the activity min width/height with the min multi windowing
              modes dimensions {@link config_minPercentageMultiWindowSupportWidth} the device
              supports to determine if the activity can be shown in multi windowing modes.
@@ -3969,11 +4022,6 @@
          The value should be between [0 - 1].
     -->
     <item name="config_minPercentageMultiWindowSupportWidth" format="float" type="dimen">0.5</item>
-
-    <!-- If the display smallest screen width is greater or equal to this value, we will treat it
-         as a large screen device, which will have some multi window features enabled by default.
-    -->
-    <integer name="config_largeScreenSmallestScreenWidthDp">600</integer>
 
     <!-- True if the device is using legacy split. -->
     <bool name="config_useLegacySplit">false</bool>
@@ -4104,16 +4152,6 @@
     -->
     <string-array translatable="false" name="config_convert_to_emergency_number_map" />
 
-    <!-- An array of packages for which notifications cannot be blocked.
-         Should only be used for core device functionality that must not be
-         rendered inoperative for safety reasons, like the phone dialer and
-         SMS handler. -->
-    <string-array translatable="false" name="config_nonBlockableNotificationPackages">
-        <item>com.android.dialer</item>
-        <item>com.android.messaging</item>
-        <item>com.android.cellbroadcastreceiver.module</item>
-    </string-array>
-
     <!-- An array of packages that can make sound on the ringer stream in priority-only DND
      mode -->
     <string-array translatable="false" name="config_priorityOnlyDndExemptPackages">
@@ -4170,11 +4208,18 @@
     <bool name="config_quickSettingsSupported">true</bool>
 
     <!-- The component name, flattened to a string, for the default autofill service
-         to  enabled for an user. This service must be trusted, as it can be activated
+         to  enabled for a user. This service must be trusted, as it can be activated
          without explicit consent of the user. If no autofill service with the
           specified name exists on the device, autofill will be disabled by default.
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the default field classification service
+         to  enabled for a user. This service must be trusted, as it can be activated
+         without explicit consent of the user. If no field classification service with the
+         specified name exists on the device, field classification will be disabled by default.
+    -->
+    <string name="config_defaultFieldClassificationService" translatable="false"></string>
 
     <!-- The package name for the OEM custom system textclassifier service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -4364,6 +4409,18 @@
      See android.credentials.CredentialManager
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the system's credential manager
+      provider service. This service allows credential retrieval and storage od credentials.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, there will be no user configurable
+     provider to service credential manager requests. However, credential manager system
+     services that do not require user consent, will still work.
+
+     See android.credentials.CredentialManager
+    -->
+    <string name="config_defaultCredentialProviderService" translatable="false"></string>
 
     <!-- The package name for the system's smartspace service.
      This service returns smartspace results.
@@ -6197,6 +6254,18 @@
          different from the home screen wallpaper. -->
     <bool name="config_independentLockscreenLiveWallpaper">false</bool>
 
+    <!-- Device state that corresponds to concurrent display mode where the default display
+         is the internal display. Public API for the feature is provided through Jetpack
+         WindowManager.
+         TODO(b/236022708) Move concurrent display state to device state config file
+    -->
+    <integer name="config_deviceStateConcurrentRearDisplay">-1</integer>
+
+    <!-- Physical display address that corresponds to the rear display in rear display mode
+         and concurrent display mode. Used to get information about the display before
+         entering the corresponding modes -->
+    <string name="config_rearDisplayPhysicalAddress" translatable="false"></string>
+
     <!-- List of certificate to be used for font fs-verity integrity verification -->
     <string-array translatable="false" name="config_fontManagerServiceCerts">
     </string-array>
@@ -6236,13 +6305,16 @@
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
          permission for staging HealthConnect's remote data. The digest should be computed over the
          DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
-    <string-array name="config_healthConnectStagingDataKnownSigners">
+    <string-array name="config_healthConnectRestoreKnownSigners">
     </string-array>
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner Health
         Connect Migration permissions. The digest should be computed over the DER encoding of the
         trusted certificate using the SHA-256 digest algorithm. -->
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
+
+    <!-- Package name of Health Connect data migrator application.  -->
+    <string name="config_healthConnectMigratorPackageName"></string>
 
     <!-- The Universal Stylus Initiative (USI) protocol version supported by each display.
          (@see https://universalstylus.org/).
@@ -6266,4 +6338,12 @@
         "stopped" during initial boot of a device, or after an OTA update. Stopped state of
         an app is not changed during subsequent reboots.  -->
     <bool name="config_stopSystemPackagesByDefault">false</bool>
+
+    <!-- Whether to show weather on the lock screen by default. -->
+    <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>
+
+    <!-- Whether to reset Battery Stats on unplug when the battery level is high. -->
+    <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
+    <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
+    <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
 </resources>

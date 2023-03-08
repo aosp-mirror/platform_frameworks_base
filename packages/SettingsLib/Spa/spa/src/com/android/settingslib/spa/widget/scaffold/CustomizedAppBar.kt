@@ -119,7 +119,6 @@ internal fun CustomizedLargeTopAppBar(
         actions = actions,
         colors = topAppBarColors(),
         windowInsets = TopAppBarDefaults.windowInsets,
-        maxHeightWithoutTitle = 120.dp,
         pinnedHeight = ContainerHeight,
         scrollBehavior = scrollBehavior,
     )
@@ -261,7 +260,7 @@ private fun SingleRowTopAppBar(
  * A two-rows top app bar that is designed to be called by the Large and Medium top app bar
  * composables.
  *
- * @throws [IllegalArgumentException] if the given [maxHeightWithoutTitle] is equal or smaller than
+ * @throws [IllegalArgumentException] if the given [MaxHeightWithoutTitle] is equal or smaller than
  * the [pinnedHeight]
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -277,11 +276,10 @@ private fun TwoRowsTopAppBar(
     actions: @Composable RowScope.() -> Unit,
     windowInsets: WindowInsets,
     colors: TopAppBarColors,
-    maxHeightWithoutTitle: Dp,
     pinnedHeight: Dp,
     scrollBehavior: TopAppBarScrollBehavior?
 ) {
-    if (maxHeightWithoutTitle <= pinnedHeight) {
+    if (MaxHeightWithoutTitle <= pinnedHeight) {
         throw IllegalArgumentException(
             "A TwoRowsTopAppBar max height should be greater than its pinned height"
         )
@@ -289,7 +287,7 @@ private fun TwoRowsTopAppBar(
     val pinnedHeightPx: Float
     val density = LocalDensity.current
     val maxHeightPx = density.run {
-        remember { mutableStateOf((maxHeightWithoutTitle + pinnedHeight).toPx()) }
+        remember { mutableStateOf((MaxHeightWithoutTitle + DefaultTitleHeight).toPx()) }
     }
     val titleBottomPaddingPx: Int
     density.run {
@@ -380,7 +378,7 @@ private fun TwoRowsTopAppBar(
                     Box(modifier = Modifier.onGloballyPositioned { coordinates ->
                         density.run {
                             maxHeightPx.value =
-                                maxHeightWithoutTitle.toPx() + coordinates.size.height.toFloat()
+                                MaxHeightWithoutTitle.toPx() + coordinates.size.height.toFloat()
                         }
                     }) { title() }
                 },
@@ -610,6 +608,8 @@ private suspend fun settleAppBar(
 // Medium or Large app bar.
 private val TopTitleAlphaEasing = CubicBezierEasing(.8f, 0f, .8f, .15f)
 
+private val MaxHeightWithoutTitle = 124.dp
+private val DefaultTitleHeight = 52.dp
 private val ContainerHeight = 56.dp
 private val LargeTitleBottomPadding = 28.dp
 private val TopAppBarHorizontalPadding = 4.dp

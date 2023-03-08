@@ -1126,6 +1126,16 @@ public final class SQLiteConnectionPool implements Closeable {
         mConnectionWaiterPool = waiter;
     }
 
+    void clearAcquiredConnectionsPreparedStatementCache() {
+        synchronized (mLock) {
+            if (!mAcquiredConnections.isEmpty()) {
+                for (SQLiteConnection connection : mAcquiredConnections.keySet()) {
+                    connection.clearPreparedStatementCache();
+                }
+            }
+        }
+    }
+
     /**
      * Dumps debugging information about this connection pool.
      *

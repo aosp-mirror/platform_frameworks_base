@@ -254,7 +254,10 @@ public class BouncerSwipeTouchHandler implements DreamTouchHandler {
         mCurrentScrimController = mScrimManager.getCurrentController();
 
         session.registerCallback(() -> {
-            mVelocityTracker.recycle();
+            if (mVelocityTracker != null) {
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+            }
             mScrimManager.removeCallback(mScrimManagerCallback);
             mCapture = null;
             mNotificationShadeWindowController.setForcePluginOpen(false, this);

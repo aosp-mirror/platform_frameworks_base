@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -36,6 +37,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -57,6 +59,7 @@ public final class DeviceStateRotationLockSettingsManager {
     private final SecureSettings mSecureSettings;
     private String[] mDeviceStateRotationLockDefaults;
     private SparseIntArray mDeviceStateRotationLockSettings;
+    private SparseIntArray mDeviceStateDefaultRotationLockSettings;
     private SparseIntArray mDeviceStateRotationLockFallbackSettings;
     private String mLastSettingValue;
     private List<SettableDeviceState> mSettableDeviceStates;
@@ -93,9 +96,7 @@ public final class DeviceStateRotationLockSettingsManager {
     /** Returns true if device-state based rotation lock settings are enabled. */
     public static boolean isDeviceStateRotationLockEnabled(Context context) {
         return context.getResources()
-                        .getStringArray(R.array.config_perDeviceStateRotationLockDefaults)
-                        .length
-                > 0;
+                .getStringArray(R.array.config_perDeviceStateRotationLockDefaults).length > 0;
     }
 
     private void listenForSettingsChange() {
@@ -228,6 +229,15 @@ public final class DeviceStateRotationLockSettingsManager {
             try {
                 key = Integer.parseInt(values[i++]);
                 value = Integer.parseInt(values[i++]);
+                boolean isPersistedValueIgnored = value == DEVICE_STATE_ROTATION_LOCK_IGNORED;
+                boolean isDefaultValueIgnored = mDeviceStateDefaultRotationLockSettings.get(key)
+                        == DEVICE_STATE_ROTATION_LOCK_IGNORED;
+                if (isPersistedValueIgnored != isDefaultValueIgnored) {
+                    Log.w(TAG, "Conflict for ignored device state " + key
+                            + ". Falling back on defaults");
+                    fallbackOnDefaults();
+                    return;
+                }
                 mDeviceStateRotationLockSettings.put(key, value);
             } catch (NumberFormatException e) {
                 Log.wtf(TAG, "Error deserializing one of the saved settings", e);
@@ -276,6 +286,9 @@ public final class DeviceStateRotationLockSettingsManager {
     }
 
     private void persistSettingIfChanged(String newSettingValue) {
+        Log.v(TAG, "persistSettingIfChanged: "
+                + "last=" + mLastSettingValue + ", "
+                + "new=" + newSettingValue);
         if (TextUtils.equals(mLastSettingValue, newSettingValue)) {
             return;
         }
@@ -288,6 +301,8 @@ public final class DeviceStateRotationLockSettingsManager {
 
     private void loadDefaults() {
         mSettableDeviceStates = new ArrayList<>(mDeviceStateRotationLockDefaults.length);
+        mDeviceStateDefaultRotationLockSettings = new SparseIntArray(
+                mDeviceStateRotationLockDefaults.length);
         mDeviceStateRotationLockSettings = new SparseIntArray(
                 mDeviceStateRotationLockDefaults.length);
         mDeviceStateRotationLockFallbackSettings = new SparseIntArray(1);
@@ -311,11 +326,28 @@ public final class DeviceStateRotationLockSettingsManager {
                 boolean isSettable = rotationLockSetting != DEVICE_STATE_ROTATION_LOCK_IGNORED;
                 mSettableDeviceStates.add(new SettableDeviceState(deviceState, isSettable));
                 mDeviceStateRotationLockSettings.put(deviceState, rotationLockSetting);
+                mDeviceStateDefaultRotationLockSettings.put(deviceState, rotationLockSetting);
             } catch (NumberFormatException e) {
                 Log.wtf(TAG, "Error parsing settings entry. Entry was: " + entry, e);
                 return;
             }
         }
+    }
+
+    /** Dumps internal state. */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("DeviceStateRotationLockSettingsManager");
+        pw.increaseIndent();
+        pw.println("mDeviceStateRotationLockDefaults: " + Arrays.toString(
+                mDeviceStateRotationLockDefaults));
+        pw.println("mDeviceStateDefaultRotationLockSettings: "
+                + mDeviceStateDefaultRotationLockSettings);
+        pw.println("mDeviceStateRotationLockSettings: " + mDeviceStateRotationLockSettings);
+        pw.println("mDeviceStateRotationLockFallbackSettings: "
+                + mDeviceStateRotationLockFallbackSettings);
+        pw.println("mSettableDeviceStates: " + mSettableDeviceStates);
+        pw.println("mLastSettingValue: " + mLastSettingValue);
+        pw.decreaseIndent();
     }
 
     /**
@@ -371,6 +403,14 @@ public final class DeviceStateRotationLockSettingsManager {
         @Override
         public int hashCode() {
             return Objects.hash(mDeviceState, mIsSettable);
+        }
+
+        @Override
+        public String toString() {
+            return "SettableDeviceState{"
+                    + "mDeviceState=" + mDeviceState
+                    + ", mIsSettable=" + mIsSettable
+                    + '}';
         }
     }
 }

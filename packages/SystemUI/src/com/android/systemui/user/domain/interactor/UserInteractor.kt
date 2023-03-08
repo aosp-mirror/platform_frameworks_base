@@ -33,6 +33,8 @@ import android.provider.Settings
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.UserIcons
+import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.R
 import com.android.systemui.SystemUISecondaryUserService
 import com.android.systemui.animation.Expandable
@@ -89,9 +91,11 @@ constructor(
     private val keyguardInteractor: KeyguardInteractor,
     private val featureFlags: FeatureFlags,
     private val manager: UserManager,
+    private val headlessSystemUserMode: HeadlessSystemUserMode,
     @Application private val applicationScope: CoroutineScope,
     telephonyInteractor: TelephonyInteractor,
     broadcastDispatcher: BroadcastDispatcher,
+    keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val activityManager: ActivityManager,
     private val refreshUsersScheduler: RefreshUsersScheduler,
@@ -289,6 +293,12 @@ constructor(
 
     val isSimpleUserSwitcher: Boolean
         get() = repository.isSimpleUserSwitcher()
+    val keyguardUpdateMonitorCallback =
+        object : KeyguardUpdateMonitorCallback() {
+            override fun onKeyguardGoingAway() {
+                dismissDialog()
+            }
+        }
 
     init {
         refreshUsersScheduler.refreshIfNotPaused()
@@ -319,6 +329,7 @@ constructor(
                 onBroadcastReceived(intent, previousSelectedUser)
             }
             .launchIn(applicationScope)
+        keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
     }
 
     fun addCallback(callback: UserCallback) {
@@ -571,7 +582,10 @@ constructor(
             actionType = action,
             isRestricted = isRestricted,
             isSwitchToEnabled =
-                canSwitchUsers(selectedUserId) &&
+                canSwitchUsers(
+                    selectedUserId = selectedUserId,
+                    isAction = true,
+                ) &&
                     // If the user is auto-created is must not be currently resetting.
                     !(isGuestUserAutoCreated && isGuestUserResetting),
         )
@@ -723,10 +737,32 @@ constructor(
         }
     }
 
-    private suspend fun canSwitchUsers(selectedUserId: Int): Boolean {
-        return withContext(backgroundDispatcher) {
-            manager.getUserSwitchability(UserHandle.of(selectedUserId))
-        } == UserManager.SWITCHABILITY_STATUS_OK
+    private suspend fun canSwitchUsers(
+        selectedUserId: Int,
+        isAction: Boolean = false,
+    ): Boolean {
+        val isHeadlessSystemUserMode =
+            withContext(backgroundDispatcher) { headlessSystemUserMode.isHeadlessSystemUserMode() }
+        // Whether menu item should be active. True if item is a user or if any user has
+        // signed in since reboot or in all cases for non-headless system user mode.
+        val isItemEnabled = !isAction || !isHeadlessSystemUserMode || isAnyUserUnlocked()
+        return isItemEnabled &&
+            withContext(backgroundDispatcher) {
+                manager.getUserSwitchability(UserHandle.of(selectedUserId))
+            } == UserManager.SWITCHABILITY_STATUS_OK
+    }
+
+    private suspend fun isAnyUserUnlocked(): Boolean {
+        return manager
+            .getUsers(
+                /* excludePartial= */ true,
+                /* excludeDying= */ true,
+                /* excludePreCreated= */ true
+            )
+            .any { user ->
+                user.id != UserHandle.USER_SYSTEM &&
+                    withContext(backgroundDispatcher) { manager.isUserUnlocked(user.userHandle) }
+            }
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")

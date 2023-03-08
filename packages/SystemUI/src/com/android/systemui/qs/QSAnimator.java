@@ -135,7 +135,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     private int mNumQuickTiles;
     private int mLastQQSTileHeight;
     private float mLastPosition;
-    private final QSTileHost mHost;
+    private final QSHost mHost;
     private final Executor mExecutor;
     private boolean mShowCollapsedOnKeyguard;
     private int mQQSTop;
@@ -146,7 +146,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     @Inject
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QuickStatusBarHeader quickStatusBarHeader,
             QSPanelController qsPanelController,
-            QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
+            QuickQSPanelController quickQSPanelController, QSHost qsTileHost,
             @Main Executor executor, TunerService tunerService,
             QSExpansionPathInterpolator qsExpansionPathInterpolator) {
         mQs = qs;
@@ -330,12 +330,8 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
                     // Offset the translation animation on the views
                     // (that goes from 0 to getOffsetTranslation)
-                    int offsetWithQSBHTranslation =
-                            yOffset - mQuickStatusBarHeader.getOffsetTranslation();
-                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0,
-                            offsetWithQSBHTranslation);
-                    translationYBuilder.addFloat(tileView, "translationY",
-                            -offsetWithQSBHTranslation, 0);
+                    qqsTranslationYBuilder.addFloat(quickTileView, "translationY", 0, yOffset);
+                    translationYBuilder.addFloat(tileView, "translationY", -yOffset, 0);
 
                     translationXBuilder.addFloat(quickTileView, "translationX", 0, xOffset);
                     translationXBuilder.addFloat(tileView, "translationX", -xOffset, 0);
@@ -489,7 +485,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         if (specs.isEmpty()) {
             // specs should not be empty in a valid secondary page, as we scrolled to it.
             // We may crash later on because there's a null animator.
-            specs = mQsPanelController.getHost().mTileSpecs;
+            specs = mHost.getSpecs();
             Log.e(TAG, "Trying to create animators for empty page " + page + ". Tiles: " + specs);
             // return null;
         }
@@ -614,7 +610,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
         View commonView = mQs.getView();
         getRelativePositionInt(qsPosition, view1, commonView);
         getRelativePositionInt(qqsPosition, view2, commonView);
-        return (qsPosition[1] - qqsPosition[1]) - mQuickStatusBarHeader.getOffsetTranslation();
+        return qsPosition[1] - qqsPosition[1];
     }
 
     private boolean isIconInAnimatedRow(int count) {

@@ -20,6 +20,7 @@ import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
@@ -214,6 +215,16 @@ public class LocalMediaManager implements BluetoothCallback {
      */
     public boolean isPreferenceRouteListingExist() {
         return mInfoMediaManager.preferRouteListingOrdering();
+    }
+
+    /**
+     * Returns required component name for system to take the user back to the app by launching an
+     * intent with the returned {@link ComponentName}, using action {@link #ACTION_TRANSFER_MEDIA},
+     * with the extra {@link #EXTRA_ROUTE_ID}.
+     */
+    @Nullable
+    public ComponentName getLinkedItemComponentName() {
+        return mInfoMediaManager.getLinkedItemComponentName();
     }
 
     /**

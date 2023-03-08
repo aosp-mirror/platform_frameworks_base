@@ -26,7 +26,6 @@ import static org.testng.Assert.assertThrows;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
@@ -46,8 +45,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.compatibility.common.util.BlockingBroadcastReceiver;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 
@@ -61,17 +58,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/** Test {@link UserManager} functionality. */
+/**
+ * Test {@link UserManager} functionality.
+ *
+ *  atest com.android.server.pm.UserManagerTest
+ */
 @Postsubmit
 @RunWith(AndroidJUnit4.class)
 public final class UserManagerTest {
     // Taken from UserManagerService
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // 30 years
 
-    private static final int SWITCH_USER_TIMEOUT_SECONDS = 40; // 40 seconds
+    private static final int SWITCH_USER_TIMEOUT_SECONDS = 180; // 180 seconds
+    private static final int REMOVE_USER_TIMEOUT_SECONDS = 180; // 180 seconds
 
     // Packages which are used during tests.
     private static final String[] PACKAGES = new String[] {
@@ -87,13 +88,17 @@ public final class UserManagerTest {
     private PackageManager mPackageManager;
     private ArraySet<Integer> mUsersToRemove;
     private UserSwitchWaiter mUserSwitchWaiter;
+    private UserRemovalWaiter mUserRemovalWaiter;
+    private int mOriginalCurrentUserId;
 
     @Before
     public void setUp() throws Exception {
+        mOriginalCurrentUserId = ActivityManager.getCurrentUser();
         mUserManager = UserManager.get(mContext);
         mActivityManager = mContext.getSystemService(ActivityManager.class);
         mPackageManager = mContext.getPackageManager();
         mUserSwitchWaiter = new UserSwitchWaiter(TAG, SWITCH_USER_TIMEOUT_SECONDS);
+        mUserRemovalWaiter = new UserRemovalWaiter(mContext, TAG, REMOVE_USER_TIMEOUT_SECONDS);
 
         mUsersToRemove = new ArraySet<>();
         removeExistingUsers();
@@ -101,10 +106,14 @@ public final class UserManagerTest {
 
     @After
     public void tearDown() throws Exception {
+        if (mOriginalCurrentUserId != ActivityManager.getCurrentUser()) {
+            switchUser(mOriginalCurrentUserId);
+        }
         mUserSwitchWaiter.close();
 
         // Making a copy of mUsersToRemove to avoid ConcurrentModificationException
         mUsersToRemove.stream().toList().forEach(this::removeUser);
+        mUserRemovalWaiter.close();
     }
 
     private void removeExistingUsers() {
@@ -302,7 +311,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testRemoveUserByHandle_ThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> removeUser(null));
+        assertThrows(IllegalArgumentException.class, () -> mUserManager.removeUser(null));
     }
 
     @MediumTest
@@ -393,11 +402,10 @@ public final class UserManagerTest {
         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
                 asHandle(currentUser));
         try {
-            runThenWaitForUserRemoval(() -> {
-                assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
-                        /* overrideDevicePolicy= */ true))
-                        .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
-            }, user1.id); // wait for user removal
+            assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
+                    /* overrideDevicePolicy= */ true))
+                    .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+            waitForUserRemoval(user1.id);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
                     asHandle(currentUser));
@@ -462,11 +470,10 @@ public final class UserManagerTest {
         assertThat(hasUser(user1.id)).isTrue();
         assertThat(getUser(user1.id).isEphemeral()).isTrue();
 
-        runThenWaitForUserRemoval(() -> {
-            // Switch back to the starting user.
-            switchUser(startUser);
-            // User will be removed once switch is complete
-        }, user1.id); // wait for user removal
+        // Switch back to the starting user.
+        switchUser(startUser);
+        // User will be removed once switch is complete
+        waitForUserRemoval(user1.id);
 
         assertThat(hasUser(user1.id)).isFalse();
     }
@@ -479,18 +486,17 @@ public final class UserManagerTest {
         // Switch to the user just created.
         switchUser(testUser.id);
 
-        runThenWaitForUserRemoval(() -> {
-            switchUserThenRun(startUser, () -> {
-                // While the switch is happening, call removeUserWhenPossible for the current user.
-                assertThat(mUserManager.removeUserWhenPossible(testUser.getUserHandle(),
-                        /* overrideDevicePolicy= */ false))
-                        .isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
+        switchUserThenRun(startUser, () -> {
+            // While the switch is happening, call removeUserWhenPossible for the current user.
+            assertThat(mUserManager.removeUserWhenPossible(testUser.getUserHandle(),
+                    /* overrideDevicePolicy= */ false))
+                    .isEqualTo(UserManager.REMOVE_RESULT_DEFERRED);
 
-                assertThat(hasUser(testUser.id)).isTrue();
-                assertThat(getUser(testUser.id).isEphemeral()).isTrue();
-            }); // wait for user switch - startUser
-            // User will be removed once switch is complete
-        }, testUser.id); // wait for user removal
+            assertThat(hasUser(testUser.id)).isTrue();
+            assertThat(getUser(testUser.id).isEphemeral()).isTrue();
+        }); // wait for user switch - startUser
+        // User will be removed once switch is complete
+        waitForUserRemoval(testUser.id);
 
         assertThat(hasUser(testUser.id)).isFalse();
     }
@@ -511,11 +517,10 @@ public final class UserManagerTest {
             assertThat(getUser(testUser.id).isEphemeral()).isTrue();
         }); // wait for user switch - testUser
 
-        runThenWaitForUserRemoval(() -> {
-            // Switch back to the starting user.
-            switchUser(startUser);
-            // User will be removed once switch is complete
-        }, testUser.id); // wait for user removal
+        // Switch back to the starting user.
+        switchUser(startUser);
+        // User will be removed once switch is complete
+        waitForUserRemoval(testUser.id);
 
         assertThat(hasUser(testUser.id)).isFalse();
     }
@@ -525,11 +530,10 @@ public final class UserManagerTest {
     public void testRemoveUserWhenPossible_nonCurrentUserRemoved() throws Exception {
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
 
-        runThenWaitForUserRemoval(() -> {
-            assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
-                    /* overrideDevicePolicy= */ false))
-                    .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
-        }, user1.id); // wait for user removal
+        assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),
+                /* overrideDevicePolicy= */ false))
+                .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+        waitForUserRemoval(user1.id);
 
         assertThat(hasUser(user1.id)).isFalse();
     }
@@ -548,11 +552,10 @@ public final class UserManagerTest {
                 UserManager.USER_TYPE_PROFILE_MANAGED,
                 parentUser.id);
 
-        runThenWaitForUserRemoval(() -> {
-            assertThat(mUserManager.removeUserWhenPossible(parentUser.getUserHandle(),
-                    /* overrideDevicePolicy= */ false))
-                    .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
-        }, parentUser.id); // wait for user removal
+        assertThat(mUserManager.removeUserWhenPossible(parentUser.getUserHandle(),
+                /* overrideDevicePolicy= */ false))
+                .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+        waitForUserRemoval(parentUser.id);
 
         assertThat(hasUser(parentUser.id)).isFalse();
         assertThat(hasUser(cloneProfileUser.id)).isFalse();
@@ -1274,7 +1277,7 @@ public final class UserManagerTest {
     @MediumTest
     @Test
     public void testConcurrentUserCreate() throws Exception {
-        int userCount = mUserManager.getUserCount();
+        int userCount = mUserManager.getUsers().size();
         int maxSupportedUsers = UserManager.getMaxSupportedUsers();
         int canBeCreatedCount = maxSupportedUsers - userCount;
         // Test exceeding the limit while running in parallel
@@ -1292,8 +1295,12 @@ public final class UserManagerTest {
             });
         }
         es.shutdown();
-        es.awaitTermination(20, TimeUnit.SECONDS);
-        assertThat(mUserManager.getUserCount()).isEqualTo(maxSupportedUsers);
+        int timeout = createUsersCount * 20;
+        assertWithMessage(
+                "Could not create " + createUsersCount + " users in " + timeout + " seconds")
+                .that(es.awaitTermination(timeout, TimeUnit.SECONDS))
+                .isTrue();
+        assertThat(mUserManager.getUsers().size()).isEqualTo(maxSupportedUsers);
         assertThat(created.get()).isEqualTo(canBeCreatedCount);
     }
 
@@ -1450,34 +1457,18 @@ public final class UserManagerTest {
     }
 
     private void removeUser(UserHandle userHandle) {
-        runThenWaitForUserRemoval(
-                () -> mUserManager.removeUser(userHandle),
-                userHandle == null ? UserHandle.USER_NULL : userHandle.getIdentifier()
-        );
+        mUserManager.removeUser(userHandle);
+        waitForUserRemoval(userHandle.getIdentifier());
     }
 
     private void removeUser(int userId) {
-        runThenWaitForUserRemoval(
-                () -> mUserManager.removeUser(userId),
-                userId
-        );
+        mUserManager.removeUser(userId);
+        waitForUserRemoval(userId);
     }
 
-    private void runThenWaitForUserRemoval(Runnable runnable, int userIdToWaitUntilDeleted) {
-        Function<Intent, Boolean> checker = intent -> {
-            UserHandle userHandle = intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle.class);
-            return userHandle != null && userHandle.getIdentifier() == userIdToWaitUntilDeleted;
-        };
-
-        BlockingBroadcastReceiver blockingBroadcastReceiver = BlockingBroadcastReceiver.create(
-                mContext, Intent.ACTION_USER_REMOVED, checker);
-
-        blockingBroadcastReceiver.register();
-
-        try (blockingBroadcastReceiver) {
-            runnable.run();
-        }
-        mUsersToRemove.remove(userIdToWaitUntilDeleted);
+    private void waitForUserRemoval(int userId) {
+        mUserRemovalWaiter.waitFor(userId);
+        mUsersToRemove.remove(userId);
     }
 
     private UserInfo createUser(String name, int flags) {

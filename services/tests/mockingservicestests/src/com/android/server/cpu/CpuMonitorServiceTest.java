@@ -32,16 +32,16 @@ import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.ServiceManager;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
-import com.android.server.ExtendedMockitoTestCase;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
-public final class CpuMonitorServiceTest extends ExtendedMockitoTestCase {
+public final class CpuMonitorServiceTest {
     private static final CpuAvailabilityMonitoringConfig TEST_CPU_AVAILABILITY_MONITORING_CONFIG =
             new CpuAvailabilityMonitoringConfig.Builder(CPUSET_ALL)
                     .addThreshold(30).addThreshold(70).build();
@@ -56,10 +56,10 @@ public final class CpuMonitorServiceTest extends ExtendedMockitoTestCase {
     private HandlerExecutor mHandlerExecutor;
     private CpuMonitorInternal mLocalService;
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.mockStatic(ServiceManager.class);
-    }
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .mockStatic(ServiceManager.class)
+            .build();
 
     @Before
     public void setUp() {

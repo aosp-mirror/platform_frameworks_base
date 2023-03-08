@@ -170,6 +170,7 @@ public class JobStatusTest {
         final JobInfo jobInfo =
                 new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                         .setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                         .build();
         JobStatus job = createJobStatus(jobInfo);
         assertTrue(job.canRunInBatterySaver());
@@ -216,12 +217,41 @@ public class JobStatusTest {
         final JobInfo jobInfo =
                 new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                         .setUserInitiated(true)
+                        .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                         .build();
         JobStatus job = createJobStatus(jobInfo);
         assertTrue(job.canRunInDoze());
         // User-initiated privilege should trump bs & doze requirement.
         job.disallowRunInBatterySaverAndDoze();
         assertTrue(job.canRunInDoze());
+    }
+
+    @Test
+    public void testIsUserVisibleJob() {
+        JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(false)
+                .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        assertFalse(job.isUserVisibleJob());
+
+        // User-initiated jobs are always user-visible unless they've been demoted.
+        jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+        job = createJobStatus(jobInfo);
+
+        assertTrue(job.isUserVisibleJob());
+
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertFalse(job.isUserVisibleJob());
+
+        job.startedAsUserInitiatedJob = true;
+        assertTrue(job.isUserVisibleJob());
+
+        job.startedAsUserInitiatedJob = false;
+        assertFalse(job.isUserVisibleJob());
     }
 
     @Test
@@ -480,6 +510,7 @@ public class JobStatusTest {
 
         jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setUserInitiated(true)
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .build();
         job = createJobStatus(jobInfo);
 

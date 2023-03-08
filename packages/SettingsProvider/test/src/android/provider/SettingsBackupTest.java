@@ -266,8 +266,6 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
                     Settings.Global.ENABLE_RESTRICTED_BUCKET,
                     Settings.Global.ENABLE_TARE,
-                    Settings.Global.ENABLE_TARE_ALARM_MANAGER,
-                    Settings.Global.ENABLE_TARE_JOB_SCHEDULER,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
@@ -324,6 +322,7 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_BATTERY_SOUND,
                     Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
                     Settings.Global.LOW_POWER_MODE,
+                    Settings.Global.EXTRA_LOW_POWER_MODE,
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     Settings.Global.LOW_POWER_MODE_STICKY,
                     Settings.Global.LOW_POWER_MODE_SUGGESTION_PARAMS,
@@ -663,7 +662,11 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
                     Settings.Global.Wearable.EARLY_UPDATES_STATUS,
                     Settings.Global.Wearable.RSB_WAKE_ENABLED,
-                    Settings.Global.Wearable.LOCK_SCREEN_STATE);
+                    Settings.Global.Wearable.LOCK_SCREEN_STATE,
+                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
+                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
+                    Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
+                    Settings.Global.Wearable.SCREENSHOT_ENABLED);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -776,7 +779,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SLEEP_TIMEOUT,
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
-                 Settings.Secure.STYLUS_BUTTONS_DISABLED,
+                 Settings.Secure.STYLUS_BUTTONS_ENABLED,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,
@@ -798,7 +801,6 @@ public class SettingsBackupTest {
                  Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
                  Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                  Settings.Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
-                 Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
                  Settings.Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION,
                  Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
                  Settings.Secure.FLASHLIGHT_AVAILABLE,

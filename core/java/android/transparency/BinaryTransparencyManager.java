@@ -67,24 +67,6 @@ public class BinaryTransparencyManager {
     }
 
     /**
-     * Gets binary measurements of all installed APEXs, each packed in a Bundle.
-     * @return A List of {@link android.os.Bundle}s with the following keys:
-     *         {@link com.android.server.BinaryTransparencyService#BUNDLE_PACKAGE_INFO}
-     *         {@link com.android.server.BinaryTransparencyService#BUNDLE_CONTENT_DIGEST_ALGORITHM}
-     *         {@link com.android.server.BinaryTransparencyService#BUNDLE_CONTENT_DIGEST}
-     */
-    // TODO(b/259422958): Fix static constants referenced here - should be defined here
-    @NonNull
-    public List getApexInfo() {
-        try {
-            Slog.d(TAG, "Calling backend's getApexInfo()");
-            return mService.getApexInfo();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Collects the APEX information on the device.
      *
      * @param includeTestOnly Whether to include test only data in the returned ApexInfo.
@@ -112,6 +94,23 @@ public class BinaryTransparencyManager {
         try {
             Slog.d(TAG, "Calling backend's collectAllUpdatedPreloadInfo()");
             return mService.collectAllUpdatedPreloadInfo(packagesToSkip);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Collects the silent installed MBA information on the device.
+     *
+     * @return A List containing the MBA info of silent installed.
+     * @hide
+     */
+    @NonNull
+    public List<IBinaryTransparencyService.AppInfo> collectAllSilentInstalledMbaInfo(
+            Bundle packagesToSkip) {
+        try {
+            Slog.d(TAG, "Calling backend's collectAllSilentInstalledMbaInfo()");
+            return mService.collectAllSilentInstalledMbaInfo(packagesToSkip);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

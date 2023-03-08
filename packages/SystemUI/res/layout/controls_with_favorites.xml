@@ -13,85 +13,94 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
 
-  <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="horizontal"
-      android:layout_marginTop="@dimen/controls_top_margin"
-      android:layout_marginBottom="@dimen/controls_header_bottom_margin">
-
-    <!-- make sure the header stays centered in the layout by adding a spacer -->
-    <Space
-        android:id="@+id/controls_spacer"
-        android:layout_width="@dimen/controls_header_menu_size"
-        android:layout_height="1dp"
-        android:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/controls_close"
-        android:contentDescription="@string/accessibility_desc_close"
-        android:src="@drawable/ic_close"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:tint="@color/control_primary_text"
-        android:layout_width="@dimen/controls_header_menu_size"
-        android:layout_height="@dimen/controls_header_menu_size"
-        android:padding="12dp"
-        android:visibility="gone" />
-    <!-- need to keep this outer view in order to have a correctly sized anchor
-         for the dropdown menu, as well as dropdown background in the right place -->
     <LinearLayout
-        android:id="@+id/controls_header"
-        android:orientation="horizontal"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:minHeight="48dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center">
-      <TextView
-          style="@style/Control.Spinner.Header"
-          android:clickable="false"
-          android:id="@+id/app_or_structure_spinner"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center" />
-    </LinearLayout>
-    <ImageView
-        android:id="@+id/controls_more"
-        android:src="@drawable/ic_more_vert"
-        android:layout_width="@dimen/controls_header_menu_size"
-        android:layout_height="@dimen/controls_header_menu_size"
-        android:padding="12dp"
-        android:tint="@color/control_more_vert"
-        android:layout_gravity="center"
-        android:contentDescription="@string/accessibility_menu"
-        android:background="?android:attr/selectableItemBackgroundBorderless" />
-  </LinearLayout>
+        android:paddingHorizontal="@dimen/controls_header_horizontal_padding"
+        android:layout_marginBottom="@dimen/controls_header_bottom_margin"
+        android:orientation="horizontal">
 
-  <ScrollView
+        <!-- make sure the header stays centered in the layout by adding a spacer -->
+        <Space
+            android:id="@+id/controls_spacer"
+            android:layout_width="@dimen/controls_header_menu_button_size"
+            android:layout_height="1dp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/controls_close"
+            android:layout_width="@dimen/controls_header_menu_button_size"
+            android:layout_height="@dimen/controls_header_menu_button_size"
+            android:layout_gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/accessibility_desc_close"
+            android:padding="12dp"
+            android:src="@drawable/ic_close"
+            android:tint="@color/control_primary_text"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- need to keep this outer view in order to have a correctly sized anchor
+             for the dropdown menu, as well as dropdown background in the right place -->
+        <LinearLayout
+            android:id="@+id/controls_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:minHeight="48dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/app_or_structure_spinner"
+                style="@style/Control.Spinner.Header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:clickable="false"
+                tools:text="Test app" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/controls_more"
+            android:layout_width="@dimen/controls_header_menu_button_size"
+            android:layout_height="@dimen/controls_header_menu_button_size"
+            android:layout_gravity="center_vertical"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/accessibility_menu"
+            android:padding="12dp"
+            android:src="@drawable/ic_more_vert"
+            android:tint="@color/control_more_vert" />
+    </LinearLayout>
+
+    <ScrollView
         android:id="@+id/controls_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/controls_content_margin_horizontal"
         android:layout_weight="1"
-        android:orientation="vertical"
         android:clipChildren="true"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
         android:scrollbars="none">
-    <include layout="@layout/global_actions_controls_list_view" />
 
-  </ScrollView>
+        <include layout="@layout/global_actions_controls_list_view" />
 
-  <FrameLayout
-      android:id="@+id/controls_panel"
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      android:layout_marginLeft="@dimen/global_actions_side_margin"
-      android:layout_marginRight="@dimen/global_actions_side_margin"
-      android:background="@drawable/controls_panel_background"
-      android:padding="@dimen/global_actions_side_margin"
-      android:visibility="gone"
-      />
+    </ScrollView>
+
+    <FrameLayout
+        android:id="@+id/controls_panel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/controls_content_margin_horizontal"
+        android:layout_weight="1"
+        android:background="@drawable/controls_panel_background"
+        android:visibility="gone"
+        tools:visibility="visible" />
 </merge>

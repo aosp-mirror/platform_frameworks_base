@@ -447,13 +447,13 @@ public class ResolverListAdapter extends BaseAdapter {
                         ri.nonLocalizedLabel = li.getNonLocalizedLabel();
                         ri.icon = li.getIconResource();
                         ri.iconResourceId = ri.icon;
-                        ri.userHandle = mInitialIntentsUserSpace;
                     }
                     if (userManager.isManagedProfile()) {
                         ri.noResourceId = true;
                         ri.icon = 0;
                     }
 
+                    ri.userHandle = mInitialIntentsUserSpace;
                     addResolveInfo(new DisplayResolveInfo(ii, ri,
                             ri.loadLabel(mPm), null, ii, makePresentationGetter(ri)));
                 }

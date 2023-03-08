@@ -24,6 +24,7 @@ import android.annotation.ColorRes;
 import android.annotation.DisplayContext;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
+import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
@@ -133,6 +134,15 @@ public abstract class Context {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     @VisibleForTesting
     public static final long OVERRIDABLE_COMPONENT_CALLBACKS = 193247900L;
+
+    /**
+     * The default device ID, which is the ID of the primary (non-virtual) device.
+     */
+    public static final int DEVICE_ID_DEFAULT = 0;
+    /**
+     * Invalid device ID.
+     */
+    public static final int DEVICE_ID_INVALID = -1;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "MODE_" }, value = {
@@ -267,7 +277,10 @@ public abstract class Context {
      */
     public static final int MODE_NO_LOCALIZED_COLLATORS = 0x0010;
 
-    /** @hide */
+    /**
+     * Flags used for bindService(int) APIs. Note, we now have long BIND_* flags.
+     * @hide
+     */
     @IntDef(flag = true, prefix = { "BIND_" }, value = {
             BIND_AUTO_CREATE,
             BIND_DEBUG_UNBIND,
@@ -280,10 +293,77 @@ public abstract class Context {
             BIND_NOT_PERCEPTIBLE,
             BIND_ALLOW_ACTIVITY_STARTS,
             BIND_INCLUDE_CAPABILITIES,
-            BIND_SHARED_ISOLATED_PROCESS
+            BIND_SHARED_ISOLATED_PROCESS,
+            BIND_EXTERNAL_SERVICE
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface BindServiceFlags {}
+    public @interface BindServiceFlagsBits {}
+
+    /**
+     * Long version of BIND_* flags used for bindService(BindServiceFlags) APIs.
+     * @hide
+     */
+    @LongDef(flag = true, prefix = { "BIND_" }, value = {
+            BIND_AUTO_CREATE,
+            BIND_DEBUG_UNBIND,
+            BIND_NOT_FOREGROUND,
+            BIND_ABOVE_CLIENT,
+            BIND_ALLOW_OOM_MANAGEMENT,
+            BIND_WAIVE_PRIORITY,
+            BIND_IMPORTANT,
+            BIND_ADJUST_WITH_ACTIVITY,
+            BIND_NOT_PERCEPTIBLE,
+            BIND_ALLOW_ACTIVITY_STARTS,
+            BIND_INCLUDE_CAPABILITIES,
+            BIND_SHARED_ISOLATED_PROCESS,
+            // Intentionally not include BIND_EXTERNAL_SERVICE, because it'd cause sign-extension.
+            // This would allow Android Studio to show a warning, if someone tries to use
+            // BIND_EXTERNAL_SERVICE BindServiceFlags.
+            BIND_EXTERNAL_SERVICE_LONG,
+            // Make sure no flag uses the sign bit (most significant bit) of the long integer,
+            // to avoid future confusion.
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BindServiceFlagsLongBits {}
+
+    /**
+     * Specific flags used for bindService() call, which encapsulates a 64 bits long integer.
+     * Call {@link BindServiceFlags#of(long)} to obtain an
+     * object of {@code BindServiceFlags}.
+     */
+    public final static class BindServiceFlags {
+        private final long mValue;
+
+        private BindServiceFlags(@BindServiceFlagsLongBits long value) {
+            mValue = value;
+        }
+
+        /**
+         * @return Return flags in 64 bits long integer.
+         * @hide
+         */
+        public long getValue() {
+            return mValue;
+        }
+
+        /**
+         * Build {@link BindServiceFlags} from BIND_* FLAGS.
+         *
+         * Note, {@link #BIND_EXTERNAL_SERVICE} is not supported in this method, because
+         * it has the highest integer bit set and cause wrong flags to be set. Use
+         * {@link #BIND_EXTERNAL_SERVICE_LONG} instead.
+         */
+        @NonNull
+        public static BindServiceFlags of(@BindServiceFlagsLongBits long value) {
+            if ((value & Integer.toUnsignedLong(BIND_EXTERNAL_SERVICE)) != 0){
+                throw new IllegalArgumentException(
+                        "BIND_EXTERNAL_SERVICE is deprecated. Use BIND_EXTERNAL_SERVICE_LONG"
+                                + " instead");
+            }
+
+            return new BindServiceFlags(value);
+        }
+    }
 
     /**
      * Flag for {@link #bindService}: automatically create the service as long
@@ -451,7 +531,7 @@ public abstract class Context {
 
     /**
      * Flag for {@link #bindService}: allow the process hosting the target service to gain
-     * {@link ActivityManager#PROCESS_CAPABILITY_NETWORK}, which allows it be able
+     * {@link ActivityManager#PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK}, which allows it be able
      * to access network regardless of any power saving restrictions.
      *
      * @hide
@@ -595,8 +675,17 @@ public abstract class Context {
      * The purpose of this flag is to allow applications to provide services that are attributed
      * to the app using the service, rather than the application providing the service.
      * </p>
+     *
+     * <em>This flag is NOT compatible with {@link BindServiceFlags}. If you need to use
+     * {@link BindServiceFlags}, you must use {@link #BIND_EXTERNAL_SERVICE_LONG} instead.
      */
     public static final int BIND_EXTERNAL_SERVICE = 0x80000000;
+
+    /**
+     * Works in the same way as {@link #BIND_EXTERNAL_SERVICE}, but it's defined as a (@code long)
+     * value that is compatible to {@link BindServiceFlags}.
+     */
+    public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
 
     /**
      * These bind flags reduce the strength of the binding such that we shouldn't
@@ -2445,13 +2534,12 @@ public abstract class Context {
      * @see #sendBroadcast(Intent)
      * @see #sendOrderedBroadcast(Intent, String)
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
-     * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @SystemApi
-    public abstract void sendBroadcast(Intent intent,
+    public void sendBroadcast(@NonNull Intent intent,
             @Nullable String receiverPermission,
-            @Nullable Bundle options);
+            @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Like {@link #sendBroadcast(Intent, String)}, but also allows specification
@@ -2485,6 +2573,32 @@ public abstract class Context {
      */
     public abstract void sendOrderedBroadcast(@RequiresPermission Intent intent,
             @Nullable String receiverPermission);
+
+    /**
+     * Broadcast the given intent to all interested BroadcastReceivers, delivering
+     * them one at a time to allow more preferred receivers to consume the
+     * broadcast before it is delivered to less preferred receivers.  This
+     * call is asynchronous; it returns immediately, and you will continue
+     * executing while the receivers are run.
+     *
+     * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * @param intent             The Intent to broadcast; all receivers matching this
+     *                           Intent will receive the broadcast.
+     * @param receiverPermission (optional) String naming a permissions that
+     *                           a receiver must hold in order to receive your broadcast.
+     *                           If null, no permission is required.
+     * @param options            (optional) Additional sending options, generated from a
+     *                           {@link android.app.BroadcastOptions}.
+     * @see android.content.BroadcastReceiver
+     * @see #registerReceiver
+     * @see #sendBroadcast(Intent)
+     * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    public void sendOrderedBroadcast(@NonNull Intent intent, @Nullable String receiverPermission,
+            @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Version of {@link #sendBroadcast(Intent)} that allows you to
@@ -2572,14 +2686,13 @@ public abstract class Context {
      * @see android.content.BroadcastReceiver
      * @see #registerReceiver
      * @see android.app.Activity#RESULT_OK
-     * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @SystemApi
-    public abstract void sendOrderedBroadcast(@NonNull Intent intent,
+    public void sendOrderedBroadcast(@NonNull Intent intent,
             @Nullable String receiverPermission, @Nullable Bundle options,
             @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
-            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras);
+            int initialCode, @Nullable String initialData, @Nullable Bundle initialExtras) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Like {@link #sendOrderedBroadcast(Intent, String, BroadcastReceiver, android.os.Handler,
@@ -3624,6 +3737,9 @@ public abstract class Context {
      * {@link #registerReceiver}, since the lifetime of this BroadcastReceiver
      * is tied to another object (the one that registered it).</p>
      *
+     * <p>This method only accepts a int type flag, to pass in a long type flag, call
+     * {@link #bindService(Intent, ServiceConnection, BindServiceFlags)} instead.</p>
+     *
      * @param service Identifies the service to connect to.  The Intent must
      *      specify an explicit component name.
      * @param conn Receives information as the service is started and stopped.
@@ -3657,13 +3773,25 @@ public abstract class Context {
      * @see #unbindService
      * @see #startService
      */
-    public abstract boolean bindService(@RequiresPermission Intent service,
-            @NonNull ServiceConnection conn, @BindServiceFlags int flags);
+    public abstract boolean bindService(@RequiresPermission @NonNull Intent service,
+            @NonNull ServiceConnection conn, int flags);
+
+    /**
+     * See {@link #bindService(Intent, ServiceConnection, int)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindService(@RequiresPermission @NonNull Intent service,
+            @NonNull ServiceConnection conn, @NonNull BindServiceFlags flags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Same as {@link #bindService(Intent, ServiceConnection, int)
      * bindService(Intent, ServiceConnection, int)} with executor to control ServiceConnection
      * callbacks.
+     *
+     * <p>This method only accepts a 32 bits flag, to pass in a 64 bits flag, call
+     * {@link #bindService(Intent, BindServiceFlags, Executor, ServiceConnection)} instead.</p>
      *
      * @param executor Callbacks on ServiceConnection will be called on executor. Must use same
      *      instance for the same instance of ServiceConnection.
@@ -3673,7 +3801,17 @@ public abstract class Context {
      *      bindService(Intent, ServiceConnection, int)}.
      */
     public boolean bindService(@RequiresPermission @NonNull Intent service,
-            @BindServiceFlags int flags, @NonNull @CallbackExecutor Executor executor,
+            @BindServiceFlagsBits int flags, @NonNull @CallbackExecutor Executor executor,
+            @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * See {@link #bindService(Intent, int, Executor, ServiceConnection)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindService(@RequiresPermission @NonNull Intent service,
+            @NonNull BindServiceFlags flags, @NonNull @CallbackExecutor Executor executor,
             @NonNull ServiceConnection conn) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -3711,7 +3849,17 @@ public abstract class Context {
      * @see android.R.attr#isolatedProcess
      */
     public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
-            @BindServiceFlags int flags, @NonNull String instanceName,
+            int flags, @NonNull String instanceName,
+            @NonNull @CallbackExecutor Executor executor, @NonNull ServiceConnection conn) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * See {@link #bindIsolatedService(Intent, int, String, Executor,ServiceConnection)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    public boolean bindIsolatedService(@RequiresPermission @NonNull Intent service,
+            @NonNull BindServiceFlags flags, @NonNull String instanceName,
             @NonNull @CallbackExecutor Executor executor, @NonNull ServiceConnection conn) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
@@ -3762,9 +3910,24 @@ public abstract class Context {
     }
 
     /**
+     * See {@link #bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     */
+    @SuppressWarnings("unused")
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+    }, conditional = true)
+    public boolean bindServiceAsUser(
+            @NonNull @RequiresPermission Intent service, @NonNull ServiceConnection conn,
+            @NonNull BindServiceFlags flags, @NonNull UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * Same as {@link #bindServiceAsUser(Intent, ServiceConnection, int, UserHandle)}, but with an
      * explicit non-null Handler to run the ServiceConnection callbacks on.
-     *
      * @hide
      */
     @RequiresPermission(anyOf = {
@@ -3775,6 +3938,22 @@ public abstract class Context {
     @UnsupportedAppUsage(trackingBug = 136728678)
     public boolean bindServiceAsUser(Intent service, ServiceConnection conn, int flags,
             Handler handler, UserHandle user) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * See {@link #bindServiceAsUser(Intent, ServiceConnection, int, Handler, UserHandle)}
+     * Call {@link BindServiceFlags#of(long)} to obtain a BindServiceFlags object.
+     * @hide
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES
+    }, conditional = true)
+    @UnsupportedAppUsage(trackingBug = 136728678)
+    public boolean bindServiceAsUser(@NonNull Intent service, @NonNull ServiceConnection conn,
+            @NonNull BindServiceFlags flags, @NonNull Handler handler, @NonNull UserHandle user) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -4098,7 +4277,7 @@ public abstract class Context {
      * <p>Note: When implementing this method, keep in mind that new services can be added on newer
      * Android releases, so if you're looking for just the explicit names mentioned above, make sure
      * to return {@code null} when you don't recognize the name &mdash; if you throw a
-     * {@link RuntimeException} exception instead, you're app might break on new Android releases.
+     * {@link RuntimeException} exception instead, your app might break on new Android releases.
      *
      * @param name The name of the desired service.
      *
@@ -5525,6 +5704,9 @@ public abstract class Context {
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.companion.virtual.VirtualDeviceManager} for managing virtual devices.
      *
+     * On devices without {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP}
+     * system feature the {@link #getSystemService(String)} will return {@code null}.
+     *
      * @see #getSystemService(String)
      * @see android.companion.virtual.VirtualDeviceManager
      */
@@ -6208,12 +6390,24 @@ public abstract class Context {
     public static final String SATELLITE_SERVICE = "satellite";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.net.wifi.sharedconnectivity.app.SharedConnectivityManager} for accessing
+     * shared connectivity services.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.sharedconnectivity.app.SharedConnectivityManager
+     * @hide
+     */
+    @SystemApi
+    public static final String SHARED_CONNECTIVITY_SERVICE = "shared_connectivity";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
      * @param permission The name of the permission being checked.
      * @param pid The process ID being checked against.  Must be > 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      *
      * @return {@link PackageManager#PERMISSION_GRANTED} if the given
@@ -6303,7 +6497,7 @@ public abstract class Context {
      *
      * @param permission The name of the permission being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param message A message to include in the exception if it is thrown.
      *
@@ -6447,7 +6641,7 @@ public abstract class Context {
      *
      * @param uri The uri that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to check.
      *
@@ -6475,7 +6669,7 @@ public abstract class Context {
      *
      * @param uris The list of URIs that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to check for the list of uris
      *
@@ -6601,7 +6795,7 @@ public abstract class Context {
      * @param writePermission The permission that provides overall write
      * access, or null to not do this check.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to check.
      *
@@ -6625,7 +6819,7 @@ public abstract class Context {
      *
      * @param uri The uri that is being checked.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
@@ -6684,7 +6878,7 @@ public abstract class Context {
      * @param writePermission The permission that provides overall write
      * access, or null to not do this check.
      * @param pid The process ID being checked against.  Must be &gt; 0.
-     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * @param uid The UID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      * @param modeFlags The access modes to enforce.
      * @param message A message to include in the exception if it is thrown.
@@ -6994,7 +7188,7 @@ public abstract class Context {
      * <p>
      * Applications that run on virtual devices may use this method to access the default device
      * capabilities and functionality (by passing
-     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}. Similarly,
+     * {@link Context#DEVICE_ID_DEFAULT}. Similarly,
      * applications running on the default device may access the functionality of virtual devices.
      * </p>
      * <p>
@@ -7348,7 +7542,6 @@ public abstract class Context {
      * @throws IllegalArgumentException if the given device ID is not a valid ID of the default
      *         device or a virtual device.
      *
-     * @see #isDeviceContext()
      * @see #createDeviceContext(int)
      * @hide
      */
@@ -7362,7 +7555,7 @@ public abstract class Context {
      * determine whether they are running on a virtual device and identify that device.
      *
      * The device ID of the host device is
-     * {@link android.companion.virtual.VirtualDeviceManager#DEVICE_ID_DEFAULT}
+     * {@link Context#DEVICE_ID_DEFAULT}
      *
      * <p>
      * If the underlying device ID is changed by the system, for example, when an
@@ -7372,26 +7565,8 @@ public abstract class Context {
      * </p>
      *
      * <p>
-     * This method will only return a reliable value for this instance if
-     * {@link Context#isDeviceContext()} is {@code true}. The system can assign an arbitrary device
-     * id value for Contexts not logically associated with a device.
-     * </p>
-     *
-     * @return the ID of the device this context is associated with.
-     * @see #isDeviceContext()
-     * @see #createDeviceContext(int)
-     * @see #registerDeviceIdChangeListener(Executor, IntConsumer)
-     */
-    public int getDeviceId() {
-        throw new RuntimeException("Not implemented. Must override in a subclass.");
-    }
-
-    /**
-     * Indicates whether the value of {@link Context#getDeviceId()} can be relied upon for
-     * this instance. It will return {@code true} for Contexts created by
-     * {@link Context#createDeviceContext(int)} which reference a valid device ID, as well as for
-     * UI and Display Contexts.
-     * <p>
+     * This method will only return a reliable value for this instance if it was created with
+     * {@link Context#createDeviceContext(int)}, or if this instance is a UI or Display Context.
      * Contexts created with {@link Context#createDeviceContext(int)} will have an explicit
      * device association, which will never change, even if the underlying device is closed or is
      * removed. UI Contexts and Display Contexts are
@@ -7401,15 +7576,12 @@ public abstract class Context {
      * logically associated with a device.
      * </p>
      *
-     * @return {@code true} if {@link Context#getDeviceId()} is reliable, {@code false} otherwise.
-     *
+     * @return the ID of the device this context is associated with.
      * @see #createDeviceContext(int)
-     * @see #getDeviceId()}
-     * @see #createDisplayContext(Display)
+     * @see #registerDeviceIdChangeListener(Executor, IntConsumer)
      * @see #isUiContext()
      */
-
-    public boolean isDeviceContext() {
+    public int getDeviceId() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -7428,7 +7600,6 @@ public abstract class Context {
      * @param listener The listener {@code IntConsumer} to call which will receive the updated
      *                 device ID.
      *
-     * @see Context#isDeviceContext()
      * @see Context#getDeviceId()
      * @see Context#createDeviceContext(int)
      */
@@ -7530,7 +7701,7 @@ public abstract class Context {
      */
     @Nullable
     public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
-            int flags) {
+            long flags) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 

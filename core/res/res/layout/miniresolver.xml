@@ -14,6 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
+<!-- Layout used to decide whether to launch a single target in another profile.
+     When this layout is used in ResolverActivity, the user can choose between a verified app in the
+     other profile and the default browser in the current profile.
+     In IntentForwarderActivity, they choose whether to launch in the other profile or cancel. -->
 <com.android.internal.widget.ResolverDrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -24,6 +29,7 @@
     android:id="@id/contentPanel">
 
     <RelativeLayout
+        android:id="@+id/title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"

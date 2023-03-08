@@ -117,6 +117,7 @@ interface IUserManager {
     boolean someUserHasAccount(in String accountName, in String accountType);
     String getProfileType(int userId);
     boolean isDemoUser(int userId);
+    boolean isAdminUser(int userId);
     boolean isPreCreated(int userId);
     UserInfo createProfileForUserEvenWhenDisallowedWithThrow(in String name, in String userType, int flags,
             int userId, in String[] disallowedPackages);
@@ -133,6 +134,7 @@ interface IUserManager {
     boolean isUserForeground(int userId);
     boolean isUserVisible(int userId);
     int[] getVisibleUsers();
+    int getDisplayIdAssignedToUser();
     boolean isUserNameSet(int userId);
     boolean hasRestrictedProfiles(int userId);
     boolean requestQuietModeEnabled(String callingPackage, boolean enableQuietMode, int userId, in IntentSender target, int flags);

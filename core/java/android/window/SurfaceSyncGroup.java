@@ -53,7 +53,7 @@ import java.util.function.Supplier;
  * see the <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/window/SurfaceSyncGroup.md">SurfaceSyncGroup documentation</a>
  * </p>
  */
-public class SurfaceSyncGroup {
+public final class SurfaceSyncGroup {
     private static final String TAG = "SurfaceSyncGroup";
     private static final boolean DEBUG = false;
 
@@ -100,6 +100,9 @@ public class SurfaceSyncGroup {
      * @hide
      */
     public final ISurfaceSyncGroup mISurfaceSyncGroup = new ISurfaceSyncGroupImpl();
+
+    @GuardedBy("mLock")
+    private Runnable mAddedToSyncListener;
 
     /**
      * Token to identify this SurfaceSyncGroup. This is used to register the SurfaceSyncGroup in
@@ -447,12 +450,15 @@ public class SurfaceSyncGroup {
     }
 
     /**
-     * Invoked when the SurfaceSyncGroup has been added to another SurfaceSyncGroup and is ready
-     * to proceed.
+     * Add a Runnable to be invoked when the SurfaceSyncGroup has been added to another
+     * SurfaceSyncGroup. This is useful to know when it's safe to proceed rendering.
      *
      * @hide
      */
-    public void onSyncReady() {
+    public void setAddedToSyncListener(Runnable addedToSyncListener) {
+        synchronized (mLock) {
+            mAddedToSyncListener = addedToSyncListener;
+        }
     }
 
     private boolean addSyncToWm(IBinder token, boolean parentSyncGroupMerge,
@@ -525,12 +531,15 @@ public class SurfaceSyncGroup {
         if (DEBUG) {
             Log.d(TAG, "setTransactionCallbackFromParent " + mName);
         }
-        boolean finished = false;
+
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW,
                     "setTransactionCallbackFromParent " + mName + " callback="
                             + transactionReadyCallback.hashCode());
         }
+
+        boolean finished = false;
+        Runnable addedToSyncListener = null;
         synchronized (mLock) {
             if (mFinished) {
                 finished = true;
@@ -577,6 +586,7 @@ public class SurfaceSyncGroup {
                         Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                     }
                 };
+                addedToSyncListener = mAddedToSyncListener;
             }
         }
 
@@ -587,8 +597,8 @@ public class SurfaceSyncGroup {
                 transactionReadyCallback.onTransactionReady(null);
             } catch (RemoteException e) {
             }
-        } else {
-            onSyncReady();
+        } else if (addedToSyncListener != null) {
+            addedToSyncListener.run();
         }
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);

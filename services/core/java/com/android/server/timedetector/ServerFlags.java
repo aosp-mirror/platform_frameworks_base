@@ -304,7 +304,7 @@ public final class ServerFlags {
 
     /**
      * Returns an {@link Instant} from {@link DeviceConfig} from the system_time
-     * namespace, returns the {@code defaultValue} if the value is missing or invalid.
+     * namespace, returns {@link Optional#empty()} if there is no explicit value set.
      */
     @NonNull
     public Optional<Instant> getOptionalInstant(@DeviceConfigKey String key) {
@@ -341,16 +341,17 @@ public final class ServerFlags {
     }
 
     /**
-     * Returns a boolean value from {@link DeviceConfig} from the system_time
-     * namespace, or {@code defaultValue} if there is no explicit value set.
+     * Returns a boolean value from {@link DeviceConfig} from the system_time namespace, or
+     * {@code defaultValue} if there is no explicit value set.
      */
     public boolean getBoolean(@DeviceConfigKey String key, boolean defaultValue) {
         return DeviceConfig.getBoolean(NAMESPACE_SYSTEM_TIME, key, defaultValue);
     }
 
     /**
-     * Returns a positive duration from {@link DeviceConfig} from the system_time
-     * namespace, or {@code defaultValue} if there is no explicit value set.
+     * Returns a positive duration from {@link DeviceConfig} from the system_time namespace,
+     * or {@code defaultValue} if there is no explicit value set or if the value is not a number or
+     * is negative.
      */
     @Nullable
     public Duration getDurationFromMillis(

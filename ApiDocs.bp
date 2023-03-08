@@ -422,26 +422,27 @@ java_genrule {
         "$(location merge_zips) $(out) $(location :ds-docs-java{.docs.zip}) $(genDir)/ds-docs-kt-moved.zip",
 }
 
-java_genrule {
-    name: "ds-docs-switched",
-    tools: [
-        "switcher4",
-        "soong_zip",
-    ],
-    srcs: [
-        ":ds-docs-java{.docs.zip}",
-        ":ds-docs-kt{.docs.zip}",
-    ],
-    out: ["ds-docs-switched.zip"],
-    dist: {
-        targets: ["docs"],
-    },
-    cmd: "unzip -q $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
-        "unzip -q $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
-        "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
-        "(cd $(genDir)/en/reference && $$SWITCHER --work platform) > /dev/null && " +
-        "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
-}
+// Disable doc generation until Doclava is migrated to JDK 17 (b/240421555).
+// java_genrule {
+//     name: "ds-docs-switched",
+//     tools: [
+//         "switcher4",
+//         "soong_zip",
+//     ],
+//     srcs: [
+//         ":ds-docs-java{.docs.zip}",
+//         ":ds-docs-kt{.docs.zip}",
+//     ],
+//     out: ["ds-docs-switched.zip"],
+//     dist: {
+//         targets: ["docs"],
+//     },
+//     cmd: "unzip -q $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
+//         "unzip -q $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
+//         "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
+//         "(cd $(genDir)/en/reference && $$SWITCHER --work platform) > /dev/null && " +
+//         "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
+// }
 
 droiddoc {
     name: "ds-static-docs",

@@ -26,7 +26,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
-import com.android.systemui.keyguard.data.repository.BiometricRepository
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.Dispatchers
@@ -86,13 +87,15 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
                 mock(PrimaryBouncerCallbackInteractor::class.java),
                 mock(FalsingCollector::class.java),
                 mock(DismissCallbackRegistry::class.java),
+                context,
+                mKeyguardUpdateMonitor,
                 mock(KeyguardBypassController::class.java),
-                mKeyguardUpdateMonitor
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(
+                mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
-                mock(BiometricRepository::class.java),
+                mock(BiometricSettingsRepository::class.java),
                 mock(DeviceEntryFingerprintAuthRepository::class.java),
                 mock(SystemClock::class.java),
                 mock(KeyguardUpdateMonitor::class.java),

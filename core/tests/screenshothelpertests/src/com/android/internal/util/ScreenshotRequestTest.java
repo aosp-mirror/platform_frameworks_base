@@ -131,6 +131,12 @@ public final class ScreenshotRequestTest {
         assertEquals(Insets.NONE, out.getInsets());
     }
 
+    @Test
+    public void testInvalidType() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new ScreenshotRequest.Builder(5, 2).build());
+    }
+
     private Bitmap makeHardwareBitmap(int width, int height) {
         HardwareBuffer buffer = HardwareBuffer.create(
                 width, height, HardwareBuffer.RGBA_8888, 1, HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE);

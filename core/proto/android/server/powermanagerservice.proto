@@ -469,5 +469,26 @@ message LowPowerStandbyControllerDumpProto {
     // Set of app ids that are exempt form low power standby
     repeated int32 allowlist = 10;
 
-    // Next tag: 11
+    // The active policy specifying exemptions
+    optional LowPowerStandbyPolicyProto policy = 11;
+
+    // Next tag: 12
+}
+
+message LowPowerStandbyPolicyProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Name of the policy
+    optional string identifier = 1;
+
+    // Packages that are exempt from Low Power Standby restrictions
+    repeated string exempt_packages = 2;
+
+    // Exemption reasons that this policy allows
+    optional int32 allowed_reasons = 3;
+
+    // Features that this policy allows to be used
+    repeated string allowed_features = 4;
+
+    // Next tag: 5
 }

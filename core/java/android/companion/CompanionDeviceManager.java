@@ -491,7 +491,7 @@ public final class CompanionDeviceManager {
      * @param associationId id of the device association.
      * @param flags system data types to be enabled.
      */
-    public void enableSystemDataSync(int associationId, @DataSyncTypes int flags) {
+    public void enableSystemDataSyncForTypes(int associationId, @DataSyncTypes int flags) {
         if (!checkFeaturePresent()) {
             return;
         }
@@ -513,7 +513,7 @@ public final class CompanionDeviceManager {
      * @param associationId id of the device association.
      * @param flags system data types to be disabled.
      */
-    public void disableSystemDataSync(int associationId, @DataSyncTypes int flags) {
+    public void disableSystemDataSyncForTypes(int associationId, @DataSyncTypes int flags) {
         if (!checkFeaturePresent()) {
             return;
         }
@@ -718,7 +718,9 @@ public final class CompanionDeviceManager {
      * @return the associations list
      * @see #addOnAssociationsChangedListener(Executor, OnAssociationsChangedListener)
      * @see #removeOnAssociationsChangedListener(OnAssociationsChangedListener)
+     * @hide
      */
+    @SystemApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public @NonNull List<AssociationInfo> getAllAssociations() {
@@ -732,7 +734,10 @@ public final class CompanionDeviceManager {
 
     /**
      * Listener for any changes to {@link AssociationInfo}.
+     *
+     * @hide
      */
+    @SystemApi
     public interface OnAssociationsChangedListener {
         /**
          * Invoked when a change occurs to any of the associations for the user (including adding
@@ -747,7 +752,9 @@ public final class CompanionDeviceManager {
      * Register listener for any changes to {@link AssociationInfo}.
      *
      * @see #getAllAssociations()
+     * @hide
      */
+    @SystemApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void addOnAssociationsChangedListener(
@@ -769,7 +776,9 @@ public final class CompanionDeviceManager {
      * Unregister listener for any changes to {@link AssociationInfo}.
      *
      * @see #getAllAssociations()
+     * @hide
      */
+    @SystemApi
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void removeOnAssociationsChangedListener(
@@ -788,6 +797,119 @@ public final class CompanionDeviceManager {
                     iterator.remove();
                 }
             }
+        }
+    }
+
+    /**
+     * Listener for any changes to {@link com.android.server.companion.transport.Transport}.
+     *
+     * @hide
+     */
+    public interface OnTransportsChangedListener {
+        /**
+         * Invoked when a change occurs to any of the transports
+         *
+         * @param associations all the associations which have connected transports
+         */
+        void onTransportsChanged(@NonNull List<AssociationInfo> associations);
+    }
+
+    /**
+     * Register a listener for any changes to
+     * {@link com.android.server.companion.transport.Transport}. Your app will receive a callback to
+     * {@link OnTransportsChangedListener} immediately with all the existing transports.
+     *
+     * @hide
+     */
+    public void addOnTransportsChangedListener(
+            @NonNull Executor executor, @NonNull OnTransportsChangedListener listener) {
+        final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
+                executor, listener);
+        try {
+            mService.addOnTransportsChangedListener(proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister a listener to stop receiving any changes to
+     * {@link com.android.server.companion.transport.Transport}.
+     *
+     * @hide
+     */
+    public void removeOnTransportsChangedListener(
+            @NonNull OnTransportsChangedListener listener) {
+        final OnTransportsChangedListenerProxy proxy = new OnTransportsChangedListenerProxy(
+                null, listener);
+        try {
+            mService.removeOnTransportsChangedListener(proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Send a message to remote devices
+     *
+     * @hide
+     */
+    public void sendMessage(int messageType, byte[] data, int[] associationIds) {
+        try {
+            mService.sendMessage(messageType, data, associationIds);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Listener when a message is received for the registered message type
+     *
+     * @see #addOnMessageReceivedListener(Executor, int, OnMessageReceivedListener)
+     *
+     * @hide
+     */
+    public interface OnMessageReceivedListener {
+        /**
+         * Called when a message is received
+         */
+        void onMessageReceived(int associationId, byte[] data);
+    }
+
+    /**
+     * Register a listener to receive callbacks when a message is received by the given type
+     *
+     * @see com.android.server.companion.transport.Transport for supported message types
+     *
+     * @hide
+     */
+    public void addOnMessageReceivedListener(@NonNull Executor executor, int messageType,
+            OnMessageReceivedListener listener) {
+        final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
+                executor, listener);
+        try {
+            mService.addOnMessageReceivedListener(messageType, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister a listener to stop receiving callbacks when a message is received by the given
+     * type
+     *
+     * @see com.android.server.companion.transport.Transport for supported message types
+     *
+     * @hide
+     */
+    public void removeOnMessageReceivedListener(int messageType,
+            OnMessageReceivedListener listener) {
+        final OnMessageReceivedListenerProxy proxy = new OnMessageReceivedListenerProxy(
+                null, listener);
+        try {
+            mService.removeOnMessageReceivedListener(messageType, proxy);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1185,6 +1307,20 @@ public final class CompanionDeviceManager {
         }
     }
 
+    /**
+     * Enable or disable secure transport for testing. Defaults to enabled.
+     *
+     * @param enabled true to enable. false to disable.
+     * @hide
+     */
+    public void enableSecureTransport(boolean enabled) {
+        try {
+            mService.enableSecureTransport(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private boolean checkFeaturePresent() {
         boolean featurePresent = mService != null;
         if (!featurePresent && DEBUG) {
@@ -1251,6 +1387,40 @@ public final class CompanionDeviceManager {
         @Override
         public void onAssociationsChanged(@NonNull List<AssociationInfo> associations) {
             mExecutor.execute(() -> mListener.onAssociationsChanged(associations));
+        }
+    }
+
+    private static class OnTransportsChangedListenerProxy
+            extends IOnTransportsChangedListener.Stub {
+        private final Executor mExecutor;
+        private final OnTransportsChangedListener mListener;
+
+        private OnTransportsChangedListenerProxy(Executor executor,
+                OnTransportsChangedListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onTransportsChanged(@NonNull List<AssociationInfo> associations) {
+            mExecutor.execute(() -> mListener.onTransportsChanged(associations));
+        }
+    }
+
+    private static class OnMessageReceivedListenerProxy
+            extends IOnMessageReceivedListener.Stub {
+        private final Executor mExecutor;
+        private final OnMessageReceivedListener mListener;
+
+        private OnMessageReceivedListenerProxy(Executor executor,
+                OnMessageReceivedListener listener) {
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void onMessageReceived(int associationId, byte[] data) {
+            mExecutor.execute(() -> mListener.onMessageReceived(associationId, data));
         }
     }
 

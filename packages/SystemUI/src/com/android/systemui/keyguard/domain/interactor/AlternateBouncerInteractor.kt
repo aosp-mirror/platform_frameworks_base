@@ -20,10 +20,11 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.BiometricRepository
+import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.LegacyAlternateBouncer
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +34,9 @@ import kotlinx.coroutines.flow.Flow
 class AlternateBouncerInteractor
 @Inject
 constructor(
+    private val keyguardStateController: KeyguardStateController,
     private val bouncerRepository: KeyguardBouncerRepository,
-    private val biometricRepository: BiometricRepository,
+    private val biometricSettingsRepository: BiometricSettingsRepository,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
     private val systemClock: SystemClock,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -44,10 +46,11 @@ constructor(
     var legacyAlternateBouncer: LegacyAlternateBouncer? = null
     var legacyAlternateBouncerVisibleTime: Long = NOT_VISIBLE
 
-    val isVisible: Flow<Boolean> = bouncerRepository.isAlternateBouncerVisible
+    val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
+     *
      * @return whether alternateBouncer is visible
      */
     fun show(): Boolean {
@@ -72,6 +75,7 @@ constructor(
      * Sets the correct bouncer states to hide the bouncer. Should only be called through
      * StatusBarKeyguardViewManager until ScrimController is refactored to use
      * alternateBouncerInteractor.
+     *
      * @return true if the alternate bouncer was newly hidden, else false.
      */
     fun hide(): Boolean {
@@ -86,7 +90,7 @@ constructor(
 
     fun isVisibleState(): Boolean {
         return if (isModernAlternateBouncerEnabled) {
-            bouncerRepository.isAlternateBouncerVisible.value
+            bouncerRepository.alternateBouncerVisible.value
         } else {
             legacyAlternateBouncer?.isShowingAlternateBouncer ?: false
         }
@@ -98,11 +102,12 @@ constructor(
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {
         return if (isModernAlternateBouncerEnabled) {
-            bouncerRepository.isAlternateBouncerUIAvailable.value &&
-                biometricRepository.isFingerprintEnrolled.value &&
-                biometricRepository.isStrongBiometricAllowed.value &&
-                biometricRepository.isFingerprintEnabledByDevicePolicy.value &&
-                !deviceEntryFingerprintAuthRepository.isLockedOut.value
+            bouncerRepository.alternateBouncerUIAvailable.value &&
+                biometricSettingsRepository.isFingerprintEnrolled.value &&
+                biometricSettingsRepository.isStrongBiometricAllowed.value &&
+                biometricSettingsRepository.isFingerprintEnabledByDevicePolicy.value &&
+                !deviceEntryFingerprintAuthRepository.isLockedOut.value &&
+                !keyguardStateController.isUnlocked
         } else {
             legacyAlternateBouncer != null &&
                 keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(true)

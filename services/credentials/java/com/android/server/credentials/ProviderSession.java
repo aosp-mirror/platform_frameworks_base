@@ -16,16 +16,23 @@
 
 package com.android.server.credentials;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.credentials.Credential;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.ui.ProviderData;
 import android.credentials.ui.ProviderPendingIntentResponse;
-import android.service.credentials.CredentialEntry;
-import android.service.credentials.CredentialProviderInfo;
-import android.util.Pair;
+import android.os.ICancellationSignal;
+import android.os.RemoteException;
+import android.util.Log;
+
+import com.android.server.credentials.metrics.CandidateProviderMetric;
+import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.UUID;
 
@@ -38,22 +45,22 @@ public abstract class ProviderSession<T, R>
         implements RemoteCredentialService.ProviderCallbacks<R> {
 
     private static final String TAG = "ProviderSession";
-    // Key to be used as an entry key for a remote entry
-    protected static final String REMOTE_ENTRY_KEY = "remote_entry_key";
 
     @NonNull protected final Context mContext;
     @NonNull protected final ComponentName mComponentName;
-    @NonNull protected final CredentialProviderInfo mProviderInfo;
-    @NonNull protected final RemoteCredentialService mRemoteCredentialService;
+    @Nullable protected final CredentialProviderInfo mProviderInfo;
+    @Nullable protected final RemoteCredentialService mRemoteCredentialService;
     @NonNull protected final int mUserId;
     @NonNull protected Status mStatus = Status.NOT_STARTED;
-    @NonNull protected final ProviderInternalCallback mCallbacks;
+    @Nullable protected final ProviderInternalCallback mCallbacks;
     @Nullable protected Credential mFinalCredentialResponse;
+    @Nullable protected ICancellationSignal mProviderCancellationSignal;
     @NonNull protected final T mProviderRequest;
     @Nullable protected R mProviderResponse;
     @NonNull protected Boolean mProviderResponseSet = false;
-    @Nullable protected Pair<String, CredentialEntry> mUiRemoteEntry;
-
+    // Specific candidate provider metric for the provider this session handles
+    @Nullable protected CandidateProviderMetric mCandidateProviderMetric;
+    @NonNull private int mProviderSessionUid;
 
     /**
      * Returns true if the given status reflects that the provider state is ready to be shown
@@ -61,7 +68,7 @@ public abstract class ProviderSession<T, R>
      */
     public static boolean isUiInvokingStatus(Status status) {
         return status == Status.CREDENTIALS_RECEIVED || status == Status.SAVE_ENTRIES_RECEIVED
-                || status == Status.REQUIRES_AUTHENTICATION;
+                || status == Status.NO_CREDENTIALS_FROM_AUTH_ENTRY;
     }
 
     /**
@@ -109,9 +116,9 @@ public abstract class ProviderSession<T, R>
 
     protected ProviderSession(@NonNull Context context, @NonNull CredentialProviderInfo info,
             @NonNull T providerRequest,
-            @NonNull ProviderInternalCallback callbacks,
+            @Nullable ProviderInternalCallback callbacks,
             @NonNull int userId,
-            @NonNull RemoteCredentialService remoteCredentialService) {
+            @Nullable RemoteCredentialService remoteCredentialService) {
         mContext = context;
         mProviderInfo = info;
         mProviderRequest = providerRequest;
@@ -119,6 +126,8 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = info.getServiceInfo().getComponentName();
         mRemoteCredentialService = remoteCredentialService;
+        mCandidateProviderMetric = new CandidateProviderMetric();
+        mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
     }
 
     /** Provider status at various states of the request session. */
@@ -133,7 +142,7 @@ public abstract class ProviderSession<T, R>
         PENDING_INTENT_INVOKED,
         CREDENTIAL_RECEIVED_FROM_SELECTION,
         SAVE_ENTRIES_RECEIVED, CANCELED,
-        NO_CREDENTIALS, COMPLETE
+        NO_CREDENTIALS, EMPTY_RESPONSE, NO_CREDENTIALS_FROM_AUTH_ENTRY, COMPLETE
     }
 
     /** Converts exception to a provider session status. */
@@ -143,12 +152,24 @@ public abstract class ProviderSession<T, R>
         return Status.CANCELED;
     }
 
-    protected String generateEntryId() {
+    protected static String generateUniqueId() {
         return UUID.randomUUID().toString();
     }
 
     public Credential getFinalCredentialResponse() {
         return  mFinalCredentialResponse;
+    }
+
+    /** Propagates cancellation signal to the remote provider service. */
+    public void cancelProviderRemoteSession() {
+        try {
+            if (mProviderCancellationSignal != null) {
+                mProviderCancellationSignal.cancel();
+            }
+            setStatus(Status.CANCELED);
+        } catch (RemoteException e) {
+            Log.i(TAG, "Issue while cancelling provider session: " + e.getMessage());
+        }
     }
 
     protected void setStatus(@NonNull Status status) {
@@ -165,7 +186,7 @@ public abstract class ProviderSession<T, R>
         return mComponentName;
     }
 
-    @NonNull
+    @Nullable
     protected RemoteCredentialService getRemoteCredentialService() {
         return mRemoteCredentialService;
     }
@@ -173,12 +194,21 @@ public abstract class ProviderSession<T, R>
     /** Updates the status .*/
     protected void updateStatusAndInvokeCallback(@NonNull Status status) {
         setStatus(status);
+        updateCandidateMetric(status);
         mCallbacks.onProviderStatusChanged(status, mComponentName);
     }
 
-    protected void onRemoteEntrySelected(
-            ProviderPendingIntentResponse providerPendingIntentResponse) {
-        //TODO: Implement
+    private void updateCandidateMetric(Status status) {
+        mCandidateProviderMetric.setCandidateUid(mProviderSessionUid);
+        mCandidateProviderMetric
+                .setQueryFinishTimeNanoseconds(System.nanoTime());
+        if (isTerminatingStatus(status)) {
+            mCandidateProviderMetric.setProviderQueryStatus(ProviderStatusForMetrics.QUERY_FAILURE
+                    .getMetricCode());
+        } else if (isCompletionStatus(status)) {
+            mCandidateProviderMetric.setProviderQueryStatus(ProviderStatusForMetrics.QUERY_SUCCESS
+                    .getMetricCode());
+        }
     }
 
     /** Get the request to be sent to the provider. */
@@ -201,6 +231,39 @@ public abstract class ProviderSession<T, R>
         return mProviderResponse;
     }
 
+    protected boolean enforceRemoteEntryRestrictions(
+            @Nullable ComponentName expectedRemoteEntryProviderService) {
+        // Check if the service is the one set by the OEM. If not silently reject this entry
+        if (!mComponentName.equals(expectedRemoteEntryProviderService)) {
+            Log.i(TAG, "Remote entry being dropped as it is not from the service "
+                    + "configured by the OEM.");
+            return false;
+        }
+        // Check if the service has the hybrid permission .If not, silently reject this entry.
+        // This check is in addition to the permission check happening in the provider's process.
+        try {
+            ApplicationInfo appInfo = mContext.getPackageManager().getApplicationInfo(
+                    mComponentName.getPackageName(),
+                    PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY));
+            if (appInfo != null
+                    && mContext.checkPermission(
+                    Manifest.permission.PROVIDE_REMOTE_CREDENTIALS,
+                    /*pId=*/-1, appInfo.uid) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        } catch (SecurityException e) {
+            Log.i(TAG, "Error getting info for "
+                    + mComponentName.flattenToString() + ": " + e.getMessage());
+            return false;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.i(TAG, "Error getting info for "
+                    + mComponentName.flattenToString() + ": " + e.getMessage());
+            return false;
+        }
+        Log.i(TAG, "In enforceRemoteEntryRestrictions - remote entry checks fail");
+        return false;
+    }
+
     /** Should be overridden to prepare, and stores state for {@link ProviderData} to be
      * shown on the UI. */
     @Nullable protected abstract ProviderData prepareUiData();
@@ -208,4 +271,8 @@ public abstract class ProviderSession<T, R>
     /** Should be overridden to handle the selected entry from the UI. */
     protected abstract void onUiEntrySelected(String entryType, String entryId,
             ProviderPendingIntentResponse providerPendingIntentResponse);
+
+    /** Should be overridden to invoke the provider at a defined location. Helpful for
+     * situations such as metric generation. */
+    protected abstract void invokeSession();
 }

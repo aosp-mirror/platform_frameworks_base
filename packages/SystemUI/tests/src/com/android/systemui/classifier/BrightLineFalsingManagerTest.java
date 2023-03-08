@@ -89,7 +89,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
         mClassifiers.add(mClassifierA);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mFalsingDataProvider.isFolded()).thenReturn(true);
+        when(mFalsingDataProvider.isUnfolded()).thenReturn(false);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassifier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,
@@ -185,7 +185,7 @@ public class BrightLineFalsingManagerTest extends SysuiTestCase {
     @Test
     public void testSkipUnfolded() {
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isTrue();
-        when(mFalsingDataProvider.isFolded()).thenReturn(false);
+        when(mFalsingDataProvider.isUnfolded()).thenReturn(true);
         assertThat(mBrightLineFalsingManager.isFalseTouch(Classifier.GENERIC)).isFalse();
     }
 }

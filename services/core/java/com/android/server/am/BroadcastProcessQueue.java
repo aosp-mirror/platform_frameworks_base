@@ -155,6 +155,12 @@ class BroadcastProcessQueue {
     private boolean mActiveViaColdStart;
 
     /**
+     * Flag indicating that the currently active broadcast is being dispatched
+     * to a package that was in the stopped state.
+     */
+    private boolean mActiveWasStopped;
+
+    /**
      * Number of consecutive urgent broadcasts that have been dispatched
      * since the last non-urgent dispatch.
      */
@@ -229,14 +235,19 @@ class BroadcastProcessQueue {
      * When defined, this receiver is considered "blocked" until at least the
      * given count of other receivers have reached a terminal state; typically
      * used for ordered broadcasts and priority traunches.
+     *
+     * @return the existing broadcast record in the queue that was replaced with a newer broadcast
+     *         sent with {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} or {@code null} if there
+     *         wasn't any broadcast that was replaced.
      */
-    public void enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            @NonNull BroadcastConsumer replacedBroadcastConsumer, boolean wouldBeSkipped) {
+    @Nullable
+    public BroadcastRecord enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record,
+            int recordIndex, boolean wouldBeSkipped) {
         if (record.isReplacePending()) {
-            final boolean didReplace = replaceBroadcast(record, recordIndex,
-                    replacedBroadcastConsumer, wouldBeSkipped);
-            if (didReplace) {
-                return;
+            final BroadcastRecord replacedBroadcastRecord = replaceBroadcast(record, recordIndex,
+                    wouldBeSkipped);
+            if (replacedBroadcastRecord != null) {
+                return replacedBroadcastRecord;
             }
         }
 
@@ -253,34 +264,37 @@ class BroadcastProcessQueue {
         // with implicit responsiveness expectations.
         getQueueForBroadcast(record).addLast(newBroadcastArgs);
         onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
+        return null;
     }
 
     /**
      * Searches from newest to oldest in the pending broadcast queues, and at the first matching
      * pending broadcast it finds, replaces it in-place and returns -- does not attempt to handle
      * "duplicate" broadcasts in the queue.
-     * <p>
-     * @return {@code true} if it found and replaced an existing record in the queue;
-     * {@code false} otherwise.
+     *
+     * @return the existing broadcast record in the queue that was replaced with a newer broadcast
+     *         sent with {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} or {@code null} if there
+     *         wasn't any broadcast that was replaced.
      */
-    private boolean replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
-            @NonNull BroadcastConsumer replacedBroadcastConsumer, boolean wouldBeSkipped) {
+    @Nullable
+    private BroadcastRecord replaceBroadcast(@NonNull BroadcastRecord record, int recordIndex,
+            boolean wouldBeSkipped) {
         final ArrayDeque<SomeArgs> queue = getQueueForBroadcast(record);
-        return replaceBroadcastInQueue(queue, record, recordIndex,
-                replacedBroadcastConsumer, wouldBeSkipped);
+        return replaceBroadcastInQueue(queue, record, recordIndex, wouldBeSkipped);
     }
 
     /**
      * Searches from newest to oldest, and at the first matching pending broadcast
      * it finds, replaces it in-place and returns -- does not attempt to handle
      * "duplicate" broadcasts in the queue.
-     * <p>
-     * @return {@code true} if it found and replaced an existing record in the queue;
-     * {@code false} otherwise.
+     *
+     * @return the existing broadcast record in the queue that was replaced with a newer broadcast
+     *         sent with {@link Intent#FLAG_RECEIVER_REPLACE_PENDING} or {@code null} if there
+     *         wasn't any broadcast that was replaced.
      */
-    private boolean replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
+    @Nullable
+    private BroadcastRecord replaceBroadcastInQueue(@NonNull ArrayDeque<SomeArgs> queue,
             @NonNull BroadcastRecord record, int recordIndex,
-            @NonNull BroadcastConsumer replacedBroadcastConsumer,
             boolean wouldBeSkipped) {
         final Iterator<SomeArgs> it = queue.descendingIterator();
         final Object receiver = record.receivers.get(recordIndex);
@@ -302,11 +316,10 @@ class BroadcastProcessQueue {
                 record.copyEnqueueTimeFrom(testRecord);
                 onBroadcastDequeued(testRecord, testRecordIndex, testWouldBeSkipped);
                 onBroadcastEnqueued(record, recordIndex, wouldBeSkipped);
-                replacedBroadcastConsumer.accept(testRecord, testRecordIndex);
-                return true;
+                return testRecord;
             }
         }
-        return false;
+        return null;
     }
 
     /**
@@ -454,8 +467,16 @@ class BroadcastProcessQueue {
         mActiveViaColdStart = activeViaColdStart;
     }
 
+    public void setActiveWasStopped(boolean activeWasStopped) {
+        mActiveWasStopped = activeWasStopped;
+    }
+
     public boolean getActiveViaColdStart() {
         return mActiveViaColdStart;
+    }
+
+    public boolean getActiveWasStopped() {
+        return mActiveWasStopped;
     }
 
     /**
@@ -477,6 +498,7 @@ class BroadcastProcessQueue {
         final boolean wouldBeSkipped = (next.argi2 == 1);
         mActiveCountSinceIdle++;
         mActiveViaColdStart = false;
+        mActiveWasStopped = false;
         next.recycle();
         onBroadcastDequeued(mActive, mActiveIndex, wouldBeSkipped);
     }
@@ -726,6 +748,22 @@ class BroadcastProcessQueue {
      */
     public boolean isPendingManifest() {
         return mCountManifest > 0;
+    }
+
+    /**
+     * Quickly determine if this queue has ordered broadcasts waiting to be delivered,
+     * which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingOrdered() {
+        return mCountOrdered > 0;
+    }
+
+    /**
+     * Quickly determine if this queue has broadcasts waiting to be delivered for which result is
+     * expected from the senders, which indicates we should request an OOM adjust.
+     */
+    public boolean isPendingResultTo() {
+        return mCountResultTo > 0;
     }
 
     /**
@@ -1107,8 +1145,11 @@ class BroadcastProcessQueue {
         pw.print(" because ");
         pw.print(reasonToString(mRunnableAtReason));
         pw.println();
-        pw.print("mProcessCached="); pw.println(mProcessCached);
+
         pw.increaseIndent();
+        dumpProcessState(pw);
+        dumpBroadcastCounts(pw);
+
         if (mActive != null) {
             dumpRecord("ACTIVE", now, pw, mActive, mActiveIndex);
         }
@@ -1125,6 +1166,49 @@ class BroadcastProcessQueue {
             dumpRecord("OFFLOAD", now, pw, r, args.argi1);
         }
         pw.decreaseIndent();
+        pw.println();
+    }
+
+    @NeverCompile
+    private void dumpProcessState(@NonNull IndentingPrintWriter pw) {
+        final StringBuilder sb = new StringBuilder();
+        if (mProcessCached) {
+            sb.append("CACHED");
+        }
+        if (mProcessInstrumented) {
+            if (sb.length() > 0) sb.append("|");
+            sb.append("INSTR");
+        }
+        if (mProcessPersistent) {
+            if (sb.length() > 0) sb.append("|");
+            sb.append("PER");
+        }
+        if (sb.length() > 0) {
+            pw.print("state:"); pw.println(sb);
+        }
+        if (runningOomAdjusted) {
+            pw.print("runningOomAdjusted:"); pw.println(runningOomAdjusted);
+        }
+    }
+
+    @NeverCompile
+    private void dumpBroadcastCounts(@NonNull IndentingPrintWriter pw) {
+        pw.print("e:"); pw.print(mCountEnqueued);
+        pw.print(" d:"); pw.print(mCountDeferred);
+        pw.print(" f:"); pw.print(mCountForeground);
+        pw.print(" fd:"); pw.print(mCountForegroundDeferred);
+        pw.print(" o:"); pw.print(mCountOrdered);
+        pw.print(" a:"); pw.print(mCountAlarm);
+        pw.print(" p:"); pw.print(mCountPrioritized);
+        pw.print(" pd:"); pw.print(mCountPrioritizedDeferred);
+        pw.print(" int:"); pw.print(mCountInteractive);
+        pw.print(" rt:"); pw.print(mCountResultTo);
+        pw.print(" ins:"); pw.print(mCountInstrumented);
+        pw.print(" m:"); pw.print(mCountManifest);
+
+        pw.print(" csi:"); pw.print(mActiveCountSinceIdle);
+        pw.print(" ccu:"); pw.print(mActiveCountConsecutiveUrgent);
+        pw.print(" ccn:"); pw.print(mActiveCountConsecutiveNormal);
         pw.println();
     }
 

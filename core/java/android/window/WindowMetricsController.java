@@ -127,7 +127,7 @@ public final class WindowMetricsController {
                     isScreenRound, alwaysConsumeSystemBars, SOFT_INPUT_ADJUST_NOTHING,
                     0 /* flags */, SYSTEM_UI_FLAG_VISIBLE,
                     WindowManager.LayoutParams.INVALID_WINDOW_TYPE, windowingMode,
-                    null /* typeSideMap */);
+                    null /* idSideMap */);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

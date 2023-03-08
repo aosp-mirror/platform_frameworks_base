@@ -1584,11 +1584,7 @@ public class BackupManagerServiceRoboTest {
     @Test
     public void testConstructor_withNullContext_throws() throws Exception {
         expectThrows(
-                NullPointerException.class,
-                () ->
-                        new BackupManagerService(
-                                /* context */ null,
-                                new SparseArray<>()));
+                NullPointerException.class, () -> new BackupManagerService(/* context */ null));
     }
 
     /** Test that the constructor does not create {@link UserBackupManagerService} instances. */
@@ -1614,18 +1610,6 @@ public class BackupManagerServiceRoboTest {
         lifecycle.onStart();
 
         verify(lifecycle).publishService(Context.BACKUP_SERVICE, backupManagerService);
-    }
-
-    /** testOnUnlockUser_forwards */
-    @Test
-    public void testOnUnlockUser_forwards() {
-        BackupManagerService backupManagerService = mock(BackupManagerService.class);
-        BackupManagerService.Lifecycle lifecycle =
-                new BackupManagerService.Lifecycle(mContext, backupManagerService);
-
-        lifecycle.onUserUnlocking(new TargetUser(new UserInfo(UserHandle.USER_SYSTEM, null, 0)));
-
-        verify(backupManagerService).onUnlockUser(UserHandle.USER_SYSTEM);
     }
 
     /** testOnStopUser_forwards */

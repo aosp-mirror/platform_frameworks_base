@@ -41,7 +41,9 @@ public class TimeoutRecord {
             TimeoutKind.SERVICE_EXEC,
             TimeoutKind.CONTENT_PROVIDER,
             TimeoutKind.APP_REGISTERED,
-            TimeoutKind.SHORT_FGS_TIMEOUT})
+            TimeoutKind.SHORT_FGS_TIMEOUT,
+            TimeoutKind.JOB_SERVICE,
+    })
 
     @Retention(RetentionPolicy.SOURCE)
     public @interface TimeoutKind {
@@ -53,6 +55,7 @@ public class TimeoutRecord {
         int CONTENT_PROVIDER = 6;
         int APP_REGISTERED = 7;
         int SHORT_FGS_TIMEOUT = 8;
+        int JOB_SERVICE = 9;
     }
 
     /** Kind of timeout, e.g. BROADCAST_RECEIVER, etc. */
@@ -151,5 +154,11 @@ public class TimeoutRecord {
     @NonNull
     public static TimeoutRecord forShortFgsTimeout(String reason) {
         return TimeoutRecord.endingNow(TimeoutKind.SHORT_FGS_TIMEOUT, reason);
+    }
+
+    /** Record for a job related timeout. */
+    @NonNull
+    public static TimeoutRecord forJobService(String reason) {
+        return TimeoutRecord.endingNow(TimeoutKind.JOB_SERVICE, reason);
     }
 }

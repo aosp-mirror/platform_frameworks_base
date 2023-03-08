@@ -25,4 +25,10 @@ python_binary_host {
     name: "lint_fix",
     main: "lint_fix.py",
     srcs: ["lint_fix.py"],
+    libs: ["soong_lint_fix"],
+}
+
+python_library_host {
+    name: "soong_lint_fix",
+    srcs: ["soong_lint_fix.py"],
 }

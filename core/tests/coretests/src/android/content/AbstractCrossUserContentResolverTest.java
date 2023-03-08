@@ -35,6 +35,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.compatibility.common.util.SystemUtil;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +98,7 @@ abstract class AbstractCrossUserContentResolverTest {
         mContext.registerReceiverAsUser(receiver, UserHandle.of(mCrossUserId),
                 new IntentFilter(Intent.ACTION_USER_UNLOCKED), null, null);
         ActivityManager.getService().startUserInBackground(mCrossUserId);
+        SystemUtil.runShellCommand("am wait-for-broadcast-barrier");
 
         try {
             if (!latch.await(TIMEOUT_USER_UNLOCK_SEC, TimeUnit.SECONDS)) {

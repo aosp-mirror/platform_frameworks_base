@@ -16,6 +16,9 @@
 
 package android.provider.settings.validators;
 
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_FORCE;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_PASSTHROUGH;
+import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_SYSTEM;
 import static android.media.AudioFormat.SURROUND_SOUND_ENCODING;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
@@ -26,6 +29,11 @@ import static android.provider.settings.validators.SettingsValidators.NON_NEGATI
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PERCENTAGE_INTEGER_VALIDATOR;
 import static android.view.Display.HdrCapabilities.HDR_TYPES;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_DOLBY_VISION;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_HDR10;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_HDR10_PLUS;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_HLG;
+import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import android.os.BatteryManager;
 import android.provider.Settings.Global;
@@ -140,9 +148,8 @@ public class GlobalSettingsValidators {
                 Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD, PERCENTAGE_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.BLUETOOTH_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.CLOCKWORK_HOME_READY, ANY_STRING_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE_ALARM_MANAGER, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Global.ENABLE_TARE_JOB_SCHEDULER, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.ENABLE_TARE,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Global.TARE_ALARM_MANAGER_CONSTANTS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.TARE_JOB_SCHEDULER_CONSTANTS, ANY_STRING_VALIDATOR);
         VALIDATORS.put(Global.PRIVATE_DNS_MODE, ANY_STRING_VALIDATOR);
@@ -288,6 +295,19 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_PIN),
                                 String.valueOf(Global.Wearable.LOCK_SCREEN_STATE_PATTERN)
                         }));
+        VALIDATORS.put(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
+                new DiscreteValueValidator(new String[]{
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE_DIGIT),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE_TERSE)}));
+        VALIDATORS.put(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
+                new DiscreteValueValidator(new String[]{String.valueOf(
+                        Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_VERY_SLOW),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_SLOW),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_MEDIUM),
+                        String.valueOf(Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_FAST),
+                        String.valueOf(
+                                Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED_VERY_FAST)}));
         VALIDATORS.put(
                 Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                 new DiscreteValueValidator(
@@ -346,6 +366,20 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.USER_PREFERRED_REFRESH_RATE, NON_NEGATIVE_FLOAT_VALIDATOR);
         VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_HEIGHT, ANY_INTEGER_VALIDATOR);
         VALIDATORS.put(Global.USER_PREFERRED_RESOLUTION_WIDTH, ANY_INTEGER_VALIDATOR);
+        VALIDATORS.put(Global.HDR_CONVERSION_MODE,  new DiscreteValueValidator(
+                new String[] {
+                        String.valueOf(HDR_CONVERSION_PASSTHROUGH),
+                        String.valueOf(HDR_CONVERSION_SYSTEM),
+                        String.valueOf(HDR_CONVERSION_FORCE)
+                }));
+        VALIDATORS.put(Global.HDR_FORCE_CONVERSION_TYPE, new DiscreteValueValidator(
+                new String[] {
+                        String.valueOf(HDR_TYPE_INVALID),
+                        String.valueOf(HDR_TYPE_DOLBY_VISION),
+                        String.valueOf(HDR_TYPE_HDR10),
+                        String.valueOf(HDR_TYPE_HLG),
+                        String.valueOf(HDR_TYPE_HDR10_PLUS)
+                }));
         VALIDATORS.put(Global.RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO_ENABLED,
                        new DiscreteValueValidator(new String[]{"0", "1"}));
         VALIDATORS.put(Global.Wearable.WET_MODE_ON, BOOLEAN_VALIDATOR);
@@ -368,5 +402,13 @@ public class GlobalSettingsValidators {
                                 String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_ABORTED),
                           }));
         VALIDATORS.put(Global.Wearable.DYNAMIC_COLOR_THEME_ENABLED, BOOLEAN_VALIDATOR);
+	VALIDATORS.put(Global.Wearable.SCREENSHOT_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Global.Wearable.UPGRADE_DATA_MIGRATION_STATUS,
+                       new DiscreteValueValidator(
+                        new String[] {
+                            String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_NOT_NEEDED),
+                            String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_PENDING),
+                            String.valueOf(Global.Wearable.UPGRADE_DATA_MIGRATION_DONE)
+                        }));
     }
 }

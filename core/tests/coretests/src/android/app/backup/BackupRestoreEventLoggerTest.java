@@ -301,6 +301,19 @@ public class BackupRestoreEventLoggerTest {
                 .isEqualTo(secondTypeErrorOneCount);
     }
 
+    @Test
+    public void testClearData_clearsAllResults() {
+        mLogger = new BackupRestoreEventLogger(BACKUP);
+        mLogger.logItemsBackedUp(DATA_TYPE_1, 5);
+        mLogger.logItemsBackedUp(DATA_TYPE_2, 4);
+        mLogger.logItemsBackupFailed(DATA_TYPE_2, 1, ERROR_1);
+        assertThat(mLogger.getLoggingResults()).isNotEmpty();
+
+        mLogger.clearData();
+
+        assertThat(mLogger.getLoggingResults()).isEmpty();
+    }
+
     private static DataTypeResult getResultForDataType(
             BackupRestoreEventLogger logger, @BackupRestoreDataType String dataType) {
         Optional<DataTypeResult> result = getResultForDataTypeIfPresent(logger, dataType);

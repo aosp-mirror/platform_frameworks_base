@@ -29,7 +29,6 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.ApplicationExitInfo;
@@ -376,7 +375,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     @GuardedBy("this")
     public int startAssistantActivityLocked(@Nullable String callingFeatureId, int callingPid,
-            int callingUid, IBinder token, Intent intent, String resolvedType) {
+            int callingUid, IBinder token, Intent intent, String resolvedType,
+            @NonNull Bundle bundle) {
         try {
             if (mActiveSession == null || token != mActiveSession.mToken) {
                 Slog.w(TAG, "startAssistantActivity does not match active session");
@@ -388,10 +388,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             }
             intent = new Intent(intent);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            final ActivityOptions options = ActivityOptions.makeBasic();
-            options.setLaunchActivityType(ACTIVITY_TYPE_ASSISTANT);
+            // TODO: make the key public hidden
+            bundle.putInt("android.activity.activityType", ACTIVITY_TYPE_ASSISTANT);
             return mAtm.startAssistantActivity(mComponent.getPackageName(), callingFeatureId,
-                    callingPid, callingUid, intent, resolvedType, options.toBundle(), mUser);
+                    callingPid, callingUid, intent, resolvedType, bundle, mUser);
         } catch (RemoteException e) {
             throw new IllegalStateException("Unexpected remote error", e);
         }
@@ -743,7 +743,15 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
                     mInfo.getServiceInfo().applicationInfo.uid, voiceInteractorIdentity,
                     mHotwordDetectionComponentName, mVisualQueryDetectionComponentName, mUser,
-                    /* bindInstantServiceAllowed= */ false, detectorType);
+                    /* bindInstantServiceAllowed= */ false, detectorType,
+                    (token1, detectorType1) -> {
+                        try {
+                            mService.detectorRemoteExceptionOccurred(token1, detectorType1);
+                        } catch (RemoteException e) {
+                            Slog.w(TAG, "Fail to notify client detector remote "
+                                    + "exception occurred.");
+                        }
+                    });
         } else if (detectorType != HotwordDetector.DETECTOR_TYPE_VISUAL_QUERY_DETECTOR) {
             // TODO: Logger events should be handled in session instead. Temporary adding the
             //  checking to prevent confusion so VisualQueryDetection events won't be logged if the
@@ -986,6 +994,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mHotwordDetectionConnection != null) {
             pw.println("  Hotword detection connection:");
             mHotwordDetectionConnection.dump("    ", pw);
+        } else {
+            pw.println("  No Hotword detection connection");
         }
         if (mActiveSession != null) {
             pw.println("  Active session:");
@@ -1077,5 +1087,9 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         // Notifies visibility change here can cause duplicate events, it is added to make sure
         // client always get the callback even if session is unexpectedly closed.
         mServiceStub.setSessionWindowVisible(connection.mToken, false);
+    }
+
+    interface DetectorRemoteExceptionListener {
+        void onDetectorRemoteException(@NonNull IBinder token, int detectorType);
     }
 }

@@ -106,7 +106,7 @@ public class BrightLineClassifierTest extends SysuiTestCase {
         mClassifiers.add(mClassifierB);
         when(mFalsingDataProvider.getRecentMotionEvents()).thenReturn(mMotionEventList);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mFalsingDataProvider.isFolded()).thenReturn(true);
+        when(mFalsingDataProvider.isUnfolded()).thenReturn(false);
         mBrightLineFalsingManager = new BrightLineFalsingManager(mFalsingDataProvider,
                 mMetricsLogger, mClassifiers, mSingleTapClassfier, mLongTapClassifier,
                 mDoubleTapClassifier, mHistoryTracker, mKeyguardStateController,

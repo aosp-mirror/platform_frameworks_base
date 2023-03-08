@@ -928,7 +928,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
         }
 
         // The smartspace is not visible if the bouncer is showing, so don't shared element it.
-        if (keyguardStateController.isBouncerShowing) {
+        if (keyguardStateController.isPrimaryBouncerShowing) {
             return false
         }
 
@@ -945,9 +945,9 @@ class KeyguardUnlockAnimationController @Inject constructor(
             return false
         }
 
-        // We don't do the shared element on tablets because they're large and the smartspace has to
-        // fly across large distances, which is distracting.
-        if (Utilities.isTablet(context)) {
+        // We don't do the shared element on large screens because the smartspace has to fly across
+        // large distances, which is distracting.
+        if (Utilities.isLargeScreen(context)) {
             return false
         }
 

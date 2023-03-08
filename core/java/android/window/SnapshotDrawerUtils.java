@@ -329,6 +329,21 @@ public class SnapshotDrawerUtils {
     }
 
     /**
+     * Get or create a TaskDescription from a RunningTaskInfo.
+     */
+    public static ActivityManager.TaskDescription getOrCreateTaskDescription(
+            ActivityManager.RunningTaskInfo runningTaskInfo) {
+        final ActivityManager.TaskDescription taskDescription;
+        if (runningTaskInfo.taskDescription != null) {
+            taskDescription = runningTaskInfo.taskDescription;
+        } else {
+            taskDescription = new ActivityManager.TaskDescription();
+            taskDescription.setBackgroundColor(WHITE);
+        }
+        return taskDescription;
+    }
+
+    /**
      * Help method to draw the snapshot on a surface.
      */
     public static void drawSnapshotOnSurface(StartingWindowInfo info, WindowManager.LayoutParams lp,
@@ -344,13 +359,8 @@ public class SnapshotDrawerUtils {
 
         final WindowManager.LayoutParams attrs = info.topOpaqueWindowLayoutParams;
         final ActivityManager.RunningTaskInfo runningTaskInfo = info.taskInfo;
-        final ActivityManager.TaskDescription taskDescription;
-        if (runningTaskInfo.taskDescription != null) {
-            taskDescription = runningTaskInfo.taskDescription;
-        } else {
-            taskDescription = new ActivityManager.TaskDescription();
-            taskDescription.setBackgroundColor(WHITE);
-        }
+        final ActivityManager.TaskDescription taskDescription =
+                getOrCreateTaskDescription(runningTaskInfo);
         drawSurface.initiateSystemBarPainter(lp.flags, lp.privateFlags,
                 attrs.insetsFlags.appearance, taskDescription, info.requestedVisibleTypes);
         final Rect systemBarInsets = getSystemBarInsets(windowBounds, topWindowInsetsState);

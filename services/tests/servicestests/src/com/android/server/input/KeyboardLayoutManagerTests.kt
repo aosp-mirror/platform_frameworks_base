@@ -167,8 +167,8 @@ class KeyboardLayoutManagerTests {
         Mockito.`when`(context.packageManager).thenReturn(packageManager)
 
         val info = createMockReceiver()
-        Mockito.`when`(packageManager.queryBroadcastReceivers(Mockito.any(), Mockito.anyInt()))
-            .thenReturn(listOf(info))
+        Mockito.`when`(packageManager.queryBroadcastReceiversAsUser(Mockito.any(), Mockito.anyInt(),
+                Mockito.anyInt())).thenReturn(listOf(info))
         Mockito.`when`(packageManager.getReceiverInfo(Mockito.any(), Mockito.anyInt()))
             .thenReturn(info.activityInfo)
 
@@ -256,12 +256,16 @@ class KeyboardLayoutManagerTests {
     @Test
     fun testNewUi_getKeyboardLayoutsForInputDevice() {
         NewSettingsApiFlag(true).use {
-            val keyboardLayouts =
-                keyboardLayoutManager.getKeyboardLayoutsForInputDevice(keyboardDevice.identifier)
-            assertEquals(
-                "New UI: getKeyboardLayoutsForInputDevice API should always return empty array",
-                0,
-                keyboardLayouts.size
+            val keyboardLayouts = keyboardLayoutManager.keyboardLayouts
+            assertNotEquals(
+                    "New UI: getKeyboardLayoutsForInputDevice API should not return empty array",
+                    0,
+                    keyboardLayouts.size
+            )
+            assertTrue(
+                    "New UI: getKeyboardLayoutsForInputDevice API should provide English(US) " +
+                            "layout",
+                    hasLayout(keyboardLayouts, ENGLISH_US_LAYOUT_DESCRIPTOR)
             )
         }
     }

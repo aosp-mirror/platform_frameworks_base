@@ -18,7 +18,6 @@ package com.android.wm.shell.compatui;
 
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.WindowInsets.Type.navigationBars;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -333,7 +332,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
                 /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
         InsetsState insetsState = new InsetsState();
-        InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR, navigationBars());
+        InsetsSource insetsSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
         insetsSource.setFrame(0, 0, 1000, 1000);
         insetsState.addSource(insetsSource);
 
@@ -473,6 +473,36 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockCompatLayout).updateVisibility(true);
         verify(mMockLetterboxEduLayout).updateVisibility(true);
         verify(mMockRestartDialogLayout).updateVisibility(true);
+    }
+
+    @Test
+    public void testRestartLayoutRecreatedIfNeeded() {
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(true).when(mMockRestartDialogLayout)
+                .needsToBeRecreated(any(TaskInfo.class),
+                        any(ShellTaskOrganizer.TaskListener.class));
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockRestartDialogLayout, times(2))
+                .createLayout(anyBoolean());
+    }
+
+    @Test
+    public void testRestartLayoutNotRecreatedIfNotNeeded() {
+        final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN);
+        doReturn(false).when(mMockRestartDialogLayout)
+                .needsToBeRecreated(any(TaskInfo.class),
+                        any(ShellTaskOrganizer.TaskListener.class));
+
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockRestartDialogLayout, times(1))
+                .createLayout(anyBoolean());
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,

@@ -231,6 +231,8 @@ public final class DexoptOptions {
                 return ReasonMapping.REASON_INACTIVE;
             case PackageManagerService.REASON_CMDLINE:
                 return ReasonMapping.REASON_CMDLINE;
+            case PackageManagerService.REASON_BOOT_AFTER_MAINLINE_UPDATE:
+                return ReasonMapping.REASON_BOOT_AFTER_MAINLINE_UPDATE;
             case PackageManagerService.REASON_POST_BOOT:
             case PackageManagerService.REASON_SHARED:
             case PackageManagerService.REASON_AB_OTA:
@@ -300,9 +302,9 @@ public final class DexoptOptions {
         if ((mFlags & DEXOPT_BOOT_COMPLETE) != 0) {
             if ((mFlags & DEXOPT_FOR_RESTORE) != 0) {
                 priority = ArtFlags.PRIORITY_INTERACTIVE_FAST;
+            } else if ((mFlags & DEXOPT_IDLE_BACKGROUND_JOB) != 0) {
+                priority = ArtFlags.PRIORITY_BACKGROUND;
             } else {
-                // TODO(b/251903639): Repurpose DEXOPT_IDLE_BACKGROUND_JOB to choose new
-                // dalvik.vm.background-dex2oat-* properties.
                 priority = ArtFlags.PRIORITY_INTERACTIVE;
             }
         } else {
@@ -317,9 +319,6 @@ public final class DexoptOptions {
         //    We don't require it to be set either. It's safe when switching between old and new
         //    code paths since the only effect is that some packages may be unnecessarily compiled
         //    without user profiles.
-        //
-        // -  DEXOPT_IDLE_BACKGROUND_JOB: Its only effect is to allow the debug variant dex2oatd to
-        //    be used, but ART Service never uses that (cf. Artd::GetDex2Oat in artd.cc).
 
         return new DexoptParams.Builder(convertToArtServiceDexoptReason(mCompilationReason), flags)
                 .setCompilerFilter(mCompilerFilter)

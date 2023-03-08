@@ -43,9 +43,11 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.qs.QSHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -73,6 +75,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private CentralSurfaces mCentralSurfaces;
     @Mock private ShadeController mShadeController;
     @Mock private CommandQueue mCommandQueue;
+    @Mock private QuickSettingsController mQuickSettingsController;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
     private final MetricsLogger mMetricsLogger = new FakeMetricsLogger();
@@ -92,6 +95,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private SystemBarAttributesListener mSystemBarAttributesListener;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private UserTracker mUserTracker;
+    @Mock private QSHost mQSHost;
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -101,6 +105,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
 
         mSbcqCallbacks = new CentralSurfacesCommandQueueCallbacks(
                 mCentralSurfaces,
+                mQuickSettingsController,
                 mContext,
                 mContext.getResources(),
                 mShadeController,
@@ -125,7 +130,8 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 DEFAULT_DISPLAY,
                 mSystemBarAttributesListener,
                 mCameraLauncherLazy,
-                mUserTracker);
+                mUserTracker,
+                mQSHost);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));

@@ -16,6 +16,8 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.inOrder;
@@ -24,8 +26,13 @@ import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.common.AuthenticateReason;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.WakeReason;
 import android.hardware.biometrics.face.ISession;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
@@ -54,6 +61,8 @@ import org.mockito.junit.MockitoRule;
 public class FaceDetectClientTest {
 
     private static final int USER_ID = 12;
+    private static final int WAKE_REASON = WakeReason.POWER_BUTTON;
+    private static final int AUTH_REASON = AuthenticateReason.Face.OCCLUDING_APP_REQUESTED;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -102,8 +111,13 @@ public class FaceDetectClientTest {
         InOrder order = inOrder(mHal, mBiometricContext);
         order.verify(mBiometricContext).updateContext(
                 mOperationContextCaptor.capture(), anyBoolean());
-        order.verify(mHal).detectInteractionWithContext(
-                same(mOperationContextCaptor.getValue().toAidlContext()));
+
+        final OperationContext aidlContext = mOperationContextCaptor.getValue().toAidlContext();
+        order.verify(mHal).detectInteractionWithContext(same(aidlContext));
+        assertThat(aidlContext.wakeReason).isEqualTo(WAKE_REASON);
+        assertThat(aidlContext.authenticateReason.getFaceAuthenticateReason())
+                .isEqualTo(AUTH_REASON);
+
         verify(mHal, never()).detectInteraction();
     }
 
@@ -112,8 +126,16 @@ public class FaceDetectClientTest {
 
         final AidlSession aidl = new AidlSession(version, mHal, USER_ID, mHalSessionCallback);
         return new FaceDetectClient(mContext, () -> aidl, mToken,
-                99 /* requestId */, mClientMonitorCallbackConverter, USER_ID,
-                "own-it", 5 /* sensorId */, mBiometricLogger, mBiometricContext,
+                99 /* requestId */, mClientMonitorCallbackConverter,
+                new FaceAuthenticateOptions.Builder()
+                        .setUserId(USER_ID)
+                        .setSensorId(5)
+                        .setOpPackageName("own-it")
+                        .setWakeReason(PowerManager.WAKE_REASON_POWER_BUTTON)
+                        .setAuthenticateReason(
+                                FaceAuthenticateOptions.AUTHENTICATE_REASON_OCCLUDING_APP_REQUESTED)
+                        .build(),
+                mBiometricLogger, mBiometricContext,
                 false /* isStrongBiometric */, null /* sensorPrivacyManager */);
     }
 }

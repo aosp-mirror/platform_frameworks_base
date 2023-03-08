@@ -62,6 +62,15 @@ public class LogModule {
         return factory.create("NotifLog", maxSize, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
+    @Provides
+    @SysUISingleton
+    @NotificationLockscreenLog
+    public static LogBuffer provideNotificationLockScreenLogBuffer(
+            LogBufferFactory factory) {
+        return factory.create("NotifLockscreenLog", 50, false /* systrace */);
+    }
+
     /** Provides a logging buffer for logs related to heads up presentation of notifications. */
     @Provides
     @SysUISingleton
@@ -265,16 +274,6 @@ public class LogModule {
         return factory.create("MediaCarouselCtlrLog", 20);
     }
 
-    /**
-     * Provides a {@link LogBuffer} for use in the status bar connectivity pipeline
-     */
-    @Provides
-    @SysUISingleton
-    @StatusBarConnectivityLog
-    public static LogBuffer provideStatusBarConnectivityBuffer(LogBufferFactory factory) {
-        return factory.create("SbConnectivity", 64);
-    }
-
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -347,6 +346,37 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 400);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.systemui.ScreenDecorations}.
+     */
+    @Provides
+    @SysUISingleton
+    @ScreenDecorationsLog
+    public static LogBuffer provideScreenDecorationsLog(LogBufferFactory factory) {
+        return factory.create("ScreenDecorationsLog", 200);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by
+     *  {@link com.android.keyguard.faceauth.KeyguardFaceAuthManagerImpl}.
+     */
+    @Provides
+    @SysUISingleton
+    @FaceAuthLog
+    public static LogBuffer provideFaceAuthLog(LogBufferFactory factory) {
+        return factory.create("KeyguardFaceAuthManagerLog", 300);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for Device State Auto-Rotation logs.
+     */
+    @Provides
+    @SysUISingleton
+    @DeviceStateAutoRotationLog
+    public static LogBuffer provideDeviceStateAutoRotationLogBuffer(LogBufferFactory factory) {
+        return factory.create("DeviceStateAutoRotationLog", 100);
     }
 
     /**

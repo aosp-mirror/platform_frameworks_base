@@ -113,7 +113,8 @@ public final class SplitWindowManager extends WindowlessWindowManager {
                     "Try to inflate divider view again without release first");
         }
 
-        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this);
+        mViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(), this,
+                "SplitWindowManager");
         mDividerView = (DividerView) LayoutInflater.from(mContext)
                 .inflate(R.layout.split_divider, null /* root */);
 
@@ -167,9 +168,16 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         }
     }
 
-    void setInteractive(boolean interactive, String from) {
+    /**
+     * Set divider should interactive to user or not.
+     *
+     * @param interactive divider interactive.
+     * @param hideHandle divider handle hidden or not, only work when interactive is false.
+     * @param from caller from where.
+     */
+    void setInteractive(boolean interactive, boolean hideHandle, String from) {
         if (mDividerView == null) return;
-        mDividerView.setInteractive(interactive, from);
+        mDividerView.setInteractive(interactive, hideHandle, from);
     }
 
     View getDividerView() {

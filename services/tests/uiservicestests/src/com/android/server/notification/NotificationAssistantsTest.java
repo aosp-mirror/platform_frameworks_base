@@ -302,30 +302,6 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testXmlMigratingAllowedAdjustments() throws Exception {
-        // Old tag, need migration
-        String xml = "<q_allowed_adjustments types=\"adj_1\"/>";
-
-        TypedXmlPullParser parser = Xml.newFastPullParser();
-        parser.setInput(new BufferedInputStream(
-                new ByteArrayInputStream(xml.toString().getBytes())), null);
-        parser.nextTag();
-        mAssistants.readExtraTag("q_allowed_adjustments", parser);
-        assertTrue(mAssistants.isAdjustmentAllowed("adj_1"));
-        assertEquals(mNm.DEFAULT_ALLOWED_ADJUSTMENTS.length + 1,
-                mAssistants.getAllowedAssistantAdjustments().size());
-
-        // New TAG
-        xml = "<s_allowed_adjustments types=\"adj_2\"/>";
-        parser.setInput(new BufferedInputStream(
-                new ByteArrayInputStream(xml.toString().getBytes())), null);
-        parser.nextTag();
-        mAssistants.readExtraTag("s_allowed_adjustments", parser);
-        assertTrue(mAssistants.isAdjustmentAllowed("adj_2"));
-        assertEquals(1, mAssistants.getAllowedAssistantAdjustments().size());
-    }
-
-    @Test
     public void testSetPackageOrComponentEnabled_onlyOnePackage() throws Exception {
         ComponentName component1 = ComponentName.unflattenFromString("package/Component1");
         ComponentName component2 = ComponentName.unflattenFromString("package/Component2");

@@ -49,6 +49,14 @@
     <string name="accessibility_action_divider_top_50" msgid="8649582798829048946">"Gornji ekran 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="3572788224908570257">"Gornji ekran 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="2831868345092314060">"Režim celog ekrana za donji ekran"</string>
+    <!-- no translation found for accessibility_split_left (1713683765575562458) -->
+    <skip />
+    <!-- no translation found for accessibility_split_right (8441001008181296837) -->
+    <skip />
+    <!-- no translation found for accessibility_split_top (2789329702027147146) -->
+    <skip />
+    <!-- no translation found for accessibility_split_bottom (8694551025220868191) -->
+    <skip />
     <string name="one_handed_tutorial_title" msgid="4583241688067426350">"Korišćenje režima jednom rukom"</string>
     <string name="one_handed_tutorial_description" msgid="3486582858591353067">"Da biste izašli, prevucite nagore od dna ekrana ili dodirnite bilo gde iznad aplikacije"</string>
     <string name="accessibility_action_start_one_handed" msgid="5070337354072861426">"Pokrenite režim jednom rukom"</string>
@@ -84,16 +92,11 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Dvaput dodirnite izvan aplikacije da biste promenili njenu poziciju"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Važi"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Proširite za još informacija."</string>
-    <!-- no translation found for letterbox_restart_dialog_title (8543049527871033505) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_description (6096946078246557848) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_cancel (1342209132692537805) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_restart (8529976234412442973) -->
-    <skip />
-    <!-- no translation found for letterbox_restart_dialog_checkbox_title (5252918008140768386) -->
-    <skip />
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Želite li da restartujete radi boljeg prikaza?"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Možete da restartujete aplikaciju da bi izgledala bolje na ekranu, s tim što možete da izgubite ono što ste uradili ili nesačuvane promene, ako ih ima"</string>
+    <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Otkaži"</string>
+    <string name="letterbox_restart_restart" msgid="8529976234412442973">"Restartuj"</string>
+    <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne prikazuj ponovo"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"Uvećajte"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Umanjite"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Zatvorite"</string>

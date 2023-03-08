@@ -47,6 +47,7 @@ class KeyguardTransitionAnimationFlow(
         duration: Duration,
         onStep: (Float) -> Float,
         startTime: Duration = 0.milliseconds,
+        onStart: (() -> Unit)? = null,
         onCancel: (() -> Float)? = null,
         onFinish: (() -> Float)? = null,
         interpolator: Interpolator = LINEAR,
@@ -73,6 +74,7 @@ class KeyguardTransitionAnimationFlow(
                 // the ViewModels of the last update
                 STARTED -> {
                     isComplete = false
+                    onStart?.invoke()
                     max(0f, min(1f, value))
                 }
                 // Always send a final value of 1. Because of rounding, [value] may never be

@@ -17,7 +17,8 @@
  */
 -->
 <resources>
-    <color name="docked_divider_handle">#ffffff</color>
+    <color name="docked_divider_handle">#000000</color>
+    <color name="split_divider_background">@color/taskbar_background</color>
     <drawable name="forced_resizable_background">#59000000</drawable>
     <color name="minimize_dock_shadow_start">#60000000</color>
     <color name="minimize_dock_shadow_end">#00000000</color>
@@ -40,6 +41,9 @@
     <!-- Letterbox Education -->
     <color name="letterbox_education_accent_primary">@android:color/system_accent1_100</color>
     <color name="letterbox_education_text_secondary">@android:color/system_neutral2_200</color>
+
+    <!-- Letterbox Dialog -->
+    <color name="letterbox_dialog_background">@android:color/system_neutral1_900</color>
 
     <!-- GM2 colors -->
     <color name="GM2_grey_200">#E8EAED</color>

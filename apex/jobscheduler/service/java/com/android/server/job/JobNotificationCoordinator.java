@@ -21,6 +21,7 @@ import static android.app.job.JobService.JOB_END_NOTIFICATION_POLICY_REMOVE;
 
 import android.annotation.NonNull;
 import android.app.Notification;
+import android.app.job.JobParameters;
 import android.app.job.JobService;
 import android.content.pm.UserPackage;
 import android.os.UserHandle;
@@ -80,7 +81,7 @@ class JobNotificationCoordinator {
         final NotificationDetails oldDetails = mNotificationDetails.get(hostingContext);
         if (oldDetails != null && oldDetails.notificationId != notificationId) {
             // App is switching notification IDs. Remove association with the old one.
-            removeNotificationAssociation(hostingContext);
+            removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED);
         }
         final int userId = UserHandle.getUserId(callingUid);
         // TODO(260848384): ensure apps can't cancel the notification for user-initiated job
@@ -100,7 +101,8 @@ class JobNotificationCoordinator {
         mNotificationDetails.put(hostingContext, details);
     }
 
-    void removeNotificationAssociation(@NonNull JobServiceContext hostingContext) {
+    void removeNotificationAssociation(@NonNull JobServiceContext hostingContext,
+            @JobParameters.StopReason int stopReason) {
         final NotificationDetails details = mNotificationDetails.remove(hostingContext);
         if (details == null) {
             return;
@@ -114,7 +116,10 @@ class JobNotificationCoordinator {
         ArraySet<JobServiceContext> associatedContexts = associations.get(details.notificationId);
         if (associatedContexts == null || associatedContexts.isEmpty()) {
             // No more jobs using this notification. Apply the final job stop policy.
-            if (details.jobEndNotificationPolicy == JOB_END_NOTIFICATION_POLICY_REMOVE) {
+            // If the user attempted to stop the job/app, then always remove the notification
+            // so the user doesn't get confused about the app state.
+            if (details.jobEndNotificationPolicy == JOB_END_NOTIFICATION_POLICY_REMOVE
+                    || stopReason == JobParameters.STOP_REASON_USER) {
                 final String packageName = details.userPackage.packageName;
                 mNotificationManagerInternal.cancelNotification(
                         packageName, packageName, details.appUid, details.appPid, /* tag */ null,

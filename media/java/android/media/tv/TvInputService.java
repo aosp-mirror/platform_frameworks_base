@@ -1005,9 +1005,10 @@ public abstract class TvInputService extends Service {
 
         /**
          * Notifies the advertisement buffer is consumed.
-         * @hide
+         *
+         * @param buffer the {@link AdBuffer} that was consumed.
          */
-        public void notifyAdBufferConsumed(AdBuffer buffer) {
+        public void notifyAdBufferConsumed(@NonNull AdBuffer buffer) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1019,6 +1020,31 @@ public abstract class TvInputService extends Service {
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAdBufferConsumed", e);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Sends the raw data from the received TV message as well as the type of message received.
+         *
+         * @param type The of message that was sent, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The data sent with the message.
+         */
+        public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+                @NonNull Bundle data) {
+            executeOrPostRunnableOnMainThread(new Runnable() {
+                @MainThread
+                @Override
+                public void run() {
+                    try {
+                        if (DEBUG) Log.d(TAG, "notifyTvMessage");
+                        if (mSessionCallback != null) {
+                            mSessionCallback.onTvMessage(type, data);
+                        }
+                    } catch (RemoteException e) {
+                        Log.w(TAG, "error in notifyTvMessage", e);
                     }
                 }
             });
@@ -1091,7 +1117,6 @@ public abstract class TvInputService extends Service {
          * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
          * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
          * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-         * @hide
          */
         public void notifyTimeShiftMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1115,9 +1140,12 @@ public abstract class TvInputService extends Service {
          * <p>This should be called when time-shifting is enabled.
          *
          * @param speeds An ordered array of playback speeds, expressed as values relative to the
-         *               normal playback speed 1.0.
+         *               normal playback speed (1.0), at which the current content can be played as
+         *               a time-shifted broadcast. This is an empty array if the supported playback
+         *               speeds are unknown or the video/broadcast is not in time shift mode. If
+         *               currently in time shift mode, this array will normally include at least
+         *               the values 1.0 (normal speed) and 0.0 (paused).
          * @see PlaybackParams#getSpeed()
-         * @hide
          */
         public void notifyAvailableSpeeds(@NonNull float[] speeds) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1165,7 +1193,6 @@ public abstract class TvInputService extends Service {
          *
          * @param available {@code true} if cueing message is available; {@code false} if it becomes
          *                  unavailable.
-         * @hide
          */
         public void notifyCueingMessageAvailability(boolean available) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1320,10 +1347,11 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Called when advertisement buffer is ready.
-         * @hide
+         * Called when an advertisement buffer is ready for playback.
+         *
+         * @param buffer The {@link AdBuffer} that became ready for playback.
          */
-        public void onAdBuffer(AdBuffer buffer) {
+        public void onAdBuffer(@NonNull AdBuffer buffer) {
         }
 
         /**
@@ -1456,6 +1484,28 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Called when the application enables or disables the detection of the specified message
+         * type.
+         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
+         * @param enabled {@code true} if TV message detection is enabled,
+         *                {@code false} otherwise.
+         */
+        public void onSetTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
+                boolean enabled) {
+        }
+
+        /**
+         * Called when a TV message is received
+         *
+         * @param type The type of message received, such as
+         * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
+         * @param data The raw data of the message
+         */
+        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+                @NonNull Bundle data) {
+        }
+
+        /**
          * Called when the application requests to play a given recorded TV program.
          *
          * @param recordedProgramUri The URI of a recorded TV program.
@@ -1537,7 +1587,6 @@ public abstract class TvInputService extends Service {
          * {@link TvInputManager#TIME_SHIFT_MODE_OFF}, {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
          * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
          * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
-         * @hide
          */
         public void onTimeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         }
@@ -1807,6 +1856,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
+         * Calls {@link #onSetTvMessageEnabled(String, boolean)}.
+         */
+        void setTvMessageEnabled(String type, boolean enabled) {
+            onSetTvMessageEnabled(type, enabled);
+        }
+
+        /**
          * Calls {@link #onAppPrivateCommand}.
          */
         void appPrivateCommand(String action, Bundle data) {
@@ -1996,6 +2052,10 @@ public abstract class TvInputService extends Service {
 
         void notifyAdBuffer(AdBuffer buffer) {
             onAdBuffer(buffer);
+        }
+
+        void onTvMessageReceived(String type, Bundle data) {
+            onTvMessage(type, data);
         }
 
         /**
@@ -2273,27 +2333,6 @@ public abstract class TvInputService extends Service {
                     }
                 }
             });
-        }
-
-        /**
-         * Informs the application of the raw data from the TV message.
-         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
-         * @param data The data sent with the message.
-         * @hide
-         */
-        public void notifyTvMessage(@TvInputManager.TvMessageType String type, Bundle data) {
-        }
-
-        /**
-         * Called when the application enables or disables the detection of the specified message
-         * type.
-         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
-         * @param enabled {@code true} if you want to enable TV message detecting
-         *                {@code false} otherwise.
-         * @hide
-         */
-        public void onSetTvMessageEnabled(@TvInputManager.TvMessageType String type,
-                boolean enabled) {
         }
 
         /**

@@ -200,7 +200,6 @@ public class WallpaperManagerServiceTests {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-
         ExtendedMockito.doAnswer(invocation -> {
             int userId = (invocation.getArgument(0));
             return getWallpaperTestDir(userId);
@@ -398,7 +397,8 @@ public class WallpaperManagerServiceTests {
             TypedXmlSerializer serializer = Xml.newBinarySerializer();
             serializer.setOutput(new ByteArrayOutputStream(), StandardCharsets.UTF_8.name());
             serializer.startDocument(StandardCharsets.UTF_8.name(), true);
-            mService.writeWallpaperAttributes(serializer, "wp", systemWallpaperData);
+            mService.mWallpaperDataParser.writeWallpaperAttributes(
+                    serializer, "wp", systemWallpaperData);
         } catch (IOException e) {
             fail("exception occurred while writing system wallpaper attributes");
         }
@@ -409,7 +409,7 @@ public class WallpaperManagerServiceTests {
                 systemWallpaperData.cropFile.getAbsolutePath());
         try {
             TypedXmlPullParser parser = Xml.newBinaryPullParser();
-            mService.parseWallpaperAttributes(parser, shouldMatchSystem, true);
+            mService.mWallpaperDataParser.parseWallpaperAttributes(parser, shouldMatchSystem, true);
         } catch (XmlPullParserException e) {
             fail("exception occurred while parsing wallpaper");
         }

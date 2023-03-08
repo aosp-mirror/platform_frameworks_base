@@ -16,11 +16,14 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.UserInfo.FLAG_ADMIN;
 import static android.content.pm.UserInfo.FLAG_DEMO;
 import static android.content.pm.UserInfo.FLAG_EPHEMERAL;
 import static android.content.pm.UserInfo.FLAG_FULL;
 import static android.content.pm.UserInfo.FLAG_GUEST;
+import static android.content.pm.UserInfo.FLAG_MAIN;
 import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_PROFILE;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
 import static android.content.pm.UserInfo.FLAG_SYSTEM;
@@ -62,7 +65,7 @@ import java.util.function.Consumer;
  * This class is responsible both for defining the AOSP use types, as well as reading in customized
  * user types from {@link com.android.internal.R.xml#config_user_types}.
  *
- * Tests are located in UserManagerServiceUserTypeTest.java.
+ * Tests are located in {@link UserManagerServiceUserTypeTest}.
  * @hide
  */
 public final class UserTypeFactory {
@@ -277,7 +280,8 @@ public final class UserTypeFactory {
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_FULL_SYSTEM)
                 .setBaseType(FLAG_SYSTEM | FLAG_FULL)
-                .setDefaultUserInfoPropertyFlags(UserInfo.FLAG_MAIN);
+                .setDefaultUserInfoPropertyFlags(FLAG_PRIMARY | FLAG_ADMIN | FLAG_MAIN)
+                .setMaxAllowed(1);
     }
 
     /**
@@ -287,7 +291,9 @@ public final class UserTypeFactory {
     private static UserTypeDetails.Builder getDefaultTypeSystemHeadless() {
         return new UserTypeDetails.Builder()
                 .setName(USER_TYPE_SYSTEM_HEADLESS)
-                .setBaseType(FLAG_SYSTEM);
+                .setBaseType(FLAG_SYSTEM)
+                .setDefaultUserInfoPropertyFlags(FLAG_PRIMARY | FLAG_ADMIN)
+                .setMaxAllowed(1);
     }
 
     private static Bundle getDefaultSecondaryUserRestrictions() {

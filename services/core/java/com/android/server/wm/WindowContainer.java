@@ -33,6 +33,7 @@ import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -122,7 +123,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -170,9 +170,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected InsetsSourceProvider mControllableInsetProvider;
 
     /**
-     * The insets sources provided by this windowContainer.
+     * The {@link InsetsSourceProvider}s provided by this window container.
      */
-    protected SparseArray<InsetsSource> mProvidedInsetsSources = null;
+    protected SparseArray<InsetsSourceProvider> mInsetsSourceProviders = null;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
@@ -366,7 +366,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * {@link WindowState#mMergedLocalInsetsSources} by visiting the entire hierarchy.
      *
      * {@link WindowState#mAboveInsetsState} is updated by visiting all the windows in z-order
-     * top-to-bottom manner and considering the {@link WindowContainer#mProvidedInsetsSources}
+     * top-to-bottom manner and considering the {@link WindowContainer#mInsetsSourceProviders}
      * provided by the {@link WindowState}s at the top.
      * {@link WindowState#updateAboveInsetsState(InsetsState, SparseArray, ArraySet)} visits the
      * IME container in the correct order to make sure the IME insets are passed correctly to the
@@ -566,7 +566,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             onDisplayChanged(dc);
             prevDc.setLayoutNeeded();
         }
-        getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
 
         // Send onParentChanged notification here is we disabled sending it in setParent for
         // reparenting case.
@@ -1035,11 +1034,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    public SparseArray<InsetsSource> getProvidedInsetsSources() {
-        if (mProvidedInsetsSources == null) {
-            mProvidedInsetsSources = new SparseArray<>();
+    /**
+     * Returns {@code true} if this node provides insets.
+     */
+    public boolean hasInsetsSourceProvider() {
+        return mInsetsSourceProviders != null;
+    }
+
+    /**
+     * Returns {@link InsetsSourceProvider}s provided by this node.
+     */
+    public SparseArray<InsetsSourceProvider> getInsetsSourceProviders() {
+        if (mInsetsSourceProviders == null) {
+            mInsetsSourceProviders = new SparseArray<>();
         }
-        return mProvidedInsetsSources;
+        return mInsetsSourceProviders;
     }
 
     public DisplayContent getDisplayContent() {
@@ -1464,7 +1473,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_PORTRAIT},
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
-    @ScreenOrientation
+    @Configuration.Orientation
     int getRequestedConfigurationOrientation() {
         return getRequestedConfigurationOrientation(false /* forDisplay */);
     }
@@ -1482,7 +1491,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         {@link Configuration#ORIENTATION_PORTRAIT},
      *         {@link Configuration#ORIENTATION_UNDEFINED}).
      */
-    @ScreenOrientation
+    @Configuration.Orientation
     int getRequestedConfigurationOrientation(boolean forDisplay) {
         int requestedOrientation = getOverrideOrientation();
         final RootDisplayArea root = getRootDisplayArea();
@@ -3183,8 +3192,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 animationRunnerBuilder.setTaskBackgroundColor(getTaskAnimationBackgroundColor());
                 // TODO: Remove when we migrate to shell (b/202383002)
                 if (mWmService.mTaskTransitionSpec != null) {
-                    animationRunnerBuilder.hideInsetSourceViewOverflows(
-                            mWmService.mTaskTransitionSpec.animationBoundInsets);
+                    animationRunnerBuilder.hideInsetSourceViewOverflows();
                 }
             }
 
@@ -3208,7 +3216,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                             ? activityRecord.getOrganizedTaskFragment()
                             : taskFragment.getOrganizedTaskFragment();
                     if (organizedTf != null && organizedTf.getAnimationParams()
-                            .getAnimationBackgroundColor() != 0) {
+                            .getAnimationBackgroundColor() != DEFAULT_ANIMATION_BACKGROUND_COLOR) {
                         // This window is embedded and has an animation background color set on the
                         // TaskFragment. Pass this color with this window, so the handler can use it
                         // as the animation background color if needed,
@@ -3221,11 +3229,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                         final Task parentTask = activityRecord != null
                                 ? activityRecord.getTask()
                                 : taskFragment.getTask();
-                        backgroundColorForTransition = ColorUtils.setAlphaComponent(
-                                parentTask.getTaskDescription().getBackgroundColor(), 255);
+                        backgroundColorForTransition = parentTask.getTaskDescription()
+                                .getBackgroundColor();
                     }
                 }
-                animationRunnerBuilder.setTaskBackgroundColor(backgroundColorForTransition);
+                // Set to opaque for animation background to prevent it from exposing the blank
+                // background or content below.
+                animationRunnerBuilder.setTaskBackgroundColor(ColorUtils.setAlphaComponent(
+                        backgroundColorForTransition, 255));
             }
 
             animationRunnerBuilder.build()
@@ -4102,13 +4113,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
 
-        private void hideInsetSourceViewOverflows(Set<Integer> insetTypes) {
-            final ArrayList<SurfaceControl> surfaceControls =
-                    new ArrayList<>(insetTypes.size());
-
-            for (int insetType : insetTypes) {
-                WindowContainerInsetsSourceProvider insetProvider = getDisplayContent()
-                        .getInsetsStateController().getSourceProvider(insetType);
+        private void hideInsetSourceViewOverflows() {
+            final SparseArray<WindowContainerInsetsSourceProvider> providers =
+                    getDisplayContent().getInsetsStateController().getSourceProviders();
+            for (int i = providers.size(); i >= 0; i--) {
+                final InsetsSourceProvider insetProvider = providers.valueAt(i);
+                if (!insetProvider.getSource().insetsRoundedCornerFrame()) {
+                    return;
+                }
 
                 // Will apply it immediately to current leash and to all future inset animations
                 // until we disable it.

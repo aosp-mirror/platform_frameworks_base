@@ -21,11 +21,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import com.android.systemui.notetask.NoteTaskController
-import com.android.systemui.notetask.NoteTaskIntentResolver
+import com.android.systemui.notetask.NoteTaskEntryPoint
 import javax.inject.Inject
 
 /** Activity responsible for launching the note experience, and finish. */
-internal class LaunchNoteTaskActivity
+class LaunchNoteTaskActivity
 @Inject
 constructor(
     private val noteTaskController: NoteTaskController,
@@ -34,7 +34,10 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        noteTaskController.showNoteTask(isInMultiWindowMode)
+        noteTaskController.showNoteTask(
+            entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT,
+            isInMultiWindowMode = isInMultiWindowMode,
+        )
 
         finish()
     }
@@ -46,7 +49,7 @@ constructor(
             return Intent(context, LaunchNoteTaskActivity::class.java).apply {
                 // Intent's action must be set in shortcuts, or an exception will be thrown.
                 // TODO(b/254606432): Use Intent.ACTION_CREATE_NOTE instead.
-                action = NoteTaskIntentResolver.ACTION_CREATE_NOTE
+                action = Intent.ACTION_CREATE_NOTE
             }
         }
     }

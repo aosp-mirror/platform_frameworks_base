@@ -63,6 +63,11 @@ class SpaSearchProviderTest {
             pageOwner.getEntryId("SearchDynamicWithImmutableStatus")
         )
         immutableStatus.checkValue(
+            QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchDynamicWithImmutableStatus")
+        )
+        immutableStatus.checkValue(
             QueryEnum.SEARCH_IMMUTABLE_STATUS_DATA_QUERY, ColumnEnum.ENTRY_DISABLED, true.toString()
         )
 
@@ -75,6 +80,11 @@ class SpaSearchProviderTest {
             pageOwner.getEntryId("SearchStaticWithMutableStatus")
         )
         mutableStatus.checkValue(
+            QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchStaticWithMutableStatus")
+        )
+        mutableStatus.checkValue(
             QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY, ColumnEnum.ENTRY_DISABLED, false.toString()
         )
 
@@ -83,6 +93,11 @@ class SpaSearchProviderTest {
             QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY,
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchDynamicWithMutableStatus")
+        )
+        mutableStatus.checkValue(
+            QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchDynamicWithMutableStatus")
         )
         mutableStatus.checkValue(
             QueryEnum.SEARCH_MUTABLE_STATUS_DATA_QUERY, ColumnEnum.ENTRY_DISABLED, true.toString()
@@ -100,6 +115,11 @@ class SpaSearchProviderTest {
             QueryEnum.SEARCH_STATIC_DATA_QUERY,
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchStaticWithNoStatus")
+        )
+        staticData.checkValue(
+            QueryEnum.SEARCH_STATIC_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchStaticWithNoStatus")
         )
         staticData.checkValue(
             QueryEnum.SEARCH_STATIC_DATA_QUERY, ColumnEnum.SEARCH_TITLE, "SearchStaticWithNoStatus"
@@ -139,6 +159,11 @@ class SpaSearchProviderTest {
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchStaticWithMutableStatus")
         )
+        staticData.checkValue(
+            QueryEnum.SEARCH_STATIC_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchStaticWithMutableStatus")
+        )
 
         val dynamicData = searchProvider.querySearchDynamicData()
         Truth.assertThat(dynamicData.count).isEqualTo(2)
@@ -148,12 +173,22 @@ class SpaSearchProviderTest {
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchDynamicWithMutableStatus")
         )
+        dynamicData.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchDynamicWithMutableStatus")
+        )
 
         dynamicData.moveToNext()
         dynamicData.checkValue(
             QueryEnum.SEARCH_DYNAMIC_DATA_QUERY,
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchDynamicWithImmutableStatus")
+        )
+        dynamicData.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_DATA_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchDynamicWithImmutableStatus")
         )
         dynamicData.checkValue(
             QueryEnum.SEARCH_DYNAMIC_DATA_QUERY,
@@ -173,6 +208,11 @@ class SpaSearchProviderTest {
             QueryEnum.SEARCH_STATIC_ROW_QUERY,
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchStaticWithNoStatus")
+        )
+        staticRow.checkValue(
+            QueryEnum.SEARCH_STATIC_ROW_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchStaticWithNoStatus")
         )
         staticRow.checkValue(
             QueryEnum.SEARCH_STATIC_ROW_QUERY, ColumnEnum.SEARCH_TITLE, "SearchStaticWithNoStatus"
@@ -223,6 +263,11 @@ class SpaSearchProviderTest {
             pageOwner.getEntryId("SearchStaticWithMutableStatus")
         )
         dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchStaticWithMutableStatus")
+        )
+        dynamicRow.checkValue(
             QueryEnum.SEARCH_DYNAMIC_ROW_QUERY, ColumnEnum.ENTRY_DISABLED, false.toString()
         )
 
@@ -231,6 +276,11 @@ class SpaSearchProviderTest {
             QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchDynamicWithMutableStatus")
+        )
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchDynamicWithMutableStatus")
         )
         dynamicRow.checkValue(
             QueryEnum.SEARCH_DYNAMIC_ROW_QUERY, ColumnEnum.ENTRY_DISABLED, true.toString()
@@ -242,6 +292,11 @@ class SpaSearchProviderTest {
             QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
             ColumnEnum.ENTRY_ID,
             pageOwner.getEntryId("SearchDynamicWithImmutableStatus")
+        )
+        dynamicRow.checkValue(
+            QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
+            ColumnEnum.ENTRY_LABEL,
+            pageOwner.getEntryLabel("SearchDynamicWithImmutableStatus")
         )
         dynamicRow.checkValue(
             QueryEnum.SEARCH_DYNAMIC_ROW_QUERY,
@@ -270,4 +325,8 @@ private fun Cursor.getExtras(query: QueryEnum, column: ColumnEnum): Bundle? {
 
 private fun SettingsPage.getEntryId(name: String): String {
     return SettingsEntryBuilder.create(this, name).build().id
+}
+
+private fun SettingsPage.getEntryLabel(name: String): String {
+    return SettingsEntryBuilder.create(this, name).build().label
 }

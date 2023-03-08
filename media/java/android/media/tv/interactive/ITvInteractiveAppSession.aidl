@@ -70,7 +70,7 @@ oneway interface ITvInteractiveAppSession {
     void notifyContentAllowed();
     void notifyContentBlocked(in String rating);
     void notifySignalStrength(int strength);
-    void notifyRecordingStarted(in String recordingId);
+    void notifyRecordingStarted(in String recordingId, in String requestId);
     void notifyRecordingStopped(in String recordingId);
     void notifyTvMessage(in String type, in Bundle data);
     void setSurface(in Surface surface);

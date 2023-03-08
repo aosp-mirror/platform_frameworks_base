@@ -52,7 +52,6 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager.UserChangedListener;
@@ -63,6 +62,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.SeenNotificationsProviderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.VisibilityLocationProviderDelegator;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
@@ -135,7 +135,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @Mock private StackStateLogger mStackLogger;
     @Mock private NotificationStackScrollLogger mLogger;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
-    @Mock private ShadeTransitionController mShadeTransitionController;
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotificationTargetsHelper mNotificationTargetsHelper;
     @Mock private SecureSettings mSecureSettings;
@@ -183,7 +182,6 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotifPipelineFlags,
                 mNotifCollection,
                 mLockscreenShadeTransitionController,
-                mShadeTransitionController,
                 mUiEventLogger,
                 mRemoteInputManager,
                 mVisibilityLocationProviderDelegator,
@@ -195,7 +193,8 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
                 mNotificationStackSizeCalculator,
                 mFeatureFlags,
                 mNotificationTargetsHelper,
-                mSecureSettings
+                mSecureSettings,
+                mock(NotificationDismissibilityProvider.class)
         );
 
         when(mNotificationStackScrollLayout.isAttachedToWindow()).thenReturn(true);
@@ -411,6 +410,37 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
         verify(mNotificationStackScrollLayout).setHasFilteredOutSeenNotifications(true);
         verify(mNotificationStackScrollLayout).updateFooter();
         verify(mNotificationStackScrollLayout).updateEmptyShadeView(anyBoolean(), anyBoolean());
+    }
+
+    @Test
+    public void testAttach_updatesViewStatusBarState() {
+        // GIVEN: Controller is attached
+        mController.attach(mNotificationStackScrollLayout);
+        ArgumentCaptor<StatusBarStateController.StateListener> captor =
+                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
+        verify(mSysuiStatusBarStateController).addCallback(captor.capture(), anyInt());
+        StatusBarStateController.StateListener stateListener = captor.getValue();
+
+        // WHEN: StatusBarState changes to SHADE
+        when(mSysuiStatusBarStateController.getState()).thenReturn(SHADE);
+        stateListener.onStateChanged(SHADE);
+
+        // THEN: NSSL is updated with the current state
+        verify(mNotificationStackScrollLayout).setStatusBarState(SHADE);
+
+        // WHEN: Controller is detached
+        mController.mOnAttachStateChangeListener
+                .onViewDetachedFromWindow(mNotificationStackScrollLayout);
+
+        // WHEN: StatusBarState changes to KEYGUARD
+        when(mSysuiStatusBarStateController.getState()).thenReturn(KEYGUARD);
+
+        // WHEN: Controller is re-attached
+        mController.mOnAttachStateChangeListener
+                .onViewAttachedToWindow(mNotificationStackScrollLayout);
+
+        // THEN: NSSL is updated with the current state
+        verify(mNotificationStackScrollLayout).setStatusBarState(KEYGUARD);
     }
 
     private LogMaker logMatcher(int category, int type) {

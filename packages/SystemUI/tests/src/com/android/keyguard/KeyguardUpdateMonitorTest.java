@@ -20,6 +20,8 @@ import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
+import static android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN;
+import static android.hardware.face.FaceAuthenticateOptions.AUTHENTICATE_REASON_STARTED_WAKING_UP;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_POWER_BUTTON;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
@@ -28,6 +30,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOM
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.keyguard.FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED;
+import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_HELP_FACE_NOT_AVAILABLE;
 import static com.android.keyguard.KeyguardUpdateMonitor.BIOMETRIC_STATE_CANCELLING_RESTARTING;
 import static com.android.keyguard.KeyguardUpdateMonitor.DEFAULT_CANCEL_SIGNAL_TIMEOUT;
 import static com.android.keyguard.KeyguardUpdateMonitor.HAL_POWER_PRESS_TIMEOUT;
@@ -47,6 +50,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -55,8 +59,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.IStrongAuthTracker;
 import android.app.trust.TrustManager;
@@ -78,18 +80,22 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.SensorProperties;
+import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbPort;
+import android.hardware.usb.UsbPortStatus;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
-import android.os.IRemoteCallback;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -116,6 +122,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
+import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
@@ -147,6 +154,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -230,18 +238,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
     @Mock
-    private IActivityManager mActivityService;
-    @Mock
     private SessionTracker mSessionTracker;
     @Mock
     private UiEventLogger mUiEventLogger;
     @Mock
     private GlobalSettings mGlobalSettings;
-    private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
     @Mock
     private FingerprintInteractiveToAuthProvider mInteractiveToAuthProvider;
+    @Mock
+    private UsbPort mUsbPort;
+    @Mock
+    private UsbManager mUsbManager;
+    @Mock
+    private UsbPortStatus mUsbPortStatus;
+    @Mock
+    private Uri mURI;
 
-
+    private List<FingerprintSensorPropertiesInternal> mFingerprintSensorProperties;
     private final int mCurrentUserId = 100;
     private final UserInfo mCurrentUserInfo = new UserInfo(mCurrentUserId, "Test user", 0);
 
@@ -250,9 +263,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             mBiometricEnabledCallbackArgCaptor;
     @Captor
     private ArgumentCaptor<FaceManager.AuthenticationCallback> mAuthenticationCallbackCaptor;
-
-    @Mock
-    private Uri mURI;
 
     // Direct executor
     private final Executor mBackgroundExecutor = Runnable::run;
@@ -263,13 +273,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private MockitoSession mMockitoSession;
     private StatusBarStateController.StateListener mStatusBarStateListener;
     private IBiometricEnabledOnKeyguardCallback mBiometricEnabledOnKeyguardCallback;
+    private FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
     private final InstanceId mKeyguardInstanceId = InstanceId.fakeInstanceId(999);
 
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        when(mActivityService.getCurrentUser()).thenReturn(mCurrentUserInfo);
-        when(mActivityService.getCurrentUserId()).thenReturn(mCurrentUserId);
         when(mFaceManager.isHardwareDetected()).thenReturn(true);
         when(mAuthController.isFaceAuthEnrolled(anyInt())).thenReturn(true);
         when(mFaceManager.getSensorPropertiesInternal()).thenReturn(mFaceSensorProperties);
@@ -280,9 +289,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mFaceSensorProperties.get(anyInt())).thenReturn(
                 createFaceSensorProperties(/* supportsFaceDetection = */ false));
 
-        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
-        when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
-        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(List.of(
+        mFingerprintSensorProperties = List.of(
                 new FingerprintSensorPropertiesInternal(1 /* sensorId */,
                         FingerprintSensorProperties.STRENGTH_STRONG,
                         1 /* maxEnrollmentsPerUser */,
@@ -291,7 +298,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                                 "1.01" /* firmwareVersion */,
                                 "00000001" /* serialNumber */, "" /* softwareVersion */)),
                         FingerprintSensorProperties.TYPE_UDFPS_OPTICAL,
-                        false /* resetLockoutRequiresHAT */)));
+                        false /* resetLockoutRequiresHAT */));
+        when(mFingerprintManager.isHardwareDetected()).thenReturn(true);
+        when(mFingerprintManager.hasEnrolledTemplates(anyInt())).thenReturn(true);
+        when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(
+                mFingerprintSensorProperties);
         when(mUserManager.isUserUnlocked(anyInt())).thenReturn(true);
         when(mUserManager.isPrimaryUser()).thenReturn(true);
         when(mStrongAuthTracker.getStub()).thenReturn(mock(IStrongAuthTracker.Stub.class));
@@ -306,13 +317,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class)
-                .spyStatic(ActivityManager.class)
                 .startMocking();
         ExtendedMockito.doReturn(SubscriptionManager.INVALID_SUBSCRIPTION_ID)
                 .when(SubscriptionManager::getDefaultSubscriptionId);
         KeyguardUpdateMonitor.setCurrentUser(mCurrentUserId);
         when(mUserTracker.getUserId()).thenReturn(mCurrentUserId);
-        ExtendedMockito.doReturn(mActivityService).when(ActivityManager::getService);
 
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.systemui.R.integer.config_face_auth_supported_posture,
@@ -600,9 +609,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();
 
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
-                anyInt());
-        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
+        verifyFingerprintAuthenticateCall();
+        verifyFingerprintDetectNeverCalled();
     }
 
     @Test
@@ -612,24 +620,51 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
         mTestableLooper.processAllMessages();
 
-        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyInt(), anyInt());
-        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
+        verifyFingerprintAuthenticateNeverCalled();
+        verifyFingerprintDetectNeverCalled();
     }
 
     @Test
     public void testOnlyDetectFingerprint_whenFingerprintUnlockNotAllowed() {
-        // Clear invocations, since previous setup (e.g. registering BiometricManager callbacks)
-        // will trigger updateBiometricListeningState();
-        clearInvocations(mFingerprintManager);
-        mKeyguardUpdateMonitor.resetBiometricListeningState();
+        givenDetectFingerprintWithClearingFingerprintManagerInvocations();
 
-        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
-        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
-        mTestableLooper.processAllMessages();
+        verifyFingerprintAuthenticateNeverCalled();
+        verifyFingerprintDetectCall();
+    }
 
-        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt());
-        verify(mFingerprintManager).detectFingerprint(any(), any(), anyInt());
+    @Test
+    public void whenDetectFingerprint_biometricDetectCallback() {
+        ArgumentCaptor<FingerprintManager.FingerprintDetectionCallback> fpDetectCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.FingerprintDetectionCallback.class);
+
+        givenDetectFingerprintWithClearingFingerprintManagerInvocations();
+        verify(mFingerprintManager).detectFingerprint(
+                any(), fpDetectCallbackCaptor.capture(), any());
+        fpDetectCallbackCaptor.getValue().onFingerprintDetected(0, 0, true);
+
+        // THEN verify keyguardUpdateMonitorCallback receives a detect callback
+        // and NO authenticate callbacks
+        verify(mTestCallback).onBiometricDetected(
+                eq(0), eq(BiometricSourceType.FINGERPRINT), eq(true));
+        verify(mTestCallback, never()).onBiometricAuthenticated(
+                anyInt(), any(), anyBoolean());
+    }
+
+    @Test
+    public void whenDetectFace_biometricDetectCallback() {
+        ArgumentCaptor<FaceManager.FaceDetectionCallback> faceDetectCallbackCaptor =
+                ArgumentCaptor.forClass(FaceManager.FaceDetectionCallback.class);
+
+        givenDetectFace();
+        verify(mFaceManager).detectFace(any(), faceDetectCallbackCaptor.capture(), any());
+        faceDetectCallbackCaptor.getValue().onFaceDetected(0, 0, false);
+
+        // THEN verify keyguardUpdateMonitorCallback receives a detect callback
+        // and NO authenticate callbacks
+        verify(mTestCallback).onBiometricDetected(
+                eq(0), eq(BiometricSourceType.FACE), eq(false));
+        verify(mTestCallback, never()).onBiometricAuthenticated(
+                anyInt(), any(), anyBoolean());
     }
 
     @Test
@@ -660,7 +695,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         strongAuthNotRequired();
 
         // WHEN fingerprint is locked out
-        fingerprintErrorLockedOut();
+        fingerprintErrorTemporaryLockedOut();
 
         // THEN unlocking with face is not allowed
         Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
@@ -683,19 +718,41 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         strongAuthNotRequired();
 
         // WHEN fingerprint is locked out
-        fingerprintErrorLockedOut();
+        fingerprintErrorTemporaryLockedOut();
 
-        // THEN unlocking with fingeprint is not allowed
+        // THEN unlocking with fingerprint is not allowed
         Assert.assertFalse(mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
                 BiometricSourceType.FINGERPRINT));
     }
 
     @Test
+    public void trustAgentHasTrust() {
+        // WHEN user has trust
+        mKeyguardUpdateMonitor.onTrustChanged(true, true, getCurrentUser(), 0, null);
+
+        // THEN user is considered as "having trust" and bouncer can be skipped
+        Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
+        Assert.assertTrue(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()));
+    }
+
+    @Test
+    public void trustAgentHasTrust_fingerprintLockout() {
+        // GIVEN user has trust
+        mKeyguardUpdateMonitor.onTrustChanged(true, true, getCurrentUser(), 0, null);
+        Assert.assertTrue(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
+
+        // WHEN fingerprint is locked out
+        fingerprintErrorTemporaryLockedOut();
+
+        // THEN user is NOT considered as "having trust" and bouncer cannot be skipped
+        Assert.assertFalse(mKeyguardUpdateMonitor.getUserHasTrust(getCurrentUser()));
+        Assert.assertFalse(mKeyguardUpdateMonitor.getUserCanSkipBouncer(getCurrentUser()));
+    }
+
+    @Test
     public void testTriesToAuthenticate_whenBouncer() {
         setKeyguardBouncerVisibility(true);
-
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
-        verify(mFaceManager, never()).hasEnrolledTemplates(anyInt());
+        verifyFaceAuthenticateCall();
     }
 
     @Test
@@ -703,8 +760,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.sendPrimaryBouncerChanged(
                 /* bouncerIsOrWillBeShowing */ true, /* bouncerFullyShown */ false);
 
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -712,7 +768,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         keyguardIsVisible();
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+
+        verifyFaceAuthenticateCall();
         verify(mUiEventLogger).logWithInstanceIdAndPosition(
                 eq(FaceAuthUiEvent.FACE_AUTH_UPDATED_STARTED_WAKING_UP),
                 eq(0),
@@ -728,8 +785,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         keyguardIsVisible();
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -740,26 +796,41 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
-    public void faceDetect_whenStrongAuthRequiredAndBypass() {
-        // GIVEN bypass is enabled, face detection is supported and strong auth is required
+    public void nofaceDetect_whenStrongAuthRequiredAndBypassUdfpsSupportedAndFpRunning() {
+        // GIVEN bypass is enabled, face detection is supported
         lockscreenBypassIsAllowed();
         supportsFaceDetection();
-        strongAuthRequiredEncrypted();
         keyguardIsVisible();
+
+        // GIVEN udfps is supported and strong auth required for weak biometrics (face) only
+        givenUdfpsSupported();
+        strongAuthRequiredForWeakBiometricOnly(); // this allows fingerprint to run but not face
 
         // WHEN the device wakes up
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
 
+        // THEN face detect and authenticate are NOT triggered
+        verifyFaceDetectNeverCalled();
+        verifyFaceAuthenticateNeverCalled();
+
+        // THEN biometric help message sent to callback
+        verify(mTestCallback).onBiometricHelp(
+                eq(BIOMETRIC_HELP_FACE_NOT_AVAILABLE), anyString(), eq(BiometricSourceType.FACE));
+    }
+
+    @Test
+    public void faceDetect_whenStrongAuthRequiredAndBypass() {
+        givenDetectFace();
+
         // FACE detect is triggered, not authenticate
-        verify(mFaceManager).detectFace(any(), any(), anyInt());
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceDetectCall();
+        verifyFaceAuthenticateNeverCalled();
 
         // WHEN bouncer becomes visible
         setKeyguardBouncerVisibility(true);
@@ -767,9 +838,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // THEN face scanning is not run
         mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
-        verify(mFaceManager, never()).detectFace(any(), any(), anyInt());
+        verifyFaceAuthenticateNeverCalled();
+        verifyFaceDetectNeverCalled();
     }
 
     @Test
@@ -784,9 +854,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         // FACE detect and authenticate are NOT triggered
-        verify(mFaceManager, never()).detectFace(any(), any(), anyInt());
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceDetectNeverCalled();
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -824,7 +893,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateCall();
     }
 
     @Test
@@ -832,12 +901,23 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setKeyguardShowing(false, true);
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
-        verify(mFaceManager, never()).authenticate(any(),
-                any(),
-                any(),
-                any(),
-                anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
+    }
+
+    @Test
+    public void noFpListeningWhenKeyguardIsOccluded_unlessAlternateBouncerShowing() {
+        // GIVEN device is awake but occluded
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(false, true);
+
+        // THEN fingerprint shouldn't listen
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(false)).isFalse();
+        verifyFingerprintAuthenticateNeverCalled();
+        // WHEN alternate bouncer is shown
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
+
+        // THEN make sure FP listening begins
+        verifyFingerprintAuthenticateCall();
     }
 
     @Test
@@ -849,7 +929,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */,
                 new ArrayList<>());
         keyguardIsVisible();
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateCall();
     }
 
     @Test
@@ -857,7 +937,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setKeyguardShowing(true, true);
         mKeyguardUpdateMonitor.setAssistantVisible(true);
 
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateCall();
         mTestableLooper.processAllMessages();
         clearInvocations(mFaceManager);
 
@@ -870,12 +950,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.handleKeyguardReset();
 
         assertThat(mKeyguardUpdateMonitor.isFaceDetectionRunning()).isFalse();
-        verify(mFaceManager, never()).authenticate(any(),
-                any(),
-                any(),
-                any(),
-                anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -885,8 +960,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, true /* newlyUnlocked */,
                 KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */, new ArrayList<>());
         keyguardIsVisible();
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -898,9 +972,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         keyguardIsVisible();
         mTestableLooper.processAllMessages();
 
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
-        verify(mFaceManager, never()).detectFace(any(), any(), anyInt());
+        verifyFaceAuthenticateNeverCalled();
+        verifyFaceDetectNeverCalled();
     }
 
     @Test
@@ -909,16 +982,14 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 .onAuthenticationError(FingerprintManager.BIOMETRIC_ERROR_POWER_PRESSED, "");
 
         // THEN doesn't authenticate immediately
-        verify(mFingerprintManager, never()).authenticate(any(),
-                any(), any(), any(), anyInt(), anyInt(), anyInt());
+        verifyFingerprintAuthenticateNeverCalled();
 
         // WHEN all messages (with delays) are processed
         mTestableLooper.moveTimeForward(HAL_POWER_PRESS_TIMEOUT);
         mTestableLooper.processAllMessages();
 
         // THEN fingerprint manager attempts to authenticate again
-        verify(mFingerprintManager).authenticate(any(),
-                any(), any(), any(), anyInt(), anyInt(), anyInt());
+        verifyFingerprintAuthenticateCall();
     }
 
     @Test
@@ -930,8 +1001,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         setKeyguardBouncerVisibility(true);
         mTestableLooper.processAllMessages();
 
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -1004,11 +1074,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testBiometricsCleared_whenUserSwitches() throws Exception {
-        final IRemoteCallback reply = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) {
-            } // do nothing
-        };
         final BiometricAuthenticated dummyAuthentication =
                 new BiometricAuthenticated(true /* authenticated */, true /* strong */);
         mKeyguardUpdateMonitor.mUserFaceAuthenticated.put(0 /* user */, dummyAuthentication);
@@ -1016,18 +1081,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.mUserFingerprintAuthenticated.size()).isEqualTo(1);
         assertThat(mKeyguardUpdateMonitor.mUserFaceAuthenticated.size()).isEqualTo(1);
 
-        mKeyguardUpdateMonitor.handleUserSwitching(10 /* user */, reply);
+        mKeyguardUpdateMonitor.handleUserSwitching(10 /* user */, new CountDownLatch(0));
         assertThat(mKeyguardUpdateMonitor.mUserFingerprintAuthenticated.size()).isEqualTo(0);
         assertThat(mKeyguardUpdateMonitor.mUserFaceAuthenticated.size()).isEqualTo(0);
     }
 
     @Test
     public void testMultiUserJankMonitor_whenUserSwitches() throws Exception {
-        final IRemoteCallback reply = new IRemoteCallback.Stub() {
-            @Override
-            public void sendResult(Bundle data) {
-            } // do nothing
-        };
         mKeyguardUpdateMonitor.handleUserSwitchComplete(10 /* user */);
         verify(mInteractionJankMonitor).end(InteractionJankMonitor.CUJ_USER_SWITCH);
         verify(mLatencyTracker).onActionEnd(LatencyTracker.ACTION_USER_SWITCH);
@@ -1058,9 +1118,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
-                anyInt());
+        verifyFaceAuthenticateCall();
+        verifyFingerprintAuthenticateCall();
 
         when(mFingerprintManager.getLockoutModeForUser(eq(FINGERPRINT_SENSOR_ID), eq(newUser)))
                 .thenReturn(fingerprintLockoutMode);
@@ -1088,8 +1147,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.isFingerprintLockedOut()).isEqualTo(fpLocked);
         assertThat(mKeyguardUpdateMonitor.isFaceLockedOut()).isEqualTo(faceLocked);
 
-        // Fingerprint should be restarted once its cancelled bc on lockout, the device
-        // can still detectFingerprint (and if it's not locked out, fingerprint can listen)
+        // Fingerprint should be cancelled on lockout if going to lockout state, else
+        // restarted if it's not
         assertThat(mKeyguardUpdateMonitor.mFingerprintRunningState)
                 .isEqualTo(BIOMETRIC_STATE_CANCELLING_RESTARTING);
     }
@@ -1507,10 +1566,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     public void testFaceDoesNotAuth_afterPinAttempt() {
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.setCredentialAttempted();
-        verify(mFingerprintManager, never()).authenticate(any(), any(), any(),
-                any(), anyInt());
-        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
-                anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -1553,7 +1609,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
         // Fingerprint is locked out.
-        fingerprintErrorLockedOut();
+        fingerprintErrorTemporaryLockedOut();
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
     }
@@ -1708,7 +1764,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldListenForFace_whenOccludingAppRequestsFaceAuth_returnsTrue()
+    public void shouldListenForFace_secureCameraLaunchedButAlternateBouncerIsLaunched_returnsTrue()
             throws RemoteException {
         // Face auth should run when the following is true.
         keyguardNotGoingAway();
@@ -1724,7 +1780,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
 
-        occludingAppRequestsFaceAuth();
+        alternateBouncerVisible();
         mTestableLooper.processAllMessages();
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
@@ -1814,7 +1870,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldListenForFace_whenUdfpsBouncerIsShowing_returnsTrue()
+    public void testShouldListenForFace_whenAlternateBouncerIsShowing_returnsTrue()
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
@@ -1826,13 +1882,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
 
-        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
     }
 
     @Test
-    public void testShouldListenForFace_udfpsBouncerIsShowingButDeviceGoingToSleep_returnsFalse()
+    public void testShouldListenForFace_alternateBouncerShowingButDeviceGoingToSleep_returnsFalse()
             throws RemoteException {
         // Preconditions for face auth to run
         keyguardNotGoingAway();
@@ -1842,7 +1898,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         biometricsEnabledForCurrentUser();
         userNotCurrentlySwitching();
         deviceNotGoingToSleep();
-        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        alternateBouncerVisible();
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
@@ -1850,6 +1906,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isFalse();
+    }
+
+    private void alternateBouncerVisible() {
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
     }
 
     @Test
@@ -1862,7 +1922,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         biometricsNotDisabledThroughDevicePolicyManager();
         biometricsEnabledForCurrentUser();
         userNotCurrentlySwitching();
-        mKeyguardUpdateMonitor.setUdfpsBouncerShowing(true);
+        mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
         mTestableLooper.processAllMessages();
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
 
@@ -1881,9 +1941,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
-        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
-                anyInt());
+        verifyFaceAuthenticateCall();
+        verifyFingerprintAuthenticateCall();
 
         mKeyguardUpdateMonitor.onFaceAuthenticated(0, false);
         // Make sure keyguard is going away after face auth attempt, and that it calls
@@ -1909,8 +1968,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchDreamingStopped();
         mTestableLooper.processAllMessages();
 
-        verify(mFaceManager, never()).authenticate(
-                any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
     }
 
     @Test
@@ -1923,17 +1981,15 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         // THEN face auth isn't triggered
-        verify(mFaceManager, never()).authenticate(
-                any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateNeverCalled();
 
         // WHEN device wakes up from the power button
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
         mTestableLooper.processAllMessages();
 
         // THEN face auth is triggered
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateCall();
     }
-
 
     @Test
     public void testOnTrustGrantedForCurrentUser_dismissKeyguardRequested_deviceInteractive() {
@@ -2102,7 +2158,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateCall();
         verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
                 anyInt());
 
@@ -2135,7 +2191,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         keyguardIsVisible();
 
-        verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
+        verifyFaceAuthenticateCall();
 
         final CancellationSignal faceCancel = spy(mKeyguardUpdateMonitor.mFaceCancelSignal);
         mKeyguardUpdateMonitor.mFaceCancelSignal = faceCancel;
@@ -2148,6 +2204,32 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         // THEN face and fingerprint listening are cancelled
+        verify(faceCancel).cancel();
+        verify(callback).onBiometricRunningStateChanged(
+                eq(false), eq(BiometricSourceType.FACE));
+    }
+
+    @Test
+    public void testPostureChangeToUnsupported_stopsFaceListeningState() {
+        // GIVEN device is listening for face
+        mKeyguardUpdateMonitor.mConfigFaceAuthSupportedPosture = DEVICE_POSTURE_CLOSED;
+        deviceInPostureStateClosed();
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+        keyguardIsVisible();
+
+        verifyFaceAuthenticateCall();
+
+        final CancellationSignal faceCancel = spy(mKeyguardUpdateMonitor.mFaceCancelSignal);
+        mKeyguardUpdateMonitor.mFaceCancelSignal = faceCancel;
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(callback);
+
+        // WHEN device is opened
+        deviceInPostureStateOpened();
+        mTestableLooper.processAllMessages();
+
+        // THEN face listening is stopped.
         verify(faceCancel).cancel();
         verify(callback).onBiometricRunningStateChanged(
                 eq(false), eq(BiometricSourceType.FACE));
@@ -2182,7 +2264,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN fingerprint fails
@@ -2205,7 +2287,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN face fails & bypass is not allowed
@@ -2229,7 +2311,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN face fails & bypass is not allowed
@@ -2251,7 +2333,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // GIVEN active unlock triggers on biometric failures
         when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
-                ActiveUnlockConfig.ACTIVE_UNLOCK_REQUEST_ORIGIN.BIOMETRIC_FAIL))
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.BIOMETRIC_FAIL))
                 .thenReturn(true);
 
         // WHEN face fails & on the bouncer
@@ -2309,6 +2391,198 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         // Whether device in any posture state, always listen for face
         assertThat(mKeyguardUpdateMonitor.shouldListenForFace()).isTrue();
+    }
+
+    @Test
+    public void testBatteryChangedIntent_refreshBatteryInfo() {
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(mContext, getBatteryIntent());
+
+        BatteryStatus status = verifyRefreshBatteryInfo();
+        assertThat(status.incompatibleCharger.get()).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
+    }
+
+    @Test
+    public void testUsbComplianceIntent_refreshBatteryInfo() {
+        Context contextSpy = getSpyContext();
+
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(
+                contextSpy, new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED));
+
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
+    }
+
+    @Test
+    public void testUsbComplianceIntent_refreshBatteryInfoWithIncompatibleCharger() {
+        Context contextSpy = getSpyContext();
+        setupIncompatibleCharging();
+
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(
+                contextSpy, new Intent(UsbManager.ACTION_USB_PORT_COMPLIANCE_CHANGED));
+
+        mTestableLooper.processAllMessages();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isTrue();
+    }
+
+    @Test
+    public void testBatteryChangedIntent_unplugDevice_resetIncompatibleCharger() {
+        mKeyguardUpdateMonitor.mIncompatibleCharger = true;
+        Intent batteryChangedIntent =
+                getBatteryIntent().putExtra(BatteryManager.EXTRA_PLUGGED, -1);
+
+        mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(mContext, batteryChangedIntent);
+
+        BatteryStatus status = verifyRefreshBatteryInfo();
+        assertThat(status.incompatibleCharger.get()).isFalse();
+        assertThat(mKeyguardUpdateMonitor.mIncompatibleCharger).isFalse();
+    }
+
+    @Test
+    public void unfoldWakeup_requestActiveUnlock_forceDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock
+        keyguardIsVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on wakeup
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE))
+                .thenReturn(true);
+
+        // GIVEN an unfold should force dismiss the keyguard
+        when(mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE)).thenReturn(true);
+
+        // WHEN device wakes up from an unfold
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNFOLD_DEVICE);
+        mTestableLooper.processAllMessages();
+
+        // THEN request unlock with a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(true));
+    }
+
+    @Test
+    public void unfoldWakeup_requestActiveUnlock_noDismissKeyguard()
+            throws RemoteException {
+        // GIVEN shouldTriggerActiveUnlock on wake from UNFOLD_DEVICE
+        keyguardIsVisible();
+        when(mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())).thenReturn(true);
+
+        // GIVEN active unlock triggers on wakeup
+        when(mActiveUnlockConfig.shouldAllowActiveUnlockFromOrigin(
+                ActiveUnlockConfig.ActiveUnlockRequestOrigin.WAKE))
+                .thenReturn(true);
+
+        // GIVEN an unfold should NOT force dismiss the keyguard
+        when(mActiveUnlockConfig.shouldWakeupForceDismissKeyguard(
+                PowerManager.WAKE_REASON_UNFOLD_DEVICE)).thenReturn(false);
+
+        // WHEN device wakes up from an unfold
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNFOLD_DEVICE);
+        mTestableLooper.processAllMessages();
+
+        // THEN request unlock WITHOUT a keyguard dismissal
+        verify(mTrustManager).reportUserRequestedUnlock(eq(KeyguardUpdateMonitor.getCurrentUser()),
+                eq(false));
+    }
+
+    @Test
+    public void detectFingerprint_onTemporaryLockoutReset_authenticateFingerprint() {
+        ArgumentCaptor<FingerprintManager.LockoutResetCallback> fpLockoutResetCallbackCaptor =
+                ArgumentCaptor.forClass(FingerprintManager.LockoutResetCallback.class);
+        verify(mFingerprintManager).addLockoutResetCallback(fpLockoutResetCallbackCaptor.capture());
+
+        // GIVEN device is locked out
+        fingerprintErrorTemporaryLockedOut();
+
+        // GIVEN FP detection is running
+        givenDetectFingerprintWithClearingFingerprintManagerInvocations();
+        verifyFingerprintDetectCall();
+        verifyFingerprintAuthenticateNeverCalled();
+
+        // WHEN temporary lockout resets
+        fpLockoutResetCallbackCaptor.getValue().onLockoutReset(0);
+        mTestableLooper.processAllMessages();
+
+        // THEN fingerprint detect state should cancel & then restart (for authenticate call)
+        assertThat(mKeyguardUpdateMonitor.mFingerprintRunningState)
+                .isEqualTo(BIOMETRIC_STATE_CANCELLING_RESTARTING);
+    }
+
+    @Test
+    public void faceAuthenticateOptions_bouncerAuthenticateReason() {
+        // GIVEN the bouncer is fully visible
+        bouncerFullyVisible();
+
+        // WHEN authenticate is called
+        ArgumentCaptor<FaceAuthenticateOptions> captor =
+                ArgumentCaptor.forClass(FaceAuthenticateOptions.class);
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), captor.capture());
+
+        // THEN the authenticate reason is attributed to the bouncer
+        assertThat(captor.getValue().getAuthenticateReason())
+                .isEqualTo(AUTHENTICATE_REASON_PRIMARY_BOUNCER_SHOWN);
+    }
+
+    @Test
+    public void faceAuthenticateOptions_wakingUpAuthenticateReason_powerButtonWakeReason() {
+        // GIVEN keyguard is visible
+        keyguardIsVisible();
+
+        // WHEN device wakes up from the power button
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+
+        // THEN face auth is triggered
+        ArgumentCaptor<FaceAuthenticateOptions> captor =
+                ArgumentCaptor.forClass(FaceAuthenticateOptions.class);
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), captor.capture());
+
+        // THEN the authenticate reason is attributed to the waking
+        assertThat(captor.getValue().getAuthenticateReason())
+                .isEqualTo(AUTHENTICATE_REASON_STARTED_WAKING_UP);
+
+        // THEN the wake reason is attributed to the power button
+        assertThat(captor.getValue().getWakeReason())
+                .isEqualTo(PowerManager.WAKE_REASON_POWER_BUTTON);
+    }
+
+    private void verifyFingerprintAuthenticateNeverCalled() {
+        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
+        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
+                anyInt(), anyInt());
+    }
+
+    private void verifyFingerprintAuthenticateCall() {
+        verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
+                anyInt());
+    }
+
+    private void verifyFingerprintDetectNeverCalled() {
+        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), any());
+    }
+
+    private void verifyFingerprintDetectCall() {
+        verify(mFingerprintManager).detectFingerprint(any(), any(), any());
+    }
+
+    private void verifyFaceAuthenticateNeverCalled() {
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), any());
+        verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt());
+    }
+
+    private void verifyFaceAuthenticateCall() {
+        verify(mFaceManager).authenticate(any(), any(), any(), any(), any());
+    }
+
+    private void verifyFaceDetectNeverCalled() {
+        verify(mFaceManager, never()).detectFace(any(), any(), any());
+    }
+
+    private void verifyFaceDetectCall() {
+        verify(mFaceManager).detectFace(any(), any(), any());
     }
 
     private void userDeviceLockDown() {
@@ -2380,7 +2654,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setSwitchingUser(true);
     }
 
-    private void fingerprintErrorLockedOut() {
+    private void fingerprintErrorTemporaryLockedOut() {
         mKeyguardUpdateMonitor.mFingerprintAuthenticationCallback
                 .onAuthenticationError(FINGERPRINT_ERROR_LOCKOUT, "Fingerprint locked out");
     }
@@ -2408,8 +2682,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 any(),
                 mAuthenticationCallbackCaptor.capture(),
                 any(),
-                anyInt(),
-                anyBoolean());
+                any());
         mAuthenticationCallbackCaptor.getValue()
                 .onAuthenticationSucceeded(
                         new FaceManager.AuthenticationResult(null, null, mCurrentUserId, false));
@@ -2439,6 +2712,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         when(mStrongAuthTracker.getStrongAuthForUser(KeyguardUpdateMonitor.getCurrentUser()))
                 .thenReturn(STRONG_AUTH_REQUIRED_AFTER_BOOT);
         when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
+    }
+
+    private void strongAuthRequiredForWeakBiometricOnly() {
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(eq(true))).thenReturn(true);
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(eq(false))).thenReturn(false);
     }
 
     private void strongAuthNotRequired() {
@@ -2495,6 +2773,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
     }
 
+    private void givenUdfpsSupported() {
+        Assert.assertFalse(mFingerprintSensorProperties.isEmpty());
+        when(mAuthController.getUdfpsProps()).thenReturn(mFingerprintSensorProperties);
+        Assert.assertTrue(mKeyguardUpdateMonitor.isUdfpsSupported());
+    }
+
     private void setBroadcastReceiverPendingResult(BroadcastReceiver receiver) {
         BroadcastReceiver.PendingResult pendingResult =
                 new BroadcastReceiver.PendingResult(Activity.RESULT_OK,
@@ -2509,6 +2793,30 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         receiver.setPendingResult(pendingResult);
     }
 
+    private void givenDetectFingerprintWithClearingFingerprintManagerInvocations() {
+        // Clear invocations, since previous setup (e.g. registering BiometricManager callbacks)
+        // will trigger updateBiometricListeningState();
+        clearInvocations(mFingerprintManager);
+        mKeyguardUpdateMonitor.resetBiometricListeningState();
+
+        when(mStrongAuthTracker.isUnlockingWithBiometricAllowed(anyBoolean())).thenReturn(false);
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+    }
+
+    private void givenDetectFace() {
+        // GIVEN bypass is enabled, face detection is supported and strong auth is required
+        lockscreenBypassIsAllowed();
+        supportsFaceDetection();
+        strongAuthRequiredEncrypted();
+        keyguardIsVisible();
+        // fingerprint is NOT running, UDFPS is NOT supported
+
+        // WHEN the device wakes up
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mTestableLooper.processAllMessages();
+    }
+
     private Intent putPhoneInfo(Intent intent, Bundle data, Boolean simInited) {
         int subscription = simInited
                 ? 1/* mock subid=1 */ : SubscriptionManager.PLACEHOLDER_SUBSCRIPTION_ID_BASE;
@@ -2517,6 +2825,37 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subscription);
         intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
         return intent;
+    }
+
+    private BatteryStatus verifyRefreshBatteryInfo() {
+        mTestableLooper.processAllMessages();
+        ArgumentCaptor<BatteryStatus> captor = ArgumentCaptor.forClass(BatteryStatus.class);
+        verify(mTestCallback, atLeastOnce()).onRefreshBatteryInfo(captor.capture());
+        List<BatteryStatus> batteryStatusList = captor.getAllValues();
+        return batteryStatusList.get(batteryStatusList.size() - 1);
+    }
+
+    private void setupIncompatibleCharging() {
+        final List<UsbPort> usbPorts = new ArrayList<>();
+        usbPorts.add(mUsbPort);
+        when(mUsbManager.getPorts()).thenReturn(usbPorts);
+        when(mUsbPort.getStatus()).thenReturn(mUsbPortStatus);
+        when(mUsbPort.supportsComplianceWarnings()).thenReturn(true);
+        when(mUsbPortStatus.isConnected()).thenReturn(true);
+        when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[]{1});
+    }
+
+    private Context getSpyContext() {
+        mContext.addMockSystemService(UsbManager.class, mUsbManager);
+        Context contextSpy = spy(mContext);
+        doReturn(getBatteryIntent()).when(contextSpy).registerReceiver(eq(null),
+                any(IntentFilter.class));
+        return contextSpy;
+    }
+
+    private Intent getBatteryIntent() {
+        return new Intent(Intent.ACTION_BATTERY_CHANGED).putExtra(
+                BatteryManager.EXTRA_HEALTH, BatteryManager.BATTERY_HEALTH_OVERHEAT);
     }
 
     private class TestableKeyguardUpdateMonitor extends KeyguardUpdateMonitor {

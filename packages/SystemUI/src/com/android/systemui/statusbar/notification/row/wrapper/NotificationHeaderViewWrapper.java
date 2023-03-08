@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.widget.DateTimeView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -344,6 +345,21 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper imple
         mTransformationHelper.setVisible(visible);
     }
 
+    /***
+     * Set Notification when value
+     * @param whenMillis
+     */
+    public void setNotificationWhen(long whenMillis) {
+        if (mNotificationHeader == null) {
+            return;
+        }
+
+        final View timeView = mNotificationHeader.findViewById(com.android.internal.R.id.time);
+
+        if (timeView instanceof DateTimeView) {
+            ((DateTimeView) timeView).setTime(whenMillis);
+        }
+    }
     protected void addTransformedViews(View... views) {
         for (View view : views) {
             if (view != null) {

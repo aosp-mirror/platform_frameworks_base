@@ -16,25 +16,15 @@
 
 package com.android.systemui.navigationbar.gestural;
 
-import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 
-import android.content.Context;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
 
 public final class Utilities {
 
-    private static final int TRACKPAD_GESTURE_SCALE = 60;
-
     public static boolean isTrackpadMotionEvent(boolean isTrackpadGestureBackEnabled,
             MotionEvent event) {
-        // TODO: ideally should use event.getClassification(), but currently only the move
-        // events get assigned the correct classification.
         return isTrackpadGestureBackEnabled
-                && (event.getSource() & SOURCE_TOUCHSCREEN) != SOURCE_TOUCHSCREEN;
-    }
-
-    public static int getTrackpadScale(Context context) {
-        return ViewConfiguration.get(context).getScaledTouchSlop() * TRACKPAD_GESTURE_SCALE;
+                && event.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE;
     }
 }

@@ -26,13 +26,12 @@ import android.graphics.MeshSpecification;
 import android.graphics.MeshSpecification.Attribute;
 import android.graphics.MeshSpecification.Varying;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.View;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
 
 public class MeshActivity extends Activity {
     @Override
@@ -64,8 +63,8 @@ public class MeshActivity extends Activity {
             vertexBuffer.put(4, 0.0f);
             vertexBuffer.put(5, 400.0f);
             vertexBuffer.rewind();
-            Mesh mesh = Mesh.make(
-                    meshSpec, Mesh.TRIANGLES, vertexBuffer, 3, new Rect(0, 0, 1000, 1000));
+            Mesh mesh = new Mesh(
+                    meshSpec, Mesh.TRIANGLES, vertexBuffer, 3, new RectF(0, 0, 1000, 1000));
 
             canvas.drawMesh(mesh, BlendMode.COLOR, new Paint());
 
@@ -98,8 +97,8 @@ public class MeshActivity extends Activity {
             }
             iVertexBuffer.rewind();
             indexBuffer.rewind();
-            Mesh mesh2 = Mesh.makeIndexed(meshSpec, Mesh.TRIANGLES, iVertexBuffer, 102, indexBuffer,
-                    new Rect(0, 0, 1000, 1000));
+            Mesh mesh2 = new Mesh(meshSpec, Mesh.TRIANGLES, iVertexBuffer, 102, indexBuffer,
+                    new RectF(0, 0, 1000, 1000));
             Paint paint = new Paint();
             paint.setColor(Color.RED);
             canvas.drawMesh(mesh2, BlendMode.COLOR, paint);
@@ -115,9 +114,11 @@ public class MeshActivity extends Activity {
                     + "      color = vec4(1.0, 0.0, 0.0, 1.0);"
                     + "      return varyings.position;\n"
                     + "}";
-            ArrayList<Attribute> attList = new ArrayList<>();
-            attList.add(new Attribute(MeshSpecification.FLOAT2, 0, "position"));
-            ArrayList<Varying> varyList = new ArrayList<>();
+            Attribute[] attList = new Attribute[]{
+                    new Attribute(MeshSpecification.TYPE_FLOAT2, 0, "position"),
+
+            };
+            Varying[] varyList = new Varying[0];
             return MeshSpecification.make(attList, 8, varyList, vs, fs);
         }
     }

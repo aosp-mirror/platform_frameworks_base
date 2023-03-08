@@ -25,7 +25,10 @@ import android.view.ViewTreeObserver
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.shade.NotificationPanelViewController
@@ -105,8 +108,14 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
             }
 
         keyguardRepository = FakeKeyguardRepository()
+        val featureFlags = FakeFeatureFlags().apply { set(FACE_AUTH_REFACTOR, true) }
         val keyguardInteractor =
-            KeyguardInteractor(repository = keyguardRepository, commandQueue = commandQueue)
+            KeyguardInteractor(
+                repository = keyguardRepository,
+                commandQueue = commandQueue,
+                featureFlags = featureFlags,
+                bouncerRepository = FakeKeyguardBouncerRepository(),
+            )
 
         // Needs to be run on the main thread
         runBlocking(IMMEDIATE) {

@@ -45,7 +45,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -69,9 +68,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MergedConfiguration;
+import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -103,7 +104,6 @@ import com.android.internal.view.BaseSurfaceHolder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -171,14 +171,14 @@ public abstract class WallpaperService extends Service {
             Float.NEGATIVE_INFINITY);
 
     private static final int NOTIFY_COLORS_RATE_LIMIT_MS = 1000;
+    private static final int PROCESS_LOCAL_COLORS_INTERVAL_MS = 1000;
 
     private static final boolean ENABLE_WALLPAPER_DIMMING =
             SystemProperties.getBoolean("persist.debug.enable_wallpaper_dimming", true);
 
     private static final long DIMMING_ANIMATION_DURATION_MS = 300L;
 
-    private final ArrayList<Engine> mActiveEngines
-            = new ArrayList<Engine>();
+    private final ArrayMap<IBinder, IWallpaperEngineWrapper> mActiveEngines = new ArrayMap<>();
 
     static final class WallpaperCommand {
         String action;
@@ -275,9 +275,13 @@ public abstract class WallpaperService extends Service {
         MotionEvent mPendingMove;
         boolean mIsInAmbientMode;
 
-        // Needed for throttling onComputeColors.
+        // used to throttle onComputeColors
         private long mLastColorInvalidation;
         private final Runnable mNotifyColorsChanged = this::notifyColorsChanged;
+
+        // used to throttle processLocalColors
+        private long mLastProcessLocalColorsTimestamp;
+        private AtomicBoolean mProcessLocalColorsPending = new AtomicBoolean(false);
         private final Supplier<Long> mClockFunction;
         private final Handler mHandler;
 
@@ -1153,11 +1157,6 @@ public abstract class WallpaperService extends Service {
                     mLayout.token = mWindowToken;
 
                     if (!mCreated) {
-                        // Retrieve watch round info
-                        TypedArray windowStyle = obtainStyledAttributes(
-                                com.android.internal.R.styleable.Window);
-                        windowStyle.recycle();
-
                         // Add window
                         mLayout.type = mIWallpaperEngine.mWindowType;
                         mLayout.gravity = Gravity.START|Gravity.TOP;
@@ -1242,7 +1241,7 @@ public abstract class WallpaperService extends Service {
                             null /* ignoringVisibilityState */, config.isScreenRound(),
                             false /* alwaysConsumeSystemBars */, mLayout.softInputMode,
                             mLayout.flags, SYSTEM_UI_FLAG_VISIBLE, mLayout.type,
-                            config.windowConfiguration.getWindowingMode(), null /* typeSideMap */);
+                            config.windowConfiguration.getWindowingMode(), null /* idSideMap */);
 
                     if (!fixedSize) {
                         final Rect padding = mIWallpaperEngine.mDisplayPadding;
@@ -1536,14 +1535,14 @@ public abstract class WallpaperService extends Service {
         void doVisibilityChanged(boolean visible) {
             if (!mDestroyed) {
                 mVisible = visible;
-                reportVisibility();
+                reportVisibility(false);
                 if (mReportedVisible) processLocalColors(mPendingXOffset, mPendingXOffsetStep);
             } else {
                 AnimationHandler.requestAnimatorsEnabled(visible, this);
             }
         }
 
-        void reportVisibility() {
+        void reportVisibility(boolean forceReport) {
             if (mScreenshotSurfaceControl != null && mVisible) {
                 if (DEBUG) Log.v(TAG, "Frozen so don't report visibility change");
                 return;
@@ -1551,10 +1550,29 @@ public abstract class WallpaperService extends Service {
             if (!mDestroyed) {
                 mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getState();
                 boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
-                if (mReportedVisible != visible) {
+                if (DEBUG) {
+                    Log.v(
+                            TAG,
+                            "reportVisibility"
+                                    + " mReportedVisible="
+                                    + mReportedVisible
+                                    + " mVisible="
+                                    + mVisible
+                                    + " mDisplayState="
+                                    + mDisplayState);
+                }
+                if (mReportedVisible != visible || forceReport) {
                     mReportedVisible = visible;
-                    if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + visible
-                            + "): " + this);
+                    if (DEBUG) {
+                        Log.v(
+                                TAG,
+                                "onVisibilityChanged("
+                                        + visible
+                                        + "): "
+                                        + this
+                                        + " forceReport="
+                                        + forceReport);
+                    }
                     if (visible) {
                         // If becoming visible, in preview mode the surface
                         // may have been destroyed so now we need to make
@@ -1624,7 +1642,26 @@ public abstract class WallpaperService extends Service {
             processLocalColors(xOffset, xOffsetStep);
         }
 
+        /**
+         * Thread-safe util to call {@link #processLocalColorsInternal} with a minimum interval of
+         * {@link #PROCESS_LOCAL_COLORS_INTERVAL_MS} between two calls.
+         */
         private void processLocalColors(float xOffset, float xOffsetStep) {
+            if (mProcessLocalColorsPending.compareAndSet(false, true)) {
+                final long now = mClockFunction.get();
+                final long timeSinceLastColorProcess = now - mLastProcessLocalColorsTimestamp;
+                final long timeToWait = Math.max(0,
+                        PROCESS_LOCAL_COLORS_INTERVAL_MS - timeSinceLastColorProcess);
+
+                mHandler.postDelayed(() -> {
+                    mLastProcessLocalColorsTimestamp = now + timeToWait;
+                    mProcessLocalColorsPending.set(false);
+                    processLocalColorsInternal(xOffset, xOffsetStep);
+                }, timeToWait);
+            }
+        }
+
+        private void processLocalColorsInternal(float xOffset, float xOffsetStep) {
             // implemented by the wallpaper
             if (supportsLocalColorExtraction()) return;
             if (DEBUG) {
@@ -1658,40 +1695,39 @@ public abstract class WallpaperService extends Service {
 
             float finalXOffsetStep = xOffsetStep;
             float finalXOffset = xOffset;
-            mHandler.post(() -> {
-                Trace.beginSection("WallpaperService#processLocalColors");
-                resetWindowPages();
-                int xPage = xCurrentPage;
-                EngineWindowPage current;
-                if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
-                    mWindowPages = new EngineWindowPage[xPages];
-                    initWindowPages(mWindowPages, finalXOffsetStep);
+
+            Trace.beginSection("WallpaperService#processLocalColors");
+            resetWindowPages();
+            int xPage = xCurrentPage;
+            EngineWindowPage current;
+            if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
+                mWindowPages = new EngineWindowPage[xPages];
+                initWindowPages(mWindowPages, finalXOffsetStep);
+            }
+            if (mLocalColorsToAdd.size() != 0) {
+                for (RectF colorArea : mLocalColorsToAdd) {
+                    if (!isValid(colorArea)) continue;
+                    mLocalColorAreas.add(colorArea);
+                    int colorPage = getRectFPage(colorArea, finalXOffsetStep);
+                    EngineWindowPage currentPage = mWindowPages[colorPage];
+                    currentPage.setLastUpdateTime(0);
+                    currentPage.removeColor(colorArea);
                 }
-                if (mLocalColorsToAdd.size() != 0) {
-                    for (RectF colorArea : mLocalColorsToAdd) {
-                        if (!isValid(colorArea)) continue;
-                        mLocalColorAreas.add(colorArea);
-                        int colorPage = getRectFPage(colorArea, finalXOffsetStep);
-                        EngineWindowPage currentPage = mWindowPages[colorPage];
-                        currentPage.setLastUpdateTime(0);
-                        currentPage.removeColor(colorArea);
-                    }
-                    mLocalColorsToAdd.clear();
+                mLocalColorsToAdd.clear();
+            }
+            if (xPage >= mWindowPages.length) {
+                if (DEBUG) {
+                    Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
+                    Log.e(TAG, "error on page " + xPage + " out of " + xPages);
+                    Log.e(TAG,
+                            "error on xOffsetStep " + finalXOffsetStep
+                                    + " xOffset " + finalXOffset);
                 }
-                if (xPage >= mWindowPages.length) {
-                    if (DEBUG) {
-                        Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
-                        Log.e(TAG, "error on page " + xPage + " out of " + xPages);
-                        Log.e(TAG,
-                                "error on xOffsetStep " + finalXOffsetStep
-                                        + " xOffset " + finalXOffset);
-                    }
-                    xPage = mWindowPages.length - 1;
-                }
-                current = mWindowPages[xPage];
-                updatePage(current, xPage, xPages, finalXOffsetStep);
-                Trace.endSection();
-            });
+                xPage = mWindowPages.length - 1;
+            }
+            current = mWindowPages[xPage];
+            updatePage(current, xPage, xPages, finalXOffsetStep);
+            Trace.endSection();
         }
 
         private void initWindowPages(EngineWindowPage[] windowPages, float step) {
@@ -2141,24 +2177,29 @@ public abstract class WallpaperService extends Service {
                 }
                 mCreated = false;
             }
+
+            if (mSurfaceControl != null) {
+                mSurfaceControl.release();
+                mSurfaceControl = null;
+            }
         }
 
-        private final DisplayListener mDisplayListener = new DisplayListener() {
-            @Override
-            public void onDisplayChanged(int displayId) {
-                if (mDisplay.getDisplayId() == displayId) {
-                    reportVisibility();
-                }
-            }
+        private final DisplayListener mDisplayListener =
+                new DisplayListener() {
+                    @Override
+                    public void onDisplayChanged(int displayId) {
+                        if (mDisplay.getDisplayId() == displayId) {
+                            boolean forceReport = mDisplay.getState() != Display.STATE_DOZE_SUSPEND;
+                            reportVisibility(forceReport);
+                        }
+                    }
 
-            @Override
-            public void onDisplayRemoved(int displayId) {
-            }
+                    @Override
+                    public void onDisplayRemoved(int displayId) {}
 
-            @Override
-            public void onDisplayAdded(int displayId) {
-            }
-        };
+                    @Override
+                    public void onDisplayAdded(int displayId) {}
+                };
 
         private Surface getOrCreateBLASTSurface(int width, int height, int format) {
             Surface ret = null;
@@ -2214,7 +2255,6 @@ public abstract class WallpaperService extends Service {
         final DisplayManager mDisplayManager;
         final Display mDisplay;
         final WallpaperManager mWallpaperManager;
-        private final AtomicBoolean mDetached = new AtomicBoolean();
 
         Engine mEngine;
         @SetWallpaperFlags int mWhich;
@@ -2329,18 +2369,15 @@ public abstract class WallpaperService extends Service {
             mEngine.removeLocalColorsAreas(regions);
         }
 
-        public void destroy() {
-            Message msg = mCaller.obtainMessage(DO_DETACH);
-            mCaller.sendMessage(msg);
-        }
-
-        public void detach() {
-            mDetached.set(true);
-        }
-
         public void applyDimming(float dimAmount) throws RemoteException {
             Message msg = mCaller.obtainMessageI(MSG_UPDATE_DIMMING,
                     Float.floatToIntBits(dimAmount));
+            mCaller.sendMessage(msg);
+        }
+
+        public void destroy() {
+            Message msg = mCaller.obtainMessage(DO_DETACH);
+            mCaller.getHandler().removeCallbacksAndMessages(null);
             mCaller.sendMessage(msg);
         }
 
@@ -2366,25 +2403,27 @@ public abstract class WallpaperService extends Service {
                 engine.detach();
                 Log.w(TAG, "Wallpaper host disappeared", e);
                 return;
+            } catch (IllegalStateException e) {
+                Log.w(TAG, "Connector instance already destroyed, "
+                                + "can't attach engine to non existing connector", e);
+                return;
             } finally {
                 Trace.endSection();
             }
-            mActiveEngines.add(engine);
             Trace.beginSection("WPMS.engine.attach");
             engine.attach(this);
             Trace.endSection();
         }
 
         private void doDetachEngine() {
-            mActiveEngines.remove(mEngine);
-            mEngine.detach();
             // Some wallpapers will not trigger the rendering threads of the remaining engines even
             // if they are visible, so we need to toggle the state to get their attention.
-            if (!mDetached.get()) {
-                for (Engine eng : mActiveEngines) {
-                    if (eng.mVisible) {
-                        eng.doVisibilityChanged(false);
-                        eng.doVisibilityChanged(true);
+            if (!mEngine.mDestroyed) {
+                mEngine.detach();
+                for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                    if (engineWrapper.mEngine != null && engineWrapper.mEngine.mVisible) {
+                        engineWrapper.mEngine.doVisibilityChanged(false);
+                        engineWrapper.mEngine.doVisibilityChanged(true);
                     }
                 }
             }
@@ -2392,12 +2431,6 @@ public abstract class WallpaperService extends Service {
 
         @Override
         public void executeMessage(Message message) {
-            if (mDetached.get()) {
-                if (mActiveEngines.contains(mEngine)) {
-                    doDetachEngine();
-                }
-                return;
-            }
             switch (message.what) {
                 case DO_ATTACH: {
                     Trace.beginSection("WPMS.DO_ATTACH");
@@ -2508,7 +2541,6 @@ public abstract class WallpaperService extends Service {
      */
     class IWallpaperServiceWrapper extends IWallpaperService.Stub {
         private final WallpaperService mTarget;
-        private IWallpaperEngineWrapper mEngineWrapper;
 
         public IWallpaperServiceWrapper(WallpaperService context) {
             mTarget = context;
@@ -2519,14 +2551,27 @@ public abstract class WallpaperService extends Service {
                 int windowType, boolean isPreview, int reqWidth, int reqHeight, Rect padding,
                 int displayId, @SetWallpaperFlags int which) {
             Trace.beginSection("WPMS.ServiceWrapper.attach");
-            mEngineWrapper = new IWallpaperEngineWrapper(mTarget, conn, windowToken,
-                    windowType, isPreview, reqWidth, reqHeight, padding, displayId, which);
+            IWallpaperEngineWrapper engineWrapper =
+                    new IWallpaperEngineWrapper(mTarget, conn, windowToken, windowType,
+                            isPreview, reqWidth, reqHeight, padding, displayId, which);
+            mActiveEngines.put(windowToken, engineWrapper);
+            if (DEBUG) {
+                Slog.v(TAG, "IWallpaperServiceWrapper Attaching window token " + windowToken);
+            }
             Trace.endSection();
         }
 
         @Override
-        public void detach() {
-            mEngineWrapper.detach();
+        public void detach(IBinder windowToken) {
+            IWallpaperEngineWrapper engineWrapper = mActiveEngines.remove(windowToken);
+            if (engineWrapper == null) {
+                Log.w(TAG, "Engine for window token " + windowToken + " already detached");
+                return;
+            }
+            if (DEBUG) {
+                Slog.v(TAG, "IWallpaperServiceWrapper Detaching window token " + windowToken);
+            }
+            engineWrapper.destroy();
         }
     }
 
@@ -2541,8 +2586,8 @@ public abstract class WallpaperService extends Service {
     public void onDestroy() {
         Trace.beginSection("WPMS.onDestroy");
         super.onDestroy();
-        for (int i=0; i<mActiveEngines.size(); i++) {
-            mActiveEngines.get(i).detach();
+        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+            engineWrapper.destroy();
         }
         mActiveEngines.clear();
         Trace.endSection();
@@ -2569,8 +2614,12 @@ public abstract class WallpaperService extends Service {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {
         out.print("State of wallpaper "); out.print(this); out.println(":");
-        for (int i=0; i<mActiveEngines.size(); i++) {
-            Engine engine = mActiveEngines.get(i);
+        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+            Engine engine = engineWrapper.mEngine;
+            if (engine == null) {
+                Slog.w(TAG, "Engine for wrapper " + engineWrapper + " not attached");
+                continue;
+            }
             out.print("  Engine "); out.print(engine); out.println(":");
             engine.dump("    ", fd, out, args);
         }

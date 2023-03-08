@@ -30,6 +30,7 @@ import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService
 import static com.android.companiondevicemanager.CompanionDeviceResources.MULTI_DEVICES_SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PERMISSION_TYPES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME_MULTI;
 import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICON;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
@@ -546,17 +547,16 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         if (deviceProfile == null) {
-            // Summary is not needed for null profile.
-            mSummary.setVisibility(View.GONE);
+            summary = getHtmlFromResources(this, SUMMARIES.get(null), deviceName);
             mConstraintList.setVisibility(View.GONE);
         } else {
+            summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
+                    getString(PROFILES_NAME.get(deviceProfile)), appLabel);
             mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
             setupPermissionList();
         }
 
         title = getHtmlFromResources(this, TITLES.get(deviceProfile), appLabel, deviceName);
-        summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
-                getString(PROFILES_NAME.get(deviceProfile)), appLabel);
         profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
 
         mTitle.setText(title);
@@ -572,6 +572,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final String deviceProfile = mRequest.getDeviceProfile();
 
         final String profileName;
+        final String profileNameMulti;
         final Spanned summary;
         final Drawable profileIcon;
         final int summaryResourceId;
@@ -581,18 +582,18 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         }
 
         profileName = getString(PROFILES_NAME.get(deviceProfile));
+        profileNameMulti = getString(PROFILES_NAME_MULTI.get(deviceProfile));
         profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
         summaryResourceId = MULTI_DEVICES_SUMMARIES.get(deviceProfile);
 
         if (deviceProfile == null) {
             summary = getHtmlFromResources(this, summaryResourceId);
-            mSummary.setVisibility(View.GONE);
         } else {
             summary = getHtmlFromResources(this, summaryResourceId, profileName, appLabel);
         }
 
         final Spanned title = getHtmlFromResources(
-                this, R.string.chooser_title, profileName, appLabel);
+                this, R.string.chooser_title, profileNameMulti, appLabel);
 
         mTitle.setText(title);
         mSummary.setText(summary);

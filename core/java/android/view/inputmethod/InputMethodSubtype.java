@@ -536,14 +536,7 @@ public final class InputMethodSubtype implements Parcelable {
         if (!TextUtils.equals(getMode(), SUBTYPE_MODE_KEYBOARD)) {
             return false;
         }
-        if (isAuxiliary()) {
-            return false;
-        }
-        final String langTag = getCanonicalizedLanguageTag();
-        if (langTag.isEmpty() || TextUtils.equals(langTag, UNDEFINED_LANGUAGE_TAG)) {
-            return false;
-        }
-        return true;
+        return !isAuxiliary();
     }
 
     /**

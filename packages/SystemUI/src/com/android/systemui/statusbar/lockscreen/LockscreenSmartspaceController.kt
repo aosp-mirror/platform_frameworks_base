@@ -31,15 +31,19 @@ import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS
 import android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS
+import android.provider.Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.ViewGroup
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.settingslib.Utils
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
@@ -48,6 +52,7 @@ import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceTargetListener
 import com.android.systemui.plugins.BcSmartspaceDataPlugin.SmartspaceView
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
@@ -59,6 +64,9 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.Execution
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.time.SystemClock
+import java.io.PrintWriter
+import java.time.Instant
 import java.util.Optional
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -74,6 +82,7 @@ constructor(
         private val smartspaceManager: SmartspaceManager,
         private val activityStarter: ActivityStarter,
         private val falsingManager: FalsingManager,
+        private val systemClock: SystemClock,
         private val secureSettings: SecureSettings,
         private val userTracker: UserTracker,
         private val contentResolver: ContentResolver,
@@ -81,6 +90,8 @@ constructor(
         private val statusBarStateController: StatusBarStateController,
         private val deviceProvisionedController: DeviceProvisionedController,
         private val bypassController: KeyguardBypassController,
+        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+        private val dumpManager: DumpManager,
         private val execution: Execution,
         @Main private val uiExecutor: Executor,
         @Background private val bgExecutor: Executor,
@@ -91,7 +102,7 @@ constructor(
         optionalWeatherPlugin: Optional<BcSmartspaceDataPlugin>,
         optionalPlugin: Optional<BcSmartspaceDataPlugin>,
         optionalConfigPlugin: Optional<BcSmartspaceConfigPlugin>,
-) {
+) : Dumpable {
     companion object {
         private const val TAG = "LockscreenSmartspaceController"
     }
@@ -144,6 +155,18 @@ constructor(
 
         // The weather data plugin takes unfiltered targets and performs the filtering internally.
         weatherPlugin?.onTargetsAvailable(targets)
+        val now = Instant.ofEpochMilli(systemClock.currentTimeMillis())
+        val weatherTarget = targets.find { t ->
+            t.featureType == SmartspaceTarget.FEATURE_WEATHER &&
+                    now.isAfter(Instant.ofEpochMilli(t.creationTimeMillis)) &&
+                    now.isBefore(Instant.ofEpochMilli(t.expiryTimeMillis))
+        }
+        if (weatherTarget != null) {
+            val weatherData = WeatherData.fromBundle(weatherTarget.baseAction.extras)
+            if (weatherData != null) {
+                keyguardUpdateMonitor.sendWeatherData(weatherData)
+            }
+        }
 
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
         plugin?.onTargetsAvailable(filteredTargets)
@@ -215,6 +238,7 @@ constructor(
 
     init {
         deviceProvisionedController.addCallback(deviceProvisionedListener)
+        dumpManager.registerDumpable(this)
     }
 
     fun isEnabled(): Boolean {
@@ -228,6 +252,17 @@ constructor(
 
         return featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED) &&
                 datePlugin != null && weatherPlugin != null
+    }
+
+    fun isWeatherEnabled(): Boolean {
+       execution.assertIsMainThread()
+       val defaultValue = context.getResources().getBoolean(
+               com.android.internal.R.bool.config_lockscreenWeatherEnabledByDefault)
+       val showWeather = secureSettings.getIntForUser(
+           LOCK_SCREEN_WEATHER_ENABLED,
+           if (defaultValue) 1 else 0,
+           userTracker.userId) == 1
+       return showWeather
     }
 
     private fun updateBypassEnabled() {
@@ -299,9 +334,9 @@ constructor(
         }
 
         val ssView = plugin.getView(parent)
+        configPlugin?.let { ssView.registerConfigProvider(it) }
         ssView.setUiSurface(BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD)
         ssView.registerDataProvider(plugin)
-        configPlugin?.let { ssView.registerConfigProvider(it) }
 
         ssView.setIntentStarter(object : BcSmartspaceDataPlugin.IntentStarter {
             override fun startIntent(view: View, intent: Intent, showOnLockscreen: Boolean) {
@@ -466,8 +501,10 @@ constructor(
 
     private fun updateTextColorFromRegionSampler() {
         smartspaceViews.forEach {
-            val textColor = regionSamplers.getValue(it).currentForegroundColor()
-            it.setPrimaryTextColor(textColor)
+            val textColor = regionSamplers.get(it)?.currentForegroundColor()
+            if (textColor != null) {
+                it.setPrimaryTextColor(textColor)
+            }
         }
     }
 
@@ -516,5 +553,12 @@ constructor(
             }
         }
         return null
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.println("Region Samplers: ${regionSamplers.size}")
+        regionSamplers.map { (_, sampler) ->
+            sampler.dump(pw)
+        }
     }
 }

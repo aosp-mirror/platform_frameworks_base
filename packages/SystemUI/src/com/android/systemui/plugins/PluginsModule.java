@@ -121,6 +121,6 @@ public abstract class PluginsModule {
     @Provides
     @Named(PLUGIN_PRIVILEGED)
     static List<String> providesPrivilegedPlugins(Context context) {
-        return Arrays.asList(context.getResources().getStringArray(R.array.config_pluginWhitelist));
+        return Arrays.asList(context.getResources().getStringArray(R.array.config_pluginAllowlist));
     }
 }

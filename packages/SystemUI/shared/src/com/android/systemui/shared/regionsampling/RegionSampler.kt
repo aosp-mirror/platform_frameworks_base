@@ -91,6 +91,22 @@ constructor(
         val sampledRegion = calculateSampledRegion(sampledView)
         val regions = ArrayList<RectF>()
         val sampledRegionWithOffset = convertBounds(sampledRegion)
+
+        if (
+            sampledRegionWithOffset.left < 0.0 ||
+                sampledRegionWithOffset.right > 1.0 ||
+                sampledRegionWithOffset.top < 0.0 ||
+                sampledRegionWithOffset.bottom > 1.0
+        ) {
+            android.util.Log.e(
+                "RegionSampler",
+                "view out of bounds: $sampledRegion | " +
+                    "screen width: ${displaySize.x}, screen height: ${displaySize.y}",
+                Exception()
+            )
+            return
+        }
+
         regions.add(sampledRegionWithOffset)
 
         wallpaperManager?.removeOnColorsChangedListener(this)
@@ -114,7 +130,27 @@ constructor(
 
     /** Dump region sampler */
     fun dump(pw: PrintWriter) {
-        regionSampler?.dump(pw)
+        pw.println("[RegionSampler]")
+        pw.println("regionSamplingEnabled: $regionSamplingEnabled")
+        pw.println("regionDarkness: $regionDarkness")
+        pw.println("lightForegroundColor: ${Integer.toHexString(lightForegroundColor)}")
+        pw.println("darkForegroundColor: ${Integer.toHexString(darkForegroundColor)}")
+        pw.println("passed-in sampledView: $sampledView")
+        pw.println("calculated samplingBounds: $samplingBounds")
+        pw.println(
+            "sampledView width: ${sampledView?.width}, sampledView height: ${sampledView?.height}"
+        )
+        pw.println("screen width: ${displaySize.x}, screen height: ${displaySize.y}")
+        pw.println(
+            "sampledRegionWithOffset: ${convertBounds(calculateSampledRegion(sampledView!!))}"
+        )
+        // TODO(b/265969235): mock initialSampling based on if component is on HS or LS wallpaper
+        // HS Smartspace - wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+        // LS Smartspace, clock - wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_LOCK)
+        pw.println(
+            "initialSampling for lockscreen: " +
+                "${wallpaperManager?.getWallpaperColors(WallpaperManager.FLAG_LOCK)}"
+        )
     }
 
     fun calculateSampledRegion(sampledView: View): RectF {

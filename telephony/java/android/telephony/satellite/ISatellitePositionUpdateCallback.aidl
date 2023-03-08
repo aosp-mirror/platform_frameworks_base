@@ -19,10 +19,25 @@ package android.telephony.satellite;
 import android.telephony.satellite.PointingInfo;
 
 /**
- * Callback for position updates from the satellite service.
+ * Interface for position update and datagram transfer state change callback.
  * @hide
  */
 oneway interface ISatellitePositionUpdateCallback {
-    void onSatellitePositionUpdate(in PointingInfo pointingInfo);
-    void onMessageTransferStateUpdate(in int state);
+    /**
+     * Called when satellite datagram transfer state changed.
+     *
+     * @param state The new datagram transfer state.
+     * @param sendPendingCount The number of datagrams that are currently being sent.
+     * @param receivePendingCount The number of datagrams that are currently being received.
+     * @param errorCode If datagram transfer failed, the reason for failure.
+     */
+    void onDatagramTransferStateChanged(in int state, in int sendPendingCount,
+            in int receivePendingCount, in int errorCode);
+
+    /**
+     * Called when the satellite position changed.
+     *
+     * @param pointingInfo The pointing info containing the satellite location.
+     */
+    void onSatellitePositionChanged(in PointingInfo pointingInfo);
 }

@@ -48,24 +48,9 @@ public final class SystemUiDeviceConfigFlags {
     public static final String NAS_MAX_SUGGESTIONS = "nas_max_suggestions";
 
     /**
-     * Whether the Notification Assistant can change ranking.
-     */
-    public static final String ENABLE_NAS_RANKING = "enable_nas_ranking";
-
-    /**
-     * Whether the Notification Assistant can prioritize notification.
-     */
-    public static final String ENABLE_NAS_PRIORITIZER = "enable_nas_prioritizer";
-
-    /**
      * Whether to enable feedback UI for Notification Assistant
      */
     public static final String ENABLE_NAS_FEEDBACK = "enable_nas_feedback";
-
-    /**
-     * Whether the Notification Assistant can label a notification not a conversation
-     */
-    public static final String ENABLE_NAS_NOT_CONVERSATION = "enable_nas_not_conversation";
 
     // Flags related to screenshot intelligence
 
@@ -562,6 +547,13 @@ public final class SystemUiDeviceConfigFlags {
             "task_manager_show_user_visible_jobs";
 
     /**
+     * (boolean) Whether the task manager should tell JobScheduler it's about to ask for an
+     * app stop.
+     */
+    public static final String TASK_MANAGER_INFORM_JOB_SCHEDULER_OF_PENDING_APP_STOP =
+            "task_manager_inform_job_scheduler_of_pending_app_stop";
+
+    /**
      * (boolean) Whether to show notification volume control slider separate from ring.
      */
     public static final String VOLUME_SEPARATE_NOTIFICATION = "volume_separate_notification";
@@ -571,13 +563,6 @@ public final class SystemUiDeviceConfigFlags {
      * layer as opposed to individual manifests in respective apps.
      */
     public static final String PERSISTS_WIDGET_PROVIDER_INFO = "persists_widget_provider_info";
-
-    /**
-     * (boolean) Whether the clipboard overlay shows an edit button (as opposed to requiring tapping
-     * the preview to send an edit intent).
-     */
-    public static final String CLIPBOARD_OVERLAY_SHOW_EDIT_BUTTON =
-            "clipboard_overlay_show_edit_button";
 
     /**
      * (boolean) Whether to show smart chips (based on TextClassifier) in the clipboard overlay.

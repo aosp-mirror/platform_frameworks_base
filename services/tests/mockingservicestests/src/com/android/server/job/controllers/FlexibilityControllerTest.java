@@ -619,7 +619,7 @@ public class FlexibilityControllerTest {
     @Test
     public void testExceptions_UserInitiated() {
         JobInfo.Builder jb = createJob(0);
-        jb.setUserInitiated(true);
+        jb.setUserInitiated(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY);
         JobStatus js = createJobStatus("testExceptions_UserInitiated", jb);
         assertFalse(js.hasFlexibilityConstraint());
     }

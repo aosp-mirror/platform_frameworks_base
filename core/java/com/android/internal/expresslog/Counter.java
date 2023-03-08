@@ -28,6 +28,7 @@ public final class Counter {
 
     /**
      * Increments Telemetry Express Counter metric by 1
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
      * @hide
      */
     public static void logIncrement(@NonNull String metricId) {
@@ -36,6 +37,8 @@ public final class Counter {
 
     /**
      * Increments Telemetry Express Counter metric by arbitrary value
+     * @param metricId to log, no-op if metricId is not defined in the TeX catalog
+     * @param amount to increment counter
      * @hide
      */
     public static void logIncrement(@NonNull String metricId, long amount) {

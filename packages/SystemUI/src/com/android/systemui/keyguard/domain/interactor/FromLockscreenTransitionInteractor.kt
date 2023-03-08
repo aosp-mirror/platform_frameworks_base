@@ -33,7 +33,6 @@ import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
@@ -53,9 +52,10 @@ constructor(
         listenForLockscreenToOccluded()
         listenForLockscreenToCamera()
         listenForLockscreenToAodOrDozing()
-        listenForLockscreenToBouncer()
+        listenForLockscreenToPrimaryBouncer()
         listenForLockscreenToDreaming()
-        listenForLockscreenToBouncerDragging()
+        listenForLockscreenToPrimaryBouncerDragging()
+        listenForLockscreenToAlternateBouncer()
     }
 
     private fun listenForLockscreenToDreaming() {
@@ -78,9 +78,9 @@ constructor(
         }
     }
 
-    private fun listenForLockscreenToBouncer() {
+    private fun listenForLockscreenToPrimaryBouncer() {
         scope.launch {
-            keyguardInteractor.isBouncerShowing
+            keyguardInteractor.primaryBouncerShowing
                 .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isBouncerShowing, lastStartedTransitionStep) = pair
@@ -91,7 +91,30 @@ constructor(
                             TransitionInfo(
                                 ownerName = name,
                                 from = KeyguardState.LOCKSCREEN,
-                                to = KeyguardState.BOUNCER,
+                                to = KeyguardState.PRIMARY_BOUNCER,
+                                animator = getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForLockscreenToAlternateBouncer() {
+        scope.launch {
+            keyguardInteractor.alternateBouncerShowing
+                .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
+                .collect { pair ->
+                    val (isAlternateBouncerShowing, lastStartedTransitionStep) = pair
+                    if (
+                        isAlternateBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.LOCKSCREEN
+                    ) {
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.LOCKSCREEN,
+                                to = KeyguardState.ALTERNATE_BOUNCER,
                                 animator = getAnimator(),
                             )
                         )
@@ -101,61 +124,65 @@ constructor(
     }
 
     /* Starts transitions when manually dragging up the bouncer from the lockscreen. */
-    private fun listenForLockscreenToBouncerDragging() {
+    private fun listenForLockscreenToPrimaryBouncerDragging() {
         var transitionId: UUID? = null
         scope.launch {
             shadeRepository.shadeModel
                 .sample(
                     combine(
-                        keyguardTransitionInteractor.finishedKeyguardState,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.statusBarState,
-                        ::Pair
+                        keyguardInteractor.isKeyguardUnlocked,
+                        ::toTriple
                     ),
-                    ::toTriple
+                    ::toQuad
                 )
-                .collect { (shadeModel, keyguardState, statusBarState) ->
+                .collect { (shadeModel, keyguardState, statusBarState, isKeyguardUnlocked) ->
                     val id = transitionId
                     if (id != null) {
-                        // An existing `id` means a transition is started, and calls to
-                        // `updateTransition` will control it until FINISHED or CANCELED
-                        var nextState =
-                            if (shadeModel.expansionAmount == 0f) {
-                                TransitionState.FINISHED
-                            } else if (shadeModel.expansionAmount == 1f) {
-                                TransitionState.CANCELED
-                            } else {
-                                TransitionState.RUNNING
-                            }
-                        keyguardTransitionRepository.updateTransition(
-                            id,
-                            1f - shadeModel.expansionAmount,
-                            nextState,
-                        )
-
-                        if (
-                            nextState == TransitionState.CANCELED ||
-                                nextState == TransitionState.FINISHED
-                        ) {
-                            transitionId = null
-                        }
-
-                        // If canceled, just put the state back
-                        if (nextState == TransitionState.CANCELED) {
-                            keyguardTransitionRepository.startTransition(
-                                TransitionInfo(
-                                    ownerName = name,
-                                    from = KeyguardState.BOUNCER,
-                                    to = KeyguardState.LOCKSCREEN,
-                                    animator = getAnimator(0.milliseconds)
-                                )
+                        if (keyguardState.to == KeyguardState.PRIMARY_BOUNCER) {
+                            // An existing `id` means a transition is started, and calls to
+                            // `updateTransition` will control it until FINISHED or CANCELED
+                            var nextState =
+                                if (shadeModel.expansionAmount == 0f) {
+                                    TransitionState.FINISHED
+                                } else if (shadeModel.expansionAmount == 1f) {
+                                    TransitionState.CANCELED
+                                } else {
+                                    TransitionState.RUNNING
+                                }
+                            keyguardTransitionRepository.updateTransition(
+                                id,
+                                1f - shadeModel.expansionAmount,
+                                nextState,
                             )
+
+                            if (
+                                nextState == TransitionState.CANCELED ||
+                                    nextState == TransitionState.FINISHED
+                            ) {
+                                transitionId = null
+                            }
+
+                            // If canceled, just put the state back
+                            if (nextState == TransitionState.CANCELED) {
+                                keyguardTransitionRepository.startTransition(
+                                    TransitionInfo(
+                                        ownerName = name,
+                                        from = KeyguardState.PRIMARY_BOUNCER,
+                                        to = KeyguardState.LOCKSCREEN,
+                                        animator = getAnimator(0.milliseconds)
+                                    )
+                                )
+                            }
                         }
                     } else {
                         // TODO (b/251849525): Remove statusbarstate check when that state is
                         // integrated into KeyguardTransitionRepository
                         if (
-                            keyguardState == KeyguardState.LOCKSCREEN &&
+                            keyguardState.to == KeyguardState.LOCKSCREEN &&
                                 shadeModel.isUserDragging &&
+                                !isKeyguardUnlocked &&
                                 statusBarState == KEYGUARD
                         ) {
                             transitionId =
@@ -163,7 +190,7 @@ constructor(
                                     TransitionInfo(
                                         ownerName = name,
                                         from = KeyguardState.LOCKSCREEN,
-                                        to = KeyguardState.BOUNCER,
+                                        to = KeyguardState.PRIMARY_BOUNCER,
                                         animator = null,
                                     )
                                 )

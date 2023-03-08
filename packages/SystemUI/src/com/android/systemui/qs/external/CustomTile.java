@@ -328,7 +328,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             if (listening) {
                 updateDefaultTileAndIcon();
                 refreshState();
-                if (!mServiceManager.isActiveTile()) {
+                if (!mServiceManager.isActiveTile() || !isTileReady()) {
                     mServiceManager.setBindRequested(true);
                     mService.onStartListening();
                 }

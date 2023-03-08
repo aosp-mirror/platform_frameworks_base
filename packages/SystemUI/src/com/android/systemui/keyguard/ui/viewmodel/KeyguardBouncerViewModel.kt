@@ -24,7 +24,9 @@ import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 /** Models UI state for the lock screen bouncer; handles user input. */
 class KeyguardBouncerViewModel
@@ -66,8 +68,16 @@ constructor(
     /** Observe whether keyguard is authenticated already. */
     val keyguardAuthenticated: Flow<Boolean> = interactor.keyguardAuthenticated
 
-    /** Observe whether screen is turned off. */
-    val screenTurnedOff: Flow<Unit> = interactor.screenTurnedOff
+    /** Observe whether the side fps is showing. */
+    val sideFpsShowing: Flow<Boolean> = interactor.sideFpsShowing
+
+    /** Observe whether we should update fps is showing. */
+    val shouldUpdateSideFps: Flow<Unit> =
+        merge(
+            interactor.startingToHide,
+            interactor.isVisible.map {},
+            interactor.startingDisappearAnimation.filterNotNull().map {}
+        )
 
     /** Observe whether we want to update resources. */
     fun notifyUpdateResources() {
@@ -82,6 +92,10 @@ constructor(
     /** Notifies that the message was shown. */
     fun onMessageShown() {
         interactor.onMessageShown()
+    }
+
+    fun updateSideFpsVisibility() {
+        interactor.updateSideFpsVisibility()
     }
 
     /** Observe whether back button is enabled. */

@@ -65,6 +65,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -2188,6 +2189,11 @@ public class ComputerEngine implements Computer {
         }
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.getUid();
+    }
+
+    private boolean isCallerFromManagedUserOrProfile(@UserIdInt int userId) {
+        final var dpmi = mInjector.getLocalService(DevicePolicyManagerInternal.class);
+        return dpmi != null && dpmi.isUserOrganizationManaged(userId);
     }
 
     public final boolean isComponentVisibleToInstantApp(@Nullable ComponentName component) {
@@ -5002,8 +5008,15 @@ public class ComputerEngine implements Computer {
         updateOwnerPackageName = installSource.mUpdateOwnerPackageName;
         if (updateOwnerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(updateOwnerPackageName);
+            final boolean isCallerSystemOrUpdateOwner = callingUid == Process.SYSTEM_UID
+                            || isCallerSameApp(updateOwnerPackageName, callingUid);
+            // Except for package visibility filtering, we also hide update owner if the installer
+            // is in the managed user or profile. As we don't enforce the update ownership for the
+            // managed user and profile, knowing there's an update owner is meaningless in that
+            // user unless the installer is the owner.
             if (ps == null
-                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
+                    || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)
+                    || (!isCallerSystemOrUpdateOwner && isCallerFromManagedUserOrProfile(userId))) {
                 updateOwnerPackageName = null;
             }
         }

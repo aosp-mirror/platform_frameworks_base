@@ -22,6 +22,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 
@@ -33,6 +35,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.DreamOverlayStateController;
+import com.android.systemui.util.settings.FakeSettings;
+import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +100,10 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
 
     private ComplicationHostViewController mController;
 
+    private SecureSettings mSecureSettings;
+
+    private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -108,12 +116,17 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
         when(mViewHolder.getLayoutParams()).thenReturn(mComplicationLayoutParams);
         when(mComplicationView.getParent()).thenReturn(mComplicationHostView);
 
+        mSecureSettings = new FakeSettings();
+        mSecureSettings.putFloatForUser(
+                        Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f, CURRENT_USER_ID);
+
         mController = new ComplicationHostViewController(
                 mComplicationHostView,
                 mLayoutEngine,
                 mDreamOverlayStateController,
                 mLifecycleOwner,
-                mViewModel);
+                mViewModel,
+                mSecureSettings);
 
         mController.init();
     }
@@ -180,6 +193,23 @@ public class ComplicationHostViewControllerTest extends SysuiTestCase {
         stateCallback.onStateChanged();
 
         // Add a complication after entry animations are finished.
+        final HashSet<ComplicationViewModel> complications = new HashSet<>(
+                Collections.singletonList(mComplicationViewModel));
+        observer.onChanged(complications);
+
+        // The complication view should not be set to invisible.
+        verify(mComplicationView, never()).setVisibility(View.INVISIBLE);
+    }
+
+    @Test
+    public void testAnimationsDisabled_ComplicationsNeverSetToInvisible() {
+        //Disable animations
+        mController.mIsAnimationEnabled = false;
+
+        final Observer<Collection<ComplicationViewModel>> observer =
+                captureComplicationViewModelsObserver();
+
+        // Add a complication before entry animations are finished.
         final HashSet<ComplicationViewModel> complications = new HashSet<>(
                 Collections.singletonList(mComplicationViewModel));
         observer.onChanged(complications);

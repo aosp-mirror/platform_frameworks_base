@@ -286,7 +286,7 @@ public class AppStandbyController
 
     /**
      * Map of uids to their current app-op mode for
-     * {@link AppOpsManager#OPSTR_SYSTEM_EXEMPT_FROM_APP_STANDBY}.
+     * {@link AppOpsManager#OPSTR_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS}.
      */
     @GuardedBy("mSystemExemptionAppOpMode")
     private final SparseIntArray mSystemExemptionAppOpMode = new SparseIntArray();
@@ -670,7 +670,7 @@ public class AppStandbyController
             IAppOpsService iAppOpsService = mInjector.getAppOpsService();
             try {
                 iAppOpsService.startWatchingMode(
-                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_APP_STANDBY,
+                        AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS,
                         /*packageName=*/ null,
                         new IAppOpsCallback.Stub() {
                             @Override
@@ -1482,7 +1482,8 @@ public class AppStandbyController
                     }
                 } else {
                     int mode = mAppOpsManager.checkOpNoThrow(
-                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_APP_STANDBY, uid, packageName);
+                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_POWER_RESTRICTIONS, uid,
+                            packageName);
                     mSystemExemptionAppOpMode.put(uid, mode);
                     if (mode == AppOpsManager.MODE_ALLOWED) {
                         return STANDBY_BUCKET_EXEMPTED;

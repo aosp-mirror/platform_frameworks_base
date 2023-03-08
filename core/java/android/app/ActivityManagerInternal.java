@@ -464,6 +464,11 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isActivityStartsLoggingEnabled();
     /** Returns true if the background activity starts is enabled. */
     public abstract boolean isBackgroundActivityStartsEnabled();
+    /**
+     * Returns The current {@link BackgroundStartPrivileges} of the UID.
+     */
+    @NonNull
+    public abstract BackgroundStartPrivileges getBackgroundStartPrivileges(int uid);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
 
     /** @see com.android.server.am.ActivityManagerService#monitor */
@@ -502,6 +507,12 @@ public abstract class ActivityManagerInternal {
      * flags.
      */
     public abstract void broadcastCloseSystemDialogs(String reason);
+
+    /**
+     * Trigger an ANR for the specified process.
+     */
+    public abstract void appNotResponding(@NonNull String processName, int uid,
+            @NonNull TimeoutRecord timeoutRecord);
 
     /**
      * Kills all background processes, except those matching any of the specified properties.
@@ -957,10 +968,27 @@ public abstract class ActivityManagerInternal {
     public abstract void stopForegroundServiceDelegate(@NonNull ServiceConnection connection);
 
     /**
-     * Called by PowerManager. Return whether a given procstate is allowed to hold
-     * wake locks in deep doze. Because it's called with the power manager lock held, we can't
-     * hold AM locks in it.
+     * Same as {@link android.app.IActivityManager#startProfile(int userId)}, but it would succeed
+     * even if the profile is disabled - it should only be called by
+     * {@link com.android.server.devicepolicy.DevicePolicyManagerService} when starting a profile
+     * while it's being created.
+     */
+    public abstract boolean startProfileEvenWhenDisabled(@UserIdInt int userId);
+
+    /**
+     * Internal method for logging foreground service API journey start.
+     * Used with FGS metrics logging
+     *
      * @hide
      */
-    public abstract boolean canHoldWakeLocksInDeepDoze(int uid, int procstate);
+    public abstract void logFgsApiBegin(int apiType, int uid, int pid);
+
+    /**
+     * Internal method for logging foreground service API journey end.
+     * Used with FGS metrics logging
+     *
+     * @hide
+     */
+    public abstract void logFgsApiEnd(int apiType, int uid, int pid);
+
 }

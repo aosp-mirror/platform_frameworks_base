@@ -33,7 +33,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 interface MobileIconInteractor {
@@ -90,7 +93,8 @@ interface MobileIconInteractor {
      * 1. The default network name, if one is configured
      * 2. A derived name based off of the intent [ACTION_SERVICE_PROVIDERS_UPDATED]
      * 3. Or, in the case where the repository sends us the default network name, we check for an
-     * override in [connectionInfo.operatorAlphaShort], a value that is derived from [ServiceState]
+     *    override in [connectionInfo.operatorAlphaShort], a value that is derived from
+     *    [ServiceState]
      */
     val networkName: StateFlow<NetworkNameModel>
 
@@ -109,6 +113,9 @@ interface MobileIconInteractor {
 
     /** Based on [CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL], either 4 or 5 */
     val numberOfLevels: StateFlow<Int>
+
+    /** See [MobileIconsInteractor.isForceHidden]. */
+    val isForceHidden: Flow<Boolean>
 }
 
 /** Interactor for a single mobile connection. This connection _should_ have one subscription ID */
@@ -124,13 +131,12 @@ class MobileIconInteractorImpl(
     defaultMobileIconGroup: StateFlow<MobileIconGroup>,
     defaultDataSubId: StateFlow<Int>,
     override val isDefaultConnectionFailed: StateFlow<Boolean>,
+    override val isForceHidden: Flow<Boolean>,
     connectionRepository: MobileConnectionRepository,
 ) : MobileIconInteractor {
-    private val connectionInfo = connectionRepository.connectionInfo
-
     override val tableLogBuffer: TableLogBuffer = connectionRepository.tableLogBuffer
 
-    override val activity = connectionInfo.mapLatest { it.dataActivityDirection }
+    override val activity = connectionRepository.dataActivityDirection
 
     override val isConnected: Flow<Boolean> = defaultMobileConnectivity.mapLatest { it.isConnected }
 
@@ -148,11 +154,11 @@ class MobileIconInteractorImpl(
     override val isDefaultDataEnabled = defaultSubscriptionHasDataEnabled
 
     override val networkName =
-        combine(connectionInfo, connectionRepository.networkName) { connection, networkName ->
-                if (
-                    networkName is NetworkNameModel.Default && connection.operatorAlphaShort != null
-                ) {
-                    NetworkNameModel.Derived(connection.operatorAlphaShort)
+        combine(connectionRepository.operatorAlphaShort, connectionRepository.networkName) {
+                operatorAlphaShort,
+                networkName ->
+                if (networkName is NetworkNameModel.Default && operatorAlphaShort != null) {
+                    NetworkNameModel.IntentDerived(operatorAlphaShort)
                 } else {
                     networkName
                 }
@@ -166,34 +172,46 @@ class MobileIconInteractorImpl(
     /** Observable for the current RAT indicator icon ([MobileIconGroup]) */
     override val networkTypeIconGroup: StateFlow<MobileIconGroup> =
         combine(
-                connectionInfo,
+                connectionRepository.resolvedNetworkType,
                 defaultMobileIconMapping,
                 defaultMobileIconGroup,
                 isDefault,
-            ) { info, mapping, defaultGroup, isDefault ->
+            ) { resolvedNetworkType, mapping, defaultGroup, isDefault ->
                 if (!isDefault) {
                     return@combine NOT_DEFAULT_DATA
                 }
 
-                when (info.resolvedNetworkType) {
+                when (resolvedNetworkType) {
                     is ResolvedNetworkType.CarrierMergedNetworkType ->
-                        info.resolvedNetworkType.iconGroupOverride
-                    else -> mapping[info.resolvedNetworkType.lookupKey] ?: defaultGroup
+                        resolvedNetworkType.iconGroupOverride
+                    else -> mapping[resolvedNetworkType.lookupKey] ?: defaultGroup
                 }
+            }
+            .distinctUntilChanged()
+            .onEach {
+                // Doesn't use [logDiffsForTable] because [MobileIconGroup] can't implement the
+                // [Diffable] interface.
+                tableLogBuffer.logChange(
+                    prefix = "",
+                    columnName = "networkTypeIcon",
+                    value = it.name
+                )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 
-    override val isEmergencyOnly: StateFlow<Boolean> =
-        connectionInfo
-            .mapLatest { it.isEmergencyOnly }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+    override val isEmergencyOnly = connectionRepository.isEmergencyOnly
 
     override val isRoaming: StateFlow<Boolean> =
-        combine(connectionInfo, connectionRepository.cdmaRoaming) { connection, cdmaRoaming ->
-                if (connection.carrierNetworkChangeActive) {
+        combine(
+                connectionRepository.carrierNetworkChangeActive,
+                connectionRepository.isGsm,
+                connectionRepository.isRoaming,
+                connectionRepository.cdmaRoaming,
+            ) { carrierNetworkChangeActive, isGsm, isRoaming, cdmaRoaming ->
+                if (carrierNetworkChangeActive) {
                     false
-                } else if (connection.isGsm) {
-                    connection.isRoaming
+                } else if (isGsm) {
+                    isRoaming
                 } else {
                     cdmaRoaming
                 }
@@ -201,12 +219,17 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val level: StateFlow<Int> =
-        combine(connectionInfo, alwaysUseCdmaLevel) { connection, alwaysUseCdmaLevel ->
+        combine(
+                connectionRepository.isGsm,
+                connectionRepository.primaryLevel,
+                connectionRepository.cdmaLevel,
+                alwaysUseCdmaLevel,
+            ) { isGsm, primaryLevel, cdmaLevel, alwaysUseCdmaLevel ->
                 when {
                     // GSM connections should never use the CDMA level
-                    connection.isGsm -> connection.primaryLevel
-                    alwaysUseCdmaLevel -> connection.cdmaLevel
-                    else -> connection.primaryLevel
+                    isGsm -> primaryLevel
+                    alwaysUseCdmaLevel -> cdmaLevel
+                    else -> primaryLevel
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
@@ -219,12 +242,9 @@ class MobileIconInteractorImpl(
         )
 
     override val isDataConnected: StateFlow<Boolean> =
-        connectionInfo
-            .mapLatest { connection -> connection.dataConnectionState == Connected }
+        connectionRepository.dataConnectionState
+            .map { it == Connected }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    override val isInService =
-        connectionRepository.connectionInfo
-            .mapLatest { it.isInService }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
+    override val isInService = connectionRepository.isInService
 }

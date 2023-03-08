@@ -18,6 +18,7 @@ package com.android.server.location.contexthub;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.TransactionResult;
@@ -456,8 +457,8 @@ public abstract class IContextHubWrapper {
                 });
             }
 
-            public void handleNanSessionRequest(boolean enable) {
-                // TODO(229888878): Implement
+            public void handleNanSessionRequest(NanSessionRequest request) {
+                // TODO(271471342): Implement
             }
 
             @Override

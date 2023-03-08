@@ -66,7 +66,9 @@ import javax.inject.Inject;
 /** Quick settings tile: Cast **/
 public class CastTile extends QSTileImpl<BooleanState> {
 
-    private static final String INTERACTION_JANK_TAG = "cast";
+    public static final String TILE_SPEC = "cast";
+
+    private static final String INTERACTION_JANK_TAG = TILE_SPEC;
 
     private static final Intent CAST_SETTINGS =
             new Intent(Settings.ACTION_CAST_SETTINGS);

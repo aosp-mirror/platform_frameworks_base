@@ -49,6 +49,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.pm.verify.domain.DomainVerificationManager;
@@ -149,6 +150,29 @@ public abstract class PackageManager {
      */
     public static final String PROPERTY_MEDIA_CAPABILITIES =
             "android.media.PROPERTY_MEDIA_CAPABILITIES";
+
+    /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag
+     * specifying the XML resource ID containing the declaration of the self-certified network
+     * capabilities used by the application.
+     *
+     * <p> Starting from Android 14, usage of some network capabilities in
+     * {@link android.net.ConnectivityManager#requestNetwork} require the application to
+     * declare its usage of that particular capability in this resource. Only some capabilities
+     * require a declaration. Please look up the specific capability you want to use in
+     * {@link android.net.NetworkCapabilities} to see if it needs declaration in this property.
+     *
+     * For example:
+     * &lt;application&gt;
+     *   &lt;property android:name="android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES"
+     *     android:resource="@xml/self_certified_network_capabilities"&gt;
+     * &lt;application&gt;
+     *
+     * <p> The detail format of self_certified_network_capabilities.xml is described in
+     * {@link android.net.NetworkRequest}
+     */
+    public static final String PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES =
+            "android.net.PROPERTY_SELF_CERTIFIED_NETWORK_CAPABILITIES";
 
     /**
      * Application level property that an app can specify to opt-out from having private data
@@ -717,7 +741,7 @@ public abstract class PackageManager {
             GET_DISABLED_UNTIL_USED_COMPONENTS,
             GET_UNINSTALLED_PACKAGES,
             MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS,
-            GET_ATTRIBUTIONS,
+            GET_ATTRIBUTIONS_LONG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PackageInfoFlagsBits {}
@@ -1127,8 +1151,9 @@ public abstract class PackageManager {
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
-     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
      */
+    @Deprecated
     public static final int GET_ATTRIBUTIONS = 0x80000000;
 
     /** @hide */
@@ -1151,6 +1176,11 @@ public abstract class PackageManager {
      * for activation at next reboot.
      */
     public static final int MATCH_APEX = 0x40000000;
+
+    /**
+     * {@link PackageInfo} flag: return all attributions declared in the package manifest
+     */
+    public static final long GET_ATTRIBUTIONS_LONG = 0x80000000L;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when
@@ -1356,7 +1386,7 @@ public abstract class PackageManager {
             INSTALL_FROM_ADB,
             INSTALL_ALL_USERS,
             INSTALL_REQUEST_DOWNGRADE,
-            INSTALL_GRANT_RUNTIME_PERMISSIONS,
+            INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS,
             INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
             INSTALL_FORCE_VOLUME_UUID,
             INSTALL_FORCE_PERMISSION_PROMPT,
@@ -1433,14 +1463,16 @@ public abstract class PackageManager {
     public static final int INSTALL_REQUEST_DOWNGRADE = 0x00000080;
 
     /**
-     * Flag parameter for {@link #installPackage} to indicate that all runtime
-     * permissions should be granted to the package. If {@link #INSTALL_ALL_USERS}
-     * is set the runtime permissions will be granted to all users, otherwise
-     * only to the owner.
+     * Flag parameter for package install to indicate that all requested permissions should be
+     * granted to the package. If {@link #INSTALL_ALL_USERS} is set the runtime permissions will
+     * be granted to all users, otherwise only to the owner.
+     * <p/>
+     * If this flag is set, {@link SessionParams#setPermissionState(String, int)} should not be
+     * called.
      *
      * @hide
      */
-    public static final int INSTALL_GRANT_RUNTIME_PERMISSIONS = 0x00000100;
+    public static final int INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS = 0x00000100;
 
     /** {@hide} */
     public static final int INSTALL_FORCE_VOLUME_UUID = 0x00000200;
@@ -1569,11 +1601,18 @@ public abstract class PackageManager {
     public static final int INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK = 0x01000000;
 
     /**
-     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that the
+     * Flag parameter for {@link SessionParams} to indicate that the
      * update ownership enforcement is requested.
      * @hide
      */
     public static final int INSTALL_REQUEST_UPDATE_OWNERSHIP = 1 << 25;
+
+    /**
+     * Flag parameter for {@link PackageInstaller.SessionParams} to indicate that this
+     * session is from a managed user or profile.
+     * @hide
+     */
+    public static final int INSTALL_FROM_MANAGED_USER_OR_PROFILE = 1 << 26;
 
     /** @hide */
     @IntDef(flag = true, value = {
@@ -5118,6 +5157,8 @@ public abstract class PackageManager {
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
+     * Use {@link #getPackageInfo(String, PackageInfoFlags)} when long flags are needed.
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @param flags Additional option flags to modify the data returned.
@@ -5130,9 +5171,7 @@ public abstract class PackageManager {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if no such package is available to the
      *             caller.
-     * @deprecated Use {@link #getPackageInfo(String, PackageInfoFlags)} instead.
      */
-    @Deprecated
     public abstract PackageInfo getPackageInfo(@NonNull String packageName, int flags)
             throws NameNotFoundException;
 
@@ -5156,6 +5195,8 @@ public abstract class PackageManager {
      * {@link #VERSION_CODE_HIGHEST} in the {@link VersionedPackage}
      * constructor.
      *
+     * Use {@link #getPackageInfo(VersionedPackage, PackageInfoFlags)} when long flags are needed.
+     *
      * @param versionedPackage The versioned package for which to query.
      * @param flags Additional option flags to modify the data returned.
      * @return A PackageInfo object containing information about the package. If
@@ -5167,9 +5208,7 @@ public abstract class PackageManager {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if no such package is available to the
      *             caller.
-     * @deprecated Use {@link #getPackageInfo(VersionedPackage, PackageInfoFlags)} instead.
      */
-    @Deprecated
     public abstract PackageInfo getPackageInfo(@NonNull VersionedPackage versionedPackage,
             int flags) throws NameNotFoundException;
 
@@ -5187,6 +5226,8 @@ public abstract class PackageManager {
      * Retrieve overall information about an application package that is
      * installed on the system.
      *
+     * Use {@link #getPackageInfoAsUser(String, PackageInfoFlags, int)} when long flags are needed.
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @param flags Additional option flags to modify the data returned.
@@ -5200,10 +5241,8 @@ public abstract class PackageManager {
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if no such package is available to the
      *             caller.
-     * @deprecated Use {@link #getPackageInfoAsUser(String, PackageInfoFlags, int)} instead.
      * @hide
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @UnsupportedAppUsage
@@ -5337,15 +5376,16 @@ public abstract class PackageManager {
      * Note that the same package may have different GIDs under different
      * {@link UserHandle} on the same device.
      *
+     * Use {@link #getPackageGids(String, PackageInfoFlags)} when long flags are needed.
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @return Returns an int array of the assigned gids, or null if there are
      *         none.
      * @throws NameNotFoundException if no such package is available to the
      *             caller.
-     * @deprecated Use {@link #getPackageGids(String, PackageInfoFlags)} instead.
      */
-    @Deprecated
+
     public abstract int[] getPackageGids(@NonNull String packageName, int flags)
             throws NameNotFoundException;
 
@@ -5365,14 +5405,14 @@ public abstract class PackageManager {
      * Note that the same package will have different UIDs under different
      * {@link UserHandle} on the same device.
      *
+     * Use {@link #getPackageUid(String, PackageInfoFlags)} when long flags are needed.
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
      *            desired package.
      * @return Returns an integer UID who owns the given package name.
      * @throws NameNotFoundException if no such package is available to the
      *             caller.
-     * @deprecated Use {@link #getPackageUid(String, PackageInfoFlags)} instead.
      */
-    @Deprecated
     public abstract int getPackageUid(@NonNull String packageName, int flags)
             throws NameNotFoundException;
 
@@ -5406,10 +5446,9 @@ public abstract class PackageManager {
 
     /**
      * See {@link #getPackageUidAsUser(String, PackageInfoFlags, int)}.
-     * @deprecated Use {@link #getPackageUidAsUser(String, PackageInfoFlags, int)} instead.
+     * Use {@link #getPackageUidAsUser(String, PackageInfoFlags, int)} when long flags are needed.
      * @hide
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract int getPackageUidAsUser(@NonNull String packageName,
@@ -5550,6 +5589,8 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular
      * package/application.
      *
+     * Use {@link #getApplicationInfo(String, ApplicationInfoFlags)} when long flags are needed.
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of an
      *            application.
      * @param flags Additional option flags to modify the data returned.
@@ -5562,10 +5603,8 @@ public abstract class PackageManager {
      *         which had been deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     * @deprecated Use {@link #getApplicationInfo(String, ApplicationInfoFlags)} instead.
      */
     @NonNull
-    @Deprecated
     public abstract ApplicationInfo getApplicationInfo(@NonNull String packageName,
             int flags) throws NameNotFoundException;
 
@@ -5580,13 +5619,13 @@ public abstract class PackageManager {
     }
 
     /**
-     * @deprecated Use {@link #getApplicationInfoAsUser(String, ApplicationInfoFlags, int)} instead.
+     * Use {@link #getApplicationInfoAsUser(String, ApplicationInfoFlags, int)} when long flags are
+     * needed.
      * {@hide}
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
-    @Deprecated
     public abstract ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
             int flags, @UserIdInt int userId) throws NameNotFoundException;
 
@@ -5603,6 +5642,9 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular
      * package/application, for a specific user.
      *
+     * Use {@link #getApplicationInfoAsUser(String, ApplicationInfoFlags, UserHandle)} when long
+     * flags are needed.
+     *
      * @param packageName The full name (i.e. com.google.apps.contacts) of an
      *            application.
      * @param flags Additional option flags to modify the data returned.
@@ -5615,14 +5657,11 @@ public abstract class PackageManager {
      *         which had been deleted with {@code DELETE_KEEP_DATA} flag set).
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     * @deprecated Use {@link #getApplicationInfoAsUser(String, ApplicationInfoFlags, UserHandle)}
-     * instead.
      * @hide
      */
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
-    @Deprecated
     public ApplicationInfo getApplicationInfoAsUser(@NonNull String packageName,
             int flags, @NonNull UserHandle user)
             throws NameNotFoundException {
@@ -5655,6 +5694,8 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular activity
      * class.
      *
+     * Use {@link #getActivityInfo(ComponentName, ComponentInfoFlags)} when long flags are needed.
+     *
      * @param component The full component name (i.e.
      *            com.google.apps.contacts/com.google.apps.contacts.
      *            ContactsList) of an Activity class.
@@ -5663,9 +5704,7 @@ public abstract class PackageManager {
      *         activity.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     * @deprecated Use {@link #getActivityInfo(ComponentName, ComponentInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract ActivityInfo getActivityInfo(@NonNull ComponentName component,
             int flags) throws NameNotFoundException;
@@ -5684,6 +5723,8 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular receiver
      * class.
      *
+     * Use {@link #getReceiverInfo(ComponentName, ComponentInfoFlags)} when long flags are needed.
+     *
      * @param component The full component name (i.e.
      *            com.google.apps.calendar/com.google.apps.calendar.
      *            CalendarAlarm) of a Receiver class.
@@ -5692,9 +5733,7 @@ public abstract class PackageManager {
      *         receiver.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     * @deprecated Use {@link #getReceiverInfo(ComponentName, ComponentInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract ActivityInfo getReceiverInfo(@NonNull ComponentName component,
             int flags) throws NameNotFoundException;
@@ -5712,6 +5751,8 @@ public abstract class PackageManager {
     /**
      * Retrieve all of the information we know about a particular service class.
      *
+     * Use {@link #getServiceInfo(ComponentName, ComponentInfoFlags)} when long flags are needed.
+     *
      * @param component The full component name (i.e.
      *            com.google.apps.media/com.google.apps.media.
      *            BackgroundPlayback) of a Service class.
@@ -5719,9 +5760,7 @@ public abstract class PackageManager {
      * @return A {@link ServiceInfo} object containing information about the
      *         service.
      * @throws NameNotFoundException if the component cannot be found on the system.
-     * @deprecated Use {@link #getServiceInfo(ComponentName, ComponentInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract ServiceInfo getServiceInfo(@NonNull ComponentName component,
             int flags) throws NameNotFoundException;
@@ -5740,6 +5779,8 @@ public abstract class PackageManager {
      * Retrieve all of the information we know about a particular content
      * provider class.
      *
+     * Use {@link #getProviderInfo(ComponentName, ComponentInfoFlags)} when long flags are needed.
+     *
      * @param component The full component name (i.e.
      *            com.google.providers.media/com.google.providers.media.
      *            MediaProvider) of a ContentProvider class.
@@ -5748,9 +5789,7 @@ public abstract class PackageManager {
      *         provider.
      * @throws NameNotFoundException if a package with the given name cannot be
      *             found on the system.
-     * @deprecated Use {@link #getProviderInfo(ComponentName, ComponentInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract ProviderInfo getProviderInfo(@NonNull ComponentName component,
             int flags) throws NameNotFoundException;
@@ -5799,6 +5838,8 @@ public abstract class PackageManager {
     /**
      * Return a List of all packages that are installed for the current user.
      *
+     * Use {@link #getInstalledPackages(PackageInfoFlags)} when long flags are needed.
+     *
      * @param flags Additional option flags to modify the data returned.
      * @return A List of PackageInfo objects, one for each installed package,
      *         containing information about the package. In the unlikely case
@@ -5808,15 +5849,12 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @deprecated Use {@link #getInstalledPackages(PackageInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<PackageInfo> getInstalledPackages(int flags);
 
     /**
      * See {@link #getInstalledPackages(int)}.
-     * @param flags
      */
     @NonNull
     public List<PackageInfo> getInstalledPackages(@NonNull PackageInfoFlags flags) {
@@ -5846,6 +5884,9 @@ public abstract class PackageManager {
      * Return a List of all installed packages that are currently holding any of
      * the given permissions.
      *
+     * Use {@link #getPackagesHoldingPermissions(String[], PackageInfoFlags)} when long flags are
+     * needed.
+     *
      * @param flags Additional option flags to modify the data returned.
      * @return A List of PackageInfo objects, one for each installed package
      *         that holds any of the permissions that were provided, containing
@@ -5856,9 +5897,7 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @deprecated Use {@link #getPackagesHoldingPermissions(String[], PackageInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<PackageInfo> getPackagesHoldingPermissions(
             @NonNull String[] permissions, int flags);
@@ -5877,6 +5916,8 @@ public abstract class PackageManager {
      * Return a List of all packages that are installed on the device, for a
      * specific user.
      *
+     * Use {@link #getInstalledPackagesAsUser(PackageInfoFlags, int)} when long flags are needed.
+     *
      * @param flags Additional option flags to modify the data returned.
      * @param userId The user for whom the installed packages are to be listed
      * @return A List of PackageInfo objects, one for each installed package,
@@ -5887,10 +5928,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @deprecated Use {@link #getInstalledPackagesAsUser(PackageInfoFlags, int)} instead.
      * @hide
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @SystemApi
@@ -6602,6 +6641,8 @@ public abstract class PackageManager {
      * applications including those deleted with {@code DELETE_KEEP_DATA}
      * (partially installed apps with data directory) will be returned.
      *
+     * Use {@link #getInstalledApplications(ApplicationInfoFlags)} when long flags are needed.
+     *
      * @param flags Additional option flags to modify the data returned.
      * @return A List of ApplicationInfo objects, one for each installed
      *         application. In the unlikely case there are no installed
@@ -6611,10 +6652,8 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @deprecated  Use {@link #getInstalledApplications(ApplicationInfoFlags)} instead.
      */
     @NonNull
-    @Deprecated
     public abstract List<ApplicationInfo> getInstalledApplications(int flags);
 
     /**
@@ -6633,6 +6672,9 @@ public abstract class PackageManager {
      * {@code DELETE_KEEP_DATA} (partially installed apps with data directory)
      * will be returned.
      *
+     * Use {@link #getInstalledApplicationsAsUser(ApplicationInfoFlags, int)} when long flags are
+     * needed.
+     *
      * @param flags Additional option flags to modify the data returned.
      * @param userId The user for whom the installed applications are to be
      *            listed
@@ -6644,13 +6686,11 @@ public abstract class PackageManager {
      *         applications (which includes installed applications as well as
      *         applications with data directory i.e. applications which had been
      *         deleted with {@code DELETE_KEEP_DATA} flag set).
-     * @deprecated  Use {@link #getInstalledApplicationsAsUser(ApplicationInfoFlags, int)} instead.
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @TestApi
-    @Deprecated
     public abstract List<ApplicationInfo> getInstalledApplicationsAsUser(
             int flags, @UserIdInt int userId);
 
@@ -6809,13 +6849,13 @@ public abstract class PackageManager {
     /**
      * Get a list of shared libraries on the device.
      *
+     * Use {@link #getSharedLibraries(PackageInfoFlags)} when long flags are needed.
+     *
      * @param flags To filter the libraries to return.
      * @return The shared library list.
      *
      * @see #MATCH_UNINSTALLED_PACKAGES
-     * @deprecated Use {@link #getSharedLibraries(PackageInfoFlags)} instead.
      */
-    @Deprecated
     public abstract @NonNull List<SharedLibraryInfo> getSharedLibraries(int flags);
 
     /**
@@ -6830,6 +6870,8 @@ public abstract class PackageManager {
     /**
      * Get a list of shared libraries on the device.
      *
+     * Use {@link #getSharedLibrariesAsUser(PackageInfoFlags, int)} when long flags are needed.
+     *
      * @param flags To filter the libraries to return.
      * @param userId The user to query for.
      * @return The shared library list.
@@ -6840,9 +6882,7 @@ public abstract class PackageManager {
      * @see #MATCH_UNINSTALLED_PACKAGES
      *
      * @hide
-     * @deprecated Use {@link #getSharedLibrariesAsUser(PackageInfoFlags, int)} instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     public abstract @NonNull List<SharedLibraryInfo> getSharedLibrariesAsUser(int flags,
             @UserIdInt int userId);
@@ -6860,14 +6900,14 @@ public abstract class PackageManager {
     /**
      * Get the list of shared libraries declared by a package.
      *
+     * Use {@link #getDeclaredSharedLibraries(String, PackageInfoFlags)} when long flags are needed.
+     *
      * @param packageName the package name to query
      * @param flags the flags to filter packages
      * @return the shared library list
      *
      * @hide
-     * @deprecated Use {@link #getDeclaredSharedLibraries(String, PackageInfoFlags)} instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @RequiresPermission(Manifest.permission.ACCESS_SHARED_LIBRARIES)
@@ -6976,6 +7016,8 @@ public abstract class PackageManager {
      * Intent.resolveActivity(PackageManager)} do.
      * </p>
      *
+     * Use {@link #resolveActivity(Intent, ResolveInfoFlags)} when long flags are needed.
+     *
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned. The
@@ -6987,9 +7029,7 @@ public abstract class PackageManager {
      *         matching activity was found. If multiple matching activities are
      *         found and there is no default set, returns a ResolveInfo object
      *         containing something else, such as the activity resolver.
-     * @deprecated Use {@link #resolveActivity(Intent, ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @Nullable
     public abstract ResolveInfo resolveActivity(@NonNull Intent intent, int flags);
 
@@ -7016,6 +7056,8 @@ public abstract class PackageManager {
      * Intent.resolveActivity(PackageManager)} do.
      * </p>
      *
+     * Use {@link #resolveActivityAsUser(Intent, ResolveInfoFlags, int)} when long flags are needed.
+     *
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned. The
@@ -7029,9 +7071,7 @@ public abstract class PackageManager {
      *         found and there is no default set, returns a ResolveInfo object
      *         containing something else, such as the activity resolver.
      * @hide
-     * @deprecated Use {@link #resolveActivityAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     @UnsupportedAppUsage
@@ -7052,6 +7092,8 @@ public abstract class PackageManager {
     /**
      * Retrieve all activities that can be performed for the given intent.
      *
+     * Use {@link #queryIntentActivities(Intent, ResolveInfoFlags)} when long flags are needed.
+     *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags to modify the data returned. The
      *            most important is {@link #MATCH_DEFAULT_ONLY}, to limit the
@@ -7063,9 +7105,7 @@ public abstract class PackageManager {
      *         words, the first item is what would be returned by
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
-     * @deprecated Use {@link #queryIntentActivities(Intent, ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentActivities(@NonNull Intent intent, int flags);
 
@@ -7083,6 +7123,9 @@ public abstract class PackageManager {
      * Retrieve all activities that can be performed for the given intent, for a
      * specific user.
      *
+     * Use {@link #queryIntentActivitiesAsUser(Intent, ResolveInfoFlags, int)} when long flags are
+     * needed.
+     *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags to modify the data returned. The
      *            most important is {@link #MATCH_DEFAULT_ONLY}, to limit the
@@ -7095,9 +7138,7 @@ public abstract class PackageManager {
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
      * @hide
-     * @deprecated Use {@link #queryIntentActivitiesAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
@@ -7119,6 +7160,9 @@ public abstract class PackageManager {
      * Retrieve all activities that can be performed for the given intent, for a
      * specific user.
      *
+     * Use {@link #queryIntentActivitiesAsUser(Intent, ResolveInfoFlags, UserHandle)} when long
+     * flags are needed.
+     *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags to modify the data returned. The
      *            most important is {@link #MATCH_DEFAULT_ONLY}, to limit the
@@ -7132,10 +7176,7 @@ public abstract class PackageManager {
      *         {@link #resolveActivity}. If there are no matching activities, an
      *         empty list is returned.
      * @hide
-     * @deprecated Use {@link #queryIntentActivitiesAsUser(Intent, ResolveInfoFlags, UserHandle)}
-     * instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
@@ -7165,6 +7206,9 @@ public abstract class PackageManager {
      * final ResolveInfo list in a reasonable order, with no duplicates, based
      * on those inputs.
      *
+     * Use {@link #queryIntentActivityOptions(ComponentName, List, Intent, ResolveInfoFlags)} when
+     * long flags are needed.
+     *
      * @param caller The class name of the activity that is making the request.
      *            This activity will never appear in the output list. Can be
      *            null.
@@ -7181,10 +7225,7 @@ public abstract class PackageManager {
      *         activities that can handle <var>intent</var> but did not get
      *         included by one of the <var>specifics</var> intents. If there are
      *         no matching activities, an empty list is returned.
-     * @deprecated Use {@link #queryIntentActivityOptions(ComponentName, List, Intent,
-     * ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentActivityOptions(@Nullable ComponentName caller,
             @Nullable Intent[] specifics, @NonNull Intent intent, int flags);
@@ -7203,14 +7244,14 @@ public abstract class PackageManager {
     /**
      * Retrieve all receivers that can handle a broadcast of the given intent.
      *
+     * Use {@link #queryBroadcastReceivers(Intent, ResolveInfoFlags)} when long flags are needed.
+     *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching receiver, ordered from best to worst. If there are
      *         no matching receivers, an empty list or null is returned.
-     * @deprecated Use {@link #queryBroadcastReceivers(Intent, ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryBroadcastReceivers(@NonNull Intent intent, int flags);
 
@@ -7228,6 +7269,9 @@ public abstract class PackageManager {
      * Retrieve all receivers that can handle a broadcast of the given intent,
      * for a specific user.
      *
+     * Use {@link #queryBroadcastReceiversAsUser(Intent, ResolveInfoFlags, UserHandle)} when long
+     * flags are needed.
+     *
      * @param intent The desired intent as per resolveActivity().
      * @param flags Additional option flags to modify the data returned.
      * @param userHandle UserHandle of the user being queried.
@@ -7235,10 +7279,7 @@ public abstract class PackageManager {
      *         each matching receiver, ordered from best to worst. If there are
      *         no matching receivers, an empty list or null is returned.
      * @hide
-     * @deprecated Use {@link #queryBroadcastReceiversAsUser(Intent, ResolveInfoFlags, UserHandle)}
-     * instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @SystemApi
@@ -7262,10 +7303,9 @@ public abstract class PackageManager {
 
     /**
      * @hide
-     * @deprecated Use {@link #queryBroadcastReceiversAsUser(Intent, ResolveInfoFlags, int)}
-     * instead.
+     * Use {@link #queryBroadcastReceiversAsUser(Intent, ResolveInfoFlags, int)} when long flags are
+     * needed.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
@@ -7303,15 +7343,15 @@ public abstract class PackageManager {
     /**
      * Determine the best service to handle for a given Intent.
      *
+     * Use {@link #resolveService(Intent, ResolveInfoFlags)} when long flags are needed.
+     *
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a ResolveInfo object containing the final service intent
      *         that was determined to be the best action. Returns null if no
      *         matching service was found.
-     * @deprecated Use {@link #resolveService(Intent, ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @Nullable
     public abstract ResolveInfo resolveService(@NonNull Intent intent, int flags);
 
@@ -7326,9 +7366,8 @@ public abstract class PackageManager {
 
     /**
      * @hide
-     * @deprecated Use {@link #resolveServiceAsUser(Intent, ResolveInfoFlags, int)} instead.
+     * Use {@link #resolveServiceAsUser(Intent, ResolveInfoFlags, int)} when long flags are needed.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
     public abstract ResolveInfo resolveServiceAsUser(@NonNull Intent intent,
@@ -7348,6 +7387,8 @@ public abstract class PackageManager {
     /**
      * Retrieve all services that can match the given intent.
      *
+     * Use {@link #queryIntentServices(Intent, ResolveInfoFlags)} when long flags are needed.
+     *
      * @param intent The desired intent as per resolveService().
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a List of ResolveInfo objects containing one entry for
@@ -7355,9 +7396,7 @@ public abstract class PackageManager {
      *         words, the first item is what would be returned by
      *         {@link #resolveService}. If there are no matching services, an
      *         empty list or null is returned.
-     * @deprecated Use {@link #queryIntentServices(Intent, ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentServices(@NonNull Intent intent,
             int flags);
@@ -7375,6 +7414,9 @@ public abstract class PackageManager {
     /**
      * Retrieve all services that can match the given intent for a given user.
      *
+     * Use {@link #queryIntentServicesAsUser(Intent, ResolveInfoFlags, int)} when long flags are
+     * needed.
+     *
      * @param intent The desired intent as per resolveService().
      * @param flags Additional option flags to modify the data returned.
      * @param userId The user id.
@@ -7384,9 +7426,7 @@ public abstract class PackageManager {
      *         {@link #resolveService}. If there are no matching services, an
      *         empty list or null is returned.
      * @hide
-     * @deprecated Use {@link #queryIntentServicesAsUser(Intent, ResolveInfoFlags, int)} instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
@@ -7407,6 +7447,9 @@ public abstract class PackageManager {
     /**
      * Retrieve all services that can match the given intent for a given user.
      *
+     * Use {@link #queryIntentServicesAsUser(Intent, ResolveInfoFlags, UserHandle)} when long flags
+     * are needed.
+     *
      * @param intent The desired intent as per resolveService().
      * @param flags Additional option flags to modify the data returned.
      * @param user The user being queried.
@@ -7416,10 +7459,7 @@ public abstract class PackageManager {
      *         {@link #resolveService}. If there are no matching services, an
      *         empty list or null is returned.
      * @hide
-     * @deprecated Use {@link #queryIntentServicesAsUser(Intent, ResolveInfoFlags, UserHandle)}
-     * instead.
      */
-    @Deprecated
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
@@ -7442,6 +7482,9 @@ public abstract class PackageManager {
     /**
      * Retrieve all providers that can match the given intent.
      *
+     * Use {@link #queryIntentContentProvidersAsUser(Intent, ResolveInfoFlags, int)} when long flags
+     * are needed.
+     *
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned.
@@ -7450,10 +7493,7 @@ public abstract class PackageManager {
      *         each matching provider, ordered from best to worst. If there are
      *         no matching services, an empty list or null is returned.
      * @hide
-     * @deprecated Use {@link #queryIntentContentProvidersAsUser(Intent, ResolveInfoFlags, int)}
-     * instead.
      */
-    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @UnsupportedAppUsage
@@ -7474,6 +7514,9 @@ public abstract class PackageManager {
     /**
      * Retrieve all providers that can match the given intent.
      *
+     * Use {@link #queryIntentContentProvidersAsUser(Intent, ResolveInfoFlags, UserHandle)} when
+     * long flags are needed.
+     *
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned.
@@ -7482,10 +7525,7 @@ public abstract class PackageManager {
      *         each matching provider, ordered from best to worst. If there are
      *         no matching services, an empty list or null is returned.
      * @hide
-     * @deprecated Use {@link #queryIntentContentProvidersAsUser(Intent, ResolveInfoFlags,
-     * UserHandle)} instead.
      */
-    @Deprecated
     @NonNull
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
     @SystemApi
@@ -7509,15 +7549,16 @@ public abstract class PackageManager {
     /**
      * Retrieve all providers that can match the given intent.
      *
+     * Use {@link #queryIntentContentProviders(Intent, ResolveInfoFlags)} when long flags are
+     * needed.
+     *
      * @param intent An intent containing all of the desired specification
      *            (action, data, type, category, and/or component).
      * @param flags Additional option flags to modify the data returned.
      * @return Returns a List of ResolveInfo objects containing one entry for
      *         each matching provider, ordered from best to worst. If there are
      *         no matching services, an empty list or null is returned.
-     * @deprecated Use {@link #queryIntentContentProviders(Intent, ResolveInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<ResolveInfo> queryIntentContentProviders(@NonNull Intent intent,
             int flags);
@@ -7541,13 +7582,13 @@ public abstract class PackageManager {
      * ProviderInfo info = packageManager.resolveContentProvider(uri.getAuthority(), flags);
      * </pre>
      *
+     * Use {@link #resolveContentProvider(String, ComponentInfoFlags)} when long flags are needed.
+     *
      * @param authority The authority of the provider to find.
      * @param flags Additional option flags to modify the data returned.
      * @return A {@link ProviderInfo} object containing information about the
      *         provider. If a provider was not found, returns null.
-     * @deprecated Use {@link #resolveContentProvider(String, ComponentInfoFlags)} instead.
      */
-    @Deprecated
     @Nullable
     public abstract ProviderInfo resolveContentProvider(@NonNull String authority,
             int flags);
@@ -7565,14 +7606,15 @@ public abstract class PackageManager {
     /**
      * Find a single content provider by its base path name.
      *
+     * Use {@link #resolveContentProviderAsUser(String, ComponentInfoFlags, int)} when long flags
+     * are needed.
+     *
      * @param providerName The name of the provider to find.
      * @param flags Additional option flags to modify the data returned.
      * @param userId The user id.
      * @return A {@link ProviderInfo} object containing information about the
      *         provider. If a provider was not found, returns null.
      * @hide
-     * @deprecated Use {@link #resolveContentProviderAsUser(String, ComponentInfoFlags, int)}
-     * instead.
      */
     @SuppressWarnings("HiddenAbstractMethod")
     @Nullable
@@ -7597,6 +7639,9 @@ public abstract class PackageManager {
      * <em>Note: unlike most other methods, an empty result set is indicated
      * by a null return instead of an empty list.</em>
      *
+     * Use {@link #queryContentProviders(String, int, ComponentInfoFlags)} when long flags are
+     * needed.
+     *
      * @param processName If non-null, limits the returned providers to only
      *            those that are hosted by the given process. If null, all
      *            content providers are returned.
@@ -7607,9 +7652,7 @@ public abstract class PackageManager {
      *         each provider either matching <var>processName</var> or, if
      *         <var>processName</var> is null, all known content providers.
      *         <em>If there are no matching providers, null is returned.</em>
-     * @deprecated Use {@link #queryContentProviders(String, int, ComponentInfoFlags)} instead.
      */
-    @Deprecated
     @NonNull
     public abstract List<ProviderInfo> queryContentProviders(
             @Nullable String processName, int uid, int flags);
@@ -7637,11 +7680,11 @@ public abstract class PackageManager {
      * to mark GAL providers, rather than intent filters, so we can't use
      * {@link #queryIntentContentProviders} for that.
      *
+     * Use {@link #queryContentProviders(String, int, ComponentInfoFlags, String)} when long flags
+     * are needed.
+     *
      * @hide
-     * @deprecated Use {@link #queryContentProviders(String, int, ComponentInfoFlags, String)}
-     * instead.
      */
-    @Deprecated
     @NonNull
     public List<ProviderInfo> queryContentProviders(@Nullable String processName,
             int uid, int flags, String metaDataKey) {
@@ -8187,13 +8230,13 @@ public abstract class PackageManager {
      * Retrieve overall information about an application package defined in a
      * package archive file
      *
+     * Use {@link #getPackageArchiveInfo(String, PackageInfoFlags)} when long flags are needed.
+     *
      * @param archiveFilePath The path to the archive file
      * @param flags Additional option flags to modify the data returned.
      * @return A PackageInfo object containing information about the package
      *         archive. If the package could not be parsed, returns null.
-     * @deprecated Use {@link #getPackageArchiveInfo(String, PackageInfoFlags)} instead.
      */
-    @Deprecated
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath, int flags) {
         return getPackageArchiveInfo(archiveFilePath, PackageInfoFlags.of(flags));
@@ -10923,10 +10966,13 @@ public abstract class PackageManager {
 
     /**
      * Attempt to relinquish the update ownership of the given package. Only the current
-     * update owner of the given package can use this API or a SecurityException will be
-     * thrown.
+     * update owner of the given package can use this API.
      *
      * @param targetPackage The installed package whose update owner will be changed.
+     * @throws IllegalArgumentException if the given package is invalid.
+     * @throws SecurityException if you are not the current update owner of the given package.
+     *
+     * @see PackageInstaller.SessionParams#setRequestUpdateOwnership
      */
     public void relinquishUpdateOwnership(@NonNull String targetPackage) {
         throw new UnsupportedOperationException(

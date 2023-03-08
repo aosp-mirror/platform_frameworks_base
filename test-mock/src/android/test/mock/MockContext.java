@@ -967,7 +967,7 @@ public class MockContext extends Context {
     /** {@hide} */
     @Override
     public IServiceConnection getServiceDispatcher(ServiceConnection conn, Handler handler,
-            int flags) {
+            long flags) {
         throw new UnsupportedOperationException();
     }
 

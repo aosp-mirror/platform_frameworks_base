@@ -14,7 +14,10 @@
 
 package com.android.internal.util;
 
+import static android.Manifest.permission.READ_DEVICE_CONFIG;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Trace.TRACE_TAG_APP;
+import static android.provider.DeviceConfig.NAMESPACE_LATENCY_TRACKER;
 
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_CHECK_CREDENTIAL_UNLOCKED;
@@ -24,6 +27,8 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOAD_SHARE_SHEET;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_LOCKSCREEN_UNLOCK;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR;
@@ -42,9 +47,12 @@ import static com.android.internal.util.LatencyTracker.ActionProperties.LEGACY_T
 import static com.android.internal.util.LatencyTracker.ActionProperties.SAMPLE_INTERVAL_SUFFIX;
 import static com.android.internal.util.LatencyTracker.ActionProperties.TRACE_THRESHOLD_SUFFIX;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.app.ActivityThread;
 import android.content.Context;
 import android.os.Build;
 import android.os.ConditionVariable;
@@ -187,6 +195,16 @@ public class LatencyTracker {
      */
     public static final int ACTION_SHOW_VOICE_INTERACTION = 19;
 
+    /**
+     * Time it takes to request IME shown animation.
+     */
+    public static final int ACTION_REQUEST_IME_SHOWN = 20;
+
+    /**
+     * Time it takes to request IME hidden animation.
+     */
+    public static final int ACTION_REQUEST_IME_HIDDEN = 21;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -208,6 +226,8 @@ public class LatencyTracker {
         ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
         ACTION_SHOW_VOICE_INTERACTION,
+        ACTION_REQUEST_IME_SHOWN,
+        ACTION_REQUEST_IME_HIDDEN,
     };
 
     /** @hide */
@@ -232,6 +252,8 @@ public class LatencyTracker {
         ACTION_SHOW_SELECTION_TOOLBAR,
         ACTION_FOLD_TO_AOD,
         ACTION_SHOW_VOICE_INTERACTION,
+        ACTION_REQUEST_IME_SHOWN,
+        ACTION_REQUEST_IME_HIDDEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -259,6 +281,8 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_FOLD_TO_AOD,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN,
     };
 
     private static LatencyTracker sLatencyTracker;
@@ -284,15 +308,30 @@ public class LatencyTracker {
         return sLatencyTracker;
     }
 
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     @VisibleForTesting
     public LatencyTracker() {
         mEnabled = DEFAULT_ENABLED;
 
-        // Post initialization to the background in case we're running on the main thread.
-        BackgroundThread.getHandler().post(() -> this.updateProperties(
-                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_LATENCY_TRACKER)));
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_LATENCY_TRACKER,
-                BackgroundThread.getExecutor(), this::updateProperties);
+        final Context context = ActivityThread.currentApplication();
+        if (context != null
+                && context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) == PERMISSION_GRANTED) {
+            // Post initialization to the background in case we're running on the main thread.
+            BackgroundThread.getHandler().post(() -> this.updateProperties(
+                    DeviceConfig.getProperties(NAMESPACE_LATENCY_TRACKER)));
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_LATENCY_TRACKER,
+                    BackgroundThread.getExecutor(), this::updateProperties);
+        } else {
+            if (DEBUG) {
+                if (context == null) {
+                    Log.d(TAG, "No application for " + ActivityThread.currentActivityThread());
+                } else {
+                    Log.d(TAG, "Initialized the LatencyTracker."
+                            + " (No READ_DEVICE_CONFIG permission to change configs)"
+                            + " enabled=" + mEnabled + ", package=" + context.getPackageName());
+                }
+            }
+        }
     }
 
     private void updateProperties(DeviceConfig.Properties properties) {
@@ -368,6 +407,10 @@ public class LatencyTracker {
                 return "ACTION_FOLD_TO_AOD";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION:
                 return "ACTION_SHOW_VOICE_INTERACTION";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_SHOWN:
+                return "ACTION_REQUEST_IME_SHOWN";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_REQUEST_IME_HIDDEN:
+                return "ACTION_REQUEST_IME_HIDDEN";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

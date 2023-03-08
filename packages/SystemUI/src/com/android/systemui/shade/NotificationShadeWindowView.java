@@ -16,7 +16,7 @@
 
 package com.android.systemui.shade;
 
-import static android.os.Trace.TRACE_TAG_ALWAYS;
+import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
@@ -328,7 +328,7 @@ public class NotificationShadeWindowView extends FrameLayout {
 
     @Override
     public void requestLayout() {
-        Trace.instant(TRACE_TAG_ALWAYS, "NotificationShadeWindowView#requestLayout");
+        Trace.instant(TRACE_TAG_APP, "NotificationShadeWindowView#requestLayout");
         super.requestLayout();
     }
 

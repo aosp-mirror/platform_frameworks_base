@@ -21,6 +21,7 @@ import android.content.Context
 import android.media.AudioManager
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
@@ -37,6 +38,8 @@ import com.android.systemui.util.mockito.whenever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -45,7 +48,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
@@ -53,8 +55,8 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
-class MuteQuickAffordanceCoreStartableTest : SysuiTestCase()  {
+@RunWith(AndroidJUnit4::class)
+class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
 
     @Mock
     private lateinit var featureFlags: FeatureFlags
@@ -67,6 +69,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase()  {
     @Mock
     private lateinit var keyguardQuickAffordanceRepository: KeyguardQuickAffordanceRepository
 
+    private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
 
     private lateinit var underTest: MuteQuickAffordanceCoreStartable
@@ -83,7 +86,8 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase()  {
         val emission = MutableStateFlow(mapOf("testQuickAffordanceKey" to listOf(config)))
         whenever(keyguardQuickAffordanceRepository.selections).thenReturn(emission)
 
-        testScope = TestScope()
+        testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
 
         underTest = MuteQuickAffordanceCoreStartable(
             featureFlags,
@@ -91,7 +95,8 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase()  {
             ringerModeTracker,
             userFileManager,
             keyguardQuickAffordanceRepository,
-            testScope,
+            testScope.backgroundScope,
+            testDispatcher,
         )
     }
 
@@ -158,6 +163,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase()  {
         runCurrent()
         verify(ringerModeInternal).observeForever(observerCaptor.capture())
         observerCaptor.value.onChanged(newRingerMode)
+        runCurrent()
         val result = sharedPrefs.getInt("key_last_non_silent_ringer_mode", -1)
 
         //then

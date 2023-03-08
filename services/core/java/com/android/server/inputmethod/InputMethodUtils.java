@@ -438,6 +438,15 @@ final class InputMethodUtils {
                     mSubtypeSplitter);
         }
 
+        List<String> getEnabledInputMethodNames() {
+            List<String> result = new ArrayList<>();
+            for (Pair<String, ArrayList<String>> pair :
+                    getEnabledInputMethodsAndSubtypeListLocked()) {
+                result.add(pair.first);
+            }
+            return result;
+        }
+
         void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
             if (reloadInputMethodStr) {
                 getEnabledInputMethodsStr();

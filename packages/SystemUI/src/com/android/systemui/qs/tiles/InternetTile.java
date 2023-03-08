@@ -67,6 +67,9 @@ import javax.inject.Inject;
 
 /** Quick settings tile: Internet **/
 public class InternetTile extends QSTileImpl<SignalState> {
+
+    public static final String TILE_SPEC = "internet";
+
     private static final Intent WIFI_SETTINGS = new Intent(Settings.ACTION_WIFI_SETTINGS);
     private static final int LAST_STATE_UNKNOWN = -1;
     private static final int LAST_STATE_CELLULAR = 0;
@@ -259,17 +262,19 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 Log.d(TAG, "setWifiIndicators: " + indicators);
             }
             mWifiInfo.mEnabled = indicators.enabled;
-            if (indicators.qsIcon == null) {
-                return;
-            }
-            mWifiInfo.mConnected = indicators.qsIcon.visible;
-            mWifiInfo.mWifiSignalIconId = indicators.qsIcon.icon;
-            mWifiInfo.mWifiSignalContentDescription = indicators.qsIcon.contentDescription;
-            mWifiInfo.mEnabled = indicators.enabled;
             mWifiInfo.mSsid = indicators.description;
             mWifiInfo.mIsTransient = indicators.isTransient;
             mWifiInfo.mStatusLabel = indicators.statusLabel;
-            refreshState(mWifiInfo);
+            if (indicators.qsIcon != null) {
+                mWifiInfo.mConnected = indicators.qsIcon.visible;
+                mWifiInfo.mWifiSignalIconId = indicators.qsIcon.icon;
+                mWifiInfo.mWifiSignalContentDescription = indicators.qsIcon.contentDescription;
+                refreshState(mWifiInfo);
+            } else {
+                mWifiInfo.mConnected = false;
+                mWifiInfo.mWifiSignalIconId = 0;
+                mWifiInfo.mWifiSignalContentDescription = null;
+            }
         }
 
         @Override
@@ -532,6 +537,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
         EthernetCallbackInfo cb = (EthernetCallbackInfo) arg;
         if (DEBUG) {
             Log.d(TAG, "handleUpdateEthernetState: " + "EthernetCallbackInfo = " + cb.toString());
+        }
+        if (!cb.mConnected) {
+            return;
         }
         final Resources r = mContext.getResources();
         state.label = r.getString(R.string.quick_settings_internet_label);

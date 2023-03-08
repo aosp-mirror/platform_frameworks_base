@@ -68,4 +68,10 @@ TEST(ApkParsingTest, InvalidSubdirectories) {
   auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
   ASSERT_THAT(lastSlash, IsNull());
 }
+
+TEST(ApkParsingTest, InvalidFileAtRoot) {
+  const char* path = "lib/library.so";
+  auto lastSlash = util::ValidLibraryPathLastSlash(path, false, false);
+  ASSERT_THAT(lastSlash, IsNull());
+}
 }

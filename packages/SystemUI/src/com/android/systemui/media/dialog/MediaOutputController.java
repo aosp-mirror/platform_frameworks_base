@@ -16,6 +16,8 @@
 
 package com.android.systemui.media.dialog;
 
+import static android.media.RouteListingPreference.ACTION_TRANSFER_MEDIA;
+import static android.media.RouteListingPreference.EXTRA_ROUTE_ID;
 import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
 
 import android.annotation.CallbackExecutor;
@@ -24,6 +26,7 @@ import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.WallpaperColors;
 import android.bluetooth.BluetoothLeBroadcast;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -382,12 +385,29 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return mContext.getPackageManager().getLaunchIntentForPackage(mPackageName);
     }
 
-    void tryToLaunchMediaApplication() {
+    void tryToLaunchInAppRoutingIntent(String routeId, View view) {
+        ComponentName componentName = mLocalMediaManager.getLinkedItemComponentName();
+        if (componentName != null) {
+            ActivityLaunchAnimator.Controller controller =
+                    mDialogLaunchAnimator.createActivityLaunchController(view);
+            Intent launchIntent = new Intent(ACTION_TRANSFER_MEDIA);
+            launchIntent.setComponent(componentName);
+            launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mCallback.dismissDialog();
+            mContext.startActivity(launchIntent);
+            mActivityStarter.startActivity(launchIntent, true, controller);
+        }
+    }
+
+    void tryToLaunchMediaApplication(View view) {
+        ActivityLaunchAnimator.Controller controller =
+                mDialogLaunchAnimator.createActivityLaunchController(view);
         Intent launchIntent = getAppLaunchIntent();
         if (launchIntent != null) {
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mContext.startActivity(launchIntent);
+            mActivityStarter.startActivity(launchIntent, true, controller);
         }
     }
 
@@ -684,19 +704,21 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 devices.removeAll(targetMediaDevices);
                 targetMediaDevices.addAll(devices);
             }
-            mMediaItemList.clear();
-            mMediaItemList.addAll(
-                    targetMediaDevices.stream().map(MediaItem::new).collect(Collectors.toList()));
+            List<MediaItem> finalMediaItems = targetMediaDevices.stream().map(
+                    MediaItem::new).collect(Collectors.toList());
             dividerItems.forEach((key, item) -> {
-                mMediaItemList.add(key, item);
+                finalMediaItems.add(key, item);
             });
-            mMediaItemList.add(new MediaItem());
+            finalMediaItems.add(new MediaItem());
+            mMediaItemList.clear();
+            mMediaItemList.addAll(finalMediaItems);
         }
     }
 
     private void categorizeMediaItems(MediaDevice connectedMediaDevice, List<MediaDevice> devices,
             boolean needToHandleMutingExpectedDevice) {
         synchronized (mMediaDevicesLock) {
+            List<MediaItem> finalMediaItems = new ArrayList<>();
             Set<String> selectedDevicesIds = getSelectedMediaDevice().stream().map(
                     MediaDevice::getId).collect(Collectors.toSet());
             if (connectedMediaDevice != null) {
@@ -706,32 +728,32 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             boolean displayGroupAdded = false;
             for (MediaDevice device : devices) {
                 if (needToHandleMutingExpectedDevice && device.isMutingExpectedDevice()) {
-                    mMediaItemList.add(0, new MediaItem(device));
+                    finalMediaItems.add(0, new MediaItem(device));
                 } else if (!needToHandleMutingExpectedDevice && selectedDevicesIds.contains(
                         device.getId())) {
-                    mMediaItemList.add(0, new MediaItem(device));
+                    finalMediaItems.add(0, new MediaItem(device));
                 } else {
                     if (device.isSuggestedDevice() && !suggestedDeviceAdded) {
-                        attachGroupDivider(mContext.getString(
+                        attachGroupDivider(finalMediaItems, mContext.getString(
                                 R.string.media_output_group_title_suggested_device));
                         suggestedDeviceAdded = true;
                     } else if (!device.isSuggestedDevice() && !displayGroupAdded) {
-                        attachGroupDivider(mContext.getString(
+                        attachGroupDivider(finalMediaItems, mContext.getString(
                                 R.string.media_output_group_title_speakers_and_displays));
                         displayGroupAdded = true;
                     }
-                    mMediaItemList.add(new MediaItem(device));
+                    finalMediaItems.add(new MediaItem(device));
                 }
             }
-            mMediaItemList.add(new MediaItem());
+            finalMediaItems.add(new MediaItem());
+            mMediaItemList.clear();
+            mMediaItemList.addAll(finalMediaItems);
         }
     }
 
-    private void attachGroupDivider(String title) {
-        synchronized (mMediaDevicesLock) {
-            mMediaItemList.add(
-                    new MediaItem(title, MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
-        }
+    private void attachGroupDivider(List<MediaItem> mediaItems, String title) {
+        mediaItems.add(
+                new MediaItem(title, MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
     }
 
     private void attachRangeInfo(List<MediaDevice> devices) {

@@ -86,6 +86,7 @@ final class FillUi {
         void onDatasetPicked(@NonNull Dataset dataset);
         void onCanceled();
         void onDestroy();
+        void onShown();
         void requestShowFillUi(int width, int height,
                 IAutofillWindowPresenter windowPresenter);
         void requestHideFillUi();
@@ -706,6 +707,7 @@ final class FillUi {
                     mWm.addView(mContentView, params);
                     mOverlayControl.hideOverlays();
                     mShowing = true;
+                    mCallback.onShown();
                 } else {
                     mWm.updateViewLayout(mContentView, params);
                 }

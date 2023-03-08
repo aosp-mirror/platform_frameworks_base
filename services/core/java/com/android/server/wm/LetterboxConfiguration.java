@@ -19,14 +19,15 @@ package com.android.server.wm;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW_IGNORE_ORIENTATION_REQUEST;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_CAMERA_COMPAT_TREATMENT;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_COMPAT_FAKE_FOCUS;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
+import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.provider.DeviceConfig;
 import android.util.Slog;
@@ -42,10 +43,6 @@ import java.util.function.Function;
 final class LetterboxConfiguration {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "LetterboxConfiguration" : TAG_ATM;
-
-    @VisibleForTesting
-    static final String DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS =
-            "enable_compat_fake_focus";
 
     /**
      * Override of aspect ratio for fixed orientation letterboxing that is set via ADB with
@@ -115,12 +112,6 @@ final class LetterboxConfiguration {
 
     /** Letterboxed app window is aligned to the right side. */
     static final int LETTERBOX_VERTICAL_REACHABILITY_POSITION_BOTTOM = 2;
-
-    @VisibleForTesting
-    static final String PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN = "com.android.COMPAT_FAKE_FOCUS_OPT_IN";
-    @VisibleForTesting
-    static final String PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT =
-            "com.android.COMPAT_FAKE_FOCUS_OPT_OUT";
 
     final Context mContext;
 
@@ -306,16 +297,23 @@ final class LetterboxConfiguration {
                 R.bool.config_isCompatFakeFocusEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsPolicyForIgnoringRequestedOrientationEnabled);
-
         mIsDisplayRotationImmersiveAppCompatPolicyEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsDisplayRotationImmersiveAppCompatPolicyEnabled);
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mIsCameraCompatTreatmentEnabled,
+                /* key */ KEY_ENABLE_CAMERA_COMPAT_TREATMENT);
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mIsDisplayRotationImmersiveAppCompatPolicyEnabled,
                 /* key */ KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY);
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ true,
                 /* key */ KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
-
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mIsCompatFakeFocusEnabled,
+                /* key */ KEY_ENABLE_COMPAT_FAKE_FOCUS);
+        mDeviceConfig.updateFlagActiveStatus(
+                /* isActive */ mTranslucentLetterboxingEnabled,
+                /* key */ KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
     }
@@ -1007,7 +1005,7 @@ final class LetterboxConfiguration {
 
     boolean isTranslucentLetterboxingEnabled() {
         return mTranslucentLetterboxingOverrideEnabled || (mTranslucentLetterboxingEnabled
-                && isTranslucentLetterboxingAllowed());
+                && mDeviceConfig.getFlag(KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY));
     }
 
     void setTranslucentLetterboxingEnabled(boolean translucentLetterboxingEnabled) {
@@ -1055,48 +1053,9 @@ final class LetterboxConfiguration {
                 isDeviceInTabletopMode, nextVerticalPosition);
     }
 
-    // TODO(b/262378106): Cache a runtime flag and implement
-    // DeviceConfig.OnPropertiesChangedListener
-    static boolean isTranslucentLetterboxingAllowed() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                "enable_translucent_activity_letterbox", false);
-    }
-
-    @VisibleForTesting
-    boolean getPackageManagerProperty(PackageManager pm, String property) {
-        boolean enabled = false;
-        try {
-            final PackageManager.Property p = pm.getProperty(property, mContext.getPackageName());
-            enabled = p.getBoolean();
-        } catch (PackageManager.NameNotFoundException e) {
-            // Property not found
-        }
-        return enabled;
-    }
-
-    @VisibleForTesting
-    boolean isCompatFakeFocusEnabled(ActivityInfo info) {
-        if (!isCompatFakeFocusEnabledOnDevice()) {
-            return false;
-        }
-        // See if the developer has chosen to opt in / out of treatment
-        PackageManager pm = mContext.getPackageManager();
-        if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_OUT)) {
-            return false;
-        } else if (getPackageManagerProperty(pm, PROPERTY_COMPAT_FAKE_FOCUS_OPT_IN)) {
-            return true;
-        }
-        if (info.isChangeEnabled(ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS)) {
-            return true;
-        }
-        return false;
-    }
-
     /** Whether fake sending focus is enabled for unfocused apps in splitscreen */
-    boolean isCompatFakeFocusEnabledOnDevice() {
-        return mIsCompatFakeFocusEnabled
-                && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                        DEVICE_CONFIG_KEY_ENABLE_COMPAT_FAKE_FOCUS, true);
+    boolean isCompatFakeFocusEnabled() {
+        return mIsCompatFakeFocusEnabled && mDeviceConfig.getFlag(KEY_ENABLE_COMPAT_FAKE_FOCUS);
     }
 
     /**
@@ -1118,15 +1077,8 @@ final class LetterboxConfiguration {
 
     /** Whether camera compatibility treatment is enabled. */
     boolean isCameraCompatTreatmentEnabled(boolean checkDeviceConfig) {
-        return mIsCameraCompatTreatmentEnabled
-                && (!checkDeviceConfig || isCameraCompatTreatmentAllowed());
-    }
-
-    // TODO(b/262977416): Cache a runtime flag and implement
-    // DeviceConfig.OnPropertiesChangedListener
-    private static boolean isCameraCompatTreatmentAllowed() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                "enable_compat_camera_treatment", true);
+        return mIsCameraCompatTreatmentEnabled && (!checkDeviceConfig
+                || mDeviceConfig.getFlag(KEY_ENABLE_CAMERA_COMPAT_TREATMENT));
     }
 
     /** Whether camera compatibility refresh is enabled. */

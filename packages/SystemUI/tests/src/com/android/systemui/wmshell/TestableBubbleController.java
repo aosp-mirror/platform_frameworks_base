@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.os.UserManager;
+import android.view.IWindowManager;
 import android.view.WindowManager;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -72,13 +73,14 @@ public class TestableBubbleController extends BubbleController {
             ShellExecutor shellMainExecutor,
             Handler shellMainHandler,
             TaskViewTransitions taskViewTransitions,
-            SyncTransactionQueue syncQueue) {
+            SyncTransactionQueue syncQueue,
+            IWindowManager wmService) {
         super(context, shellInit, shellCommandHandler, shellController, data, Runnable::run,
                 floatingContentCoordinator, dataRepository, statusBarService, windowManager,
                 windowManagerShellWrapper, userManager, launcherApps, bubbleLogger,
                 taskStackListener, shellTaskOrganizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
-                new SyncExecutor(), taskViewTransitions, syncQueue);
+                new SyncExecutor(), taskViewTransitions, syncQueue, wmService);
         setInflateSynchronously(true);
         onInit();
     }

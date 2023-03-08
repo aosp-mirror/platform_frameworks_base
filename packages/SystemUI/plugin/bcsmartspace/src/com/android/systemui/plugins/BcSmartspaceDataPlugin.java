@@ -118,12 +118,6 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void setPrimaryTextColor(int color);
 
         /**
-         * When the view is displayed on Dream, set the flag to true, immediately after the view is
-         * created.
-         */
-        void setIsDreaming(boolean isDreaming);
-
-        /**
          * Set the UI surface for the cards. Should be called immediately after the view is created.
          */
         void setUiSurface(String uiSurface);

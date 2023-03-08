@@ -16,15 +16,21 @@
 
 package com.android.systemui.animation.back
 
+import android.annotation.IntRange
 import android.util.DisplayMetrics
+import android.view.View
 import android.window.BackEvent
 import android.window.OnBackAnimationCallback
+import android.window.OnBackInvokedDispatcher
+import android.window.OnBackInvokedDispatcher.Priority
 
 /**
  * Generates an [OnBackAnimationCallback] given a [backAnimationSpec]. [onBackProgressed] will be
  * called on each update passing the current [BackTransformation].
  *
  * Optionally, you can specify [onBackStarted], [onBackInvoked], and [onBackCancelled] callbacks.
+ *
+ * @sample com.android.systemui.util.registerAnimationOnBackInvoked
  */
 fun onBackAnimationCallbackFrom(
     backAnimationSpec: BackAnimationSpec,
@@ -62,5 +68,36 @@ fun onBackAnimationCallbackFrom(
         override fun onBackCancelled() {
             onBackCancelled()
         }
+    }
+}
+
+/**
+ * Register [OnBackAnimationCallback] when View is attached and unregister it when View is detached
+ *
+ * @sample com.android.systemui.util.registerAnimationOnBackInvoked
+ */
+fun View.registerOnBackInvokedCallbackOnViewAttached(
+    onBackInvokedDispatcher: OnBackInvokedDispatcher,
+    onBackAnimationCallback: OnBackAnimationCallback,
+    @Priority @IntRange(from = 0) priority: Int = OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+) {
+    addOnAttachStateChangeListener(
+        object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                    priority,
+                    onBackAnimationCallback
+                )
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {
+                removeOnAttachStateChangeListener(this)
+                onBackInvokedDispatcher.unregisterOnBackInvokedCallback(onBackAnimationCallback)
+            }
+        }
+    )
+
+    if (isAttachedToWindow) {
+        onBackInvokedDispatcher.registerOnBackInvokedCallback(priority, onBackAnimationCallback)
     }
 }

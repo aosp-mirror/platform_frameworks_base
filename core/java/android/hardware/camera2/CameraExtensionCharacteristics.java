@@ -541,7 +541,8 @@ public final class CameraExtensionCharacteristics {
     private static <T> boolean isOutputSupportedFor(Class<T> klass) {
         Objects.requireNonNull(klass, "klass must not be null");
 
-        if (klass == android.graphics.SurfaceTexture.class) {
+        if ((klass == android.graphics.SurfaceTexture.class) ||
+                (klass == android.view.SurfaceView.class)) {
             return true;
         }
 
@@ -724,6 +725,12 @@ public final class CameraExtensionCharacteristics {
      * The {@link android.graphics.SurfaceTexture} class is guaranteed at least one size for
      * backward compatible cameras whereas other output classes are not guaranteed to be supported.
      * </p>
+     *
+     * <p>Starting with Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}
+     * {@link android.view.SurfaceView} classes are also guaranteed to be supported and include
+     * the same resolutions as {@link android.graphics.SurfaceTexture}.
+     * Clients must set the desired SurfaceView resolution by calling
+     * {@link android.view.SurfaceHolder#setFixedSize}.</p>
      *
      * @param extension the extension type
      * @param klass     a non-{@code null} {@link Class} object reference

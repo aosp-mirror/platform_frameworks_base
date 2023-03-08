@@ -49,6 +49,7 @@ import javax.inject.Named;
 public class ReduceBrightColorsTile extends QSTileImpl<QSTile.BooleanState>
         implements ReduceBrightColorsController.Listener{
 
+    public static final String TILE_SPEC = "reduce_brightness";
     private final boolean mIsAvailable;
     private final ReduceBrightColorsController mReduceBrightColorsController;
     private boolean mIsListening;

@@ -180,16 +180,7 @@ public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 return;
             }
             clearCallbacksOnDispatcher();
-            if (actualDispatcher instanceof ProxyOnBackInvokedDispatcher) {
-                // We don't want to nest ProxyDispatchers, so if we are given on, we unwrap its
-                // actual dispatcher.
-                // This can happen when an Activity is recreated but the Window is preserved (e.g.
-                // when going from split-screen back to single screen)
-                mActualDispatcher =
-                        ((ProxyOnBackInvokedDispatcher) actualDispatcher).mActualDispatcher;
-            } else {
-                mActualDispatcher = actualDispatcher;
-            }
+            mActualDispatcher = actualDispatcher;
             transferCallbacksToDispatcher();
         }
     }

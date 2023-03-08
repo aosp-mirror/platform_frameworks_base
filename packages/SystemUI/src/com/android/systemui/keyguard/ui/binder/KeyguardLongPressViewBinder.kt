@@ -34,7 +34,7 @@ object KeyguardLongPressViewBinder {
      * @param viewModel The view-model that models the UI state.
      * @param onSingleTap A callback to invoke when the system decides that there was a single tap.
      * @param falsingManager [FalsingManager] for making sure the long-press didn't just happen in
-     * the user's pocket.
+     *   the user's pocket.
      */
     @JvmStatic
     fun bind(

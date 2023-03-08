@@ -388,7 +388,7 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
                 if (abi32 >= 0) {
                     final String abi = Build.SUPPORTED_32_BIT_ABIS[abi32];
                     if (abi64 >= 0) {
-                        if (pkg.isUse32BitAbi()) {
+                        if (pkg.is32BitAbiPreferred()) {
                             secondaryCpuAbi = primaryCpuAbi;
                             primaryCpuAbi = abi;
                         } else {
@@ -474,7 +474,8 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     private boolean shouldExtractLibs(AndroidPackage pkg, boolean isSystemApp,
             boolean isUpdatedSystemApp) {
         // We shouldn't extract libs if the package is a library or if extractNativeLibs=false
-        boolean extractLibs = !AndroidPackageUtils.isLibrary(pkg) && pkg.isExtractNativeLibs();
+        boolean extractLibs = !AndroidPackageUtils.isLibrary(pkg)
+                && pkg.isExtractNativeLibrariesRequested();
         // We shouldn't attempt to extract libs from system app when it was not updated.
         if (isSystemApp && !isUpdatedSystemApp) {
             extractLibs = false;

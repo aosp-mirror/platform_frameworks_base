@@ -194,8 +194,12 @@ public class MagnificationControllerTest {
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternal);
 
         mScreenMagnificationController = spy(new FullScreenMagnificationController(
-                mControllerCtx, new Object(),
-                mScreenMagnificationInfoChangedCallbackDelegate, mScaleProvider));
+                mControllerCtx,
+                new Object(),
+                mScreenMagnificationInfoChangedCallbackDelegate,
+                mScaleProvider,
+                () -> null
+        ));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
         mWindowMagnificationManager = spy(new WindowMagnificationManager(mContext, globalLock,
@@ -736,6 +740,13 @@ public class MagnificationControllerTest {
 
         verify(mWindowMagnificationManager).setMagnificationFollowTypingEnabled(eq(false));
         verify(mScreenMagnificationController).setMagnificationFollowTypingEnabled(eq(false));
+    }
+
+    @Test
+    public void setPreferenceAlwaysOnMagnificationEnabled_setPrefEnabled_enableOnFullScreen() {
+        mMagnificationController.setAlwaysOnMagnificationEnabled(true);
+
+        verify(mScreenMagnificationController).setAlwaysOnMagnificationEnabled(eq(true));
     }
 
     @Test

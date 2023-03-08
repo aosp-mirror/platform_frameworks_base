@@ -391,6 +391,11 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runLegacyDexoptCommand(@NonNull String cmd)
             throws RemoteException, LegacyDexoptDisabledException {
         Installer.checkLegacyDexoptDisabled();
+
+        if (!PackageManagerServiceUtils.isRootOrShell(Binder.getCallingUid())) {
+            throw new SecurityException("Dexopt shell commands need root or shell access");
+        }
+
         switch (cmd) {
             case "compile":
                 return runCompile();
@@ -971,6 +976,9 @@ class PackageManagerShellCommand extends ShellCommand {
                     case "--uid":
                         showUid = true;
                         uid = Integer.parseInt(getNextArgRequired());
+                        break;
+                    case "--match-libraries":
+                        getFlags |= PackageManager.MATCH_STATIC_SHARED_AND_SDK_LIBRARIES;
                         break;
                     default:
                         pw.println("Error: Unknown option: " + opt);
@@ -2002,8 +2010,8 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    public int runForceDexOpt() throws RemoteException {
-        mInterface.forceDexOpt(getNextArgRequired());
+    public int runForceDexOpt() throws RemoteException, LegacyDexoptDisabledException {
+        mPm.legacyForceDexOpt(getNextArgRequired());
         return 0;
     }
 
@@ -3069,7 +3077,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 getOutPrintWriter().printf("Success: user %d is already being removed\n", userId);
                 return 0;
             case UserManager.REMOVE_RESULT_ERROR_MAIN_USER_PERMANENT_ADMIN:
-                getOutPrintWriter().printf("Error: user %d is a permanent admin main user\n",
+                getErrPrintWriter().printf("Error: user %d is a permanent admin main user\n",
                         userId);
                 return 1;
             default:
@@ -3123,12 +3131,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 translateUserId(userId, UserHandle.USER_NULL, "runSetUserRestriction");
         final IUserManager um = IUserManager.Stub.asInterface(
                 ServiceManager.getService(Context.USER_SERVICE));
-        try {
-            um.setUserRestriction(restriction, value, translatedUserId);
-        } catch (IllegalArgumentException e) {
-            getErrPrintWriter().println(e.getMessage());
-            return 1;
-        }
+        um.setUserRestriction(restriction, value, translatedUserId);
         return 0;
     }
 
@@ -3198,7 +3201,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_REQUEST_DOWNGRADE;
                     break;
                 case "-g":
-                    sessionParams.installFlags |= PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS;
+                    sessionParams.installFlags |=
+                            PackageManager.INSTALL_GRANT_ALL_REQUESTED_PERMISSIONS;
                     break;
                 case "--restrict-permissions":
                     sessionParams.installFlags &=
@@ -4084,6 +4088,7 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("      --factory-only: only show system packages excluding updates");
         pw.println("      --uid UID: filter to only show packages with the given UID");
         pw.println("      --user USER_ID: only list packages belonging to the given user");
+        pw.println("      --match-libraries: include packages that declare static shared and SDK libraries");
         pw.println("");
         pw.println("  list permission-groups");
         pw.println("    Prints all known permission groups.");
@@ -4410,10 +4415,9 @@ class PackageManagerShellCommand extends ShellCommand {
             pw.println("            " + PackageManagerServiceCompilerMapping.REASON_STRINGS[i]);
         }
         pw.println("      --reset: restore package to its post-install state");
-        pw.println("      --check-prof (true | false): look at profiles when doing dexopt?");
+        pw.println("      --check-prof (true | false): ignored - this is always true");
         pw.println("      --secondary-dex: compile app secondary dex files");
         pw.println("      --split SPLIT: compile only the given split name");
-        pw.println("      --compile-layouts: compile layout resources for faster inflation");
         pw.println("");
         pw.println("  force-dex-opt PACKAGE");
         pw.println("    Force immediate execution of dex opt for the given PACKAGE.");

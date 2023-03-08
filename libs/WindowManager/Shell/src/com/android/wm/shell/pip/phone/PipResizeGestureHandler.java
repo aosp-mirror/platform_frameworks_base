@@ -228,7 +228,7 @@ public class PipResizeGestureHandler {
 
         if (mIsEnabled) {
             // Register input event receiver
-            mInputMonitor = InputManager.getInstance().monitorGestureInput(
+            mInputMonitor = mContext.getSystemService(InputManager.class).monitorGestureInput(
                     "pip-resize", mDisplayId);
             try {
                 mMainExecutor.executeBlocking(() -> {

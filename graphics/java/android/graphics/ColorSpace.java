@@ -170,7 +170,7 @@ public abstract class ColorSpace {
     /**
      * Standard CIE 1931 2° illuminant D65, encoded in xyY.
      * This illuminant has a color temperature of 6504K. This illuminant
-     * is commonly used in RGB color spaces such as sRGB, BT.209, etc.
+     * is commonly used in RGB color spaces such as sRGB, BT.709, etc.
      */
     public static final float[] ILLUMINANT_D65 = { 0.31271f, 0.32902f };
     /**
@@ -212,9 +212,9 @@ public abstract class ColorSpace {
             new Rgb.TransferParameters(1 / 1.055, 0.055 / 1.055, 1 / 12.92, 0.04045, 2.4);
     private static final Rgb.TransferParameters BT2020_HLG_TRANSFER_PARAMETERS =
             new Rgb.TransferParameters(2.0f, 2.0f, 1 / 0.17883277f,
-                0.28466892f, 0.5599107f, 0.0f, -3.0f, true);
+                0.28466892f, 0.5599107f, -11 / 12.0f, -3.0f, true);
     private static final Rgb.TransferParameters BT2020_PQ_TRANSFER_PARAMETERS =
-            new Rgb.TransferParameters(107 / 128.0f, 1.0f, 32 / 2523.0f,
+            new Rgb.TransferParameters(-107 / 128.0f, 1.0f, 32 / 2523.0f,
                 2413 / 128.0f, -2392 / 128.0f, 8192 / 1305.0f, -2.0f, true);
 
     // See static initialization block next to #get(Named)
@@ -862,8 +862,8 @@ public abstract class ColorSpace {
     public enum Model {
         /**
          * The RGB model is a color model with 3 components that
-         * refer to the three additive primiaries: red, green
-         * andd blue.
+         * refer to the three additive primaries: red, green
+         * and blue.
          */
         RGB(3),
         /**
@@ -2537,7 +2537,7 @@ public abstract class ColorSpace {
          * does not need to be specified and is assumed to be 1.0. Only the xy components
          * are required.</p>
          *
-         * <p class="note">The ID, areturned by {@link #getId()}, of an object created by
+         * <p class="note">The ID, as returned by {@link #getId()}, of an object created by
          * this constructor is always {@link #MIN_ID}.</p>
          *
          * @param name Name of the color space, cannot be null, its length must be >= 1
@@ -3961,7 +3961,7 @@ public abstract class ColorSpace {
              *
              * <p>We can only connect color spaces if they use the same profile
              * connection space. We assume the connection space is always
-             * CIE XYZ but we maye need to perform a chromatic adaptation to
+             * CIE XYZ but we maybe need to perform a chromatic adaptation to
              * match the white points. If an adaptation is needed, we use the
              * CIE standard illuminant D50. The unmatched color space is adapted
              * using the von Kries transform and the {@link Adaptation#BRADFORD}

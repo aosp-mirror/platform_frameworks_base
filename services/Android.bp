@@ -191,6 +191,14 @@ java_library {
         "service-sdksandbox.stubs.system_server",
     ],
 
+    vintf_fragments: [
+        "manifest_services.xml",
+    ],
+
+    required: [
+        "libukey2_jni_shared",
+    ],
+
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
     //javacflags: ["-Xlint"],
 }

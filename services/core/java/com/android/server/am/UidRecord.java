@@ -443,6 +443,8 @@ public final class UidRecord {
         sb.append(",");
         sb.append(lastNetworkUpdatedProcStateSeq);
         sb.append(")}");
+        sb.append(" caps=");
+        ActivityManager.printCapabilitiesSummary(sb, mCurCapability);
         return sb.toString();
     }
 }

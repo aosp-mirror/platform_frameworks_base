@@ -16,18 +16,17 @@
 
 #pragma once
 
-#include <cutils/compiler.h>
-#include <utils/Functor.h>
 #include <SaveFlags.h>
-
-#include <androidfw/ResourceTypes.h>
-#include "Properties.h"
-#include "pipeline/skia/AnimatedDrawables.h"
-#include "utils/Macros.h"
-
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
+#include <androidfw/ResourceTypes.h>
+#include <cutils/compiler.h>
+#include <utils/Functor.h>
+
+#include "Properties.h"
+#include "pipeline/skia/AnimatedDrawables.h"
+#include "utils/Macros.h"
 
 class SkAnimatedImage;
 enum class SkBlendMode;
@@ -35,6 +34,7 @@ class SkCanvasState;
 class SkRRect;
 class SkRuntimeShaderBuilder;
 class SkVertices;
+class Mesh;
 
 namespace minikin {
 class Font;
@@ -227,7 +227,7 @@ public:
                          float sweepAngle, bool useCenter, const Paint& paint) = 0;
     virtual void drawPath(const SkPath& path, const Paint& paint) = 0;
     virtual void drawVertices(const SkVertices*, SkBlendMode, const Paint& paint) = 0;
-    virtual void drawMesh(const SkMesh& mesh, sk_sp<SkBlender>, const SkPaint& paint) = 0;
+    virtual void drawMesh(const Mesh& mesh, sk_sp<SkBlender>, const Paint& paint) = 0;
 
     // Bitmap-based
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) = 0;

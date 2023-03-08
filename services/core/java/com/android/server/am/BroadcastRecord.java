@@ -89,6 +89,7 @@ final class BroadcastRecord extends Binder {
     final boolean initialSticky; // initial broadcast from register to sticky?
     final boolean prioritized; // contains more than one priority tranche
     final boolean deferUntilActive; // infinitely deferrable broadcast
+    final boolean shareIdentity;  // whether the broadcaster's identity should be shared
     final int userId;       // user id this broadcast was for
     final @Nullable String resolvedType; // the resolved data type
     final @Nullable String[] requiredPermissions; // permissions the caller has required
@@ -98,6 +99,7 @@ final class BroadcastRecord extends Binder {
     final @Nullable BroadcastOptions options; // BroadcastOptions supplied by caller
     final @NonNull List<Object> receivers;   // contains BroadcastFilter and ResolveInfo
     final @DeliveryState int[] delivery;   // delivery state of each receiver
+    final @NonNull String[] deliveryReasons; // reasons for delivery state of each receiver
     final boolean[] deferredUntilActive; // whether each receiver is infinitely deferred
     final int[] blockedUntilTerminalCount; // blocked until count of each receiver
     @Nullable ProcessRecord resultToApp; // who receives final result if non-null
@@ -119,8 +121,6 @@ final class BroadcastRecord extends Binder {
     @UptimeMillisLong       long finishTime;         // when broadcast finished
     final @UptimeMillisLong long[] scheduledTime;    // when each receiver was scheduled
     final @UptimeMillisLong long[] terminalTime;     // when each receiver was terminal
-    final                   int[] transmitGroup;     // the batch group for each receiver
-    final                   int[] transmitOrder;     // the position of the receiver in the group
     final boolean timeoutExempt;  // true if this broadcast is not subject to receiver timeouts
     int resultCode;         // current result code value.
     @Nullable String resultData;      // current result data value.
@@ -219,6 +219,8 @@ final class BroadcastRecord extends Binder {
 
     boolean mIsReceiverAppRunning; // Was the receiver's app already running.
 
+    boolean mWasReceiverAppStopped; // Was the receiver app stopped prior to starting
+
     // Private refcount-management bookkeeping; start > 0
     static AtomicInteger sNextToken = new AtomicInteger(1);
 
@@ -297,7 +299,7 @@ final class BroadcastRecord extends Binder {
                     pw.print(" initialSticky="); pw.println(initialSticky);
         }
         if (nextReceiver != 0) {
-            pw.print(prefix); pw.print("nextReceiver="); pw.print(nextReceiver);
+            pw.print(prefix); pw.print("nextReceiver="); pw.println(nextReceiver);
         }
         if (curFilter != null) {
             pw.print(prefix); pw.print("curFilter="); pw.println(curFilter);
@@ -327,6 +329,7 @@ final class BroadcastRecord extends Binder {
             }
             pw.print(prefix); pw.print("state="); pw.print(state); pw.println(stateStr);
         }
+        pw.print(prefix); pw.print("terminalCount="); pw.println(terminalCount);
         final int N = receivers != null ? receivers.size() : 0;
         String p2 = prefix + "  ";
         PrintWriterPrinter printer = new PrintWriterPrinter(pw);
@@ -345,6 +348,7 @@ final class BroadcastRecord extends Binder {
                 TimeUtils.formatDuration(terminalTime[i] - scheduledTime[i], pw);
                 pw.print(' ');
             }
+            pw.print("("); pw.print(blockedUntilTerminalCount[i]); pw.print(") ");
             pw.print("#"); pw.print(i); pw.print(": ");
             if (o instanceof BroadcastFilter) {
                 pw.println(o);
@@ -354,6 +358,9 @@ final class BroadcastRecord extends Binder {
                 ((ResolveInfo) o).dump(printer, p2, 0);
             } else {
                 pw.println(o);
+            }
+            if (deliveryReasons[i] != null) {
+                pw.print(p2); pw.print("reason: "); pw.println(deliveryReasons[i]);
             }
         }
     }
@@ -392,13 +399,12 @@ final class BroadcastRecord extends Binder {
         options = _options;
         receivers = (_receivers != null) ? _receivers : EMPTY_RECEIVERS;
         delivery = new int[_receivers != null ? _receivers.size() : 0];
+        deliveryReasons = new String[delivery.length];
         deferUntilActive = options != null ? options.isDeferUntilActive() : false;
         deferredUntilActive = new boolean[deferUntilActive ? delivery.length : 0];
         blockedUntilTerminalCount = calculateBlockedUntilTerminalCount(receivers, _serialized);
         scheduledTime = new long[delivery.length];
         terminalTime = new long[delivery.length];
-        transmitGroup = new int[delivery.length];
-        transmitOrder = new int[delivery.length];
         resultToApp = _resultToApp;
         resultTo = _resultTo;
         resultCode = _resultCode;
@@ -417,6 +423,7 @@ final class BroadcastRecord extends Binder {
         pushMessage = options != null && options.isPushMessagingBroadcast();
         pushMessageOverQuota = options != null && options.isPushMessagingOverQuotaBroadcast();
         interactive = options != null && options.isInteractive();
+        shareIdentity = options != null && options.isShareIdentityEnabled();
         this.filterExtrasForReceiver = filterExtrasForReceiver;
     }
 
@@ -448,13 +455,12 @@ final class BroadcastRecord extends Binder {
         options = from.options;
         receivers = from.receivers;
         delivery = from.delivery;
+        deliveryReasons = from.deliveryReasons;
         deferUntilActive = from.deferUntilActive;
         deferredUntilActive = from.deferredUntilActive;
         blockedUntilTerminalCount = from.blockedUntilTerminalCount;
         scheduledTime = from.scheduledTime;
         terminalTime = from.terminalTime;
-        transmitGroup = from.transmitGroup;
-        transmitOrder = from.transmitOrder;
         resultToApp = from.resultToApp;
         resultTo = from.resultTo;
         enqueueTime = from.enqueueTime;
@@ -481,6 +487,7 @@ final class BroadcastRecord extends Binder {
         pushMessage = from.pushMessage;
         pushMessageOverQuota = from.pushMessageOverQuota;
         interactive = from.interactive;
+        shareIdentity = from.shareIdentity;
         filterExtrasForReceiver = from.filterExtrasForReceiver;
     }
 
@@ -610,8 +617,10 @@ final class BroadcastRecord extends Binder {
      * Update the delivery state of the given {@link #receivers} index.
      * Automatically updates any time measurements related to state changes.
      */
-    void setDeliveryState(int index, @DeliveryState int deliveryState) {
+    void setDeliveryState(int index, @DeliveryState int deliveryState,
+            @NonNull String reason) {
         delivery[index] = deliveryState;
+        deliveryReasons[index] = reason;
         if (deferUntilActive) deferredUntilActive[index] = false;
         switch (deliveryState) {
             case DELIVERY_DELIVERED:
@@ -631,6 +640,18 @@ final class BroadcastRecord extends Binder {
 
     @DeliveryState int getDeliveryState(int index) {
         return delivery[index];
+    }
+
+    boolean wasDeliveryAttempted(int index) {
+        final int deliveryState = getDeliveryState(index);
+        switch (deliveryState) {
+            case DELIVERY_DELIVERED:
+            case DELIVERY_TIMEOUT:
+            case DELIVERY_FAILURE:
+                return true;
+            default:
+                return false;
+        }
     }
 
     void copyEnqueueTimeFrom(@NonNull BroadcastRecord replacedBroadcast) {
@@ -966,7 +987,8 @@ final class BroadcastRecord extends Binder {
             if (label == null) {
                 label = intent.toString();
             }
-            mCachedToShortString = label + "/u" + userId;
+            mCachedToShortString = Integer.toHexString(System.identityHashCode(this))
+                    + ":" + label + "/u" + userId;
         }
         return mCachedToShortString;
     }

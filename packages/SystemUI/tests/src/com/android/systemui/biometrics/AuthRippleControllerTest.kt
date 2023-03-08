@@ -25,7 +25,9 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -109,6 +111,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
             udfpsControllerProvider,
             statusBarStateController,
             featureFlags,
+            KeyguardLogger(logcatLogBuffer(AuthRippleController.TAG)),
             rippleView
         )
         controller.init()

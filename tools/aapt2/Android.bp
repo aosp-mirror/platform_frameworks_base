@@ -50,6 +50,7 @@ cc_defaults {
     ],
     target: {
         windows: {
+            compile_multilib: "64",
             enabled: true,
             cflags: ["-Wno-maybe-uninitialized"],
             ldflags: ["-static"],

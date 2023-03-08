@@ -27,6 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -34,7 +35,6 @@ import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChan
 import android.companion.virtual.camera.VirtualCameraDevice;
 import android.companion.virtual.camera.VirtualCameraInput;
 import android.companion.virtual.sensor.VirtualSensor;
-import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -88,24 +88,6 @@ import java.util.function.IntConsumer;
 public final class VirtualDeviceManager {
 
     private static final String TAG = "VirtualDeviceManager";
-
-    private static final int DEFAULT_VIRTUAL_DISPLAY_FLAGS =
-            DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH
-                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
-
-    /**
-     * The default device ID, which is the ID of the primary (non-virtual) device.
-     */
-    public static final int DEVICE_ID_DEFAULT = 0;
-
-    /**
-     * Invalid device ID.
-     */
-    public static final int DEVICE_ID_INVALID = -1;
 
     /**
      * Broadcast Action: A Virtual Device was removed.
@@ -250,7 +232,7 @@ public final class VirtualDeviceManager {
     public int getDeviceIdForDisplayId(int displayId) {
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
-            return DEVICE_ID_DEFAULT;
+            return Context.DEVICE_ID_DEFAULT;
         }
         try {
             return mService.getDeviceIdForDisplayId(displayId);
@@ -261,7 +243,7 @@ public final class VirtualDeviceManager {
 
     /**
      * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
-     * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * {@link Context#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
      * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
      * created by {@link VirtualDeviceManager#createVirtualDevice(int, VirtualDeviceParams)}.
      *
@@ -378,13 +360,16 @@ public final class VirtualDeviceManager {
                 new IVirtualDeviceActivityListener.Stub() {
 
                     @Override
-                    public void onTopActivityChanged(int displayId, ComponentName topActivity) {
+                    public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                            @UserIdInt int userId) {
                         final long token = Binder.clearCallingIdentity();
                         try {
                             synchronized (mActivityListenersLock) {
                                 for (int i = 0; i < mActivityListeners.size(); i++) {
                                     mActivityListeners.valueAt(i)
                                             .onTopActivityChanged(displayId, topActivity);
+                                    mActivityListeners.valueAt(i)
+                                          .onTopActivityChanged(displayId, topActivity, userId);
                                 }
                             }
                         } finally {
@@ -424,8 +409,6 @@ public final class VirtualDeviceManager {
                 };
         @Nullable
         private VirtualCameraDevice mVirtualCameraDevice;
-        @NonNull
-        private final List<VirtualSensor> mVirtualSensors = new ArrayList<>();
         @Nullable
         private VirtualAudioDevice mVirtualAudioDevice;
 
@@ -444,10 +427,6 @@ public final class VirtualDeviceManager {
                     params,
                     mActivityListenerBinder,
                     mSoundEffectListener);
-            final List<VirtualSensorConfig> virtualSensorConfigs = params.getVirtualSensorConfigs();
-            for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
-                mVirtualSensors.add(createVirtualSensor(virtualSensorConfigs.get(i)));
-            }
         }
 
         /**
@@ -474,20 +453,19 @@ public final class VirtualDeviceManager {
         }
 
         /**
-         * Returns this device's sensor with the given type and name, if any.
+         * Returns this device's sensors.
          *
          * @see VirtualDeviceParams.Builder#addVirtualSensorConfig
          *
-         * @param type The type of the sensor.
-         * @param name The name of the sensor.
-         * @return The matching sensor if found, {@code null} otherwise.
+         * @return A list of all sensors for this device, or an empty list if no sensors exist.
          */
-        @Nullable
-        public VirtualSensor getVirtualSensor(int type, @NonNull String name) {
-            return mVirtualSensors.stream()
-                    .filter(sensor -> sensor.getType() == type && sensor.getName().equals(name))
-                    .findAny()
-                    .orElse(null);
+        @NonNull
+        public List<VirtualSensor> getVirtualSensorList() {
+            try {
+                return mVirtualDevice.getVirtualSensorList();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -553,7 +531,11 @@ public final class VirtualDeviceManager {
          * not create the virtual display.
          *
          * @see DisplayManager#createVirtualDisplay
+         *
+         * @deprecated use {@link #createVirtualDisplay(VirtualDisplayConfig, Executor,
+         * VirtualDisplay.Callback)}
          */
+        @Deprecated
         @Nullable
         public VirtualDisplay createVirtualDisplay(
                 @IntRange(from = 1) int width,
@@ -563,33 +545,20 @@ public final class VirtualDeviceManager {
                 @VirtualDisplayFlag int flags,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
-            VirtualDisplayConfig config = new VirtualDisplayConfig.Builder(
+            VirtualDisplayConfig.Builder builder = new VirtualDisplayConfig.Builder(
                     getVirtualDisplayName(), width, height, densityDpi)
-                    .setSurface(surface)
-                    .setFlags(getVirtualDisplayFlags(flags))
-                    .build();
-            return createVirtualDisplayInternal(config, executor, callback);
+                    .setFlags(flags);
+            if (surface != null) {
+                builder.setSurface(surface);
+            }
+            return createVirtualDisplay(builder.build(), executor, callback);
         }
 
         /**
          * Creates a virtual display for this virtual device. All displays created on the same
          * device belongs to the same display group.
          *
-         * @param width The width of the virtual display in pixels, must be greater than 0.
-         * @param height The height of the virtual display in pixels, must be greater than 0.
-         * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
-         * @param displayCategories The categories of the virtual display, indicating the type of
-         * activities allowed to run on the display. Activities can declare their type using
-         * {@link android.content.pm.ActivityInfo#requiredDisplayCategory}.
-         * @param surface The surface to which the content of the virtual display should
-         * be rendered, or null if there is none initially. The surface can also be set later using
-         * {@link VirtualDisplay#setSurface(Surface)}.
-         * @param flags A combination of virtual display flags accepted by
-         * {@link DisplayManager#createVirtualDisplay}. In addition, the following flags are
-         * automatically set for all virtual devices:
-         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC VIRTUAL_DISPLAY_FLAG_PUBLIC} and
-         * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-         * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
+         * @param config The configuration of the display.
          * @param executor The executor on which {@code callback} will be invoked. This is ignored
          * if {@code callback} is {@code null}. If {@code callback} is specified, this executor must
          * not be null.
@@ -601,34 +570,9 @@ public final class VirtualDeviceManager {
          */
         @Nullable
         public VirtualDisplay createVirtualDisplay(
-                @IntRange(from = 1) int width,
-                @IntRange(from = 1) int height,
-                @IntRange(from = 1) int densityDpi,
-                @NonNull List<String> displayCategories,
-                @Nullable Surface surface,
-                @VirtualDisplayFlag int flags,
-                @Nullable @CallbackExecutor Executor executor,
-                @Nullable VirtualDisplay.Callback callback) {
-            VirtualDisplayConfig config = new VirtualDisplayConfig.Builder(
-                    getVirtualDisplayName(), width, height, densityDpi)
-                    .setDisplayCategories(displayCategories)
-                    .setSurface(surface)
-                    .setFlags(getVirtualDisplayFlags(flags))
-                    .build();
-            return createVirtualDisplayInternal(config, executor, callback);
-        }
-
-        /**
-         * @hide
-         */
-        @Nullable
-        private VirtualDisplay createVirtualDisplayInternal(
                 @NonNull VirtualDisplayConfig config,
                 @Nullable @CallbackExecutor Executor executor,
                 @Nullable VirtualDisplay.Callback callback) {
-            // TODO(b/205343547): Handle display groups properly instead of creating a new display
-            //  group for every new virtual display created using this API.
-            // belongs to the same display group.
             IVirtualDisplayCallback callbackWrapper =
                     new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
             final int displayId;
@@ -914,16 +858,6 @@ public final class VirtualDeviceManager {
             }
         }
 
-        /**
-         * Returns the display flags that should be added to a particular virtual display.
-         * Additional device-level flags from {@link
-         * com.android.server.companion.virtual.VirtualDeviceImpl#getBaseVirtualDisplayFlags()} will
-         * be added by DisplayManagerService.
-         */
-        private int getVirtualDisplayFlags(int flags) {
-            return DEFAULT_VIRTUAL_DISPLAY_FLAGS | flags;
-        }
-
         private String getVirtualDisplayName() {
             try {
                 // Currently this just use the device ID, which means all of the virtual displays
@@ -931,28 +865,6 @@ public final class VirtualDeviceManager {
                 // only be used for informational purposes, and not for identifying the display in
                 // code.
                 return "VirtualDevice_" + mVirtualDevice.getDeviceId();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        /**
-         * Creates a virtual sensor, capable of injecting sensor events into the system. Only for
-         * internal use, since device sensors must remain valid for the entire lifetime of the
-         * device.
-         *
-         * @param config The configuration of the sensor.
-         * @hide
-         */
-        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-        @NonNull
-        public VirtualSensor createVirtualSensor(@NonNull VirtualSensorConfig config) {
-            Objects.requireNonNull(config);
-            try {
-                final IBinder token = new Binder(
-                        "android.hardware.sensor.VirtualSensor:" + config.getName());
-                mVirtualDevice.createVirtualSensor(token, config);
-                return new VirtualSensor(config.getType(), config.getName(), mVirtualDevice, token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -1087,8 +999,23 @@ public final class VirtualDeviceManager {
          *
          * @param displayId The display ID on which the activity change happened.
          * @param topActivity The component name of the top activity.
+         * @deprecated Use {@link #onTopActivityChanged(int, ComponentName, int)} instead
          */
         void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity);
+
+        /**
+         * Called when the top activity is changed.
+         *
+         * <p>Note: When there are no activities running on the virtual display, the
+         * {@link #onDisplayEmpty(int)} will be called. If the value topActivity is cached, it
+         * should be cleared when {@link #onDisplayEmpty(int)} is called.
+         *
+         * @param displayId   The display ID on which the activity change happened.
+         * @param topActivity The component name of the top activity.
+         * @param userId      The user ID associated with the top activity.
+         */
+        default void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity,
+                @UserIdInt int userId) {}
 
         /**
          * Called when the display becomes empty (e.g. if the user hits back on the last
@@ -1113,6 +1040,12 @@ public final class VirtualDeviceManager {
 
         public void onTopActivityChanged(int displayId, ComponentName topActivity) {
             mExecutor.execute(() -> mActivityListener.onTopActivityChanged(displayId, topActivity));
+        }
+
+        public void onTopActivityChanged(int displayId, ComponentName topActivity,
+                @UserIdInt int userId) {
+            mExecutor.execute(() ->
+                    mActivityListener.onTopActivityChanged(displayId, topActivity, userId));
         }
 
         public void onDisplayEmpty(int displayId) {

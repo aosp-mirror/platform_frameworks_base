@@ -17,9 +17,12 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+
 import static com.android.server.am.ActivityManagerService.Injector;
 import static com.android.server.am.CachedAppOptimizer.compactActionIntToAction;
+
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
@@ -34,26 +37,29 @@ import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
+
 import androidx.test.platform.app.InstrumentationRegistry;
+
 import com.android.modules.utils.testing.TestableDeviceConfig;
+import com.android.server.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
 import com.android.server.wm.ActivityTaskManagerService;
+
+import org.junit.After;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.After;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Tests for {@link CachedAppOptimizer}.
@@ -62,7 +68,6 @@ import org.mockito.junit.MockitoJUnitRunner;
  * atest FrameworksMockingServicesTests:CachedAppOptimizerTest
  */
 @Presubmit
-@RunWith(MockitoJUnitRunner.class)
 public final class CachedAppOptimizerTest {
 
     private ServiceThread mThread;
@@ -81,16 +86,22 @@ public final class CachedAppOptimizerTest {
     @Mock
     private PackageManagerInternal mPackageManagerInt;
 
-    @Rule
-    public final TestableDeviceConfig.TestableDeviceConfigRule
-            mDeviceConfigRule = new TestableDeviceConfig.TestableDeviceConfigRule();
+    private final TestableDeviceConfig mDeviceConfig = new TestableDeviceConfig();
+
     @Rule
     public final ApplicationExitInfoTest.ServiceThreadRule
             mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
+    @Rule
+    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
+            .dynamiclyConfigureSessionBuilder(
+                    sessionBuilder -> mDeviceConfig.setUpMockedClasses(sessionBuilder))
+            .build();
+
     @Before
     public void setUp() {
         System.loadLibrary("mockingservicestestjni");
+        mDeviceConfig.setUpMockBehaviors();
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
@@ -121,6 +132,7 @@ public final class CachedAppOptimizerTest {
         mHandlerThread.quit();
         mThread.quit();
         mCountDown = null;
+        mDeviceConfig.tearDown();
     }
 
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, String processName,
@@ -1157,7 +1169,8 @@ public final class CachedAppOptimizerTest {
         }
 
         @Override
-        public AppOpsService getAppOpsService(File file, Handler handler) {
+        public AppOpsService getAppOpsService(File recentAccessesFile, File storageFile,
+                Handler handler) {
             return mAppOpsService;
         }
 

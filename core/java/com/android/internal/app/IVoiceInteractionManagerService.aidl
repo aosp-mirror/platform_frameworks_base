@@ -51,7 +51,7 @@ interface IVoiceInteractionManagerService {
     int startVoiceActivity(IBinder token, in Intent intent, String resolvedType,
             String attributionTag);
     int startAssistantActivity(IBinder token, in Intent intent, String resolvedType,
-            String attributionTag);
+            String attributionTag, in Bundle bundle);
     void setKeepAwake(IBinder token, boolean keepAwake);
     void closeSystemDialogs(IBinder token);
     void finish(IBinder token);
@@ -243,7 +243,14 @@ interface IVoiceInteractionManagerService {
      */
     IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
             in Identity originatorIdentity,
-            IBinder client);
+            IBinder client,
+            in SoundTrigger.ModuleProperties moduleProperties);
+
+    /**
+     * Lists properties of SoundTrigger modules that can be attached to by
+     * @{link createSoundTriggerSessionAsOriginator}.
+     */
+    List<SoundTrigger.ModuleProperties> listModuleProperties(in Identity originatorIdentity);
 
     /**
      * Set configuration and pass read-only data to hotword detection service.

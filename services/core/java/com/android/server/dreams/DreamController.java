@@ -158,15 +158,14 @@ final class DreamController {
             final DreamRecord oldDream = mCurrentDream;
             mCurrentDream = new DreamRecord(token, name, isPreviewMode, canDoze, userId, wakeLock);
             if (oldDream != null) {
-                if (!oldDream.mWakingGently) {
-                    // We will stop these previous dreams once the new dream is started.
-                    mPreviousDreams.add(oldDream);
-                } else if (Objects.equals(oldDream.mName, mCurrentDream.mName)) {
+                if (Objects.equals(oldDream.mName, mCurrentDream.mName)) {
                     // We are attempting to start a dream that is currently waking up gently.
                     // Let's silently stop the old instance here to clear the dream state.
                     // This should happen after the new mCurrentDream is set to avoid announcing
                     // a "dream stopped" state.
                     stopDreamInstance(/* immediately */ true, "restarting same dream", oldDream);
+                } else {
+                    mPreviousDreams.add(oldDream);
                 }
             }
 
@@ -294,8 +293,6 @@ final class DreamController {
                         new int[] {ACTIVITY_TYPE_DREAM});
 
                 mListener.onDreamStopped(dream.mToken);
-            } else if (dream.mCanDoze && !mCurrentDream.mCanDoze) {
-                mListener.stopDozing(dream.mToken);
             }
 
         } finally {
@@ -322,7 +319,7 @@ final class DreamController {
         try {
             service.asBinder().linkToDeath(mCurrentDream, 0);
             service.attach(mCurrentDream.mToken, mCurrentDream.mCanDoze,
-                    mCurrentDream.mDreamingStartedCallback);
+                    mCurrentDream.mIsPreviewMode, mCurrentDream.mDreamingStartedCallback);
         } catch (RemoteException ex) {
             Slog.e(TAG, "The dream service died unexpectedly.", ex);
             stopDream(true /*immediate*/, "attach failed");
@@ -343,7 +340,6 @@ final class DreamController {
      */
     public interface Listener {
         void onDreamStopped(Binder token);
-        void stopDozing(Binder token);
     }
 
     private final class DreamRecord implements DeathRecipient, ServiceConnection {

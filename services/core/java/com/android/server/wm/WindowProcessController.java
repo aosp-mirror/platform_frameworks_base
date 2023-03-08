@@ -54,7 +54,6 @@ import android.app.BackgroundStartPrivileges;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
-import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -211,7 +210,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether {@link #mLastReportedConfiguration} is deferred by the cached state. */
     private volatile boolean mHasCachedConfiguration;
 
-    private int mTopActivityDeviceId = VirtualDeviceManager.DEVICE_ID_DEFAULT;
+    private int mLastTopActivityDeviceId = Context.DEVICE_ID_DEFAULT;
     /**
      * Registered {@link DisplayArea} as a listener to override config changes. {@code null} if not
      * registered.
@@ -603,7 +602,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /**
      * Add bound client Uid.
      */
-    public void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+    public void addBoundClientUid(int clientUid, String clientPackageName, long bindFlags) {
         mBgLaunchController.addBoundClientUid(clientUid, clientPackageName, bindFlags);
     }
 
@@ -1412,8 +1411,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // If deviceId for the top-activity changed, schedule passing it to the app process.
         boolean topActivityDeviceChanged = false;
         int deviceId = getTopActivityDeviceId();
-        if (deviceId != mTopActivityDeviceId) {
+        if (deviceId != mLastTopActivityDeviceId) {
             topActivityDeviceChanged = true;
+            mLastTopActivityDeviceId = deviceId;
         }
 
         final Configuration config = getConfiguration();
@@ -1432,15 +1432,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return;
         }
 
-        // TODO(b/263402938): Add tests that capture the deviceId dispatch to the client.
-        mTopActivityDeviceId = deviceId;
-        dispatchConfiguration(config, topActivityDeviceChanged ? mTopActivityDeviceId
-                : VirtualDeviceManager.DEVICE_ID_INVALID);
+        dispatchConfiguration(config);
     }
 
     private int getTopActivityDeviceId() {
         ActivityRecord topActivity = getTopNonFinishingActivity();
-        int updatedDeviceId = mTopActivityDeviceId;
+        int updatedDeviceId = Context.DEVICE_ID_DEFAULT;
         if (topActivity != null && topActivity.mDisplayContent != null) {
             updatedDeviceId = mAtm.mTaskSupervisor.getDeviceIdForDisplayId(
                     topActivity.mDisplayContent.mDisplayId);
@@ -1485,10 +1482,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void dispatchConfiguration(Configuration config) {
-        dispatchConfiguration(config, getTopActivityDeviceId());
-    }
-
-    void dispatchConfiguration(Configuration config, int deviceId) {
         mHasPendingConfigurationChange = false;
         if (mThread == null) {
             if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1515,16 +1508,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(mThread, config, deviceId);
+        scheduleConfigurationChange(mThread, config);
     }
 
     private void scheduleConfigurationChange(IApplicationThread thread, Configuration config) {
-        // By default send invalid deviceId as no-op signal so it's not updated on the client side.
-        scheduleConfigurationChange(thread, config, VirtualDeviceManager.DEVICE_ID_INVALID);
-    }
-
-    private void scheduleConfigurationChange(IApplicationThread thread, Configuration config,
-            int deviceId) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1534,7 +1521,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mHasCachedConfiguration = false;
         try {
             mAtm.getLifecycleManager().scheduleTransaction(thread,
-                    ConfigurationChangeItem.obtain(config, deviceId));
+                    ConfigurationChangeItem.obtain(config, mLastTopActivityDeviceId));
         } catch (Exception e) {
             Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change: " + mOwner, e);
         }
@@ -1838,6 +1825,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 if ((stateFlags & ACTIVITY_STATE_FLAG_IS_STOPPING_FINISHING) != 0) {
                     pw.print("F|");
                 }
+            }
+            if ((stateFlags & ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK) != 0) {
+                pw.print("VT|");
             }
             final int taskLayer = stateFlags & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
             if (taskLayer != ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER) {

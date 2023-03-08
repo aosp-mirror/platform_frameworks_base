@@ -19,11 +19,11 @@ package android.app.backup;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
-import android.app.backup.BackupAnnotations.OperationType;
 import android.util.Slog;
 
 import java.lang.annotation.Retention;
@@ -227,6 +227,16 @@ public class BackupRestoreEventLogger {
     @OperationType
     public int getOperationType() {
         return mOperationType;
+    }
+
+    /**
+     * Clears data logged. This method should only be used by B&R code in Android Framework.
+     *
+     * @hide
+     */
+    public void clearData() {
+        mResults.clear();
+
     }
 
     private void logSuccess(@OperationType int operationType,

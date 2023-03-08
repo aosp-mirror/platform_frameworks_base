@@ -18,9 +18,9 @@ package com.android.server.clipboard;
 
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_DEFAULT;
-import static android.companion.virtual.VirtualDeviceManager.DEVICE_ID_INVALID;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
+import static android.content.Context.DEVICE_ID_DEFAULT;
+import static android.content.Context.DEVICE_ID_INVALID;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -484,6 +484,51 @@ public class ClipboardService extends SystemService {
                     sourcePackage);
         }
 
+        @Override
+        public boolean areClipboardAccessNotificationsEnabledForUser(int userId) {
+            int result = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("areClipboardAccessNotificationsEnable requires "
+                        + "permission MANAGE_CLIPBOARD_ACCESS_NOTIFICATION");
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                return Settings.Secure.getIntForUser(getContext().getContentResolver(),
+                        Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS,
+                        getDefaultClipboardAccessNotificationsSetting(), userId) != 0;
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
+        @Override
+        public void setClipboardAccessNotificationsEnabledForUser(boolean enable, int userId) {
+            int result = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.MANAGE_CLIPBOARD_ACCESS_NOTIFICATION);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("areClipboardAccessNotificationsEnable requires "
+                        + "permission MANAGE_CLIPBOARD_ACCESS_NOTIFICATION");
+            }
+
+            long callingId = Binder.clearCallingIdentity();
+            try {
+                ContentResolver resolver = getContext()
+                        .createContextAsUser(UserHandle.of(userId), 0).getContentResolver();
+                Settings.Secure.putInt(resolver,
+                        Settings.Secure.CLIPBOARD_SHOW_ACCESS_NOTIFICATIONS, (enable ? 1 : 0));
+            } finally {
+                Binder.restoreCallingIdentity(callingId);
+            }
+        }
+
+        private int getDefaultClipboardAccessNotificationsSetting() {
+            return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_CLIPBOARD,
+                    ClipboardManager.DEVICE_CONFIG_SHOW_ACCESS_NOTIFICATIONS,
+                    ClipboardManager.DEVICE_CONFIG_DEFAULT_SHOW_ACCESS_NOTIFICATIONS) ? 1 : 0;
+        }
+
         private void checkAndSetPrimaryClip(
                 ClipData clip,
                 String callingPackage,
@@ -824,7 +869,9 @@ public class ClipboardService extends SystemService {
     @GuardedBy("mLock")
     private void setPrimaryClipInternalLocked(
             @Nullable ClipData clip, int uid, int deviceId, @Nullable String sourcePackage) {
-        mEmulatorClipboardMonitor.accept(clip);
+        if (deviceId == DEVICE_ID_DEFAULT) {
+            mEmulatorClipboardMonitor.accept(clip);
+        }
 
         final int userId = UserHandle.getUserId(uid);
 

@@ -231,8 +231,27 @@ public interface HotwordDetector {
 
         /**
          * Called when the detection fails due to an error.
+         *
+         * @deprecated On Android 14 and above, implement {@link #onFailure(DetectorFailure)}
+         * instead.
          */
+        @Deprecated
         void onError();
+
+        /**
+         * Called when the detection fails due to an error, the subclasses of
+         * {@link DetectorFailure} will be reported to the detector.
+         *
+         * @see android.service.voice.HotwordDetectionServiceFailure
+         * @see android.service.voice.SoundTriggerFailure
+         * @see android.service.voice.UnknownFailure
+         * @see android.service.voice.VisualQueryDetectionServiceFailure
+         *
+         * @param detectorFailure It provides the error code, error message and suggested action.
+         */
+        default void onFailure(@NonNull DetectorFailure detectorFailure) {
+            onError();
+        }
 
         /**
          * Called when the recognition is paused temporarily for some reason.
@@ -264,9 +283,9 @@ public interface HotwordDetector {
          *
          * @param status Info about initialization state of {@link HotwordDetectionService} or
          * {@link VisualQueryDetectionService}; allowed values are
-         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_SUCCESS},
-         * 1<->{@link SandboxedDetectionServiceBase#getMaxCustomInitializationStatus()},
-         * {@link SandboxedDetectionServiceBase#INITIALIZATION_STATUS_UNKNOWN}.
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_SUCCESS},
+         * 1<->{@link SandboxedDetectionInitializer#getMaxCustomInitializationStatus()},
+         * {@link SandboxedDetectionInitializer#INITIALIZATION_STATUS_UNKNOWN}.
          */
         void onHotwordDetectionServiceInitialized(int status);
 

@@ -374,10 +374,24 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     }
 
     @Override
+    public void onBiometricDetected(int userId, BiometricSourceType biometricSourceType,
+            boolean isStrongBiometric) {
+        Trace.beginSection("BiometricUnlockController#onBiometricDetected");
+        if (mUpdateMonitor.isGoingToSleep()) {
+            Trace.endSection();
+            return;
+        }
+        startWakeAndUnlock(MODE_SHOW_BOUNCER);
+    }
+
+    @Override
     public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType,
             boolean isStrongBiometric) {
         Trace.beginSection("BiometricUnlockController#onBiometricAuthenticated");
         if (mUpdateMonitor.isGoingToSleep()) {
+            mLogger.deferringAuthenticationDueToSleep(userId,
+                    biometricSourceType,
+                    mPendingAuthenticated != null);
             mPendingAuthenticated = new PendingAuthenticated(userId, biometricSourceType,
                     isStrongBiometric);
             Trace.endSection();
@@ -784,6 +798,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 public void onFinishedGoingToSleep() {
                     Trace.beginSection("BiometricUnlockController#onFinishedGoingToSleep");
                     if (mPendingAuthenticated != null) {
+                        mLogger.finishedGoingToSleepWithPendingAuth();
                         PendingAuthenticated pendingAuthenticated = mPendingAuthenticated;
                         // Post this to make sure it's executed after the device is fully locked.
                         mHandler.post(() -> onBiometricAuthenticated(pendingAuthenticated.userId,

@@ -51,7 +51,6 @@ import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.server.wm.ActivityRecord.State.FINISHING;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
@@ -103,6 +102,7 @@ import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.companion.virtual.VirtualDeviceManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -133,6 +133,7 @@ import android.os.WorkSource;
 import android.provider.MediaStore;
 import android.util.ArrayMap;
 import android.util.MergedConfiguration;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -1161,6 +1162,11 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return false;
         }
 
+        if ((displayContent.mDisplay.getFlags() & Display.FLAG_REAR) != 0) {
+            Slog.w(TAG, "Launch on display check: activity launch is not allowed on rear display");
+            return false;
+        }
+
         // Check if the caller has enough privileges to embed activities and launch to private
         // displays.
         final int startAnyPerm = mService.checkPermission(INTERNAL_SYSTEM_WINDOW, callingPid,
@@ -1230,11 +1236,16 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
     int getDeviceIdForDisplayId(int displayId) {
         if (displayId == DEFAULT_DISPLAY || displayId == INVALID_DISPLAY)  {
-            return VirtualDeviceManager.DEVICE_ID_DEFAULT;
+            return Context.DEVICE_ID_DEFAULT;
         }
         if (mVirtualDeviceManager == null) {
-            mVirtualDeviceManager =
-                    mService.mContext.getSystemService(VirtualDeviceManager.class);
+            if (mService.mHasCompanionDeviceSetupFeature) {
+                mVirtualDeviceManager =
+                        mService.mContext.getSystemService(VirtualDeviceManager.class);
+            }
+            if (mVirtualDeviceManager == null) {
+                return Context.DEVICE_ID_DEFAULT;
+            }
         }
         return mVirtualDeviceManager.getDeviceIdForDisplayId(displayId);
     }
@@ -1630,44 +1641,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             // Prevent recursion.
             return;
         }
-        boolean passesAsmChecks = true;
-        // We may have already checked that the callingUid has additional clearTask privileges, and
-        // cleared the calling identify. If so, we infer we do not need further restrictions here.
-        // TODO(b/263368846) Move to live with the rest of the ASM logic.
-        if (callingUid != SYSTEM_UID) {
-            passesAsmChecks = doesTopActivityMatchingUidExistForAsm(task, callingUid,
-                    null);
-            if (!passesAsmChecks) {
-                ActivityRecord topActivity =  task.getActivity(ar ->
-                        !ar.isState(FINISHING) && !ar.isAlwaysOnTop());
-                FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
-                        /* caller_uid */
-                        callingUid,
-                        /* caller_activity_class_name */
-                        callerActivityClassName,
-                        /* target_task_top_activity_uid */
-                        topActivity == null ? -1 : topActivity.getUid(),
-                        /* target_task_top_activity_class_name */
-                        topActivity == null ? null : topActivity.info.name,
-                        /* target_task_is_different */
-                        false,
-                        /* target_activity_uid */
-                        -1,
-                        /* target_activity_class_name */
-                        null,
-                        /* target_intent_action */
-                        null,
-                        /* target_intent_flags */
-                        0,
-                        /* action */
-                        FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
-                        /* version */
-                        1,
-                        /* multi_window */
-                        false
-                );
-            }
-        }
         task.mTransitionController.requestCloseTransitionIfNeeded(task);
         task.mInRemoveTask = true;
         try {
@@ -1678,30 +1651,101 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             if (task.isPersistable) {
                 mService.notifyTaskPersisterLocked(null, true);
             }
-            if (!passesAsmChecks) {
-                boolean shouldRestrictActivitySwitch =
-                        ActivitySecurityModelFeatureFlags.shouldRestrictActivitySwitch(callingUid);
-
-                if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)) {
-                    UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
-                            (shouldRestrictActivitySwitch
-                                    ? "Returning home due to "
-                                    : "Would return home due to ")
-                                    + ActivitySecurityModelFeatureFlags.DOC_LINK,
-                            Toast.LENGTH_SHORT).show());
-                }
-
-                // If the activity switch should be restricted, return home rather than the
-                // previously top task, to prevent users from being confused which app they're
-                // viewing
-                if (shouldRestrictActivitySwitch) {
-                    Slog.w(TAG, "Return to home as source uid: " + callingUid
-                            + "is not on top of task t: " + task);
-                    task.getTaskDisplayArea().moveHomeActivityToTop("taskRemoved");
-                }
-            }
+            checkActivitySecurityForTaskClear(callingUid, task, callerActivityClassName);
         } finally {
             task.mInRemoveTask = false;
+        }
+    }
+
+    // TODO(b/263368846) Move to live with the rest of the ASM logic.
+    /**
+     * Returns home if the passed in callingUid is not top of the stack, rather than returning to
+     * previous task.
+     */
+    private void checkActivitySecurityForTaskClear(int callingUid, Task task,
+            String callerActivityClassName) {
+        // We may have already checked that the callingUid has additional clearTask privileges, and
+        // cleared the calling identify. If so, we infer we do not need further restrictions here.
+        if (callingUid == SYSTEM_UID) {
+            return;
+        }
+
+        TaskDisplayArea displayArea = task.getTaskDisplayArea();
+        if (displayArea == null) {
+            // If there is no associated display area, we can not return home.
+            return;
+        }
+
+        Pair<Boolean, Boolean> pair = doesTopActivityMatchingUidExistForAsm(task, callingUid, null);
+        boolean shouldBlockActivitySwitchIfFeatureEnabled = !pair.first;
+        boolean wouldBlockActivitySwitchIgnoringFlags = !pair.second;
+
+        if (!wouldBlockActivitySwitchIgnoringFlags) {
+            return;
+        }
+
+        ActivityRecord topActivity = task.getActivity(ar -> !ar.finishing && !ar.isAlwaysOnTop());
+        FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED,
+                /* caller_uid */
+                callingUid,
+                /* caller_activity_class_name */
+                callerActivityClassName,
+                /* target_task_top_activity_uid */
+                topActivity == null ? -1 : topActivity.getUid(),
+                /* target_task_top_activity_class_name */
+                topActivity == null ? null : topActivity.info.name,
+                /* target_task_is_different */
+                false,
+                /* target_activity_uid */
+                -1,
+                /* target_activity_class_name */
+                null,
+                /* target_intent_action */
+                null,
+                /* target_intent_flags */
+                0,
+                /* action */
+                FrameworkStatsLog.ACTIVITY_ACTION_BLOCKED__ACTION__FINISH_TASK,
+                /* version */
+                ActivitySecurityModelFeatureFlags.ASM_VERSION,
+                /* multi_window */
+                false,
+                /* bal_code */
+                -1
+        );
+
+        boolean restrictActivitySwitch = ActivitySecurityModelFeatureFlags
+                .shouldRestrictActivitySwitch(callingUid)
+                && shouldBlockActivitySwitchIfFeatureEnabled;
+
+        PackageManager pm = mService.mContext.getPackageManager();
+        String callingPackage = pm.getNameForUid(callingUid);
+        final CharSequence callingLabel;
+        if (callingPackage == null) {
+            callingPackage = String.valueOf(callingUid);
+            callingLabel = callingPackage;
+        } else {
+            callingLabel = getApplicationLabel(pm, callingPackage);
+        }
+
+        if (ActivitySecurityModelFeatureFlags.shouldShowToast(callingUid)) {
+            UiThread.getHandler().post(() -> Toast.makeText(mService.mContext,
+                    (ActivitySecurityModelFeatureFlags.DOC_LINK
+                            + (restrictActivitySwitch ? " returned home due to "
+                                    : " would return home due to ")
+                            + callingLabel), Toast.LENGTH_LONG).show());
+        }
+
+        // If the activity switch should be restricted, return home rather than the
+        // previously top task, to prevent users from being confused which app they're
+        // viewing
+        if (restrictActivitySwitch) {
+            Slog.w(TAG, "[ASM] Return to home as source: " + callingPackage
+                    + " is not on top of task t: " + task);
+            displayArea.moveHomeActivityToTop("taskRemoved");
+        } else {
+            Slog.i(TAG, "[ASM] Would return to home as source: " + callingPackage
+                    + " is not on top of task t: " + task);
         }
     }
 
@@ -1714,46 +1758,65 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      *
      *  The 'sourceRecord' can be considered top even if it is 'finishing'
      *
-     *  TODO(b/263368846) Shift to BackgroundActivityStartController once class is ready
+     * @return A pair where the first value is the return value matching the checks above, and the
+     * second value is the return value disregarding the feature flag or target api levels. Use the
+     * first value for blocking launches - the second value is only used to determine if a toast
+     * should be displayed, and will be used alongside a feature flag in {@link ActivityStarter}.
      */
+    // TODO(b/263368846) Shift to BackgroundActivityStartController once class is ready
     @Nullable
-    static boolean doesTopActivityMatchingUidExistForAsm(@Nullable Task task,
+    static Pair<Boolean, Boolean> doesTopActivityMatchingUidExistForAsm(@Nullable Task task,
             int uid, @Nullable ActivityRecord sourceRecord) {
         // If the source is visible, consider it 'top'.
         if (sourceRecord != null && sourceRecord.isVisible()) {
-            return true;
+            return new Pair<>(true, true);
         }
 
         // Consider the source activity, whether or not it is finishing. Do not consider any other
         // finishing activity.
         Predicate<ActivityRecord> topOfStackPredicate = (ar) -> ar.equals(sourceRecord)
-                || (!ar.isState(FINISHING) && !ar.isAlwaysOnTop());
+                || (!ar.finishing && !ar.isAlwaysOnTop());
 
         // Check top of stack (or the first task fragment for embedding).
         ActivityRecord topActivity = task.getActivity(topOfStackPredicate);
         if (topActivity == null) {
-            return false;
+            return new Pair<>(false, false);
         }
 
-        if (topActivity.getUid() == uid) {
-            return true;
+        Pair<Boolean, Boolean> pair = topActivity.allowCrossUidActivitySwitchFromBelow(uid);
+        if (pair.first) {
+            return new Pair<>(true, pair.second);
         }
 
         // Even if the top activity is not a match, we may be in an embedded activity scenario with
         // an adjacent task fragment. Get the second fragment.
         TaskFragment taskFragment = topActivity.getTaskFragment();
         if (taskFragment == null) {
-            return false;
+            return new Pair<>(false, false);
         }
 
         TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
         if (adjacentTaskFragment == null) {
-            return false;
+            return new Pair<>(false, false);
         }
 
         // Check the second fragment.
         topActivity = adjacentTaskFragment.getActivity(topOfStackPredicate);
-        return topActivity != null && topActivity.getUid() == uid;
+        if (topActivity == null) {
+            return new Pair<>(false, false);
+        }
+
+        return topActivity.allowCrossUidActivitySwitchFromBelow(uid);
+    }
+
+    static CharSequence getApplicationLabel(PackageManager pm, String packageName) {
+        try {
+            ApplicationInfo launchedFromPackageInfo = pm.getApplicationInfo(
+                    packageName, PackageManager.ApplicationInfoFlags.of(0));
+            return pm.getApplicationLabel(launchedFromPackageInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            return packageName;
+        }
     }
 
     void cleanUpRemovedTaskLocked(Task task, boolean killProcess, boolean removeFromRecents) {
@@ -2053,7 +2116,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         // Stop any activities that are scheduled to do so but have been waiting for the transition
         // animation to finish.
         ArrayList<ActivityRecord> readyToStopActivities = null;
-        for (int i = mStoppingActivities.size() - 1; i >= 0; --i) {
+        for (int i = 0; i < mStoppingActivities.size(); i++) {
             final ActivityRecord s = mStoppingActivities.get(i);
             final boolean animating = s.isInTransition();
             ProtoLog.v(WM_DEBUG_STATES, "Stopping %s: nowVisible=%b animating=%b "
@@ -2074,6 +2137,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 readyToStopActivities.add(s);
 
                 mStoppingActivities.remove(i);
+                i--;
             }
         }
 

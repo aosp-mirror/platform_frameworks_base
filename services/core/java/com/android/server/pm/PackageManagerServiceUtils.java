@@ -24,6 +24,7 @@ import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDWR;
 
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH;
 import static com.android.server.LocalManagerRegistry.ManagerNotFoundException;
 import static com.android.server.pm.PackageManagerService.COMPRESSED_EXTENSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
@@ -94,6 +95,7 @@ import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityManagerUtils;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -1186,12 +1188,6 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
-            // Only enforce filter matching if target app's target SDK >= T
-            if (!compat.isChangeEnabledInternal(
-                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo)) {
-                continue;
-            }
-
             final ParsedMainComponent comp;
             if (info instanceof ActivityInfo) {
                 if (isReceiver) {
@@ -1210,6 +1206,10 @@ public class PackageManagerServiceUtils {
                 continue;
             }
 
+            // Only enforce filter matching if target app's target SDK >= T
+            final boolean enforce = compat.isChangeEnabledInternal(
+                    ENFORCE_INTENTS_TO_MATCH_INTENT_FILTERS, info.applicationInfo);
+
             boolean match = false;
             for (int j = 0, size = comp.getIntents().size(); j < size; ++j) {
                 IntentFilter intentFilter = comp.getIntents().get(j).getIntentFilter();
@@ -1219,14 +1219,19 @@ public class PackageManagerServiceUtils {
                 }
             }
             if (!match) {
-                Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
-                Slog.w(TAG, "Access blocked: " + comp.getComponentName());
-                if (DEBUG_INTENT_MATCHING) {
-                    Slog.v(TAG, "Component intent filters:");
-                    comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
-                    Slog.v(TAG, "-----------------------------");
+                ActivityManagerUtils.logUnsafeIntentEvent(
+                        UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__EXPLICIT_INTENT_FILTER_UNMATCH,
+                        filterCallingUid, intent, resolvedType, enforce);
+                if (enforce) {
+                    Slog.w(TAG, "Intent does not match component's intent filter: " + intent);
+                    Slog.w(TAG, "Access blocked: " + comp.getComponentName());
+                    if (DEBUG_INTENT_MATCHING) {
+                        Slog.v(TAG, "Component intent filters:");
+                        comp.getIntents().forEach(f -> f.getIntentFilter().dump(logPrinter, "  "));
+                        Slog.v(TAG, "-----------------------------");
+                    }
+                    resolveInfos.remove(i);
                 }
-                resolveInfos.remove(i);
             }
         }
     }

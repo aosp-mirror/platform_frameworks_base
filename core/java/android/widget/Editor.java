@@ -52,6 +52,7 @@ import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -124,13 +125,11 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.CorrectionInfo;
 import android.view.inputmethod.CursorAnchorInfo;
-import android.view.inputmethod.EditorBoundsInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
-import android.view.inputmethod.TextAppearanceInfo;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationManager;
 import android.widget.AdapterView.OnItemClickListener;
@@ -170,6 +169,9 @@ public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
 
+    // TODO(nona): Make this configurable.
+    private static final boolean FLAG_USE_NEW_CONTEXT_MENU = false;
+
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
 
@@ -187,20 +189,24 @@ public class Editor {
     // Tag used when the Editor maintains its own separate UndoManager.
     private static final String UNDO_OWNER_TAG = "Editor";
 
-    // Ordering constants used to place the Action Mode or context menu items in their menu.
-    private static final int MENU_ITEM_ORDER_ASSIST = 0;
-    private static final int MENU_ITEM_ORDER_UNDO = 2;
-    private static final int MENU_ITEM_ORDER_REDO = 3;
-    private static final int MENU_ITEM_ORDER_CUT = 4;
-    private static final int MENU_ITEM_ORDER_COPY = 5;
-    private static final int MENU_ITEM_ORDER_PASTE = 6;
-    private static final int MENU_ITEM_ORDER_SHARE = 7;
-    private static final int MENU_ITEM_ORDER_SELECT_ALL = 8;
-    private static final int MENU_ITEM_ORDER_REPLACE = 9;
-    private static final int MENU_ITEM_ORDER_AUTOFILL = 10;
-    private static final int MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
-    private static final int MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
-    private static final int MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
+    // Ordering constants used to place the Action Mode items in their menu.
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_ASSIST = 0;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_CUT = 4;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_COPY = 5;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_PASTE = 6;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_SHARE = 7;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_SELECT_ALL = 8;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_REPLACE = 9;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_AUTOFILL = 10;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT = 11;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START = 50;
+    private static final int ACTION_MODE_MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START = 100;
+
+    private static final int CONTEXT_MENU_ITEM_ORDER_REPLACE = 11;
+
+    private static final int CONTEXT_MENU_GROUP_UNDO_REDO = Menu.FIRST;
+    private static final int CONTEXT_MENU_GROUP_CLIPBOARD = Menu.FIRST + 1;
+    private static final int CONTEXT_MENU_GROUP_MISC = Menu.FIRST + 2;
 
     private static final int FLAG_MISSPELLED_OR_GRAMMAR_ERROR =
             SuggestionSpan.FLAG_MISSPELLED | SuggestionSpan.FLAG_GRAMMAR_ERROR;
@@ -3085,7 +3091,33 @@ public class Editor {
         mContextMenuAnchorY = y;
     }
 
-    void onCreateContextMenu(ContextMenu menu) {
+    private void setAssistContextMenuItems(Menu menu) {
+        final TextClassification textClassification =
+                getSelectionActionModeHelper().getTextClassification();
+        if (textClassification == null) {
+            return;
+        }
+
+        final AssistantCallbackHelper helper =
+                new AssistantCallbackHelper(getSelectionActionModeHelper());
+        helper.updateAssistMenuItems(menu, (MenuItem item) -> {
+            getSelectionActionModeHelper()
+                    .onSelectionAction(item.getItemId(), item.getTitle().toString());
+
+            if (mProcessTextIntentActionsHandler.performMenuItemAction(item)) {
+                return true;
+            }
+            if (item.getGroupId() == TextView.ID_ASSIST && helper.onAssistMenuItemClicked(item)) {
+                return true;
+            }
+            return mTextView.onTextContextMenuItem(item.getItemId());
+        });
+    }
+
+    /**
+     * Called when the context menu is created.
+     */
+    public void onCreateContextMenu(ContextMenu menu) {
         if (mIsBeingLongClicked || Float.isNaN(mContextMenuAnchorX)
                 || Float.isNaN(mContextMenuAnchorY)) {
             return;
@@ -3114,8 +3146,8 @@ public class Editor {
             for (int i = 0; i < suggestionInfoArray.length; i++) {
                 suggestionInfoArray[i] = new SuggestionInfo();
             }
-            final SubMenu subMenu = menu.addSubMenu(Menu.NONE, Menu.NONE, MENU_ITEM_ORDER_REPLACE,
-                    com.android.internal.R.string.replace);
+            final SubMenu subMenu = menu.addSubMenu(Menu.NONE, Menu.NONE,
+                    CONTEXT_MENU_ITEM_ORDER_REPLACE, com.android.internal.R.string.replace);
             final int numItems = mSuggestionHelper.getSuggestionInfo(suggestionInfoArray, null);
             for (int i = 0; i < numItems; i++) {
                 final SuggestionInfo info = suggestionInfoArray[i];
@@ -3130,55 +3162,121 @@ public class Editor {
             }
         }
 
-        final int keyboard = mTextView.getResources().getConfiguration().keyboard;
-        menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
+        final int menuItemOrderUndo = 2;
+        final int menuItemOrderRedo = 3;
+        final int menuItemOrderCut = 4;
+        final int menuItemOrderCopy = 5;
+        final int menuItemOrderPaste = 6;
+        final int menuItemOrderPasteAsPlainText;
+        final int menuItemOrderSelectAll;
+        final int menuItemOrderShare;
+        final int menuItemOrderAutofill;
+        if (FLAG_USE_NEW_CONTEXT_MENU) {
+            menuItemOrderPasteAsPlainText = 7;
+            menuItemOrderSelectAll = 8;
+            menuItemOrderShare = 9;
+            menuItemOrderAutofill = 10;
 
-        menu.add(Menu.NONE, TextView.ID_UNDO, MENU_ITEM_ORDER_UNDO,
+            menu.setOptionalIconsVisible(true);
+            menu.setGroupDividerEnabled(true);
+
+            setAssistContextMenuItems(menu);
+
+            final int keyboard = mTextView.getResources().getConfiguration().keyboard;
+            menu.setQwertyMode(keyboard == Configuration.KEYBOARD_QWERTY);
+        } else {
+            menuItemOrderShare = 7;
+            menuItemOrderSelectAll = 8;
+            menuItemOrderAutofill = 10;
+            menuItemOrderPasteAsPlainText = 11;
+        }
+
+        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
                 com.android.internal.R.string.undo)
                 .setAlphabeticShortcut('z')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canUndo());
-        menu.add(Menu.NONE, TextView.ID_REDO, MENU_ITEM_ORDER_REDO,
+        menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, menuItemOrderRedo,
                 com.android.internal.R.string.redo)
                 .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canRedo());
 
-        menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, menuItemOrderCut,
                 com.android.internal.R.string.cut)
                 .setAlphabeticShortcut('x')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canCut());
-        menu.add(Menu.NONE, TextView.ID_COPY, MENU_ITEM_ORDER_COPY,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, menuItemOrderCopy,
                 com.android.internal.R.string.copy)
                 .setAlphabeticShortcut('c')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
                 .setEnabled(mTextView.canCopy());
-        menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, menuItemOrderPaste,
                 com.android.internal.R.string.paste)
                 .setAlphabeticShortcut('v')
                 .setEnabled(mTextView.canPaste())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_PASTE_AS_PLAIN_TEXT, MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
+                        menuItemOrderPasteAsPlainText,
                 com.android.internal.R.string.paste_as_plain_text)
                 .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setEnabled(mTextView.canPasteAsPlainText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
-                com.android.internal.R.string.share)
-                .setEnabled(mTextView.canShare())
-                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_SELECT_ALL, MENU_ITEM_ORDER_SELECT_ALL,
-                com.android.internal.R.string.selectAll)
+        menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
+                        menuItemOrderSelectAll, com.android.internal.R.string.selectAll)
                 .setAlphabeticShortcut('a')
                 .setEnabled(mTextView.canSelectAllText())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
-        menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+
+        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, menuItemOrderShare,
+                com.android.internal.R.string.share)
+                .setEnabled(mTextView.canShare())
+                .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
+        menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
                 android.R.string.autofill)
                 .setEnabled(mTextView.canRequestAutofill())
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
         mPreserveSelection = true;
+
+        // No-op for the old context menu because it doesn't have icons.
+        adjustIconSpacing(menu);
+    }
+
+    /**
+     * Adjust icon spacing to align the texts.
+     * @hide
+     */
+    @VisibleForTesting
+    public void adjustIconSpacing(ContextMenu menu) {
+        int width = -1;
+        int height = -1;
+        for (int i = 0; i < menu.size(); ++i) {
+            final MenuItem item = menu.getItem(i);
+            final Drawable d = item.getIcon();
+            if (d == null) {
+                continue;
+            }
+
+            width = Math.max(width, d.getIntrinsicWidth());
+            height = Math.max(height, d.getIntrinsicHeight());
+        }
+
+        if (width < 0 || height < 0) {
+            return;  // No menu has icon drawable.
+        }
+
+        GradientDrawable paddingDrawable = new GradientDrawable();
+        paddingDrawable.setSize(width, height);
+
+        for (int i = 0; i < menu.size(); ++i) {
+            final MenuItem item = menu.getItem(i);
+            final Drawable d = item.getIcon();
+            if (d == null) {
+                item.setIcon(paddingDrawable);
+            }
+        }
     }
 
     @Nullable
@@ -4278,6 +4376,165 @@ public class Editor {
     }
 
     /**
+     * Helper class for UI component (e.g. ActionMode and ContextMenu) with TextClassification.
+     * @hide
+     */
+    @VisibleForTesting
+    public class AssistantCallbackHelper {
+        private final Map<MenuItem, OnClickListener> mAssistClickHandlers = new HashMap<>();
+        @Nullable private TextClassification mPrevTextClassification;
+        @NonNull private final SelectionActionModeHelper mHelper;
+
+        public AssistantCallbackHelper(SelectionActionModeHelper helper) {
+            mHelper = helper;
+        }
+
+        /**
+         * Clears callback handlers.
+         */
+        public void clearCallbackHandlers() {
+            mAssistClickHandlers.clear();
+        }
+
+        /**
+         * Get on click listener assisiated with the MenuItem.
+         */
+        public OnClickListener getOnClickListener(MenuItem key) {
+            return mAssistClickHandlers.get(key);
+        }
+
+        /**
+         * Update menu items.
+         *
+         * Existing assist menu will be cleared and latest assist menu will be added.
+         */
+        public void updateAssistMenuItems(Menu menu, MenuItem.OnMenuItemClickListener listener) {
+            final TextClassification textClassification = mHelper.getTextClassification();
+            if (mPrevTextClassification == textClassification) {
+                // Already handled.
+                return;
+            }
+            clearAssistMenuItems(menu);
+            if (textClassification == null) {
+                return;
+            }
+            if (!shouldEnableAssistMenuItems()) {
+                return;
+            }
+            if (!textClassification.getActions().isEmpty()) {
+                // Primary assist action (Always shown).
+                final MenuItem item = addAssistMenuItem(menu,
+                        textClassification.getActions().get(0), TextView.ID_ASSIST,
+                        ACTION_MODE_MENU_ITEM_ORDER_ASSIST, MenuItem.SHOW_AS_ACTION_ALWAYS,
+                        listener);
+                item.setIntent(textClassification.getIntent());
+            } else if (hasLegacyAssistItem(textClassification)) {
+                // Legacy primary assist action (Always shown).
+                final MenuItem item = menu.add(TextView.ID_ASSIST, TextView.ID_ASSIST,
+                                ACTION_MODE_MENU_ITEM_ORDER_ASSIST,
+                                textClassification.getLabel())
+                        .setIcon(textClassification.getIcon())
+                        .setIntent(textClassification.getIntent());
+                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+                mAssistClickHandlers.put(item, TextClassification.createIntentOnClickListener(
+                        TextClassification.createPendingIntent(mTextView.getContext(),
+                                textClassification.getIntent(),
+                                createAssistMenuItemPendingIntentRequestCode())));
+            }
+            final int count = textClassification.getActions().size();
+            for (int i = 1; i < count; i++) {
+                // Secondary assist action (Never shown).
+                addAssistMenuItem(menu, textClassification.getActions().get(i), Menu.NONE,
+                        ACTION_MODE_MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i - 1,
+                        MenuItem.SHOW_AS_ACTION_NEVER, listener);
+            }
+            mPrevTextClassification = textClassification;
+        }
+
+        private MenuItem addAssistMenuItem(Menu menu, RemoteAction action, int itemId, int order,
+                int showAsAction, MenuItem.OnMenuItemClickListener listener) {
+            final MenuItem item = menu.add(TextView.ID_ASSIST, itemId, order, action.getTitle())
+                    .setContentDescription(action.getContentDescription());
+            if (action.shouldShowIcon()) {
+                item.setIcon(action.getIcon().loadDrawable(mTextView.getContext()));
+            }
+            item.setShowAsAction(showAsAction);
+            mAssistClickHandlers.put(item,
+                    TextClassification.createIntentOnClickListener(action.getActionIntent()));
+            mA11ySmartActions.addAction(action);
+            if (listener != null) {
+                item.setOnMenuItemClickListener(listener);
+            }
+            return item;
+        }
+
+        private void clearAssistMenuItems(Menu menu) {
+            int i = 0;
+            while (i < menu.size()) {
+                final MenuItem menuItem = menu.getItem(i);
+                if (menuItem.getGroupId() == TextView.ID_ASSIST) {
+                    menu.removeItem(menuItem.getItemId());
+                    continue;
+                }
+                i++;
+            }
+            mA11ySmartActions.reset();
+        }
+
+        private boolean hasLegacyAssistItem(TextClassification classification) {
+            // Check whether we have the UI data and action.
+            return (classification.getIcon() != null || !TextUtils.isEmpty(
+                    classification.getLabel())) && (classification.getIntent() != null
+                    || classification.getOnClickListener() != null);
+        }
+
+        private boolean shouldEnableAssistMenuItems() {
+            return mTextView.isDeviceProvisioned()
+                    && TextClassificationManager.getSettings(mTextView.getContext())
+                    .isSmartTextShareEnabled();
+        }
+
+        private int createAssistMenuItemPendingIntentRequestCode() {
+            return mTextView.hasSelection()
+                    ? mTextView.getText().subSequence(
+                            mTextView.getSelectionStart(), mTextView.getSelectionEnd())
+                    .hashCode()
+                    : 0;
+        }
+
+        /**
+         * Called when the assist menu on ActionMode or ContextMenu is called.
+         */
+        public boolean onAssistMenuItemClicked(MenuItem assistMenuItem) {
+            Preconditions.checkArgument(assistMenuItem.getGroupId() == TextView.ID_ASSIST);
+
+            final TextClassification textClassification =
+                    getSelectionActionModeHelper().getTextClassification();
+            if (!shouldEnableAssistMenuItems() || textClassification == null) {
+                // No textClassification result to handle the click. Eat the click.
+                return true;
+            }
+
+            OnClickListener onClickListener = getOnClickListener(assistMenuItem);
+            if (onClickListener == null) {
+                final Intent intent = assistMenuItem.getIntent();
+                if (intent != null) {
+                    onClickListener = TextClassification.createIntentOnClickListener(
+                            TextClassification.createPendingIntent(
+                                    mTextView.getContext(), intent,
+                                    createAssistMenuItemPendingIntentRequestCode()));
+                }
+            }
+            if (onClickListener != null) {
+                onClickListener.onClick(mTextView);
+                stopTextActionMode();
+            }
+            // We tried our best.
+            return true;
+        }
+    }
+
+    /**
      * An ActionMode Callback class that is used to provide actions while in text insertion or
      * selection mode.
      *
@@ -4289,9 +4546,8 @@ public class Editor {
         private final RectF mSelectionBounds = new RectF();
         private final boolean mHasSelection;
         private final int mHandleHeight;
-        private final Map<MenuItem, OnClickListener> mAssistClickHandlers = new HashMap<>();
-        @Nullable
-        private TextClassification mPrevTextClassification;
+        private final AssistantCallbackHelper mHelper = new AssistantCallbackHelper(
+                getSelectionActionModeHelper());
 
         TextActionModeCallback(@TextActionMode int mode) {
             mHasSelection = mode == TextActionMode.SELECTION
@@ -4320,7 +4576,7 @@ public class Editor {
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            mAssistClickHandlers.clear();
+            mHelper.clearCallbackHandlers();
 
             mode.setTitle(null);
             mode.setSubtitle(null);
@@ -4355,28 +4611,28 @@ public class Editor {
 
         private void populateMenuWithItems(Menu menu) {
             if (mTextView.canCut()) {
-                menu.add(Menu.NONE, TextView.ID_CUT, MENU_ITEM_ORDER_CUT,
+                menu.add(Menu.NONE, TextView.ID_CUT, ACTION_MODE_MENU_ITEM_ORDER_CUT,
                         com.android.internal.R.string.cut)
                                 .setAlphabeticShortcut('x')
                                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canCopy()) {
-                menu.add(Menu.NONE, TextView.ID_COPY, MENU_ITEM_ORDER_COPY,
+                menu.add(Menu.NONE, TextView.ID_COPY, ACTION_MODE_MENU_ITEM_ORDER_COPY,
                         com.android.internal.R.string.copy)
                                 .setAlphabeticShortcut('c')
                                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canPaste()) {
-                menu.add(Menu.NONE, TextView.ID_PASTE, MENU_ITEM_ORDER_PASTE,
+                menu.add(Menu.NONE, TextView.ID_PASTE, ACTION_MODE_MENU_ITEM_ORDER_PASTE,
                         com.android.internal.R.string.paste)
                                 .setAlphabeticShortcut('v')
                                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
             }
 
             if (mTextView.canShare()) {
-                menu.add(Menu.NONE, TextView.ID_SHARE, MENU_ITEM_ORDER_SHARE,
+                menu.add(Menu.NONE, TextView.ID_SHARE, ACTION_MODE_MENU_ITEM_ORDER_SHARE,
                         com.android.internal.R.string.share)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
@@ -4384,7 +4640,7 @@ public class Editor {
             if (mTextView.canRequestAutofill()) {
                 final String selected = mTextView.getSelectedText();
                 if (selected == null || selected.isEmpty()) {
-                    menu.add(Menu.NONE, TextView.ID_AUTOFILL, MENU_ITEM_ORDER_AUTOFILL,
+                    menu.add(Menu.NONE, TextView.ID_AUTOFILL, ACTION_MODE_MENU_ITEM_ORDER_AUTOFILL,
                             com.android.internal.R.string.autofill)
                             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
                 }
@@ -4394,21 +4650,21 @@ public class Editor {
                 menu.add(
                         Menu.NONE,
                         TextView.ID_PASTE_AS_PLAIN_TEXT,
-                        MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
+                                ACTION_MODE_MENU_ITEM_ORDER_PASTE_AS_PLAIN_TEXT,
                         com.android.internal.R.string.paste_as_plain_text)
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             }
 
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
-            updateAssistMenuItems(menu);
+            mHelper.updateAssistMenuItems(menu, null);
         }
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
             updateSelectAllItem(menu);
             updateReplaceItem(menu);
-            updateAssistMenuItems(menu);
+            mHelper.updateAssistMenuItems(menu, null);
 
             Callback customCallback = getCustomCallback();
             if (customCallback != null) {
@@ -4421,7 +4677,7 @@ public class Editor {
             boolean canSelectAll = mTextView.canSelectAllText();
             boolean selectAllItemExists = menu.findItem(TextView.ID_SELECT_ALL) != null;
             if (canSelectAll && !selectAllItemExists) {
-                menu.add(Menu.NONE, TextView.ID_SELECT_ALL, MENU_ITEM_ORDER_SELECT_ALL,
+                menu.add(Menu.NONE, TextView.ID_SELECT_ALL, ACTION_MODE_MENU_ITEM_ORDER_SELECT_ALL,
                         com.android.internal.R.string.selectAll)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             } else if (!canSelectAll && selectAllItemExists) {
@@ -4433,131 +4689,12 @@ public class Editor {
             boolean canReplace = mTextView.isSuggestionsEnabled() && shouldOfferToShowSuggestions();
             boolean replaceItemExists = menu.findItem(TextView.ID_REPLACE) != null;
             if (canReplace && !replaceItemExists) {
-                menu.add(Menu.NONE, TextView.ID_REPLACE, MENU_ITEM_ORDER_REPLACE,
+                menu.add(Menu.NONE, TextView.ID_REPLACE, ACTION_MODE_MENU_ITEM_ORDER_REPLACE,
                         com.android.internal.R.string.replace)
                     .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             } else if (!canReplace && replaceItemExists) {
                 menu.removeItem(TextView.ID_REPLACE);
             }
-        }
-
-        private void updateAssistMenuItems(Menu menu) {
-            final TextClassification textClassification =
-                    getSelectionActionModeHelper().getTextClassification();
-            if (mPrevTextClassification == textClassification) {
-                // Already handled.
-                return;
-            }
-            clearAssistMenuItems(menu);
-            if (textClassification == null) {
-                return;
-            }
-            if (!shouldEnableAssistMenuItems()) {
-                return;
-            }
-            if (!textClassification.getActions().isEmpty()) {
-                // Primary assist action (Always shown).
-                final MenuItem item = addAssistMenuItem(menu,
-                        textClassification.getActions().get(0), TextView.ID_ASSIST,
-                        MENU_ITEM_ORDER_ASSIST, MenuItem.SHOW_AS_ACTION_ALWAYS);
-                item.setIntent(textClassification.getIntent());
-            } else if (hasLegacyAssistItem(textClassification)) {
-                // Legacy primary assist action (Always shown).
-                final MenuItem item = menu.add(
-                        TextView.ID_ASSIST, TextView.ID_ASSIST, MENU_ITEM_ORDER_ASSIST,
-                        textClassification.getLabel())
-                        .setIcon(textClassification.getIcon())
-                        .setIntent(textClassification.getIntent());
-                item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-                mAssistClickHandlers.put(item, TextClassification.createIntentOnClickListener(
-                        TextClassification.createPendingIntent(mTextView.getContext(),
-                                textClassification.getIntent(),
-                                createAssistMenuItemPendingIntentRequestCode())));
-            }
-            final int count = textClassification.getActions().size();
-            for (int i = 1; i < count; i++) {
-                // Secondary assist action (Never shown).
-                addAssistMenuItem(menu, textClassification.getActions().get(i), Menu.NONE,
-                        MENU_ITEM_ORDER_SECONDARY_ASSIST_ACTIONS_START + i - 1,
-                        MenuItem.SHOW_AS_ACTION_NEVER);
-            }
-            mPrevTextClassification = textClassification;
-        }
-
-        private MenuItem addAssistMenuItem(Menu menu, RemoteAction action, int itemId, int order,
-                int showAsAction) {
-            final MenuItem item = menu.add(TextView.ID_ASSIST, itemId, order, action.getTitle())
-                    .setContentDescription(action.getContentDescription());
-            if (action.shouldShowIcon()) {
-                item.setIcon(action.getIcon().loadDrawable(mTextView.getContext()));
-            }
-            item.setShowAsAction(showAsAction);
-            mAssistClickHandlers.put(item,
-                    TextClassification.createIntentOnClickListener(action.getActionIntent()));
-            mA11ySmartActions.addAction(action);
-            return item;
-        }
-
-        private void clearAssistMenuItems(Menu menu) {
-            int i = 0;
-            while (i < menu.size()) {
-                final MenuItem menuItem = menu.getItem(i);
-                if (menuItem.getGroupId() == TextView.ID_ASSIST) {
-                    menu.removeItem(menuItem.getItemId());
-                    continue;
-                }
-                i++;
-            }
-            mA11ySmartActions.reset();
-        }
-
-        private boolean hasLegacyAssistItem(TextClassification classification) {
-            // Check whether we have the UI data and and action.
-            return (classification.getIcon() != null || !TextUtils.isEmpty(
-                    classification.getLabel())) && (classification.getIntent() != null
-                    || classification.getOnClickListener() != null);
-        }
-
-        private boolean onAssistMenuItemClicked(MenuItem assistMenuItem) {
-            Preconditions.checkArgument(assistMenuItem.getGroupId() == TextView.ID_ASSIST);
-
-            final TextClassification textClassification =
-                    getSelectionActionModeHelper().getTextClassification();
-            if (!shouldEnableAssistMenuItems() || textClassification == null) {
-                // No textClassification result to handle the click. Eat the click.
-                return true;
-            }
-
-            OnClickListener onClickListener = mAssistClickHandlers.get(assistMenuItem);
-            if (onClickListener == null) {
-                final Intent intent = assistMenuItem.getIntent();
-                if (intent != null) {
-                    onClickListener = TextClassification.createIntentOnClickListener(
-                            TextClassification.createPendingIntent(
-                                    mTextView.getContext(), intent,
-                                    createAssistMenuItemPendingIntentRequestCode()));
-                }
-            }
-            if (onClickListener != null) {
-                onClickListener.onClick(mTextView);
-                stopTextActionMode();
-            }
-            // We tried our best.
-            return true;
-        }
-
-        private int createAssistMenuItemPendingIntentRequestCode() {
-            return mTextView.hasSelection()
-                    ? mTextView.getText().subSequence(
-                            mTextView.getSelectionStart(), mTextView.getSelectionEnd())
-                            .hashCode()
-                    : 0;
-        }
-
-        private boolean shouldEnableAssistMenuItems() {
-            return mTextView.isDeviceProvisioned()
-                && TextClassificationManager.getSettings(mTextView.getContext())
-                        .isSmartTextShareEnabled();
         }
 
         @Override
@@ -4572,7 +4709,7 @@ public class Editor {
             if (customCallback != null && customCallback.onActionItemClicked(mode, item)) {
                 return true;
             }
-            if (item.getGroupId() == TextView.ID_ASSIST && onAssistMenuItemClicked(item)) {
+            if (item.getGroupId() == TextView.ID_ASSIST && mHelper.onAssistMenuItemClicked(item)) {
                 return true;
             }
             return mTextView.onTextContextMenuItem(item.getItemId());
@@ -4602,7 +4739,7 @@ public class Editor {
                 mSelectionModifierCursorController.hide();
             }
 
-            mAssistClickHandlers.clear();
+            mHelper.clearCallbackHandlers();
             mRequestingLinkActionMode = false;
         }
 
@@ -4649,7 +4786,7 @@ public class Editor {
      * {@link InputMethodManager#isWatchingCursor(View)} returns false.
      */
     private final class CursorAnchorInfoNotifier implements TextViewPositionListener {
-        final CursorAnchorInfo.Builder mSelectionInfoBuilder = new CursorAnchorInfo.Builder();
+        final CursorAnchorInfo.Builder mCursorAnchorInfoBuilder = new CursorAnchorInfo.Builder();
         final Matrix mViewToScreenMatrix = new Matrix();
 
         @Override
@@ -4669,165 +4806,21 @@ public class Editor {
             // Skip if the IME has not requested the cursor/anchor position.
             final int knownCursorAnchorInfoModes =
                     InputConnection.CURSOR_UPDATE_IMMEDIATE | InputConnection.CURSOR_UPDATE_MONITOR;
-            if ((mInputMethodState.mUpdateCursorAnchorInfoMode & knownCursorAnchorInfoModes) == 0) {
+            if ((ims.mUpdateCursorAnchorInfoMode & knownCursorAnchorInfoModes) == 0) {
                 return;
             }
-            Layout layout = mTextView.getLayout();
-            if (layout == null) {
-                return;
+
+            final CursorAnchorInfo cursorAnchorInfo =
+                    mTextView.getCursorAnchorInfo(ims.mUpdateCursorAnchorInfoFilter,
+                            mCursorAnchorInfoBuilder, mViewToScreenMatrix);
+
+            if (cursorAnchorInfo != null) {
+                imm.updateCursorAnchorInfo(mTextView, cursorAnchorInfo);
+
+                // Drop the immediate flag if any.
+                mInputMethodState.mUpdateCursorAnchorInfoMode &=
+                        ~InputConnection.CURSOR_UPDATE_IMMEDIATE;
             }
-            final int filter = mInputMethodState.mUpdateCursorAnchorInfoFilter;
-            boolean includeEditorBounds =
-                    (filter & InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS) != 0;
-            boolean includeCharacterBounds =
-                    (filter & InputConnection.CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS) != 0;
-            boolean includeInsertionMarker =
-                    (filter & InputConnection.CURSOR_UPDATE_FILTER_INSERTION_MARKER) != 0;
-            boolean includeVisibleLineBounds =
-                    (filter & InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS) != 0;
-            boolean includeTextAppearance =
-                    (filter & InputConnection.CURSOR_UPDATE_FILTER_TEXT_APPEARANCE) != 0;
-            boolean includeAll =
-                    (!includeEditorBounds && !includeCharacterBounds && !includeInsertionMarker
-                    && !includeVisibleLineBounds && !includeTextAppearance);
-
-            includeEditorBounds |= includeAll;
-            includeCharacterBounds |= includeAll;
-            includeInsertionMarker |= includeAll;
-            includeVisibleLineBounds |= includeAll;
-            includeTextAppearance |= includeAll;
-
-            final CursorAnchorInfo.Builder builder = mSelectionInfoBuilder;
-            builder.reset();
-
-            final int selectionStart = mTextView.getSelectionStart();
-            builder.setSelectionRange(selectionStart, mTextView.getSelectionEnd());
-
-            // Construct transformation matrix from view local coordinates to screen coordinates.
-            mViewToScreenMatrix.reset();
-            mTextView.transformMatrixToGlobal(mViewToScreenMatrix);
-            builder.setMatrix(mViewToScreenMatrix);
-
-            if (includeEditorBounds) {
-                final RectF editorBounds = new RectF();
-                editorBounds.set(0 /* left */, 0 /* top */,
-                        mTextView.getWidth(), mTextView.getHeight());
-                final RectF handwritingBounds = new RectF(
-                        -mTextView.getHandwritingBoundsOffsetLeft(),
-                        -mTextView.getHandwritingBoundsOffsetTop(),
-                        mTextView.getWidth() + mTextView.getHandwritingBoundsOffsetRight(),
-                        mTextView.getHeight() + mTextView.getHandwritingBoundsOffsetBottom());
-                EditorBoundsInfo.Builder boundsBuilder = new EditorBoundsInfo.Builder();
-                EditorBoundsInfo editorBoundsInfo = boundsBuilder.setEditorBounds(editorBounds)
-                        .setHandwritingBounds(handwritingBounds).build();
-                builder.setEditorBoundsInfo(editorBoundsInfo);
-            }
-
-            if (includeCharacterBounds || includeInsertionMarker || includeVisibleLineBounds) {
-                final float viewportToContentHorizontalOffset =
-                        mTextView.viewportToContentHorizontalOffset();
-                final float viewportToContentVerticalOffset =
-                        mTextView.viewportToContentVerticalOffset();
-                final boolean isTextTransformed = (mTextView.getTransformationMethod() != null
-                        && mTextView.getTransformed() instanceof OffsetMapping);
-                if (includeCharacterBounds && !isTextTransformed) {
-                    final CharSequence text = mTextView.getText();
-                    if (text instanceof Spannable) {
-                        final Spannable sp = (Spannable) text;
-                        int composingTextStart = EditableInputConnection.getComposingSpanStart(sp);
-                        int composingTextEnd = EditableInputConnection.getComposingSpanEnd(sp);
-                        if (composingTextEnd < composingTextStart) {
-                            final int temp = composingTextEnd;
-                            composingTextEnd = composingTextStart;
-                            composingTextStart = temp;
-                        }
-                        final boolean hasComposingText =
-                                (0 <= composingTextStart) && (composingTextStart
-                                        < composingTextEnd);
-                        if (hasComposingText) {
-                            final CharSequence composingText = text.subSequence(composingTextStart,
-                                    composingTextEnd);
-                            builder.setComposingText(composingTextStart, composingText);
-                            mTextView.populateCharacterBounds(builder, composingTextStart,
-                                    composingTextEnd, viewportToContentHorizontalOffset,
-                                    viewportToContentVerticalOffset);
-                        }
-                    }
-                }
-
-                if (includeInsertionMarker) {
-                    // Treat selectionStart as the insertion point.
-                    if (0 <= selectionStart) {
-                        final int offsetTransformed = mTextView.originalToTransformed(
-                                selectionStart, OffsetMapping.MAP_STRATEGY_CURSOR);
-                        final int line = layout.getLineForOffset(offsetTransformed);
-                        final float insertionMarkerX =
-                                layout.getPrimaryHorizontal(offsetTransformed)
-                                        + viewportToContentHorizontalOffset;
-                        final float insertionMarkerTop = layout.getLineTop(line)
-                                + viewportToContentVerticalOffset;
-                        final float insertionMarkerBaseline = layout.getLineBaseline(line)
-                                + viewportToContentVerticalOffset;
-                        final float insertionMarkerBottom =
-                                layout.getLineBottom(line, /* includeLineSpacing= */ false)
-                                        + viewportToContentVerticalOffset;
-                        final boolean isTopVisible = mTextView
-                                .isPositionVisible(insertionMarkerX, insertionMarkerTop);
-                        final boolean isBottomVisible = mTextView
-                                .isPositionVisible(insertionMarkerX, insertionMarkerBottom);
-                        int insertionMarkerFlags = 0;
-                        if (isTopVisible || isBottomVisible) {
-                            insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
-                        }
-                        if (!isTopVisible || !isBottomVisible) {
-                            insertionMarkerFlags |= CursorAnchorInfo.FLAG_HAS_INVISIBLE_REGION;
-                        }
-                        if (layout.isRtlCharAt(offsetTransformed)) {
-                            insertionMarkerFlags |= CursorAnchorInfo.FLAG_IS_RTL;
-                        }
-                        builder.setInsertionMarkerLocation(insertionMarkerX, insertionMarkerTop,
-                                insertionMarkerBaseline, insertionMarkerBottom,
-                                insertionMarkerFlags);
-                    }
-                }
-
-                if (includeVisibleLineBounds) {
-                    final Rect visibleRect = new Rect();
-                    if (mTextView.getContentVisibleRect(visibleRect)) {
-                        // Subtract the viewportToContentVerticalOffset to convert the view
-                        // coordinates to layout coordinates.
-                        final float visibleTop =
-                                visibleRect.top - viewportToContentVerticalOffset;
-                        final float visibleBottom =
-                                visibleRect.bottom - viewportToContentVerticalOffset;
-                        final int firstLine =
-                                layout.getLineForVertical((int) Math.floor(visibleTop));
-                        final int lastLine =
-                                layout.getLineForVertical((int) Math.ceil(visibleBottom));
-
-                        for (int line = firstLine; line <= lastLine; ++line) {
-                            final float left = layout.getLineLeft(line)
-                                    + viewportToContentHorizontalOffset;
-                            final float top = layout.getLineTop(line)
-                                    + viewportToContentVerticalOffset;
-                            final float right = layout.getLineRight(line)
-                                    + viewportToContentHorizontalOffset;
-                            final float bottom = layout.getLineBottom(line, false)
-                                    + viewportToContentVerticalOffset;
-                            builder.addVisibleLineBounds(left, top, right, bottom);
-                        }
-                    }
-                }
-            }
-
-            if (includeTextAppearance) {
-                builder.setTextAppearanceInfo(TextAppearanceInfo.createFromTextView(mTextView));
-            }
-            imm.updateCursorAnchorInfo(mTextView, builder.build());
-
-            // Drop the immediate flag if any.
-            mInputMethodState.mUpdateCursorAnchorInfoMode &=
-                    ~InputConnection.CURSOR_UPDATE_IMMEDIATE;
         }
     }
 
@@ -7923,7 +7916,7 @@ public class Editor {
             for (int i = 0; i < size; i++) {
                 final ResolveInfo resolveInfo = mSupportedActivities.get(i);
                 menu.add(Menu.NONE, Menu.NONE,
-                        Editor.MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
+                        Editor.ACTION_MODE_MENU_ITEM_ORDER_PROCESS_TEXT_INTENT_ACTIONS_START + i,
                         getLabel(resolveInfo))
                         .setIntent(createProcessTextIntentForResolveInfo(resolveInfo))
                         .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
@@ -8118,7 +8111,7 @@ public class Editor {
             final boolean isSingleLine = mTextView.isSingleLine();
             mInsertModeTransformationMethod = new InsertModeTransformationMethod(offset,
                     isSingleLine, oldTransformationMethod);
-            mTextView.setTransformationMethod(mInsertModeTransformationMethod);
+            mTextView.setTransformationMethodInternal(mInsertModeTransformationMethod);
             Selection.setSelection((Spannable) mTextView.getText(), offset);
 
             mIsInsertModeActive = true;
@@ -8129,11 +8122,6 @@ public class Editor {
             if (!mIsInsertModeActive) return;
             if (mInsertModeTransformationMethod == null
                     || mInsertModeTransformationMethod != mTextView.getTransformationMethod()) {
-                // If mInsertionModeTransformationMethod doesn't match the one on TextView,
-                // something else have changed the TextView's TransformationMethod while the
-                // insertion mode is active. We don't need to restore the oldTransformationMethod.
-                // TODO(265871733): support the case where setTransformationMethod is called in
-                // the insert mode.
                 mIsInsertModeActive = false;
                 return;
             }
@@ -8143,7 +8131,7 @@ public class Editor {
             final int selectionEnd = mTextView.getSelectionEnd();
             final TransformationMethod oldTransformationMethod =
                     mInsertModeTransformationMethod.getOldTransformationMethod();
-            mTextView.setTransformationMethod(oldTransformationMethod);
+            mTextView.setTransformationMethodInternal(oldTransformationMethod);
             Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
             mIsInsertModeActive = false;
         }
@@ -8164,6 +8152,25 @@ public class Editor {
                 layout.getSelection(highlightStart, highlightEnd, consumer);
             }
         }
+
+        /**
+         * Notify the {@link InsertModeController} before the TextView's
+         * {@link TransformationMethod} is updated. If it's not in the insert mode,
+         * the given method is directly returned. Otherwise, it will wrap the given transformation
+         * method with an {@link InsertModeTransformationMethod} and then return.
+         *
+         * @param oldTransformationMethod the new {@link TransformationMethod} to be set on the
+         *                             TextView.
+         * @return the updated {@link TransformationMethod} to be set on the Textview.
+         */
+        TransformationMethod updateTransformationMethod(
+                TransformationMethod oldTransformationMethod) {
+            if (!mIsInsertModeActive) return oldTransformationMethod;
+
+            mInsertModeTransformationMethod = mInsertModeTransformationMethod.update(
+                    oldTransformationMethod, mTextView.isSingleLine());
+            return mInsertModeTransformationMethod;
+        }
     }
 
     boolean enterInsertMode(int offset) {
@@ -8177,6 +8184,26 @@ public class Editor {
     void exitInsertMode() {
         if (mInsertModeController == null) return;
         mInsertModeController.exitInsertMode();
+    }
+
+    /**
+     * Called by the {@link TextView} when the {@link TransformationMethod} is updated.
+     *
+     * @param method the {@link TransformationMethod} to be set on the TextView.
+     */
+    void setTransformationMethod(TransformationMethod method) {
+        if (mInsertModeController == null || !mInsertModeController.mIsInsertModeActive) {
+            mTextView.setTransformationMethodInternal(method);
+            return;
+        }
+
+        // Changing TransformationMethod will reset selection range to [0, 0), we need to
+        // manually restore the old selection range.
+        final int selectionStart = mTextView.getSelectionStart();
+        final int selectionEnd = mTextView.getSelectionEnd();
+        method = mInsertModeController.updateTransformationMethod(method);
+        mTextView.setTransformationMethodInternal(method);
+        Selection.setSelection((Spannable) mTextView.getText(), selectionStart, selectionEnd);
     }
 
     /**

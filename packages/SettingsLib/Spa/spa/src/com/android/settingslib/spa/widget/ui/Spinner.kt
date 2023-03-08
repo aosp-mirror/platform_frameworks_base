@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.material.icons.outlined.ArrowDropUp
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.ExpandMore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -76,8 +76,8 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             SpinnerText(options.find { it.id == selectedId })
             Icon(
                 imageVector = when {
-                    expanded -> Icons.Outlined.ArrowDropUp
-                    else -> Icons.Outlined.ArrowDropDown
+                    expanded -> Icons.Outlined.ExpandLess
+                    else -> Icons.Outlined.ExpandMore
                 },
                 contentDescription = null,
             )

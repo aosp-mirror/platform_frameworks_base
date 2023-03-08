@@ -17,15 +17,14 @@
 package com.android.systemui.qs.logging
 
 import android.service.quicksettings.Tile
+import android.view.View
 import com.android.systemui.log.dagger.QSLog
 import com.android.systemui.plugins.log.ConstantStringsLogger
 import com.android.systemui.plugins.log.ConstantStringsLoggerImpl
 import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.plugins.log.LogLevel.ERROR
 import com.android.systemui.plugins.log.LogLevel.VERBOSE
-import com.android.systemui.plugins.log.LogMessage
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.StatusBarState
 import com.google.errorprone.annotations.CompileTimeConstant
@@ -330,6 +329,27 @@ class QSLogger @Inject constructor(@QSLog private val buffer: LogBuffer) :
             Tile.STATE_INACTIVE -> "inactive"
             Tile.STATE_UNAVAILABLE -> "unavailable"
             else -> "wrong state"
+        }
+    }
+
+    fun logVisibility(viewName: String, @View.Visibility visibility: Int) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = viewName
+                str2 = toVisibilityString(visibility)
+            },
+            { "$str1 visibility: $str2" }
+        )
+    }
+
+    private fun toVisibilityString(visibility: Int): String {
+        return when (visibility) {
+            View.VISIBLE -> "VISIBLE"
+            View.INVISIBLE -> "INVISIBLE"
+            View.GONE -> "GONE"
+            else -> "undefined"
         }
     }
 }

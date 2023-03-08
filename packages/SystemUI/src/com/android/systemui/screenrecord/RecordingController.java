@@ -38,6 +38,8 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
+import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialog;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.settings.UserTracker;
@@ -47,6 +49,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import dagger.Lazy;
 
 /**
  * Helper class to initiate a screen recording
@@ -63,6 +67,8 @@ public class RecordingController
     private CountDownTimer mCountDownTimer = null;
     private final Executor mMainExecutor;
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final Context mContext;
+    private final FeatureFlags mFlags;
     private final UserContextProvider mUserContextProvider;
     private final UserTracker mUserTracker;
 
@@ -72,6 +78,8 @@ public class RecordingController
 
     private CopyOnWriteArrayList<RecordingStateChangeCallback> mListeners =
             new CopyOnWriteArrayList<>();
+
+    private final Lazy<ScreenCaptureDevicePolicyResolver> mDevicePolicyResolver;
 
     @VisibleForTesting
     final UserTracker.Callback mUserChangedCallback =
@@ -103,9 +111,15 @@ public class RecordingController
     @Inject
     public RecordingController(@Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher,
+            Context context,
+            FeatureFlags flags,
             UserContextProvider userContextProvider,
+            Lazy<ScreenCaptureDevicePolicyResolver> devicePolicyResolver,
             UserTracker userTracker) {
         mMainExecutor = mainExecutor;
+        mContext = context;
+        mFlags = flags;
+        mDevicePolicyResolver = devicePolicyResolver;
         mBroadcastDispatcher = broadcastDispatcher;
         mUserContextProvider = userContextProvider;
         mUserTracker = userTracker;
@@ -115,14 +129,30 @@ public class RecordingController
         mInteractiveBroadcastOption = options.toBundle();
     }
 
-    /** Create a dialog to show screen recording options to the user. */
+    /**
+     * MediaProjection host is SystemUI for the screen recorder, so return 'my user handle'
+     */
+    private UserHandle getHostUserHandle() {
+        return UserHandle.of(UserHandle.myUserId());
+    }
+
+    /** Create a dialog to show screen recording options to the user.
+     *  If screen capturing is currently not allowed it will return a dialog
+     *  that warns users about it. */
     public Dialog createScreenRecordDialog(Context context, FeatureFlags flags,
                                            DialogLaunchAnimator dialogLaunchAnimator,
                                            ActivityStarter activityStarter,
                                            @Nullable Runnable onStartRecordingClicked) {
+        if (mFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)
+                && mDevicePolicyResolver.get()
+                        .isScreenCaptureCompletelyDisabled(getHostUserHandle())) {
+            return new ScreenCaptureDisabledDialog(mContext);
+        }
+
         return flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING)
-                ? new ScreenRecordPermissionDialog(context, this, activityStarter,
-                        dialogLaunchAnimator, mUserContextProvider, onStartRecordingClicked)
+                ? new ScreenRecordPermissionDialog(context,  getHostUserHandle(), this,
+                    activityStarter, dialogLaunchAnimator, mUserContextProvider,
+                    onStartRecordingClicked)
                 : new ScreenRecordDialog(context, this, activityStarter,
                 mUserContextProvider, flags, dialogLaunchAnimator, onStartRecordingClicked);
     }

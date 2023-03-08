@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.interruption;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD;
 import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR;
+import static com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -28,6 +29,7 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
@@ -87,7 +89,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD(1236),
 
         @UiEvent(doc = "HUN suppressed for old when")
-        HUN_SUPPRESSED_OLD_WHEN(1237);
+        HUN_SUPPRESSED_OLD_WHEN(1237),
+
+        @UiEvent(doc = "HUN snooze bypassed for potentially suppressed FSI")
+        HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI(1269);
 
         private final int mId;
 
@@ -239,10 +244,10 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
     @Override
     public FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry) {
-        if (mFlags.disableFsi()) {
-            return FullScreenIntentDecision.NO_FSI_DISABLED;
-        }
         if (entry.getSbn().getNotification().fullScreenIntent == null) {
+            if (entry.isStickyAndNotDemoted()) {
+                return FullScreenIntentDecision.NO_FSI_SHOW_STICKY_HUN;
+            }
             return FullScreenIntentDecision.NO_FULL_SCREEN_INTENT;
         }
 
@@ -331,8 +336,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         final int uid = entry.getSbn().getUid();
         final String packageName = entry.getSbn().getPackageName();
         switch (decision) {
-            case NO_FSI_DISABLED:
-                mLogger.logNoFullscreen(entry, "Disabled");
+            case NO_FSI_SHOW_STICKY_HUN:
+                mLogger.logNoFullscreen(entry, "Permission denied, show sticky HUN");
                 return;
             case NO_FULL_SCREEN_INTENT:
                 return;
@@ -409,7 +414,15 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        if (isSnoozedPackage(sbn)) {
+        final boolean isSnoozedPackage = isSnoozedPackage(sbn);
+        final boolean fsiRequiresKeyguard = mFlags.fullScreenIntentRequiresKeyguard();
+        final boolean hasFsi = sbn.getNotification().fullScreenIntent != null;
+
+        // Assume any notification with an FSI is time-sensitive (like an alarm or incoming call)
+        // and ignore whether HUNs have been snoozed for the package.
+        final boolean shouldBypassSnooze = fsiRequiresKeyguard && hasFsi;
+
+        if (isSnoozedPackage && !shouldBypassSnooze) {
             if (log) mLogger.logNoHeadsUpPackageSnoozed(entry);
             return false;
         }
@@ -447,6 +460,19 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 return false;
             }
         }
+
+        if (isSnoozedPackage) {
+            if (log) {
+                mLogger.logHeadsUpPackageSnoozeBypassedHasFsi(entry);
+                final int uid = entry.getSbn().getUid();
+                final String packageName = entry.getSbn().getPackageName();
+                mUiEventLogger.log(HUN_SNOOZE_BYPASSED_POTENTIALLY_SUPPRESSED_FSI, uid,
+                        packageName);
+            }
+
+            return true;
+        }
+
         if (log) mLogger.logHeadsUp(entry);
         return true;
     }

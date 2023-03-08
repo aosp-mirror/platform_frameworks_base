@@ -64,7 +64,7 @@ import kotlin.jvm.functions.Function1;
 public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewController<T>
         implements Dumpable{
     private static final String TAG = "QSPanelControllerBase";
-    protected final QSTileHost mHost;
+    protected final QSHost mHost;
     private final QSCustomizerController mQsCustomizerController;
     private final boolean mUsingMediaPlayer;
     protected final MediaHost mMediaHost;
@@ -104,14 +104,14 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
                     switchTileLayoutIfNeeded();
                     onConfigurationChanged();
                     if (previousSplitShadeState != mShouldUseSplitNotificationShade) {
-                        onSplitShadeChanged();
+                        onSplitShadeChanged(mShouldUseSplitNotificationShade);
                     }
                 }
             };
 
     protected void onConfigurationChanged() { }
 
-    protected void onSplitShadeChanged() { }
+    protected void onSplitShadeChanged(boolean shouldUseSplitNotificationShade) { }
 
     private final Function1<Boolean, Unit> mMediaHostVisibilityListener = (visible) -> {
         if (mMediaVisibilityChangedListener != null) {
@@ -128,7 +128,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
 
     protected QSPanelControllerBase(
             T view,
-            QSTileHost host,
+            QSHost host,
             QSCustomizerController qsCustomizerController,
             @Named(QS_USING_MEDIA_PLAYER) boolean usingMediaPlayer,
             MediaHost mediaHost,

@@ -80,14 +80,14 @@ interface KeyguardRepository {
      */
     val isKeyguardShowing: Flow<Boolean>
 
+    /** Is the keyguard in a unlocked state? */
+    val isKeyguardUnlocked: Flow<Boolean>
+
     /** Is an activity showing over the keyguard? */
     val isKeyguardOccluded: Flow<Boolean>
 
     /** Observable for the signal that keyguard is about to go away. */
     val isKeyguardGoingAway: Flow<Boolean>
-
-    /** Observable for whether the bouncer is showing. */
-    val isBouncerShowing: Flow<Boolean>
 
     /** Is the always-on display available to be used? */
     val isAodAvailable: Flow<Boolean>
@@ -281,6 +281,31 @@ constructor(
             }
             .distinctUntilChanged()
 
+    override val isKeyguardUnlocked: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val callback =
+                    object : KeyguardStateController.Callback {
+                        override fun onUnlockedChanged() {
+                            trySendWithFailureLogging(
+                                keyguardStateController.isUnlocked,
+                                TAG,
+                                "updated isKeyguardUnlocked"
+                            )
+                        }
+                    }
+
+                keyguardStateController.addCallback(callback)
+                // Adding the callback does not send an initial update.
+                trySendWithFailureLogging(
+                    keyguardStateController.isUnlocked,
+                    TAG,
+                    "initial isKeyguardUnlocked"
+                )
+
+                awaitClose { keyguardStateController.removeCallback(callback) }
+            }
+            .distinctUntilChanged()
+
     override val isKeyguardGoingAway: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
             object : KeyguardStateController.Callback {
@@ -299,29 +324,6 @@ constructor(
             keyguardStateController.isKeyguardGoingAway,
             TAG,
             "initial isKeyguardGoingAway"
-        )
-
-        awaitClose { keyguardStateController.removeCallback(callback) }
-    }
-
-    override val isBouncerShowing: Flow<Boolean> = conflatedCallbackFlow {
-        val callback =
-            object : KeyguardStateController.Callback {
-                override fun onBouncerShowingChanged() {
-                    trySendWithFailureLogging(
-                        keyguardStateController.isBouncerShowing,
-                        TAG,
-                        "updated isBouncerShowing"
-                    )
-                }
-            }
-
-        keyguardStateController.addCallback(callback)
-        // Adding the callback does not send an initial update.
-        trySendWithFailureLogging(
-            keyguardStateController.isBouncerShowing,
-            TAG,
-            "initial isBouncerShowing"
         )
 
         awaitClose { keyguardStateController.removeCallback(callback) }

@@ -35,6 +35,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -237,7 +238,7 @@ final class DeletePackageHelper {
         synchronized (mPm.mInstallLock) {
             if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageX: pkg=" + packageName + " user=" + userId);
             try (PackageFreezer freezer = mPm.freezePackageForDelete(packageName, freezeUser,
-                    deleteFlags, "deletePackageX")) {
+                    deleteFlags, "deletePackageX", ApplicationExitInfo.REASON_OTHER)) {
                 res = deletePackageLIF(packageName, UserHandle.of(removeUser), true, allUsers,
                         deleteFlags | PackageManager.DELETE_CHATTY, info, true);
             }
@@ -262,7 +263,7 @@ final class DeletePackageHelper {
             final boolean killApp = (deleteFlags & PackageManager.DELETE_DONT_KILL_APP) == 0;
             info.sendPackageRemovedBroadcasts(killApp, removedBySystem);
             info.sendSystemPackageUpdatedBroadcasts();
-            PackageMetrics.onUninstallSucceeded(info, deleteFlags, userId);
+            PackageMetrics.onUninstallSucceeded(info, deleteFlags, removeUser);
         }
 
         // Force a gc to clear up things.

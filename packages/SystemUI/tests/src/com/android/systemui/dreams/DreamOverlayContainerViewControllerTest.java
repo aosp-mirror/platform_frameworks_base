@@ -17,6 +17,7 @@
 package com.android.systemui.dreams;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +34,7 @@ import android.view.ViewTreeObserver;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
@@ -63,6 +65,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
     @Mock
     DreamOverlayStatusBarViewController mDreamOverlayStatusBarViewController;
+
+    @Mock
+    LowLightTransitionCoordinator mLowLightTransitionCoordinator;
 
     @Mock
     DreamOverlayContainerView mDreamOverlayContainerView;
@@ -109,6 +114,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mComplicationHostViewController,
                 mDreamOverlayContentView,
                 mDreamOverlayStatusBarViewController,
+                mLowLightTransitionCoordinator,
                 mBlurUtils,
                 mHandler,
                 mResources,
@@ -200,7 +206,7 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         mController.onViewAttached();
 
-        verify(mAnimationsController).startEntryAnimations();
+        verify(mAnimationsController).startEntryAnimations(false);
         verify(mAnimationsController, never()).cancelAnimations();
     }
 
@@ -210,11 +216,11 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
 
         mController.onViewAttached();
 
-        verify(mAnimationsController, never()).startEntryAnimations();
+        verify(mAnimationsController, never()).startEntryAnimations(anyBoolean());
     }
 
     @Test
-    public void testSkipEntryAnimationsWhenExitingLowLight() {
+    public void testDownwardEntryAnimationsWhenExitingLowLight() {
         ArgumentCaptor<DreamOverlayStateController.Callback> callbackCaptor =
                 ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
         when(mStateController.isLowLightActive()).thenReturn(false);
@@ -230,8 +236,14 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
 
         // Entry animations should be started then immediately ended to skip to the end.
-        verify(mAnimationsController).startEntryAnimations();
-        verify(mAnimationsController).endAnimations();
+        verify(mAnimationsController).startEntryAnimations(true);
+    }
+
+    @Test
+    public void testStartsExitAnimationsBeforeEnteringLowLight() {
+        mController.onBeforeEnterLowLight();
+
+        verify(mAnimationsController).startExitAnimations();
     }
 
     @Test

@@ -112,7 +112,9 @@ public class PerformAdbRestoreTask implements Runnable {
             BackupEligibilityRules eligibilityRules = new BackupEligibilityRules(
                     mBackupManagerService.getPackageManager(),
                     LocalServices.getService(PackageManagerInternal.class),
-                    mBackupManagerService.getUserId(), BackupDestination.ADB_BACKUP);
+                    mBackupManagerService.getUserId(),
+                    mBackupManagerService.getContext(),
+                    BackupDestination.ADB_BACKUP);
             FullRestoreEngine mEngine = new FullRestoreEngine(mBackupManagerService,
                     mOperationStorage, null, mObserver, null, null,
                     true, 0 /*unused*/, true, eligibilityRules);

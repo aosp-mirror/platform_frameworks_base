@@ -31,10 +31,12 @@ bootstrap_go_package {
         "blueprint",
         "soong",
         "soong-android",
+        "soong-bp2build",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
+    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
 }
 
@@ -100,7 +102,7 @@ combined_apis {
         "framework-connectivity-t",
         "framework-devicelock",
         "framework-graphics",
-        "framework-healthconnect",
+        "framework-healthfitness",
         "framework-media",
         "framework-mediaprovider",
         "framework-ondevicepersonalization",
@@ -119,7 +121,7 @@ combined_apis {
     system_server_classpath: [
         "service-art",
         "service-configinfrastructure",
-        "service-healthconnect",
+        "service-healthfitness",
         "service-media-s",
         "service-permission",
         "service-rkp",
@@ -182,6 +184,18 @@ genrule {
         "--baseline:compatibility:released $(location :android-incompatibilities.api.module-lib.latest) " +
         "--update-baseline:compatibility:released $(genDir)/updated-baseline.txt " +
         "$(location :frameworks-base-api-module-lib-current.txt)",
+}
+
+genrule {
+    name: "frameworks-base-api-current.srcjar",
+    tools: ["merge_zips"],
+    out: ["current.srcjar"],
+    cmd: "$(location merge_zips) $(out) $(in)",
+    srcs: [
+        ":api-stubs-docs-non-updatable",
+        ":all-modules-public-stubs-source",
+    ],
+    visibility: ["//visibility:private"], // Used by make module in //development, mind
 }
 
 // This produces the same annotations.zip as framework-doc-stubs, but by using
@@ -248,4 +262,16 @@ genrule {
     tools: ["metalava"],
     out: ["combined-removed-dex.txt"],
     cmd: "$(location gen_combined_removed_dex.sh) $(location metalava) $(genDir) $(in) > $(out)",
+}
+
+java_genrule {
+    name: "api_fingerprint",
+    srcs: [
+        ":frameworks-base-api-current.txt",
+        ":frameworks-base-api-system-current.txt",
+        ":frameworks-base-api-module-lib-current.txt",
+        ":frameworks-base-api-system-server-current.txt",
+    ],
+    out: ["api_fingerprint.txt"],
+    cmd: "cat $(in) | md5sum | cut -d' ' -f1 > $(out)",
 }
