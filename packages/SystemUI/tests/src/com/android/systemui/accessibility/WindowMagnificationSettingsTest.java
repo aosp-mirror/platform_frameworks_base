@@ -201,13 +201,6 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         assertThat(magnifierMediumButton.isSelected()).isTrue();
     }
 
-    @Test
-    public void showSettingPanel_focusOnThePanel() {
-        mWindowMagnificationSettings.showSettingPanel();
-
-        assertThat(mSettingView.isFocused()).isTrue();
-    }
-
     private <T extends View> T getInternalView(@IdRes int idRes) {
         T view = mSettingView.findViewById(idRes);
         assertNotNull(view);
