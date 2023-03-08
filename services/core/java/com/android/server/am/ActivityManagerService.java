@@ -17246,6 +17246,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ComponentName startSdkSandboxService(Intent service, int clientAppUid,
                 String clientAppPackage, String processName) throws RemoteException {
             validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+                throw new IllegalArgumentException("uid does not belong to provided package");
+            }
             // TODO(b/269598719): Is passing the application thread of the system_server alright?
             // e.g. the sandbox getting privileged access due to this.
             ComponentName cn = ActivityManagerService.this.startService(
@@ -17312,6 +17315,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String processName, long flags)
                 throws RemoteException {
             validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+                throw new IllegalArgumentException("uid does not belong to provided package");
+            }
             if (conn == null) {
                 throw new IllegalArgumentException("connection is null");
             }
@@ -17363,9 +17369,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (!UserHandle.isApp(clientAppUid)) {
                 throw new IllegalArgumentException("uid is not within application range");
-            }
-            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
-                throw new IllegalArgumentException("uid does not belong to provided package");
             }
         }
 
