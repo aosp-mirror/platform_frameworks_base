@@ -533,7 +533,8 @@ class JobConcurrencyManager {
             mIdleContexts.add(
                     mInjector.createJobServiceContext(mService, this,
                             mNotificationCoordinator, batteryStats,
-                            mService.mJobPackageTracker, mContext.getMainLooper()));
+                            mService.mJobPackageTracker,
+                            AppSchedulingModuleThread.get().getLooper()));
         }
     }
 
@@ -1925,7 +1926,7 @@ class JobConcurrencyManager {
         return mInjector.createJobServiceContext(mService, this, mNotificationCoordinator,
                 IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME)),
-                mService.mJobPackageTracker, mContext.getMainLooper());
+                mService.mJobPackageTracker, AppSchedulingModuleThread.get().getLooper());
     }
 
     @GuardedBy("mLock")
