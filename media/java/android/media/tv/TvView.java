@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -637,6 +638,20 @@ public class TvView extends ViewGroup {
     public void timeShiftSetMode(@android.media.tv.TvInputManager.TimeShiftMode int mode) {
         if (mSession != null) {
             mSession.timeShiftSetMode(mode);
+        }
+    }
+
+
+    /**
+     * Sends TV messages to the session for testing purposes
+     *
+     * @hide
+     */
+    @TestApi
+    public void notifyTvMessage(@TvInputManager.TvMessageType @NonNull String type,
+            @NonNull Bundle data) {
+        if (mSession != null) {
+            mSession.notifyTvMessage(type, data);
         }
     }
 

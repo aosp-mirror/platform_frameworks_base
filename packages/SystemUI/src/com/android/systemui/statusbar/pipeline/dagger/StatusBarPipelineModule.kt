@@ -148,5 +148,19 @@ abstract class StatusBarPipelineModule {
         fun provideMobileInputLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("MobileInputLog", 100)
         }
+
+        @Provides
+        @SysUISingleton
+        @MobileViewLog
+        fun provideMobileViewLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("MobileViewLog", 100)
+        }
+
+        @Provides
+        @SysUISingleton
+        @VerboseMobileViewLog
+        fun provideVerboseMobileViewLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("VerboseMobileViewLog", 100)
+        }
     }
 }

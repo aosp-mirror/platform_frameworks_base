@@ -60,8 +60,7 @@ import androidx.credentials.provider.CreateEntry
 import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
-import androidx.credentials.provider.RemoteCreateEntry
-import androidx.credentials.provider.RemoteCredentialEntry
+import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 
 // TODO: remove all !! checks
@@ -336,7 +335,7 @@ class GetFlowUtils {
             if (remoteEntry == null) {
                 return null
             }
-            val structuredRemoteEntry = RemoteCredentialEntry.fromSlice(remoteEntry.slice)
+            val structuredRemoteEntry = RemoteEntry.fromSlice(remoteEntry.slice)
                 ?: return null
             return RemoteEntryInfo(
                 providerId = providerId,
@@ -628,7 +627,7 @@ class CreateFlowUtils {
             remoteEntry: Entry?,
         ): RemoteInfo? {
             return if (remoteEntry != null) {
-                val structuredRemoteEntry = RemoteCreateEntry.fromSlice(remoteEntry.slice)
+                val structuredRemoteEntry = RemoteEntry.fromSlice(remoteEntry.slice)
                     ?: return null
                 RemoteInfo(
                     providerId = providerId,

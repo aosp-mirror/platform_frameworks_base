@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialOption;
+import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.AuthenticationEntry;
@@ -35,7 +36,6 @@ import android.service.credentials.BeginGetCredentialRequest;
 import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
-import android.service.credentials.CredentialProviderInfo;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.GetCredentialRequest;
 import android.service.credentials.RemoteEntry;
@@ -502,8 +502,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             String id = generateUniqueId();
             Entry entry = new Entry(CREDENTIAL_ENTRY_KEY,
                     id, credentialEntry.getSlice(),
-                    setUpFillInIntent(credentialEntry
-                            .getBeginGetCredentialOption().getId()));
+                    setUpFillInIntent(credentialEntry.getBeginGetCredentialOptionId()));
             mUiCredentialEntries.put(id, new Pair<>(credentialEntry, entry));
         }
 

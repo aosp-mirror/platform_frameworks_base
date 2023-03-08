@@ -61,7 +61,7 @@ public abstract class AbstractMultiplePendingRequestsRemoteService<S
             final int size = mPendingRequests.size();
             if (mVerbose) Slog.v(mTag, "Sending " + size + " pending requests");
             for (int i = 0; i < size; i++) {
-                mPendingRequests.get(i).run();
+                handlePendingRequest(mPendingRequests.get(i));
             }
             mPendingRequests.clear();
         }

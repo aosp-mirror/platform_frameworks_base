@@ -36,8 +36,8 @@ droidstubs {
     args: metalava_framework_docs_args,
     check_api: {
         current: {
-            api_file: "core/api/current.txt",
-            removed_api_file: "core/api/removed.txt",
+            api_file: ":non-updatable-current.txt",
+            removed_api_file: ":non-updatable-removed.txt",
         },
         last_released: {
             api_file: ":android-non-updatable.api.public.latest",
@@ -88,8 +88,8 @@ droidstubs {
     args: metalava_framework_docs_args + priv_apps,
     check_api: {
         current: {
-            api_file: "core/api/system-current.txt",
-            removed_api_file: "core/api/system-removed.txt",
+            api_file: ":non-updatable-system-current.txt",
+            removed_api_file: ":non-updatable-system-removed.txt",
         },
         last_released: {
             api_file: ":android-non-updatable.api.system.latest",
@@ -99,7 +99,7 @@ droidstubs {
         api_lint: {
             enabled: true,
             new_since: ":android.api.system.latest",
-            baseline_file: "core/api/system-lint-baseline.txt",
+            baseline_file: ":non-updatable-system-lint-baseline.txt",
         },
     },
     dists: [
@@ -127,12 +127,12 @@ droidstubs {
     args: metalava_framework_docs_args + test + priv_apps_in_stubs,
     check_api: {
         current: {
-            api_file: "core/api/test-current.txt",
-            removed_api_file: "core/api/test-removed.txt",
+            api_file: ":non-updatable-test-current.txt",
+            removed_api_file: ":non-updatable-test-removed.txt",
         },
         api_lint: {
             enabled: true,
-            baseline_file: "core/api/test-lint-baseline.txt",
+            baseline_file: ":non-updatable-test-lint-baseline.txt",
         },
     },
     dists: [
@@ -172,8 +172,8 @@ droidstubs {
     args: metalava_framework_docs_args + priv_apps_in_stubs + module_libs,
     check_api: {
         current: {
-            api_file: "core/api/module-lib-current.txt",
-            removed_api_file: "core/api/module-lib-removed.txt",
+            api_file: ":non-updatable-module-lib-current.txt",
+            removed_api_file: ":non-updatable-module-lib-removed.txt",
         },
         last_released: {
             api_file: ":android-non-updatable.api.module-lib.latest",
@@ -183,7 +183,7 @@ droidstubs {
         api_lint: {
             enabled: true,
             new_since: ":android.api.module-lib.latest",
-            baseline_file: "core/api/module-lib-lint-baseline.txt",
+            baseline_file: ":non-updatable-module-lib-lint-baseline.txt",
         },
     },
     dists: [
@@ -364,15 +364,15 @@ java_library {
 
 java_library {
     name: "android_system_server_stubs_current",
-    defaults: ["android_stubs_dists_default"],
+    defaults: [
+        "android.jar_defaults",
+        "android_stubs_dists_default",
+    ],
     srcs: [":services-non-updatable-stubs"],
     installable: false,
     static_libs: [
         "android_module_lib_stubs_current",
     ],
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
     dist: {
         dir: "apistubs/android/system-server",
     },
@@ -575,20 +575,7 @@ droidstubs {
 
 droidstubs {
     name: "hwbinder-stubs-docs",
-    srcs: [
-        "core/java/android/os/HidlSupport.java",
-        "core/java/android/os/HidlMemory.java",
-        "core/java/android/os/HwBinder.java",
-        "core/java/android/os/HwBlob.java",
-        "core/java/android/os/HwParcel.java",
-        "core/java/android/os/IHwBinder.java",
-        "core/java/android/os/IHwInterface.java",
-        "core/java/android/os/DeadObjectException.java",
-        "core/java/android/os/DeadSystemException.java",
-        "core/java/android/os/NativeHandle.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/util/AndroidException.java",
-    ],
+    srcs: [":hwbinder-stubs-srcs"],
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "core_platform",
@@ -609,13 +596,4 @@ java_library {
         ":hwbinder-stubs-docs",
     ],
     visibility: ["//visibility:public"],
-}
-
-java_api_contribution {
-    name: "frameworks-base-core-api-module-lib-stubs",
-    api_surface: "module-lib",
-    api_file: "core/api/module-lib-current.txt",
-    visibility: [
-        "//build/orchestrator/apis",
-    ],
 }

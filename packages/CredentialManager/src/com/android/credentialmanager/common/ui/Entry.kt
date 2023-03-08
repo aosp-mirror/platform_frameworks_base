@@ -102,8 +102,9 @@ fun Entry(
                     SmallTitleText(text = entryHeadlineText, enforceOneLine = enforceOneLine)
                     if (passwordValue != null) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
                         ) {
                             val visualTransformation = remember { PasswordVisualTransformation() }
                             val originalPassword by remember {
@@ -117,9 +118,13 @@ fun Entry(
                                 )
                             }
                             BodySmallText(
-                                text = displayedPassword.value, enforceOneLine = enforceOneLine)
+                                text = displayedPassword.value,
+                                // Apply weight to allow visibility button to render first so that
+                                // it doesn't get squeezed out by a super long password.
+                                modifier = Modifier.wrapContentSize().weight(1f, fill = false),
+                            )
                             ToggleVisibilityButton(
-                                modifier = Modifier.padding(start = 12.dp, top = 5.dp).size(24.dp),
+                                modifier = Modifier.padding(start = 12.dp).size(24.dp),
                                 onToggle = {
                                     if (it) {
                                         displayedPassword.value = originalPassword

@@ -128,6 +128,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.Spline;
+import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
@@ -250,6 +251,7 @@ public final class DisplayManagerService extends SystemService {
     private ActivityManagerInternal mActivityManagerInternal;
     private ActivityManager mActivityManager;
     private UidImportanceListener mUidImportanceListener = new UidImportanceListener();
+    @Nullable
     private IMediaProjectionManager mProjectionService;
     private DeviceStateManagerInternal mDeviceStateManager;
     @GuardedBy("mSyncRoot")
@@ -1494,8 +1496,9 @@ public final class DisplayManagerService extends SystemService {
 
         final long token = Binder.clearCallingIdentity();
         try {
+            final int displayId;
             synchronized (mSyncRoot) {
-                final int displayId =
+                displayId =
                         createVirtualDisplayLocked(
                                 callback,
                                 projection,
@@ -1509,8 +1512,39 @@ public final class DisplayManagerService extends SystemService {
                     mDisplayWindowPolicyControllers.put(
                             displayId, Pair.create(virtualDevice, dwpc));
                 }
-                return displayId;
             }
+
+            // When calling setContentRecordingSession into the WindowManagerService, the WMS
+            // attempts to acquire a lock before executing its main body. Due to this, we need
+            // to be sure that it isn't called while the DisplayManagerService is also holding
+            // a lock, to avoid a deadlock scenario.
+            final ContentRecordingSession session =
+                    virtualDisplayConfig.getContentRecordingSession();
+
+            if (displayId != Display.INVALID_DISPLAY && session != null) {
+                // Only attempt to set content recording session if there are details to set and a
+                // VirtualDisplay has been successfully constructed.
+                session.setDisplayId(displayId);
+
+                // We set the content recording session here on the server side instead of using
+                // a second AIDL call in MediaProjection. By ensuring that a virtual display has
+                // been constructed before calling setContentRecordingSession, we avoid a race
+                // condition between the DMS & WMS which could lead to the MediaProjection
+                // being pre-emptively torn down.
+                if (!mWindowManagerInternal.setContentRecordingSession(session)) {
+                    // Unable to start mirroring, so tear down projection & release VirtualDisplay.
+                    try {
+                        getProjectionService().stopActiveProjection();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to tell MediaProjectionManagerService to stop the "
+                                + "active projection", e);
+                    }
+                    releaseVirtualDisplayInternal(callback.asBinder());
+                    return Display.INVALID_DISPLAY;
+                }
+            }
+
+            return displayId;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2804,8 +2838,7 @@ public final class DisplayManagerService extends SystemService {
 
     private IMediaProjectionManager getProjectionService() {
         if (mProjectionService == null) {
-            IBinder b = ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE);
-            mProjectionService = IMediaProjectionManager.Stub.asInterface(b);
+            mProjectionService = mInjector.getProjectionService();
         }
         return mProjectionService;
     }
@@ -2963,6 +2996,11 @@ public final class DisplayManagerService extends SystemService {
 
         boolean getHdrOutputConversionSupport() {
             return DisplayControl.getHdrOutputConversionSupport();
+        }
+
+        IMediaProjectionManager getProjectionService() {
+            IBinder b = ServiceManager.getService(Context.MEDIA_PROJECTION_SERVICE);
+            return  IMediaProjectionManager.Stub.asInterface(b);
         }
     }
 

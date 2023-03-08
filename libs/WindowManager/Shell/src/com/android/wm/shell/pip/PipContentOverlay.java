@@ -39,6 +39,9 @@ import android.window.TaskSnapshot;
  * Represents the content overlay used during the entering PiP animation.
  */
 public abstract class PipContentOverlay {
+    // Fixed string used in WMShellFlickerTests
+    protected static final String LAYER_NAME = "PipContentOverlay";
+
     protected SurfaceControl mLeash;
 
     /** Attaches the internal {@link #mLeash} to the given parent leash. */
@@ -86,7 +89,7 @@ public abstract class PipContentOverlay {
             mContext = context;
             mLeash = new SurfaceControl.Builder(new SurfaceSession())
                     .setCallsite(TAG)
-                    .setName(TAG)
+                    .setName(LAYER_NAME)
                     .setColorLayer()
                     .build();
         }
@@ -139,7 +142,7 @@ public abstract class PipContentOverlay {
             mSourceRectHint = new Rect(sourceRectHint);
             mLeash = new SurfaceControl.Builder(new SurfaceSession())
                     .setCallsite(TAG)
-                    .setName(TAG)
+                    .setName(LAYER_NAME)
                     .build();
         }
 
@@ -194,7 +197,7 @@ public abstract class PipContentOverlay {
             prepareAppIconOverlay(activityInfo);
             mLeash = new SurfaceControl.Builder(new SurfaceSession())
                     .setCallsite(TAG)
-                    .setName(TAG)
+                    .setName(LAYER_NAME)
                     .build();
         }
 
