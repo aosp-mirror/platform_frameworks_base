@@ -105,10 +105,10 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
-import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.controllers.BackgroundJobsController;
@@ -411,7 +411,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             EconomyManagerInternal.TareStateChangeListener {
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                    JobSchedulerBackgroundThread.getExecutor(), this);
+                    AppSchedulingModuleThread.getExecutor(), this);
             final EconomyManagerInternal economyManagerInternal =
                     LocalServices.getService(EconomyManagerInternal.class);
             economyManagerInternal
