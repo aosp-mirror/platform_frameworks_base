@@ -16,15 +16,17 @@
 
 package com.android.systemui.statusbar.notification
 
-import android.animation.ObjectAnimator
 import android.util.FloatProperty
 import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
+import androidx.core.animation.ObjectAnimator
 import com.android.systemui.Dumpable
 import com.android.systemui.animation.Interpolators
+import com.android.systemui.animation.InterpolatorsAndroidX
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.NotificationPanelViewController.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.statusbar.StatusBarState
@@ -37,8 +39,11 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController.OnBypassSta
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
+import com.android.systemui.util.doOnCancel
+import com.android.systemui.util.doOnEnd
 import java.io.PrintWriter
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.math.min
 
 @SysUISingleton
@@ -57,23 +62,13 @@ constructor(
     StatusBarStateController.StateListener,
     ShadeExpansionListener,
     Dumpable {
-
-    private val mNotificationVisibility =
-        object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
-
-            override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
-                coordinator.setVisibilityAmount(value)
-            }
-
-            override fun get(coordinator: NotificationWakeUpCoordinator): Float? {
-                return coordinator.mLinearVisibilityAmount
-            }
-        }
     private lateinit var mStackScrollerController: NotificationStackScrollLayoutController
     private var mVisibilityInterpolator = Interpolators.FAST_OUT_SLOW_IN_REVERSE
 
     private var inputLinearDozeAmount: Float = 0.0f
     private var inputEasedDozeAmount: Float = 0.0f
+    private var delayedDozeAmountOverride: Float = 0.0f
+    private var delayedDozeAmountAnimator: ObjectAnimator? = null
     /** Valid values: {1f, 0f, null} null => use input */
     private var hardDozeAmountOverride: Float? = null
     private var hardDozeAmountOverrideSource: String = "n/a"
@@ -319,7 +314,8 @@ constructor(
 
     private fun updateDozeAmount() {
         // Calculate new doze amount (linear)
-        val newOutputLinearDozeAmount = hardDozeAmountOverride ?: inputLinearDozeAmount
+        val newOutputLinearDozeAmount =
+            hardDozeAmountOverride ?: max(inputLinearDozeAmount, delayedDozeAmountOverride)
         val changed = outputLinearDozeAmount != newOutputLinearDozeAmount
 
         // notify when the animation is starting
@@ -337,6 +333,7 @@ constructor(
         outputEasedDozeAmount = dozeAmountInterpolator.getInterpolation(outputLinearDozeAmount)
         logger.logUpdateDozeAmount(
             inputLinear = inputLinearDozeAmount,
+            delayLinear = delayedDozeAmountOverride,
             hardOverride = hardDozeAmountOverride,
             outputLinear = outputLinearDozeAmount,
             state = statusBarStateController.state,
@@ -365,8 +362,27 @@ constructor(
         wakingUp: Boolean,
         requestDelayedAnimation: Boolean,
     ) {
+        logger.logSetWakingUp(wakingUp, requestDelayedAnimation)
         this.wakingUp = wakingUp
-        // TODO(jeffdq): Delay the wakeup animation if we're pressing to unlock.
+        if (wakingUp && requestDelayedAnimation) {
+            scheduleDelayedDozeAmountAnimation()
+        }
+    }
+
+    private fun scheduleDelayedDozeAmountAnimation() {
+        val alreadyRunning = delayedDozeAmountAnimator != null
+        logger.logStartDelayedDozeAmountAnimation(alreadyRunning)
+        if (alreadyRunning) return
+        delayedDozeAmount.setValue(this, 1.0f)
+        delayedDozeAmountAnimator =
+            ObjectAnimator.ofFloat(this, delayedDozeAmount, 0.0f).apply {
+                interpolator = InterpolatorsAndroidX.LINEAR
+                duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
+                startDelay = WAKEUP_ANIMATION_DELAY_MS.toLong()
+                doOnEnd { delayedDozeAmountAnimator = null }
+                doOnCancel { delayedDozeAmountAnimator = null }
+                start()
+            }
     }
 
     override fun onStateChanged(newState: Int) {
@@ -489,8 +505,8 @@ constructor(
                 else Interpolators.FAST_OUT_SLOW_IN_REVERSE
         }
         val target = if (mNotificationsVisible) 1.0f else 0.0f
-        val visibilityAnimator = ObjectAnimator.ofFloat(this, mNotificationVisibility, target)
-        visibilityAnimator.interpolator = Interpolators.LINEAR
+        val visibilityAnimator = ObjectAnimator.ofFloat(this, notificationVisibility, target)
+        visibilityAnimator.interpolator = InterpolatorsAndroidX.LINEAR
         var duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
         if (increaseSpeed) {
             duration = (duration.toFloat() / 1.5F).toLong()
@@ -501,6 +517,7 @@ constructor(
     }
 
     private fun setVisibilityAmount(visibilityAmount: Float) {
+        logger.logSetVisibilityAmount(visibilityAmount)
         mLinearVisibilityAmount = visibilityAmount
         mVisibilityAmount = mVisibilityInterpolator.getInterpolation(visibilityAmount)
         handleAnimationFinished()
@@ -517,6 +534,7 @@ constructor(
     private fun updateHideAmount() {
         val linearAmount = min(1.0f - mLinearVisibilityAmount, outputLinearDozeAmount)
         val amount = min(1.0f - mVisibilityAmount, outputEasedDozeAmount)
+        logger.logSetHideAmount(linearAmount)
         mStackScrollerController.setHideAmount(linearAmount, amount)
         notificationsFullyHidden = linearAmount == 1.0f
     }
@@ -558,6 +576,7 @@ constructor(
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("inputLinearDozeAmount: $inputLinearDozeAmount")
         pw.println("inputEasedDozeAmount: $inputEasedDozeAmount")
+        pw.println("delayedDozeAmountOverride: $delayedDozeAmountOverride")
         pw.println("hardDozeAmountOverride: $hardDozeAmountOverride")
         pw.println("hardDozeAmountOverrideSource: $hardDozeAmountOverrideSource")
         pw.println("outputLinearDozeAmount: $outputLinearDozeAmount")
@@ -592,5 +611,33 @@ constructor(
          * @param expandingChanged if the user has started or stopped expanding
          */
         @JvmDefault fun onPulseExpansionChanged(expandingChanged: Boolean) {}
+    }
+
+    companion object {
+        private val notificationVisibility =
+            object : FloatProperty<NotificationWakeUpCoordinator>("notificationVisibility") {
+
+                override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
+                    coordinator.setVisibilityAmount(value)
+                }
+
+                override fun get(coordinator: NotificationWakeUpCoordinator): Float {
+                    return coordinator.mLinearVisibilityAmount
+                }
+            }
+
+        private val delayedDozeAmount =
+            object : FloatProperty<NotificationWakeUpCoordinator>("delayedDozeAmount") {
+
+                override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
+                    coordinator.delayedDozeAmountOverride = value
+                    coordinator.logger.logSetDelayDozeAmountOverride(value)
+                    coordinator.updateDozeAmount()
+                }
+
+                override fun get(coordinator: NotificationWakeUpCoordinator): Float {
+                    return coordinator.delayedDozeAmountOverride
+                }
+            }
     }
 }
