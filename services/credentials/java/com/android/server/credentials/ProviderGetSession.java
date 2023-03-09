@@ -169,7 +169,8 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             CallingAppInfo callingAppInfo,
             Map<String, CredentialOption> beginGetOptionToCredentialOptionMap,
             String hybridService) {
-        super(context, info, beginGetRequest, callbacks, userId, remoteCredentialService);
+        super(context, beginGetRequest, callbacks, info.getComponentName() ,
+                userId, remoteCredentialService);
         mCompleteRequest = completeGetRequest;
         mCallingAppInfo = callingAppInfo;
         setStatus(Status.PENDING);
@@ -196,7 +197,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
     /** Called when provider service dies. */
     @Override // Callback from the remote provider
     public void onProviderServiceDied(RemoteCredentialService service) {
-        if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
+        if (service.getComponentName().equals(mComponentName)) {
             updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "

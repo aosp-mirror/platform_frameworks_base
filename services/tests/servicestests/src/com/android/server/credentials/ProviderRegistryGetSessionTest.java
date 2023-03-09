@@ -36,7 +36,6 @@ import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.credentials.Credential;
 import android.credentials.CredentialOption;
-import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.GetCredentialProviderData;
@@ -45,7 +44,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialEntry;
-import android.service.credentials.CredentialProviderInfoFactory;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.GetCredentialRequest;
 
@@ -61,7 +59,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.security.cert.CertificateException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -89,7 +86,6 @@ public class ProviderRegistryGetSessionTest {
     @Mock private GetRequestSession mGetRequestSession;
     private CredentialOption mGetCredentialOption;
     @Mock private ServiceInfo mServiceInfo;
-    private CredentialProviderInfo mCredentialProviderInfo;
     private CallingAppInfo mCallingAppInfo;
     @Mock private CredentialDescriptionRegistry mCredentialDescriptionRegistry;
     private Bundle mRetrievalData;
@@ -111,12 +107,6 @@ public class ProviderRegistryGetSessionTest {
         mGetCredentialOption = new CredentialOption(CREDENTIAL_TYPE, mRetrievalData,
                 new Bundle(), false);
         when(mServiceInfo.getComponentName()).thenReturn(CREDENTIAL_PROVIDER_COMPONENT);
-        mCredentialProviderInfo = CredentialProviderInfoFactory
-                .createForTests(mServiceInfo,
-                        /* overrideLabel= */ "test",
-                        /* isSystemProvider= */ false,
-                        /* isEnabled= */ true,
-                        /* capabilities= */ Collections.EMPTY_LIST);
         CredentialDescriptionRegistry.setSession(USER_ID_1, mCredentialDescriptionRegistry);
         mResponse = new HashSet<>();
         mSlice = createSlice();
@@ -130,7 +120,7 @@ public class ProviderRegistryGetSessionTest {
         when(mCredentialDescriptionRegistry.getFilteredResultForProvider(anyString(), anyString()))
                 .thenReturn(mResponse);
         mProviderRegistryGetSession = ProviderRegistryGetSession
-                .createNewSession(context, USER_ID_1, mGetRequestSession, mCredentialProviderInfo,
+                .createNewSession(context, USER_ID_1, mGetRequestSession,
                         mCallingAppInfo,
                         CALLING_PACKAGE_NAME,
                         mGetCredentialOption);

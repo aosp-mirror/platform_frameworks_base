@@ -133,7 +133,7 @@ public final class ProviderCreateSession extends ProviderSession<
             @NonNull BeginCreateCredentialRequest beginCreateRequest,
             @NonNull CreateCredentialRequest completeCreateRequest,
             String hybridService) {
-        super(context, info, beginCreateRequest, callbacks, userId,
+        super(context, beginCreateRequest, callbacks, info.getComponentName(), userId,
                 remoteCredentialService);
         mCompleteRequest = completeCreateRequest;
         setStatus(Status.PENDING);
@@ -161,7 +161,7 @@ public final class ProviderCreateSession extends ProviderSession<
     /** Called when provider service dies. */
     @Override
     public void onProviderServiceDied(RemoteCredentialService service) {
-        if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
+        if (service.getComponentName().equals(mComponentName)) {
             updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "
