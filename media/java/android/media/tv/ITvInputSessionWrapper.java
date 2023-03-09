@@ -267,7 +267,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_SET_TV_MESSAGE_ENABLED: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.setTvMessageEnabled((String) args.arg1, (Boolean) args.arg2);
+                mTvInputSessionImpl.setTvMessageEnabled((Integer) args.arg1, (Boolean) args.arg2);
                 break;
             }
             case DO_REQUEST_AD: {
@@ -470,7 +470,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void notifyTvMessage(String type, Bundle data) {
+    public void notifyTvMessage(int type, Bundle data) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
     }
 

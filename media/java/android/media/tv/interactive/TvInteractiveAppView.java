@@ -946,7 +946,7 @@ public class TvInteractiveAppView extends ViewGroup {
      * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
      * @param data The raw data of the message
      */
-    public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+    public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType int type,
             @NonNull Bundle data) {
         if (DEBUG) {
             Log.d(TAG, "notifyTvMessage type=" + type
