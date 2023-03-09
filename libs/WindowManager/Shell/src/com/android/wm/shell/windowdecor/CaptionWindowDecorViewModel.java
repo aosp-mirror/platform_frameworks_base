@@ -193,6 +193,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         private final DragDetector mDragDetector;
 
         private int mDragPointerId = -1;
+        private boolean mIsDragging;
 
         private CaptionTouchEventListener(
                 RunningTaskInfo taskInfo,
@@ -223,19 +224,15 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             if (v.getId() != R.id.caption) {
                 return false;
             }
-            mDragDetector.onMotionEvent(e);
-
-            if (e.getAction() != MotionEvent.ACTION_DOWN) {
-                return false;
+            if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
+                if (!taskInfo.isFocused) {
+                    final WindowContainerTransaction wct = new WindowContainerTransaction();
+                    wct.reorder(mTaskToken, true /* onTop */);
+                    mSyncQueue.queue(wct);
+                }
             }
-            final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
-            if (taskInfo.isFocused) {
-                return false;
-            }
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.reorder(mTaskToken, true /* onTop */);
-            mSyncQueue.queue(wct);
-            return true;
+            return mDragDetector.onMotionEvent(e);
         }
 
         /**
@@ -253,20 +250,24 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     mDragPointerId = e.getPointerId(0);
                     mDragPositioningCallback.onDragPositioningStart(
                             0 /* ctrlType */, e.getRawX(0), e.getRawY(0));
-                    break;
+                    mIsDragging = false;
+                    return false;
                 }
                 case MotionEvent.ACTION_MOVE: {
                     int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
-                    break;
+                    mIsDragging = true;
+                    return true;
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
                     int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
-                    break;
+                    final boolean wasDragging = mIsDragging;
+                    mIsDragging = false;
+                    return wasDragging;
                 }
             }
             return true;
