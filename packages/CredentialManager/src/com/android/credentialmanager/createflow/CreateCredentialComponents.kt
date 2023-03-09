@@ -446,6 +446,7 @@ fun MoreOptionsRowIntroCard(
             BodyMediumText(text = stringResource(
                 R.string.use_provider_for_all_description, entryInfo.userProviderDisplayName))
         }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
             CtaButtonRow(
                 leftButton = {
