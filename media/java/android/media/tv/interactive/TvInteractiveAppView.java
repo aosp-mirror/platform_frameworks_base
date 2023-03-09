@@ -682,7 +682,7 @@ public class TvInteractiveAppView extends ViewGroup {
             Log.d(TAG, "notifyRecordingStarted");
         }
         if (mSession != null) {
-            mSession.notifyRecordingStarted(recordingId, recordingId);
+            mSession.notifyRecordingStarted(recordingId, requestId);
         }
     }
 
