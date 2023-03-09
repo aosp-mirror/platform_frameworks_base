@@ -156,6 +156,14 @@ public class AutofillFeatureFlags {
             "trigger_fill_request_on_unimportant_view";
 
     /**
+     * Whether to apply heuristic check on important views.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_FILTERED_IMPORTANT_VIEWS =
+            "trigger_fill_request_on_filtered_important_views";
+
+    /**
      * Continas imeAction ids that is irrelevant for autofill. For example, ime_action_search. We
      * use this to avoid trigger fill request on unimportant views.
      *
@@ -167,6 +175,14 @@ public class AutofillFeatureFlags {
     @SuppressLint("IntentName")
     public static final String DEVICE_CONFIG_NON_AUTOFILLABLE_IME_ACTION_IDS =
             "non_autofillable_ime_action_ids";
+
+    /**
+     * Whether to enable autofill on all view types (not just checkbox, spinner, datepicker etc...)
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES =
+            "should_enable_autofill_on_all_view_types";
     // END AUTOFILL FOR ALL APPS FLAGS //
 
 
@@ -312,6 +328,28 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
             DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW, false);
+    }
+
+    /**
+     * Whether to apply heuristic check on important views before triggering fill request
+     *
+     * @hide
+     */
+    public static boolean isTriggerFillRequestOnFilteredImportantViewsEnabled() {
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_FILTERED_IMPORTANT_VIEWS, false);
+    }
+
+    /**
+     * Whether to enable autofill on all view types.
+     *
+     * @hide
+     */
+    public static boolean shouldEnableAutofillOnAllViewTypes(){
+        return DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_AUTOFILL,
+            DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES, false);
     }
 
     /**
