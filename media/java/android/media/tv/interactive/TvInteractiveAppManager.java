@@ -1751,7 +1751,7 @@ public final class TvInteractiveAppManager {
         /**
          * Notifies Interactive APP session when a new TV message is received.
          */
-        public void notifyTvMessage(String type, Bundle data) {
+        public void notifyTvMessage(int type, Bundle data) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
