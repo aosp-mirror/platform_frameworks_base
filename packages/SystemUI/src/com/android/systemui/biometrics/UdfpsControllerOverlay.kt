@@ -353,10 +353,19 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
             flags = flags or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         }
 
-        // Original sensorBounds assume portrait mode.
+        val isEnrollment = when (requestReason) {
+            REASON_ENROLL_FIND_SENSOR, REASON_ENROLL_ENROLLING -> true
+            else -> false
+        }
+
+        // Use expanded overlay unless touchExploration enabled
         var rotatedBounds =
             if (featureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)) {
-                Rect(overlayParams.overlayBounds)
+                if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
+                    Rect(overlayParams.sensorBounds)
+                } else {
+                    Rect(overlayParams.overlayBounds)
+                }
             } else {
                 Rect(overlayParams.sensorBounds)
             }
