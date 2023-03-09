@@ -89,22 +89,16 @@ constructor(
     /**
      * Shows a note task. How the task is shown will depend on when the method is invoked.
      *
-     * If in multi-window mode, notes will open as a full screen experience. That is particularly
-     * important for Large screen devices. These devices may support a taskbar that let users to
-     * drag and drop a shortcut into multi-window mode, and notes should comply with this behaviour.
-     *
      * If the keyguard is locked, notes will open as a full screen experience. A locked device has
      * no contextual information which let us use the whole screen space available.
      *
-     * If not in multi-window or the keyguard is unlocked, notes will open as a bubble OR it will be
-     * collapsed if the notes bubble is already opened.
+     * If the keyguard is unlocked, notes will open as a bubble OR it will be collapsed if the notes
+     * bubble is already opened.
      *
      * That will let users open other apps in full screen, and take contextual notes.
      */
-    @JvmOverloads
     fun showNoteTask(
         entryPoint: NoteTaskEntryPoint,
-        isInMultiWindowMode: Boolean = false,
     ) {
         if (!isEnabled) return
 
@@ -125,13 +119,7 @@ constructor(
             return
         }
 
-        val info =
-            resolver.resolveInfo(
-                entryPoint = entryPoint,
-                isInMultiWindowMode = isInMultiWindowMode,
-                isKeyguardLocked = isKeyguardLocked,
-            )
-                ?: return
+        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked) ?: return
 
         infoReference.set(info)
 
