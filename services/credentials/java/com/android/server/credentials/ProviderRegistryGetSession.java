@@ -19,10 +19,10 @@ package com.android.server.credentials;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialOption;
-import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialResponse;
 import android.credentials.ui.Entry;
@@ -64,7 +64,6 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             @NonNull Context context,
             @UserIdInt int userId,
             @NonNull GetRequestSession getRequestSession,
-            @NonNull CredentialProviderInfo credentialProviderInfo,
             @NonNull CallingAppInfo callingAppInfo,
             @NonNull String credentialProviderPackageName,
             @NonNull CredentialOption requestOption) {
@@ -72,7 +71,6 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 context,
                 userId,
                 getRequestSession,
-                credentialProviderInfo,
                 callingAppInfo,
                 credentialProviderPackageName,
                 requestOption);
@@ -94,11 +92,12 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     protected ProviderRegistryGetSession(@NonNull Context context,
             @NonNull int userId,
             @NonNull GetRequestSession session,
-            @NonNull CredentialProviderInfo credentialProviderInfo,
             @NonNull CallingAppInfo callingAppInfo,
             @NonNull String servicePackageName,
             @NonNull CredentialOption requestOption) {
-        super(context, credentialProviderInfo, requestOption, session, userId, null);
+        super(context, requestOption, session,
+                new ComponentName(servicePackageName, servicePackageName) ,
+                userId, null);
         mCredentialDescriptionRegistry = CredentialDescriptionRegistry.forUser(userId);
         mCallingAppInfo = callingAppInfo;
         mCredentialProviderPackageName = servicePackageName;

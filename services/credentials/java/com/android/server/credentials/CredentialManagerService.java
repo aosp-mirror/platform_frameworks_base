@@ -33,7 +33,6 @@ import android.content.pm.ServiceInfo;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
-import android.credentials.CredentialDescription;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
@@ -296,11 +295,6 @@ public final class CredentialManagerService
                             mContext,
                             UserHandle.getCallingUserId(),
                             session,
-                            CredentialProviderInfoFactory.getCredentialProviderFromPackageName(
-                                    mContext, UserHandle.getCallingUserId() ,
-                                            result.second.mPackageName,
-                                            CredentialManager.PROVIDER_FILTER_ALL_PROVIDERS,
-                                    new HashSet<>()),
                             session.mClientAppInfo,
                             result.second.mPackageName,
                             result.first));
@@ -752,44 +746,6 @@ public final class CredentialManagerService
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
 
-            List<CredentialProviderInfo> services =
-                    getServicesForCredentialDescription(UserHandle.getCallingUserId());
-
-            List<String> providers =
-                    services.stream()
-                            .map(
-                                    credentialProviderInfo ->
-                                            credentialProviderInfo.getServiceInfo().packageName)
-                            .toList();
-
-            if (!providers.contains(callingPackage)) {
-                throw new NonCredentialProviderCallerException(callingPackage);
-            }
-
-            List<CredentialProviderInfo> matchingService =
-                    services.stream()
-                            .filter(
-                                    credentialProviderInfo ->
-                                            credentialProviderInfo
-                                                    .getServiceInfo()
-                                                    .packageName
-                                                    .equals(callingPackage))
-                            .toList();
-
-            CredentialProviderInfo credentialProviderInfo = matchingService.get(0);
-
-            Set<String> supportedTypes =
-                    request.getCredentialDescriptions().stream()
-                            .map(CredentialDescription::getType)
-                            .filter(credentialProviderInfo::hasCapability)
-                            .collect(Collectors.toSet());
-
-            if (supportedTypes.size() != request.getCredentialDescriptions().size()) {
-                throw new IllegalArgumentException(
-                        "CredentialProvider does not support one or more"
-                                + "of the registered types. Check your XML entry.");
-            }
-
             CredentialDescriptionRegistry session =
                     CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
 
@@ -807,20 +763,6 @@ public final class CredentialManagerService
             }
 
             enforceCallingPackage(callingPackage, Binder.getCallingUid());
-
-            List<CredentialProviderInfo> services =
-                    getServicesForCredentialDescription(UserHandle.getCallingUserId());
-
-            List<String> providers =
-                    services.stream()
-                            .map(
-                                    credentialProviderInfo ->
-                                            credentialProviderInfo.getServiceInfo().packageName)
-                            .toList();
-
-            if (!providers.contains(callingPackage)) {
-                throw new NonCredentialProviderCallerException(callingPackage);
-            }
 
             CredentialDescriptionRegistry session =
                     CredentialDescriptionRegistry.forUser(UserHandle.getCallingUserId());
