@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.UserManager
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
+import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.GuestResetOrExitSessionReceiver
 import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.SysuiTestCase
@@ -80,6 +81,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
     @Mock private lateinit var resumeSessionReceiver: GuestResumeSessionReceiver
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
     @Mock private lateinit var commandQueue: CommandQueue
+    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
     private lateinit var underTest: StatusBarUserChipViewModel
 
@@ -263,6 +265,7 @@ class StatusBarUserChipViewModelTest : SysuiTestCase() {
                             repository = FakeTelephonyRepository(),
                         ),
                     broadcastDispatcher = fakeBroadcastDispatcher,
+                    keyguardUpdateMonitor = keyguardUpdateMonitor,
                     backgroundDispatcher = testDispatcher,
                     activityManager = activityManager,
                     refreshUsersScheduler = refreshUsersScheduler,

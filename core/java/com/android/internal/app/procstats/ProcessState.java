@@ -73,6 +73,7 @@ import com.android.internal.app.procstats.ProcessStats.TotalMemoryUseCollection;
 
 import java.io.PrintWriter;
 import java.util.Comparator;
+import java.util.concurrent.TimeUnit;
 
 public final class ProcessState {
     private static final String TAG = "ProcessStats";
@@ -1540,6 +1541,75 @@ public final class ProcessState {
         }
         // Write the full process name
         proto.write(fieldId, procName);
+    }
+
+    /** Dumps the duration of each state to statsEventOutput. */
+    public void dumpStateDurationToStatsd(
+            int atomTag, ProcessStats processStats, StatsEventOutput statsEventOutput) {
+        long topMs = 0;
+        long fgsMs = 0;
+        long boundTopMs = 0;
+        long boundFgsMs = 0;
+        long importantForegroundMs = 0;
+        long cachedMs = 0;
+        long frozenMs = 0;
+        long otherMs = 0;
+        for (int i = 0, size = mDurations.getKeyCount(); i < size; i++) {
+            final int key = mDurations.getKeyAt(i);
+            final int type = SparseMappingTable.getIdFromKey(key);
+            int procStateIndex = type % STATE_COUNT;
+            long duration = mDurations.getValue(key);
+            switch (procStateIndex) {
+                case STATE_TOP:
+                    topMs += duration;
+                    break;
+                case STATE_BOUND_TOP_OR_FGS:
+                    boundTopMs += duration;
+                    break;
+                case STATE_FGS:
+                    fgsMs += duration;
+                    break;
+                case STATE_IMPORTANT_FOREGROUND:
+                case STATE_IMPORTANT_BACKGROUND:
+                    importantForegroundMs += duration;
+                    break;
+                case STATE_BACKUP:
+                case STATE_SERVICE:
+                case STATE_SERVICE_RESTARTING:
+                case STATE_RECEIVER:
+                case STATE_HEAVY_WEIGHT:
+                case STATE_HOME:
+                case STATE_LAST_ACTIVITY:
+                case STATE_PERSISTENT:
+                    otherMs += duration;
+                    break;
+                case STATE_CACHED_ACTIVITY:
+                case STATE_CACHED_ACTIVITY_CLIENT:
+                case STATE_CACHED_EMPTY:
+                    cachedMs += duration;
+                    break;
+                    // TODO (b/261910877) Add support for tracking boundFgsMs and
+                    // frozenMs.
+            }
+        }
+        statsEventOutput.write(
+                atomTag,
+                getUid(),
+                getName(),
+                (int) TimeUnit.MILLISECONDS.toSeconds(processStats.mTimePeriodStartUptime),
+                (int) TimeUnit.MILLISECONDS.toSeconds(processStats.mTimePeriodEndUptime),
+                (int)
+                        TimeUnit.MILLISECONDS.toSeconds(
+                                processStats.mTimePeriodEndUptime
+                                        - processStats.mTimePeriodStartUptime),
+                (int) TimeUnit.MILLISECONDS.toSeconds(topMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(fgsMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(boundTopMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(boundFgsMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(importantForegroundMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(cachedMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(frozenMs),
+                (int) TimeUnit.MILLISECONDS.toSeconds(otherMs));
     }
 
     /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */

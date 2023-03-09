@@ -58,13 +58,11 @@ public class DreamActivity extends Activity {
             setTitle(title);
         }
 
-        final Object callback = getIntent().getExtras().getBinder(EXTRA_CALLBACK);
-        if (callback instanceof DreamService.DreamActivityCallbacks) {
-            mCallback = (DreamService.DreamActivityCallbacks) callback;
+        final Bundle extras = getIntent().getExtras();
+        mCallback = (DreamService.DreamActivityCallbacks) extras.getBinder(EXTRA_CALLBACK);
+
+        if (mCallback != null) {
             mCallback.onActivityCreated(this);
-        } else {
-            mCallback = null;
-            finishAndRemoveTask();
         }
     }
 

@@ -190,6 +190,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
      * @param textSize an optional font size.
      * @param colors an optional colors array that must be the same size as numLines passed to
      *               the TextInterpolator
+     * @param strokeWidth an optional paint stroke width
      * @param animate an optional boolean indicating true for showing style transition as animation,
      *                false for immediate style transition. True by default.
      * @param duration an optional animation duration in milliseconds. This is ignored if animate is
@@ -201,6 +202,7 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         weight: Int = -1,
         textSize: Float = -1f,
         color: Int? = null,
+        strokeWidth: Float = -1f,
         animate: Boolean = true,
         duration: Long = -1L,
         interpolator: TimeInterpolator? = null,
@@ -253,6 +255,9 @@ class TextAnimator(layout: Layout, private val invalidateCallback: () -> Unit) {
         }
         if (color != null) {
             textInterpolator.targetPaint.color = color
+        }
+        if (strokeWidth >= 0F) {
+            textInterpolator.targetPaint.strokeWidth = strokeWidth
         }
         textInterpolator.onTargetPaintModified()
 

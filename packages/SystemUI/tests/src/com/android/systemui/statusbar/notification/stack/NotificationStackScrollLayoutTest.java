@@ -68,7 +68,9 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -129,6 +131,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationShelf mNotificationShelf;
     @Mock private NotificationStackSizeCalculator mNotificationStackSizeCalculator;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    @Mock private FeatureFlags mFeatureFlags;
 
     @Before
     @UiThreadTest
@@ -142,7 +146,10 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mDumpManager,
                 mNotificationSectionsManager,
                 mBypassController,
-                mStatusBarKeyguardViewManager));
+                mStatusBarKeyguardViewManager,
+                mLargeScreenShadeInterpolator,
+                mFeatureFlags
+        ));
 
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);

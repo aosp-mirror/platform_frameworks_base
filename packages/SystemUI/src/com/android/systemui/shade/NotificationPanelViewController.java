@@ -2883,7 +2883,10 @@ public final class NotificationPanelViewController implements Dumpable {
         mHeadsUpStartHeight = startHeight;
         float scrimMinFraction;
         if (mSplitShadeEnabled) {
-            boolean highHun = mHeadsUpStartHeight * 2.5 > mSplitShadeScrimTransitionDistance;
+            boolean highHun = mHeadsUpStartHeight * 2.5
+                    >
+                    (mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)
+                    ? mSplitShadeFullTransitionDistance : mSplitShadeScrimTransitionDistance);
             // if HUN height is higher than 40% of predefined transition distance, it means HUN
             // is too high for regular transition. In that case we need to calculate transition
             // distance - here we take scrim transition distance as equal to shade transition

@@ -51,6 +51,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellAnimationThread;
@@ -167,6 +168,18 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return new DevicePostureController(context, shellInit, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static TabletopModeController provideTabletopModeController(
+            Context context,
+            ShellInit shellInit,
+            DevicePostureController postureController,
+            DisplayController displayController,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new TabletopModeController(
+                context, shellInit, postureController, displayController, mainExecutor);
     }
 
     @WMSingleton
