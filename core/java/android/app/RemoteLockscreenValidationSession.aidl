@@ -17,4 +17,4 @@
 package android.app;
 
 /** {@hide} */
-parcelable StartLockscreenValidationRequest;
+parcelable RemoteLockscreenValidationSession;
