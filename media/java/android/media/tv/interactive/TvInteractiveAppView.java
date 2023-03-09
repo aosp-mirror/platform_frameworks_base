@@ -1350,7 +1350,7 @@ public class TvInteractiveAppView extends ViewGroup {
          */
         public void onRequestTvRecordingInfoList(
                 @NonNull String iAppServiceId,
-                @NonNull @TvRecordingInfo.TvRecordingListType int type) {
+                @TvRecordingInfo.TvRecordingListType int type) {
         }
     }
 
