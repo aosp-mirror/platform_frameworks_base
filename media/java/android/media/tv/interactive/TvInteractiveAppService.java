@@ -1507,8 +1507,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param type The type of recording to retrieve.
          */
         @CallSuper
-        public void requestTvRecordingInfoList(@NonNull @TvRecordingInfo.TvRecordingListType
-                int type) {
+        public void requestTvRecordingInfoList(@TvRecordingInfo.TvRecordingListType int type) {
             executeOrPostRunnableOnMainThread(() -> {
                 try {
                     if (DEBUG) {
