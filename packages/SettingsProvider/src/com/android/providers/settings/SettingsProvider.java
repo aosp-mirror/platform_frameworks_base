@@ -2327,15 +2327,11 @@ public class SettingsProvider extends ContentProvider {
         result.putString(Settings.NameValueTable.VALUE,
                 (setting != null && !setting.isNull()) ? setting.getValue() : null);
 
-        synchronized (mLock) {
-            if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
-                // Individual generation tracking for predefined settings even if they are unset
+        if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
+            // Don't track generation for non-existent settings unless the name is predefined
+            synchronized (mLock) {
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
                         SettingsState.makeKey(type, userId), name);
-            } else {
-                // All non-predefined, unset settings are tracked using the same generation number
-                mSettingsRegistry.mGenerationRegistry.addGenerationDataForUnsetSettings(result,
-                        SettingsState.makeKey(type, userId));
             }
         }
         return result;
@@ -2349,8 +2345,7 @@ public class SettingsProvider extends ContentProvider {
         } else if (type == SETTINGS_TYPE_SYSTEM) {
             return sAllSystemSettings.contains(name);
         } else {
-            // Consider all config settings predefined because they are used by system apps only
-            return type == SETTINGS_TYPE_CONFIG;
+            return false;
         }
     }
 
@@ -2359,13 +2354,14 @@ public class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putSerializable(Settings.NameValueTable.VALUE, keyValues);
         if (trackingGeneration) {
+            // Track generation even if the namespace is empty because this is for system apps
             synchronized (mLock) {
-                // Track generation even if namespace is empty because this is for system apps only
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
-                        SettingsState.makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM),
-                        prefix);
+                        mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_CONFIG,
+                                UserHandle.USER_SYSTEM).mKey, prefix);
             }
         }
+
         return result;
     }
 
@@ -3056,15 +3052,10 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             boolean success = false;
-            boolean isNewSetting = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
-                if (!settingsState.hasSetting(name)) {
-                    isNewSetting = true;
-                }
                 success = settingsState.insertSettingLocked(name, value,
-                        tag, makeDefault, forceNonSystemPackage, packageName,
-                        overrideableByRestore);
+                        tag, makeDefault, forceNonSystemPackage, packageName, overrideableByRestore);
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {
@@ -3073,11 +3064,6 @@ public class SettingsProvider extends ContentProvider {
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
-                if (isNewSetting && !isSettingPreDefined(name, type)) {
-                    // Increment the generation number for all null settings because a new
-                    // non-predefined setting has been inserted
-                    mGenerationRegistry.incrementGenerationForUnsetSettings(key);
-                }
             }
             if (success) {
                 logSettingChanged(userId, name, type, CHANGE_TYPE_INSERT);

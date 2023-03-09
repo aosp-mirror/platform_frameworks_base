@@ -759,12 +759,6 @@ final class SettingsState {
         mPackageToMemoryUsage.put(packageName, newSize);
     }
 
-    public boolean hasSetting(String name) {
-        synchronized (mLock) {
-            return hasSettingLocked(name);
-        }
-    }
-
     @GuardedBy("mLock")
     private boolean hasSettingLocked(String name) {
         return mSettings.indexOfKey(name) >= 0;
