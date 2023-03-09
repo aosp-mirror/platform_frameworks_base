@@ -15,10 +15,8 @@
     <string name="ssl_error_example" msgid="6188711843183058764">"ઉદાહરણ તરીકે, લોગિન પૃષ્ઠ બતાવવામાં આવેલી સંસ્થાનું ન પણ હોય."</string>
     <string name="ssl_error_continue" msgid="1138548463994095584">"તો પણ બ્રાઉઝર મારફતે ચાલુ રાખો"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"પર્ફોર્મન્સ બૂસ્ટ"</string>
-    <!-- no translation found for performance_boost_notification_title (6091638924925876776) -->
-    <skip />
-    <!-- no translation found for performance_boost_notification_detail (86969987181456032) -->
-    <skip />
+    <string name="performance_boost_notification_title" msgid="6091638924925876776">"ઍપ વિશેનો તમારો અનુભવ બહેતર બનાવો"</string>
+    <string name="performance_boost_notification_detail" msgid="907363829888387028">"%sની વેબસાઇટની મુલાકાત લેવા માટે ટૅપ કરો અને વધુ જાણો"</string>
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"હમણાં નહીં"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"મેનેજ કરો"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"પર્ફોર્મન્સ બૂસ્ટ ખરીદો."</string>
