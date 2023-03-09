@@ -389,11 +389,11 @@ class HeadsUpCoordinator @Inject constructor(
             // First check whether this notification should launch a full screen intent, and
             // launch it if needed.
             val fsiDecision = mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
-            if (fsiDecision != null && fsiDecision.shouldLaunch) {
-                mNotificationInterruptStateProvider.logFullScreenIntentDecision(entry, fsiDecision)
+            mNotificationInterruptStateProvider.logFullScreenIntentDecision(entry, fsiDecision)
+            if (fsiDecision.shouldLaunch) {
                 mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
             } else if (mFlags.fsiOnDNDUpdate() &&
-                fsiDecision.equals(FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND)) {
+                fsiDecision == FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND) {
                 // If DND was the only reason this entry was suppressed, note it for potential
                 // reconsideration on later ranking updates.
                 addForFSIReconsideration(entry, mSystemClock.currentTimeMillis())
@@ -514,14 +514,24 @@ class HeadsUpCoordinator @Inject constructor(
                         mNotificationInterruptStateProvider.getFullScreenIntentDecision(entry)
                     if (decision.shouldLaunch) {
                         // Log both the launch of the full screen and also that this was via a
-                        // ranking update.
-                        mLogger.logEntryUpdatedToFullScreen(entry.key)
+                        // ranking update, and finally revoke candidacy for FSI reconsideration
+                        mLogger.logEntryUpdatedToFullScreen(entry.key, decision.name)
                         mNotificationInterruptStateProvider.logFullScreenIntentDecision(
                             entry, decision)
                         mLaunchFullScreenIntentProvider.launchFullScreenIntent(entry)
+                        mFSIUpdateCandidates.remove(entry.key)
 
                         // if we launch the FSI then this is no longer a candidate for HUN
                         continue
+                    } else if (decision == FullScreenIntentDecision.NO_FSI_SUPPRESSED_ONLY_BY_DND) {
+                        // decision has not changed; no need to log
+                    } else {
+                        // some other condition is now blocking FSI; log that and revoke candidacy
+                        // for FSI reconsideration
+                        mLogger.logEntryDisqualifiedFromFullScreen(entry.key, decision.name)
+                        mNotificationInterruptStateProvider.logFullScreenIntentDecision(
+                            entry, decision)
+                        mFSIUpdateCandidates.remove(entry.key)
                     }
                 }
 

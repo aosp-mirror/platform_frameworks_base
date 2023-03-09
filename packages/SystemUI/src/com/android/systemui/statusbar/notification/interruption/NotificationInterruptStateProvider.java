@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.interruption;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
@@ -153,7 +155,8 @@ public interface NotificationInterruptStateProvider {
      * @param entry the entry to evaluate
      * @return FullScreenIntentDecision representing the decision for whether to show the intent
      */
-    FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry);
+    @NonNull
+    FullScreenIntentDecision getFullScreenIntentDecision(@NonNull NotificationEntry entry);
 
     /**
      * Write the full screen launch decision for the given entry to logs.
