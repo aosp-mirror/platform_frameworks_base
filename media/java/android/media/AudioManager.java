@@ -9564,7 +9564,10 @@ public class AudioManager {
      * A stream type is considered independent when the volume changes of that type do not
      * affect any other independent volume control stream type.
      * An independent stream type is its own alias when using {@link #getStreamTypeAlias(int)}.
-     * @return list of independent stream types.
+     * @return list of independent stream types, where each value can be one of
+     *     {@link #STREAM_VOICE_CALL}, {@link #STREAM_SYSTEM}, {@link #STREAM_RING},
+     *     {@link #STREAM_MUSIC}, {@link #STREAM_ALARM}, {@link #STREAM_NOTIFICATION},
+     *     {@link #STREAM_DTMF} and {@link #STREAM_ACCESSIBILITY}.
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
