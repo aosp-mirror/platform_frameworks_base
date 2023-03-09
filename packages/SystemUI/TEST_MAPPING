@@ -43,6 +43,9 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     },
@@ -157,6 +160,22 @@
       "options" : [
         {
           "include-filter": "android.platform.tests.NotificationTest"
+        }
+      ]
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "SystemUIGoogleScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     }
