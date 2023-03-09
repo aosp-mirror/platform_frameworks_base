@@ -24,7 +24,7 @@ import android.util.Log;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
-import com.android.server.credentials.metrics.CandidateProviderMetric;
+import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderMetric;
 
 import java.util.Map;
@@ -98,7 +98,7 @@ public class MetricUtilities {
             int[] candidateStatusList = new int[providerSize];
             int index = 0;
             for (var session : providerSessions) {
-                CandidateProviderMetric metric = session.mCandidateProviderMetric;
+                CandidatePhaseMetric metric = session.mCandidateProviderMetric;
                 candidateUidList[index] = metric.getCandidateUid();
                 candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
                 candidateStatusList[index] = metric.getProviderQueryStatus();
