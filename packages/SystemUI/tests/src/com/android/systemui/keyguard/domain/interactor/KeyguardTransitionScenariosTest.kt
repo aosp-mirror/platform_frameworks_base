@@ -358,6 +358,50 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun `LOCKSCREEN to DREAMING`() =
+        testScope.runTest {
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            reset(mockTransitionRepository)
+
+            // WHEN the device begins to dream
+            keyguardRepository.setDreamingWithOverlay(true)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to DREAMING should occur
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun `LOCKSCREEN to DOZING`() =
         testScope.runTest {
             // GIVEN a device with AOD not available
