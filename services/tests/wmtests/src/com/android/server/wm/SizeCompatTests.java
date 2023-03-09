@@ -51,6 +51,7 @@ import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANG
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_LETTERBOXED;
 import static com.android.internal.util.FrameworkStatsLog.APP_COMPAT_STATE_CHANGED__STATE__NOT_VISIBLE;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
@@ -3882,6 +3883,24 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mActivity.isEligibleForLetterboxEducation());
         assertFalse(mActivity.isLetterboxedForFixedOrientationAndAspectRatio());
         assertTrue(mActivity.inSizeCompatMode());
+    }
+
+    @Test
+    public void testTopActivityInSizeCompatMode_pausedAndInSizeCompatMode_returnsTrue() {
+        setUpDisplaySizeWithApp(1000, 2500);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        spyOn(mActivity);
+        doReturn(mTask).when(mActivity).getOrganizedTask();
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        mActivity.setState(PAUSED, "test");
+
+        assertTrue(mActivity.inSizeCompatMode());
+        assertEquals(mActivity.getState(), PAUSED);
+        assertTrue(mActivity.isVisible());
+        assertTrue(mTask.getTaskInfo().topActivityInSizeCompat);
     }
 
     /**
