@@ -61,9 +61,8 @@ open class PipAppHelper(instrumentation: Instrumentation) :
      * Drags the PIP window away from the screen edge while not crossing the display center.
      *
      * @throws IllegalStateException if default display bounds are not available
-     * @return initial bounds of the PIP window
      */
-    fun dragPipWindowAwayFromEdge(wmHelper: WindowManagerStateHelper, steps: Int): Rect {
+    fun dragPipWindowAwayFromEdge(wmHelper: WindowManagerStateHelper, steps: Int) {
         val initWindowRect = getWindowRect(wmHelper).clone()
 
         // initial pointer at the center of the window
@@ -83,8 +82,6 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
         // drag the window to the left but not beyond the center of the display
         uiDevice.drag(startX, y, endX, y, steps)
-
-        return initWindowRect
     }
 
     /**
@@ -92,7 +89,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
      *
      * @throws IllegalStateException if default display bounds are not available
      */
-    private fun isCloserToRightEdge(wmHelper: WindowManagerStateHelper): Boolean {
+    fun isCloserToRightEdge(wmHelper: WindowManagerStateHelper): Boolean {
         val windowRect = getWindowRect(wmHelper)
 
         val displayRect = wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
@@ -267,7 +264,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         closePipWindow(WindowManagerStateHelper(mInstrumentation))
     }
 
-    private fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
+    /**
+     * Returns the pip window bounds.
+     */
+    fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
         val windowRegion = wmHelper.getWindowRegion(this)
         require(!windowRegion.isEmpty) { "Unable to find a PIP window in the current state" }
         return windowRegion.bounds
@@ -354,7 +354,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     /**
      * Waits until the PIP window snaps horizontally to the provided bounds.
      *
-     * @param finalRightX the final x coordinate of the right edge of the pip window
+     * @param finalBounds the bounds to wait for PIP window to snap to
      */
     fun waitForPipToSnapTo(wmHelper: WindowManagerStateHelper, finalBounds: android.graphics.Rect) {
         wmHelper
@@ -369,6 +369,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
                 return@add pipRegionBounds.left == finalBounds.left &&
                     pipRegionBounds.right == finalBounds.right
             }
+            .add(ConditionsFactory.isWMStateComplete())
             .waitForAndVerify()
     }
 
