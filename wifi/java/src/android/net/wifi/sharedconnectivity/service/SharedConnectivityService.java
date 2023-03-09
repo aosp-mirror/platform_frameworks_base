@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.sharedconnectivity.app.HotspotNetwork;
@@ -40,8 +41,11 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.R;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -379,6 +383,30 @@ public abstract class SharedConnectivityService extends Service {
             }
         }
         mRemoteCallbackList.finishBroadcast();
+    }
+
+    /**
+     * System and settings UI support on the device for instant tether.
+     * @return True if the UI can display Instant Tether network data. False otherwise.
+     */
+    public static boolean areHotspotNetworksEnabledForService(@NonNull Context context) {
+        String servicePackage = context.getResources()
+                .getString(R.string.config_sharedConnectivityServicePackage);
+        return Objects.equals(context.getPackageName(), servicePackage)
+                && context.getResources()
+                        .getBoolean(R.bool.config_hotspotNetworksEnabledForService);
+    }
+
+    /**
+     * System and settings UI support on the device for known networks.
+     * @return True if the UI can display known networks data. False otherwise.
+     */
+    public static boolean areKnownNetworksEnabledForService(@NonNull Context context) {
+        String servicePackage = context.getResources()
+                .getString(R.string.config_sharedConnectivityServicePackage);
+        return Objects.equals(context.getPackageName(), servicePackage)
+                && context.getResources()
+                        .getBoolean(R.bool.config_knownNetworksEnabledForService);
     }
 
     /**

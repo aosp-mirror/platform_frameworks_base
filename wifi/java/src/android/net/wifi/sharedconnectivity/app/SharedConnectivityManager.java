@@ -161,9 +161,9 @@ public class SharedConnectivityManager {
         Resources resources = context.getResources();
         try {
             String servicePackageName = resources.getString(
-                    R.string.shared_connectivity_service_package);
+                    R.string.config_sharedConnectivityServicePackage);
             String serviceIntentAction = resources.getString(
-                    R.string.shared_connectivity_service_intent_action);
+                    R.string.config_sharedConnectivityServiceIntentAction);
             return new SharedConnectivityManager(context, servicePackageName, serviceIntentAction);
         } catch (Resources.NotFoundException e) {
             Log.e(TAG, "To support shared connectivity service on this device, the service's"

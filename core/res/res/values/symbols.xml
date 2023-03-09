@@ -4960,8 +4960,10 @@
   <java-symbol type="bool" name="config_stopSystemPackagesByDefault"/>
   <java-symbol type="string" name="config_wearServiceComponent" />
 
-  <java-symbol type="string" name="shared_connectivity_service_package" />
-  <java-symbol type="string" name="shared_connectivity_service_intent_action" />
+  <java-symbol type="string" name="config_sharedConnectivityServicePackage" />
+  <java-symbol type="string" name="config_sharedConnectivityServiceIntentAction" />
+  <java-symbol type="bool" name="config_hotspotNetworksEnabledForService"/>
+  <java-symbol type="bool" name="config_knownNetworksEnabledForService"/>
 
   <!-- Whether to show weather on the lockscreen by default. -->
   <java-symbol type="bool" name="config_lockscreenWeatherEnabledByDefault" />

@@ -10159,6 +10159,8 @@ package android.net.wifi.sharedconnectivity.service {
 
   public abstract class SharedConnectivityService extends android.app.Service {
     ctor public SharedConnectivityService();
+    method public static boolean areHotspotNetworksEnabledForService(@NonNull android.content.Context);
+    method public static boolean areKnownNetworksEnabledForService(@NonNull android.content.Context);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onConnectHotspotNetwork(@NonNull android.net.wifi.sharedconnectivity.app.HotspotNetwork);
     method public abstract void onConnectKnownNetwork(@NonNull android.net.wifi.sharedconnectivity.app.KnownNetwork);

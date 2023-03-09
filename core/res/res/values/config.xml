@@ -3020,10 +3020,18 @@
             >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
 
     <!-- Package name of the system service that implements the shared connectivity service -->
-    <string translatable="false" name="shared_connectivity_service_package"></string>
+    <string translatable="false" name="config_sharedConnectivityServicePackage"></string>
 
     <!-- Intent action used when binding to the shared connectivity service -->
-    <string translatable="false" name="shared_connectivity_service_intent_action"></string>
+    <string translatable="false" name="config_sharedConnectivityServiceIntentAction"></string>
+
+    <!-- The system and settings UI can support all the features of instant tether. If set to false,
+     instant tether will run in notifications mode -->
+    <bool name="config_hotspotNetworksEnabledForService">false</bool>
+
+    <!-- The system and settings UI can support all the features of known networks. If set to false,
+         known networks will run in notifications mode -->
+    <bool name="config_knownNetworksEnabledForService">false</bool>
 
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
