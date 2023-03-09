@@ -2125,7 +2125,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void notifyTvMessage(IBinder sessionToken, String type, Bundle data, int userId) {
+        public void notifyTvMessage(IBinder sessionToken, int type, Bundle data, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
                     userId, "timeShiftEnablePositionTracking");
@@ -3765,7 +3765,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onTvMessage(String type, Bundle data) {
+        public void onTvMessage(int type, Bundle data) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "onTvMessage(type=" + type + ", data=" + data + ")");
