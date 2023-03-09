@@ -20,12 +20,11 @@ data class NoteTaskInfo(
     val packageName: String,
     val uid: Int,
     val entryPoint: NoteTaskEntryPoint? = null,
-    val isInMultiWindowMode: Boolean = false,
     val isKeyguardLocked: Boolean = false,
 ) {
 
     val launchMode: NoteTaskLaunchMode =
-        if (isInMultiWindowMode || isKeyguardLocked) {
+        if (isKeyguardLocked) {
             NoteTaskLaunchMode.Activity
         } else {
             NoteTaskLaunchMode.AppBubble

@@ -72,7 +72,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         whenever(context.packageManager).thenReturn(packageManager)
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(noteTaskInfo)
+        whenever(resolver.resolveInfo(any(), any())).thenReturn(noteTaskInfo)
         whenever(userManager.isUserUnlocked).thenReturn(true)
         whenever(
                 devicePolicyManager.getKeyguardDisabledFeatures(
@@ -102,7 +102,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     // region onBubbleExpandChanged
     @Test
     fun onBubbleExpandChanged_expanding_logNoteTaskOpened() {
-        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = false, isInMultiWindowMode = false)
+        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = false)
 
         createNoteTaskController()
             .apply { infoReference.set(expectedInfo) }
@@ -117,7 +117,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun onBubbleExpandChanged_collapsing_logNoteTaskClosed() {
-        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = false, isInMultiWindowMode = false)
+        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = false)
 
         createNoteTaskController()
             .apply { infoReference.set(expectedInfo) }
@@ -132,7 +132,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun onBubbleExpandChanged_expandingAndKeyguardLocked_doNothing() {
-        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = true, isInMultiWindowMode = false)
+        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = true)
 
         createNoteTaskController()
             .apply { infoReference.set(expectedInfo) }
@@ -146,35 +146,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun onBubbleExpandChanged_notExpandingAndKeyguardLocked_doNothing() {
-        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = true, isInMultiWindowMode = false)
-
-        createNoteTaskController()
-            .apply { infoReference.set(expectedInfo) }
-            .onBubbleExpandChanged(
-                isExpanding = false,
-                key = Bubble.KEY_APP_BUBBLE,
-            )
-
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager, eventLogger)
-    }
-
-    @Test
-    fun onBubbleExpandChanged_expandingAndInMultiWindowMode_doNothing() {
-        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = false, isInMultiWindowMode = true)
-
-        createNoteTaskController()
-            .apply { infoReference.set(expectedInfo) }
-            .onBubbleExpandChanged(
-                isExpanding = true,
-                key = Bubble.KEY_APP_BUBBLE,
-            )
-
-        verifyZeroInteractions(context, bubbles, keyguardManager, userManager)
-    }
-
-    @Test
-    fun onBubbleExpandChanged_notExpandingAndInMultiWindowMode_doNothing() {
-        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = false, isInMultiWindowMode = true)
+        val expectedInfo = noteTaskInfo.copy(isKeyguardLocked = true)
 
         createNoteTaskController()
             .apply { infoReference.set(expectedInfo) }
@@ -215,16 +187,14 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         val expectedInfo =
             noteTaskInfo.copy(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
                 isKeyguardLocked = true,
             )
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
 
         createNoteTaskController()
             .showNoteTask(
                 entryPoint = expectedInfo.entryPoint!!,
-                isInMultiWindowMode = expectedInfo.isInMultiWindowMode,
             )
 
         val intentCaptor = argumentCaptor<Intent>()
@@ -250,16 +220,14 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         val expectedInfo =
             noteTaskInfo.copy(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
                 isKeyguardLocked = false,
             )
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
+        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
         whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
 
         createNoteTaskController()
             .showNoteTask(
                 entryPoint = expectedInfo.entryPoint!!,
-                isInMultiWindowMode = expectedInfo.isInMultiWindowMode,
             )
 
         verifyZeroInteractions(context)
@@ -275,49 +243,10 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNoteTask_isInMultiWindowMode_shouldStartActivityAndLogUiEvent() {
-        val expectedInfo =
-            noteTaskInfo.copy(
-                entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT,
-                isInMultiWindowMode = true,
-                isKeyguardLocked = false,
-            )
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(expectedInfo)
-        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
-
-        createNoteTaskController()
-            .showNoteTask(
-                entryPoint = expectedInfo.entryPoint!!,
-                isInMultiWindowMode = expectedInfo.isInMultiWindowMode,
-            )
-
-        val intentCaptor = argumentCaptor<Intent>()
-        val userCaptor = argumentCaptor<UserHandle>()
-        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
-
-        (intentCaptor.value.flags and FLAG_ACTIVITY_NEW_TASK) == FLAG_ACTIVITY_NEW_TASK
-
-        intentCaptor.value.let { intent ->
-            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
-            assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
-            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
-            assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
-                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
-            assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
-                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
-            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
-        }
-        assertThat(userCaptor.value).isEqualTo(userTracker.userHandle)
-        verify(eventLogger).logNoteTaskOpened(expectedInfo)
-        verifyZeroInteractions(bubbles)
-    }
-
-    @Test
     fun showNoteTask_bubblesIsNull_shouldDoNothing() {
         createNoteTaskController(bubbles = null)
             .showNoteTask(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
             )
 
         verifyZeroInteractions(context, bubbles, eventLogger)
@@ -325,12 +254,11 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
     @Test
     fun showNoteTask_intentResolverReturnsNull_shouldDoNothing() {
-        whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(null)
+        whenever(resolver.resolveInfo(any(), any())).thenReturn(null)
 
         createNoteTaskController()
             .showNoteTask(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
             )
 
         verifyZeroInteractions(context, bubbles, eventLogger)
@@ -341,7 +269,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController(isEnabled = false)
             .showNoteTask(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
             )
 
         verifyZeroInteractions(context, bubbles, eventLogger)
@@ -354,7 +281,6 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController()
             .showNoteTask(
                 entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
-                isInMultiWindowMode = false,
             )
 
         verifyZeroInteractions(context, bubbles, eventLogger)
@@ -405,11 +331,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
             .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
 
-        createNoteTaskController()
-            .showNoteTask(
-                isInMultiWindowMode = false,
-                entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE
-            )
+        createNoteTaskController().showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
 
         verifyZeroInteractions(context, bubbles, eventLogger)
     }
@@ -425,11 +347,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
             .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
 
-        createNoteTaskController()
-            .showNoteTask(
-                isInMultiWindowMode = false,
-                entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE
-            )
+        createNoteTaskController().showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
 
         verifyZeroInteractions(context, bubbles, eventLogger)
     }
@@ -445,11 +363,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
             .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
 
-        createNoteTaskController()
-            .showNoteTask(
-                isInMultiWindowMode = false,
-                entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE
-            )
+        createNoteTaskController().showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
 
         val intentCaptor = argumentCaptor<Intent>()
         verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
@@ -472,11 +386,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             )
             .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FEATURES_ALL)
 
-        createNoteTaskController()
-            .showNoteTask(
-                isInMultiWindowMode = false,
-                entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE
-            )
+        createNoteTaskController().showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
 
         val intentCaptor = argumentCaptor<Intent>()
         verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
