@@ -139,6 +139,13 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
     }
 
     @Test
+    public void testInvalidMode() {
+        assertThrows(IllegalArgumentException.class, () -> new UserVisibilityMediator(
+                /* visibleBackgroundUsersOnDisplaysEnabled= */ false,
+                /* visibleBackgroundUserOnDefaultDisplayAllowed= */ true, mHandler));
+    }
+
+    @Test
     public final void testAssignUserToDisplayOnStart_invalidUserIds() {
         assertThrows(IllegalArgumentException.class, () -> mMediator
                 .assignUserToDisplayOnStart(USER_NULL, USER_ID, FG, DEFAULT_DISPLAY));
