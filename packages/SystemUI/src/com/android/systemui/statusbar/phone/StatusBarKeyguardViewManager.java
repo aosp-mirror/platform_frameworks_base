@@ -405,14 +405,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
-     * Sets a new legacy alternate bouncer. Only used if mdoern alternate bouncer is NOT enable.
+     * Sets a new legacy alternate bouncer. Only used if modern alternate bouncer is NOT enabled.
      */
     public void setLegacyAlternateBouncer(@NonNull LegacyAlternateBouncer alternateBouncerLegacy) {
         if (!mIsModernAlternateBouncerEnabled) {
             if (!Objects.equals(mAlternateBouncerInteractor.getLegacyAlternateBouncer(),
                     alternateBouncerLegacy)) {
                 mAlternateBouncerInteractor.setLegacyAlternateBouncer(alternateBouncerLegacy);
-                hideAlternateBouncer(false);
+                hideAlternateBouncer(true);
             }
         }
 
@@ -640,8 +640,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void showPrimaryBouncer(boolean scrimmed) {
         hideAlternateBouncer(false);
-
-        if (mKeyguardStateController.isShowing()  && !isBouncerShowing()) {
+        if (mKeyguardStateController.isShowing() && !isBouncerShowing()) {
             mPrimaryBouncerInteractor.show(scrimmed);
         }
         updateStates();
@@ -734,7 +733,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
                 showBouncerOrKeyguard(hideBouncerWhenShowing);
             }
             if (hideBouncerWhenShowing) {
-                hideAlternateBouncer(false);
+                hideAlternateBouncer(true);
             }
             mKeyguardUpdateManager.sendKeyguardReset();
             updateStates();
@@ -742,8 +741,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
-    public void hideAlternateBouncer(boolean forceUpdateScrim) {
-        updateAlternateBouncerShowing(mAlternateBouncerInteractor.hide() || forceUpdateScrim);
+    public void hideAlternateBouncer(boolean updateScrim) {
+        updateAlternateBouncerShowing(mAlternateBouncerInteractor.hide() && updateScrim);
     }
 
     private void updateAlternateBouncerShowing(boolean updateScrim) {
@@ -1448,16 +1447,21 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * For any touches on the NPVC, show the primary bouncer if the alternate bouncer is currently
      * showing.
      */
-    public void onTouch(MotionEvent event) {
-        if (mAlternateBouncerInteractor.isVisibleState()
+    public boolean onTouch(MotionEvent event) {
+        boolean handledTouch = false;
+        if (event.getAction() == MotionEvent.ACTION_UP
+                && mAlternateBouncerInteractor.isVisibleState()
                 && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()) {
             showPrimaryBouncer(true);
+            handledTouch = true;
         }
 
         // Forward NPVC touches to callbacks in case they want to respond to touches
         for (KeyguardViewManagerCallback callback: mCallbacks) {
             callback.onTouch(event);
         }
+
+        return handledTouch;
     }
 
     /** Update keyguard position based on a tapped X coordinate. */

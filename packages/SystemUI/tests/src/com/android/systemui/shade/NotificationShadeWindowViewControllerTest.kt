@@ -276,6 +276,20 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         underTest.keyguardMessageArea
         verify(view).findViewById<ViewGroup>(R.id.keyguard_message_area)
     }
+
+    @Test
+    fun handleDispatchTouchEvent_statusBarViewControllerOnTouch_returnsTrue() {
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+
+        // GIVEN the statusBarKeyguardViewManager will handle any touches
+        whenever(statusBarKeyguardViewManager.onTouch(any())).thenReturn(true)
+
+        // WHEN a touch is dispatched
+        val returnVal = interactionEventHandler.handleDispatchTouchEvent(downEv)
+
+        // THEN handleDispatchTouchEvent returns true
+        assertThat(returnVal).isTrue()
+    }
 }
 
 private val downEv = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
