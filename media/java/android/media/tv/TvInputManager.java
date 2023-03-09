@@ -3642,13 +3642,13 @@ public final class TvInputManager {
         /**
          * Notifies when the advertisement buffer is filled and ready to be read.
          */
-        public void notifyAdBuffer(AdBuffer buffer) {
+        public void notifyAdBufferReady(AdBuffer buffer) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.notifyAdBuffer(mToken, buffer, mUserId);
+                mService.notifyAdBufferReady(mToken, buffer, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

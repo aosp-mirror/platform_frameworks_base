@@ -3047,16 +3047,16 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onAdBuffer(AdBuffer buffer) {
+        public void onAdBufferReady(AdBuffer buffer) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slogf.d(TAG, "onAdBuffer(buffer=" + buffer + ")");
+                    Slogf.d(TAG, "onAdBufferReady(buffer=" + buffer + ")");
                 }
                 if (mSessionState.mSession == null || mSessionState.mClient == null) {
                     return;
                 }
                 try {
-                    mSessionState.mClient.onAdBuffer(buffer, mSessionState.mSeq);
+                    mSessionState.mClient.onAdBufferReady(buffer, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onAdBuffer", e);
                 }
