@@ -220,6 +220,11 @@ object Flags {
             "lock_screen_long_press_enabled"
         )
 
+    /** Whether to inflate the bouncer view on a background thread. */
+    // TODO(b/272091103): Tracking Bug
+    @JvmField
+    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
