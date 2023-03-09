@@ -2590,7 +2590,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void notifyAdBuffer(
+        public void notifyAdBufferReady(
                 IBinder sessionToken, AdBuffer buffer, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2602,7 +2602,7 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 resolvedUserId);
-                        getSessionLocked(sessionState).notifyAdBuffer(buffer);
+                        getSessionLocked(sessionState).notifyAdBufferReady(buffer);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in notifyAdBuffer", e);
                     }
