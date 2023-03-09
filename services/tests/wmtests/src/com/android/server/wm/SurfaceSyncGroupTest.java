@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Presubmit
 public class SurfaceSyncGroupTest {
     private static final String TAG = "SurfaceSyncGroupTest";
+    private static final int TIMEOUT_MS = 100;
 
     private final Executor mExecutor = Runnable::run;
 
@@ -86,7 +87,7 @@ public class SurfaceSyncGroupTest {
 
         syncTarget2.markSyncReady();
 
-        finishedLatch.await(5, TimeUnit.SECONDS);
+        finishedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch.getCount());
     }
 
@@ -124,13 +125,13 @@ public class SurfaceSyncGroupTest {
 
         syncTarget1.markSyncReady();
 
-        finishedLatch1.await(5, TimeUnit.SECONDS);
+        finishedLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch1.getCount());
         assertNotEquals(0, finishedLatch2.getCount());
 
         syncTarget2.markSyncReady();
 
-        finishedLatch2.await(5, TimeUnit.SECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch2.getCount());
     }
 
@@ -156,17 +157,17 @@ public class SurfaceSyncGroupTest {
         // Finish syncTarget2 first to test that the syncGroup is not complete until the merged sync
         // is also done.
         syncTarget2.markSyncReady();
-        finishedLatch2.await(1, TimeUnit.SECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         // Sync did not complete yet
         assertNotEquals(0, finishedLatch2.getCount());
 
         syncTarget1.markSyncReady();
 
         // The first sync will still get a callback when it's sync requirements are done.
-        finishedLatch1.await(5, TimeUnit.SECONDS);
+        finishedLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch1.getCount());
 
-        finishedLatch2.await(5, TimeUnit.SECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch2.getCount());
     }
 
@@ -189,7 +190,7 @@ public class SurfaceSyncGroupTest {
         syncTarget1.markSyncReady();
 
         // The first sync will still get a callback when it's sync requirements are done.
-        finishedLatch1.await(5, TimeUnit.SECONDS);
+        finishedLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch1.getCount());
 
         syncGroup2.add(syncGroup1, null /* runnable */);
@@ -198,7 +199,7 @@ public class SurfaceSyncGroupTest {
 
         // Verify that the second sync will receive complete since the merged sync was already
         // completed before the merge.
-        finishedLatch2.await(5, TimeUnit.SECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch2.getCount());
     }
 
@@ -232,8 +233,8 @@ public class SurfaceSyncGroupTest {
         syncTarget3.markSyncReady();
 
         // Neither SyncGroup will be ready.
-        finishedLatch1.await(1, TimeUnit.SECONDS);
-        finishedLatch2.await(1, TimeUnit.SECONDS);
+        finishedLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
         assertEquals(1, finishedLatch1.getCount());
         assertEquals(1, finishedLatch2.getCount());
@@ -241,8 +242,8 @@ public class SurfaceSyncGroupTest {
         syncTarget2.markSyncReady();
 
         // Both sync groups should be ready after target2 completed.
-        finishedLatch1.await(5, TimeUnit.SECONDS);
-        finishedLatch2.await(5, TimeUnit.SECONDS);
+        finishedLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch1.getCount());
         assertEquals(0, finishedLatch2.getCount());
     }
@@ -275,8 +276,8 @@ public class SurfaceSyncGroupTest {
         syncTarget1.markSyncReady();
 
         // Only SyncGroup1 will be ready, but SyncGroup2 still needs its own targets to be ready.
-        finishedLatch1.await(1, TimeUnit.SECONDS);
-        finishedLatch2.await(1, TimeUnit.SECONDS);
+        finishedLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
         assertEquals(0, finishedLatch1.getCount());
         assertEquals(1, finishedLatch2.getCount());
@@ -284,7 +285,7 @@ public class SurfaceSyncGroupTest {
         syncTarget3.markSyncReady();
 
         // SyncGroup2 is finished after target3 completed.
-        finishedLatch2.await(1, TimeUnit.SECONDS);
+        finishedLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch2.getCount());
     }
 
@@ -357,6 +358,27 @@ public class SurfaceSyncGroupTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        assertEquals(0, finishedLatch.getCount());
+    }
+
+    public void testSurfaceSyncGroupTimeout() throws InterruptedException {
+        final CountDownLatch finishedLatch = new CountDownLatch(1);
+        SurfaceSyncGroup syncGroup = new SurfaceSyncGroup(TAG);
+        syncGroup.addSyncCompleteCallback(mExecutor, finishedLatch::countDown);
+        SurfaceSyncGroup syncTarget1 = new SurfaceSyncGroup("FakeSyncTarget1");
+        SurfaceSyncGroup syncTarget2 = new SurfaceSyncGroup("FakeSyncTarget2");
+
+        syncGroup.add(syncTarget1, null /* runnable */);
+        syncGroup.add(syncTarget2, null /* runnable */);
+        syncGroup.markSyncReady();
+
+        syncTarget1.markSyncReady();
+        assertNotEquals(0, finishedLatch.getCount());
+
+        // Never finish syncTarget2 so it forces the timeout. Timeout is 1 second so wait a little
+        // over 1 second to make sure it completes.
+        finishedLatch.await(1100, TimeUnit.MILLISECONDS);
         assertEquals(0, finishedLatch.getCount());
     }
 }
