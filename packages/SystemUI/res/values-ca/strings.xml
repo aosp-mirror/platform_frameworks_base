@@ -649,7 +649,7 @@
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"suprimir el mosaic"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"afegir un mosaic al final"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mou el mosaic"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Afegeix un mosaic"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Afegeix una icona"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mou a la posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Afegeix a la posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>

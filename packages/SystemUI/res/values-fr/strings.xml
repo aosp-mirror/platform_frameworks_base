@@ -835,7 +835,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Commande indisponible"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Impossible d\'accéder à \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Vérifiez l\'application <xliff:g id="APPLICATION">%2$s</xliff:g> pour vous assurer que la commande est toujours disponible et que les paramètres de l\'application n\'ont pas changé."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'application"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'appli"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Impossible de charger l\'état"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
