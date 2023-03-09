@@ -99,8 +99,8 @@ public final class GeoidHeightMap {
 
     /**
      * Adds to {@code values} values in the unit interval [0, 1] for the map cells identified by
-     * {@code s2CellIds}. Returns true if values are present for all non-zero IDs; otherwise,
-     * returns false and adds NaNs for absent values.
+     * {@code s2CellIds}. Returns true if values are present for all IDs; otherwise, returns false
+     * and adds NaNs for absent values.
      */
     private static boolean getUnitIntervalValues(@NonNull MapParamsProto params,
             @NonNull TileFunction tileFunction,
@@ -109,10 +109,8 @@ public final class GeoidHeightMap {
 
         S2TileProto[] tiles = new S2TileProto[len];
         for (int i = 0; i < len; i++) {
-            if (s2CellIds[i] != 0) {
-                long cacheKey = getCacheKey(params, s2CellIds[i]);
-                tiles[i] = tileFunction.getTile(cacheKey);
-            }
+            long cacheKey = getCacheKey(params, s2CellIds[i]);
+            tiles[i] = tileFunction.getTile(cacheKey);
             values[i] = Double.NaN;
         }
 
@@ -128,9 +126,6 @@ public final class GeoidHeightMap {
 
         boolean allFound = true;
         for (int i = 0; i < len; i++) {
-            if (s2CellIds[i] == 0) {
-                continue;
-            }
             if (Double.isNaN(values[i])) {
                 allFound = false;
             } else {
@@ -195,7 +190,7 @@ public final class GeoidHeightMap {
         }
 
         for (int i = tileIndex; i < tiles.length; i++) {
-            if (s2CellIds[i] == 0 || tiles[i] != tiles[tileIndex]) {
+            if (tiles[i] != tiles[tileIndex]) {
                 continue;
             }
 
@@ -226,15 +221,14 @@ public final class GeoidHeightMap {
     private static void validate(@NonNull MapParamsProto params, @NonNull long[] s2CellIds) {
         Preconditions.checkArgument(s2CellIds.length == 4);
         for (long s2CellId : s2CellIds) {
-            Preconditions.checkArgument(
-                    s2CellId == 0 || S2CellIdUtils.getLevel(s2CellId) == params.mapS2Level);
+            Preconditions.checkArgument(S2CellIdUtils.getLevel(s2CellId) == params.mapS2Level);
         }
     }
 
     /**
      * Returns the geoid heights in meters associated with the map cells identified by
-     * {@code s2CellIds}. Throws an {@link IOException} if a geoid height cannot be calculated for a
-     * non-zero ID.
+     * {@code s2CellIds}. Throws an {@link IOException} if a geoid height cannot be calculated for
+     * an ID.
      */
     @NonNull
     public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull Context context,
@@ -254,8 +248,8 @@ public final class GeoidHeightMap {
 
     /**
      * Same as {@link #readGeoidHeights(MapParamsProto, Context, long[])} except that data will not
-     * be loaded from raw assets. Returns the heights if present for all non-zero IDs; otherwise,
-     * returns null.
+     * be loaded from raw assets. Returns the heights if present for all IDs; otherwise, returns
+     * null.
      */
     @Nullable
     public double[] readGeoidHeights(@NonNull MapParamsProto params, @NonNull long[] s2CellIds) {
@@ -269,8 +263,8 @@ public final class GeoidHeightMap {
 
     /**
      * Adds to {@code heightsMeters} the geoid heights in meters associated with the map cells
-     * identified by {@code s2CellIds}. Returns true if heights are present for all non-zero IDs;
-     * otherwise, returns false and adds NaNs for absent heights.
+     * identified by {@code s2CellIds}. Returns true if heights are present for all IDs; otherwise,
+     * returns false and adds NaNs for absent heights.
      */
     private boolean getGeoidHeights(@NonNull MapParamsProto params,
             @NonNull TileFunction tileFunction, @NonNull long[] s2CellIds,
@@ -292,9 +286,6 @@ public final class GeoidHeightMap {
         // Enable batch loading by finding all cache keys upfront.
         long[] cacheKeys = new long[len];
         for (int i = 0; i < len; i++) {
-            if (s2CellIds[i] == 0) {
-                continue;
-            }
             cacheKeys[i] = getCacheKey(params, s2CellIds[i]);
         }
 
@@ -302,7 +293,7 @@ public final class GeoidHeightMap {
         S2TileProto[] loadedTiles = new S2TileProto[len];
         String[] diskTokens = new String[len];
         for (int i = 0; i < len; i++) {
-            if (s2CellIds[i] == 0 || diskTokens[i] != null) {
+            if (diskTokens[i] != null) {
                 continue;
             }
             loadedTiles[i] = mCacheTiles.get(cacheKeys[i]);
@@ -319,7 +310,7 @@ public final class GeoidHeightMap {
 
         // Attempt to load tiles from disk.
         for (int i = 0; i < len; i++) {
-            if (s2CellIds[i] == 0 || loadedTiles[i] != null) {
+            if (loadedTiles[i] != null) {
                 continue;
             }
 

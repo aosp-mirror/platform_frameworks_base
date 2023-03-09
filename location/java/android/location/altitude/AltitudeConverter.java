@@ -31,6 +31,14 @@ import java.io.IOException;
 /**
  * Converts altitudes reported above the World Geodetic System 1984 (WGS84) reference ellipsoid
  * into ones above Mean Sea Level.
+ *
+ * <p>Reference:
+ *
+ * <pre>
+ * Brian Julian and Michael Angermann.
+ * "Resource efficient and accurate altitude conversion to Mean Sea Level."
+ * To appear in 2023 IEEE/ION Position, Location and Navigation Symposium (PLANS).
+ * </pre>
  */
 public final class AltitudeConverter {
 
@@ -81,27 +89,47 @@ public final class AltitudeConverter {
         long s2CellId = S2CellIdUtils.fromLatLngDegrees(location.getLatitude(),
                 location.getLongitude());
 
-        // (0,0) cell.
+        // Cell-space properties and coordinates.
+        int sizeIj = 1 << (S2CellIdUtils.MAX_LEVEL - params.mapS2Level);
+        int maxIj = 1 << S2CellIdUtils.MAX_LEVEL;
         long s0 = S2CellIdUtils.getParent(s2CellId, params.mapS2Level);
+        int f0 = S2CellIdUtils.getFace(s2CellId);
+        int i0 = S2CellIdUtils.getI(s2CellId);
+        int j0 = S2CellIdUtils.getJ(s2CellId);
+        int i1 = i0 + sizeIj;
+        int j1 = j0 + sizeIj;
+
+        // Non-boundary region calculation - simplest and most common case.
+        if (i1 < maxIj && j1 < maxIj) {
+            return new long[]{
+                    s0,
+                    S2CellIdUtils.getParent(S2CellIdUtils.fromFij(f0, i1, j0), params.mapS2Level),
+                    S2CellIdUtils.getParent(S2CellIdUtils.fromFij(f0, i0, j1), params.mapS2Level),
+                    S2CellIdUtils.getParent(S2CellIdUtils.fromFij(f0, i1, j1), params.mapS2Level)
+            };
+        }
+
+        // Boundary region calculation.
         long[] edgeNeighbors = new long[4];
         S2CellIdUtils.getEdgeNeighbors(s0, edgeNeighbors);
-
-        // (1,0) cell.
-        int i1 = S2CellIdUtils.getI(s2CellId) > S2CellIdUtils.getI(s0) ? -1 : 1;
-        long s1 = edgeNeighbors[i1 + 2];
-
-        // (0,1) cell.
-        int i2 = S2CellIdUtils.getJ(s2CellId) > S2CellIdUtils.getJ(s0) ? 1 : -1;
-        long s2 = edgeNeighbors[i2 + 1];
-
-        // (1,1) cell.
-        S2CellIdUtils.getEdgeNeighbors(s1, edgeNeighbors);
-        long s3 = 0;
-        for (int i = 0; i < edgeNeighbors.length; i++) {
-            if (edgeNeighbors[i] == s0) {
-                int i3 = (i + i1 * i2 + edgeNeighbors.length) % edgeNeighbors.length;
-                s3 = edgeNeighbors[i3] == s2 ? 0 : edgeNeighbors[i3];
-                break;
+        long s1 = edgeNeighbors[1];
+        long s2 = edgeNeighbors[2];
+        long s3;
+        if (f0 % 2 == 1) {
+            S2CellIdUtils.getEdgeNeighbors(s1, edgeNeighbors);
+            if (i1 < maxIj) {
+                s3 = edgeNeighbors[2];
+            } else {
+                s3 = s1;
+                s1 = edgeNeighbors[1];
+            }
+        } else {
+            S2CellIdUtils.getEdgeNeighbors(s2, edgeNeighbors);
+            if (j1 < maxIj) {
+                s3 = edgeNeighbors[1];
+            } else {
+                s3 = s2;
+                s2 = edgeNeighbors[3];
             }
         }
 
@@ -118,13 +146,12 @@ public final class AltitudeConverter {
      * Mean Sea Level altitude accuracy is added if the {@code location} has a valid vertical
      * accuracy; otherwise, does not add a corresponding accuracy.
      */
-    private static void addMslAltitude(@NonNull MapParamsProto params, @NonNull long[] s2CellIds,
+    private static void addMslAltitude(@NonNull MapParamsProto params,
             @NonNull double[] geoidHeightsMeters, @NonNull Location location) {
-        long s0 = s2CellIds[0];
         double h0 = geoidHeightsMeters[0];
         double h1 = geoidHeightsMeters[1];
         double h2 = geoidHeightsMeters[2];
-        double h3 = s2CellIds[3] == 0 ? h0 : geoidHeightsMeters[3];
+        double h3 = geoidHeightsMeters[3];
 
         // Bilinear interpolation on an S2 square of size equal to that of a map cell. wi and wj
         // are the normalized [0,1] weights in the i and j directions, respectively, allowing us to
@@ -132,8 +159,8 @@ public final class AltitudeConverter {
         long s2CellId = S2CellIdUtils.fromLatLngDegrees(location.getLatitude(),
                 location.getLongitude());
         double sizeIj = 1 << (S2CellIdUtils.MAX_LEVEL - params.mapS2Level);
-        double wi = Math.abs(S2CellIdUtils.getI(s2CellId) - S2CellIdUtils.getI(s0)) / sizeIj;
-        double wj = Math.abs(S2CellIdUtils.getJ(s2CellId) - S2CellIdUtils.getJ(s0)) / sizeIj;
+        double wi = (S2CellIdUtils.getI(s2CellId) % sizeIj) / sizeIj;
+        double wj = (S2CellIdUtils.getJ(s2CellId) % sizeIj) / sizeIj;
         double offsetMeters = h0 + (h1 - h0) * wi + (h2 - h0) * wj + (h3 - h1 - h2 + h0) * wi * wj;
 
         location.setMslAltitudeMeters(location.getAltitude() - offsetMeters);
@@ -167,7 +194,7 @@ public final class AltitudeConverter {
         MapParamsProto params = GeoidHeightMap.getParams(context);
         long[] s2CellIds = findMapSquare(params, location);
         double[] geoidHeightsMeters = mGeoidHeightMap.readGeoidHeights(params, context, s2CellIds);
-        addMslAltitude(params, s2CellIds, geoidHeightsMeters, location);
+        addMslAltitude(params, geoidHeightsMeters, location);
     }
 
     /**
@@ -190,7 +217,7 @@ public final class AltitudeConverter {
             return false;
         }
 
-        addMslAltitude(params, s2CellIds, geoidHeightsMeters, location);
+        addMslAltitude(params, geoidHeightsMeters, location);
         return true;
     }
 }
