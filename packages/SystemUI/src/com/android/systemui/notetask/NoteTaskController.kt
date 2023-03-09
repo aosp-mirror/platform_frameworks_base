@@ -187,25 +187,16 @@ constructor(
 
     companion object {
         val TAG = NoteTaskController::class.simpleName.orEmpty()
-
-        // TODO(b/254604589): Use final KeyEvent.KEYCODE_* instead.
-        const val NOTE_TASK_KEY_EVENT = 311
-
-        // TODO(b/265912743): Use Intent.ACTION_CREATE_NOTE instead.
-        const val ACTION_CREATE_NOTE = "android.intent.action.CREATE_NOTE"
-
-        // TODO(b/265912743): Use Intent.INTENT_EXTRA_USE_STYLUS_MODE instead.
-        const val INTENT_EXTRA_USE_STYLUS_MODE = "android.intent.extra.USE_STYLUS_MODE"
     }
 }
 
 private fun createNoteIntent(info: NoteTaskInfo): Intent =
-    Intent(NoteTaskController.ACTION_CREATE_NOTE).apply {
+    Intent(Intent.ACTION_CREATE_NOTE).apply {
         setPackage(info.packageName)
 
         // EXTRA_USE_STYLUS_MODE does not mean a stylus is in-use, but a stylus entrypoint
         // was used to start it.
-        putExtra(NoteTaskController.INTENT_EXTRA_USE_STYLUS_MODE, true)
+        putExtra(Intent.EXTRA_USE_STYLUS_MODE, true)
 
         addFlags(FLAG_ACTIVITY_NEW_TASK)
         // We should ensure the note experience can be open both as a full screen (lock screen)

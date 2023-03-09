@@ -2935,19 +2935,17 @@ interface ITelephony {
     * Send datagram over satellite.
     *
     * @param subId The subId of the subscription to send satellite datagrams for.
-    * @param datagramId An id that uniquely identifies datagram requested to be sent.
     * @param datagramType Type of datagram.
     * @param datagram Datagram to send over satellite.
     * @param needFullScreenPointingUI this is used to indicate pointingUI app to open in
     *                                 full screen mode.
-    * @param receiver Result receiver to get the datagramId if datagram is sent successfully else
-    *                 error code of the request.
+    * @param callback The callback to get the error code of the request.
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
-    void sendSatelliteDatagram(int subId, long datagramId, int datagramType,
+    void sendSatelliteDatagram(int subId, int datagramType,
              in SatelliteDatagram datagram, in boolean needFullScreenPointingUI,
-             in ResultReceiver receiver);
+             IIntegerConsumer callback);
 
     /**
      * Request to get whether satellite communication is allowed for the current location.

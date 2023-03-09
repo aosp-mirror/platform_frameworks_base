@@ -60,6 +60,7 @@ public class TvPipCustomAction extends TvPipAction {
         }
         button.setImageIconAsync(mRemoteAction.getIcon(), mainHandler);
         button.setEnabled(isCloseAction() || mRemoteAction.isEnabled());
+        button.setIsCustomCloseAction(isCloseAction());
     }
 
     PendingIntent getPendingIntent() {

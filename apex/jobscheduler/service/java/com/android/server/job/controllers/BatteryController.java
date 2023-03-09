@@ -35,7 +35,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -151,7 +151,7 @@ public final class BatteryController extends RestrictingController {
     @GuardedBy("mLock")
     public void onBatteryStateChangedLocked() {
         // Update job bookkeeping out of band.
-        JobSchedulerBackgroundThread.getHandler().post(() -> {
+        AppSchedulingModuleThread.getHandler().post(() -> {
             synchronized (mLock) {
                 maybeReportNewChargingStateLocked();
             }

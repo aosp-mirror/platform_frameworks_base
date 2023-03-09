@@ -488,17 +488,17 @@ public final class DisplayPowerControllerTest {
         // We should still set screen state for the default display
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1);
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState, times(2)).setScreenState(anyInt());
 
         mHolder = createDisplayPowerController(42, UNIQUE_ID);
 
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1);
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
 
         mHolder.dpc.onBootCompleted();
-        advanceTime(1);
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState).setScreenState(anyInt());
     }
 
@@ -645,6 +645,34 @@ public final class DisplayPowerControllerTest {
         advanceTime(1); // Run updatePowerState
 
         verify(mHolder.screenOffBrightnessSensorController).stop();
+    }
+
+    @Test
+    public void testBrightnessNitsPersistWhenDisplayDeviceChanges() {
+        float brightness = 0.3f;
+        float nits = 500;
+        when(mResourcesMock.getBoolean(
+                com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay))
+                .thenReturn(true);
+        mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID);
+        when(mHolder.automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
+
+        mHolder.dpc.setBrightness(brightness);
+        verify(mHolder.brightnessSetting).setBrightnessNitsForDefaultDisplay(nits);
+
+        float newBrightness = 0.4f;
+        when(mHolder.brightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(nits);
+        when(mHolder.automaticBrightnessController.convertToFloatScale(nits))
+                .thenReturn(newBrightness);
+        // New display device
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mock(DisplayDeviceConfig.class), /* isEnabled= */ true);
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+        // One triggered by handleBrightnessModeChange, another triggered by onDisplayChanged
+        verify(mHolder.animator, times(2)).animateTo(eq(newBrightness), anyFloat(), anyFloat());
     }
 
     private DisplayPowerControllerHolder createDisplayPowerController(int displayId,

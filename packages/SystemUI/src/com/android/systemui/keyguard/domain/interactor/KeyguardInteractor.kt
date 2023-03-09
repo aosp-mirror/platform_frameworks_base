@@ -142,6 +142,8 @@ constructor(
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState> = repository.statusBarState
+    /** Whether or not quick settings or quick quick settings are showing. */
+    val isQuickSettingsVisible: Flow<Boolean> = repository.isQuickSettingsVisible
     /**
      * Observable for [BiometricUnlockModel] when biometrics like face or any fingerprint (rear,
      * side, under display) is used to unlock the device.

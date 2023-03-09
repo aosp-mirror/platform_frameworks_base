@@ -6346,4 +6346,8 @@
     <bool name="config_batteryStatsResetOnUnplugHighBatteryLevel">true</bool>
     <!-- Whether to reset Battery Stats on unplug if the battery was significantly charged -->
     <bool name="config_batteryStatsResetOnUnplugAfterSignificantCharge">true</bool>
+
+    <!-- Whether we should persist the brightness value in nits for the default display even if
+         the underlying display device changes. -->
+    <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
 </resources>

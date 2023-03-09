@@ -50,7 +50,12 @@ import com.android.server.display.brightness.BrightnessEvent;
 
 import java.io.PrintWriter;
 
-class AutomaticBrightnessController {
+/**
+ * Manages the associated display brightness when in auto-brightness mode. This is also
+ * responsible for managing the brightness lux-nits mapping strategies. Internally also listens to
+ * the LightSensor and adjusts the system brightness in case of changes in the surrounding lux.
+ */
+public class AutomaticBrightnessController {
     private static final String TAG = "AutomaticBrightnessController";
 
     private static final boolean DEBUG_PRETEND_LIGHT_SENSOR_ABSENT = false;
@@ -1140,7 +1145,7 @@ class AutomaticBrightnessController {
         if (mCurrentBrightnessMapper != null) {
             return mCurrentBrightnessMapper.convertToFloatScale(nits);
         } else {
-            return -1.0f;
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
     }
 

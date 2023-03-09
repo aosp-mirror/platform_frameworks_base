@@ -354,7 +354,8 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     // cost of RAM
     if (result == SkCodec::kSuccess && !jpostProcess && !preferRamOverQuality) {
         // The gainmap costs RAM to improve quality, so skip this if we're prioritizing RAM instead
-        result = decoder->extractGainmap(nativeBitmap.get());
+        result = decoder->extractGainmap(nativeBitmap.get(),
+                                         allocator == kSharedMemory_Allocator ? true : false);
         jexception = get_and_clear_exception(env);
     }
 
@@ -469,8 +470,10 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             if (hwBitmap) {
                 hwBitmap->setImmutable();
                 if (nativeBitmap->hasGainmap()) {
-                    // TODO: Also convert to a HW gainmap image
-                    hwBitmap->setGainmap(nativeBitmap->gainmap());
+                    auto gm = uirenderer::Gainmap::allocateHardwareGainmap(nativeBitmap->gainmap());
+                    if (gm) {
+                        hwBitmap->setGainmap(std::move(gm));
+                    }
                 }
                 return bitmap::createBitmap(env, hwBitmap.release(), bitmapCreateFlags,
                                             ninePatchChunk, ninePatchInsets);

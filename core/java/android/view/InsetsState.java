@@ -42,7 +42,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
@@ -705,40 +704,6 @@ public class InsetsState implements Parcelable {
         return (windowFlags & FLAG_LAYOUT_NO_LIMITS) != 0
                 && windowType != TYPE_WALLPAPER && windowType != TYPE_SYSTEM_ERROR
                 && !WindowConfiguration.inMultiWindowMode(windowingMode);
-    }
-
-    public static @InternalInsetsType ArraySet<Integer> toInternalType(@InsetsType int types) {
-        final ArraySet<Integer> result = new ArraySet<>();
-        if ((types & Type.STATUS_BARS) != 0) {
-            result.add(ITYPE_STATUS_BAR);
-            result.add(ITYPE_CLIMATE_BAR);
-        }
-        if ((types & Type.NAVIGATION_BARS) != 0) {
-            result.add(ITYPE_NAVIGATION_BAR);
-            result.add(ITYPE_EXTRA_NAVIGATION_BAR);
-        }
-        if ((types & Type.SYSTEM_OVERLAYS) != 0) {
-            result.add(ITYPE_LEFT_GENERIC_OVERLAY);
-            result.add(ITYPE_TOP_GENERIC_OVERLAY);
-            result.add(ITYPE_RIGHT_GENERIC_OVERLAY);
-            result.add(ITYPE_BOTTOM_GENERIC_OVERLAY);
-        }
-        if ((types & Type.CAPTION_BAR) != 0) {
-            result.add(ITYPE_CAPTION_BAR);
-        }
-        if ((types & Type.SYSTEM_GESTURES) != 0) {
-            result.add(ITYPE_LEFT_GESTURES);
-            result.add(ITYPE_TOP_GESTURES);
-            result.add(ITYPE_RIGHT_GESTURES);
-            result.add(ITYPE_BOTTOM_GESTURES);
-        }
-        if ((types & Type.MANDATORY_SYSTEM_GESTURES) != 0) {
-            result.add(ITYPE_LEFT_MANDATORY_GESTURES);
-            result.add(ITYPE_TOP_MANDATORY_GESTURES);
-            result.add(ITYPE_RIGHT_MANDATORY_GESTURES);
-            result.add(ITYPE_BOTTOM_MANDATORY_GESTURES);
-        }
-        return result;
     }
 
     /**

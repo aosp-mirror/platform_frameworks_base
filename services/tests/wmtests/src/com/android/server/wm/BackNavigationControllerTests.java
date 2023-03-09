@@ -26,6 +26,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.window.BackNavigationInfo.typeToString;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -149,6 +150,28 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
+    public void backTypeCrossActivityWithCustomizeExitAnimation() {
+        CrossActivityTestCase testCase = createTopTaskWithTwoActivities();
+        IOnBackInvokedCallback callback = withSystemCallback(testCase.task);
+        testCase.windowFront.mAttrs.windowAnimations = 0x10;
+        spyOn(mDisplayContent.mAppTransition.mTransitionAnimation);
+        doReturn(0xffff00AB).when(mDisplayContent.mAppTransition.mTransitionAnimation)
+                .getAnimationResId(any(), anyInt(), anyInt());
+        doReturn(0xffff00CD).when(mDisplayContent.mAppTransition.mTransitionAnimation)
+                .getDefaultAnimationResId(anyInt(), anyInt());
+
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
+        assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
+        assertThat(backNavigationInfo.getCustomAnimationInfo().getWindowAnimations())
+                .isEqualTo(testCase.windowFront.mAttrs.windowAnimations);
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_ACTIVITY));
+        // verify if back animation would start.
+        assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
+    }
+
+    @Test
     public void backTypeCrossActivityWhenBackToPreviousActivity() {
         CrossActivityTestCase testCase = createTopTaskWithTwoActivities();
         IOnBackInvokedCallback callback = withSystemCallback(testCase.task);
@@ -158,6 +181,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(backNavigationInfo.getOnBackInvokedCallback()).isEqualTo(callback);
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CROSS_ACTIVITY));
+        // verify if back animation would start.
+        assertTrue("Animation scheduled", backNavigationInfo.isPrepareRemoteAnimation());
 
         // reset drawing status
         testCase.recordFront.forAllWindows(w -> {
@@ -510,6 +535,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         testCase.task = task;
         testCase.recordBack = record1;
         testCase.recordFront = record2;
+        testCase.windowBack = window1;
+        testCase.windowFront = window2;
         return testCase;
     }
 
@@ -525,6 +552,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private class CrossActivityTestCase {
         public Task task;
         public ActivityRecord recordBack;
+        public WindowState windowBack;
         public ActivityRecord recordFront;
+        public WindowState windowFront;
     }
 }

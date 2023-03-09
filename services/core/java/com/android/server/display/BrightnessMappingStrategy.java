@@ -322,9 +322,10 @@ public abstract class BrightnessMappingStrategy {
     public abstract float convertToNits(float brightness);
 
     /**
-     * Converts the provided nits value to a float value if possible.
+     * Converts the provided nit value to a float scale value if possible.
      *
-     * Returns -1.0f if there's no available mapping for the nits to float.
+     * Returns {@link PowerManager.BRIGHTNESS_INVALID_FLOAT} if there's no available mapping for
+     * the nits to float scale.
      */
     public abstract float convertToFloatScale(float nits);
 
@@ -679,7 +680,7 @@ public abstract class BrightnessMappingStrategy {
 
         @Override
         public float convertToFloatScale(float nits) {
-            return -1.0f;
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
         }
 
         @Override

@@ -147,12 +147,12 @@ import com.android.internal.util.LocalLog;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.StatLogger;
 import com.android.server.AlarmManagerInternal;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.AppStateTrackerImpl.Listener;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.EventLogTags;
-import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemClockTime;
 import com.android.server.SystemClockTime.TimeConfidence;
@@ -4691,7 +4691,7 @@ public class AlarmManagerService extends SystemService {
 
         void registerDeviceConfigListener(DeviceConfig.OnPropertiesChangedListener listener) {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ALARM_MANAGER,
-                    JobSchedulerBackgroundThread.getExecutor(), listener);
+                    AppSchedulingModuleThread.getExecutor(), listener);
         }
     }
 

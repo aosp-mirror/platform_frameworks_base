@@ -173,12 +173,6 @@ interface ControlsController : UserAwareController {
     fun removeFavorites(componentName: ComponentName): Boolean
 
     /**
-     * Checks if the favorites can be removed. You can't remove components from the preferred list.
-     * @param componentName the name of the service that provides the [Control]
-     */
-    fun canRemoveFavorites(componentName: ComponentName): Boolean
-
-    /**
      * Replaces the favorites for the given structure.
      *
      * Calling this method will eliminate the previous selection of favorites and replace it with a

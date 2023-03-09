@@ -17,5 +17,5 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <corners android:radius="@dimen/tv_window_menu_button_radius" />
-    <solid android:color="@color/tv_window_menu_icon_bg" />
+    <solid android:color="@android:color/white" />
 </shape>

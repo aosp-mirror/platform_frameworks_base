@@ -3772,10 +3772,9 @@
     <permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
                 android:protectionLevel="signature|privileged|vendorPrivileged|oem|verifier|role"/>
 
-    <!-- Allows an application to hint that a component lifecycle operation such as sending
-         a broadcast is associated with an "interactive" usage scenario.
+    <!-- Allows an application to request interactive options when sending a broadcast.
          @hide -->
-    <permission android:name="android.permission.COMPONENT_OPTION_INTERACTIVE"
+    <permission android:name="android.permission.BROADCAST_OPTION_INTERACTIVE"
                 android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Must be required by activities that handle the intent action
@@ -8167,6 +8166,10 @@
 
         <service android:name="com.android.server.healthconnect.HealthConnectDailyService"
                  android:permission="android.permission.BIND_JOB_SERVICE" >
+        </service>
+
+        <service android:name="com.android.server.healthconnect.migration.MigrationBroadcastJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
         <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader"
