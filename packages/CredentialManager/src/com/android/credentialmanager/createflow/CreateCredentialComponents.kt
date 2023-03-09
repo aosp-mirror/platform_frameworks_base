@@ -560,7 +560,11 @@ fun CreationSelectionCard(
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
-            item { BodySmallText(text = createOptionInfo.footerDescription) }
+            item {
+                Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                    BodySmallText(text = createOptionInfo.footerDescription)
+                }
+            }
         }
     }
     onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_CREATION_OPTION_SELECTION)
