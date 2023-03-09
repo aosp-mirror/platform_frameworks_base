@@ -31,7 +31,7 @@ import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.server.credentials.metrics.CandidateProviderMetric;
+import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.UUID;
@@ -59,7 +59,7 @@ public abstract class ProviderSession<T, R>
     @Nullable protected R mProviderResponse;
     @NonNull protected Boolean mProviderResponseSet = false;
     // Specific candidate provider metric for the provider this session handles
-    @Nullable protected CandidateProviderMetric mCandidateProviderMetric;
+    @Nullable protected CandidatePhaseMetric mCandidateProviderMetric;
     @NonNull private int mProviderSessionUid;
 
     /**
@@ -126,7 +126,7 @@ public abstract class ProviderSession<T, R>
         mUserId = userId;
         mComponentName = info.getServiceInfo().getComponentName();
         mRemoteCredentialService = remoteCredentialService;
-        mCandidateProviderMetric = new CandidateProviderMetric();
+        mCandidateProviderMetric = new CandidatePhaseMetric();
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
     }
 
