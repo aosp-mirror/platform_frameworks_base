@@ -32,7 +32,7 @@ import java.io.PrintWriter;
  * Trace.traceEnd. These traces are used for performance testing.
  */
 public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServiceInterface {
-    private static final long TRACE_TAG = Trace.TRACE_TAG_SYSTEM_SERVER;
+    private static final long TRACE_TAG = Trace.TRACE_TAG_ACTIVITY_MANAGER;
     private final AppOpsCheckingServiceInterface mService;
 
     AppOpsCheckingServiceTracingDecorator(
