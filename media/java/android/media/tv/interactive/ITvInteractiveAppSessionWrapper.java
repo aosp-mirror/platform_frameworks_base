@@ -558,7 +558,7 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifyRecordingStarted(String recordingId, String requestId) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(
-                DO_NOTIFY_RECORDING_STARTED, recordingId, recordingId));
+                DO_NOTIFY_RECORDING_STARTED, recordingId, requestId));
     }
 
     @Override
