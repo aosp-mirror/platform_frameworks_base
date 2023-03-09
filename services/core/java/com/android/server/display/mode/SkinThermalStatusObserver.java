@@ -84,7 +84,11 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
     @Override
     public void notifyThrottling(Temperature temp) {
         @Temperature.ThrottlingStatus int currentStatus = temp.getStatus();
+
         synchronized (mThermalObserverLock) {
+            if (mStatus == currentStatus) {
+                return; // status not changed, skip update
+            }
             mStatus = currentStatus;
             mHandler.post(this::updateVotes);
         }
@@ -187,6 +191,10 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         synchronized (mThermalObserverLock) {
             localStatus = mStatus;
             localMap = mThermalThrottlingByDisplay.get(displayId);
+        }
+        if (localMap == null) {
+            Slog.d(TAG, "Updating votes, display already removed, display=" + displayId);
+            return;
         }
         if (mLoggingEnabled) {
             Slog.d(TAG, "Updating votes for status=" + localStatus + ", display =" + displayId
