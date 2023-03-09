@@ -164,7 +164,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -350,6 +349,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     mLongPressHomeEnabled = longPressHomeEnabled;
                     updateAssistantEntrypoints(available, longPressHomeEnabled);
                 }
+
+                @Override
+                public void updateWallpaperVisibility(boolean visible, int displayId) {
+                    mNavigationBarTransitions.setWallpaperVisibility(visible);
+                }
+
                 @Override
                 public void updateRotationWatcherState(int rotation) {
                     if (mIsOnDefaultDisplay && mView != null) {

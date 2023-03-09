@@ -150,6 +150,7 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mNavBarHelper);
         verify(mAssistManager, times(1)).getAssistInfoForUser(anyInt());
         verify(mWm, times(1)).watchRotation(any(), anyInt());
+        verify(mWm, times(1)).registerWallpaperVisibilityListener(any(), anyInt());
     }
 
     @Test
@@ -161,6 +162,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         verify(mAccessibilityManager, times(1)).removeAccessibilityServicesStateChangeListener(
                 mNavBarHelper);
         verify(mWm, times(1)).removeRotationWatcher(any());
+        verify(mWm, times(1)).unregisterWallpaperVisibilityListener(any(), anyInt());
     }
 
     @Test
@@ -183,6 +185,8 @@ public class NavBarHelperTest extends SysuiTestCase {
                 .updateAssistantAvailable(anyBoolean(), anyBoolean());
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateRotationWatcherState(anyInt());
+        verify(mNavbarTaskbarStateUpdater, times(1))
+                .updateWallpaperVisibility(anyBoolean(), anyInt());
     }
 
     @Test

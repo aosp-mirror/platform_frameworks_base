@@ -47,6 +47,7 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.IRotationWatcher;
+import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowInsets;
@@ -119,6 +120,7 @@ public final class NavBarHelper implements
     private int mA11yButtonState;
     private int mRotationWatcherRotation;
     private boolean mTogglingNavbarTaskbar;
+    private boolean mWallpaperVisible;
 
     // Attributes used in NavBarHelper.CurrentSysuiState
     private int mWindowStateDisplayId;
@@ -131,6 +133,19 @@ public final class NavBarHelper implements
             updateAssistantAvailability();
         }
     };
+
+    // Listens for changes to the wallpaper visibility
+    private final IWallpaperVisibilityListener mWallpaperVisibilityListener =
+            new IWallpaperVisibilityListener.Stub() {
+                @Override
+                public void onWallpaperVisibilityChanged(boolean visible,
+                        int displayId) throws RemoteException {
+                    mHandler.post(() -> {
+                        mWallpaperVisible = visible;
+                        dispatchWallpaperVisibilityChanged(visible, displayId);
+                    });
+                }
+            };
 
     // Listens for changes to display rotation
     private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
@@ -219,6 +234,14 @@ public final class NavBarHelper implements
         } catch (Exception e) {
             Log.w(TAG, "Failed to register rotation watcher", e);
         }
+
+        // Setup wallpaper visibility listener
+        try {
+            mWallpaperVisible = mWm.registerWallpaperVisibilityListener(
+                    mWallpaperVisibilityListener, mDefaultDisplayId);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to register wallpaper visibility listener", e);
+        }
     }
 
     /**
@@ -239,6 +262,14 @@ public final class NavBarHelper implements
         } catch (Exception e) {
             Log.w(TAG, "Failed to unregister rotation watcher", e);
         }
+
+        // Clean up wallpaper visibility listener
+        try {
+            mWm.unregisterWallpaperVisibilityListener(mWallpaperVisibilityListener,
+                    mDefaultDisplayId);
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to register wallpaper visibility listener", e);
+        }
     }
 
     /**
@@ -258,6 +289,7 @@ public final class NavBarHelper implements
             listener.updateAccessibilityServicesState();
             listener.updateAssistantAvailable(mAssistantAvailable, mLongPressHomeEnabled);
         }
+        listener.updateWallpaperVisibility(mWallpaperVisible, mDefaultDisplayId);
         listener.updateRotationWatcherState(mRotationWatcherRotation);
     }
 
@@ -435,6 +467,12 @@ public final class NavBarHelper implements
         mWindowState = state;
     }
 
+    private void dispatchWallpaperVisibilityChanged(boolean visible, int displayId) {
+        for (NavbarTaskbarStateUpdater listener : mStateListeners) {
+            listener.updateWallpaperVisibility(visible, displayId);
+        }
+    }
+
     private void dispatchRotationChanged(int rotation) {
         for (NavbarTaskbarStateUpdater listener : mStateListeners) {
             listener.updateRotationWatcherState(rotation);
@@ -452,6 +490,7 @@ public final class NavBarHelper implements
     public interface NavbarTaskbarStateUpdater {
         void updateAccessibilityServicesState();
         void updateAssistantAvailable(boolean available, boolean longPressHomeEnabled);
+        default void updateWallpaperVisibility(boolean visible, int displayId) {}
         default void updateRotationWatcherState(int rotation) {}
     }
 
