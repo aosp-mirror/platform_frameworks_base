@@ -2564,18 +2564,16 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
 
-            mHiding = true;
-
             if (mShowing && !mOccluded) {
+                mHiding = true;
                 mKeyguardGoingAwayRunnable.run();
             } else {
-                // TODO(bc-unlock): Fill parameters
-                mNotificationShadeWindowControllerLazy.get().batchApplyWindowLayoutParams(() -> {
-                    handleStartKeyguardExitAnimation(
-                            SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
-                            mHideAnimation.getDuration(), null /* apps */, null /* wallpapers */,
-                            null /* nonApps */, null /* finishedCallback */);
-                });
+                Log.d(TAG, "Hiding keyguard while occluded. Just hide the keyguard view and exit.");
+
+                mKeyguardViewControllerLazy.get().hide(
+                        SystemClock.uptimeMillis() + mHideAnimation.getStartOffset(),
+                        mHideAnimation.getDuration());
+                onKeyguardExitFinished();
             }
 
             // It's possible that the device was unlocked (via BOUNCER or Fingerprint) while
