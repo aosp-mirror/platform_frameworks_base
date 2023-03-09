@@ -1314,6 +1314,15 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());
     }
 
+    @Test
+    public void frpLockedDevice_shadeDisabled() {
+        when(mDeviceProvisionedController.isFrpActive()).thenReturn(true);
+        when(mDozeServiceHost.isPulsing()).thenReturn(true);
+        mCentralSurfaces.updateNotificationPanelTouchState();
+
+        verify(mNotificationPanelViewController).setTouchAndAnimationDisabled(true);
+    }
+
     /**
      * Configures the appropriate mocks and then calls {@link CentralSurfacesImpl#updateIsKeyguard}
      * to reconfigure the keyguard to reflect the requested showing/occluded states.
