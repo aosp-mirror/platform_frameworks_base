@@ -3989,7 +3989,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  --checkin: output checkin format, resetting data.");
             pw.println("  --C: output checkin format, not resetting data.");
             pw.println("  --proto: output dump in protocol buffer format.");
-            pw.println("  --verbose: dumps extra information.");
             pw.printf("  %s: dump just the DUMPABLE-related state of an activity. Use the %s "
                     + "option to list the supported DUMPABLEs\n", Activity.DUMP_ARG_DUMP_DUMPABLE,
                     Activity.DUMP_ARG_LIST_DUMPABLES);
