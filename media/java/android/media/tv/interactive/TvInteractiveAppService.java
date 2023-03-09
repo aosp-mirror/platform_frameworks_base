@@ -38,6 +38,7 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvContract;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvRecordingInfo;
@@ -1346,7 +1347,8 @@ public abstract class TvInteractiveAppService extends Service {
          *                  {@link TvInteractiveAppService} and can be any string.
          *                  Should this API be called with the same requestId twice, both 
          *                  requests should be handled regardless by the TV application.
-         * @param programUri The URI for the TV program to record.
+         * @param programUri The URI for the TV program to record, built by
+         *            {@link TvContract#buildProgramUri(long)}. Can be {@code null}.
          * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
         @CallSuper
