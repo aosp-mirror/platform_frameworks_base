@@ -36,6 +36,7 @@ import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.transition.Transitions;
 
@@ -372,7 +373,8 @@ public class PipAnimationController {
 
         void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo) {
             reattachContentOverlay(
-                    new PipContentOverlay.PipAppIconOverlay(context, bounds, activityInfo));
+                    new PipContentOverlay.PipAppIconOverlay(context, bounds,
+                            () -> new IconProvider(context).getIcon(activityInfo)));
         }
 
         private void reattachContentOverlay(PipContentOverlay overlay) {
