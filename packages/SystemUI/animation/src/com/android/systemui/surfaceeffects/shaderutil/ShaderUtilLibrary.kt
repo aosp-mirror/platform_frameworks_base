@@ -53,6 +53,19 @@ class ShaderUtilLibrary {
                                 cos(p.y * 0.01 + time * 0.005931)) * distort_amount_xy;
             }
 
+            // Perceived luminosity (L′), not absolute luminosity.
+            half getLuminosity(vec3 c) {
+                return 0.3 * c.r + 0.59 * c.g + 0.11 * c.b;
+            }
+
+            // Creates a luminosity mask and clamp to the legal range.
+            vec3 maskLuminosity(vec3 dest, float lum) {
+                dest.rgb *= vec3(lum);
+                // Clip back into the legal range
+                dest = clamp(dest, vec3(0.), vec3(1.0));
+                return dest;
+            }
+
             // Return range [-1, 1].
             vec3 hash(vec3 p) {
                 p = fract(p * vec3(.3456, .1234, .9876));
@@ -62,14 +75,14 @@ class ShaderUtilLibrary {
             }
 
             // Skew factors (non-uniform).
-            const float SKEW = 0.3333333;  // 1/3
-            const float UNSKEW = 0.1666667;  // 1/6
+            const half SKEW = 0.3333333;  // 1/3
+            const half UNSKEW = 0.1666667;  // 1/6
 
             // Return range roughly [-1,1].
             // It's because the hash function (that returns a random gradient vector) returns
             // different magnitude of vectors. Noise doesn't have to be in the precise range thus
             // skipped normalize.
-            float simplex3d(vec3 p) {
+            half simplex3d(vec3 p) {
                 // Skew the input coordinate, so that we get squashed cubical grid
                 vec3 s = floor(p + (p.x + p.y + p.z) * SKEW);
 
@@ -142,6 +155,22 @@ class ShaderUtilLibrary {
                 // Add all the noise contributions.
                 // Should multiply by the possible max contribution to adjust the range in [-1,1].
                 return dot(vec4(32.), nc);
+            }
+
+            // Random rotations.
+            // The way you create fractal noise is layering simplex noise with some rotation.
+            // To make random cloud looking noise, the rotations should not align. (Otherwise it
+            // creates patterned noise).
+            // Below rotations only rotate in one axis.
+            const mat3 rot1 = mat3(1.0, 0. ,0., 0., 0.15, -0.98, 0., 0.98, 0.15);
+            const mat3 rot2 = mat3(-0.95, 0. ,-0.3, 0., 1., 0., 0.3, 0., -0.95);
+            const mat3 rot3 = mat3(1.0, 0. ,0., 0., -0.44, -0.89, 0., 0.89, -0.44);
+
+            // Octave = 4
+            // Divide each coefficient by 3 to produce more grainy noise.
+            half simplex3d_fractal(vec3 mat) {
+                return 0.675 * simplex3d(mat * rot1) + 0.225 * simplex3d(2.0 * mat * rot2)
+                        + 0.075 * simplex3d(4.0 * mat * rot3) + 0.025 * simplex3d(8.0 * mat);
             }
             """
     }
