@@ -64,7 +64,11 @@ constructor(
                 .sample(keyguardTransitionInteractor.startedKeyguardTransitionStep, ::Pair)
                 .collect { pair ->
                     val (isAbleToDream, lastStartedTransition) = pair
-                    if (isAbleToDream && lastStartedTransition.to == KeyguardState.LOCKSCREEN) {
+                    if (
+                        isAbleToDream &&
+                            lastStartedTransition.to == KeyguardState.LOCKSCREEN &&
+                            lastStartedTransition.from != KeyguardState.AOD
+                    ) {
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 name,
