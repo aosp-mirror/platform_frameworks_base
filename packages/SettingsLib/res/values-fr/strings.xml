@@ -371,6 +371,10 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Afficher les limites de coupe, les marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Forcer écriture droite à gauche"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Forcer l\'orientation du texte de droite à gauche pour toutes les langues"</string>
+    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
+    <skip />
+    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
+    <skip />
     <string name="window_blurs" msgid="6831008984828425106">"Autor. floutage fenêtre"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Forcer MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activer MSAA 4x dans les applications OpenGL ES 2.0"</string>
@@ -679,4 +683,6 @@
     <item msgid="7728484337962740316">"Déplacer vers la droite"</item>
     <item msgid="324200556467459329">"Déplacer vers le haut"</item>
   </string-array>
+    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
+    <skip />
 </resources>

@@ -371,6 +371,10 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokaži meje obrezovanja, obrobe ipd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vsili od desne proti levi"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vsili smer postavitve na zaslonu od desne proti levi za vse jezike."</string>
+    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
+    <skip />
+    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
+    <skip />
     <string name="window_blurs" msgid="6831008984828425106">"Dovoli zameglitve na ravni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vsili 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"V aplikacijah OpenGL ES 2.0 omogoči 4x MSAA."</string>
@@ -679,4 +683,6 @@
     <item msgid="7728484337962740316">"Premaknite se desno"</item>
     <item msgid="324200556467459329">"Premaknite se navzgor"</item>
   </string-array>
+    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
+    <skip />
 </resources>
