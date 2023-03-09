@@ -435,9 +435,234 @@ class TableLogBufferTest : SysuiTestCase() {
 
         assertThat(dumpedString).doesNotContain("testString[0]")
         assertThat(dumpedString).doesNotContain("testString[1]")
-        assertThat(dumpedString).doesNotContain("testString[2]")
+        // The buffer should contain [MAX_SIZE + 1] entries since we also save the most recently
+        // evicted value.
+        assertThat(dumpedString).contains("testString[2]")
         assertThat(dumpedString).contains("testString[3]")
         assertThat(dumpedString).contains("testString[${MAX_SIZE + 2}]")
+    }
+
+    @Test
+    fun columnEvicted_lastKnownColumnValueInDump() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvicted", value = "evictedValue")
+
+        // Exactly fill the buffer so that "willBeEvicted" is evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have both the evicted column entry...
+        val evictedColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "willBeEvicted" +
+                SEPARATOR +
+                "evictedValue"
+        assertThat(dumpedString).contains(evictedColumnLog)
+
+        // ... *and* all of the fillingColumn entries.
+        val firstFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[0]"
+        val lastFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(1100L) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[9]"
+        assertThat(dumpedString).contains(firstFillingColumnLog)
+        assertThat(dumpedString).contains(lastFillingColumnLog)
+    }
+
+    @Test
+    fun multipleColumnsEvicted_allColumnsInDump() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedString", value = "evictedValue")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedInt", value = 45)
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedBool", value = true)
+
+        // Exactly fill the buffer so that all the above columns will be evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have all the evicted column entries...
+        val evictedColumnLogString =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "willBeEvictedString" +
+                SEPARATOR +
+                "evictedValue"
+        val evictedColumnLogInt =
+            TABLE_LOG_DATE_FORMAT.format(200L) + SEPARATOR + "willBeEvictedInt" + SEPARATOR + "45"
+        val evictedColumnLogBool =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "willBeEvictedBool" +
+                SEPARATOR +
+                "true"
+        assertThat(dumpedString).contains(evictedColumnLogString)
+        assertThat(dumpedString).contains(evictedColumnLogInt)
+        assertThat(dumpedString).contains(evictedColumnLogBool)
+
+        // ... *and* all of the fillingColumn entries.
+        val firstFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(400) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[0]"
+        val lastFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(1300) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[9]"
+        assertThat(dumpedString).contains(firstFillingColumnLog)
+        assertThat(dumpedString).contains(lastFillingColumnLog)
+    }
+
+    @Test
+    fun multipleColumnsEvicted_differentPrefixSameName_allColumnsInDump() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "prefix1", columnName = "sameName", value = "value1")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "prefix2", columnName = "sameName", value = "value2")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "prefix3", columnName = "sameName", value = "value3")
+
+        // Exactly fill the buffer so that all the above columns will be evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have all the evicted column entries
+        val evictedColumn1 =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "prefix1.sameName" +
+                SEPARATOR +
+                "value1"
+        val evictedColumn2 =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "prefix2.sameName" +
+                SEPARATOR +
+                "value2"
+        val evictedColumn3 =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "prefix3.sameName" +
+                SEPARATOR +
+                "value3"
+        assertThat(dumpedString).contains(evictedColumn1)
+        assertThat(dumpedString).contains(evictedColumn2)
+        assertThat(dumpedString).contains(evictedColumn3)
+    }
+
+    @Test
+    fun multipleColumnsEvicted_dumpSortedByTimestamp() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedFirst", value = "evictedValue")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedSecond", value = 45)
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedThird", value = true)
+
+        // Exactly fill the buffer with so that all the above columns will be evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have all the evicted column entries in timestamp order
+        val firstEvictedLog =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "willBeEvictedFirst" +
+                SEPARATOR +
+                "evictedValue"
+        val secondEvictedLog =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "willBeEvictedSecond" +
+                SEPARATOR +
+                "45"
+        val thirdEvictedLog =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "willBeEvictedThird" +
+                SEPARATOR +
+                "true"
+        assertThat(dumpedString).contains(firstEvictedLog)
+        val stringAfterFirst = dumpedString.substringAfter(firstEvictedLog)
+        assertThat(stringAfterFirst).contains(secondEvictedLog)
+        val stringAfterSecond = stringAfterFirst.substringAfter(secondEvictedLog)
+        assertThat(stringAfterSecond).contains(thirdEvictedLog)
+    }
+
+    @Test
+    fun sameColumnEvictedMultipleTimes_onlyLastEvictionInDump() {
+        systemClock.setCurrentTimeMillis(0L)
+
+        for (i in 1 until 4) {
+            systemClock.advanceTime(100L)
+            val dumpString = "evicted[$i]"
+            underTest.logChange(prefix = "", columnName = "evictedColumn", value = dumpString)
+        }
+
+        // Exactly fill the buffer so that all the entries for "evictedColumn" will be evicted.
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we only have the most recent evicted column entry
+        val evictedColumnLog1 =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "evictedColumn" +
+                SEPARATOR +
+                "evicted[1]"
+        val evictedColumnLog2 =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "evictedColumn" +
+                SEPARATOR +
+                "evicted[2]"
+        val evictedColumnLog3 =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "evictedColumn" +
+                SEPARATOR +
+                "evicted[3]"
+        assertThat(dumpedString).doesNotContain(evictedColumnLog1)
+        assertThat(dumpedString).doesNotContain(evictedColumnLog2)
+        assertThat(dumpedString).contains(evictedColumnLog3)
     }
 
     private fun dumpChanges(): String {
