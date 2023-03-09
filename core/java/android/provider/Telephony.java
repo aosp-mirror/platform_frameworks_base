@@ -3396,8 +3396,10 @@ public final class Telephony {
         public static final int MATCH_ALL_APN_SET_ID = -1;
 
         /**
-         * A unique carrier id associated with this APN
-         * {@see TelephonyManager#getSimCarrierId()}
+         * A unique carrier id associated with this APN {@link TelephonyManager#getSimCarrierId()}
+         * In case of matching carrier information, this should be used by default instead of
+         * those fields of {@link #MCC}, {@link #MNC}, {@link #NUMERIC}, {@link #MVNO_TYPE},
+         * {@link #MVNO_MATCH_DATA}, etc.
          * <p>Type: STRING</p>
          */
         public static final String CARRIER_ID = "carrier_id";
