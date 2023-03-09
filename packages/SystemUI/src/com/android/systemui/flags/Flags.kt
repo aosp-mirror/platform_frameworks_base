@@ -679,5 +679,5 @@ object Flags {
     // TODO(b/272036292): Tracking Bug
     @JvmField
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
-            unreleasedFlag(2602, "large_shade_granular_alpha_interpolation")
+            unreleasedFlag(2602, "large_shade_granular_alpha_interpolation", teamfood = true)
 }
