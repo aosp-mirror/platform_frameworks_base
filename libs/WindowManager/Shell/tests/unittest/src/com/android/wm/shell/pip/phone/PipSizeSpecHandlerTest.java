@@ -33,6 +33,7 @@ import android.view.DisplayInfo;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -74,6 +75,7 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Mock private Context mContext;
     @Mock private Resources mResources;
 
+    private PipDisplayLayoutState mPipDisplayLayoutState;
     private PipSizeSpecHandler mPipSizeSpecHandler;
 
     /**
@@ -137,7 +139,6 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
     @Before
     public void setUp() {
         initExpectedSizes();
-        setUpStaticSystemPropertiesSession();
 
         when(mResources.getDimensionPixelSize(anyInt())).thenReturn(DEFAULT_MIN_EDGE_SIZE);
         when(mResources.getFloat(anyInt())).thenReturn(OPTIMIZED_ASPECT_RATIO);
@@ -148,11 +149,6 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         // set up the mock context for spec handler specifically
         when(mContext.getResources()).thenReturn(mResources);
 
-        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext);
-
-        // no overridden min edge size by default
-        mPipSizeSpecHandler.setOverrideMinSize(null);
-
         DisplayInfo displayInfo = new DisplayInfo();
         displayInfo.logicalWidth = DISPLAY_EDGE_SIZE;
         displayInfo.logicalHeight = DISPLAY_EDGE_SIZE;
@@ -161,7 +157,14 @@ public class PipSizeSpecHandlerTest extends ShellTestCase {
         // this is done to avoid unnecessary mocking while allowing for custom display dimensions
         DisplayLayout displayLayout = new DisplayLayout(displayInfo, getContext().getResources(),
                 false, false);
-        mPipSizeSpecHandler.setDisplayLayout(displayLayout);
+        mPipDisplayLayoutState = new PipDisplayLayoutState(mContext);
+        mPipDisplayLayoutState.setDisplayLayout(displayLayout);
+
+        setUpStaticSystemPropertiesSession();
+        mPipSizeSpecHandler = new PipSizeSpecHandler(mContext, mPipDisplayLayoutState);
+
+        // no overridden min edge size by default
+        mPipSizeSpecHandler.setOverrideMinSize(null);
     }
 
     @After
