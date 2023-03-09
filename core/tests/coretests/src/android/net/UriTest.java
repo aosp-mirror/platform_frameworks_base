@@ -48,6 +48,7 @@ public class UriTest extends TestCase {
     public void testParcelling() {
         parcelAndUnparcel(Uri.parse("foo:bob%20lee"));
         parcelAndUnparcel(Uri.fromParts("foo", "bob lee", "fragment"));
+        parcelAndUnparcel(Uri.fromParts("https", "www.google.com", null));
         parcelAndUnparcel(new Uri.Builder()
             .scheme("http")
             .authority("crazybob.org")
@@ -873,7 +874,60 @@ public class UriTest extends TestCase {
             Throwable targetException = expected.getTargetException();
             // Check that the exception was thrown for the correct reason.
             assertEquals("Unknown representation: 0", targetException.getMessage());
+        } finally {
+            parcel.recycle();
         }
+    }
+
+    private Uri buildUriFromRawParcel(boolean argumentsEncoded,
+                                      String scheme,
+                                      String authority,
+                                      String path,
+                                      String query,
+                                      String fragment) {
+        // Representation value (from AbstractPart.REPRESENTATION_{ENCODED,DECODED}).
+        final int representation = argumentsEncoded ? 1 : 2;
+        Parcel parcel = Parcel.obtain();
+        try {
+            parcel.writeInt(3);  // hierarchical
+            parcel.writeString8(scheme);
+            parcel.writeInt(representation);
+            parcel.writeString8(authority);
+            parcel.writeInt(representation);
+            parcel.writeString8(path);
+            parcel.writeInt(representation);
+            parcel.writeString8(query);
+            parcel.writeInt(representation);
+            parcel.writeString8(fragment);
+            parcel.setDataPosition(0);
+            return Uri.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
+    }
+
+    public void testUnparcelMalformedPath() {
+        // Regression tests for b/171966843.
+
+        // Test cases with arguments encoded (covering testing `scheme` * `authority` options).
+        Uri uri0 = buildUriFromRawParcel(true, "https", "google.com", "@evil.com", null, null);
+        assertEquals("https://google.com/@evil.com", uri0.toString());
+        Uri uri1 = buildUriFromRawParcel(true, null, "google.com", "@evil.com", "name=spark", "x");
+        assertEquals("//google.com/@evil.com?name=spark#x", uri1.toString());
+        Uri uri2 = buildUriFromRawParcel(true, "http:", null, "@evil.com", null, null);
+        assertEquals("http::/@evil.com", uri2.toString());
+        Uri uri3 = buildUriFromRawParcel(true, null, null, "@evil.com", null, null);
+        assertEquals("@evil.com", uri3.toString());
+
+        // Test cases with arguments not encoded (covering testing `scheme` * `authority` options).
+        Uri uriA = buildUriFromRawParcel(false, "https", "google.com", "@evil.com", null, null);
+        assertEquals("https://google.com/%40evil.com", uriA.toString());
+        Uri uriB = buildUriFromRawParcel(false, null, "google.com", "@evil.com", null, null);
+        assertEquals("//google.com/%40evil.com", uriB.toString());
+        Uri uriC = buildUriFromRawParcel(false, "http:", null, "@evil.com", null, null);
+        assertEquals("http::/%40evil.com", uriC.toString());
+        Uri uriD = buildUriFromRawParcel(false, null, null, "@evil.com", "name=spark", "y");
+        assertEquals("%40evil.com?name%3Dspark#y", uriD.toString());
     }
 
     public void testToSafeString() {
