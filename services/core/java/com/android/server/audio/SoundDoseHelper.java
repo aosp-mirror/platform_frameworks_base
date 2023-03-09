@@ -366,6 +366,21 @@ public class SoundDoseHelper {
             return;
         }
 
+        SoundDoseRecord[] doseRecordsArray;
+        synchronized (mCsdStateLock) {
+            mCurrentCsd = csd;
+
+            mDoseRecords.clear();
+
+            if (mCurrentCsd > 0.0f) {
+                final SoundDoseRecord record = new SoundDoseRecord();
+                record.timestamp = SystemClock.elapsedRealtime();
+                record.value = csd;
+                mDoseRecords.add(record);
+            }
+            doseRecordsArray = mDoseRecords.toArray(new SoundDoseRecord[0]);
+        }
+
         final ISoundDose soundDose = mSoundDose.get();
         if (soundDose == null) {
             Log.w(TAG, "Sound dose interface not initialized");
@@ -373,11 +388,7 @@ public class SoundDoseHelper {
         }
 
         try {
-            final SoundDoseRecord record = new SoundDoseRecord();
-            record.timestamp = System.currentTimeMillis();
-            record.value = csd;
-            final SoundDoseRecord[] recordArray = new SoundDoseRecord[] { record };
-            soundDose.resetCsd(csd, recordArray);
+            soundDose.resetCsd(csd, doseRecordsArray);
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while setting the CSD value", e);
         }
@@ -648,6 +659,11 @@ public class SoundDoseHelper {
 
     /*package*/ void dump(PrintWriter pw) {
         pw.print("  mEnableCsd="); pw.println(mEnableCsd);
+        if (mEnableCsd) {
+            synchronized (mCsdStateLock) {
+                pw.print("  mCurrentCsd="); pw.println(mCurrentCsd);
+            }
+        }
         pw.print("  mSafeMediaVolumeState=");
         pw.println(safeMediaVolumeStateToString(mSafeMediaVolumeState));
         pw.print("  mSafeMediaVolumeIndex="); pw.println(mSafeMediaVolumeIndex);

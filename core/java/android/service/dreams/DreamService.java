@@ -1409,6 +1409,10 @@ public class DreamService extends Service implements Window.Callback {
                             // Request the DreamOverlay be told to dream with dream's window
                             // parameters once the window has been attached.
                             mDreamStartOverlayConsumer = overlay -> {
+                                if (mWindow == null) {
+                                    Slog.d(TAG, "mWindow is null");
+                                    return;
+                                }
                                 try {
                                     overlay.startDream(mWindow.getAttributes(), mOverlayCallback,
                                             mDreamComponent.flattenToString(),

@@ -36,6 +36,7 @@ import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.systemui.doze.util.BurnInHelperKt;
 
 import org.junit.Test;
@@ -107,7 +108,7 @@ public class LockIconViewControllerTest extends LockIconViewControllerBaseTest {
         Pair<Float, Point> udfps = setupUdfps();
 
         // WHEN udfps location changes
-        mAuthControllerCallback.onUdfpsLocationChanged();
+        mAuthControllerCallback.onUdfpsLocationChanged(new UdfpsOverlayParams());
         mDelayableExecutor.runAllReady();
 
         // THEN lock icon view location is updated with the same coordinates as auth controller vals

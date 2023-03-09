@@ -56,4 +56,8 @@ class UIMetrics() {
             mUiEventLogger.logWithInstanceId(event, /*uid=*/0, packageName, instanceId)
         }
     }
+
+    fun logNormal(event: UiEventLogger.UiEventEnum, packageName: String) {
+        mUiEventLogger.logWithInstanceId(event, /*uid=*/0, packageName, mInstanceId)
+    }
 }

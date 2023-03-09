@@ -54,15 +54,18 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants;
+import com.android.systemui.keyguard.shared.model.ScrimAlpha;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.NotificationPanelViewController;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -206,7 +209,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private final SysuiStatusBarStateController mStatusBarStateController;
 
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
@@ -245,6 +247,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mWallpaperVisibilityTimedOut;
     private int mScrimsVisibility;
     private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
+    private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
+    private final FeatureFlags mFeatureFlags;
     private Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
@@ -265,12 +269,16 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private CoroutineDispatcher mMainDispatcher;
     private boolean mIsBouncerToGoneTransitionRunning = false;
     private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
-    private final Consumer<Float> mScrimAlphaConsumer =
-            (Float alpha) -> {
+    private final Consumer<ScrimAlpha> mScrimAlphaConsumer =
+            (ScrimAlpha alphas) -> {
+                mInFrontAlpha = alphas.getFrontAlpha();
                 mScrimInFront.setViewAlpha(mInFrontAlpha);
+
+                mNotificationsAlpha = alphas.getNotificationsAlpha();
                 mNotificationsScrim.setViewAlpha(mNotificationsAlpha);
-                mBehindAlpha = alpha;
-                mScrimBehind.setViewAlpha(alpha);
+
+                mBehindAlpha = alphas.getBehindAlpha();
+                mScrimBehind.setViewAlpha(mBehindAlpha);
             };
 
     Consumer<TransitionStep> mPrimaryBouncerToGoneTransition;
@@ -292,15 +300,17 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
-            SysuiStatusBarStateController sysuiStatusBarStateController,
-            @Main CoroutineDispatcher mainDispatcher) {
+            @Main CoroutineDispatcher mainDispatcher,
+            LargeScreenShadeInterpolator largeScreenShadeInterpolator,
+            FeatureFlags featureFlags) {
         mScrimStateListener = lightBarController::setScrimState;
+        mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
+        mFeatureFlags = featureFlags;
         mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
 
         mKeyguardStateController = keyguardStateController;
         mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mStatusBarStateController = sysuiStatusBarStateController;
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mHandler = handler;
         mMainExecutor = mainExecutor;
@@ -400,7 +410,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         collectFlow(behindScrim, mKeyguardTransitionInteractor.getPrimaryBouncerToGoneTransition(),
                 mPrimaryBouncerToGoneTransition, mMainDispatcher);
-        collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimBehindAlpha(),
+        collectFlow(behindScrim, mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha(),
                 mScrimAlphaConsumer, mMainDispatcher);
     }
 
@@ -850,16 +860,21 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             if (!mScreenOffAnimationController.shouldExpandNotifications()
                     && !mAnimatingPanelExpansionOnUnlock
                     && !occluding) {
-                if (mClipsQsScrim) {
+                if (mTransparentScrimBackground) {
+                    mBehindAlpha = 0;
+                    mNotificationsAlpha = 0;
+                } else if (mClipsQsScrim) {
                     float behindFraction = getInterpolatedFraction();
                     behindFraction = (float) Math.pow(behindFraction, 0.8f);
-                    mBehindAlpha = mTransparentScrimBackground ? 0 : 1;
-                    mNotificationsAlpha =
-                            mTransparentScrimBackground ? 0 : behindFraction * mDefaultScrimAlpha;
+                    mBehindAlpha = 1;
+                    mNotificationsAlpha = behindFraction * mDefaultScrimAlpha;
                 } else {
-                    if (mTransparentScrimBackground) {
-                        mBehindAlpha = 0;
-                        mNotificationsAlpha = 0;
+                    if (mFeatureFlags.isEnabled(Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+                        mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
+                                mPanelExpansionFraction * mDefaultScrimAlpha);
+                        mNotificationsAlpha =
+                                mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
+                                        mPanelExpansionFraction);
                     } else {
                         // Behind scrim will finish fading in at 30% expansion.
                         float behindFraction = MathUtils
@@ -1113,8 +1128,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             mBehindAlpha = 1;
         }
         // Prevent notification scrim flicker when transitioning away from keyguard.
-        if (mKeyguardStateController.isKeyguardGoingAway()
-                && !mStatusBarStateController.leaveOpenOnKeyguardHide()) {
+        if (mKeyguardStateController.isKeyguardGoingAway()) {
             mNotificationsAlpha = 0;
         }
 

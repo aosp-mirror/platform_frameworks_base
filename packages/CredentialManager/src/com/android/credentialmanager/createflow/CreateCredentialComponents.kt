@@ -171,9 +171,6 @@ fun CreateCredentialScreen(
                                 onLog = { viewModel.logUiEvent(it) },
                         )
                     }
-                    viewModel.uiMetrics.log(
-                            CreateCredentialEvent
-                                    .CREDMAN_CREATE_CRED_PROVIDER_ACTIVITY_NOT_APPLICABLE)
                 }
                 ProviderActivityState.READY_TO_LAUNCH -> {
                     // Launch only once per providerActivityState change so that the provider
@@ -449,6 +446,7 @@ fun MoreOptionsRowIntroCard(
             BodyMediumText(text = stringResource(
                 R.string.use_provider_for_all_description, entryInfo.userProviderDisplayName))
         }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
             CtaButtonRow(
                 leftButton = {

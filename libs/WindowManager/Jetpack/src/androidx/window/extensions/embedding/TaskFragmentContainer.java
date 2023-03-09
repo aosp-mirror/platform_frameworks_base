@@ -153,6 +153,11 @@ class TaskFragmentContainer {
     Runnable mAppearEmptyTimeout;
 
     /**
+     * Whether this TaskFragment contains activities of another process/package.
+     */
+    private boolean mHasCrossProcessActivities;
+
+    /**
      * Creates a container with an existing activity that will be re-parented to it in a window
      * container transaction.
      * @param pairedPrimaryContainer    when it is set, the new container will be add right above it
@@ -418,10 +423,18 @@ class TaskFragmentContainer {
             mAppearEmptyTimeout = null;
         }
 
+        mHasCrossProcessActivities = false;
         mInfo = info;
         if (mInfo == null || mInfo.isEmpty()) {
             return;
         }
+
+        // Contains activities of another process if the activities size is not matched to the
+        // running activity count
+        if (mInfo.getRunningActivityCount() != mInfo.getActivities().size()) {
+            mHasCrossProcessActivities = true;
+        }
+
         // Only track the pending Intent when the container is empty.
         mPendingAppearedIntent = null;
         if (mPendingAppearedActivities.isEmpty()) {
@@ -749,6 +762,11 @@ class TaskFragmentContainer {
             return true;
         }
         return mPendingAppearedInRequestedTaskFragmentActivities.contains(activityToken);
+    }
+
+    /** Whether contains activities of another process */
+    boolean hasCrossProcessActivities() {
+        return mHasCrossProcessActivities;
     }
 
     /** Gets the parent leaf Task id. */

@@ -21,6 +21,7 @@ import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
@@ -31,6 +32,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.ResourceId;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -51,12 +53,14 @@ import android.window.OnBackInvokedCallbackInfo;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -79,6 +83,8 @@ class BackNavigationController {
     // running. The pending animation builder will do the animation stuff includes creating leashes,
     // re-parenting leashes and set launch behind, etc. Will be handled when transition finished.
     private AnimationHandler.ScheduleAnimationBuilder mPendingAnimationBuilder;
+
+    private static int sDefaultAnimationResId;
 
     /**
      * true if the back predictability feature is enabled
@@ -255,9 +261,19 @@ class BackNavigationController {
             } else if (prevActivity != null) {
                 if (!isOccluded || prevActivity.canShowWhenLocked()) {
                     // We have another Activity in the same currentTask to go to
-                    backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
+                    final WindowContainer parent = currentActivity.getParent();
+                    final boolean isCustomize = parent != null
+                            && (parent.asTask() != null
+                            || (parent.asTaskFragment() != null
+                            && parent.canCustomizeAppTransition()))
+                            && isCustomizeExitAnimation(window);
+                    if (isCustomize) {
+                        infoBuilder.setWindowAnimations(
+                                window.mAttrs.packageName, window.mAttrs.windowAnimations);
+                    }
                     removedWindowContainer = currentActivity;
                     prevTask = prevActivity.getTask();
+                    backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
                 } else {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 }
@@ -368,6 +384,37 @@ class BackNavigationController {
         final KeyguardController kc = mWindowManagerService.mAtmService.mKeyguardController;
         final int displayId = focusWindow.getDisplayId();
         return kc.isKeyguardLocked(displayId) && kc.isDisplayOccluded(displayId);
+    }
+
+    /**
+     * There are two ways to customize activity exit animation, one is to provide the
+     * windowAnimationStyle by Activity#setTheme, another one is to set resId by
+     * Window#setWindowAnimations.
+     * Not all run-time customization methods can be checked from here, such as
+     * overridePendingTransition, which the animation resource will be set just before the
+     * transition is about to happen.
+     */
+    private static boolean isCustomizeExitAnimation(WindowState window) {
+        // The default animation ResId is loaded from system package, so the result must match.
+        if (Objects.equals(window.mAttrs.packageName, "android")) {
+            return false;
+        }
+        if (window.mAttrs.windowAnimations != 0) {
+            final TransitionAnimation transitionAnimation = window.getDisplayContent()
+                    .mAppTransition.mTransitionAnimation;
+            final int attr = com.android.internal.R.styleable
+                    .WindowAnimation_activityCloseExitAnimation;
+            final int appResId = transitionAnimation.getAnimationResId(
+                    window.mAttrs, attr, TRANSIT_OLD_NONE);
+            if (ResourceId.isValid(appResId)) {
+                if (sDefaultAnimationResId == 0) {
+                    sDefaultAnimationResId = transitionAnimation.getDefaultAnimationResId(attr,
+                            TRANSIT_OLD_NONE);
+                }
+                return sDefaultAnimationResId != appResId;
+            }
+        }
+        return false;
     }
 
     // For legacy transition.
@@ -997,7 +1044,7 @@ class BackNavigationController {
 
                 return () -> {
                     try {
-                        mBackAnimationAdapter.getRunner().onAnimationStart(mType,
+                        mBackAnimationAdapter.getRunner().onAnimationStart(
                                 targets, null, null, callback);
                     } catch (RemoteException e) {
                         e.printStackTrace();

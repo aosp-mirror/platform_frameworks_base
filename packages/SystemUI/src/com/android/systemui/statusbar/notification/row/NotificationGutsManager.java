@@ -629,7 +629,6 @@ public class NotificationGutsManager implements NotifGutsViewManager {
                                 !mAccessibilityManager.isTouchExplorationEnabled());
 
                 guts.openControls(
-                        !row.isBlockingHelperShowing(),
                         x,
                         y,
                         needsFalsingProtection,

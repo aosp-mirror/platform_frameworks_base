@@ -65,7 +65,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.PowerAllowlistInternal;
 import com.android.server.job.ConstantsProto;
@@ -560,13 +560,14 @@ public final class QuotaController extends StateController {
             @NonNull BackgroundJobsController backgroundJobsController,
             @NonNull ConnectivityController connectivityController) {
         super(service);
-        mHandler = new QcHandler(mContext.getMainLooper());
+        mHandler = new QcHandler(AppSchedulingModuleThread.get().getLooper());
         mAlarmManager = mContext.getSystemService(AlarmManager.class);
         mQcConstants = new QcConstants();
         mBackgroundJobsController = backgroundJobsController;
         mConnectivityController = connectivityController;
         mIsEnabled = !mConstants.USE_TARE_POLICY;
-        mInQuotaAlarmQueue = new InQuotaAlarmQueue(mContext, mContext.getMainLooper());
+        mInQuotaAlarmQueue =
+                new InQuotaAlarmQueue(mContext, AppSchedulingModuleThread.get().getLooper());
 
         // Set up the app standby bucketing tracker
         AppStandbyInternal appStandby = LocalServices.getService(AppStandbyInternal.class);
@@ -1649,7 +1650,7 @@ public final class QuotaController extends StateController {
         mEJPkgTimers.forEach(mTimerChargingUpdateFunctor);
         mPkgTimers.forEach(mTimerChargingUpdateFunctor);
         // Now update jobs out of band so broadcast processing can proceed.
-        JobSchedulerBackgroundThread.getHandler().post(() -> {
+        AppSchedulingModuleThread.getHandler().post(() -> {
             synchronized (mLock) {
                 maybeUpdateAllConstraintsLocked();
             }
@@ -2486,7 +2487,7 @@ public final class QuotaController extends StateController {
         public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket, int reason) {
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 final int bucketIndex = JobSchedulerService.standbyBucketToBucketIndex(bucket);
                 updateStandbyBucket(userId, packageName, bucketIndex);
             });
@@ -2938,7 +2939,7 @@ public final class QuotaController extends StateController {
         if (mQcConstants.mShouldReevaluateConstraints || mIsEnabled == mConstants.USE_TARE_POLICY) {
             mIsEnabled = !mConstants.USE_TARE_POLICY;
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 synchronized (mLock) {
                     invalidateAllExecutionStatsLocked();
                     maybeUpdateAllConstraintsLocked();

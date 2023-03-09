@@ -64,7 +64,7 @@ public class ChosenProviderMetric {
     /* ---------------- Latencies ------------------ */
 
 
-    /* ----- Direct Latencies ------- */
+    /* ----- Direct Delta Latencies for Local Utility ------- */
 
     /**
      * In order for a chosen provider to be selected, the call must have successfully begun.
@@ -85,7 +85,7 @@ public class ChosenProviderMetric {
      * metric.
      *
      * @param queryPhaseLatencyMicroseconds the millisecond latency for the query phase, typically
-     *                                      passed in through the {@link CandidateProviderMetric}
+     *                                      passed in through the {@link CandidatePhaseMetric}
      */
     public void setQueryPhaseLatencyMicroseconds(int queryPhaseLatencyMicroseconds) {
         mQueryPhaseLatencyMicroseconds = queryPhaseLatencyMicroseconds;
@@ -106,7 +106,7 @@ public class ChosenProviderMetric {
 
     /**
      * Returns the full provider (invocation to response) latency in microseconds. Expects the
-     * start time to be provided, such as from {@link CandidateProviderMetric}.
+     * start time to be provided, such as from {@link CandidatePhaseMetric}.
      */
     public int getEntireProviderLatencyMicroseconds() {
         return (int) ((this.mFinalFinishTimeNanoseconds
@@ -172,7 +172,7 @@ public class ChosenProviderMetric {
         return mFinalFinishTimeNanoseconds;
     }
 
-    /* --- Time Stamp Conversion to Microseconds --- */
+    /* --- Time Stamp Conversion to Microseconds from Reference Point --- */
 
     /**
      * We collect raw timestamps in nanoseconds for ease of collection. However, given the scope

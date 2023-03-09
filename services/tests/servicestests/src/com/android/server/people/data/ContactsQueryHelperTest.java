@@ -91,8 +91,16 @@ public final class ContactsQueryHelperTest {
     }
 
     @Test
-    public void testQueryException_returnsFalse() {
-        contentProvider.setThrowException(true);
+    public void testQuerySQLiteException_returnsFalse() {
+        contentProvider.setThrowSQLiteException(true);
+
+        Uri contactUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, CONTACT_LOOKUP_KEY);
+        assertFalse(mHelper.query(contactUri.toString()));
+    }
+
+    @Test
+    public void testQueryIllegalArgumentException_returnsFalse() {
+        contentProvider.setThrowIllegalArgumentException(true);
 
         Uri contactUri = Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, CONTACT_LOOKUP_KEY);
         assertFalse(mHelper.query(contactUri.toString()));
@@ -178,13 +186,17 @@ public final class ContactsQueryHelperTest {
     private class ContactsContentProvider extends MockContentProvider {
 
         private Map<Uri, Cursor> mUriPrefixToCursorMap = new ArrayMap<>();
-        private boolean throwException = false;
+        private boolean mThrowSQLiteException = false;
+        private boolean mThrowIllegalArgumentException = false;
 
         @Override
         public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                 String sortOrder) {
-            if (throwException) {
+            if (mThrowSQLiteException) {
                 throw new SQLiteException();
+            }
+            if (mThrowIllegalArgumentException) {
+                throw new IllegalArgumentException();
             }
 
             for (Uri prefixUri : mUriPrefixToCursorMap.keySet()) {
@@ -195,8 +207,12 @@ public final class ContactsQueryHelperTest {
             return mUriPrefixToCursorMap.get(uri);
         }
 
-        public void setThrowException(boolean throwException) {
-            this.throwException = throwException;
+        public void setThrowSQLiteException(boolean throwException) {
+            this.mThrowSQLiteException = throwException;
+        }
+
+        public void setThrowIllegalArgumentException(boolean throwException) {
+            this.mThrowIllegalArgumentException = throwException;
         }
 
         private void registerCursor(Uri uriPrefix, Cursor cursor) {

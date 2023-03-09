@@ -39,7 +39,10 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
@@ -216,7 +219,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 if (ambientState.isBouncerInTransit()) {
                     viewState.setAlpha(aboutToShowBouncerProgress(expansion));
                 } else {
-                    viewState.setAlpha(ShadeInterpolation.getContentAlpha(expansion));
+                    FeatureFlags flags = ambientState.getFeatureFlags();
+                    if (ambientState.isSmallScreen() || !flags.isEnabled(
+                            Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+                        viewState.setAlpha(ShadeInterpolation.getContentAlpha(expansion));
+                    } else {
+                        LargeScreenShadeInterpolator interpolator =
+                                ambientState.getLargeScreenShadeInterpolator();
+                        viewState.setAlpha(interpolator.getNotificationContentAlpha(expansion));
+                    }
                 }
             } else {
                 viewState.setAlpha(1f - ambientState.getHideAmount());

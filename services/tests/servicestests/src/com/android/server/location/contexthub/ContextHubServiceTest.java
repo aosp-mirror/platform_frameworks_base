@@ -18,7 +18,8 @@ package com.android.server.location.contexthub;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,7 +76,7 @@ public class ContextHubServiceTest {
 
     @Test
     public void testDump_emptyPreloadedNanoappList() {
-        when(mMockContextHubWrapper.getPreloadedNanoappIds()).thenReturn(null);
+        when(mMockContextHubWrapper.getPreloadedNanoappIds(anyInt())).thenReturn(null);
         StringWriter stringWriter = new StringWriter();
 
         ContextHubService service = new ContextHubService(mContext, mMockContextHubWrapper);

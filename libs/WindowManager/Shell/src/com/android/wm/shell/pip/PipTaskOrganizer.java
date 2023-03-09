@@ -1179,6 +1179,20 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     /**
+     * Directly update the animator bounds.
+     */
+    public void updateAnimatorBounds(Rect bounds) {
+        final PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getCurrentAnimator();
+        if (animator != null && animator.isRunning()) {
+            if (animator.getAnimationType() == ANIM_TYPE_BOUNDS) {
+                animator.updateEndValue(bounds);
+            }
+            animator.setDestinationBounds(bounds);
+        }
+    }
+
+    /**
      * Handles all changes to the PictureInPictureParams.
      */
     protected void applyNewPictureInPictureParams(@NonNull PictureInPictureParams params) {

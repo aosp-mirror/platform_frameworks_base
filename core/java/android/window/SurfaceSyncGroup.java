@@ -22,6 +22,8 @@ import android.annotation.UiThread;
 import android.os.Binder;
 import android.os.BinderProxy;
 import android.os.Debug;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -60,6 +62,7 @@ public final class SurfaceSyncGroup {
     private static final int MAX_COUNT = 100;
 
     private static final AtomicInteger sCounter = new AtomicInteger(0);
+    private static final int TRANSACTION_READY_TIMEOUT = 1000;
 
     private static Supplier<Transaction> sTransactionFactory = Transaction::new;
 
@@ -110,6 +113,13 @@ public final class SurfaceSyncGroup {
      * included in this SurfaceSyncGroup.
      */
     private final Binder mToken = new Binder();
+
+    private static final Object sHandlerThreadLock = new Object();
+    @GuardedBy("sHandlerThreadLock")
+    private static HandlerThread sHandlerThread;
+    private Handler mHandler;
+
+    private boolean mTimeoutAdded;
 
     private static boolean isLocalBinder(IBinder binder) {
         return !(binder instanceof BinderProxy);
@@ -538,6 +548,11 @@ public final class SurfaceSyncGroup {
                             + transactionReadyCallback.hashCode());
         }
 
+        // Start the timeout when this SurfaceSyncGroup has been added to a parent SurfaceSyncGroup.
+        // This is because if the other SurfaceSyncGroup has bugs and doesn't complete, this SSG
+        // will get stuck. It's better to complete this SSG even if the parent SSG is broken.
+        addTimeout();
+
         boolean finished = false;
         Runnable addedToSyncListener = null;
         synchronized (mLock) {
@@ -641,6 +656,9 @@ public final class SurfaceSyncGroup {
         }
         mTransactionReadyConsumer.accept(mTransaction);
         mFinished = true;
+        if (mTimeoutAdded) {
+            mHandler.removeCallbacksAndMessages(this);
+        }
     }
 
     /**
@@ -701,6 +719,12 @@ public final class SurfaceSyncGroup {
             }
         }
 
+        // Start the timeout when another SSG has been added to this SurfaceSyncGroup. This is
+        // because if the other SurfaceSyncGroup has bugs and doesn't complete, it will affect this
+        // SSGs. So it's better to just add a timeout in case the other SSG doesn't invoke the
+        // callback and complete this SSG.
+        addTimeout();
+
         return transactionReadyCallback;
     }
 
@@ -729,6 +753,41 @@ public final class SurfaceSyncGroup {
         SurfaceSyncGroup getSurfaceSyncGroup() {
             return SurfaceSyncGroup.this;
         }
+    }
+
+    private void addTimeout() {
+        synchronized (sHandlerThreadLock) {
+            if (sHandlerThread == null) {
+                sHandlerThread = new HandlerThread("SurfaceSyncGroupTimer");
+                sHandlerThread.start();
+            }
+        }
+
+        synchronized (mLock) {
+            if (mTimeoutAdded) {
+                // We only need one timeout for the entire SurfaceSyncGroup since we just want to
+                // ensure it doesn't stay stuck forever.
+                return;
+            }
+
+            if (mHandler == null) {
+                mHandler = new Handler(sHandlerThread.getLooper());
+            }
+
+            mTimeoutAdded = true;
+        }
+
+        Runnable runnable = () -> {
+            Log.e(TAG, "Failed to receive transaction ready in " + TRANSACTION_READY_TIMEOUT
+                    + "ms. Marking SurfaceSyncGroup as ready " + mName);
+            // Clear out any pending syncs in case the other syncs can't complete or timeout due to
+            // a crash.
+            synchronized (mLock) {
+                mPendingSyncs.clear();
+            }
+            markSyncReady();
+        };
+        mHandler.postDelayed(runnable, this, TRANSACTION_READY_TIMEOUT);
     }
 
     /**

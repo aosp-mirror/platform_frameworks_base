@@ -62,7 +62,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.StatLogger;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
@@ -499,7 +499,7 @@ class JobConcurrencyManager {
         mInjector = injector;
         mNotificationCoordinator = new JobNotificationCoordinator();
 
-        mHandler = JobSchedulerBackgroundThread.getHandler();
+        mHandler = AppSchedulingModuleThread.getHandler();
 
         mGracePeriodObserver = new GracePeriodObserver(mContext);
         mShouldRestrictBgUser = mContext.getResources().getBoolean(
@@ -533,7 +533,8 @@ class JobConcurrencyManager {
             mIdleContexts.add(
                     mInjector.createJobServiceContext(mService, this,
                             mNotificationCoordinator, batteryStats,
-                            mService.mJobPackageTracker, mContext.getMainLooper()));
+                            mService.mJobPackageTracker,
+                            AppSchedulingModuleThread.get().getLooper()));
         }
     }
 
@@ -1925,7 +1926,7 @@ class JobConcurrencyManager {
         return mInjector.createJobServiceContext(mService, this, mNotificationCoordinator,
                 IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME)),
-                mService.mJobPackageTracker, mContext.getMainLooper());
+                mService.mJobPackageTracker, AppSchedulingModuleThread.get().getLooper());
     }
 
     @GuardedBy("mLock")

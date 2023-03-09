@@ -691,6 +691,9 @@ public final class AutofillManager {
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
 
+    // Cached autofill feature flag
+    private boolean mShouldIgnoreCredentialViews = false;
+
     private final String[] mFillDialogEnabledHints;
 
     // Tracked all views that have appeared, including views that there are no
@@ -838,6 +841,7 @@ public final class AutofillManager {
 
         mIsFillDialogEnabled = AutofillFeatureFlags.isFillDialogEnabled();
         mFillDialogEnabledHints = AutofillFeatureFlags.getFillDialogEnabledHints();
+        mShouldIgnoreCredentialViews = AutofillFeatureFlags.shouldIgnoreCredentialViews();
         if (sDebug) {
             Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled
                     + ", hints=" + Arrays.toString(mFillDialogEnabledHints));
@@ -2078,6 +2082,11 @@ public final class AutofillManager {
     public boolean isAutofillUiShowing() {
         final AutofillClient client = mContext.getAutofillClient();
         return client != null && client.autofillClientIsFillUiShowing();
+    }
+
+    /** @hide */
+    public boolean shouldIgnoreCredentialViews() {
+        return mShouldIgnoreCredentialViews;
     }
 
     /** @hide */

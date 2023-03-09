@@ -232,11 +232,14 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         }
 
         final boolean alreadyPresent = isDevicePresent(newDeviceAssociationId);
-        if (DEBUG && alreadyPresent) Log.i(TAG, "Device is already present.");
+        if (alreadyPresent) {
+            Log.i(TAG, "Device" + "id (" + newDeviceAssociationId + ") already present.");
+        }
 
         final boolean added = presentDevicesForSource.add(newDeviceAssociationId);
-        if (DEBUG && !added) {
-            Log.w(TAG, "Association with id " + newDeviceAssociationId + " is ALREADY reported as "
+        if (!added) {
+            Log.w(TAG, "Association with id "
+                    + newDeviceAssociationId + " is ALREADY reported as "
                     + "present by this source (" + sourceLoggingTag + ")");
         }
 
@@ -256,16 +259,17 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
 
         final boolean removed = presentDevicesForSource.remove(goneDeviceAssociationId);
         if (!removed) {
-            if (DEBUG) {
-                Log.w(TAG, "Association with id " + goneDeviceAssociationId + " was NOT reported "
-                        + "as present by this source (" + sourceLoggingTag + ")");
-            }
+            Log.w(TAG, "Association with id " + goneDeviceAssociationId + " was NOT reported "
+                    + "as present by this source (" + sourceLoggingTag + ")");
+
             return;
         }
 
         final boolean stillPresent = isDevicePresent(goneDeviceAssociationId);
         if (stillPresent) {
-            if (DEBUG) Log.i(TAG, "  Device is still present.");
+            if (DEBUG) {
+                Log.i(TAG, "  Device id (" + goneDeviceAssociationId + ") is still present.");
+            }
             return;
         }
 

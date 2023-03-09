@@ -36,7 +36,7 @@ import android.util.Log;
 import com.android.internal.R;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
-import com.android.server.credentials.metrics.CandidateProviderMetric;
+import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderMetric;
 
 import java.util.ArrayList;
@@ -218,7 +218,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
      * @param componentName the componentName to associate with a provider
      */
     protected void setChosenMetric(ComponentName componentName) {
-        CandidateProviderMetric metric = this.mProviders.get(componentName.flattenToString())
+        CandidatePhaseMetric metric = this.mProviders.get(componentName.flattenToString())
                 .mCandidateProviderMetric;
         mChosenProviderMetric.setChosenUid(metric.getCandidateUid());
         mChosenProviderMetric.setFinalFinishTimeNanoseconds(System.nanoTime());

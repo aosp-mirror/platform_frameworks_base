@@ -16,8 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.view.InsetsSource.ID_IME;
-
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
 import static com.android.server.wm.InsetsSourceProviderProto.CAPTURED_LEASH;
 import static com.android.server.wm.InsetsSourceProviderProto.CLIENT_VISIBLE;
@@ -41,7 +39,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.SurfaceControl;
@@ -514,31 +511,11 @@ abstract class InsetsSourceProvider {
     }
 
     protected void updateVisibility() {
-        mSource.setVisible(mServerVisible && (isMirroredSource() || mClientVisible));
+        mSource.setVisible(mServerVisible && mClientVisible);
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS,
                 "InsetsSource updateVisibility for %s, serverVisible: %s clientVisible: %s",
                 WindowInsets.Type.toString(mSource.getType()),
                 mServerVisible, mClientVisible);
-    }
-
-    private boolean isMirroredSource() {
-        if (mWindowContainer == null) {
-            return false;
-        }
-        if (mWindowContainer.asWindowState() == null) {
-            return false;
-        }
-        final InsetsFrameProvider[] providers =
-                ((WindowState) mWindowContainer).mAttrs.providedInsets;
-        if (providers == null) {
-            return false;
-        }
-        for (int i = 0; i < providers.length; i++) {
-            if (providers[i].type == ID_IME) {
-                return true;
-            }
-        }
-        return false;
     }
 
     InsetsSourceControl getControl(InsetsControlTarget target) {

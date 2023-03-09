@@ -717,6 +717,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (mKeyguardGoingAway) {
             updateFaceListeningState(BIOMETRIC_ACTION_STOP,
                     FACE_AUTH_STOPPED_KEYGUARD_GOING_AWAY);
+            for (int i = 0; i < mCallbacks.size(); i++) {
+                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                if (cb != null) {
+                    cb.onKeyguardGoingAway();
+                }
+            }
         }
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
@@ -2453,8 +2459,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         Boolean isFaceEnrolled = mFaceManager != null && !mFaceSensorProperties.isEmpty()
                 && mBiometricEnabledForUser.get(userId)
                 && mAuthController.isFaceAuthEnrolled(userId);
+        if (mIsFaceEnrolled != isFaceEnrolled) {
+            mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
+        }
         mIsFaceEnrolled = isFaceEnrolled;
-        mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
     }
 
     public boolean isFaceSupported() {
@@ -3126,13 +3134,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        boolean fpEnrolled = mFpm != null
+        boolean newFpEnrolled = mFpm != null
                 && !mFingerprintSensorProperties.isEmpty()
                 && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId);
-        mLogger.logFpEnrolledUpdated(userId,
-                mIsUnlockWithFingerprintPossible.getOrDefault(userId, false),
-                fpEnrolled);
-        mIsUnlockWithFingerprintPossible.put(userId, fpEnrolled);
+        Boolean oldFpEnrolled = mIsUnlockWithFingerprintPossible.getOrDefault(userId, false);
+        if (oldFpEnrolled != newFpEnrolled) {
+            mLogger.logFpEnrolledUpdated(userId, oldFpEnrolled, newFpEnrolled);
+        }
+        mIsUnlockWithFingerprintPossible.put(userId, newFpEnrolled);
         return mIsUnlockWithFingerprintPossible.get(userId);
     }
 
@@ -3680,7 +3689,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Register to receive notifications about general keyguard information
      * (see {@link KeyguardUpdateMonitorCallback}.
      *
-     * @param callback The callback to register
+     * @param callback The callback to register. Stay away from passing anonymous instances
+     *                 as they will likely be dereferenced. Ensure that the callback is a class
+     *                 field to persist it.
      */
     public void registerCallback(KeyguardUpdateMonitorCallback callback) {
         Assert.isMainThread();
