@@ -269,6 +269,7 @@ package android.app {
   }
 
   public class BroadcastOptions extends android.app.ComponentOptions {
+    ctor public BroadcastOptions();
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
     method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
@@ -1145,7 +1146,6 @@ package android.credentials.ui {
 
   public final class Entry implements android.os.Parcelable {
     ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice);
-    ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.app.PendingIntent, @NonNull android.content.Intent);
     ctor public Entry(@NonNull String, @NonNull String, @NonNull android.app.slice.Slice, @NonNull android.content.Intent);
     method public int describeContents();
     method @Nullable public android.content.Intent getFrameworkExtrasIntent();

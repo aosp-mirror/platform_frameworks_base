@@ -346,31 +346,31 @@ public class CompanionApplicationController {
         // Make sure do not schedule rebind for the case ServiceConnector still gets callback after
         // app is uninstalled.
         boolean stillAssociated = false;
+        // Make sure to clean up the state for all the associations
+        // that associate with this package.
+        boolean shouldScheduleRebind = false;
 
         for (AssociationInfo ai :
                 mAssociationStore.getAssociationsForPackage(userId, packageName)) {
             final int associationId = ai.getId();
             stillAssociated = true;
-
             if (ai.isSelfManaged()) {
                 // Do not rebind if primary one is died for selfManaged application.
                 if (isPrimary
                         && mDevicePresenceMonitor.isDevicePresent(associationId)) {
                     mDevicePresenceMonitor.onSelfManagedDeviceReporterBinderDied(associationId);
-                    return false;
+                    shouldScheduleRebind = false;
                 }
                 // Do not rebind if both primary and secondary services are died for
                 // selfManaged application.
-                if (!isCompanionApplicationBound(userId, packageName)) {
-                    return false;
-                }
+                shouldScheduleRebind = isCompanionApplicationBound(userId, packageName);
             } else if (ai.isNotifyOnDeviceNearby()) {
                 // Always rebind for non-selfManaged devices.
-                return true;
+                shouldScheduleRebind = true;
             }
         }
 
-        return stillAssociated;
+        return stillAssociated && shouldScheduleRebind;
     }
 
     private class CompanionServicesRegister extends PerUser<Map<String, List<ComponentName>>> {

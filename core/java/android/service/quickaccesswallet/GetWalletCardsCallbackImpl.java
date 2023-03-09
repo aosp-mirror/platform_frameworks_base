@@ -17,6 +17,8 @@
 package android.service.quickaccesswallet;
 
 import android.annotation.NonNull;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.os.Handler;
@@ -36,13 +38,18 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
     private final IQuickAccessWalletServiceCallbacks mCallback;
     private final GetWalletCardsRequest mRequest;
     private final Handler mHandler;
+    private final Context mContext;
     private boolean mCalled;
 
-    GetWalletCardsCallbackImpl(GetWalletCardsRequest request,
-            IQuickAccessWalletServiceCallbacks callback, Handler handler) {
+    GetWalletCardsCallbackImpl(
+            GetWalletCardsRequest request,
+            IQuickAccessWalletServiceCallbacks callback,
+            Handler handler,
+            Context context) {
         mRequest = request;
         mCallback = callback;
         mHandler = handler;
+        mContext = context;
     }
 
     /**
@@ -50,11 +57,17 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
      * was successfully handled by the service.
      *
      * @param response The response contains the list of {@link WalletCard walletCards} to be shown
-     *                 to the user as well as the index of the card that should initially be
-     *                 presented as the selected card.
+     *     to the user as well as the index of the card that should initially be presented as the
+     *     selected card.
      */
     public void onSuccess(@NonNull GetWalletCardsResponse response) {
         if (isValidResponse(response)) {
+            // Strip location info from response if the feature is not enabled.
+            if (!mContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_WALLET_LOCATION_BASED_SUGGESTIONS)) {
+                removeLocationsFromResponse(response);
+            }
+
             mHandler.post(() -> onSuccessInternal(response));
         } else {
             Log.w(TAG, "Invalid GetWalletCards response");
@@ -151,5 +164,11 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
             }
         }
         return true;
+    }
+
+    private void removeLocationsFromResponse(@NonNull GetWalletCardsResponse response) {
+        for (WalletCard card : response.getWalletCards()) {
+            card.removeCardLocations();
+        }
     }
 }

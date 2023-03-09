@@ -37,6 +37,7 @@ import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.getflow.GetCredentialUiState
 import com.android.credentialmanager.getflow.GetScreenState
+import com.android.credentialmanager.logging.LifecycleEvent
 import com.android.credentialmanager.logging.UIMetrics
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
@@ -61,6 +62,11 @@ class CredentialSelectorViewModel(
 
     var uiMetrics: UIMetrics = UIMetrics()
 
+    init{
+        uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
+                credManRepo.requestInfo.appPackageName)
+    }
+
     /**************************************************************************/
     /*****                       Shared Callbacks                         *****/
     /**************************************************************************/
@@ -84,6 +90,8 @@ class CredentialSelectorViewModel(
 
         if (this.credManRepo.requestInfo.token != credManRepo.requestInfo.token) {
             this.uiMetrics.resetInstanceId()
+            this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
+                    credManRepo.requestInfo.appPackageName)
         }
     }
 
@@ -156,6 +164,8 @@ class CredentialSelectorViewModel(
 
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
+        this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
+                credManRepo.requestInfo.appPackageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }

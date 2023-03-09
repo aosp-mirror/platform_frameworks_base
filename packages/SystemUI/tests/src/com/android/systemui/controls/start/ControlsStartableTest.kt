@@ -23,17 +23,19 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.ServiceInfo
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
 import com.android.systemui.controls.management.ControlsListingController
+import com.android.systemui.controls.panels.AuthorizedPanelsRepository
+import com.android.systemui.controls.panels.FakeSelectedComponentRepository
 import com.android.systemui.controls.ui.SelectedItem
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.Optional
 import org.junit.Before
@@ -53,16 +55,16 @@ class ControlsStartableTest : SysuiTestCase() {
     @Mock private lateinit var controlsController: ControlsController
     @Mock private lateinit var controlsListingController: ControlsListingController
     @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var authorizedPanelsRepository: AuthorizedPanelsRepository
+
+    private val preferredPanelsRepository = FakeSelectedComponentRepository()
 
     private lateinit var fakeExecutor: FakeExecutor
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf<String>()
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages()).thenReturn(setOf())
 
         fakeExecutor = FakeExecutor(FakeSystemClock())
     }
@@ -87,10 +89,8 @@ class ControlsStartableTest : SysuiTestCase() {
 
     @Test
     fun testPreferredPackagesNotInstalled_noNewSelection() {
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE_PANEL)
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         `when`(controlsListingController.getCurrentServices()).thenReturn(emptyList())
 
@@ -101,10 +101,8 @@ class ControlsStartableTest : SysuiTestCase() {
 
     @Test
     fun testPreferredPackageNotPanel_noNewSelection() {
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE_PANEL)
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT, "not panel", hasPanel = false))
         `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
@@ -116,10 +114,8 @@ class ControlsStartableTest : SysuiTestCase() {
 
     @Test
     fun testExistingSelection_noNewSelection() {
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE_PANEL)
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection())
             .thenReturn(mock<SelectedItem.PanelItem>())
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
@@ -132,10 +128,8 @@ class ControlsStartableTest : SysuiTestCase() {
 
     @Test
     fun testPanelAdded() {
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE_PANEL)
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
         `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
@@ -147,10 +141,8 @@ class ControlsStartableTest : SysuiTestCase() {
 
     @Test
     fun testMultiplePreferredOnlyOnePanel_panelAdded() {
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf("other_package", TEST_PACKAGE_PANEL)
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings =
             listOf(
@@ -166,10 +158,8 @@ class ControlsStartableTest : SysuiTestCase() {
 
     @Test
     fun testMultiplePreferredMultiplePanels_firstPreferredAdded() {
-        context.orCreateTestableResources.addOverride(
-            R.array.config_controlsPreferredPackages,
-            arrayOf(TEST_PACKAGE_PANEL, "other_package")
-        )
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings =
             listOf(
@@ -217,6 +207,20 @@ class ControlsStartableTest : SysuiTestCase() {
         verify(controlsController, never()).bindComponentForPanel(any())
     }
 
+    @Test
+    fun testAlreadyAddedPanel_noNewSelection() {
+        preferredPanelsRepository.setShouldAddDefaultComponent(false)
+        whenever(authorizedPanelsRepository.getPreferredPackages())
+            .thenReturn(setOf(TEST_PACKAGE_PANEL))
+        `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
+        val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
+        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+
+        createStartable(enabled = true).start()
+
+        verify(controlsController, never()).setPreferredSelection(any())
+    }
+
     private fun createStartable(enabled: Boolean): ControlsStartable {
         val component: ControlsComponent =
             mock() {
@@ -230,7 +234,13 @@ class ControlsStartableTest : SysuiTestCase() {
                     `when`(getControlsListingController()).thenReturn(Optional.empty())
                 }
             }
-        return ControlsStartable(context.resources, fakeExecutor, component, userTracker)
+        return ControlsStartable(
+            fakeExecutor,
+            component,
+            userTracker,
+            authorizedPanelsRepository,
+            preferredPanelsRepository,
+        )
     }
 
     private fun ControlsServiceInfo(

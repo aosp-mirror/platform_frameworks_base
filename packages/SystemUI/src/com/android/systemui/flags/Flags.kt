@@ -112,6 +112,9 @@ object Flags {
     val ANIMATED_NOTIFICATION_SHADE_INSETS =
         unreleasedFlag(270682168, "animated_notification_shade_insets", teamfood = true)
 
+    // TODO(b/268005230): Tracking Bug
+    @JvmField val SENSITIVE_REVEAL_ANIM = unreleasedFlag(268005230, "sensitive_reveal_anim")
+
     // 200 - keyguard/lockscreen
     // ** Flag retired **
     // public static final BooleanFlag KEYGUARD_LAYOUT =
@@ -385,13 +388,16 @@ object Flags {
     @JvmField val ROUNDED_BOX_RIPPLE = releasedFlag(1002, "rounded_box_ripple")
 
     // TODO(b/270882464): Tracking Bug
-    val ENABLE_DOCK_SETUP_V2 = unreleasedFlag(1005, "enable_dock_setup_v2")
+    val ENABLE_DOCK_SETUP_V2 = unreleasedFlag(1005, "enable_dock_setup_v2", teamfood = true)
 
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
     @JvmField
-    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(1004, "enable_low_light_clock_undocked")
+    // TODO(b/271428141): Tracking Bug
+    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = unreleasedFlag(
+        1004,
+        "enable_low_light_clock_undocked", teamfood = true)
 
     // 1100 - windowing
     @Keep
@@ -579,7 +585,7 @@ object Flags {
     @JvmField
     val LEAVE_SHADE_OPEN_FOR_BUGREPORT = releasedFlag(1800, "leave_shade_open_for_bugreport")
     // TODO(b/265944639): Tracking Bug
-    @JvmField val DUAL_SHADE = releasedFlag(1801, "dual_shade")
+    @JvmField val DUAL_SHADE = unreleasedFlag(1801, "dual_shade")
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag(1900, "keycode_flag")
@@ -653,4 +659,9 @@ object Flags {
     // TODO(b/259428678): Tracking Bug
     @JvmField
     val KEYBOARD_BACKLIGHT_INDICATOR = unreleasedFlag(2601, "keyboard_backlight_indicator")
+
+    // TODO(b/272036292): Tracking Bug
+    @JvmField
+    val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
+            unreleasedFlag(2602, "large_shade_granular_alpha_interpolation")
 }

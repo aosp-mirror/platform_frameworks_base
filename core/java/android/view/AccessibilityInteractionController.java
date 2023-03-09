@@ -874,8 +874,11 @@ public final class AccessibilityInteractionController {
             return;
         }
         try {
+            // Clearing focus does not expose sensitive data, so set fetch flags to ensure that the
+            // root view is always returned if present.
             setAccessibilityFetchFlags(
-                    AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS);
+                    AccessibilityNodeInfo.FLAG_SERVICE_REQUESTS_INCLUDE_NOT_IMPORTANT_VIEWS
+                            | AccessibilityNodeInfo.FLAG_SERVICE_IS_ACCESSIBILITY_TOOL);
             final View root = getRootView();
             if (root != null && isShown(root)) {
                 final View host = mViewRootImpl.mAccessibilityFocusedHost;

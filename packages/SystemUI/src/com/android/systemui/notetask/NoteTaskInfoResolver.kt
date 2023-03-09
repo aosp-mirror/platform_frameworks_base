@@ -56,9 +56,6 @@ constructor(
     companion object {
         private val TAG = NoteTaskInfoResolver::class.simpleName.orEmpty()
 
-        // TODO(b/265912743): Use RoleManager.NOTES_ROLE instead.
-        const val ROLE_NOTES = "android.app.role.NOTES"
-
         private val EMPTY_APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0)!!
 
         /**

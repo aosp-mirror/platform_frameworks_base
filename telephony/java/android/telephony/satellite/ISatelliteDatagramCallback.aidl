@@ -16,8 +16,9 @@
 
 package android.telephony.satellite;
 
-import android.telephony.satellite.ISatelliteDatagramReceiverAck;
 import android.telephony.satellite.SatelliteDatagram;
+
+import com.android.internal.telephony.ILongConsumer;
 
 /**
  * Interface for satellite datagrams callback.
@@ -30,10 +31,10 @@ oneway interface ISatelliteDatagramCallback {
      * @param datagramId An id that uniquely identifies incoming datagram.
      * @param datagram Datagram received from satellite.
      * @param pendingCount Number of datagrams yet to be received from satellite.
-     * @param callback This callback will be used by datagram receiver app to send ack back to
-     *                 Telephony. If the callback is not received within five minutes,
-     *                 Telephony will resend the datagrams.
+     * @param callback This callback will be used by datagram receiver app to send received
+     *                 datagramId to Telephony. If the callback is not received within five minutes,
+     *                 Telephony will resend the datagram.
      */
     void onSatelliteDatagramReceived(long datagramId, in SatelliteDatagram datagram,
-            int pendingCount, ISatelliteDatagramReceiverAck callback);
+            int pendingCount, ILongConsumer callback);
 }

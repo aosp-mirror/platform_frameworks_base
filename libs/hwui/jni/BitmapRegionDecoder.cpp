@@ -334,7 +334,10 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, jlong brdHandle, jint in
     if (isHardware) {
         sk_sp<Bitmap> hardwareBitmap = Bitmap::allocateHardwareBitmap(bitmap);
         if (hasGainmap) {
-            hardwareBitmap->setGainmap(std::move(gainmap));
+            auto gm = uirenderer::Gainmap::allocateHardwareGainmap(gainmap);
+            if (gm) {
+                hardwareBitmap->setGainmap(std::move(gm));
+            }
         }
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags);
     }

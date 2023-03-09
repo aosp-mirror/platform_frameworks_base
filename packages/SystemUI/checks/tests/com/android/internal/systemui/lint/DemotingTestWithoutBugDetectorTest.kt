@@ -127,6 +127,139 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
             )
     }
 
+    @Test
+    fun testExcludeDevices_withBugId() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import android.platform.test.rule.PlatinumRule.Platinum;
+
+                        @Platinum(devices = "foo,bar", bugId = 123)
+                        public class TestClass {
+                            public void testCase() {}
+                        }
+                    """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(DemotingTestWithoutBugDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun testExcludeDevices_withoutBugId() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import android.platform.test.rule.PlatinumRule.Platinum;
+
+                        @Platinum(devices = "foo,bar")
+                        public class TestClass {
+                            public void testCase() {}
+                        }
+                    """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(DemotingTestWithoutBugDetector.ISSUE)
+            .run()
+            .expect(
+                """
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug id to track demoted test [DemotingTestWithoutBug]
+                @Platinum(devices = "foo,bar")
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
+    }
+
+    @Test
+    fun testIgnore_withBug() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import org.junit.Ignore;
+
+                        @Ignore("Blocked by b/123.")
+                        public class TestClass {
+                            public void testCase() {}
+                        }
+                    """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(DemotingTestWithoutBugDetector.ISSUE)
+            .run()
+            .expectClean()
+    }
+
+    @Test
+    fun testIgnore_withoutBug() {
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import org.junit.Ignore;
+
+                        @Ignore
+                        public class TestClass {
+                            public void testCase() {}
+                        }
+                    """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(DemotingTestWithoutBugDetector.ISSUE)
+            .run()
+            .expect(
+                """
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug (e.g. b/123) to track demoted test [DemotingTestWithoutBug]
+                @Ignore
+                ~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
+
+        lint()
+            .files(
+                TestFiles.java(
+                        """
+                        package test.pkg;
+                        import org.junit.Ignore;
+
+                        @Ignore("Not ready")
+                        public class TestClass {
+                            public void testCase() {}
+                        }
+                    """
+                    )
+                    .indented(),
+                *stubs
+            )
+            .issues(DemotingTestWithoutBugDetector.ISSUE)
+            .run()
+            .expect(
+                """
+                src/test/pkg/TestClass.java:4: Warning: Please attach a bug (e.g. b/123) to track demoted test [DemotingTestWithoutBug]
+                @Ignore("Not ready")
+                ~~~~~~~~~~~~~~~~~~~~
+                0 errors, 1 warnings
+                """
+            )
+    }
+
     private val filtersFlakyTestStub: TestFile =
         java(
             """
@@ -147,5 +280,34 @@ class DemotingTestWithoutBugDetectorTest : SystemUILintDetectorTest() {
         }
         """
         )
-    private val stubs = arrayOf(filtersFlakyTestStub, annotationsFlakyTestStub)
+    private val annotationsPlatinumStub: TestFile =
+        java(
+            """
+        package android.platform.test.rule;
+
+        public class PlatinumRule {
+            public @interface Platinum {
+                String devices();
+                int bugId() default -1;
+            }
+        }
+        """
+        )
+    private val annotationsIgnoreStub: TestFile =
+        java(
+            """
+        package org.junit;
+
+        public @interface Ignore {
+            String value() default "";
+        }
+        """
+        )
+    private val stubs =
+        arrayOf(
+            filtersFlakyTestStub,
+            annotationsFlakyTestStub,
+            annotationsPlatinumStub,
+            annotationsIgnoreStub
+        )
 }

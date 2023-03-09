@@ -46,8 +46,15 @@ constructor(
             viewModel.dialogContent.collect { dialogViewModel ->
                 if (dialogViewModel != null) {
                     if (dialog == null) {
-                        dialog = KeyboardBacklightDialog(context, dialogViewModel)
-                        // pass viewModel and show
+                        dialog =
+                            KeyboardBacklightDialog(
+                                context,
+                                initialCurrentLevel = dialogViewModel.currentValue,
+                                initialMaxLevel = dialogViewModel.maxValue
+                            )
+                        dialog?.show()
+                    } else {
+                        dialog?.updateState(dialogViewModel.currentValue, dialogViewModel.maxValue)
                     }
                 } else {
                     dialog?.dismiss()

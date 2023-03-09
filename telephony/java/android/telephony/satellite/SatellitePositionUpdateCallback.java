@@ -93,7 +93,7 @@ public class SatellitePositionUpdateCallback {
 
     /**@hide*/
     @NonNull
-    public final ISatellitePositionUpdateCallback getBinder() {
+    final ISatellitePositionUpdateCallback getBinder() {
         return mBinder;
     }
 

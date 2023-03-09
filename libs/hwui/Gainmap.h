@@ -27,6 +27,7 @@ class Gainmap : public LightRefBase<Gainmap> {
 public:
     SkGainmapInfo info;
     sk_sp<Bitmap> bitmap;
+    static sp<Gainmap> allocateHardwareGainmap(const sp<Gainmap>& srcGainmap);
 };
 
 }  // namespace android::uirenderer

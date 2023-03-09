@@ -18,30 +18,22 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.demo
 
 import android.content.Context
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
-import android.telephony.TelephonyManager.DATA_ACTIVITY_NONE
 import android.util.Log
 import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
-import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
-import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.ResolvedNetworkType.DefaultNetworkType
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.Mobile
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel.MobileDisabled
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.CarrierMergedConnectionRepository.Companion.createCarrierMergedConnectionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.MOBILE_CONNECTION_BUFFER_SIZE
-import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.DemoModeWifiDataSource
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.demo.model.FakeWifiEventModel
 import javax.inject.Inject
@@ -183,7 +175,7 @@ constructor(
     private fun createDemoMobileConnectionRepo(subId: Int): CacheContainer {
         val tableLogBuffer =
             logFactory.getOrCreate(
-                "DemoMobileConnectionLog [$subId]",
+                "DemoMobileConnectionLog[$subId]",
                 MOBILE_CONNECTION_BUFFER_SIZE,
             )
 
@@ -191,6 +183,7 @@ constructor(
             DemoMobileConnectionRepository(
                 subId,
                 tableLogBuffer,
+                scope,
             )
         return CacheContainer(repo, lastMobileState = null)
     }
@@ -237,23 +230,18 @@ constructor(
         }
     }
 
-    private fun processEnabledMobileState(state: Mobile) {
+    private fun processEnabledMobileState(event: Mobile) {
         // get or create the connection repo, and set its values
-        val subId = state.subId ?: DEFAULT_SUB_ID
+        val subId = event.subId ?: DEFAULT_SUB_ID
         maybeCreateSubscription(subId)
 
         val connection = getRepoForSubId(subId)
-        connectionRepoCache[subId]?.lastMobileState = state
+        connectionRepoCache[subId]?.lastMobileState = event
 
         // TODO(b/261029387): until we have a command, use the most recent subId
         defaultDataSubId.value = subId
 
-        // This is always true here, because we split out disabled states at the data-source level
-        connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.IntentDerived(state.name)
-
-        connection.cdmaRoaming.value = state.roaming
-        connection.connectionInfo.value = state.toMobileConnectionModel()
+        connection.processDemoMobileEvent(event, event.dataType.toResolvedNetworkType())
     }
 
     private fun processCarrierMergedWifiState(event: FakeWifiEventModel.CarrierMerged) {
@@ -272,13 +260,7 @@ constructor(
         defaultDataSubId.value = subId
 
         val connection = getRepoForSubId(subId)
-        // This is always true here, because we split out disabled states at the data-source level
-        connection.dataEnabled.value = true
-        connection.networkName.value = NetworkNameModel.IntentDerived(CARRIER_MERGED_NAME)
-        connection.numberOfLevels.value = event.numberOfLevels
-        connection.cdmaRoaming.value = false
-        connection.connectionInfo.value = event.toMobileConnectionModel()
-        Log.e("CCS", "output connection info = ${connection.connectionInfo.value}")
+        connection.processCarrierMergedEvent(event)
     }
 
     private fun maybeRemoveSubscription(subId: Int?) {
@@ -332,29 +314,6 @@ constructor(
     private fun subIdsString(): String =
         _subscriptions.value.joinToString(",") { it.subscriptionId.toString() }
 
-    private fun Mobile.toMobileConnectionModel(): MobileConnectionModel {
-        return MobileConnectionModel(
-            isEmergencyOnly = false, // TODO(b/261029387): not yet supported
-            isRoaming = roaming,
-            isInService = (level ?: 0) > 0,
-            isGsm = false, // TODO(b/261029387): not yet supported
-            cdmaLevel = level ?: 0,
-            primaryLevel = level ?: 0,
-            dataConnectionState =
-                DataConnectionState.Connected, // TODO(b/261029387): not yet supported
-            dataActivityDirection = (activity ?: DATA_ACTIVITY_NONE).toMobileDataActivityModel(),
-            carrierNetworkChangeActive = carrierNetworkChange,
-            resolvedNetworkType = dataType.toResolvedNetworkType()
-        )
-    }
-
-    private fun FakeWifiEventModel.CarrierMerged.toMobileConnectionModel(): MobileConnectionModel {
-        return createCarrierMergedConnectionModel(
-            this.level,
-            activity.toMobileDataActivityModel(),
-        )
-    }
-
     private fun SignalIcon.MobileIconGroup?.toResolvedNetworkType(): ResolvedNetworkType {
         val key = mobileMappingsReverseLookup.value[this] ?: "dis"
         return DefaultNetworkType(key)
@@ -364,8 +323,6 @@ constructor(
         private const val TAG = "DemoMobileConnectionsRepo"
 
         private const val DEFAULT_SUB_ID = 1
-
-        private const val CARRIER_MERGED_NAME = "Carrier Merged Network"
     }
 }
 
@@ -374,18 +331,3 @@ class CacheContainer(
     /** The last received [Mobile] event. Used when switching from carrier merged back to mobile. */
     var lastMobileState: Mobile?,
 )
-
-class DemoMobileConnectionRepository(
-    override val subId: Int,
-    override val tableLogBuffer: TableLogBuffer,
-) : MobileConnectionRepository {
-    override val connectionInfo = MutableStateFlow(MobileConnectionModel())
-
-    override val numberOfLevels = MutableStateFlow(DEFAULT_NUM_LEVELS)
-
-    override val dataEnabled = MutableStateFlow(true)
-
-    override val cdmaRoaming = MutableStateFlow(false)
-
-    override val networkName = MutableStateFlow(NetworkNameModel.IntentDerived("demo network"))
-}

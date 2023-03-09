@@ -100,6 +100,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
         fakeFeatureFlags.set(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE, true);
+        fakeFeatureFlags.set(Flags.SENSITIVE_REVEAL_ANIM, false);
         mNotificationTestHelper.setFeatureFlags(fakeFeatureFlags);
     }
 
@@ -396,17 +397,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         group.setHeadsUpAnimatingAway(false);
         verify(headsUpListener).accept(false);
         verify(aboveShelfChangedListener).onAboveShelfStateChanged(false);
-    }
-
-    @Test
-    public void testIsBlockingHelperShowing_isCorrectlyUpdated() throws Exception {
-        ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-
-        group.setBlockingHelperShowing(true);
-        assertTrue(group.isBlockingHelperShowing());
-
-        group.setBlockingHelperShowing(false);
-        assertFalse(group.isBlockingHelperShowing());
     }
 
     @Test

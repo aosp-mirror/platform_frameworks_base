@@ -99,6 +99,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.FrameworkStatsLog.UNSAFE_INTENT_EVENT_REPORTED__EVENT_TYPE__INTERNAL_NON_EXPORTED_COMPONENT_MATCH;
@@ -9681,8 +9682,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void dumpEverything(FileDescriptor fd, PrintWriter pw, String[] args, int opti,
-            boolean dumpAll, String dumpPackage, boolean dumpClient, boolean dumpNormalPriority,
-            int dumpAppId, boolean dumpProxies) {
+            boolean dumpAll, String dumpPackage, int displayIdFilter, boolean dumpClient,
+            boolean dumpNormalPriority, int dumpAppId, boolean dumpProxies) {
 
         ActiveServices.ServiceDumper sdumper;
 
@@ -9762,27 +9763,27 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            mAtmInternal.dump(
-                    DUMP_RECENTS_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            mAtmInternal.dump(DUMP_RECENTS_CMD, fd, pw, args, opti, dumpAll, dumpClient,
+                    dumpPackage, displayIdFilter);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            mAtmInternal.dump(
-                    DUMP_LASTANR_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            mAtmInternal.dump(DUMP_LASTANR_CMD, fd, pw, args, opti, dumpAll, dumpClient,
+                    dumpPackage, displayIdFilter);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            mAtmInternal.dump(
-                    DUMP_STARTER_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+            mAtmInternal.dump(DUMP_STARTER_CMD, fd, pw, args, opti, dumpAll, dumpClient,
+                    dumpPackage, displayIdFilter);
             if (dumpPackage == null) {
                 pw.println();
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                mAtmInternal.dump(
-                        DUMP_CONTAINERS_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                mAtmInternal.dump(DUMP_CONTAINERS_CMD, fd, pw, args, opti, dumpAll, dumpClient,
+                        dumpPackage, displayIdFilter);
             }
             // Activities section is dumped as part of the Critical priority dump. Exclude the
             // section if priority is Normal.
@@ -9791,8 +9792,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                mAtmInternal.dump(
-                        DUMP_ACTIVITIES_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                mAtmInternal.dump(DUMP_ACTIVITIES_CMD, fd, pw, args, opti, dumpAll, dumpClient,
+                        dumpPackage, displayIdFilter);
             }
             if (mAssociations.size() > 0) {
                 pw.println();
@@ -9865,6 +9866,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpNormalPriority = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
+        boolean dumpVerbose = false;
+        int dumpDisplayId = INVALID_DISPLAY;
         String dumpPackage = null;
         int dumpUserId = UserHandle.USER_ALL;
 
@@ -9909,11 +9912,27 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("Error: --user option requires user id argument");
                     return;
                 }
+            } else if ("-d".equals(opt)) {
+                if (opti < args.length) {
+                    dumpDisplayId = Integer.parseInt(args[opti]);
+                    if (dumpDisplayId == INVALID_DISPLAY) {
+                        pw.println("Error: -d cannot be used with INVALID_DISPLAY");
+                        return;
+                    }
+                    opti++;
+                } else {
+                    pw.println("Error: -d option requires display argument");
+                    return;
+                }
+                dumpClient = true;
+            } else if ("--verbose".equals(opt)) {
+                dumpVerbose = true;
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
+                return;
             }
         }
 
@@ -10026,8 +10045,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     || DUMP_RECENTS_CMD.equals(cmd) || DUMP_RECENTS_SHORT_CMD.equals(cmd)
                     || DUMP_TOP_RESUMED_ACTIVITY.equals(cmd)
                     || DUMP_VISIBLE_ACTIVITIES.equals(cmd)) {
-                mAtmInternal.dump(
-                        cmd, fd, pw, args, opti, true /* dumpAll */, dumpClient, dumpPackage);
+                mAtmInternal.dump(cmd, fd, pw, args, opti, /* dumpAll= */ true , dumpClient,
+                        dumpPackage, dumpDisplayId);
             } else if ("binder-proxies".equals(cmd)) {
                 if (opti >= args.length) {
                     dumpBinderProxies(pw, 0 /* minToDump */);
@@ -10194,7 +10213,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 // Dumping a single activity?
                 if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
-                        dumpVisibleStacksOnly, dumpFocusedStackOnly, dumpUserId)) {
+                        dumpVisibleStacksOnly, dumpFocusedStackOnly, dumpVerbose, dumpDisplayId,
+                        dumpUserId)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
                     int res = shell.exec(this, null, fd, null, args, null,
                             new ResultReceiver(null));
@@ -10217,15 +10237,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (dumpClient) {
                 // dumpEverything() will take the lock when needed, and momentarily drop
                 // it for dumping client state.
-                dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
-                        dumpNormalPriority, dumpAppId, true /* dumpProxies */);
+                dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpDisplayId,
+                        dumpClient, dumpNormalPriority, dumpAppId, /* dumpProxies= */ true);
             } else {
                 // Take the lock here, so we get a consistent state for the entire dump;
                 // dumpEverything() will take the lock as well, which is fine for everything
                 // except dumping proxies, which can take a long time; exclude them.
                 synchronized(this) {
-                    dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
-                            dumpNormalPriority, dumpAppId, false /* dumpProxies */);
+                    dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpDisplayId,
+                            dumpClient, dumpNormalPriority, dumpAppId, /* dumpProxies= */ false);
                 }
             }
             if (dumpAll) {
@@ -14261,7 +14281,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     // Apply permission policy around the use of specific broadcast options
     void enforceBroadcastOptionPermissionsInternal(
             @Nullable Bundle options, int callingUid) {
-        enforceBroadcastOptionPermissionsInternal(BroadcastOptions.fromBundle(options), callingUid);
+        enforceBroadcastOptionPermissionsInternal(BroadcastOptions.fromBundleNullable(options),
+                callingUid);
     }
 
     void enforceBroadcastOptionPermissionsInternal(
@@ -14277,7 +14298,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (options.isInteractive()) {
                 enforceCallingPermission(
-                        android.Manifest.permission.COMPONENT_OPTION_INTERACTIVE,
+                        android.Manifest.permission.BROADCAST_OPTION_INTERACTIVE,
                         "setInteractive");
             }
         }
@@ -14314,9 +14335,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int res = broadcastIntentLockedTraced(callerApp, callerPackage, callerFeatureId,
                 intent, resolvedType, resultToApp, resultTo, resultCode, resultData, resultExtras,
                 requiredPermissions, excludedPermissions, excludedPackages, appOp,
-                BroadcastOptions.fromBundle(bOptions), ordered, sticky, callingPid, callingUid,
-                realCallingUid, realCallingPid, userId, backgroundStartPrivileges,
-                broadcastAllowList, filterExtrasForReceiver);
+                BroadcastOptions.fromBundleNullable(bOptions), ordered, sticky,
+                callingPid, callingUid, realCallingUid, realCallingPid, userId,
+                backgroundStartPrivileges, broadcastAllowList, filterExtrasForReceiver);
         BroadcastQueue.traceEnd(cookie);
         return res;
     }
@@ -18118,8 +18139,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         | Intent.FLAG_RECEIVER_REPLACE_PENDING
                         | Intent.FLAG_RECEIVER_FOREGROUND
                         | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+                final Bundle configChangedOptions = new BroadcastOptions()
+                        .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                        .setDeferUntilActive(true)
+                        .toBundle();
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                        null, null, OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
+                        null, null, OP_NONE, configChangedOptions, false, false, MY_PID, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
                 if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
                     intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
@@ -18178,8 +18203,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     intent.putExtra("reason", reason);
                 }
 
+                final BroadcastOptions options = new BroadcastOptions()
+                        .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                        .setDeferUntilActive(true);
+                if (reason != null) {
+                    options.setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS, reason);
+                }
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
-                        null, null, OP_NONE, null, false, false, -1, SYSTEM_UID,
+                        null, null, OP_NONE, options.toBundle(), false, false, -1, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), UserHandle.USER_ALL);
             }
         }

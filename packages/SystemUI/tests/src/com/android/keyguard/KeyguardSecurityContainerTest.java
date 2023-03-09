@@ -263,9 +263,6 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         assertThat(viewFlipperConstraint.layout.bottomToBottom).isEqualTo(PARENT_ID);
         assertThat(userSwitcherConstraint.layout.topToTop).isEqualTo(PARENT_ID);
         assertThat(userSwitcherConstraint.layout.bottomToBottom).isEqualTo(PARENT_ID);
-        assertThat(userSwitcherConstraint.layout.bottomMargin).isEqualTo(
-                getContext().getResources().getDimensionPixelSize(
-                        R.dimen.bouncer_user_switcher_y_trans));
         assertThat(viewFlipperConstraint.layout.horizontalChainStyle).isEqualTo(CHAIN_SPREAD);
         assertThat(userSwitcherConstraint.layout.horizontalChainStyle).isEqualTo(CHAIN_SPREAD);
         assertThat(viewFlipperConstraint.layout.mHeight).isEqualTo(MATCH_CONSTRAINT);

@@ -172,6 +172,12 @@ class ActivityStarter {
     private static final int INVALID_LAUNCH_MODE = -1;
 
     /**
+     * Avoid problematical apps from occupying system resources (e.g. the amount of surface) by
+     * launching too many activities in a task.
+     */
+    private static final long MAX_TASK_WEIGHT_FOR_ADDING_ACTIVITY = 300;
+
+    /**
      * Feature flag to protect PendingIntent being abused to start background activity.
      */
     @ChangeId
@@ -1647,6 +1653,13 @@ class ActivityStarter {
         }
 
         if (targetTask != null) {
+            if (targetTask.getTreeWeight() > MAX_TASK_WEIGHT_FOR_ADDING_ACTIVITY) {
+                Slog.e(TAG, "Remove " + targetTask + " because it has contained too many"
+                        + " activities or windows (abort starting " + r
+                        + " from uid=" + mCallingUid);
+                targetTask.removeImmediately("bulky-task");
+                return START_ABORTED;
+            }
             mPriorAboveTask = TaskDisplayArea.getRootTaskAbove(targetTask.getRootTask());
         }
 

@@ -41,7 +41,7 @@ import android.util.ArraySet;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 
@@ -180,7 +180,7 @@ public class BatteryControllerTest {
     }
 
     private void waitForNonDelayedMessagesProcessed() {
-        JobSchedulerBackgroundThread.getHandler().runWithScissors(() -> {}, 15_000);
+        AppSchedulingModuleThread.getHandler().runWithScissors(() -> {}, 15_000);
     }
 
     private JobInfo.Builder createBaseJobInfoBuilder(int jobId) {

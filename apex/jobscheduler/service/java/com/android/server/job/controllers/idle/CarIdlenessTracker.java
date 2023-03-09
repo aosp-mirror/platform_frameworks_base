@@ -24,7 +24,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -91,7 +91,7 @@ public final class CarIdlenessTracker extends BroadcastReceiver implements Idlen
         filter.addAction(ACTION_UNFORCE_IDLE);
         filter.addAction(ActivityManagerService.ACTION_TRIGGER_IDLE);
 
-        context.registerReceiver(this, filter, null, JobSchedulerBackgroundThread.getHandler());
+        context.registerReceiver(this, filter, null, AppSchedulingModuleThread.getHandler());
     }
 
     @Override

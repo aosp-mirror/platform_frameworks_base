@@ -152,6 +152,8 @@ class ContactsQueryHelper {
             }
         } catch (SQLiteException exception) {
             Slog.w("SQLite exception when querying contacts.", exception);
+        } catch (IllegalArgumentException exception) {
+            Slog.w("Illegal Argument exception when querying contacts.", exception);
         }
         if (found && lookupKey != null && hasPhoneNumber) {
             return queryPhoneNumber(lookupKey);

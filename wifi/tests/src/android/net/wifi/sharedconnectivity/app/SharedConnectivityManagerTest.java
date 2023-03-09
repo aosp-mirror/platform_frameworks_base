@@ -423,20 +423,20 @@ public class SharedConnectivityManagerTest {
      * Verify getters.
      */
     @Test
-    public void getHotspotNetworks_serviceNotConnected_shouldReturnEmptyList() {
+    public void getHotspotNetworks_serviceNotConnected_shouldReturnNull() {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertThat(manager.getKnownNetworks()).isEmpty();
+        assertThat(manager.getHotspotNetworks()).isNull();
     }
 
     @Test
-    public void getHotspotNetworks_remoteException_shouldReturnEmptyList() throws RemoteException {
+    public void getHotspotNetworks_remoteException_shouldReturnNull() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getHotspotNetworks();
 
-        assertThat(manager.getKnownNetworks()).isEmpty();
+        assertThat(manager.getHotspotNetworks()).isNull();
     }
 
     @Test
@@ -450,21 +450,21 @@ public class SharedConnectivityManagerTest {
     }
 
     @Test
-    public void getKnownNetworks_serviceNotConnected_shouldReturnEmptyList()
+    public void getKnownNetworks_serviceNotConnected_shouldReturnNull()
             throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(null);
 
-        assertThat(manager.getKnownNetworks()).isEmpty();
+        assertThat(manager.getKnownNetworks()).isNull();
     }
 
     @Test
-    public void getKnownNetworks_remoteException_shouldReturnEmptyList() throws RemoteException {
+    public void getKnownNetworks_remoteException_shouldReturnNull() throws RemoteException {
         SharedConnectivityManager manager = SharedConnectivityManager.create(mContext);
         manager.setService(mService);
         doThrow(new RemoteException()).when(mService).getKnownNetworks();
 
-        assertThat(manager.getKnownNetworks()).isEmpty();
+        assertThat(manager.getKnownNetworks()).isNull();
     }
 
     @Test
