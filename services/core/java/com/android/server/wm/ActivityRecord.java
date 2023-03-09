@@ -7733,27 +7733,38 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /**
      * Returns the requested {@link Configuration.Orientation} for the current activity.
-     *
-     * <p>When The current orientation is set to {@link SCREEN_ORIENTATION_BEHIND} it returns the
-     * requested orientation for the activity below which is the first activity with an explicit
-     * (different from {@link SCREEN_ORIENTATION_UNSET}) orientation which is not {@link
-     * SCREEN_ORIENTATION_BEHIND}.
      */
     @Configuration.Orientation
     @Override
     int getRequestedConfigurationOrientation(boolean forDisplay) {
+        return getRequestedConfigurationOrientation(forDisplay, getOverrideOrientation());
+    }
+
+    /**
+     * Returns the requested {@link Configuration.Orientation} for the requested
+     * {@link ActivityInfo.ScreenOrientation}.
+     *
+     * <p>When the current screen orientation is set to {@link SCREEN_ORIENTATION_BEHIND} it returns
+     * the requested orientation for the activity below which is the first activity with an explicit
+     * (different from {@link SCREEN_ORIENTATION_UNSET}) orientation which is not {@link
+     * SCREEN_ORIENTATION_BEHIND}.
+     */
+    @Configuration.Orientation
+    int getRequestedConfigurationOrientation(boolean forDisplay,
+            @ActivityInfo.ScreenOrientation int requestedOrientation) {
         if (mLetterboxUiController.hasInheritedOrientation()) {
             final RootDisplayArea root = getRootDisplayArea();
             if (forDisplay && root != null && root.isOrientationDifferentFromDisplay()) {
-                return ActivityInfo.reverseOrientation(
+                return reverseConfigurationOrientation(
                         mLetterboxUiController.getInheritedOrientation());
             } else {
                 return mLetterboxUiController.getInheritedOrientation();
             }
         }
-        if (task != null && getOverrideOrientation() == SCREEN_ORIENTATION_BEHIND) {
+        if (task != null && requestedOrientation == SCREEN_ORIENTATION_BEHIND) {
             // We use Task here because we want to be consistent with what happens in
             // multi-window mode where other tasks orientations are ignored.
+            android.util.Log.d("orientation", "We are here");
             final ActivityRecord belowCandidate = task.getActivity(
                     a -> a.canDefineOrientationForActivitiesAbove() /* callback */,
                     this /* boundary */, false /* includeBoundary */,
@@ -7762,7 +7773,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return belowCandidate.getRequestedConfigurationOrientation(forDisplay);
             }
         }
-        return super.getRequestedConfigurationOrientation(forDisplay);
+        return super.getRequestedConfigurationOrientation(forDisplay, requestedOrientation);
+    }
+
+    /**
+     * Returns the reversed configuration orientation.
+     * @hide
+     */
+    @Configuration.Orientation
+    public static int reverseConfigurationOrientation(@Configuration.Orientation int orientation) {
+        switch (orientation) {
+            case ORIENTATION_LANDSCAPE:
+                return ORIENTATION_PORTRAIT;
+            case ORIENTATION_PORTRAIT:
+                return ORIENTATION_LANDSCAPE;
+            default:
+                return orientation;
+        }
     }
 
     /**
@@ -7808,6 +7835,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mLetterboxUiController.shouldIgnoreRequestedOrientation(requestedOrientation)) {
             return;
         }
+        // This is necessary in order to avoid going into size compat mode when the orientation
+        // change request comes from the app
+        if (mWmService.mLetterboxConfiguration
+                    .isSizeCompatModeDisabledAfterOrientationChangeFromApp()
+                && getRequestedConfigurationOrientation(false, requestedOrientation)
+                    != getRequestedConfigurationOrientation(false /*forDisplay */)) {
+            // Do not change the requested configuration now, because this will be done when setting
+            // the orientation below with the new mCompatDisplayInsets
+            clearSizeCompatModeAttributes();
+        }
+        ProtoLog.v(WM_DEBUG_ORIENTATION,
+                "Setting requested orientation %s for %s",
+                ActivityInfo.screenOrientationToString(requestedOrientation), this);
         setOrientation(requestedOrientation, this);
 
         // Push the new configuration to the requested app in case where it's not pushed, e.g. when
@@ -8027,17 +8067,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         mDisplayContent, this, mLetterboxBoundsForFixedOrientationAndAspectRatio);
     }
 
-    @VisibleForTesting
-    void clearSizeCompatMode() {
-        final float lastSizeCompatScale = mSizeCompatScale;
+    private void clearSizeCompatModeAttributes() {
         mInSizeCompatModeForBounds = false;
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
+    }
+
+    @VisibleForTesting
+    void clearSizeCompatMode() {
+        final float lastSizeCompatScale = mSizeCompatScale;
+        clearSizeCompatModeAttributes();
         if (mSizeCompatScale != lastSizeCompatScale) {
             forAllWindows(WindowState::updateGlobalScale, false /* traverseTopToBottom */);
         }
-
         // Clear config override in #updateCompatDisplayInsets().
         final int activityType = getActivityType();
         final Configuration overrideConfig = getRequestedOverrideConfiguration();
