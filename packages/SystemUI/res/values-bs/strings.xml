@@ -69,7 +69,8 @@
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"Omogući USB"</string>
     <string name="learn_more" msgid="4690632085667273811">"Saznajte više"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snimak ekrana"</string>
-    <string name="global_action_smart_lock_disabled" msgid="9097102067802412936">"Smart Lock je onemogućen"</string>
+    <!-- no translation found for global_action_smart_lock_disabled (6286551337177954859) -->
+    <skip />
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslao/la sliku"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Spašavanje snimka ekrana..."</string>
     <string name="screenshot_saving_work_profile_title" msgid="5332829607308450880">"Pohranjivanje snimka ekrana na radni profil…"</string>
@@ -169,7 +170,6 @@
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ako u sljedećem pokušaju unesete neispravan PIN, vaš radni profil i njegovi podaci će se izbrisati."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ako u sljedećem pokušaju unesete neispravnu lozinku, vaš radni profil i njegovi podaci će se izbrisati."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dodirnite senzor za otisak prsta"</string>
-    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"Ikona za otisak prsta"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nije moguće prepoznati lice. Koristite otisak prsta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
     <skip />
@@ -834,6 +834,7 @@
     <string name="magnification_mode_switch_state_full_screen" msgid="5229653514979530561">"Uvećavanje prikaza preko cijelog ekrana"</string>
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Uvećavanje dijela ekrana"</string>
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"Prekidač"</string>
+    <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Otvori postavke povećavanja"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Prevucite ugao da promijenite veličinu"</string>
     <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Dozvoli dijagonalno klizanje"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Promijeni veličinu"</string>
@@ -843,6 +844,7 @@
     <string name="accessibility_magnification_left_handle" msgid="6694953733271752950">"Lijeva ručica"</string>
     <string name="accessibility_magnification_right_handle" msgid="9055988237319397605">"Desna ručica"</string>
     <string name="accessibility_magnification_bottom_handle" msgid="6531646968813821258">"Donja ručica"</string>
+    <string name="accessibility_magnification_settings_panel_description" msgid="8174187340747846953">"Postavke povećavanja"</string>
     <string name="accessibility_magnifier_size" msgid="3038755600030422334">"Veličina povećala"</string>
     <string name="accessibility_magnification_zoom" msgid="4222088982642063979">"Zumiranje"</string>
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Srednje"</string>
@@ -869,7 +871,9 @@
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Dodana je # kontrola.}one{Dodana je # kontrola.}few{Dodane su # kontrole.}other{Dodano je # kontrola.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
     <string name="controls_panel_authorization_title" msgid="267429338785864842">"Dodati aplikaciju <xliff:g id="APPNAME">%s</xliff:g>?"</string>
-    <string name="controls_panel_authorization" msgid="4540047176861801815">"Kada dodate aplikaciju <xliff:g id="APPNAME">%s</xliff:g>, ona može dodavati kontrole i sadržaj na ovu ploču. U nekim aplikacijama možete odabrati koje kontrole se prikazuju ovdje."</string>
+    <!-- no translation found for controls_panel_authorization (4665218066461350247) -->
+    <skip />
+    <string name="controls_panel_remove_app_authorization" msgid="5920442084735364674">"Ukloniti kontrole za aplikaciju <xliff:g id="APPNAME">%s</xliff:g>?"</string>
     <string name="accessibility_control_favorite" msgid="8694362691985545985">"Dodano u omiljeno"</string>
     <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Dodano u omiljeno, pozicija <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Uklonjeno iz omiljenog"</string>
@@ -887,12 +891,14 @@
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Uklanjanje"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Predlaže <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Uređaj je zaključan"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Prikazati uređaje i kontrolirati njima sa zaključanog ekrana?"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"Na zaključani ekran možete dodati kontrole za eksterne uređaje.\n\nAplikacija vašeg uređaja vam može omogućiti da kontrolirate određene uređaje bez otključavanja telefona ili tableta.\n\nPromjene možete izvršiti bilo kada u Postavkama."</string>
     <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"Kontrolirati uređaje sa zaključanog ekrana?"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"Neke uređaje možete kontrolirati bez otključavanja telefona ili tableta.\n\nAplikacija vašeg uređaja određuje koji uređaji se mogu kontrolirati na ovaj način."</string>
+    <!-- no translation found for controls_settings_trivial_controls_dialog_message (397178734990952575) -->
+    <skip />
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"Ne, hvala"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"Da"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN sadrži slova ili simbole"</string>
@@ -940,6 +946,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Dodaj kontrole"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Uredi kontrole"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Dodaj aplikaciju"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Ukloni aplikaciju"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Dodajte izlaze"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Grupa"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"Odabran je 1 uređaj"</string>
