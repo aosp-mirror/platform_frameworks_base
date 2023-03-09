@@ -1392,10 +1392,6 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         return sql.replaceAll("[\\s]*\\n+[\\s]*", " ");
     }
 
-    void clearPreparedStatementCache() {
-        mPreparedStatementCache.evictAll();
-    }
-
     /**
      * Holder type for a prepared statement.
      *
