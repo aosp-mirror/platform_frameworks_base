@@ -28,6 +28,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
+import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.flags.FeatureFlags
@@ -326,7 +327,7 @@ class AuthRippleController @Inject constructor(
                 updateUdfpsDependentParams()
             }
 
-            override fun onUdfpsLocationChanged() {
+            override fun onUdfpsLocationChanged(udfpsOverlayParams: UdfpsOverlayParams) {
                 updateUdfpsDependentParams()
             }
         }
