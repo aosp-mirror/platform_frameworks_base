@@ -839,6 +839,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
         mFrame = null;
         mOrientationHandle = null;
+        notifyNavigationBarSurface();
     }
 
     // TODO: Remove this when we update nav bar recreation
@@ -1003,7 +1004,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private void notifyNavigationBarSurface() {
         ViewRootImpl viewRoot = mView.getViewRootImpl();
-        SurfaceControl surface = viewRoot != null
+        SurfaceControl surface = mView.getParent() != null 
+                && viewRoot != null
                 && viewRoot.getSurfaceControl() != null
                 && viewRoot.getSurfaceControl().isValid()
                         ? viewRoot.getSurfaceControl()
