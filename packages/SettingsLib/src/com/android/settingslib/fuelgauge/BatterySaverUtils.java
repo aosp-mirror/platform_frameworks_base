@@ -169,11 +169,8 @@ public class BatterySaverUtils {
      */
     public static boolean maybeShowBatterySaverConfirmation(Context context, Bundle extras) {
         if (Secure.getInt(context.getContentResolver(),
-                Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0
-                && Secure.getInt(context.getContentResolver(),
-                Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
-            // Already shown.
-            return false;
+                Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
+            return false; // Already shown.
         }
         context.sendBroadcast(
                 getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, extras));
@@ -193,10 +190,8 @@ public class BatterySaverUtils {
     }
 
     private static void setBatterySaverConfirmationAcknowledged(Context context) {
-        Secure.putIntForUser(context.getContentResolver(),
-                Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 1, UserHandle.USER_CURRENT);
-        Secure.putIntForUser(context.getContentResolver(),
-                Secure.EXTRA_LOW_POWER_WARNING_ACKNOWLEDGED, 1, UserHandle.USER_CURRENT);
+        Secure.putIntForUser(context.getContentResolver(), Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 1,
+                UserHandle.USER_CURRENT);
     }
 
     /**
