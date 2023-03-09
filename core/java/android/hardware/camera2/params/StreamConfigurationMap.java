@@ -26,7 +26,6 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.hardware.camera2.utils.SurfaceUtils;
-import android.util.Log;
 import android.util.Range;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -2019,7 +2018,7 @@ public final class StreamConfigurationMap {
     /**
      * @hide
      */
-    public static final int HAL_DATASPACE_HEIF = 0x1003;
+    public static final int HAL_DATASPACE_HEIF = 0x1004;
     /**
      * @hide
      */
