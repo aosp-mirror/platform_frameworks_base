@@ -39,14 +39,14 @@ import platform.test.screenshot.getEmulatedDevicePathConfig
 import platform.test.screenshot.matchers.BitmapMatcher
 
 /** A rule for View screenshot diff unit tests. */
-class ViewScreenshotTestRule(
+open class ViewScreenshotTestRule(
     emulationSpec: DeviceEmulationSpec,
     private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
     assetsPathRelativeToBuildRoot: String
 ) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
-    private val screenshotRule =
+    protected val screenshotRule =
         ScreenshotTestRule(
             SystemUIGoldenImagePathManager(
                 getEmulatedDevicePathConfig(emulationSpec),
@@ -64,15 +64,10 @@ class ViewScreenshotTestRule(
         return delegateRule.apply(base, description)
     }
 
-    /**
-     * Compare the content of the view provided by [viewProvider] with the golden image identified
-     * by [goldenIdentifier] in the context of [emulationSpec].
-     */
-    fun screenshotTest(
-        goldenIdentifier: String,
+    protected fun takeScreenshot(
         mode: Mode = Mode.WrapContent,
         viewProvider: (ComponentActivity) -> View,
-    ) {
+    ): Bitmap {
         activityRule.scenario.onActivity { activity ->
             // Make sure that the activity draws full screen and fits the whole display instead of
             // the system bars.
@@ -99,7 +94,19 @@ class ViewScreenshotTestRule(
             contentView = content.getChildAt(0)
         }
 
-        val bitmap = contentView?.toBitmap() ?: error("contentView is null")
+        return contentView?.toBitmap() ?: error("contentView is null")
+    }
+
+    /**
+     * Compare the content of the view provided by [viewProvider] with the golden image identified
+     * by [goldenIdentifier] in the context of [emulationSpec].
+     */
+    fun screenshotTest(
+        goldenIdentifier: String,
+        mode: Mode = Mode.WrapContent,
+        viewProvider: (ComponentActivity) -> View,
+    ) {
+        val bitmap = takeScreenshot(mode, viewProvider)
         screenshotRule.assertBitmapAgainstGolden(
             bitmap,
             goldenIdentifier,
