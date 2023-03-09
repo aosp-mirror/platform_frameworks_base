@@ -16,6 +16,7 @@
 
 package com.android.server.audio;
 
+import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
 import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
@@ -311,7 +312,7 @@ public class AudioService extends IAudioService.Stub
      * volumes will be updated in case of a change.
      * @param alias if true, STREAM_NOTIFICATION is aliased to STREAM_RING
      */
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setNotifAliasRingForTest(boolean alias) {
         super.setNotifAliasRingForTest_enforcePermission();
         boolean update = (mNotifAliasRing != alias);
@@ -3845,7 +3846,7 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     @android.annotation.EnforcePermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
+            MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     /** @see AudioManager#setVolumeGroupVolumeIndex(int, int, int) */
@@ -3892,7 +3893,7 @@ public class AudioService extends IAudioService.Stub
 
     @Override
     @android.annotation.EnforcePermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
+            MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     /** @see AudioManager#getVolumeGroupVolumeIndex(int) */
@@ -3911,7 +3912,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#getVolumeGroupMaxVolumeIndex(int) */
     @android.annotation.EnforcePermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
+            MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     public int getVolumeGroupMaxVolumeIndex(int groupId) {
@@ -3927,7 +3928,7 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#getVolumeGroupMinVolumeIndex(int) */
     @android.annotation.EnforcePermission(anyOf = {
-            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED,
+            MODIFY_AUDIO_SETTINGS_PRIVILEGED,
             android.Manifest.permission.MODIFY_AUDIO_ROUTING
     })
     public int getVolumeGroupMinVolumeIndex(int groupId) {
@@ -5053,7 +5054,7 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#addOnStreamAliasingChangedListener(Executor, Runnable)
      * @see AudioManager#removeOnStreamAliasingChangedListener(Runnable)
      */
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void registerStreamAliasingDispatcher(IStreamAliasingDispatcher isad, boolean register) {
         super.registerStreamAliasingDispatcher_enforcePermission();
         Objects.requireNonNull(isad);
@@ -5081,7 +5082,7 @@ public class AudioService extends IAudioService.Stub
      * @see AudioManager#getIndependentStreamTypes()
      * @return the list of non-aliased stream types
      */
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public ArrayList<Integer> getIndependentStreamTypes() {
         super.getIndependentStreamTypes_enforcePermission();
 
@@ -5103,7 +5104,7 @@ public class AudioService extends IAudioService.Stub
      * @param sourceStreamType the stream type for which the alias is queried
      * @return the stream alias
      */
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public @AudioManager.PublicStreamTypes
     int getStreamTypeAlias(@AudioManager.PublicStreamTypes int sourceStreamType) {
         super.getStreamTypeAlias_enforcePermission();
@@ -5118,7 +5119,7 @@ public class AudioService extends IAudioService.Stub
      * @return true when volume control is performed through volume groups, false if it uses
      *     stream types.
      */
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isVolumeControlUsingVolumeGroups() {
         super.isVolumeControlUsingVolumeGroups_enforcePermission();
 
@@ -10477,49 +10478,53 @@ public class AudioService extends IAudioService.Stub
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getOutputRs2UpperBound() {
         super.getOutputRs2UpperBound_enforcePermission();
         return mSoundDoseHelper.getOutputRs2UpperBound();
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setOutputRs2UpperBound(float rs2Value) {
         super.setOutputRs2UpperBound_enforcePermission();
         mSoundDoseHelper.setOutputRs2UpperBound(rs2Value);
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public float getCsd() {
         super.getCsd_enforcePermission();
         return mSoundDoseHelper.getCsd();
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void setCsd(float csd) {
         super.setCsd_enforcePermission();
-        mSoundDoseHelper.setCsd(csd);
+        if (csd < 0.0f) {
+            mSoundDoseHelper.resetCsdTimeouts();
+        } else {
+            mSoundDoseHelper.setCsd(csd);
+        }
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void forceUseFrameworkMel(boolean useFrameworkMel) {
         super.forceUseFrameworkMel_enforcePermission();
         mSoundDoseHelper.forceUseFrameworkMel(useFrameworkMel);
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public void forceComputeCsdOnAllDevices(boolean computeCsdOnAllDevices) {
         super.forceComputeCsdOnAllDevices_enforcePermission();
         mSoundDoseHelper.forceComputeCsdOnAllDevices(computeCsdOnAllDevices);
     }
 
     @Override
-    @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isCsdEnabled() {
         super.isCsdEnabled_enforcePermission();
         return mSoundDoseHelper.isCsdEnabled();
