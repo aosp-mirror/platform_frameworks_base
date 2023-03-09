@@ -5718,7 +5718,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 34;
     private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
     private static final int MSG_REPORT_KEEP_CLEAR_RECTS = 36;
-
+    private static final int MSG_PAUSED_FOR_SYNC_TIMEOUT = 37;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -6005,6 +6005,11 @@ public final class ViewRootImpl implements ViewParent,
                 }   break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
+                    break;
+                case MSG_PAUSED_FOR_SYNC_TIMEOUT:
+                    Log.e(mTag, "Timedout waiting to unpause for sync");
+                    mNumPausedForSync = 0;
+                    scheduleTraversals();
                     break;
             }
         }
@@ -11584,9 +11589,16 @@ public final class ViewRootImpl implements ViewParent,
             mActiveSurfaceSyncGroup = new SurfaceSyncGroup(mTag);
             mActiveSurfaceSyncGroup.setAddedToSyncListener(() -> {
                 Runnable runnable = () -> {
-                    mNumPausedForSync--;
-                    if (!mIsInTraversal && mNumPausedForSync == 0) {
-                        scheduleTraversals();
+                    // Check if it's already 0 because the timeout could have reset the count to
+                    // 0 and we don't want to go negative.
+                    if (mNumPausedForSync > 0) {
+                        mNumPausedForSync--;
+                    }
+                    if (mNumPausedForSync == 0) {
+                        mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+                        if (!mIsInTraversal) {
+                            scheduleTraversals();
+                        }
                     }
                 };
 
@@ -11613,6 +11625,8 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mNumPausedForSync++;
+        mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+        mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT, 1000);
         return mActiveSurfaceSyncGroup;
     };
 
