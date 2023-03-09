@@ -29,7 +29,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.PropertyInvalidatedCache;
 import android.app.RemoteLockscreenValidationResult;
-import android.app.StartLockscreenValidationRequest;
+import android.app.RemoteLockscreenValidationSession;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
@@ -1875,7 +1875,7 @@ public class LockPatternUtils {
      * Starts a session to verify lockscreen credentials provided by a remote device.
      */
     @NonNull
-    public StartLockscreenValidationRequest startRemoteLockscreenValidation() {
+    public RemoteLockscreenValidationSession startRemoteLockscreenValidation() {
         try {
             return getLockSettings().startRemoteLockscreenValidation();
         } catch (RemoteException e) {
