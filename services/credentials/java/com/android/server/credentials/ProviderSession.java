@@ -114,17 +114,18 @@ public abstract class ProviderSession<T, R>
                 @Nullable String message);
     }
 
-    protected ProviderSession(@NonNull Context context, @Nullable CredentialProviderInfo info,
+    protected ProviderSession(@NonNull Context context,
             @NonNull T providerRequest,
             @Nullable ProviderInternalCallback callbacks,
+            @NonNull ComponentName componentName,
             @NonNull int userId,
             @Nullable RemoteCredentialService remoteCredentialService) {
         mContext = context;
-        mProviderInfo = info;
+        mProviderInfo = null;
         mProviderRequest = providerRequest;
         mCallbacks = callbacks;
         mUserId = userId;
-        mComponentName = info.getServiceInfo().getComponentName();
+        mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
         mCandidateProviderMetric = new CandidateProviderMetric();
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
