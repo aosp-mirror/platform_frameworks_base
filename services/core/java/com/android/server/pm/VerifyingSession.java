@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.os.PowerWhitelistManager.REASON_PACKAGE_VERIFIER;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
@@ -408,7 +407,7 @@ final class VerifyingSession {
         final int numRequiredVerifierPackages = requiredVerifierPackages.size();
         for (int i = numRequiredVerifierPackages - 1; i >= 0; i--) {
             if (!snapshot.isApplicationEffectivelyEnabled(requiredVerifierPackages.get(i),
-                    SYSTEM_UID)) {
+                    verifierUser)) {
                 Slog.w(TAG,
                         "Required verifier: " + requiredVerifierPackages.get(i) + " is disabled");
                 requiredVerifierPackages.remove(i);
