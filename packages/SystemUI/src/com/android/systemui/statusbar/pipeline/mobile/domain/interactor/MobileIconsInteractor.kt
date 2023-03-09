@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 
+import android.content.Context
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
@@ -112,6 +113,7 @@ constructor(
     connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
     @Application private val scope: CoroutineScope,
+    private val context: Context,
 ) : MobileIconsInteractor {
 
     override val mobileIsDefault = mobileConnectionsRepo.mobileIsDefault
@@ -286,6 +288,7 @@ constructor(
             isDefaultConnectionFailed,
             isForceHidden,
             mobileConnectionsRepo.getRepoForSubId(subId),
+            context,
         )
 
     companion object {
