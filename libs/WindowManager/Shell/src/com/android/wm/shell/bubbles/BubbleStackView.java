@@ -1360,16 +1360,6 @@ public class BubbleStackView extends FrameLayout
         updateOverflowVisibility();
     }
 
-    void updateOverflowButtonDot() {
-        for (Bubble b : mBubbleData.getOverflowBubbles()) {
-            if (b.showDot()) {
-                mBubbleOverflow.setShowDot(true);
-                return;
-            }
-        }
-        mBubbleOverflow.setShowDot(false);
-    }
-
     /**
      * Handle theme changes.
      */
