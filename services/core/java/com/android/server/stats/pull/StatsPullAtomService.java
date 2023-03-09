@@ -168,6 +168,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
+import android.uwb.UwbActivityEnergyInfo;
+import android.uwb.UwbManager;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
@@ -343,6 +345,7 @@ public class StatsPullAtomService extends SystemService {
     private StorageManager mStorageManager;
     private WifiManager mWifiManager;
     private TelephonyManager mTelephony;
+    private UwbManager mUwbManager;
     private SubscriptionManager mSubscriptionManager;
     private NetworkStatsManager mNetworkStatsManager;
 
@@ -412,6 +415,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mWifiActivityInfoLock = new Object();
     private final Object mModemActivityInfoLock = new Object();
     private final Object mBluetoothActivityInfoLock = new Object();
+    private final Object mUwbActivityInfoLock = new Object();
     private final Object mSystemElapsedRealtimeLock = new Object();
     private final Object mSystemUptimeLock = new Object();
     private final Object mProcessMemoryStateLock = new Object();
@@ -533,6 +537,10 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.BLUETOOTH_ACTIVITY_INFO:
                         synchronized (mBluetoothActivityInfoLock) {
                             return pullBluetoothActivityInfoLocked(atomTag, data);
+                        }
+                    case FrameworkStatsLog.UWB_ACTIVITY_INFO:
+                        synchronized (mUwbActivityInfoLock) {
+                            return pullUwbActivityInfoLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.SYSTEM_ELAPSED_REALTIME:
                         synchronized (mSystemElapsedRealtimeLock) {
@@ -774,8 +782,12 @@ public class StatsPullAtomService extends SystemService {
                 registerEventListeners();
             });
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            // Network stats related pullers can only be initialized after service is ready.
-            BackgroundThread.getHandler().post(() -> initAndRegisterNetworkStatsPullers());
+            BackgroundThread.getHandler().post(() -> {
+                // Network stats related pullers can only be initialized after service is ready.
+                initAndRegisterNetworkStatsPullers();
+                // For services that are not ready at boot phase PHASE_SYSTEM_SERVICES_READY
+                initAndRegisterDeferredPullers();
+            });
         }
     }
 
@@ -984,6 +996,12 @@ public class StatsPullAtomService extends SystemService {
         registerBytesTransferByTagAndMetered();
         registerDataUsageBytesTransfer();
         registerOemManagedBytesTransfer();
+    }
+
+    private void initAndRegisterDeferredPullers() {
+        mUwbManager = mContext.getSystemService(UwbManager.class);
+
+        registerUwbActivityInfo();
     }
 
     private IThermalService getIThermalService() {
@@ -2145,6 +2163,46 @@ public class StatsPullAtomService extends SystemService {
                 info.getBluetoothStackState(), info.getControllerTxTimeMillis(),
                 info.getControllerRxTimeMillis(), info.getControllerIdleTimeMillis(),
                 info.getControllerEnergyUsed()));
+        return StatsManager.PULL_SUCCESS;
+    }
+
+    private void registerUwbActivityInfo() {
+        int tagId = FrameworkStatsLog.UWB_ACTIVITY_INFO;
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                null, // use default PullAtomMetadata values
+                DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    int pullUwbActivityInfoLocked(int atomTag, List<StatsEvent> pulledData) {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            SynchronousResultReceiver uwbReceiver = new SynchronousResultReceiver("uwb");
+            mUwbManager.getUwbActivityEnergyInfoAsync(Runnable::run,
+                    info -> {
+                        Bundle bundle = new Bundle();
+                        bundle.putParcelable(BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY, info);
+                        uwbReceiver.send(0, bundle);
+                }
+            );
+            final UwbActivityEnergyInfo uwbInfo = awaitControllerInfo(uwbReceiver);
+            if (uwbInfo == null) {
+                return StatsManager.PULL_SKIP;
+            }
+            pulledData.add(
+                    FrameworkStatsLog.buildStatsEvent(atomTag,
+                            uwbInfo.getControllerTxDurationMillis(),
+                            uwbInfo.getControllerRxDurationMillis(),
+                            uwbInfo.getControllerIdleDurationMillis(),
+                            uwbInfo.getControllerWakeCount()));
+        } catch (RuntimeException e) {
+            Slog.e(TAG, "failed to getUwbActivityEnergyInfoAsync", e);
+            return StatsManager.PULL_SKIP;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
         return StatsManager.PULL_SUCCESS;
     }
 
