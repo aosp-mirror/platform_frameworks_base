@@ -561,6 +561,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
         if (runner.isWaitingAnimation()) {
             ProtoLog.w(WM_SHELL_BACK_PREVIEW, "Gesture released, but animation didn't ready.");
+            // Supposed it is in post commit animation state, and start the timeout to watch
+            // if the animation is ready.
+            mShellExecutor.executeDelayed(mAnimationTimeoutRunnable, MAX_ANIMATION_DURATION);
             return;
         } else if (runner.isAnimationCancelled()) {
             invokeOrCancelBack();
@@ -577,6 +580,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         if (mPostCommitAnimationInProgress) {
             return;
         }
+
+        mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "BackAnimationController: startPostCommitAnimation()");
         mPostCommitAnimationInProgress = true;
         mShellExecutor.executeDelayed(mAnimationTimeoutRunnable, MAX_ANIMATION_DURATION);
@@ -595,9 +600,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     @VisibleForTesting
     void onBackAnimationFinished() {
-        if (!mPostCommitAnimationInProgress) {
-            return;
-        }
         // Stop timeout runner.
         mShellExecutor.removeCallbacks(mAnimationTimeoutRunnable);
         mPostCommitAnimationInProgress = false;
