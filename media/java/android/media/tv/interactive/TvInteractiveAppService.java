@@ -285,7 +285,10 @@ public abstract class TvInteractiveAppService extends Service {
     public static final String COMMAND_PARAMETER_KEY_PLAYBACK_PARAMS = "command_playback_params";
     /**
      * Time shift command parameter: playback params.
-     * <p>Type: Integer. One of {@link TvInputManager#TIME_SHIFT_MODE_OFF},
+     * <p>Type: Integer. One of {@link TvInputManager#         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both requests
+         *                  should be handled regardless by the TV application.TIME_SHIFT_MODE_OFF},
      * {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
      * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
      * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
@@ -630,6 +633,8 @@ public abstract class TvInteractiveAppService extends Service {
          *                  {@link #requestStartRecording(String, Uri)} is called.
          *                  {@code null} if the recording is not triggered by a
          *                  {@link #requestStartRecording(String, Uri)} request.
+         *                  This ID should be created by the {@link TvInteractiveAppService} and
+         *                  can be any string.
          * @see #onRecordingStopped(String)
          */
         public void onRecordingStarted(@NonNull String recordingId, @Nullable String requestId) {
@@ -708,6 +713,8 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of the request when
          *                  {@link #requestScheduleRecording}  is called.
          *                  {@code null} if the recording is not triggered by a request.
+         *                  This ID should be created by the {@link TvInteractiveAppService} and
+         *                  can be any string.
          */
         public void onRecordingScheduled(@NonNull String recordingId, @Nullable String requestId) {
         }
@@ -1338,7 +1345,10 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
          *                  {@link #onRecordingStarted(String, String)} for this request is the
-         *                  same as the ID sent here.
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both 
+         *                  requests should be handled regardless by the TV application.
          * @param programUri The URI for the TV program to record.
          * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
@@ -1390,7 +1400,10 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
          *                  {@link #onRecordingScheduled(String, String)} for this request is the
-         *                  same as the ID sent here.
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both requests
+         *                  should be handled regardless by the TV application.
          * @param inputId The ID of the TV input for the given channel.
          * @param channelUri The URI of a channel to be recorded.
          * @param programUri The URI of the TV program to be recorded.
@@ -1424,7 +1437,10 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
          *                  {@link #onRecordingScheduled(String, String)} for this request is the
-         *                  same as the ID sent here.
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string. Should this API
+         *                  be called with the same requestId twice, both requests should be handled
+         *                  regardless by the TV application.
          * @param inputId The ID of the TV input for the given channel.
          * @param channelUri The URI of a channel to be recorded.
          * @param startTime The start time of the recording in milliseconds since epoch.
