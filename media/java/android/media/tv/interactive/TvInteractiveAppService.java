@@ -1941,7 +1941,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param buffer The {@link AdBuffer} to be received
          */
         @CallSuper
-        public void notifyAdBuffer(@NonNull AdBuffer buffer) {
+        public void notifyAdBufferReady(@NonNull AdBuffer buffer) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1949,10 +1949,10 @@ public abstract class TvInteractiveAppService extends Service {
                     try {
                         if (DEBUG) {
                             Log.d(TAG,
-                                    "notifyAdBuffer(buffer=" + buffer + ")");
+                                    "notifyAdBufferReady(buffer=" + buffer + ")");
                         }
                         if (mSessionCallback != null) {
-                            mSessionCallback.onAdBuffer(buffer);
+                            mSessionCallback.onAdBufferReady(buffer);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAdBuffer", e);

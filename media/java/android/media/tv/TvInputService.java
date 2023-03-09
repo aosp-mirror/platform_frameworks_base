@@ -1351,7 +1351,7 @@ public abstract class TvInputService extends Service {
          *
          * @param buffer The {@link AdBuffer} that became ready for playback.
          */
-        public void onAdBuffer(@NonNull AdBuffer buffer) {
+        public void onAdBufferReady(@NonNull AdBuffer buffer) {
         }
 
         /**
@@ -2050,8 +2050,8 @@ public abstract class TvInputService extends Service {
             onRequestAd(request);
         }
 
-        void notifyAdBuffer(AdBuffer buffer) {
-            onAdBuffer(buffer);
+        void notifyAdBufferReady(AdBuffer buffer) {
+            onAdBufferReady(buffer);
         }
 
         void onTvMessageReceived(String type, Bundle data) {

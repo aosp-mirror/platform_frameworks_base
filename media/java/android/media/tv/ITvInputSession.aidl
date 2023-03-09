@@ -75,7 +75,7 @@ oneway interface ITvInputSession {
 
     // For ad request
     void requestAd(in AdRequest request);
-    void notifyAdBuffer(in AdBuffer buffer);
+    void notifyAdBufferReady(in AdBuffer buffer);
 
     // For TV messages
     void notifyTvMessage(in String type, in Bundle data);
