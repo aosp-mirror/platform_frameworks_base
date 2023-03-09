@@ -29,6 +29,7 @@ import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
+import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
 import android.telephony.TelephonyManager.DATA_ACTIVITY_DORMANT
 import android.telephony.TelephonyManager.DATA_ACTIVITY_IN
@@ -414,9 +415,14 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
+            val overrideType = OVERRIDE_NETWORK_TYPE_NONE
             val type = NETWORK_TYPE_LTE
             val expected = DefaultNetworkType(mobileMappings.toIconKey(type))
-            val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
+            val ti =
+                mock<TelephonyDisplayInfo>().also {
+                    whenever(it.overrideNetworkType).thenReturn(overrideType)
+                    whenever(it.networkType).thenReturn(type)
+                }
             callback.onDisplayInfoChanged(ti)
 
             assertThat(latest).isEqualTo(expected)
@@ -436,6 +442,28 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val ti =
                 mock<TelephonyDisplayInfo>().also {
                     whenever(it.networkType).thenReturn(type)
+                    whenever(it.overrideNetworkType).thenReturn(type)
+                }
+            callback.onDisplayInfoChanged(ti)
+
+            assertThat(latest).isEqualTo(expected)
+
+            job.cancel()
+        }
+
+    @Test
+    fun networkType_unknownNetworkWithOverride_usesOverrideKey() =
+        testScope.runTest {
+            var latest: ResolvedNetworkType? = null
+            val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
+
+            val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
+            val unknown = NETWORK_TYPE_UNKNOWN
+            val type = OVERRIDE_NETWORK_TYPE_LTE_CA
+            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
+            val ti =
+                mock<TelephonyDisplayInfo>().also {
+                    whenever(it.networkType).thenReturn(unknown)
                     whenever(it.overrideNetworkType).thenReturn(type)
                 }
             callback.onDisplayInfoChanged(ti)

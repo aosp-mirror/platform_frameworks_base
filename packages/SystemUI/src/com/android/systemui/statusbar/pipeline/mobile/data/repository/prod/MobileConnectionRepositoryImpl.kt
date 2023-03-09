@@ -245,20 +245,18 @@ class MobileConnectionRepositoryImpl(
         callbackEvents
             .filterIsInstance<CallbackEvent.OnDisplayInfoChanged>()
             .map {
-                if (it.telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
-                    UnknownNetworkType
-                } else if (
-                    it.telephonyDisplayInfo.overrideNetworkType == OVERRIDE_NETWORK_TYPE_NONE
-                ) {
-                    DefaultNetworkType(
-                        mobileMappingsProxy.toIconKey(it.telephonyDisplayInfo.networkType)
-                    )
-                } else {
+                if (it.telephonyDisplayInfo.overrideNetworkType != OVERRIDE_NETWORK_TYPE_NONE) {
                     OverrideNetworkType(
                         mobileMappingsProxy.toIconKeyOverride(
                             it.telephonyDisplayInfo.overrideNetworkType
                         )
                     )
+                } else if (it.telephonyDisplayInfo.networkType != NETWORK_TYPE_UNKNOWN) {
+                    DefaultNetworkType(
+                        mobileMappingsProxy.toIconKey(it.telephonyDisplayInfo.networkType)
+                    )
+                } else {
+                    UnknownNetworkType
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
