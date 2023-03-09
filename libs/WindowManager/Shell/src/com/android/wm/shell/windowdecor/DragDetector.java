@@ -56,10 +56,15 @@ class DragDetector {
      * {@link #mEventHandler} handles the previous down event if the event shouldn't be passed
     */
     boolean onMotionEvent(MotionEvent ev) {
+        final boolean isTouchScreen =
+                (ev.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
+        if (!isTouchScreen) {
+            // Only touches generate noisy moves, so mouse/trackpad events don't need to filtered
+            // to take the slop threshold into consideration.
+            return mEventHandler.handleMotionEvent(ev);
+        }
         switch (ev.getActionMasked()) {
             case ACTION_DOWN: {
-                // Only touch screens generate noisy moves.
-                mIsDragEvent = (ev.getSource() & SOURCE_TOUCHSCREEN) != SOURCE_TOUCHSCREEN;
                 mDragPointerId = ev.getPointerId(0);
                 float rawX = ev.getRawX(0);
                 float rawY = ev.getRawY(0);
@@ -72,8 +77,12 @@ class DragDetector {
                     int dragPointerIndex = ev.findPointerIndex(mDragPointerId);
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
+                    // Touches generate noisy moves, so only once the move is past the touch
+                    // slop threshold should it be considered a drag.
                     mIsDragEvent = Math.hypot(dx, dy) > mTouchSlop;
                 }
+                // The event handler should only be notified about 'move' events if a drag has been
+                // detected.
                 if (mIsDragEvent) {
                     return mEventHandler.handleMotionEvent(ev);
                 } else {
@@ -92,10 +101,6 @@ class DragDetector {
 
     void setTouchSlop(int touchSlop) {
         mTouchSlop = touchSlop;
-    }
-
-    boolean isDragEvent() {
-        return mIsDragEvent;
     }
 
     private void resetState() {
