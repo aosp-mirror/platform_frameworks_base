@@ -5,13 +5,16 @@ import android.app.WindowConfiguration
 import android.graphics.Rect
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
+import android.view.Display
 import android.window.WindowContainerToken
+import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.Change.CHANGE_DRAG_RESIZING
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_BOTTOM
 import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_RIGHT
 import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_TOP
 import com.android.wm.shell.windowdecor.TaskPositioner.CTRL_TYPE_UNDEFINED
@@ -19,10 +22,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.any
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 /**
@@ -51,6 +55,8 @@ class TaskPositionerTest : ShellTestCase() {
     private lateinit var mockDisplayController: DisplayController
     @Mock
     private lateinit var mockDisplayLayout: DisplayLayout
+    @Mock
+    private lateinit var mockDisplay: Display
 
     private lateinit var taskPositioner: TaskPositioner
 
@@ -68,6 +74,9 @@ class TaskPositionerTest : ShellTestCase() {
         `when`(taskToken.asBinder()).thenReturn(taskBinder)
         `when`(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
         `when`(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)
+        `when`(mockDisplayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(STABLE_BOUNDS)
+        }
 
         mockWindowDecoration.mTaskInfo = ActivityManager.RunningTaskInfo().apply {
             taskId = TASK_ID
@@ -78,6 +87,8 @@ class TaskPositionerTest : ShellTestCase() {
             displayId = DISPLAY_ID
             configuration.windowConfiguration.bounds = STARTING_BOUNDS
         }
+        mockWindowDecoration.mDisplay = mockDisplay
+        `when`(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
     }
 
     @Test
@@ -451,6 +462,72 @@ class TaskPositionerTest : ShellTestCase() {
         })
     }
 
+    fun testDragResize_toDisallowedBounds_freezesAtLimit() {
+        taskPositioner.onDragPositioningStart(
+                CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM, // Resize right-bottom corner
+                STARTING_BOUNDS.right.toFloat(),
+                STARTING_BOUNDS.bottom.toFloat()
+        )
+
+        // Resize the task by 10px to the right and bottom, a valid destination
+        val newBounds = Rect(
+                STARTING_BOUNDS.left,
+                STARTING_BOUNDS.top,
+                STARTING_BOUNDS.right + 10,
+                STARTING_BOUNDS.bottom + 10)
+        taskPositioner.onDragPositioningMove(
+                newBounds.right.toFloat(),
+                newBounds.bottom.toFloat()
+        )
+
+        // Resize the task by another 10px to the right (allowed) and to just in the disallowed
+        // area of the Y coordinate.
+        val newBounds2 = Rect(
+                newBounds.left,
+                newBounds.top,
+                newBounds.right + 10,
+                DISALLOWED_RESIZE_AREA.top
+        )
+        taskPositioner.onDragPositioningMove(
+                newBounds2.right.toFloat(),
+                newBounds2.bottom.toFloat()
+        )
+
+        taskPositioner.onDragPositioningEnd(newBounds2.right.toFloat(), newBounds2.bottom.toFloat())
+
+        // The first resize falls in the allowed area, verify there's a change for it.
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder && change.ofBounds(newBounds)
+            }
+        })
+        // The second resize falls in the disallowed area, verify there's no change for it.
+        verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder && change.ofBounds(newBounds2)
+            }
+        })
+        // Instead, there should be a change for its allowed portion (the X movement) with the Y
+        // staying frozen in the last valid resize position.
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder && change.ofBounds(
+                        Rect(
+                                newBounds2.left,
+                                newBounds2.top,
+                                newBounds2.right,
+                                newBounds.bottom // Stayed at the first resize destination.
+                        )
+                )
+            }
+        })
+    }
+
+    private fun WindowContainerTransaction.Change.ofBounds(bounds: Rect): Boolean {
+        return ((windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0) &&
+                bounds == configuration.windowConfiguration.bounds
+    }
+
     companion object {
         private const val TASK_ID = 5
         private const val MIN_WIDTH = 10
@@ -458,6 +535,19 @@ class TaskPositionerTest : ShellTestCase() {
         private const val DENSITY_DPI = 20
         private const val DEFAULT_MIN = 40
         private const val DISPLAY_ID = 1
+        private const val NAVBAR_HEIGHT = 50
+        private val DISPLAY_BOUNDS = Rect(0, 0, 2400, 1600)
         private val STARTING_BOUNDS = Rect(0, 0, 100, 100)
+        private val DISALLOWED_RESIZE_AREA = Rect(
+                DISPLAY_BOUNDS.left,
+                DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT,
+                DISPLAY_BOUNDS.right,
+                DISPLAY_BOUNDS.bottom)
+        private val STABLE_BOUNDS = Rect(
+                DISPLAY_BOUNDS.left,
+                DISPLAY_BOUNDS.top,
+                DISPLAY_BOUNDS.right,
+                DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT
+        )
     }
 }
