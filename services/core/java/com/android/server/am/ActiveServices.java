@@ -337,6 +337,13 @@ public final class ActiveServices {
     final ArrayMap<ForegroundServiceDelegation, ServiceRecord> mFgsDelegations = new ArrayMap<>();
 
     /**
+     * A global counter for generating sequence numbers to uniquely identify bindService requests.
+     * It is purely for logging purposes.
+     */
+    @GuardedBy("mAm")
+    private long mBindServiceSeqCounter = 0;
+
+    /**
      * Whether there is a rate limit that suppresses immediate re-deferral of new FGS
      * notifications from each app.  On by default, disabled only by shell command for
      * test-suite purposes.  To disable the behavior more generally, use the usual
@@ -4420,8 +4427,12 @@ public final class ActiveServices {
             try {
                 bumpServiceExecutingLocked(r, execInFg, "bind",
                         OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
+                    Trace.instant(Trace.TRACE_TAG_ACTIVITY_MANAGER, "requestServiceBinding="
+                            + i.intent.getIntent() + ". bindSeq=" + mBindServiceSeqCounter);
+                }
                 r.app.getThread().scheduleBindService(r, i.intent.getIntent(), rebind,
-                        r.app.mState.getReportedProcState());
+                        r.app.mState.getReportedProcState(), mBindServiceSeqCounter++);
                 if (!rebind) {
                     i.requested = true;
                 }
