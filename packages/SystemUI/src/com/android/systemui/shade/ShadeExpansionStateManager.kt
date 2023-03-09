@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import android.annotation.IntDef
+import android.os.Trace
+import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
@@ -153,6 +155,14 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
                 if (fullyClosed) " fullyClosed" else ""
         )
 
+        if (Trace.isTagEnabled(TRACE_TAG)) {
+            Trace.traceCounter(TRACE_TAG, "panel_expansion", (fraction * 100).toInt())
+            if (state != oldState) {
+                Trace.asyncTraceForTrackEnd(TRACE_TAG, TRACK_NAME, 0)
+                Trace.asyncTraceForTrackBegin(TRACE_TAG, TRACK_NAME, state.panelStateToString(), 0)
+            }
+        }
+
         val expansionChangeEvent =
             ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
         expansionListeners.forEach { it.onPanelExpansionChanged(expansionChangeEvent) }
@@ -210,6 +220,10 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     private fun debugLog(msg: String) {
         if (!DEBUG) return
         Log.v(TAG, msg)
+    }
+
+    companion object {
+        private const val TRACK_NAME = "ShadeExpansionState"
     }
 }
 
