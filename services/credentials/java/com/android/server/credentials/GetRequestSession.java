@@ -19,6 +19,7 @@ package com.android.server.credentials;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
@@ -36,6 +37,7 @@ import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Central session for a single getCredentials request. This class listens to the
@@ -47,9 +49,14 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     private static final String TAG = "GetRequestSession";
     public GetRequestSession(Context context, int userId, int callingUid,
             IGetCredentialCallback callback, GetCredentialRequest request,
-            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal) {
+            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
+            long startedTimestamp) {
         super(context, userId, callingUid, request, callback, RequestInfo.TYPE_GET,
-                callingAppInfo, cancellationSignal);
+                callingAppInfo, cancellationSignal, startedTimestamp);
+        int numTypes = (request.getCredentialOptions().stream()
+                .map(CredentialOption::getType).collect(
+                Collectors.toSet())).size(); // Dedupe type strings
+        setupInitialPhaseMetric(ApiName.GET_CREDENTIAL.getMetricCode(), numTypes);
     }
 
     /**
