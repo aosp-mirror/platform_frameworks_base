@@ -579,9 +579,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         recordDisplay(wc.getDisplayContent());
         if (info.mShowWallpaper) {
             // Collect the wallpaper token (for isWallpaper(wc)) so it is part of the sync set.
-            final WindowState wallpaper =
-                    wc.getDisplayContent().mWallpaperController.getTopVisibleWallpaper();
-            if (wallpaper != null) {
+            final List<WindowState> wallpapers =
+                    wc.getDisplayContent().mWallpaperController.getAllTopWallpapers();
+            for (int i = wallpapers.size() - 1; i >= 0; i--) {
+                WindowState wallpaper = wallpapers.get(i);
                 collect(wallpaper.mToken);
             }
         }
