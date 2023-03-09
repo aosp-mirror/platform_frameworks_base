@@ -26,12 +26,16 @@ import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
+
 import android.os.Parcel;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 
@@ -39,6 +43,7 @@ import java.util.Arrays;
  * Unit tests for {@link HotspotNetwork}.
  */
 @SmallTest
+@RunWith(AndroidJUnit4.class)
 public class HotspotNetworkTest {
     private static final long DEVICE_ID = 11L;
     private static final NetworkProviderInfo NETWORK_PROVIDER_INFO =
@@ -67,7 +72,7 @@ public class HotspotNetworkTest {
      */
     @Test
     public void testParcelOperation() {
-        HotspotNetwork network = buildHotspotNetworkBuilder().build();
+        HotspotNetwork network = buildHotspotNetworkBuilder(true).build();
 
         Parcel parcelW = Parcel.obtain();
         network.writeToParcel(parcelW, 0);
@@ -88,30 +93,30 @@ public class HotspotNetworkTest {
      */
     @Test
     public void testEqualsOperation() {
-        HotspotNetwork network1 = buildHotspotNetworkBuilder().build();
-        HotspotNetwork network2 = buildHotspotNetworkBuilder().build();
+        HotspotNetwork network1 = buildHotspotNetworkBuilder(true).build();
+        HotspotNetwork network2 = buildHotspotNetworkBuilder(true).build();
         assertThat(network1).isEqualTo(network2);
 
-        HotspotNetwork.Builder builder = buildHotspotNetworkBuilder().setDeviceId(DEVICE_ID_1);
+        HotspotNetwork.Builder builder = buildHotspotNetworkBuilder(true).setDeviceId(DEVICE_ID_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildHotspotNetworkBuilder().setNetworkProviderInfo(NETWORK_PROVIDER_INFO1);
+        builder = buildHotspotNetworkBuilder(true).setNetworkProviderInfo(NETWORK_PROVIDER_INFO1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildHotspotNetworkBuilder().setHostNetworkType(NETWORK_TYPE_1);
+        builder = buildHotspotNetworkBuilder(true).setHostNetworkType(NETWORK_TYPE_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildHotspotNetworkBuilder().setNetworkName(NETWORK_NAME_1);
+        builder = buildHotspotNetworkBuilder(true).setNetworkName(NETWORK_NAME_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildHotspotNetworkBuilder().setHotspotSsid(HOTSPOT_SSID_1);
+        builder = buildHotspotNetworkBuilder(true).setHotspotSsid(HOTSPOT_SSID_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildHotspotNetworkBuilder().setHotspotBssid(HOTSPOT_BSSID_1);
+        builder = buildHotspotNetworkBuilder(true).setHotspotBssid(HOTSPOT_BSSID_1);
         assertThat(builder.build()).isNotEqualTo(network1);
 
-        builder = buildHotspotNetworkBuilder();
-        HotspotNetwork.Builder builder1 = buildHotspotNetworkBuilder();
+        builder = buildHotspotNetworkBuilder(true);
+        HotspotNetwork.Builder builder1 = buildHotspotNetworkBuilder(true);
         Arrays.stream(HOTSPOT_SECURITY_TYPES_1).forEach(builder1::addHotspotSecurityType);
 
         assertThat(builder1.build()).isNotEqualTo(builder.build());
@@ -122,7 +127,7 @@ public class HotspotNetworkTest {
      */
     @Test
     public void testGetMethods() {
-        HotspotNetwork network = buildHotspotNetworkBuilder().build();
+        HotspotNetwork network = buildHotspotNetworkBuilder(true).build();
         ArraySet<Integer> securityTypes = new ArraySet<>();
         Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(securityTypes::add);
 
@@ -137,21 +142,30 @@ public class HotspotNetworkTest {
 
     @Test
     public void testHashCode() {
-        HotspotNetwork network1 = buildHotspotNetworkBuilder().build();
-        HotspotNetwork network2 = buildHotspotNetworkBuilder().build();
+        HotspotNetwork network1 = buildHotspotNetworkBuilder(true).build();
+        HotspotNetwork network2 = buildHotspotNetworkBuilder(true).build();
 
         assertThat(network1.hashCode()).isEqualTo(network2.hashCode());
     }
 
-    private HotspotNetwork.Builder buildHotspotNetworkBuilder() {
+    @Test
+    public void networkProviderInfoNotSet_shouldThrowException() {
+        Exception e = assertThrows(IllegalArgumentException.class,
+                () -> buildHotspotNetworkBuilder(false).build());
+        assertThat(e.getMessage()).contains("NetworkProviderInfo");
+    }
+
+    private HotspotNetwork.Builder buildHotspotNetworkBuilder(boolean withNetworkProviderInfo) {
         HotspotNetwork.Builder builder = new HotspotNetwork.Builder()
                 .setDeviceId(DEVICE_ID)
-                .setNetworkProviderInfo(NETWORK_PROVIDER_INFO)
                 .setHostNetworkType(NETWORK_TYPE)
                 .setNetworkName(NETWORK_NAME)
                 .setHotspotSsid(HOTSPOT_SSID)
                 .setHotspotBssid(HOTSPOT_BSSID);
         Arrays.stream(HOTSPOT_SECURITY_TYPES).forEach(builder::addHotspotSecurityType);
+        if (withNetworkProviderInfo) {
+            builder.setNetworkProviderInfo(NETWORK_PROVIDER_INFO);
+        }
         return builder;
     }
 }
