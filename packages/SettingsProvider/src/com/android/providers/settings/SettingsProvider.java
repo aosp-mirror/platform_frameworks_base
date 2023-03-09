@@ -3056,11 +3056,11 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             boolean success = false;
-            boolean wasUnsetNonPredefinedSetting = false;
+            boolean isNewSetting = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
-                if (!isSettingPreDefined(name, type) && !settingsState.hasSetting(name)) {
-                    wasUnsetNonPredefinedSetting = true;
+                if (!settingsState.hasSetting(name)) {
+                    isNewSetting = true;
                 }
                 success = settingsState.insertSettingLocked(name, value,
                         tag, makeDefault, forceNonSystemPackage, packageName,
@@ -3073,9 +3073,9 @@ public class SettingsProvider extends ContentProvider {
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
-                if (wasUnsetNonPredefinedSetting) {
-                    // Increment the generation number for all non-predefined, unset settings,
-                    // because a new non-predefined setting has been inserted
+                if (isNewSetting && !isSettingPreDefined(name, type)) {
+                    // Increment the generation number for all null settings because a new
+                    // non-predefined setting has been inserted
                     mGenerationRegistry.incrementGenerationForUnsetSettings(key);
                 }
             }
