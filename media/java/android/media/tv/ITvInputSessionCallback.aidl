@@ -66,5 +66,5 @@ oneway interface ITvInputSessionCallback {
     void onAdBufferConsumed(in AdBuffer buffer);
 
     // For messages sent from the TV input
-    void onTvMessage(in String type, in Bundle data);
+    void onTvMessage(int type, in Bundle data);
 }
