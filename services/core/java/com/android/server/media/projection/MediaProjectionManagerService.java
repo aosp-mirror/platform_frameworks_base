@@ -16,6 +16,9 @@
 
 package com.android.server.media.projection;
 
+import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
+import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -484,6 +487,9 @@ public final class MediaProjectionManagerService extends SystemService
             userHandle = new UserHandle(UserHandle.getUserId(uid));
             mTargetSdkVersion = targetSdkVersion;
             mIsPrivileged = isPrivileged;
+            // TODO(b/267740338): Add unit test.
+            mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
+                    MEDIA_PROJECTION_TOKEN_EVENT_CREATED);
         }
 
         @Override // Binder call
@@ -630,6 +636,9 @@ public final class MediaProjectionManagerService extends SystemService
                 mToken = null;
                 unregisterCallback(mCallback);
                 mCallback = null;
+                // TODO(b/267740338): Add unit test.
+                mActivityManagerInternal.notifyMediaProjectionEvent(uid, asBinder(),
+                        MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED);
             }
         }
 

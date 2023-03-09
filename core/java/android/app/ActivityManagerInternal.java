@@ -18,6 +18,7 @@ package android.app;
 
 import static android.app.ActivityManager.StopUserOnSwitch;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
@@ -47,6 +48,8 @@ import android.util.Pair;
 
 import com.android.internal.os.TimeoutRecord;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -991,4 +994,48 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void logFgsApiEnd(int apiType, int uid, int pid);
 
+    /**
+     * The list of the events about the {@link android.media.projection.IMediaProjection} itself.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        MEDIA_PROJECTION_TOKEN_EVENT_CREATED,
+        MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED,
+    })
+    public @interface MediaProjectionTokenEvent{};
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been created
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_CREATED = 0;
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been destroyed
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED = 1;
+
+    /**
+     * Called after the system created/destroyed a media projection for an app, if the user
+     * has granted the permission to start a media projection from this app.
+     *
+     * <p>This API is specifically for the use case of enforcing the FGS type
+     * {@code android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION},
+     * where the app who is starting this type of FGS must have been granted with the permission
+     * to start the projection via the {@link android.media.projection.MediaProjection} APIs.
+     *
+     * @param uid The uid of the app which the system created/destroyed a media projection for.
+     * @param projectionToken The {@link android.media.projection.IMediaProjection} token that
+     *                        the system created/destroyed.
+     * @param event The actual event happening to the given {@code projectionToken}.
+     */
+    public abstract void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+            @MediaProjectionTokenEvent int event);
 }
