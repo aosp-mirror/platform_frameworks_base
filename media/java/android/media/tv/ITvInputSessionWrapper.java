@@ -275,7 +275,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_NOTIFY_AD_BUFFER: {
-                mTvInputSessionImpl.notifyAdBuffer((AdBuffer) msg.obj);
+                mTvInputSessionImpl.notifyAdBufferReady((AdBuffer) msg.obj);
                 break;
             }
             case DO_NOTIFY_TV_MESSAGE: {
@@ -465,7 +465,7 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void notifyAdBuffer(AdBuffer buffer) {
+    public void notifyAdBufferReady(AdBuffer buffer) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER, buffer));
     }
 
