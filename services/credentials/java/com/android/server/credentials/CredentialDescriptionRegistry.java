@@ -25,17 +25,19 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /** Contains information on what CredentialProvider has what provisioned Credential. */
 public class CredentialDescriptionRegistry {
 
+    private static final String FLAT_STRING_SPLIT_REGEX = ";";
     private static final int MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS = 128;
     private static final int MAX_ALLOWED_ENTRIES_PER_PROVIDER = 16;
     @GuardedBy("sLock")
@@ -164,14 +166,16 @@ public class CredentialDescriptionRegistry {
     /** Returns package names and entries of a CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
     public Set<FilterResult> getFilteredResultForProvider(String packageName,
-            String flatRequestStrings) {
+            String flatRequestString) {
         Set<FilterResult> result = new HashSet<>();
         if (!mCredentialDescriptions.containsKey(packageName)) {
             return result;
         }
         Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
+        Set<String> unflattenedRequestString = flatStringToSet(flatRequestString);
         for (CredentialDescription containedDescription: currentSet) {
-            if (flatRequestStrings.equals(containedDescription.getFlattenedRequestString())) {
+            if (checkForMatch(flatStringToSet(containedDescription.getFlattenedRequestString()),
+                    unflattenedRequestString)) {
                 result.add(new FilterResult(packageName,
                         containedDescription.getFlattenedRequestString(), containedDescription
                         .getCredentialEntries()));
@@ -182,12 +186,16 @@ public class CredentialDescriptionRegistry {
 
     /** Returns package names of CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
-    public Set<FilterResult> getMatchingProviders(Set<String> flatRequestString) {
+    public Set<FilterResult> getMatchingProviders(Set<String> flatRequestStrings) {
         Set<FilterResult> result = new HashSet<>();
+        Set<Set<String>> unflattenedRequestStrings = flatRequestStrings.stream().map(
+                CredentialDescriptionRegistry::flatStringToSet).collect(Collectors.toSet());
         for (String packageName: mCredentialDescriptions.keySet()) {
             Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
             for (CredentialDescription containedDescription : currentSet) {
-                if (flatRequestString.contains(containedDescription.getFlattenedRequestString())) {
+                if (canProviderSatisfyAny(flatStringToSet(containedDescription
+                                .getFlattenedRequestString()),
+                        unflattenedRequestStrings)) {
                     result.add(new FilterResult(packageName,
                             containedDescription.getFlattenedRequestString(), containedDescription
                             .getCredentialEntries()));
@@ -201,6 +209,26 @@ public class CredentialDescriptionRegistry {
         if (mCredentialDescriptions.containsKey(packageName)) {
             mCredentialDescriptions.remove(packageName);
         }
+    }
+
+    private static boolean canProviderSatisfyAny(Set<String> registeredUnflattenedStrings,
+            Set<Set<String>> requestedUnflattenedStrings) {
+        for (Set<String> requestedUnflattenedString : requestedUnflattenedStrings) {
+            if (registeredUnflattenedStrings.containsAll(requestedUnflattenedString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean checkForMatch(Set<String> registeredUnflattenedStrings,
+            Set<String> requestedUnflattenedString) {
+        return registeredUnflattenedStrings.containsAll(requestedUnflattenedString);
+    }
+
+    private static Set<String> flatStringToSet(String flatString) {
+        return new HashSet<>(Arrays
+                .asList(flatString.split(FLAT_STRING_SPLIT_REGEX)));
     }
 
 }
