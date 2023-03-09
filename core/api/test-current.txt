@@ -264,6 +264,7 @@ package android.app {
   }
 
   public class BroadcastOptions {
+    ctor public BroadcastOptions();
     ctor public BroadcastOptions(@NonNull android.os.Bundle);
     method @Deprecated public int getMaxManifestReceiverApiLevel();
     method public long getTemporaryAppAllowlistDuration();
