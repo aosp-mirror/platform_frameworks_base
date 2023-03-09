@@ -1367,7 +1367,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pripojené zariadenie sa nabíja. Ďalšie možností získate klepnutím."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bolo zistené analógové zvukové príslušenstvo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB pripojené"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB je pripojené"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Klepnutím vypnite ladenie cez USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Vyberte, ak chcete zakázať ladenie cez USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bezdrôtové ladenie je pripojené"</string>

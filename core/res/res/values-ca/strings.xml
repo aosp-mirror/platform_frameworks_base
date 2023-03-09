@@ -1326,8 +1326,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Permet"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Denega"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vol enviar un missatge a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Aquesta acció "<b>"pot produir càrrecs"</b>" al teu compte per a mòbils."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Aquesta acció produirà càrrecs al teu compte per a mòbils."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Aquesta acció "<b>"pot produir càrrecs"</b>" al teu compte mòbil."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Aquesta acció produirà càrrecs al teu compte mòbil."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Envia"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancel·la"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Recorda la meva selecció"</string>
@@ -1366,7 +1366,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"S\'ha detectat un accessori d\'àudio analògic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuració per USB activada"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuració per USB connectada"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca per desactivar la depuració per USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecciona per desactivar la depuració per USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"S\'ha connectat la depuració sense fil"</string>

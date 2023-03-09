@@ -1416,7 +1416,7 @@
     <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Түзмөктү форматташыңыз керек болушу мүмкүн. Чыгаруу үчүн таптап коюңуз."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3487534182861251401">"<xliff:g id="NAME">%s</xliff:g> аныкталды"</string>
     <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> иштебей жатат"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Тууралоо үчүн таптаңыз."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="8463636521459807981">"Орнотуу үчүн басыңыз."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="1595482802187036532">"Колдоого алынуучу форматта орнотуу үчүн <xliff:g id="NAME">%s</xliff:g> тандаңыз."</string>
     <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Түзмөктү форматташыңыз керек болушу мүмкүн"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> күтүүсүздөн өчүрүлдү"</string>
