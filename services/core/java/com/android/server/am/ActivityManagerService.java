@@ -18137,7 +18137,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
                 final Bundle configChangedOptions = new BroadcastOptions()
                         .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                        .setDeferUntilActive(true)
+                        .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                         .toBundle();
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
                         null, null, OP_NONE, configChangedOptions, false, false, MY_PID, SYSTEM_UID,
@@ -18156,7 +18156,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             PowerExemptionManager.REASON_LOCALE_CHANGED, "");
                     bOptions.setDeliveryGroupPolicy(
                             BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
-                    bOptions.setDeferUntilActive(true);
+                    bOptions.setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
                             null, null, OP_NONE, bOptions.toBundle(), false, false, MY_PID,
                             SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(),
@@ -18201,7 +18201,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final BroadcastOptions options = new BroadcastOptions()
                         .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                        .setDeferUntilActive(true);
+                        .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
                 if (reason != null) {
                     options.setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS, reason);
                 }
