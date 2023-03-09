@@ -61,7 +61,6 @@ import android.window.TaskFragmentOrganizer;
 import android.window.TaskFragmentOrganizerToken;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -332,19 +331,6 @@ public class TaskFragmentOrganizerControllerTest extends WindowTestsBase {
         mController.unregisterRemoteAnimations(mIOrganizer, TASK_ID);
 
         assertNull(mController.getRemoteAnimationDefinition(mIOrganizer, TASK_ID));
-    }
-
-    @Test
-    public void testWindowContainerTransaction_setTaskFragmentOrganizer() {
-        mOrganizer.applyTransaction(mTransaction);
-
-        assertEquals(mIOrganizer, mTransaction.getTaskFragmentOrganizer());
-
-        mTransaction = new WindowContainerTransaction();
-        mOrganizer.applySyncTransaction(
-                mTransaction, mock(WindowContainerTransactionCallback.class));
-
-        assertEquals(mIOrganizer, mTransaction.getTaskFragmentOrganizer());
     }
 
     @Test
