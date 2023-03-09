@@ -285,10 +285,7 @@ public abstract class TvInteractiveAppService extends Service {
     public static final String COMMAND_PARAMETER_KEY_PLAYBACK_PARAMS = "command_playback_params";
     /**
      * Time shift command parameter: playback params.
-     * <p>Type: Integer. One of {@link TvInputManager#         *                  same as the ID sent here. This should be defined by the
-         *                  {@link TvInteractiveAppService} and can be any string.
-         *                  Should this API be called with the same requestId twice, both requests
-         *                  should be handled regardless by the TV application.TIME_SHIFT_MODE_OFF},
+     * <p>Type: Integer. One of {@link TvInputManager#TIME_SHIFT_MODE_OFF},
      * {@link TvInputManager#TIME_SHIFT_MODE_LOCAL},
      * {@link TvInputManager#TIME_SHIFT_MODE_NETWORK},
      * {@link TvInputManager#TIME_SHIFT_MODE_AUTO}.
