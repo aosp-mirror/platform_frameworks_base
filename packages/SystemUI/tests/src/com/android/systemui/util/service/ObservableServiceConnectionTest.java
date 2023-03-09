@@ -16,6 +16,8 @@
 
 package com.android.systemui.util.service;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -168,5 +170,20 @@ public class ObservableServiceConnectionTest extends SysuiTestCase {
 
         verify(mCallback).onDisconnected(eq(connection),
                 eq(ObservableServiceConnection.DISCONNECT_REASON_UNBIND));
+    }
+
+    @Test
+    public void testBindServiceThrowsError() {
+        ObservableServiceConnection<Foo> connection = new ObservableServiceConnection<>(mContext,
+                mIntent, mExecutor, mTransformer);
+        connection.addCallback(mCallback);
+
+        when(mContext.bindService(eq(mIntent), anyInt(), eq(mExecutor), eq(connection)))
+                .thenThrow(new SecurityException());
+
+        // Verify that the exception was caught and that bind returns false, and we properly
+        // unbind.
+        assertThat(connection.bind()).isFalse();
+        verify(mContext).unbindService(connection);
     }
 }
