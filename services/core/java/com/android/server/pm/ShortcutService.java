@@ -1641,7 +1641,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return false;
         }
         int uid = injectGetPackageUid(systemChooser.getPackageName(), UserHandle.USER_SYSTEM);
-        return uid == callingUid;
+        return UserHandle.getAppId(uid) == UserHandle.getAppId(callingUid);
     }
 
     private void enforceSystemOrShell() {
