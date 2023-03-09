@@ -2439,8 +2439,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 () -> mFaceManager != null && mFaceManager.isHardwareDetected()
                         && mFaceManager.hasEnrolledTemplates(userId)
                         && mBiometricEnabledForUser.get(userId));
+        if (mIsFaceEnrolled != isFaceEnrolled) {
+            mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
+        }
         mIsFaceEnrolled = isFaceEnrolled;
-        mLogger.logFaceEnrolledUpdated(mIsFaceEnrolled, isFaceEnrolled);
     }
 
     public boolean isFaceSupported() {
@@ -3100,12 +3102,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     @VisibleForTesting
     boolean isUnlockWithFingerprintPossible(int userId) {
         // TODO (b/242022358), make this rely on onEnrollmentChanged event and update it only once.
-        boolean fpEnrolled = mFpm != null && mFpm.isHardwareDetected()
+        boolean newFpEnrolled = mFpm != null && mFpm.isHardwareDetected()
                 && !isFingerprintDisabled(userId) && mFpm.hasEnrolledTemplates(userId);
-        mLogger.logFpEnrolledUpdated(userId,
-                mIsUnlockWithFingerprintPossible.getOrDefault(userId, false),
-                fpEnrolled);
-        mIsUnlockWithFingerprintPossible.put(userId, fpEnrolled);
+        Boolean oldFpEnrolled = mIsUnlockWithFingerprintPossible.getOrDefault(userId, false);
+        if (oldFpEnrolled != newFpEnrolled) {
+            mLogger.logFpEnrolledUpdated(userId, oldFpEnrolled, newFpEnrolled);
+        }
+        mIsUnlockWithFingerprintPossible.put(userId, newFpEnrolled);
         return mIsUnlockWithFingerprintPossible.get(userId);
     }
 
