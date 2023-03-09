@@ -27,6 +27,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.os.storage.StorageManager;
 
 public class MockLockSettingsContext extends ContextWrapper {
 
+    private final Resources mResources;
     private final ContentResolver mContentResolver;
     private final UserManager mUserManager;
     private final NotificationManager mNotificationManager;
@@ -47,13 +49,14 @@ public class MockLockSettingsContext extends ContextWrapper {
     private final FaceManager mFaceManager;
     private final PackageManager mPackageManager;
 
-    public MockLockSettingsContext(Context base, ContentResolver contentResolver,
-            UserManager userManager, NotificationManager notificationManager,
-            DevicePolicyManager devicePolicyManager, StorageManager storageManager,
-            TrustManager trustManager, KeyguardManager keyguardManager,
-            FingerprintManager fingerprintManager, FaceManager faceManager,
-            PackageManager packageManager) {
+    public MockLockSettingsContext(Context base, Resources resources,
+            ContentResolver contentResolver, UserManager userManager,
+            NotificationManager notificationManager, DevicePolicyManager devicePolicyManager,
+            StorageManager storageManager, TrustManager trustManager,
+            KeyguardManager keyguardManager, FingerprintManager fingerprintManager,
+            FaceManager faceManager, PackageManager packageManager) {
         super(base);
+        mResources = resources;
         mContentResolver = contentResolver;
         mUserManager = userManager;
         mNotificationManager = notificationManager;
@@ -64,6 +67,11 @@ public class MockLockSettingsContext extends ContextWrapper {
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
         mPackageManager = packageManager;
+    }
+
+    @Override
+    public Resources getResources() {
+        return mResources;
     }
 
     @Override
