@@ -148,6 +148,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     @NonNull private final WindowManager mWindowManager;
     @NonNull private final DisplayManager mDisplayManager;
     @Nullable private UdfpsController mUdfpsController;
+    @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @Nullable private SideFpsController mSideFpsController;
     @Nullable private UdfpsLogger mUdfpsLogger;
@@ -806,6 +807,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             final FingerprintSensorPropertiesInternal udfpsProp = mUdfpsProps.get(0);
 
             final Rect previousUdfpsBounds = mUdfpsBounds;
+            final UdfpsOverlayParams previousUdfpsOverlayParams = mUdfpsOverlayParams;
+
             mUdfpsBounds = udfpsProp.getLocation().getRect();
             mUdfpsBounds.scale(mScaleFactor);
 
@@ -815,7 +818,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                     mCachedDisplayInfo.getNaturalWidth(), /* right */
                     mCachedDisplayInfo.getNaturalHeight() /* botom */);
 
-            final UdfpsOverlayParams overlayParams = new UdfpsOverlayParams(
+            mUdfpsOverlayParams = new UdfpsOverlayParams(
                     mUdfpsBounds,
                     overlayBounds,
                     mCachedDisplayInfo.getNaturalWidth(),
@@ -823,10 +826,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                     mScaleFactor,
                     mCachedDisplayInfo.rotation);
 
-            mUdfpsController.updateOverlayParams(udfpsProp, overlayParams);
-            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds)) {
+            mUdfpsController.updateOverlayParams(udfpsProp, mUdfpsOverlayParams);
+            if (!Objects.equals(previousUdfpsBounds, mUdfpsBounds) || !Objects.equals(
+                    previousUdfpsOverlayParams, mUdfpsOverlayParams)) {
                 for (Callback cb : mCallbacks) {
-                    cb.onUdfpsLocationChanged();
+                    cb.onUdfpsLocationChanged(mUdfpsOverlayParams);
                 }
             }
         }
@@ -1336,7 +1340,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
          * On devices with UDFPS, this is always called alongside
          * {@link #onFingerprintLocationChanged}.
          */
-        default void onUdfpsLocationChanged() {}
+        default void onUdfpsLocationChanged(UdfpsOverlayParams udfpsOverlayParams) {}
 
         /**
          * Called when the location of the face unlock sensor (typically the front facing camera)

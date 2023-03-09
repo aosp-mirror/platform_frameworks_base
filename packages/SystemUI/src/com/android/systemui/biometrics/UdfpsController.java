@@ -100,6 +100,8 @@ import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.SystemClock;
 
+import kotlin.Unit;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -109,8 +111,6 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import kotlin.Unit;
 
 /**
  * Shows and hides the under-display fingerprint sensor (UDFPS) overlay, handles UDFPS touch events,
@@ -598,14 +598,20 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 mFalsingManager.isFalseTouch(UDFPS_AUTHENTICATION);
                 break;
 
+            case UNCHANGED:
+                if (!isWithinSensorArea(mOverlay.getOverlayView(), event.getX(), event.getY(),
+                        true) && mActivePointerId == MotionEvent.INVALID_POINTER_ID
+                        && event.getActionMasked() == MotionEvent.ACTION_DOWN
+                        && mAlternateBouncerInteractor.isVisibleState()) {
+                    // No pointer on sensor, forward to keyguard if alternateBouncer is visible
+                    mKeyguardViewManager.onTouch(event);
+                }
+
             default:
                 break;
         }
         logBiometricTouch(processedTouch.getEvent(), data);
 
-        // We should only consume touches that are within the sensor. By returning "false" for
-        // touches outside of the sensor, we let other UI components consume these events and act on
-        // them appropriately.
         return processedTouch.getTouchData().isWithinSensor(mOverlayParams.getNativeSensorBounds());
     }
 
