@@ -4492,7 +4492,7 @@
 
     <!-- Allows an application to be able to store and retrieve credentials from a remote
          device.
-         @hide @SystemApi -->
+    <p>Protection level: signature|privileged|role -->
     <permission android:name="android.permission.PROVIDE_REMOTE_CREDENTIALS"
                 android:protectionLevel="signature|privileged|role" />
 
