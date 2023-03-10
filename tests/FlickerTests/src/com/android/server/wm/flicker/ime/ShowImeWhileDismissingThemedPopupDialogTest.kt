@@ -45,7 +45,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ShowImeWhileDismissingThemedPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
+open class ShowImeWhileDismissingThemedPopupDialogTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp = ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
 
     /** {@inheritDoc} */
