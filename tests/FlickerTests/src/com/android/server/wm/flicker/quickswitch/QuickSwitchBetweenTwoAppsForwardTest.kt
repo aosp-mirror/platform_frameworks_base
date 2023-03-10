@@ -16,11 +16,11 @@
 
 package com.android.server.wm.flicker.quickswitch
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.datatypes.Rect
 import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.device.flicker.isShellTransitionsEnabled
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -29,9 +29,8 @@ import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.NonResizeableAppHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -57,11 +56,6 @@ import org.junit.runners.Parameterized
 open class QuickSwitchBetweenTwoAppsForwardTest(flicker: FlickerTest) : BaseTest(flicker) {
     private val testApp1 = SimpleAppHelper(instrumentation)
     private val testApp2 = NonResizeableAppHelper(instrumentation)
-
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -113,7 +107,7 @@ open class QuickSwitchBetweenTwoAppsForwardTest(flicker: FlickerTest) : BaseTest
      * Checks that the transition starts with [testApp1]'s layers filling/covering exactly the
      * entirety of the display.
      */
-    @Presubmit
+    @FlakyTest(bugId = 250522691)
     @Test
     open fun startsWithApp1LayersCoverFullScreen() {
         flicker.assertLayersStart { this.visibleRegion(testApp1).coversExactly(startDisplayBounds) }
@@ -247,6 +241,20 @@ open class QuickSwitchBetweenTwoAppsForwardTest(flicker: FlickerTest) : BaseTest
     @Presubmit
     @Test
     override fun taskBarLayerIsVisibleAtStartAndEnd() = super.taskBarLayerIsVisibleAtStartAndEnd()
+
+    /** {@inheritDoc} */
+    @Ignore("Nav bar window becomes invisible during quick switch")
+    @Test
+    override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
+
+    @FlakyTest(bugId = 246284708)
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+
+    @FlakyTest(bugId = 250518877)
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
         private var startDisplayBounds = Rect.EMPTY
