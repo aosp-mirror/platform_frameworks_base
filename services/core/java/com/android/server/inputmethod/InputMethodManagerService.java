@@ -1488,16 +1488,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         }
 
                         int change = isPackageDisappearing(imi.getPackageName());
-                        if (isPackageModified(imi.getPackageName())) {
-                            mAdditionalSubtypeMap.remove(imi.getId());
-                            AdditionalSubtypeUtils.save(mAdditionalSubtypeMap, mMethodMap,
-                                    mSettings.getCurrentUserId());
-                        }
                         if (change == PACKAGE_TEMPORARY_CHANGE
                                 || change == PACKAGE_PERMANENT_CHANGE) {
                             Slog.i(TAG, "Input method uninstalled, disabling: "
                                     + imi.getComponent());
                             setInputMethodEnabledLocked(imi.getId(), false);
+                        } else if (change == PACKAGE_UPDATING) {
+                            Slog.i(TAG,
+                                    "Input method reinstalling, clearing additional subtypes: "
+                                            + imi.getComponent());
+                            mAdditionalSubtypeMap.remove(imi.getId());
+                            AdditionalSubtypeUtils.save(mAdditionalSubtypeMap,
+                                    mMethodMap,
+                                    mSettings.getCurrentUserId());
                         }
                     }
                 }
