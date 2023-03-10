@@ -76,6 +76,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -601,30 +602,33 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         final Task task = createTask(mDefaultDisplay);
         final ActivityRecord bottomActivity = createActivityRecord(task);
         final ActivityRecord homeActivity = mRootHomeTask.getTopNonFinishingActivity();
-
+        final ArrayList<ActivityRecord> openActivities = new ArrayList<>();
+        openActivities.add(homeActivity);
         final BackNavigationController.AnimationHandler.ScheduleAnimationBuilder toHomeBuilder =
                 animationHandler.prepareAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME,
-                        mBackAnimationAdapter, task, mRootHomeTask, bottomActivity, homeActivity);
+                        mBackAnimationAdapter, task, mRootHomeTask, bottomActivity, openActivities);
         assertTrue(toHomeBuilder.mIsLaunchBehind);
         toHomeBuilder.build();
-        verify(mAtm.mTaskOrganizerController, never())
-                .addWindowlessStartingSurface(any(), any(), any(), any(), any());
+        verify(mAtm.mTaskOrganizerController, never()).addWindowlessStartingSurface(
+                any(), any(), any(), any(), any(), any());
         animationHandler.clearBackAnimateTarget();
+        openActivities.clear();
 
         // Back to ACTIVITY and TASK have the same logic, just with different target.
         final ActivityRecord topActivity = createActivityRecord(task);
+        openActivities.add(bottomActivity);
         final BackNavigationController.AnimationHandler.ScheduleAnimationBuilder toActivityBuilder =
                 animationHandler.prepareAnimation(
                         BackNavigationInfo.TYPE_CROSS_ACTIVITY, mBackAnimationAdapter, task, task,
-                        topActivity, bottomActivity);
+                        topActivity, openActivities);
         assertFalse(toActivityBuilder.mIsLaunchBehind);
         toActivityBuilder.build();
         if (preferWindowlessSurface) {
-            verify(mAtm.mTaskOrganizerController)
-                    .addWindowlessStartingSurface(any(), any(), any(), any(), any());
+            verify(mAtm.mTaskOrganizerController).addWindowlessStartingSurface(
+                    any(), any(), any(), any(), any(), any());
         } else {
-            verify(mAtm.mTaskOrganizerController, never())
-                    .addWindowlessStartingSurface(any(), any(), any(), any(), any());
+            verify(mAtm.mTaskOrganizerController, never()).addWindowlessStartingSurface(
+                    any(), any(), any(), any(), any(),  any());
         }
     }
 
