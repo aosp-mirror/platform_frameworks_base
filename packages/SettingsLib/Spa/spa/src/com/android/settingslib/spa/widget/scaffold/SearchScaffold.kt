@@ -41,6 +41,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -72,6 +73,7 @@ fun SearchScaffold(
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (bottomPadding: Dp, searchQuery: State<String>) -> Unit,
 ) {
+    var isSearchMode by rememberSaveable { mutableStateOf(false) }
     val viewModel: SearchScaffoldViewModel = viewModel()
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -82,8 +84,11 @@ fun SearchScaffold(
                 title = title,
                 actions = actions,
                 scrollBehavior = scrollBehavior,
+                isSearchMode = isSearchMode,
+                onSearchModeChange = { isSearchMode = it },
                 searchQuery = viewModel.searchQuery,
-            ) { viewModel.searchQuery = it }
+                onSearchQueryChange = { viewModel.searchQuery = it },
+            )
         },
     ) { paddingValues ->
         Box(
@@ -95,7 +100,7 @@ fun SearchScaffold(
             content(
                 bottomPadding = paddingValues.calculateBottomPadding(),
                 searchQuery = remember {
-                    derivedStateOf { viewModel.searchQuery?.text ?: "" }
+                    derivedStateOf { if (isSearchMode) viewModel.searchQuery.text else "" }
                 },
             )
         }
@@ -103,7 +108,8 @@ fun SearchScaffold(
 }
 
 internal class SearchScaffoldViewModel : ViewModel() {
-    var searchQuery: TextFieldValue? by mutableStateOf(null)
+    // Put in view model because TextFieldValue has not default Saver for rememberSaveable.
+    var searchQuery by mutableStateOf(TextFieldValue())
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,14 +118,16 @@ private fun SearchableTopAppBar(
     title: String,
     actions: @Composable RowScope.() -> Unit,
     scrollBehavior: TopAppBarScrollBehavior,
-    searchQuery: TextFieldValue?,
-    onSearchQueryChange: (TextFieldValue?) -> Unit,
+    isSearchMode: Boolean,
+    onSearchModeChange: (Boolean) -> Unit,
+    searchQuery: TextFieldValue,
+    onSearchQueryChange: (TextFieldValue) -> Unit,
 ) {
-    if (searchQuery != null) {
+    if (isSearchMode) {
         SearchTopAppBar(
             query = searchQuery,
             onQueryChange = onSearchQueryChange,
-            onClose = { onSearchQueryChange(null) },
+            onClose = { onSearchModeChange(false) },
             actions = actions,
         )
     } else {
@@ -127,6 +135,7 @@ private fun SearchableTopAppBar(
             SearchAction {
                 scrollBehavior.collapse()
                 onSearchQueryChange(TextFieldValue())
+                onSearchModeChange(true)
             }
             actions()
         }
