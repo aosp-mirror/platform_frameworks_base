@@ -70,6 +70,34 @@ public final class S2CellIdUtils {
         return fromLatLngRadians(Math.toRadians(latDegrees), Math.toRadians(lngDegrees));
     }
 
+    /** Returns the leaf S2 cell ID of the specified (face, i, j) coordinate. */
+    public static long fromFij(int face, int i, int j) {
+        int bits = (face & SWAP_MASK);
+        // Update most significant bits.
+        long msb = ((long) face) << (POS_BITS - 33);
+        for (int k = 7; k >= 4; --k) {
+            bits = lookupBits(i, j, k, bits);
+            msb = updateBits(msb, k, bits);
+            bits = maskBits(bits);
+        }
+        // Update least significant bits.
+        long lsb = 0;
+        for (int k = 3; k >= 0; --k) {
+            bits = lookupBits(i, j, k, bits);
+            lsb = updateBits(lsb, k, bits);
+            bits = maskBits(bits);
+        }
+        return (((msb << 32) + lsb) << 1) + 1;
+    }
+
+    /**
+     * Returns the face of the specified S2 cell. The returned face is in [0, 5] for valid S2 cell
+     * IDs. Behavior is undefined for invalid S2 cell IDs.
+     */
+    public static int getFace(long s2CellId) {
+        return (int) (s2CellId >>> POS_BITS);
+    }
+
     /**
      * Returns the ID of the parent of the specified S2 cell at the specified parent level.
      * Behavior is undefined for invalid S2 cell IDs or parent levels not in
@@ -219,26 +247,6 @@ public final class S2CellIdUtils {
         return fromFij(face, i, j);
     }
 
-    /** Returns the leaf S2 cell ID of the specified (face, i, j) coordinate. */
-    private static long fromFij(int face, int i, int j) {
-        int bits = (face & SWAP_MASK);
-        // Update most significant bits.
-        long msb = ((long) face) << (POS_BITS - 33);
-        for (int k = 7; k >= 4; --k) {
-            bits = lookupBits(i, j, k, bits);
-            msb = updateBits(msb, k, bits);
-            bits = maskBits(bits);
-        }
-        // Update least significant bits.
-        long lsb = 0;
-        for (int k = 3; k >= 0; --k) {
-            bits = lookupBits(i, j, k, bits);
-            lsb = updateBits(lsb, k, bits);
-            bits = maskBits(bits);
-        }
-        return (((msb << 32) + lsb) << 1) + 1;
-    }
-
     private static long fromFijWrap(int face, int i, int j) {
         double u = iToU(i);
         double v = jToV(j);
@@ -312,10 +320,6 @@ public final class S2CellIdUtils {
 
     private static int maskBits(int bits) {
         return bits & (SWAP_MASK | INVERT_MASK);
-    }
-
-    private static int getFace(long s2CellId) {
-        return (int) (s2CellId >>> POS_BITS);
     }
 
     private static boolean isLeaf(long s2CellId) {
