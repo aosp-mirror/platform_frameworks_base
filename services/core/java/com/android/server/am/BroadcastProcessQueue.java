@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UptimeMillisLong;
+import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -42,7 +43,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -124,12 +124,6 @@ class BroadcastProcessQueue {
      * {@link #mPending}.
      */
     private final ArrayDeque<SomeArgs> mPendingOffload = new ArrayDeque<>(4);
-
-    /**
-     * List of all queues holding broadcasts that are waiting to be dispatched.
-     */
-    private final List<ArrayDeque<SomeArgs>> mPendingQueues = List.of(
-            mPendingUrgent, mPending, mPendingOffload);
 
     /**
      * Broadcast actively being dispatched to this process.
@@ -1043,14 +1037,28 @@ class BroadcastProcessQueue {
      * that we're not wedged.
      */
     public void checkHealthLocked() {
-        if (mRunnableAtReason == REASON_BLOCKED) {
-            final SomeArgs next = peekNextBroadcast();
-            Objects.requireNonNull(next, "peekNextBroadcast");
+        checkHealthLocked(mPending);
+        checkHealthLocked(mPendingUrgent);
+        checkHealthLocked(mPendingOffload);
+    }
 
-            // If blocked more than 10 minutes, we're likely wedged
-            final BroadcastRecord r = (BroadcastRecord) next.arg1;
-            final long waitingTime = SystemClock.uptimeMillis() - r.enqueueTime;
-            checkState(waitingTime < (10 * DateUtils.MINUTE_IN_MILLIS), "waitingTime");
+    private void checkHealthLocked(@NonNull ArrayDeque<SomeArgs> queue) {
+        if (queue.isEmpty()) return;
+
+        final Iterator<SomeArgs> it = queue.descendingIterator();
+        while (it.hasNext()) {
+            final SomeArgs args = it.next();
+            final BroadcastRecord record = (BroadcastRecord) args.arg1;
+            final int recordIndex = args.argi1;
+
+            if (BroadcastRecord.isDeliveryStateTerminal(record.getDeliveryState(recordIndex))
+                    || record.isDeferUntilActive()) {
+                continue;
+            } else {
+                // If waiting more than 10 minutes, we're likely wedged
+                final long waitingTime = SystemClock.uptimeMillis() - record.enqueueTime;
+                checkState(waitingTime < (10 * DateUtils.MINUTE_IN_MILLIS), "waitingTime");
+            }
         }
     }
 
