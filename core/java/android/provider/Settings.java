@@ -3021,7 +3021,11 @@ public final class Settings {
 
         public void destroy() {
             try {
-                mArray.close();
+                // If this process is the system server process, mArray is the same object as
+                // the memory int array kept inside SetingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer()) {
+                    mArray.close();
+                }
             } catch (IOException e) {
                 Log.e(TAG, "Error closing backing array", e);
             }
@@ -3190,9 +3194,7 @@ public final class Settings {
         @UnsupportedAppUsage
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
-            int currentGeneration = -1;
             boolean needsGenerationTracker = false;
-
             if (isSelf) {
                 synchronized (NameValueCache.this) {
                     final GenerationTracker generationTracker = mGenerationTrackers.get(name);
@@ -3204,26 +3206,30 @@ public final class Settings {
                                         + " in package:" + cr.getPackageName()
                                         + " and user:" + userHandle);
                             }
+                            // When a generation number changes, remove cached value, remove the old
+                            // generation tracker and request a new one
                             mValues.remove(name);
+                            generationTracker.destroy();
+                            mGenerationTrackers.remove(name);
                         } else if (mValues.containsKey(name)) {
                             if (DEBUG) {
                                 Log.i(TAG, "Cache hit for setting:" + name);
                             }
                             return mValues.get(name);
                         }
-                        currentGeneration = generationTracker.getCurrentGeneration();
-                    } else {
-                        needsGenerationTracker = true;
                     }
                 }
+                if (DEBUG) {
+                    Log.i(TAG, "Cache miss for setting:" + name + " for user:"
+                            + userHandle);
+                }
+                // Generation tracker doesn't exist or the value isn't cached
+                needsGenerationTracker = true;
             } else {
                 if (DEBUG || LOCAL_LOGV) {
                     Log.v(TAG, "get setting for user " + userHandle
                             + " by user " + UserHandle.myUserId() + " so skipping cache");
                 }
-            }
-            if (DEBUG) {
-                Log.i(TAG, "Cache miss for setting:" + name + " for user:" + userHandle);
             }
 
             // Check if the target settings key is readable. Reject if the caller is not system and
@@ -3324,11 +3330,10 @@ public final class Settings {
                                         mGenerationTrackers.put(name, new GenerationTracker(name,
                                                 array, index, generation,
                                                 mGenerationTrackerErrorHandler));
-                                        currentGeneration = generation;
                                     }
                                 }
-                                if (mGenerationTrackers.get(name) != null && currentGeneration
-                                        == mGenerationTrackers.get(name).getCurrentGeneration()) {
+                                if (mGenerationTrackers.get(name) != null
+                                        && !mGenerationTrackers.get(name).isGenerationChanged()) {
                                     if (DEBUG) {
                                         Log.i(TAG, "Updating cache for setting:" + name);
                                     }
@@ -3374,8 +3379,8 @@ public final class Settings {
 
                 String value = c.moveToNext() ? c.getString(0) : null;
                 synchronized (NameValueCache.this) {
-                    if (mGenerationTrackers.get(name) != null && currentGeneration
-                            == mGenerationTrackers.get(name).getCurrentGeneration()) {
+                    if (mGenerationTrackers.get(name) != null
+                            && !mGenerationTrackers.get(name).isGenerationChanged()) {
                         if (DEBUG) {
                             Log.i(TAG, "Updating cache for setting:" + name + " using query");
                         }
