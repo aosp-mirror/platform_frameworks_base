@@ -2,19 +2,15 @@ package com.android.systemui.navigationbar.gestural
 
 import android.content.Context
 import android.content.res.Configuration
-import android.content.res.TypedArray
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
 import android.util.MathUtils.min
-import android.util.TypedValue
 import android.view.View
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import com.android.internal.R.style.Theme_DeviceDefault
 import com.android.internal.util.LatencyTracker
 import com.android.settingslib.Utils
 import com.android.systemui.navigationbar.gestural.BackPanelController.DelayedOnAnimationEndListener
@@ -159,26 +155,21 @@ class BackPanel(
         val isDeviceInNightTheme = resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
-        val colorControlActivated = ContextThemeWrapper(context, Theme_DeviceDefault)
-                .run {
-                    val typedValue = TypedValue()
-                    val a: TypedArray = obtainStyledAttributes(typedValue.data,
-                            intArrayOf(android.R.attr.colorControlActivated))
-                    val color = a.getColor(0, 0)
-                    a.recycle()
-                    color
-                }
+        arrowPaint.color = Utils.getColorAttrDefaultColor(context,
+            if (isDeviceInNightTheme) {
+                com.android.internal.R.attr.colorAccentPrimary
+            } else {
+                com.android.internal.R.attr.textColorPrimary
+            }
+        )
 
-        val colorPrimary =
-                Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
-
-        arrowPaint.color = Utils.getColorAccentDefaultColor(context)
-
-        arrowBackgroundPaint.color = if (isDeviceInNightTheme) {
-            colorPrimary
-        } else {
-            colorControlActivated
-        }
+        arrowBackgroundPaint.color = Utils.getColorAttrDefaultColor(context,
+            if (isDeviceInNightTheme) {
+                com.android.internal.R.attr.colorSurface
+            } else {
+                com.android.internal.R.attr.colorAccentSecondary
+            }
+        )
     }
 
     inner class AnimatedFloat(
@@ -414,9 +405,9 @@ class BackPanel(
     ) {
         horizontalTranslation.updateRestingPosition(restingParams.horizontalTranslation)
         scale.updateRestingPosition(restingParams.scale)
-        arrowAlpha.updateRestingPosition(restingParams.arrowDimens.alpha)
         backgroundAlpha.updateRestingPosition(restingParams.backgroundDimens.alpha)
 
+        arrowAlpha.updateRestingPosition(restingParams.arrowDimens.alpha, animate)
         arrowLength.updateRestingPosition(restingParams.arrowDimens.length, animate)
         arrowHeight.updateRestingPosition(restingParams.arrowDimens.height, animate)
         scalePivotX.updateRestingPosition(restingParams.backgroundDimens.width, animate)
