@@ -5263,13 +5263,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Before setting mVisibleRequested so we can track changes.
         boolean isCollecting = false;
+        boolean inFinishingTransition = false;
         if (mTransitionController.isShellTransitionsEnabled()) {
             isCollecting = mTransitionController.isCollecting();
             if (isCollecting) {
                 mTransitionController.collect(this);
             } else {
-                Slog.e(TAG, "setVisibility=" + visible + " while transition is not collecting "
-                        + this + " caller=" + Debug.getCallers(8));
+                inFinishingTransition = mTransitionController.inFinishingTransition(this);
+                if (!inFinishingTransition) {
+                    Slog.e(TAG, "setVisibility=" + visible
+                            + " while transition is not collecting or finishing "
+                            + this + " caller=" + Debug.getCallers(8));
+                }
             }
         }
 
@@ -5344,6 +5349,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (!visible && mTransitionController.inPlayingTransition(this)) {
                 mTransitionChangeFlags |= FLAG_IS_OCCLUDED;
             }
+            return;
+        }
+        if (inFinishingTransition) {
+            // Let the finishing transition commit the visibility.
             return;
         }
         // If we are preparing an app transition, then delay changing

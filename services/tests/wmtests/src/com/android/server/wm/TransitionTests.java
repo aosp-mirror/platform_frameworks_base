@@ -1391,7 +1391,7 @@ public class TransitionTests extends WindowTestsBase {
 
         verify(snapshotController, times(1)).recordSnapshot(eq(task2), eq(false));
 
-        openTransition.finishTransition();
+        controller.finishTransition(openTransition);
 
         // We are now going to simulate closing task1 to return back to (open) task2.
         final Transition closeTransition = controller.createTransition(TRANSIT_CLOSE);
@@ -1416,7 +1416,19 @@ public class TransitionTests extends WindowTestsBase {
         verify(snapshotController, times(0)).recordSnapshot(eq(task1), eq(false));
 
         enteringAnimReports.clear();
-        closeTransition.finishTransition();
+        final boolean[] wasInFinishingTransition = { false };
+        controller.registerLegacyListener(new WindowManagerInternal.AppTransitionListener() {
+            @Override
+            public void onAppTransitionFinishedLocked(IBinder token) {
+                final ActivityRecord r = ActivityRecord.forToken(token);
+                if (r != null) {
+                    wasInFinishingTransition[0] = controller.inFinishingTransition(r);
+                }
+            }
+        });
+        controller.finishTransition(closeTransition);
+        assertTrue(wasInFinishingTransition[0]);
+        assertNull(controller.mFinishingTransition);
 
         assertEquals(ActivityTaskManagerService.APP_SWITCH_DISALLOW, mAtm.getBalAppSwitchesState());
         assertFalse(activity1.app.hasActivityInVisibleTask());
