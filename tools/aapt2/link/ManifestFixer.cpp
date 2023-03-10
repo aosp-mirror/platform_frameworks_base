@@ -749,6 +749,23 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     attr->value = options_.compile_sdk_version_codename.value();
   }
 
+  if (!options_.fingerprint_prefixes.empty()) {
+    xml::Element* install_constraints_el = root->FindChild({}, "install-constraints");
+    if (install_constraints_el == nullptr) {
+      std::unique_ptr<xml::Element> install_constraints = std::make_unique<xml::Element>();
+      install_constraints->name = "install-constraints";
+      install_constraints_el = install_constraints.get();
+      root->AppendChild(std::move(install_constraints));
+    }
+    for (const std::string& prefix : options_.fingerprint_prefixes) {
+      std::unique_ptr<xml::Element> prefix_el = std::make_unique<xml::Element>();
+      prefix_el->name = "fingerprint-prefix";
+      xml::Attribute* attr = prefix_el->FindOrCreateAttribute(xml::kSchemaAndroid, "value");
+      attr->value = prefix;
+      install_constraints_el->AppendChild(std::move(prefix_el));
+    }
+  }
+
   xml::XmlActionExecutor executor;
   if (!BuildRules(&executor, context->GetDiagnostics())) {
     return false;
