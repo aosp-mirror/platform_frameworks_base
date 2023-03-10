@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ServiceInfo;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CreateCredentialException;
 import android.credentials.CreateCredentialRequest;
@@ -696,13 +695,20 @@ public final class CredentialManagerService
 
         @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
         // this.mLock
-        private Set<ServiceInfo> getEnabledProviders() {
-            Set<ServiceInfo> enabledProviders = new HashSet<>();
+        private Set<ComponentName> getEnabledProviders() {
+            Set<ComponentName> enabledProviders = new HashSet<>();
             synchronized (mLock) {
                 runForUser(
                         (service) -> {
-                            enabledProviders.add(
-                                    service.getCredentialProviderInfo().getServiceInfo());
+                            try {
+                                enabledProviders.add(
+                                        service.getCredentialProviderInfo()
+                                                .getServiceInfo().getComponentName());
+                            } catch (NullPointerException e) {
+                                // Safe check
+                                Log.i(TAG, "Skipping provider as either the providerInfo"
+                                        + "or serviceInfo is null - weird");
+                            }
                         });
             }
             return enabledProviders;
