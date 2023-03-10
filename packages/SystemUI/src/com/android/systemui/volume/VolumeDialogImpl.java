@@ -1400,7 +1400,11 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             @Override
             public void onAnimationCancel(@NonNull Animator animation) {
                 mInteractionJankMonitor.cancel(CUJ_VOLUME_CONTROL);
-                Log.d(TAG, "onAnimationCancel");
+                Log.i(TAG, "onAnimationCancel");
+
+                // We can only have one animation listener for cancel, so the jank listener should
+                // also call for cleanup.
+                finishDismiss();
             }
 
             @Override
@@ -1492,12 +1496,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 .setDuration(mDialogHideAnimationDurationMs)
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .withEndAction(() -> mHandler.postDelayed(() -> {
-                    mController.notifyVisible(false);
-                    mDialog.dismiss();
-                    tryToRemoveCaptionsTooltip();
-                    mIsAnimatingDismiss = false;
-
-                    hideRingerDrawer();
+                    finishDismiss();
                 }, 50));
         if (!shouldSlideInVolumeTray()) animator.translationX(mDialogView.getWidth() / 2.0f);
         animator.setListener(getJankListener(getDialogView(), TYPE_DISMISS,
@@ -1510,6 +1509,18 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             }
         }
         Trace.endSection();
+    }
+
+    /**
+     * Clean up and hide volume dialog. Called when animation is finished/cancelled.
+     */
+    private void finishDismiss() {
+        mController.notifyVisible(false);
+        mDialog.dismiss();
+        tryToRemoveCaptionsTooltip();
+        mIsAnimatingDismiss = false;
+
+        hideRingerDrawer();
     }
 
     private boolean showActiveStreamOnly() {
