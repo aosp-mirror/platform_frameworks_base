@@ -244,7 +244,9 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
-        mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
+        if (mInputMethodManagerService != null) {
+            mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
+        }
 
         if (mServiceThread != null) {
             mServiceThread.quitSafely();
