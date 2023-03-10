@@ -1189,8 +1189,8 @@ public final class CameraManager {
             PackageManager packageManager = context.getPackageManager();
 
             try {
-                return packageManager.getProperty(context.getOpPackageName(),
-                            PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT).getBoolean();
+                return packageManager.getProperty(PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT,
+                        context.getOpPackageName()).getBoolean();
             } catch (PackageManager.NameNotFoundException e) {
                 // No such property
             }
