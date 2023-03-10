@@ -291,14 +291,15 @@ public final class CredentialManagerService
         List<ProviderSession> providerSessions = new ArrayList<>();
         for (Pair<CredentialOption, CredentialDescriptionRegistry.FilterResult> result :
                 activeCredentialContainers) {
-            providerSessions.add(
-                    ProviderRegistryGetSession.createNewSession(
-                            mContext,
-                            UserHandle.getCallingUserId(),
-                            session,
-                            session.mClientAppInfo,
-                            result.second.mPackageName,
-                            result.first));
+            ProviderSession providerSession = ProviderRegistryGetSession.createNewSession(
+                    mContext,
+                    UserHandle.getCallingUserId(),
+                    session,
+                    session.mClientAppInfo,
+                    result.second.mPackageName,
+                    result.first);
+            providerSessions.add(providerSession);
+            session.addProviderSession(providerSession.getComponentName(), providerSession);
         }
         return providerSessions;
     }
@@ -328,10 +329,15 @@ public final class CredentialManagerService
                 new HashSet<>();
 
         for (CredentialDescriptionRegistry.FilterResult filterResult : filterResults) {
+            Set<String> registeredUnflattenedStrings = CredentialDescriptionRegistry
+                    .flatStringToSet(filterResult.mFlattenedRequest);
             for (CredentialOption credentialOption : options) {
-                if (filterResult.mFlattenedRequest.equals(credentialOption
-                        .getCredentialRetrievalData()
-                        .getString(CredentialOption.FLATTENED_REQUEST))) {
+                Set<String> requestedUnflattenedStrings = CredentialDescriptionRegistry
+                        .flatStringToSet(credentialOption
+                                .getCredentialRetrievalData()
+                                .getString(CredentialOption.FLATTENED_REQUEST));
+                if (CredentialDescriptionRegistry.checkForMatch(registeredUnflattenedStrings,
+                        requestedUnflattenedStrings)) {
                     result.add(new Pair<>(credentialOption, filterResult));
                 }
             }
