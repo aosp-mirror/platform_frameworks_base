@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.hardware.BatteryState;
+import android.hardware.SensorManager;
 import android.hardware.input.InputManager.InputDeviceBatteryListener;
 import android.hardware.input.InputManager.InputDeviceListener;
 import android.hardware.input.InputManager.KeyboardBacklightListener;
@@ -81,6 +82,8 @@ public final class InputManagerGlobal {
     @Nullable private ArrayList<KeyboardBacklightListenerDelegate> mKeyboardBacklightListeners;
     @GuardedBy("mKeyboardBacklightListenerLock")
     @Nullable private IKeyboardBacklightListener mKeyboardBacklightListener;
+
+    @Nullable private InputDeviceSensorManager mInputDeviceSensorManager;
 
     private static InputManagerGlobal sInstance;
 
@@ -819,6 +822,85 @@ public final class InputManagerGlobal {
                 mKeyboardBacklightListeners = null;
                 mKeyboardBacklightListener = null;
             }
+        }
+    }
+
+    /**
+     * @see InputManager#getInputDeviceSensorManager(int)
+     */
+    @NonNull
+    SensorManager getInputDeviceSensorManager(int deviceId) {
+        if (mInputDeviceSensorManager == null) {
+            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+        }
+        return mInputDeviceSensorManager.getSensorManager(deviceId);
+    }
+
+    /**
+     * @see InputManager#getSensorList(int)
+     */
+    InputSensorInfo[] getSensorList(int deviceId) {
+        try {
+            return mIm.getSensorList(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#enableSensor(int, int, int, int)
+     */
+    boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
+            int maxBatchReportLatencyUs) {
+        try {
+            return mIm.enableSensor(deviceId, sensorType, samplingPeriodUs,
+                    maxBatchReportLatencyUs);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#disableSensor(int, int)
+     */
+    void disableSensor(int deviceId, int sensorType) {
+        try {
+            mIm.disableSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#flushSensor(int, int)
+     */
+    boolean flushSensor(int deviceId, int sensorType) {
+        try {
+            return mIm.flushSensor(deviceId, sensorType);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#registerSensorListener(IInputSensorEventListener)
+     */
+    boolean registerSensorListener(IInputSensorEventListener listener) {
+        try {
+            return mIm.registerSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterSensorListener(IInputSensorEventListener)
+     */
+    void unregisterSensorListener(IInputSensorEventListener listener) {
+        try {
+            mIm.unregisterSensorListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
         }
     }
 }
