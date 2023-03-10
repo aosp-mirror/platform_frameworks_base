@@ -371,9 +371,9 @@ fun MoreOptionsSelectionCard(
             onNavigationIconClicked =
             if (isFromProviderSelection) onBackProviderSelectionButtonSelected
             else onBackCreationSelectionButtonSelected,
+            bottomPadding = 16.dp,
         )
     }) {
-        item { Divider(thickness = 8.dp, color = Color.Transparent) } // Top app bar has a 8dp
         // bottom padding already
         item {
             CredentialContainerCard {
@@ -617,9 +617,9 @@ fun MoreAboutPasskeysIntroCard(
             MoreOptionTopAppBar(
                 text = stringResource(R.string.more_about_passkeys_title),
                 onNavigationIconClicked = onBackPasskeyIntroButtonSelected,
+                bottomPadding = 0.dp,
             )
         },
-        contentVerticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item {
             MoreAboutPasskeySectionHeader(
