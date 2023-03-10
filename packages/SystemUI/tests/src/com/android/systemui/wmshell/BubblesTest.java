@@ -57,7 +57,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
-import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -101,7 +100,6 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shared.system.QuickStepContract;
-import com.android.systemui.statusbar.NotificationEntryHelper;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -137,7 +135,6 @@ import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubbleStackView;
 import com.android.wm.shell.bubbles.BubbleViewInfoTask;
 import com.android.wm.shell.bubbles.Bubbles;
-import com.android.wm.shell.bubbles.StackEducationViewKt;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
@@ -1649,60 +1646,6 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowStackEdu_isNotConversationBubble() {
-        // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
-        BubbleEntry bubbleEntry = createBubbleEntry(false /* isConversation */);
-        mBubbleController.updateBubble(bubbleEntry);
-        assertTrue(mBubbleController.hasBubbles());
-
-        // Click on bubble
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
-        assertFalse(bubble.isConversation());
-        bubble.getIconView().callOnClick();
-
-        // Check education is not shown
-        BubbleStackView stackView = mBubbleController.getStackView();
-        assertFalse(stackView.isStackEduVisible());
-    }
-
-    @Test
-    public void testShowStackEdu_isConversationBubble() {
-        // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, false);
-        BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
-        mBubbleController.updateBubble(bubbleEntry);
-        assertTrue(mBubbleController.hasBubbles());
-
-        // Click on bubble
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
-        assertTrue(bubble.isConversation());
-        bubble.getIconView().callOnClick();
-
-        // Check education is shown
-        BubbleStackView stackView = mBubbleController.getStackView();
-        assertTrue(stackView.isStackEduVisible());
-    }
-
-    @Test
-    public void testShowStackEdu_isSeenConversationBubble() {
-        // Setup
-        setPrefBoolean(StackEducationViewKt.PREF_STACK_EDUCATION, true);
-        BubbleEntry bubbleEntry = createBubbleEntry(true /* isConversation */);
-        mBubbleController.updateBubble(bubbleEntry);
-        assertTrue(mBubbleController.hasBubbles());
-
-        // Click on bubble
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(bubbleEntry.getKey());
-        assertTrue(bubble.isConversation());
-        bubble.getIconView().callOnClick();
-
-        // Check education is not shown
-        BubbleStackView stackView = mBubbleController.getStackView();
-        assertFalse(stackView.isStackEduVisible());
-    }
-
-    @Test
     public void testShowOrHideAppBubble_addsAndExpand() {
         assertThat(mBubbleController.isStackExpanded()).isFalse();
         assertThat(mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE)).isNull();
@@ -1831,20 +1774,6 @@ public class BubblesTest extends SysuiTestCase {
                 mock(Bubbles.PendingIntentCanceledListener.class), new SyncExecutor());
     }
 
-    private BubbleEntry createBubbleEntry(boolean isConversation) {
-        NotificationEntry notificationEntry = mNotificationTestHelper.createBubble(mDeleteIntent);
-        if (isConversation) {
-            ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext)
-                    .setId("shortcutId")
-                    .build();
-            NotificationEntryHelper.modifyRanking(notificationEntry)
-                    .setIsConversation(true)
-                    .setShortcutInfo(shortcutInfo)
-                    .build();
-        }
-        return mBubblesManager.notifToBubbleEntry(notificationEntry);
-    }
-
     /** Creates a context that will return a PackageManager with specific AppInfo. */
     private Context setUpContextWithPackageManager(String pkg, ApplicationInfo info)
             throws Exception {
@@ -1879,15 +1808,6 @@ public class BubblesTest extends SysuiTestCase {
             flags &= ~flag;
         }
         bubbleMetadata.setFlags(flags);
-    }
-
-    /**
-     * Set preferences boolean value for key
-     * Used to setup global state for stack view education tests
-     */
-    private void setPrefBoolean(String key, boolean enabled) {
-        mContext.getSharedPreferences(mContext.getPackageName(), Context.MODE_PRIVATE)
-                .edit().putBoolean(key, enabled).apply();
     }
 
     private Notification.BubbleMetadata getMetadata() {
