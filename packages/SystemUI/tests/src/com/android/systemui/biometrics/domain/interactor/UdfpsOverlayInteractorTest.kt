@@ -77,16 +77,14 @@ class UdfpsOverlayInteractorTest : SysuiTestCase() {
 
             runCurrent()
 
-            // Then touch should not be intercepted
-            val canInterceptTrue = underTest.canInterceptTouchInUdfpsBounds(downEv)
-            assertThat(canInterceptTrue).isFalse()
+            // Then touch is within udfps area
+            assertThat(underTest.isTouchWithinUdfpsArea(downEv)).isTrue()
 
             // When touch is outside of bounds
             whenever(overlayBounds.contains(downEv.x.toInt(), downEv.y.toInt())).thenReturn(false)
 
-            // Then touch should be intercepted
-            val canInterceptFalse = underTest.canInterceptTouchInUdfpsBounds(downEv)
-            assertThat(canInterceptFalse).isTrue()
+            // Then touch is not within udfps area
+            assertThat(underTest.isTouchWithinUdfpsArea(downEv)).isFalse()
         }
 
     @Test

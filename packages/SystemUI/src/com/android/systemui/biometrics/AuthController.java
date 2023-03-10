@@ -823,7 +823,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
             final Rect overlayBounds = new Rect(
                     0, /* left */
-                    mCachedDisplayInfo.getNaturalHeight() / 2, /* top */
+                    0, /* top */
                     mCachedDisplayInfo.getNaturalWidth(), /* right */
                     mCachedDisplayInfo.getNaturalHeight() /* botom */);
 
