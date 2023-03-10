@@ -824,6 +824,9 @@
     <protected-broadcast android:name="android.companion.virtual.action.VIRTUAL_DEVICE_REMOVED" />
     <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_START_PREVIEW" />
     <protected-broadcast android:name="com.android.internal.intent.action.FLASH_NOTIFICATION_STOP_PREVIEW" />
+    <protected-broadcast android:name="android.app.admin.action.DEVICE_FINANCING_STATE_CHANGED" />
+    <protected-broadcast android:name="android.app.admin.action.DEVICE_POLICY_SET_RESULT" />
+    <protected-broadcast android:name="android.app.admin.action.DEVICE_POLICY_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
