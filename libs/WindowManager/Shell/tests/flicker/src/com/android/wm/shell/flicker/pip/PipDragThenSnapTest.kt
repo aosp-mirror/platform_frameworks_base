@@ -41,6 +41,9 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker){
+    // represents the direction in which the pip window should be snapping
+    private var willSnapRight: Boolean = true
+
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             val stringExtras: Map<String, String> =
@@ -55,9 +58,16 @@ class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker){
                 RemoveAllTasksButHomeRule.removeAllTasksButHome()
                 pipApp.launchViaIntentAndWaitForPip(wmHelper, stringExtras = stringExtras)
 
-                val initRegion = pipApp.dragPipWindowAwayFromEdge(wmHelper, 50)
+                // get the initial region bounds and cache them
+                val initRegion = pipApp.getWindowRect(wmHelper)
                 startBounds
-                    .set(initRegion.left, initRegion.top, initRegion.right, initRegion.bottom)
+                        .set(initRegion.left, initRegion.top, initRegion.right, initRegion.bottom)
+
+                // drag the pip window away from the edge
+                pipApp.dragPipWindowAwayFromEdge(wmHelper, 50)
+
+                // determine the direction in which the snapping should occur
+                willSnapRight = pipApp.isCloserToRightEdge(wmHelper)
             }
             transitions {
                 // continue the transition until the PIP snaps
@@ -65,14 +75,20 @@ class PipDragThenSnapTest(flicker: FlickerTest) : PipTransition(flicker){
             }
         }
 
-    /** Checks that the visible region area of [pipApp] always moves right during the animation. */
+    /**
+     * Checks that the visible region area of [pipApp] moves to closest edge during the animation.
+     */
     @Postsubmit
     @Test
-    fun pipLayerMovesRight() {
+    fun pipLayerMovesToClosestEdge() {
         flicker.assertLayers {
             val pipLayerList = layers { pipApp.layerMatchesAnyOf(it) && it.isVisible }
             pipLayerList.zipWithNext { previous, current ->
-                current.visibleRegion.isToTheRight(previous.visibleRegion.region)
+                if (willSnapRight) {
+                    current.visibleRegion.isToTheRight(previous.visibleRegion.region)
+                } else {
+                    previous.visibleRegion.isToTheRight(current.visibleRegion.region)
+                }
             }
         }
     }
