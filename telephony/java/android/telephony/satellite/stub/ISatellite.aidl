@@ -49,10 +49,9 @@ oneway interface ISatellite {
      * Listening mode allows the satellite service to listen for incoming pages.
      *
      * @param enable True to enable satellite listening mode and false to disable.
-     * @param isDemoMode Whether demo mode is enabled.
      * @param timeout How long the satellite modem should wait for the next incoming page before
      *                disabling listening mode.
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -64,16 +63,17 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestSatelliteListeningEnabled(in boolean enable, in boolean isDemoMode, in int timeout,
-            in IIntegerConsumer errorCallback);
+    void requestSatelliteListeningEnabled(in boolean enable, in int timeout,
+            in IIntegerConsumer resultCallback);
 
     /**
-     * Request to enable or disable the satellite modem. If the satellite modem is enabled,
-     * this will also disable the cellular modem, and if the satellite modem is disabled,
-     * this will also re-enable the cellular modem.
+     * Request to enable or disable the satellite modem and demo mode. If the satellite modem
+     * is enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
+     * this may also re-enable the cellular modem.
      *
-     * @param enable True to enable the satellite modem and false to disable.
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param enableSatellite True to enable the satellite modem and false to disable.
+     * @param enableDemoMode True to enable demo mode and false to disable.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -85,13 +85,14 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestSatelliteEnabled(in boolean enabled, in IIntegerConsumer errorCallback);
+    void requestSatelliteEnabled(in boolean enableSatellite, in boolean enableDemoMode,
+            in IIntegerConsumer resultCallback);
 
     /**
      * Request to get whether the satellite modem is enabled.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 whether the satellite modem is enabled.
      *
@@ -105,13 +106,13 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestIsSatelliteEnabled(in IIntegerConsumer errorCallback, in IBooleanConsumer callback);
+    void requestIsSatelliteEnabled(in IIntegerConsumer resultCallback, in IBooleanConsumer callback);
 
     /**
      * Request to get whether the satellite service is supported on the device.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 whether the satellite service is supported on the device.
      *
@@ -125,14 +126,14 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestIsSatelliteSupported(in IIntegerConsumer errorCallback,
+    void requestIsSatelliteSupported(in IIntegerConsumer resultCallback,
             in IBooleanConsumer callback);
 
     /**
      * Request to get the SatelliteCapabilities of the satellite service.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 the SatelliteCapabilities of the satellite service.
      *
@@ -146,7 +147,7 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestSatelliteCapabilities(in IIntegerConsumer errorCallback,
+    void requestSatelliteCapabilities(in IIntegerConsumer resultCallback,
             in ISatelliteCapabilitiesConsumer callback);
 
     /**
@@ -154,7 +155,7 @@ oneway interface ISatellite {
      * The satellite service should report the satellite pointing info via
      * ISatelliteListener#onSatellitePositionChanged as the user device/satellite moves.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -166,13 +167,13 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void startSendingSatellitePointingInfo(in IIntegerConsumer errorCallback);
+    void startSendingSatellitePointingInfo(in IIntegerConsumer resultCallback);
 
     /**
      * User stopped pointing to the satellite.
      * The satellite service should stop reporting satellite pointing info to the framework.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -184,28 +185,7 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void stopSendingSatellitePointingInfo(in IIntegerConsumer errorCallback);
-
-    /**
-     * Request to get the maximum number of characters per MO text message on satellite.
-     *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
-     * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
-     *                 the maximum number of characters per MO text message on satellite.
-     *
-     * Valid error codes returned:
-     *   SatelliteError:ERROR_NONE
-     *   SatelliteError:SERVICE_ERROR
-     *   SatelliteError:MODEM_ERROR
-     *   SatelliteError:INVALID_MODEM_STATE
-     *   SatelliteError:INVALID_ARGUMENTS
-     *   SatelliteError:RADIO_NOT_AVAILABLE
-     *   SatelliteError:REQUEST_NOT_SUPPORTED
-     *   SatelliteError:NO_RESOURCES
-     */
-    void requestMaxCharactersPerMOTextMessage(in IIntegerConsumer errorCallback,
-            in IIntegerConsumer callback);
+    void stopSendingSatellitePointingInfo(in IIntegerConsumer resultCallback);
 
     /**
      * Provision the device with a satellite provider.
@@ -214,7 +194,8 @@ oneway interface ISatellite {
      *
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param regionId The region ID for the device's current location.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -229,7 +210,8 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_ABORTED
      *   SatelliteError:NETWORK_TIMEOUT
      */
-    void provisionSatelliteService(in String token, in IIntegerConsumer errorCallback);
+    void provisionSatelliteService(in String token, in String regionId,
+            in IIntegerConsumer resultCallback);
 
     /**
      * Deprovision the device with the satellite provider.
@@ -237,7 +219,7 @@ oneway interface ISatellite {
      * Once deprovisioned, ISatelliteListener#onSatelliteProvisionStateChanged should report false.
      *
      * @param token The token of the device/subscription to be deprovisioned.
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -252,13 +234,13 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_ABORTED
      *   SatelliteError:NETWORK_TIMEOUT
      */
-    void deprovisionSatelliteService(in String token, in IIntegerConsumer errorCallback);
+    void deprovisionSatelliteService(in String token, in IIntegerConsumer resultCallback);
 
     /**
      * Request to get whether this device is provisioned with a satellite provider.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 whether this device is provisioned with a satellite provider.
      *
@@ -272,7 +254,7 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestIsSatelliteProvisioned(in IIntegerConsumer errorCallback,
+    void requestIsSatelliteProvisioned(in IIntegerConsumer resultCallback,
             in IBooleanConsumer callback);
 
     /**
@@ -280,7 +262,7 @@ oneway interface ISatellite {
      * The satellite service should check if there are any pending datagrams to be received over
      * satellite and report them via ISatelliteListener#onSatelliteDatagramsReceived.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -297,15 +279,14 @@ oneway interface ISatellite {
      *   SatelliteError:SATELLITE_NOT_REACHABLE
      *   SatelliteError:NOT_AUTHORIZED
      */
-    void pollPendingSatelliteDatagrams(in IIntegerConsumer errorCallback);
+    void pollPendingSatelliteDatagrams(in IIntegerConsumer resultCallback);
 
     /**
      * Send datagram over satellite.
      *
      * @param datagram Datagram to send in byte format.
-     * @param isDemoMode Whether demo mode is enabled.
      * @param isEmergency Whether this is an emergency datagram.
-     * @param errorCallback The callback to receive the error code result of the operation.
+     * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
      *   SatelliteError:ERROR_NONE
@@ -323,16 +304,16 @@ oneway interface ISatellite {
      *   SatelliteError:SATELLITE_NOT_REACHABLE
      *   SatelliteError:NOT_AUTHORIZED
      */
-    void sendSatelliteDatagram(in SatelliteDatagram datagram, in boolean isDemoMode,
-            in boolean isEmergency, in IIntegerConsumer errorCallback);
+    void sendSatelliteDatagram(in SatelliteDatagram datagram, in boolean isEmergency,
+            in IIntegerConsumer resultCallback);
 
     /**
      * Request the current satellite modem state.
      * The satellite service should report the current satellite modem state via
      * ISatelliteListener#onSatelliteModemStateChanged.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 the current satellite modem state.
      *
@@ -346,14 +327,14 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestSatelliteModemState(in IIntegerConsumer errorCallback,
+    void requestSatelliteModemState(in IIntegerConsumer resultCallback,
             in IIntegerConsumer callback);
 
     /**
      * Request to get whether satellite communication is allowed for the current location.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 whether satellite communication is allowed for the current location.
      *
@@ -368,15 +349,15 @@ oneway interface ISatellite {
      *   SatelliteError:NO_RESOURCES
      */
     void requestIsSatelliteCommunicationAllowedForCurrentLocation(
-            in IIntegerConsumer errorCallback, in IBooleanConsumer callback);
+            in IIntegerConsumer resultCallback, in IBooleanConsumer callback);
 
     /**
      * Request to get the time after which the satellite will be visible. This is an int
      * representing the duration in seconds after which the satellite will be visible.
      * This will return 0 if the satellite is currently visible.
      *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
+     * @param resultCallback The callback to receive the error code result of the operation.
+     *                       This must only be sent when the error is not SatelliteError#ERROR_NONE.
      * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
      *                 the time after which the satellite will be visible.
      *
@@ -390,6 +371,6 @@ oneway interface ISatellite {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    void requestTimeForNextSatelliteVisibility(in IIntegerConsumer errorCallback,
+    void requestTimeForNextSatelliteVisibility(in IIntegerConsumer resultCallback,
             in IIntegerConsumer callback);
 }

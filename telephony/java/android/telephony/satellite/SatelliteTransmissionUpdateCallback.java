@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,22 @@
 
 package android.telephony.satellite;
 
-import android.telephony.satellite.PointingInfo;
+import android.annotation.NonNull;
 
 /**
- * Interface for position update and datagram transfer state change callback.
+ * A callback class for monitoring satellite position update and datagram transfer state change
+ * events.
+ *
  * @hide
  */
-oneway interface ISatellitePositionUpdateCallback {
+public interface SatelliteTransmissionUpdateCallback {
+    /**
+     * Called when the satellite position changed.
+     *
+     * @param pointingInfo The pointing info containing the satellite location.
+     */
+    void onSatellitePositionChanged(@NonNull PointingInfo pointingInfo);
+
     /**
      * Called when satellite datagram transfer state changed.
      *
@@ -31,13 +40,7 @@ oneway interface ISatellitePositionUpdateCallback {
      * @param receivePendingCount The number of datagrams that are currently being received.
      * @param errorCode If datagram transfer failed, the reason for failure.
      */
-    void onDatagramTransferStateChanged(in int state, in int sendPendingCount,
-            in int receivePendingCount, in int errorCode);
-
-    /**
-     * Called when the satellite position changed.
-     *
-     * @param pointingInfo The pointing info containing the satellite location.
-     */
-    void onSatellitePositionChanged(in PointingInfo pointingInfo);
+    void onDatagramTransferStateChanged(@SatelliteManager.SatelliteDatagramTransferState int state,
+            int sendPendingCount, int receivePendingCount,
+            @SatelliteManager.SatelliteError int errorCode);
 }

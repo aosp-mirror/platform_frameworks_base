@@ -70,20 +70,21 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode,
-                int timeout, IIntegerConsumer errorCallback) throws RemoteException {
+        public void requestSatelliteListeningEnabled(boolean enable, int timeout,
+                IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .requestSatelliteListeningEnabled(
-                                    enable, isDemoMode, timeout, errorCallback),
+                            .requestSatelliteListeningEnabled(enable, timeout, errorCallback),
                     "requestSatelliteListeningEnabled");
         }
 
         @Override
-        public void requestSatelliteEnabled(boolean enable, IIntegerConsumer errorCallback)
-                throws RemoteException {
+        public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
+                IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
-                    () -> SatelliteImplBase.this.requestSatelliteEnabled(enable, errorCallback),
+                    () -> SatelliteImplBase.this
+                            .requestSatelliteEnabled(
+                                    enableSatellite, enableDemoMode, errorCallback),
                     "requestSatelliteEnabled");
         }
 
@@ -131,19 +132,11 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void requestMaxCharactersPerMOTextMessage(IIntegerConsumer errorCallback,
-                IIntegerConsumer callback) throws RemoteException {
+        public void provisionSatelliteService(String token, String regionId,
+                IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .requestMaxCharactersPerMOTextMessage(errorCallback, callback),
-                    "requestMaxCharactersPerMOTextMessage");
-        }
-
-        @Override
-        public void provisionSatelliteService(String token, IIntegerConsumer errorCallback)
-                throws RemoteException {
-            executeMethodAsync(
-                    () -> SatelliteImplBase.this.provisionSatelliteService(token, errorCallback),
+                            .provisionSatelliteService(token, regionId, errorCallback),
                     "provisionSatelliteService");
         }
 
@@ -173,12 +166,11 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void sendSatelliteDatagram(SatelliteDatagram datagram, boolean isDemoMode,
-                boolean isEmergency, IIntegerConsumer errorCallback) throws RemoteException {
+        public void sendSatelliteDatagram(SatelliteDatagram datagram, boolean isEmergency,
+                IIntegerConsumer errorCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .sendSatelliteDatagram(
-                                    datagram, isDemoMode, isEmergency, errorCallback),
+                            .sendSatelliteDatagram(datagram, isEmergency, errorCallback),
                     "sendSatelliteDatagram");
         }
 
@@ -249,7 +241,6 @@ public class SatelliteImplBase extends SatelliteService {
      * Listening mode allows the satellite service to listen for incoming pages.
      *
      * @param enable True to enable satellite listening mode and false to disable.
-     * @param isDemoMode Whether demo mode is enabled.
      * @param timeout How long the satellite modem should wait for the next incoming page before
      *                disabling listening mode.
      * @param errorCallback The callback to receive the error code result of the operation.
@@ -264,17 +255,18 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    public void requestSatelliteListeningEnabled(boolean enable, boolean isDemoMode, int timeout,
+    public void requestSatelliteListeningEnabled(boolean enable, int timeout,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
 
     /**
-     * Request to enable or disable the satellite modem. If the satellite modem is enabled,
-     * this will also disable the cellular modem, and if the satellite modem is disabled,
-     * this will also re-enable the cellular modem.
+     * Request to enable or disable the satellite modem and demo mode. If the satellite modem is
+     * enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
+     * this may also re-enable the cellular modem.
      *
-     * @param enable True to enable the satellite modem and false to disable.
+     * @param enableSatellite True to enable the satellite modem and false to disable.
+     * @param enableDemoMode True to enable demo mode and false to disable.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -287,7 +279,8 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_NOT_SUPPORTED
      *   SatelliteError:NO_RESOURCES
      */
-    public void requestSatelliteEnabled(boolean enable, @NonNull IIntegerConsumer errorCallback) {
+    public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
+            @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
 
@@ -402,35 +395,13 @@ public class SatelliteImplBase extends SatelliteService {
     }
 
     /**
-     * Request to get the maximum number of characters per MO text message on satellite.
-     *
-     * @param errorCallback The callback to receive the error code result of the operation.
-     *                      This must only be sent when the result is not SatelliteError#ERROR_NONE.
-     * @param callback If the result is SatelliteError#ERROR_NONE, the callback to receive
-     *                 the maximum number of characters per MO text message on satellite.
-     *
-     * Valid error codes returned:
-     *   SatelliteError:ERROR_NONE
-     *   SatelliteError:SERVICE_ERROR
-     *   SatelliteError:MODEM_ERROR
-     *   SatelliteError:INVALID_MODEM_STATE
-     *   SatelliteError:INVALID_ARGUMENTS
-     *   SatelliteError:RADIO_NOT_AVAILABLE
-     *   SatelliteError:REQUEST_NOT_SUPPORTED
-     *   SatelliteError:NO_RESOURCES
-     */
-    public void requestMaxCharactersPerMOTextMessage(@NonNull IIntegerConsumer errorCallback,
-            @NonNull IIntegerConsumer callback) {
-        // stub implementation
-    }
-
-    /**
      * Provision the device with a satellite provider.
      * This is needed if the provider allows dynamic registration.
      * Once provisioned, ISatelliteListener#onSatelliteProvisionStateChanged should report true.
      *
      * @param token The token to be used as a unique identifier for provisioning with satellite
      *              gateway.
+     * @param regionId The region ID for the device's current location.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
      * Valid error codes returned:
@@ -446,7 +417,7 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:REQUEST_ABORTED
      *   SatelliteError:NETWORK_TIMEOUT
      */
-    public void provisionSatelliteService(@NonNull String token,
+    public void provisionSatelliteService(@NonNull String token, @NonNull String regionId,
             @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
@@ -530,7 +501,6 @@ public class SatelliteImplBase extends SatelliteService {
      * Send datagram over satellite.
      *
      * @param datagram Datagram to send in byte format.
-     * @param isDemoMode Whether demo mode is enabled.
      * @param isEmergency Whether this is an emergency datagram.
      * @param errorCallback The callback to receive the error code result of the operation.
      *
@@ -550,8 +520,8 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteError:SATELLITE_NOT_REACHABLE
      *   SatelliteError:NOT_AUTHORIZED
      */
-    public void sendSatelliteDatagram(@NonNull SatelliteDatagram datagram, boolean isDemoMode,
-            boolean isEmergency, @NonNull IIntegerConsumer errorCallback) {
+    public void sendSatelliteDatagram(@NonNull SatelliteDatagram datagram, boolean isEmergency,
+            @NonNull IIntegerConsumer errorCallback) {
         // stub implementation
     }
 
