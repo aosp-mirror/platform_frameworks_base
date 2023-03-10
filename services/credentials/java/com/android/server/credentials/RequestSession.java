@@ -128,6 +128,10 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
         this.mInitialPhaseMetric.setCountRequestClassType(requestClassType);
     }
 
+    public void addProviderSession(ComponentName componentName, ProviderSession providerSession) {
+        mProviders.put(componentName.flattenToString(), providerSession);
+    }
+
     // UI callbacks
 
     @Override // from CredentialManagerUiCallbacks
