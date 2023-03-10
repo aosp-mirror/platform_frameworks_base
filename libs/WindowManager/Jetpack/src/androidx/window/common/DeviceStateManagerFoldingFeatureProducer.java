@@ -19,6 +19,7 @@ package androidx.window.common;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
 import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_UNKNOWN;
+import static androidx.window.common.CommonFoldingFeature.COMMON_STATE_USE_BASE_STATE;
 import static androidx.window.common.CommonFoldingFeature.parseListFromString;
 
 import android.annotation.NonNull;
@@ -52,12 +53,53 @@ public final class DeviceStateManagerFoldingFeatureProducer
             DeviceStateManagerFoldingFeatureProducer.class.getSimpleName();
     private static final boolean DEBUG = false;
 
+    /**
+     * Emulated device state {@link DeviceStateManager.DeviceStateCallback#onStateChanged(int)} to
+     * {@link CommonFoldingFeature.State} map.
+     */
     private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
 
+    /**
+     * Emulated device state received via
+     * {@link DeviceStateManager.DeviceStateCallback#onStateChanged(int)}.
+     * "Emulated" states differ from "base" state in the sense that they may not correspond 1:1 with
+     * physical device states. They represent the state of the device when various software
+     * features and APIs are applied. The emulated states generally consist of all "base" states,
+     * but may have additional states such as "concurrent" or "rear display". Concurrent mode for
+     * example is activated via public API and can be active in both the "open" and "half folded"
+     * device states.
+     */
     private int mCurrentDeviceState = INVALID_DEVICE_STATE;
+
+    /**
+     * Base device state received via
+     * {@link DeviceStateManager.DeviceStateCallback#onBaseStateChanged(int)}.
+     * "Base" in this context means the "physical" state of the device.
+     */
+    private int mCurrentBaseDeviceState = INVALID_DEVICE_STATE;
 
     @NonNull
     private final BaseDataProducer<String> mRawFoldSupplier;
+
+    private final DeviceStateCallback mDeviceStateCallback = new DeviceStateCallback() {
+        @Override
+        public void onStateChanged(int state) {
+            mCurrentDeviceState = state;
+            mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer
+                    .this::notifyFoldingFeatureChange);
+        }
+
+        @Override
+        public void onBaseStateChanged(int state) {
+            mCurrentBaseDeviceState = state;
+
+            if (mDeviceStateToPostureMap.get(mCurrentDeviceState)
+                    == COMMON_STATE_USE_BASE_STATE) {
+                mRawFoldSupplier.getData(DeviceStateManagerFoldingFeatureProducer
+                        .this::notifyFoldingFeatureChange);
+            }
+        }
+    };
 
     public DeviceStateManagerFoldingFeatureProducer(@NonNull Context context,
             @NonNull BaseDataProducer<String> rawFoldSupplier) {
@@ -92,12 +134,8 @@ public final class DeviceStateManagerFoldingFeatureProducer
         }
 
         if (mDeviceStateToPostureMap.size() > 0) {
-            DeviceStateCallback deviceStateCallback = (state) -> {
-                mCurrentDeviceState = state;
-                mRawFoldSupplier.getData(this::notifyFoldingFeatureChange);
-            };
             Objects.requireNonNull(context.getSystemService(DeviceStateManager.class))
-                    .registerCallback(context.getMainExecutor(), deviceStateCallback);
+                    .registerCallback(context.getMainExecutor(), mDeviceStateCallback);
         }
     }
 
@@ -178,11 +216,18 @@ public final class DeviceStateManagerFoldingFeatureProducer
     }
 
     private List<CommonFoldingFeature> calculateFoldingFeature(String displayFeaturesString) {
-        final int globalHingeState = globalHingeState();
-        return parseListFromString(displayFeaturesString, globalHingeState);
+        return parseListFromString(displayFeaturesString, currentHingeState());
     }
 
-    private int globalHingeState() {
-        return mDeviceStateToPostureMap.get(mCurrentDeviceState, COMMON_STATE_UNKNOWN);
+    @CommonFoldingFeature.State
+    private int currentHingeState() {
+        @CommonFoldingFeature.State
+        int posture = mDeviceStateToPostureMap.get(mCurrentDeviceState, COMMON_STATE_UNKNOWN);
+
+        if (posture == CommonFoldingFeature.COMMON_STATE_USE_BASE_STATE) {
+            posture = mDeviceStateToPostureMap.get(mCurrentBaseDeviceState, COMMON_STATE_UNKNOWN);
+        }
+
+        return posture;
     }
 }
