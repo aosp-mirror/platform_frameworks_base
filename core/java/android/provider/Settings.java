@@ -8001,6 +8001,15 @@ public final class Settings {
                 "accessibility_display_inversion_enabled";
 
         /**
+         * Flag that specifies whether font size has been changed. The flag will
+         * be set when users change the scaled value of font size for the first time.
+         * @hide
+         */
+        @Readable
+        public static final String ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED =
+                "accessibility_font_scaling_has_been_changed";
+
+        /**
          * Setting that specifies whether display color space adjustment is
          * enabled.
          *
