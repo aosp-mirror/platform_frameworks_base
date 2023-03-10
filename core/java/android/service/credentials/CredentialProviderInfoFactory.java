@@ -462,7 +462,7 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices) {
         requireNonNull(context, "context must not be null");
 
         final List<CredentialProviderInfo> providerInfos = new ArrayList<>();
@@ -476,7 +476,7 @@ public final class CredentialProviderInfoFactory {
                                 si,
                                 /* isSystemProvider= */ true,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(si));
+                                enabledServices.contains(si.getComponentName()));
                 if (cpi.isSystemProvider()) {
                     providerInfos.add(cpi);
                 } else {
@@ -506,31 +506,6 @@ public final class CredentialProviderInfoFactory {
     }
 
     /**
-     * Returns a valid credential provider that has the given package name. Returns null if no
-     * match is found.
-     */
-    @Nullable
-    public static CredentialProviderInfo getCredentialProviderFromPackageName(
-            @NonNull Context context,
-            int userId,
-            @NonNull String packageName,
-            int providerFilter,
-            @NonNull Set<ServiceInfo> enabledServices) {
-        requireNonNull(context, "context must not be null");
-        requireNonNull(packageName, "package name must not be null");
-        requireNonNull(enabledServices, "enabledServices must not be null");
-
-        for (CredentialProviderInfo credentialProviderInfo : getCredentialProviderServices(context,
-                userId, providerFilter, enabledServices)) {
-            if (credentialProviderInfo.getServiceInfo()
-                    .packageName.equals(packageName)) {
-                return credentialProviderInfo;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Returns the valid credential provider services available for the user with the given {@code
      * userId}.
      */
@@ -539,7 +514,7 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             int userId,
             int providerFilter,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -568,7 +543,7 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             int userId,
             int providerFilter,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -674,7 +649,7 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices) {
         final List<CredentialProviderInfo> services = new ArrayList<>();
         final List<ResolveInfo> resolveInfos =
                 context.getPackageManager()
@@ -684,6 +659,11 @@ public final class CredentialProviderInfoFactory {
                                 userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            if (serviceInfo == null) {
+                Log.i(TAG, "No serviceInfo found for resolveInfo so skipping this provider");
+                continue;
+            }
+
             try {
                 CredentialProviderInfo cpi =
                         CredentialProviderInfoFactory.create(
@@ -691,7 +671,7 @@ public final class CredentialProviderInfoFactory {
                                 serviceInfo,
                                 /* isSystemProvider= */ false,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(serviceInfo));
+                                enabledServices.contains(serviceInfo.getComponentName()));
                 if (!cpi.isSystemProvider()) {
                     services.add(cpi);
                 }
