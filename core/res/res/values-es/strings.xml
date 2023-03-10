@@ -1366,9 +1366,9 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Cargando el dispositivo conectado. Toca para ver más opciones."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración USB habilitada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración USB"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración USB"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activa"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración por USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Toca para desactivar la depuración inalámbrica."</string>

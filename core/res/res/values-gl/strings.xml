@@ -1325,8 +1325,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Permitir"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Rexeitar"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; quere enviar unha mensaxe a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na túa conta de teléfono móbil."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na túa conta de teléfono móbil."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Esta acción "<b>"pode supoñer custos"</b>" na conta do teu operador móbil."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Esta acción suporá custos na conta do teu operador móbil."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Enviar"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancelar"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Lembrar a miña opción"</string>
