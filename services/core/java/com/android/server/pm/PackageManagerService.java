@@ -188,7 +188,6 @@ import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
-import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.EventLogTags;
 import com.android.server.FgThread;
 import com.android.server.LocalManagerRegistry;
@@ -6744,16 +6743,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public LegacyPermissionSettings getLegacyPermissions() {
             synchronized (mLock) {
                 return mSettings.mPermissions;
-            }
-        }
-
-        /**
-         * Read legacy permission states for permissions migration to new permission subsystem.
-         */
-        @Override
-        public RuntimePermissionsState getLegacyPermissionsState(int userId) {
-            synchronized (mLock) {
-                return mSettings.getLegacyPermissionsState(userId);
             }
         }
 
