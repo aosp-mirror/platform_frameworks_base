@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -347,6 +348,33 @@ public class SizeCompatTests extends WindowTestsBase {
         // We check aspect ratios
         assertEquals(1.2f, translucentActivity.getMinAspectRatio(), 0.00001f);
         assertEquals(1.5f, translucentActivity.getMaxAspectRatio(), 0.00001f);
+    }
+
+    @Test
+    public void testApplyStrategyToTranslucentActivitiesRetainsWindowConfigurationProperties() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2000, 1000);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm)
+                .setLaunchedFromUid(mActivity.getUid())
+                .build();
+        doReturn(false).when(translucentActivity).fillsParent();
+        WindowConfiguration translucentWinConf = translucentActivity.getWindowConfiguration();
+        translucentActivity.setActivityType(ACTIVITY_TYPE_STANDARD);
+        translucentActivity.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        translucentActivity.setDisplayWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        translucentActivity.setAlwaysOnTop(true);
+
+        mTask.addChild(translucentActivity);
+
+        // We check the WIndowConfiguration properties
+        translucentWinConf = translucentActivity.getWindowConfiguration();
+        assertEquals(ACTIVITY_TYPE_STANDARD, translucentActivity.getActivityType());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getWindowingMode());
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, translucentWinConf.getDisplayWindowingMode());
+        assertTrue(translucentWinConf.isAlwaysOnTop());
     }
 
     @Test
