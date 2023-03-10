@@ -446,6 +446,7 @@ fun MoreOptionsRowIntroCard(
             BodyMediumText(text = stringResource(
                 R.string.use_provider_for_all_description, entryInfo.userProviderDisplayName))
         }
+        item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
             CtaButtonRow(
                 leftButton = {
@@ -559,7 +560,11 @@ fun CreationSelectionCard(
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
-            item { BodySmallText(text = createOptionInfo.footerDescription) }
+            item {
+                Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+                    BodySmallText(text = createOptionInfo.footerDescription)
+                }
+            }
         }
     }
     onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_CREATION_OPTION_SELECTION)

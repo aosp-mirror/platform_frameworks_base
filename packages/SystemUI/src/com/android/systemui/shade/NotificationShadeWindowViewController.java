@@ -36,6 +36,7 @@ import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.LockIconViewController;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.R;
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -86,7 +87,7 @@ public class NotificationShadeWindowViewController {
     private final PulsingGestureListener mPulsingGestureListener;
     private final NotificationInsetsController mNotificationInsetsController;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
-
+    private final UdfpsOverlayInteractor mUdfpsOverlayInteractor;
     private GestureDetector mPulsingWakeupGestureHandler;
     private View mBrightnessMirror;
     private boolean mTouchActive;
@@ -134,6 +135,7 @@ public class NotificationShadeWindowViewController {
             KeyguardBouncerViewModel keyguardBouncerViewModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory,
             AlternateBouncerInteractor alternateBouncerInteractor,
+            UdfpsOverlayInteractor udfpsOverlayInteractor,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
             PrimaryBouncerToGoneTransitionViewModel primaryBouncerToGoneTransitionViewModel
     ) {
@@ -156,6 +158,7 @@ public class NotificationShadeWindowViewController {
         mPulsingGestureListener = pulsingGestureListener;
         mNotificationInsetsController = notificationInsetsController;
         mAlternateBouncerInteractor = alternateBouncerInteractor;
+        mUdfpsOverlayInteractor = udfpsOverlayInteractor;
 
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
@@ -240,7 +243,6 @@ public class NotificationShadeWindowViewController {
 
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
-                mStatusBarKeyguardViewManager.onTouch(ev);
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {
                     // Disallow new pointers while the brightness mirror is visible. This is so that
@@ -316,8 +318,8 @@ public class NotificationShadeWindowViewController {
                 }
 
                 if (mAlternateBouncerInteractor.isVisibleState()) {
-                    // capture all touches if the alt auth bouncer is showing
-                    return true;
+                    // If using UDFPS, don't intercept touches that are within its overlay bounds
+                    return mUdfpsOverlayInteractor.canInterceptTouchInUdfpsBounds(ev);
                 }
 
                 if (mLockIconViewController.onInterceptTouchEvent(ev)) {
@@ -355,6 +357,7 @@ public class NotificationShadeWindowViewController {
 
                 if (mAlternateBouncerInteractor.isVisibleState()) {
                     // eat the touch
+                    mStatusBarKeyguardViewManager.onTouch(ev);
                     handled = true;
                 }
 

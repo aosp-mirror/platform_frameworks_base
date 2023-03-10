@@ -1173,7 +1173,7 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "setAllConfigSettings for prefix: " + prefix);
         }
 
-        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+        enforceDeviceConfigWritePermission(getContext(), keyValues.keySet());
         final String callingPackage = resolveCallingPackage();
 
         synchronized (mLock) {
@@ -1192,7 +1192,8 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "setSyncDisabledModeConfig(" + syncDisabledMode + ")");
         }
 
-        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+        enforceHasAtLeastOnePermission(Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG);
 
         synchronized (mLock) {
             setSyncDisabledModeConfigLocked(syncDisabledMode);
@@ -1204,7 +1205,8 @@ public class SettingsProvider extends ContentProvider {
             Slog.v(LOG_TAG, "getSyncDisabledModeConfig");
         }
 
-        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
+        enforceHasAtLeastOnePermission(Manifest.permission.WRITE_DEVICE_CONFIG,
+                Manifest.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG);
 
         synchronized (mLock) {
             return getSyncDisabledModeConfigLocked();
@@ -1289,13 +1291,13 @@ public class SettingsProvider extends ContentProvider {
 
     private boolean mutateConfigSetting(String name, String value, String prefix,
             boolean makeDefault, int operation, int mode) {
-        enforceWritePermission(Manifest.permission.WRITE_DEVICE_CONFIG);
         final String callingPackage = resolveCallingPackage();
 
         // Perform the mutation.
         synchronized (mLock) {
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
+                    enforceDeviceConfigWritePermission(getContext(), Collections.singleton(name));
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, name, value, null, makeDefault, true,
                             callingPackage, false, null,
@@ -1303,11 +1305,14 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 case MUTATION_OPERATION_DELETE: {
+                    enforceDeviceConfigWritePermission(getContext(), Collections.singleton(name));
                     return mSettingsRegistry.deleteSettingLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, name, false, null);
                 }
 
                 case MUTATION_OPERATION_RESET: {
+                    enforceDeviceConfigWritePermission(getContext(),
+                            getAllConfigFlags(prefix).keySet());
                     mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
                             UserHandle.USER_SYSTEM, callingPackage, mode, null, prefix);
                 } return true;
@@ -1464,7 +1469,7 @@ public class SettingsProvider extends ContentProvider {
             boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
             int mode, boolean overrideableByRestore) {
         // Make sure the caller can change the settings - treated as secure.
-        enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
+        enforceHasAtLeastOnePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
@@ -1752,7 +1757,7 @@ public class SettingsProvider extends ContentProvider {
             boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
             int mode, boolean overrideableByRestore) {
         // Make sure the caller can change the settings.
-        enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
+        enforceHasAtLeastOnePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
 
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
@@ -2277,11 +2282,57 @@ public class SettingsProvider extends ContentProvider {
         }
     }
 
-    private void enforceWritePermission(String permission) {
-        if (getContext().checkCallingOrSelfPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Permission denial: writing to settings requires:"
-                    + permission);
+    private void enforceHasAtLeastOnePermission(String ...permissions) {
+        for (String permission : permissions) {
+            if (getContext().checkCallingOrSelfPermission(permission)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+        }
+        throw new SecurityException("Permission denial, must have one of: "
+            + Arrays.toString(permissions));
+    }
+
+    /**
+     * Throws an exception if write permissions are not granted for {@code flags}.
+     * <p>
+     * Write permissions are granted if the calling UID is root, or the
+     * WRITE_DEVICE_CONFIG permission is granted, or the WRITE_DEVICE_CONFIG_ALLOWLIST
+     * permission is granted and each flag in {@code flags} is allowlisted in {@code
+     * WRITABLE_FLAG_ALLOWLIST_FLAG}.
+     *
+     * @param context the {@link Context} this is called in
+     * @param flags a list of flags to check, each one of the form 'namespace/flagName'
+     *
+     * @throws SecurityException if the above criteria are not met.
+     * @hide
+     */
+    private void enforceDeviceConfigWritePermission(
+            @NonNull Context context,
+            @NonNull Set<String> flags) {
+        boolean hasAllowlistPermission =
+                context.checkCallingOrSelfPermission(
+                Manifest.permission.ALLOWLISTED_WRITE_DEVICE_CONFIG)
+                == PackageManager.PERMISSION_GRANTED;
+        boolean hasWritePermission =
+                context.checkCallingOrSelfPermission(
+                Manifest.permission.WRITE_DEVICE_CONFIG)
+                == PackageManager.PERMISSION_GRANTED;
+        boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
+
+        if (isRoot || hasWritePermission) {
+            return;
+        } else if (hasAllowlistPermission) {
+            for (String flag : flags) {
+                if (!DeviceConfig.getAdbWritableFlags().contains(flag)) {
+                    throw new SecurityException("Permission denial for flag '"
+                        + flag
+                        + "'; allowlist permission granted, but must add flag to the allowlist.");
+                }
+            }
+        } else {
+            throw new SecurityException("Permission denial to mutate flag, must have root, "
+                + "WRITE_DEVICE_CONFIG, or ALLOWLISTED_WRITE_DEVICE_CONFIG");
         }
     }
 
@@ -2327,15 +2378,11 @@ public class SettingsProvider extends ContentProvider {
         result.putString(Settings.NameValueTable.VALUE,
                 (setting != null && !setting.isNull()) ? setting.getValue() : null);
 
-        synchronized (mLock) {
-            if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
-                // Individual generation tracking for predefined settings even if they are unset
+        if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
+            // Don't track generation for non-existent settings unless the name is predefined
+            synchronized (mLock) {
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
                         SettingsState.makeKey(type, userId), name);
-            } else {
-                // All non-predefined, unset settings are tracked using the same generation number
-                mSettingsRegistry.mGenerationRegistry.addGenerationDataForUnsetSettings(result,
-                        SettingsState.makeKey(type, userId));
             }
         }
         return result;
@@ -2349,8 +2396,7 @@ public class SettingsProvider extends ContentProvider {
         } else if (type == SETTINGS_TYPE_SYSTEM) {
             return sAllSystemSettings.contains(name);
         } else {
-            // Consider all config settings predefined because they are used by system apps only
-            return type == SETTINGS_TYPE_CONFIG;
+            return false;
         }
     }
 
@@ -2359,13 +2405,14 @@ public class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putSerializable(Settings.NameValueTable.VALUE, keyValues);
         if (trackingGeneration) {
+            // Track generation even if the namespace is empty because this is for system apps
             synchronized (mLock) {
-                // Track generation even if namespace is empty because this is for system apps only
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
-                        SettingsState.makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM),
-                        prefix);
+                        mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_CONFIG,
+                                UserHandle.USER_SYSTEM).mKey, prefix);
             }
         }
+
         return result;
     }
 
@@ -3056,15 +3103,10 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             boolean success = false;
-            boolean wasUnsetNonPredefinedSetting = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
-                if (!isSettingPreDefined(name, type) && !settingsState.hasSetting(name)) {
-                    wasUnsetNonPredefinedSetting = true;
-                }
                 success = settingsState.insertSettingLocked(name, value,
-                        tag, makeDefault, forceNonSystemPackage, packageName,
-                        overrideableByRestore);
+                        tag, makeDefault, forceNonSystemPackage, packageName, overrideableByRestore);
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {
@@ -3073,11 +3115,6 @@ public class SettingsProvider extends ContentProvider {
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
-                if (wasUnsetNonPredefinedSetting) {
-                    // Increment the generation number for all non-predefined, unset settings,
-                    // because a new non-predefined setting has been inserted
-                    mGenerationRegistry.incrementGenerationForUnsetSettings(key);
-                }
             }
             if (success) {
                 logSettingChanged(userId, name, type, CHANGE_TYPE_INSERT);

@@ -1117,7 +1117,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void notifyTvMessage(IBinder sessionToken, String type, Bundle data, int userId) {
+        public void notifyTvMessage(IBinder sessionToken, int type, Bundle data, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid, userId,
@@ -3047,16 +3047,16 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onAdBuffer(AdBuffer buffer) {
+        public void onAdBufferReady(AdBuffer buffer) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slogf.d(TAG, "onAdBuffer(buffer=" + buffer + ")");
+                    Slogf.d(TAG, "onAdBufferReady(buffer=" + buffer + ")");
                 }
                 if (mSessionState.mSession == null || mSessionState.mClient == null) {
                     return;
                 }
                 try {
-                    mSessionState.mClient.onAdBuffer(buffer, mSessionState.mSeq);
+                    mSessionState.mClient.onAdBufferReady(buffer, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onAdBuffer", e);
                 }

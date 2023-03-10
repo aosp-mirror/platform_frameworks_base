@@ -630,6 +630,8 @@ public abstract class TvInteractiveAppService extends Service {
          *                  {@link #requestStartRecording(String, Uri)} is called.
          *                  {@code null} if the recording is not triggered by a
          *                  {@link #requestStartRecording(String, Uri)} request.
+         *                  This ID should be created by the {@link TvInteractiveAppService} and
+         *                  can be any string.
          * @see #onRecordingStopped(String)
          */
         public void onRecordingStarted(@NonNull String recordingId, @Nullable String requestId) {
@@ -708,6 +710,8 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of the request when
          *                  {@link #requestScheduleRecording}  is called.
          *                  {@code null} if the recording is not triggered by a request.
+         *                  This ID should be created by the {@link TvInteractiveAppService} and
+         *                  can be any string.
          */
         public void onRecordingScheduled(@NonNull String recordingId, @Nullable String requestId) {
         }
@@ -916,7 +920,7 @@ public abstract class TvInteractiveAppService extends Service {
          * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
          * @param data The raw data of the message
          */
-        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
         }
 
@@ -1338,7 +1342,10 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
          *                  {@link #onRecordingStarted(String, String)} for this request is the
-         *                  same as the ID sent here.
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both 
+         *                  requests should be handled regardless by the TV application.
          * @param programUri The URI for the TV program to record.
          * @see android.media.tv.TvRecordingClient#startRecording(Uri)
          */
@@ -1390,7 +1397,10 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
          *                  {@link #onRecordingScheduled(String, String)} for this request is the
-         *                  same as the ID sent here.
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string.
+         *                  Should this API be called with the same requestId twice, both requests
+         *                  should be handled regardless by the TV application.
          * @param inputId The ID of the TV input for the given channel.
          * @param channelUri The URI of a channel to be recorded.
          * @param programUri The URI of the TV program to be recorded.
@@ -1424,7 +1434,10 @@ public abstract class TvInteractiveAppService extends Service {
          * @param requestId The ID of this request which is used to match the corresponding
          *                  response. The request ID in
          *                  {@link #onRecordingScheduled(String, String)} for this request is the
-         *                  same as the ID sent here.
+         *                  same as the ID sent here. This should be defined by the
+         *                  {@link TvInteractiveAppService} and can be any string. Should this API
+         *                  be called with the same requestId twice, both requests should be handled
+         *                  regardless by the TV application.
          * @param inputId The ID of the TV input for the given channel.
          * @param channelUri The URI of a channel to be recorded.
          * @param startTime The start time of the recording in milliseconds since epoch.
@@ -1507,8 +1520,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param type The type of recording to retrieve.
          */
         @CallSuper
-        public void requestTvRecordingInfoList(@NonNull @TvRecordingInfo.TvRecordingListType
-                int type) {
+        public void requestTvRecordingInfoList(@TvRecordingInfo.TvRecordingListType int type) {
             executeOrPostRunnableOnMainThread(() -> {
                 try {
                     if (DEBUG) {
@@ -1753,7 +1765,7 @@ public abstract class TvInteractiveAppService extends Service {
             onAdResponse(response);
         }
 
-        void notifyTvMessage(String type, Bundle data) {
+        void notifyTvMessage(int type, Bundle data) {
             if (DEBUG) {
                 Log.d(TAG, "notifyTvMessage (type=" + type + ", data= " + data + ")");
             }
@@ -1942,7 +1954,7 @@ public abstract class TvInteractiveAppService extends Service {
          * @param buffer The {@link AdBuffer} to be received
          */
         @CallSuper
-        public void notifyAdBuffer(@NonNull AdBuffer buffer) {
+        public void notifyAdBufferReady(@NonNull AdBuffer buffer) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -1950,10 +1962,10 @@ public abstract class TvInteractiveAppService extends Service {
                     try {
                         if (DEBUG) {
                             Log.d(TAG,
-                                    "notifyAdBuffer(buffer=" + buffer + ")");
+                                    "notifyAdBufferReady(buffer=" + buffer + ")");
                         }
                         if (mSessionCallback != null) {
-                            mSessionCallback.onAdBuffer(buffer);
+                            mSessionCallback.onAdBufferReady(buffer);
                         }
                     } catch (RemoteException e) {
                         Log.w(TAG, "error in notifyAdBuffer", e);

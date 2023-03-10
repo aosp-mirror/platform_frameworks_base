@@ -72,7 +72,8 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
             ProviderInternalCallback callbacks,
             int userId, RemoteCredentialService remoteCredentialService,
             ClearCredentialStateRequest providerRequest) {
-        super(context, info, providerRequest, callbacks, userId, remoteCredentialService);
+        super(context, providerRequest, callbacks, info.getComponentName(),
+                userId, remoteCredentialService);
         setStatus(Status.PENDING);
     }
 
@@ -95,7 +96,7 @@ public final class  ProviderClearSession extends ProviderSession<ClearCredential
     /** Called when provider service dies. */
     @Override // Callback from the remote provider
     public void onProviderServiceDied(RemoteCredentialService service) {
-        if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
+        if (service.getComponentName().equals(mComponentName)) {
             updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
         } else {
             Slog.i(TAG, "Component names different in onProviderServiceDied - "

@@ -1224,6 +1224,44 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void onTouch_WithNewTouchDetection_forwardToKeyguard() throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultDown = new TouchProcessorResult.ProcessedTouch(
+                InteractionEvent.UNCHANGED, -1 /* pointerOnSensorId */, touchData);
+
+        // Enable new touch detection.
+        when(mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true);
+
+        // Configure UdfpsController to use FingerprintManager as opposed to AlternateTouchProvider.
+        initUdfpsController(mOpticalProps, false /* hasAlternateTouchProvider */);
+
+        // Configure UdfpsView to accept the ACTION_DOWN event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(false);
+
+        // GIVEN that the overlay is showing and a11y touch exploration NOT enabled
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // WHEN ACTION_DOWN is received
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultDown);
+        MotionEvent downEvent = MotionEvent.obtain(0, 0, ACTION_DOWN, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, downEvent);
+        mBiometricExecutor.runAllReady();
+
+        // THEN the touch is forwarded to Keyguard
+        verify(mStatusBarKeyguardViewManager).onTouch(downEvent);
+        downEvent.recycle();
+    }
+
+    @Test
     public void onAodInterrupt_onAcquiredGood_fingerNoLongerDown() throws RemoteException {
         // GIVEN UDFPS overlay is showing
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,

@@ -243,7 +243,7 @@ public class ITvInteractiveAppSessionWrapper
             }
             case DO_NOTIFY_TV_MESSAGE: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mSessionImpl.notifyTvMessage((String) args.arg1, (Bundle) args.arg2);
+                mSessionImpl.notifyTvMessage((Integer) args.arg1, (Bundle) args.arg2);
                 args.recycle();
                 break;
             }
@@ -520,7 +520,7 @@ public class ITvInteractiveAppSessionWrapper
     }
 
     @Override
-    public void notifyTvMessage(String type, Bundle data) {
+    public void notifyTvMessage(int type, Bundle data) {
         mCaller.executeOrSendMessage(
                 mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
     }
@@ -558,7 +558,7 @@ public class ITvInteractiveAppSessionWrapper
     @Override
     public void notifyRecordingStarted(String recordingId, String requestId) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(
-                DO_NOTIFY_RECORDING_STARTED, recordingId, recordingId));
+                DO_NOTIFY_RECORDING_STARTED, recordingId, requestId));
     }
 
     @Override

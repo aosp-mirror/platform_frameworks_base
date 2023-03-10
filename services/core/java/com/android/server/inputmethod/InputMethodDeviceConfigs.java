@@ -21,6 +21,8 @@ import static android.provider.InputMethodManagerDeviceConfig.KEY_HIDE_IME_WHEN_
 import android.app.ActivityThread;
 import android.provider.DeviceConfig;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Class for the device-level configuration related to the input method manager
  * platform features in {@link DeviceConfig}.
@@ -55,5 +57,10 @@ final class InputMethodDeviceConfigs {
      */
     public boolean shouldHideImeWhenNoEditorFocus() {
         return mHideImeWhenNoEditorFocus;
+    }
+
+    @VisibleForTesting
+    void destroy() {
+        DeviceConfig.removeOnPropertiesChangedListener(mDeviceConfigChangedListener);
     }
 }

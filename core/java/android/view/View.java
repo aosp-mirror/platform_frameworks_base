@@ -142,7 +142,6 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
-import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -164,6 +163,7 @@ import android.view.translation.ViewTranslationCallback;
 import android.view.translation.ViewTranslationRequest;
 import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
 import android.window.OnBackInvokedDispatcher;
@@ -10357,35 +10357,61 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final AutofillManager afm = getAutofillManager();
         // keep default behavior
         if (afm == null) return false;
-        return afm.isMatchingAutofillableHeuristics(this);
+        return afm.isMatchingAutofillableHeuristicsForNotImportantViews(this);
     }
 
     private boolean isAutofillable() {
         if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
 
+        final AutofillManager afm = getAutofillManager();
+        if (afm == null) {
+            return false;
+        }
+
         // Disable triggering autofill if the view is integrated with CredentialManager.
-        if (AutofillFeatureFlags.shouldIgnoreCredentialViews()
-                && isCredential()) return false;
+        if (afm.shouldIgnoreCredentialViews() && isCredential()) {
+            return false;
+        }
+
+        // Experiment imeAction heuristic on important views. If the important view doesn't pass
+        // heuristic check, also check augmented autofill in case augmented autofill is enabled
+        // for the activity
+        // TODO: refactor to have both important views and not important views use the same
+        // heuristic check
+        if (isImportantForAutofill()
+            && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled()
+            && this instanceof EditText
+            && !afm.isPassingImeActionCheck((EditText) this)
+            && !notifyAugmentedAutofillIfNeeded(afm)) {
+            // TODO: add a log to indicate what has filtered out the view
+            return false;
+        }
 
         if (!isImportantForAutofill()) {
             // If view matches heuristics and is not denied, it will be treated same as view that's
             // important for autofill
-            if (isMatchingAutofillableHeuristics()
-                    && !isActivityDeniedForAutofillForUnimportantView()) {
+            if (afm.isMatchingAutofillableHeuristicsForNotImportantViews(this)
+                    && !afm.isActivityDeniedForAutofillForUnimportantView()) {
                 return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
             }
             // View is not important for "regular" autofill, so we must check if Augmented Autofill
             // is enabled for the activity
-            final AutofillOptions options = mContext.getAutofillOptions();
-            if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
+            if (!notifyAugmentedAutofillIfNeeded(afm)){
                 return false;
             }
-            final AutofillManager afm = getAutofillManager();
-            if (afm == null) return false;
-            afm.notifyViewEnteredForAugmentedAutofill(this);
         }
 
         return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+    }
+
+    /** @hide **/
+    public boolean notifyAugmentedAutofillIfNeeded(AutofillManager afm) {
+        final AutofillOptions options = mContext.getAutofillOptions();
+        if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
+            return false;
+        }
+        afm.notifyViewEnteredForAugmentedAutofill(this);
+        return true;
     }
 
     /** @hide */

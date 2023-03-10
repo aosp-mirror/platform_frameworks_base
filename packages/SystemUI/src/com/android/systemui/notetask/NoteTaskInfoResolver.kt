@@ -34,7 +34,6 @@ constructor(
 
     fun resolveInfo(
         entryPoint: NoteTaskEntryPoint? = null,
-        isInMultiWindowMode: Boolean = false,
         isKeyguardLocked: Boolean = false,
     ): NoteTaskInfo? {
         // TODO(b/267634412): Select UserHandle depending on where the user initiated note-taking.
@@ -48,7 +47,6 @@ constructor(
             packageName = packageName,
             uid = packageManager.getUidOf(packageName, user),
             entryPoint = entryPoint,
-            isInMultiWindowMode = isInMultiWindowMode,
             isKeyguardLocked = isKeyguardLocked,
         )
     }

@@ -26,6 +26,7 @@ import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
@@ -86,6 +87,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var pulsingGestureListener: PulsingGestureListener
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
+    @Mock private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
     @Mock lateinit var keyguardBouncerComponentFactory: KeyguardBouncerComponent.Factory
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
@@ -133,6 +135,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory,
                 alternateBouncerInteractor,
+                udfpsOverlayInteractor,
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
             )
@@ -262,6 +265,17 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
 
         verify(phoneStatusBarViewController).sendTouchToView(nextEvent)
         assertThat(returnVal).isTrue()
+    }
+
+    @Test
+    fun shouldInterceptTouchEvent_downEventAlternateBouncer_ignoreIfInUdfpsOverlay() {
+        // Down event within udfpsOverlay bounds while alternateBouncer is showing
+        whenever(udfpsOverlayInteractor.canInterceptTouchInUdfpsBounds(downEv)).thenReturn(false)
+        whenever(alternateBouncerInteractor.isVisibleState()).thenReturn(true)
+
+        // Then touch should not be intercepted
+        val shouldIntercept = interactionEventHandler.shouldInterceptTouchEvent(downEv)
+        assertThat(shouldIntercept).isFalse()
     }
 
     @Test
