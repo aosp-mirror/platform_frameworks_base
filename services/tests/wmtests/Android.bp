@@ -49,7 +49,7 @@ android_test {
     static_libs: [
         "frameworks-base-testutils",
         "services.core",
-        "service-permission.impl",
+        "service-permission.stubs.system_server",
         "androidx.test.runner",
         "androidx.test.rules",
         "mockito-target-extended-minus-junit4",

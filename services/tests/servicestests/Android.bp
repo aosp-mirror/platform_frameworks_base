@@ -36,7 +36,7 @@ android_test {
         "services.net",
         "services.people",
         "services.usage",
-        "service-permission.impl",
+        "service-permission.stubs.system_server",
         "guava",
         "guava-android-testlib",
         "androidx.test.core",
