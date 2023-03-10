@@ -640,6 +640,7 @@ public final class ActiveServices {
         mAppWidgetManagerInternal = LocalServices.getService(AppWidgetManagerInternal.class);
         setAllowListWhileInUsePermissionInFgs();
         initSystemExemptedFgsTypePermission();
+        initMediaProjectFgsTypeCustomPermission();
     }
 
     private AppStateTracker getAppStateTracker() {
@@ -2577,6 +2578,39 @@ public final class ActiveServices {
                        ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
         if (policyInfo != null) {
             policyInfo.setCustomPermission(new SystemExemptedFgsTypePermission());
+        }
+    }
+
+    /**
+     * A custom permission checker for the "mediaProjection" FGS type:
+     * if the app has been granted the permission to start a media projection via
+     * the {@link android.media.project.MediaProjectionManager#createScreenCaptureIntent()},
+     * it'll get the permission to start a foreground service with type "mediaProjection".
+     */
+    private class MediaProjectionFgsTypeCustomPermission extends ForegroundServiceTypePermission {
+        MediaProjectionFgsTypeCustomPermission() {
+            super("Media projection screen capture permission");
+        }
+
+        @Override
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
+                @NonNull String packageName, boolean allowWhileInUse) {
+            return mAm.isAllowedMediaProjectionNoOpCheck(callerUid)
+                    ? PERMISSION_GRANTED : PERMISSION_DENIED;
+        }
+    }
+
+    /**
+     * Set a custom permission checker for the "mediaProjection" FGS type.
+     */
+    private void initMediaProjectFgsTypeCustomPermission() {
+        final ForegroundServiceTypePolicy policy = ForegroundServiceTypePolicy.getDefaultPolicy();
+        final ForegroundServiceTypePolicyInfo policyInfo =
+                policy.getForegroundServiceTypePolicyInfo(
+                       ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION,
+                       ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE);
+        if (policyInfo != null) {
+            policyInfo.setCustomPermission(new MediaProjectionFgsTypeCustomPermission());
         }
     }
 

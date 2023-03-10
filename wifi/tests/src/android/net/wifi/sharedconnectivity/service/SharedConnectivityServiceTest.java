@@ -26,10 +26,12 @@ import static android.net.wifi.sharedconnectivity.app.NetworkProviderInfo.DEVICE
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.wifi.sharedconnectivity.app.HotspotNetwork;
 import android.net.wifi.sharedconnectivity.app.HotspotNetworkConnectionStatus;
 import android.net.wifi.sharedconnectivity.app.KnownNetwork;
@@ -85,6 +87,9 @@ public class SharedConnectivityServiceTest {
 
     @Mock
     Context mContext;
+
+    @Mock
+    Resources mResources;
 
     static class FakeSharedConnectivityService extends SharedConnectivityService {
         public void attachBaseContext(Context context) {
@@ -178,6 +183,48 @@ public class SharedConnectivityServiceTest {
 
         assertThat(binder.getKnownNetworkConnectionStatus())
                 .isEqualTo(KNOWN_NETWORK_CONNECTION_STATUS);
+    }
+
+    @Test
+    public void areHotspotNetworksEnabledForService() {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getPackageName()).thenReturn("package");
+        when(mResources.getString(anyInt())).thenReturn("package");
+        when(mResources.getBoolean(anyInt())).thenReturn(true);
+
+        assertThat(SharedConnectivityService.areHotspotNetworksEnabledForService(mContext))
+                .isTrue();
+    }
+
+    @Test
+    public void areHotspotNetworksEnabledForService_notSamePackage_shouldReturnFalse() {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getPackageName()).thenReturn("package");
+        when(mResources.getString(anyInt())).thenReturn("other_package");
+        when(mResources.getBoolean(anyInt())).thenReturn(true);
+
+        assertThat(SharedConnectivityService.areHotspotNetworksEnabledForService(mContext))
+                .isFalse();
+    }
+
+    @Test
+    public void areKnownNetworksEnabledForService() {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getPackageName()).thenReturn("package");
+        when(mResources.getString(anyInt())).thenReturn("package");
+        when(mResources.getBoolean(anyInt())).thenReturn(true);
+
+        assertThat(SharedConnectivityService.areKnownNetworksEnabledForService(mContext)).isTrue();
+    }
+
+    @Test
+    public void areKnownNetworksEnabledForService_notSamePackage_shouldReturnFalse() {
+        when(mContext.getResources()).thenReturn(mResources);
+        when(mContext.getPackageName()).thenReturn("package");
+        when(mResources.getString(anyInt())).thenReturn("other_package");
+        when(mResources.getBoolean(anyInt())).thenReturn(true);
+
+        assertThat(SharedConnectivityService.areKnownNetworksEnabledForService(mContext)).isFalse();
     }
 
     private SharedConnectivityService createService() {

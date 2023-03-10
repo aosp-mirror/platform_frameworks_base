@@ -384,7 +384,25 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTranslucentActivitiesDontGoInSizeCompactMode() {
+    public void testNotApplyStrategyToTranslucentActivitiesOverEmbeddedActivities() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2000, 1000);
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Mock the activity as embedded without additional TaskFragment layer in the task for
+        // simplicity.
+        doReturn(true).when(mActivity).isEmbedded();
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm).build();
+        doReturn(false).when(translucentActivity).matchParentBounds();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+        // Check the strategy has not being applied
+        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
+    }
+
+    @Test
+    public void testTranslucentActivitiesDontGoInSizeCompatMode() {
         mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
         setUpDisplaySizeWithApp(2800, 1400);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
@@ -2472,11 +2490,11 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.inSizeCompatMode());
 
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
-
-        assertTrue(mActivity.inSizeCompatMode());
-        // We should remember the original orientation.
+        // Activity is not in size compat mode because the orientation change request came from the
+        // app itself
+        assertFalse(mActivity.inSizeCompatMode());
         assertEquals(mActivity.getResolvedOverrideConfiguration().orientation,
-                Configuration.ORIENTATION_PORTRAIT);
+                Configuration.ORIENTATION_UNDEFINED);
     }
 
     @Test
@@ -3048,6 +3066,25 @@ public class SizeCompatTests extends WindowTestsBase {
         // Vertical reachability is enabled because the app matches parent width
         assertEquals(mActivity.getBounds().width(), mActivity.mDisplayContent.getBounds().width());
         assertTrue(mActivity.mLetterboxUiController.isVerticalReachabilityEnabled());
+    }
+
+    @Test
+    public void testAppRequestsOrientationChange_notInSizeCompat() {
+        setUpDisplaySizeWithApp(2200, 1800);
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+
+        mActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        // Activity is not in size compat mode because the orientation change request came from the
+        // app itself
+        assertFalse(mActivity.inSizeCompatMode());
+
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_270);
+        // Activity should go into size compat mode now because the orientation change came from the
+        // system (device rotation)
+        assertTrue(mActivity.inSizeCompatMode());
     }
 
     @Test

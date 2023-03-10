@@ -674,6 +674,12 @@ public final class AutofillManager {
     // Indicate whether trigger fill request on unimportant views is enabled
     private boolean mIsTriggerFillRequestOnUnimportantViewEnabled = false;
 
+    // Indicate whether to apply heuristic check on important views before trigger fill request
+    private boolean mIsTriggerFillRequestOnFilteredImportantViewsEnabled;
+
+    // Indicate whether to enable autofill for all view types
+    private boolean mShouldEnableAutofillOnAllViewTypes;
+
     // A set containing all non-autofillable ime actions passed by flag
     private Set<String> mNonAutofillableImeActionIdSet = new ArraySet<>();
 
@@ -690,6 +696,9 @@ public final class AutofillManager {
 
     // Indicates whether called the showAutofillDialog() method.
     private boolean mShowAutofillDialogCalled = false;
+
+    // Cached autofill feature flag
+    private boolean mShouldIgnoreCredentialViews = false;
 
     private final String[] mFillDialogEnabledHints;
 
@@ -838,6 +847,7 @@ public final class AutofillManager {
 
         mIsFillDialogEnabled = AutofillFeatureFlags.isFillDialogEnabled();
         mFillDialogEnabledHints = AutofillFeatureFlags.getFillDialogEnabledHints();
+        mShouldIgnoreCredentialViews = AutofillFeatureFlags.shouldIgnoreCredentialViews();
         if (sDebug) {
             Log.d(TAG, "Fill dialog is enabled:" + mIsFillDialogEnabled
                     + ", hints=" + Arrays.toString(mFillDialogEnabledHints));
@@ -851,6 +861,12 @@ public final class AutofillManager {
         mIsTriggerFillRequestOnUnimportantViewEnabled =
             AutofillFeatureFlags.isTriggerFillRequestOnUnimportantViewEnabled();
 
+        mIsTriggerFillRequestOnFilteredImportantViewsEnabled =
+            AutofillFeatureFlags.isTriggerFillRequestOnFilteredImportantViewsEnabled();
+
+        mShouldEnableAutofillOnAllViewTypes =
+            AutofillFeatureFlags.shouldEnableAutofillOnAllViewTypes();
+
         mNonAutofillableImeActionIdSet =
             AutofillFeatureFlags.getNonAutofillableImeActionIdSetFromFlag();
 
@@ -861,12 +877,37 @@ public final class AutofillManager {
         mIsPackageFullyDeniedForAutofillForUnimportantView =
             isPackageFullyDeniedForAutofillForUnimportantView(denyListString, packageName);
 
-        mIsPackagePartiallyDeniedForAutofillForUnimportantView =
-            isPackagePartiallyDeniedForAutofillForUnimportantView(denyListString, packageName);
+        if (!mIsPackageFullyDeniedForAutofillForUnimportantView) {
+            mIsPackagePartiallyDeniedForAutofillForUnimportantView =
+                isPackagePartiallyDeniedForAutofillForUnimportantView(denyListString, packageName);
+        }
 
         if (mIsPackagePartiallyDeniedForAutofillForUnimportantView) {
             setDeniedActivitySetWithDenyList(denyListString, packageName);
         }
+    }
+
+    /**
+     * Whether to apply heuristic check on important views before triggering fill request
+     *
+     * @hide
+     */
+    public boolean isTriggerFillRequestOnFilteredImportantViewsEnabled() {
+        return mIsTriggerFillRequestOnFilteredImportantViewsEnabled;
+    }
+
+    /**
+     * Whether view passes the imeAction check
+     *
+     * @hide
+     */
+    public boolean isPassingImeActionCheck(EditText editText) {
+        final int actionId = editText.getImeOptions();
+        if (mNonAutofillableImeActionIdSet.contains(String.valueOf(actionId))) {
+            // TODO: add a log to indicate what has filtered out the view
+            return false;
+        }
+        return true;
     }
 
     private boolean isPackageFullyDeniedForAutofillForUnimportantView(
@@ -953,25 +994,32 @@ public final class AutofillManager {
      *
      * @hide
      */
-    public final boolean isMatchingAutofillableHeuristics(@NonNull View view) {
+    public final boolean isMatchingAutofillableHeuristicsForNotImportantViews(@NonNull View view) {
         if (!mIsTriggerFillRequestOnUnimportantViewEnabled) {
             return false;
         }
+
+        // TODO: remove the autofill type check when this function is applied on both important and
+        // not important views.
+        // This check is needed here because once the view type check is lifted, addiditional
+        // unimportant views will be added to the assist structure which may cuase system health
+        // regression (viewGroup#populateChidlrenForAutofill() calls this function to decide whether
+        // to include child view)
+        if (view.getAutofillType() == View.AUTOFILL_TYPE_NONE) return false;
+
         if (view instanceof EditText) {
-            final int actionId = ((EditText) view).getImeOptions();
-            if (mNonAutofillableImeActionIdSet.contains(String.valueOf(actionId))) {
-                return false;
-            }
-            return true;
+            return isPassingImeActionCheck((EditText) view);
         }
+
         if (view instanceof CheckBox
-                || view instanceof Spinner
-                || view instanceof DatePicker
-                || view instanceof TimePicker
-                || view instanceof RadioGroup) {
+            || view instanceof Spinner
+            || view instanceof DatePicker
+            || view instanceof TimePicker
+            || view instanceof RadioGroup) {
             return true;
         }
-        return false;
+
+        return mShouldEnableAutofillOnAllViewTypes;
     }
 
 
@@ -2078,6 +2126,11 @@ public final class AutofillManager {
     public boolean isAutofillUiShowing() {
         final AutofillClient client = mContext.getAutofillClient();
         return client != null && client.autofillClientIsFillUiShowing();
+    }
+
+    /** @hide */
+    public boolean shouldIgnoreCredentialViews() {
+        return mShouldIgnoreCredentialViews;
     }
 
     /** @hide */

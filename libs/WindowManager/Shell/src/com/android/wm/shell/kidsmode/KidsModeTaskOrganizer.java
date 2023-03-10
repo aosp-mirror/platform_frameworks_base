@@ -267,6 +267,11 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
             mLaunchRootTask = taskInfo;
         }
 
+        if (mHomeTask != null && mHomeTask.taskId == taskInfo.taskId
+                && !taskInfo.equals(mHomeTask)) {
+            mHomeTask = taskInfo;
+        }
+
         super.onTaskInfoChanged(taskInfo);
     }
 
@@ -376,6 +381,7 @@ public class KidsModeTaskOrganizer extends ShellTaskOrganizer {
         final WindowContainerTransaction wct = getWindowContainerTransaction();
         final Rect taskBounds = calculateBounds();
         wct.setBounds(mLaunchRootTask.token, taskBounds);
+        wct.setBounds(mHomeTask.token, new Rect(0, 0, mDisplayWidth, mDisplayHeight));
         mSyncQueue.queue(wct);
         final SurfaceControl finalLeash = mLaunchRootLeash;
         mSyncQueue.runInSync(t -> {

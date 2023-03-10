@@ -65,6 +65,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
@@ -120,6 +121,14 @@ public class InputMethodManagerServiceTestBase {
     protected IInputMethodInvoker mMockInputMethodInvoker;
     protected InputMethodManagerService mInputMethodManagerService;
     protected ServiceThread mServiceThread;
+
+    @BeforeClass
+    public static void setupClass() {
+        // Make sure DeviceConfig's lazy-initialized ContentProvider gets
+        // a real instance before we stub out all system services below.
+        // TODO(b/272229177): remove dependency on real ContentProvider
+        new InputMethodDeviceConfigs().destroy();
+    }
 
     @Before
     public void setUp() throws RemoteException {
@@ -231,6 +240,8 @@ public class InputMethodManagerServiceTestBase {
 
     @After
     public void tearDown() {
+        mInputMethodManagerService.mInputMethodDeviceConfigs.destroy();
+
         if (mServiceThread != null) {
             mServiceThread.quitSafely();
         }

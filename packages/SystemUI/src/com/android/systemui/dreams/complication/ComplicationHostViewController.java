@@ -61,9 +61,6 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
     @VisibleForTesting
     boolean mIsAnimationEnabled;
 
-    // Whether dream entry animations are finished.
-    private boolean mEntryAnimationsFinished = false;
-
     @Inject
     protected ComplicationHostViewController(
             @Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout view,
@@ -77,14 +74,6 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
         mLifecycleOwner = lifecycleOwner;
         mComplicationCollectionViewModel = viewModel;
         mDreamOverlayStateController = dreamOverlayStateController;
-
-        mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
-            @Override
-            public void onStateChanged() {
-                mEntryAnimationsFinished =
-                        mDreamOverlayStateController.areEntryAnimationsFinished();
-            }
-        });
 
         // Whether animations are enabled.
         mIsAnimationEnabled = secureSettings.getFloatForUser(
@@ -159,7 +148,8 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
 
                     // Complications to be added before dream entry animations are finished are set
                     // to invisible and are animated in.
-                    if (!mEntryAnimationsFinished && mIsAnimationEnabled) {
+                    if (!mDreamOverlayStateController.areEntryAnimationsFinished()
+                            && mIsAnimationEnabled) {
                         view.setVisibility(View.INVISIBLE);
                     }
                     mComplications.put(id, viewHolder);

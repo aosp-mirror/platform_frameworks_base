@@ -11219,7 +11219,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } else {
             Objects.requireNonNull(admin, "ComponentName is null");
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
-                    || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
+                    || isProfileOwnerOfOrganizationOwnedDevice(caller));
         }
         if (parent) {
             userId = getProfileParentId(mInjector.userHandleGetCallingUserId());

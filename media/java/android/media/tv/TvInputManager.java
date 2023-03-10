@@ -22,7 +22,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.StringDef;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -134,14 +133,17 @@ public final class TvInputManager {
     public @interface VideoUnavailableReason {}
 
     /** Indicates that this TV message contains watermarking data */
-    public static final String TV_MESSAGE_TYPE_WATERMARK = "Watermark";
+    public static final int TV_MESSAGE_TYPE_WATERMARK = 1;
 
     /** Indicates that this TV message contains Closed Captioning data */
-    public static final String TV_MESSAGE_TYPE_CLOSED_CAPTION = "CC";
+    public static final int TV_MESSAGE_TYPE_CLOSED_CAPTION = 2;
+
+    /** Indicates that this TV message contains other data */
+    public static final int TV_MESSAGE_TYPE_OTHER = 1000;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_CLOSED_CAPTION})
+    @IntDef({TV_MESSAGE_TYPE_WATERMARK, TV_MESSAGE_TYPE_CLOSED_CAPTION, TV_MESSAGE_TYPE_OTHER})
     public @interface TvMessageType {}
 
     /**
@@ -802,7 +804,7 @@ public final class TvInputManager {
          * @param type The type of message received, such as {@link #TV_MESSAGE_TYPE_WATERMARK}
          * @param data The raw data of the message
          */
-        public void onTvMessage(Session session, @TvInputManager.TvMessageType String type,
+        public void onTvMessage(Session session, @TvInputManager.TvMessageType int type,
                 Bundle data) {
         }
 
@@ -1081,7 +1083,7 @@ public final class TvInputManager {
             });
         }
 
-        void postTvMessage(String type, Bundle data) {
+        void postTvMessage(int type, Bundle data) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -1620,7 +1622,7 @@ public final class TvInputManager {
             }
 
             @Override
-            public void onTvMessage(String type, Bundle data, int seq) {
+            public void onTvMessage(int type, Bundle data, int seq) {
                 synchronized (mSessionCallbackRecordMap) {
                     SessionCallbackRecord record = mSessionCallbackRecordMap.get(seq);
                     if (record == null) {
@@ -3230,7 +3232,7 @@ public final class TvInputManager {
         /**
          * Sends TV messages to the service for testing purposes
          */
-        public void notifyTvMessage(@NonNull @TvMessageType String type, @NonNull Bundle data) {
+        public void notifyTvMessage(@NonNull @TvMessageType int type, @NonNull Bundle data) {
             try {
                 mService.notifyTvMessage(mToken, type, data, mUserId);
             } catch (RemoteException e) {
@@ -3642,13 +3644,13 @@ public final class TvInputManager {
         /**
          * Notifies when the advertisement buffer is filled and ready to be read.
          */
-        public void notifyAdBuffer(AdBuffer buffer) {
+        public void notifyAdBufferReady(AdBuffer buffer) {
             if (mToken == null) {
                 Log.w(TAG, "The session has been already released");
                 return;
             }
             try {
-                mService.notifyAdBuffer(mToken, buffer, mUserId);
+                mService.notifyAdBufferReady(mToken, buffer, mUserId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

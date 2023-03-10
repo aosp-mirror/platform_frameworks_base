@@ -116,10 +116,10 @@ interface ITvInputManager {
 
     // For ad request
     void requestAd(in IBinder sessionToken, in AdRequest request, int userId);
-    void notifyAdBuffer(in IBinder sessionToken, in AdBuffer buffer, int userId);
+    void notifyAdBufferReady(in IBinder sessionToken, in AdBuffer buffer, int userId);
 
     // For TV Message
-    void notifyTvMessage(in IBinder sessionToken, in String type, in Bundle data, int userId);
+    void notifyTvMessage(in IBinder sessionToken, int type, in Bundle data, int userId);
 
     // For TV input hardware binding
     List<TvInputHardwareInfo> getHardwareList();

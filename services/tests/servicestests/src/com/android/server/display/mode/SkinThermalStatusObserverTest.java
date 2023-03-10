@@ -18,6 +18,7 @@ package com.android.server.display.mode;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import android.hardware.display.DisplayManager;
@@ -49,6 +50,7 @@ public class SkinThermalStatusObserverTest {
     private static final float FLOAT_TOLERANCE = 0.01f;
     private static final int DISPLAY_ID = 1;
     private static final int DISPLAY_ID_OTHER = 2;
+    private static final int DISPLAY_ID_ADDED = 3;
 
     SkinThermalStatusObserver mObserver;
 
@@ -165,6 +167,42 @@ public class SkinThermalStatusObserverTest {
                 DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE);
         assertEquals(90, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
         assertEquals(120, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testDisplayAdded() {
+        // GIVEN 2 displays with no thermalThrottling config AND temperature level CRITICAL
+        mObserver.observe();
+        mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_CRITICAL));
+        // WHEN new display is added
+        mObserver.onDisplayAdded(DISPLAY_ID_ADDED);
+        mHandler.flush();
+        // THEN 3rd vote is added to storage with (0,60) render refresh rate(default behaviour)
+        assertEquals(3, mStorage.mVoteRegistry.size());
+
+        SparseArray<DisplayModeDirector.Vote> displayVotes = mStorage.mVoteRegistry.get(
+                DISPLAY_ID_ADDED);
+        assertEquals(1, displayVotes.size());
+
+        DisplayModeDirector.Vote vote = displayVotes.get(
+                DisplayModeDirector.Vote.PRIORITY_SKIN_TEMPERATURE);
+        assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
+        assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+    }
+
+    @Test
+    public void testDisplayAddedAndThenImmediatelyRemoved() {
+        // GIVEN 2 displays with no thermalThrottling config AND temperature level CRITICAL
+        mObserver.observe();
+        mObserver.notifyThrottling(createTemperature(Temperature.THROTTLING_CRITICAL));
+        // WHEN new display is added and immediately removed
+        mObserver.onDisplayAdded(DISPLAY_ID_ADDED);
+        mObserver.onDisplayRemoved(DISPLAY_ID_ADDED);
+        mHandler.flush();
+        // THEN there are 2 votes in registry
+        assertEquals(2, mStorage.mVoteRegistry.size());
+        assertNotNull(mStorage.mVoteRegistry.get(DISPLAY_ID));
+        assertNotNull(mStorage.mVoteRegistry.get(DISPLAY_ID_OTHER));
     }
 
     private static Temperature createTemperature(@Temperature.ThrottlingStatus int status) {

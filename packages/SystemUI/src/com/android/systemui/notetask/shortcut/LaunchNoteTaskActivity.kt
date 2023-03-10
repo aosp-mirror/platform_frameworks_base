@@ -28,17 +28,12 @@ import javax.inject.Inject
 class LaunchNoteTaskActivity
 @Inject
 constructor(
-    private val noteTaskController: NoteTaskController,
+    private val controller: NoteTaskController,
 ) : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        noteTaskController.showNoteTask(
-            entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT,
-            isInMultiWindowMode = isInMultiWindowMode,
-        )
-
+        controller.showNoteTask(entryPoint = NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT)
         finish()
     }
 
