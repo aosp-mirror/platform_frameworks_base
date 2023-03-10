@@ -24,10 +24,12 @@ import android.util.Log;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
+import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
 import com.android.server.credentials.metrics.InitialPhaseMetric;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,77 +83,138 @@ public class MetricUtilities {
     }
 
     /**
-     * A logging utility used primarily for the candidate phase of the current metric setup.
+     * A logging utility used primarily for the final phase of the current metric setup.
      *
-     * @param providers            a map with known providers
+     * @param finalPhaseMetric     the coalesced data of the chosen provider
+     * @param browsingPhaseMetrics the coalesced data of the browsing phase
+     * @param apiStatus            the final status of this particular api call
      * @param emitSequenceId       an emitted sequence id for the current session
      */
-    protected static void logApiCalled(Map<String, ProviderSession> providers,
+    protected static void logApiCalled(ChosenProviderFinalPhaseMetric finalPhaseMetric,
+            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus,
             int emitSequenceId) {
         try {
-            var providerSessions = providers.values();
-            int providerSize = providerSessions.size();
-            int[] candidateUidList = new int[providerSize];
-            int[] candidateQueryRoundTripTimeList = new int[providerSize];
-            int[] candidateStatusList = new int[providerSize];
+            int browsedSize = browsingPhaseMetrics.size();
+            int[] browsedClickedEntries = new int[browsedSize];
+            int[] browsedProviderUid = new int[browsedSize];
             int index = 0;
-            for (var session : providerSessions) {
-                CandidatePhaseMetric metric = session.mCandidatePhasePerProviderMetric;
-                candidateUidList[index] = metric.getCandidateUid();
-                candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
-                candidateStatusList[index] = metric.getProviderQueryStatus();
+            for (CandidateBrowsingPhaseMetric metric : browsingPhaseMetrics) {
+                browsedClickedEntries[index] = metric.getEntryEnum();
+                browsedProviderUid[index] = metric.getProviderUid();
                 index++;
             }
-            // TODO Handle the emit here
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE,
+                    /* session_id */ finalPhaseMetric.getSessionId(),
+                    /* sequence_num */ emitSequenceId,
+                    /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
+                    /* chosen_provider_uid */ finalPhaseMetric.getChosenUid(),
+                    /* chosen_provider_query_start_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryStartTimeNanoseconds()),
+                    /* chosen_provider_query_end_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryEndTimeNanoseconds()),
+                    /* chosen_provider_ui_invoked_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallStartTimeNanoseconds()),
+                    /* chosen_provider_ui_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallEndTimeNanoseconds()),
+                    /* chosen_provider_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getFinalFinishTimeNanoseconds()),
+                    /* chosen_provider_status */ finalPhaseMetric.getChosenProviderStatus(),
+                    /* chosen_provider_has_exception */ finalPhaseMetric.isHasException(),
+                    /* chosen_provider_available_entries */ finalPhaseMetric.getAvailableEntries()
+                            .stream().mapToInt(i -> i).toArray(),
+                    /* chosen_provider_action_entry_count */ finalPhaseMetric.getActionEntryCount(),
+                    /* chosen_provider_credential_entry_count */
+                    finalPhaseMetric.getCredentialEntryCount(),
+                    /* chosen_provider_credential_entry_type_count */
+                    finalPhaseMetric.getCredentialEntryTypeCount(),
+                    /* chosen_provider_remote_entry_count */
+                    finalPhaseMetric.getRemoteEntryCount(),
+                    /* chosen_provider_authentication_entry_count */
+                    finalPhaseMetric.getAuthenticationEntryCount(),
+                    /* clicked_entries */ browsedClickedEntries,
+                    /* provider_of_clicked_entry */ browsedProviderUid,
+                    /* api_status */ apiStatus
+            );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
     /**
-     * The most common logging helper, handles the overall status of the API request with the
-     * provider status and latencies. Other versions of this method may be more useful depending
-     * on the situation, as this is geared towards the logging of {@link ProviderSession} types.
+     * A logging utility used primarily for the candidate phase of the current metric setup.
      *
-     * @param apiName              the api type to log
-     * @param apiStatus            the api status to log
-     * @param providers            a map with known providers
-     * @param callingUid           the calling UID of the client app
-     * @param chosenProviderFinalPhaseMetric the metric data type of the final chosen provider
-     * TODO remove soon
+     * @param providers      a map with known providers and their held metric objects
+     * @param emitSequenceId an emitted sequence id for the current session
      */
-    protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
-            Map<String, ProviderSession> providers, int callingUid,
-            ChosenProviderFinalPhaseMetric chosenProviderFinalPhaseMetric) {
+    protected static void logApiCalled(Map<String, ProviderSession> providers,
+            int emitSequenceId) {
         try {
             var providerSessions = providers.values();
             int providerSize = providerSessions.size();
+            int sessionId = -1;
+            boolean queryReturned = false;
             int[] candidateUidList = new int[providerSize];
-            int[] candidateQueryRoundTripTimeList = new int[providerSize];
+            int[] candidateQueryStartTimeStampList = new int[providerSize];
+            int[] candidateQueryEndTimeStampList = new int[providerSize];
             int[] candidateStatusList = new int[providerSize];
+            boolean[] candidateHasExceptionList = new boolean[providerSize];
+            int[] candidateTotalEntryCountList = new int[providerSize];
+            int[] candidateCredentialEntryCountList = new int[providerSize];
+            int[] candidateCredentialTypeCountList = new int[providerSize];
+            int[] candidateActionEntryCountList = new int[providerSize];
+            int[] candidateAuthEntryCountList = new int[providerSize];
+            int[] candidateRemoteEntryCountList = new int[providerSize];
             int index = 0;
             for (var session : providerSessions) {
                 CandidatePhaseMetric metric = session.mCandidatePhasePerProviderMetric;
+                if (sessionId == -1) {
+                    sessionId = metric.getSessionId();
+                }
+                if (!queryReturned) {
+                    queryReturned = metric.isQueryReturned();
+                }
                 candidateUidList[index] = metric.getCandidateUid();
-                candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
+                candidateQueryStartTimeStampList[index] =
+                        metric.getTimestampFromReferenceStartMicroseconds(
+                                metric.getStartQueryTimeNanoseconds());
+                candidateQueryEndTimeStampList[index] =
+                        metric.getTimestampFromReferenceStartMicroseconds(
+                                metric.getQueryFinishTimeNanoseconds());
                 candidateStatusList[index] = metric.getProviderQueryStatus();
+                candidateHasExceptionList[index] = metric.isHasException();
+                candidateTotalEntryCountList[index] = metric.getNumEntriesTotal();
+                candidateCredentialEntryCountList[index] = metric.getCredentialEntryCount();
+                candidateCredentialTypeCountList[index] = metric.getCredentialEntryTypeCount();
+                candidateActionEntryCountList[index] = metric.getActionEntryCount();
+                candidateAuthEntryCountList[index] = metric.getAuthenticationEntryCount();
+                candidateRemoteEntryCountList[index] = metric.getRemoteEntryCount();
                 index++;
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
-                    /* api_name */apiName.getMetricCode(),
-                    /* caller_uid */ callingUid,
-                    /* api_status */ apiStatus.getMetricCode(),
-                    /* repeated_candidate_provider_uid */ candidateUidList,
-                    /* repeated_candidate_provider_round_trip_time_query_microseconds */
-                    candidateQueryRoundTripTimeList,
-                    /* repeated_candidate_provider_status */ candidateStatusList,
-                    /* chosen_provider_uid */ chosenProviderFinalPhaseMetric.getChosenUid(),
-                    /* chosen_provider_round_trip_time_overall_microseconds */
-                    chosenProviderFinalPhaseMetric.getEntireProviderLatencyMicroseconds(),
-                    /* chosen_provider_final_phase_microseconds (backwards compat only) */
-                    DEFAULT_INT_32,
-                    /* chosen_provider_status */ chosenProviderFinalPhaseMetric
-                            .getChosenProviderStatus());
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE,
+                    /* session_id */ sessionId,
+                    /* sequence_num */ emitSequenceId,
+                    /* query_returned */ queryReturned,
+                    /* candidate_provider_uid_list */ candidateUidList,
+                    /* candidate_provider_query_start_timestamp_microseconds */
+                    candidateQueryStartTimeStampList,
+                    /* candidate_provider_query_end_timestamp_microseconds */
+                    candidateQueryEndTimeStampList,
+                    /* candidate_provider_status */ candidateStatusList,
+                    /* candidate_provider_has_exception */ candidateHasExceptionList,
+                    /* candidate_provider_num_entries */ candidateTotalEntryCountList,
+                    /* candidate_provider_action_entry_count */ candidateActionEntryCountList,
+                    /* candidate_provider_credential_entry_count */
+                    candidateCredentialEntryCountList,
+                    /* candidate_provider_credential_entry_type_count */
+                    candidateCredentialTypeCountList,
+                    /* candidate_provider_remote_entry_count */ candidateRemoteEntryCountList,
+                    /* candidate_provider_authentication_entry_count */ candidateAuthEntryCountList
+            );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
@@ -162,7 +225,6 @@ public class MetricUtilities {
      * contain default values for all other optional parameters.
      *
      * TODO(b/271135048) - given space requirements, this may be a good candidate for another atom
-     * TODO immediately remove and carry over TODO to new log for this setup
      *
      * @param apiName    the api name to log
      * @param apiStatus  the status to log
@@ -194,14 +256,24 @@ public class MetricUtilities {
      * Handles the metric emit for the initial phase.
      *
      * @param initialPhaseMetric contains all the data for this emit
+     * @param sequenceNum        the sequence number for this api call session emit
      */
-    protected static void logApiCalled(InitialPhaseMetric initialPhaseMetric) {
-        /*
-        FrameworkStatsLog.write(FrameworkStatsLog.INITIAL_PHASE,
-        .. session_id .. initialPhaseMetric.getSessionId(),
-        ...
-        TODO Immediately - Fill in asap now that the split atom is checked in.
-         */
+    protected static void logApiCalled(InitialPhaseMetric initialPhaseMetric, int sequenceNum) {
+        try {
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_INIT_PHASE,
+                    /* api_name */ initialPhaseMetric.getApiName(),
+                    /* caller_uid */ initialPhaseMetric.getCallerUid(),
+                    /* session_id */ initialPhaseMetric.getSessionId(),
+                    /* sequence_num */ sequenceNum,
+                    /* initial_timestamp_reference_nanoseconds */
+                    initialPhaseMetric.getCredentialServiceStartedTimeNanoseconds(),
+                    /* count_credential_request_classtypes */
+                    initialPhaseMetric.getCountRequestClassType()
+                    // TODO(b/271135048) - add total count of request options
+            );
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
     }
 
 }

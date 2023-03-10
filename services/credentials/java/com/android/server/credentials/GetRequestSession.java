@@ -123,36 +123,43 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     }
 
     private void respondToClientWithResponseAndFinish(GetCredentialResponse response) {
+        collectFinalPhaseMetricStatus(false, ProviderStatusForMetrics.FINAL_SUCCESS);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Log.i(TAG, "Request has already been completed. This is strange.");
             return;
         }
         if (isSessionCancelled()) {
-            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-                    ApiStatus.CLIENT_CANCELED);
+            logApiCall(mChosenProviderFinalPhaseMetric,
+                    mCandidateBrowsingPhaseMetric,
+                    /* apiStatus */ ApiStatus.CLIENT_CANCELED.getMetricCode());
             finishSession(/*propagateCancellation=*/true);
             return;
         }
         try {
             mClientCallback.onResponse(response);
-            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-                    ApiStatus.SUCCESS);
+            logApiCall(mChosenProviderFinalPhaseMetric,
+                    mCandidateBrowsingPhaseMetric,
+                    /* apiStatus */ ApiStatus.SUCCESS.getMetricCode());
         } catch (RemoteException e) {
+            collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
             Log.i(TAG, "Issue while responding to client with a response : " + e.getMessage());
-            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-                    ApiStatus.FAILURE);
+            logApiCall(mChosenProviderFinalPhaseMetric,
+                    mCandidateBrowsingPhaseMetric,
+                    /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
         }
         finishSession(/*propagateCancellation=*/false);
     }
 
     private void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
             Log.i(TAG, "Request has already been completed. This is strange.");
             return;
         }
         if (isSessionCancelled()) {
-            logApiCall(ApiName.GET_CREDENTIAL, /* apiStatus */
-                    ApiStatus.CLIENT_CANCELED);
+            logApiCall(mChosenProviderFinalPhaseMetric,
+                    mCandidateBrowsingPhaseMetric,
+                    /* apiStatus */ ApiStatus.CLIENT_CANCELED.getMetricCode());
             finishSession(/*propagateCancellation=*/true);
             return;
         }
@@ -167,12 +174,16 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     }
 
     private void logFailureOrUserCancel(String errorType) {
+        collectFinalPhaseMetricStatus(true, ProviderStatusForMetrics.FINAL_FAILURE);
         if (GetCredentialException.TYPE_USER_CANCELED.equals(errorType)) {
-            logApiCall(ApiName.GET_CREDENTIAL,
-                    /* apiStatus */ ApiStatus.USER_CANCELED);
+            mChosenProviderFinalPhaseMetric.setHasException(false);
+            logApiCall(mChosenProviderFinalPhaseMetric,
+                    mCandidateBrowsingPhaseMetric,
+                    /* apiStatus */ ApiStatus.USER_CANCELED.getMetricCode());
         } else {
-            logApiCall(ApiName.GET_CREDENTIAL,
-                    /* apiStatus */ ApiStatus.FAILURE);
+            logApiCall(mChosenProviderFinalPhaseMetric,
+                    mCandidateBrowsingPhaseMetric,
+                    /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
         }
     }
 

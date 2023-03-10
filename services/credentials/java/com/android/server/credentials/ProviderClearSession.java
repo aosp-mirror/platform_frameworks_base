@@ -91,7 +91,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
         if (exception instanceof ClearCredentialStateException) {
             mProviderException = (ClearCredentialStateException) exception;
         }
-        captureCandidateFailure();
+        captureCandidateFailureInMetrics();
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 

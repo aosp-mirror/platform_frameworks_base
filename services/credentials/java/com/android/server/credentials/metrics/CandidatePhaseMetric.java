@@ -70,7 +70,7 @@ public class CandidatePhaseMetric {
     // The count of authentication entries from this provider, defaults to -1
     private int mAuthenticationEntryCount = -1;
     // Gathered to pass on to chosen provider when required
-    private List<EntryEnum> mAvailableEntries = new ArrayList<>();
+    private final List<Integer> mAvailableEntries = new ArrayList<>();
 
     public CandidatePhaseMetric() {
     }
@@ -252,7 +252,7 @@ public class CandidatePhaseMetric {
      *          collector
      */
     public void addEntry(EntryEnum e) {
-        this.mAvailableEntries.add(e);
+        this.mAvailableEntries.add(e.getMetricCode());
     }
 
     /**
@@ -262,7 +262,7 @@ public class CandidatePhaseMetric {
      * @return the full collection of entries encountered by the candidate provider associated with
      * this metric
      */
-    public List<EntryEnum> getAvailableEntries() {
+    public List<Integer> getAvailableEntries() {
         return new ArrayList<>(this.mAvailableEntries); // no alias copy
     }
 }

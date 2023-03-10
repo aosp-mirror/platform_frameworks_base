@@ -16,11 +16,11 @@
 
 package com.android.server.credentials.metrics;
 
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CLEAR_CREDENTIAL;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CREATE_CREDENTIAL;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_GET_CREDENTIAL;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_UNKNOWN;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__ACTION_ENTRY;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__AUTHENTICATION_ENTRY;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__CREDENTIAL_ENTRY;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__REMOTE_ENTRY;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__UNKNOWN;
 import static com.android.server.credentials.ProviderGetSession.ACTION_ENTRY_KEY;
 import static com.android.server.credentials.ProviderGetSession.AUTHENTICATION_ACTION_ENTRY_KEY;
 import static com.android.server.credentials.ProviderGetSession.CREDENTIAL_ENTRY_KEY;
@@ -32,13 +32,12 @@ import java.util.AbstractMap;
 import java.util.Map;
 
 public enum EntryEnum {
-    // TODO immediately, update with built entries
-    UNKNOWN(CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_UNKNOWN),
-    ACTION_ENTRY(CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_GET_CREDENTIAL),
-    CREDENTIAL_ENTRY(CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CREATE_CREDENTIAL),
-    REMOTE_ENTRY(CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_CLEAR_CREDENTIAL),
+    UNKNOWN(CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__UNKNOWN),
+    ACTION_ENTRY(CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__ACTION_ENTRY),
+    CREDENTIAL_ENTRY(CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__CREDENTIAL_ENTRY),
+    REMOTE_ENTRY(CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__REMOTE_ENTRY),
     AUTHENTICATION_ENTRY(
-            CREDENTIAL_MANAGER_API_CALLED__API_NAME__API_NAME_IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE
+            CREDENTIAL_MANAGER_FINAL_PHASE__CLICKED_ENTRIES__AUTHENTICATION_ENTRY
     );
 
     private static final String TAG = "EntryEnum";

@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Central provider session that listens for provider callbacks, and maintains provider state.
@@ -195,7 +196,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         if (exception instanceof GetCredentialException) {
             mProviderException = (GetCredentialException) exception;
         }
-        captureCandidateFailure();
+        captureCandidateFailureInMetrics();
         updateStatusAndInvokeCallback(toStatus(errorCode));
     }
 
@@ -448,9 +449,11 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             int numCredEntries = response.getCredentialEntries().size();
             int numActionEntries = response.getActions().size();
             int numAuthEntries = response.getAuthenticationActions().size();
-            // TODO immediately add remote entries
-            // TODO immediately confirm how to get types from slice to get unique type count via
-            //  dedupe
+            int numRemoteEntry = MetricUtilities.ZERO;
+            if (response.getRemoteCredentialEntry() != null) {
+                numRemoteEntry = MetricUtilities.UNIT;
+                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
+            }
             response.getCredentialEntries().forEach(c ->
                     mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
             response.getActions().forEach(c ->
@@ -458,10 +461,15 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             response.getAuthenticationActions().forEach(c ->
                     mCandidatePhasePerProviderMetric.addEntry(EntryEnum.AUTHENTICATION_ENTRY));
             mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCredEntries + numAuthEntries
-                    + numActionEntries);
+                    + numActionEntries + numRemoteEntry);
             mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCredEntries);
+            int numTypes = (response.getCredentialEntries().stream()
+                    .map(CredentialEntry::getType).collect(
+                            Collectors.toSet())).size(); // Dedupe type strings
+            mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(numTypes);
             mCandidatePhasePerProviderMetric.setActionEntryCount(numActionEntries);
             mCandidatePhasePerProviderMetric.setAuthenticationEntryCount(numAuthEntries);
+            mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
