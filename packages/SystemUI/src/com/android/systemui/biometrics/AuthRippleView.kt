@@ -31,7 +31,7 @@ import com.android.internal.graphics.ColorUtils
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.surfaceeffects.ripple.RippleShader
 
-private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
+private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
 
 /**
  * Handles two ripple effects: dwell ripple and unlocked ripple
@@ -75,8 +75,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
     private var radius: Float = 0f
         set(value) {
-            rippleShader.rippleSize.setMaxSize(value * 2f, value * 2f)
-            field = value
+            field = value * .9f
+            rippleShader.rippleSize.setMaxSize(field * 2f, field * 2f)
         }
     private var origin: Point = Point()
         set(value) {
@@ -87,8 +87,9 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     init {
         rippleShader.color = 0xffffffff.toInt() // default color
         rippleShader.rawProgress = 0f
+        rippleShader.pixelDensity = resources.displayMetrics.density
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
-        setupRippleFadeParams()
+        updateRippleFadeParams()
         ripplePaint.shader = rippleShader
 
         dwellShader.color = 0xffffffff.toInt() // default color
@@ -266,7 +267,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         unlockedRippleAnimator?.cancel()
 
         val rippleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            interpolator = Interpolators.LINEAR_OUT_SLOW_IN
             duration = AuthRippleController.RIPPLE_ANIMATION_DURATION
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
@@ -277,7 +277,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             }
         }
 
-        val alphaInAnimator = ValueAnimator.ofInt(0, 255).apply {
+        val alphaInAnimator = ValueAnimator.ofInt(0, 62).apply {
             duration = alphaInDuration
             addUpdateListener { animator ->
                 rippleShader.color = ColorUtils.setAlphaComponent(
@@ -339,15 +339,17 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         )
     }
 
-    private fun setupRippleFadeParams() {
+    private fun updateRippleFadeParams() {
         with(rippleShader) {
-            baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
-            baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+            baseRingFadeParams.fadeInStart = 0f
+            baseRingFadeParams.fadeInEnd = .2f
+            baseRingFadeParams.fadeOutStart = .2f
+            baseRingFadeParams.fadeOutEnd = 1f
 
-            centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
-            centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
-            centerFillFadeParams.fadeOutStart = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_START
-            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_END
+            centerFillFadeParams.fadeInStart = 0f
+            centerFillFadeParams.fadeInEnd = .15f
+            centerFillFadeParams.fadeOutStart = .15f
+            centerFillFadeParams.fadeOutEnd = .56f
         }
     }
 
