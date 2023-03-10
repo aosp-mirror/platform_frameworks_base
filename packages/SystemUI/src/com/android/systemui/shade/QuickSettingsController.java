@@ -1035,7 +1035,11 @@ public class QuickSettingsController {
     private void setClippingBounds() {
         float qsExpansionFraction = computeExpansionFraction();
         final int qsPanelBottomY = calculateBottomPosition(qsExpansionFraction);
-        final boolean qsVisible = (qsExpansionFraction > 0 || qsPanelBottomY > 0);
+        // Split shade has no QQS
+        final boolean qqsVisible =
+                !mSplitShadeEnabled && qsExpansionFraction == 0 && qsPanelBottomY > 0;
+        final boolean qsVisible = qsExpansionFraction > 0;
+        final boolean qsOrQqsVisible = qqsVisible || qsVisible;
         checkCorrectScrimVisibility(qsExpansionFraction);
 
         int top = calculateTopClippingBound(qsPanelBottomY);
@@ -1044,7 +1048,7 @@ public class QuickSettingsController {
         int right = calculateRightClippingBound();
         // top should never be lower than bottom, otherwise it will be invisible.
         top = Math.min(top, bottom);
-        applyClippingBounds(left, top, right, bottom, qsVisible);
+        applyClippingBounds(left, top, right, bottom, qsOrQqsVisible);
     }
 
     /**
