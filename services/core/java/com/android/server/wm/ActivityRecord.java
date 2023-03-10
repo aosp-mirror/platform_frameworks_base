@@ -7766,7 +7766,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task != null && requestedOrientation == SCREEN_ORIENTATION_BEHIND) {
             // We use Task here because we want to be consistent with what happens in
             // multi-window mode where other tasks orientations are ignored.
-            android.util.Log.d("orientation", "We are here");
             final ActivityRecord belowCandidate = task.getActivity(
                     a -> a.canDefineOrientationForActivitiesAbove() /* callback */,
                     this /* boundary */, false /* includeBoundary */,
