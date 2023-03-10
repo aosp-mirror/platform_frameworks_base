@@ -17,8 +17,8 @@
 package android.service.voice;
 
 import android.media.AudioFormat;
-import android.service.voice.DetectorFailure;
 import android.service.voice.HotwordDetectedResult;
+import android.service.voice.HotwordDetectionServiceFailure;
 import android.service.voice.HotwordRejectedResult;
 
 /**
@@ -39,7 +39,8 @@ oneway interface IMicrophoneHotwordDetectionVoiceInteractionCallback {
     /**
      * Called when the detection fails due to an error.
      */
-    void onError(in DetectorFailure detectorFailure);
+    void onHotwordDetectionServiceFailure(
+        in HotwordDetectionServiceFailure hotwordDetectionServiceFailure);
 
     /**
      * Called when the detected result was not detected.
