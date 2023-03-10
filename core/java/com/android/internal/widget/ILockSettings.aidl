@@ -18,7 +18,7 @@ package com.android.internal.widget;
 
 import android.app.PendingIntent;
 import android.app.RemoteLockscreenValidationResult;
-import android.app.RemoteLockscreenValidationSession;
+import android.app.StartLockscreenValidationRequest;
 import android.app.trust.IStrongAuthTracker;
 import android.os.Bundle;
 import android.security.keystore.recovery.WrappedApplicationKey;
@@ -95,7 +95,7 @@ interface ILockSettings {
             in byte[] recoveryKeyBlob,
             in List<WrappedApplicationKey> applicationKeys);
     void closeSession(in String sessionId);
-    RemoteLockscreenValidationSession startRemoteLockscreenValidation();
+    StartLockscreenValidationRequest startRemoteLockscreenValidation();
     RemoteLockscreenValidationResult validateRemoteLockscreen(in byte[] encryptedCredential);
     boolean hasSecureLockScreen();
     boolean tryUnlockWithCachedUnifiedChallenge(int userId);

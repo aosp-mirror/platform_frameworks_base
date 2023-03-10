@@ -55,16 +55,10 @@ public final class RemoteLockscreenValidationResult implements Parcelable {
      */
     public static final int RESULT_NO_REMAINING_ATTEMPTS = 4;
 
-    /**
-     * New lockscreen validation session is required to verify guess.
-     */
-    public static final int RESULT_SESSION_EXPIRED = 5;
-
     @IntDef({RESULT_GUESS_VALID,
             RESULT_GUESS_INVALID,
             RESULT_LOCKOUT,
-            RESULT_NO_REMAINING_ATTEMPTS,
-            RESULT_SESSION_EXPIRED})
+            RESULT_NO_REMAINING_ATTEMPTS})
     @Retention(RetentionPolicy.SOURCE)
     @interface ResultCode {}
 
