@@ -143,7 +143,7 @@ object Flags {
      * the digits when the clock moves.
      */
     @JvmField
-    val STEP_CLOCK_ANIMATION = unreleasedFlag(212, "step_clock_animation", teamfood = true)
+    val STEP_CLOCK_ANIMATION = releasedFlag(212, "step_clock_animation")
 
     /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
@@ -220,6 +220,11 @@ object Flags {
             "lock_screen_long_press_enabled",
             teamfood = true,
         )
+
+    /** Whether to inflate the bouncer view on a background thread. */
+    // TODO(b/272091103): Tracking Bug
+    @JvmField
+    val ASYNC_INFLATE_BOUNCER = unreleasedFlag(229, "async_inflate_bouncer", teamfood = true)
 
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
@@ -488,6 +493,13 @@ object Flags {
     val ENABLE_PIP_APP_ICON_OVERLAY =
         sysPropBooleanFlag(1115, "persist.wm.debug.enable_pip_app_icon_overlay", default = true)
 
+    // TODO(b/272110828): Tracking bug
+    @Keep
+    @JvmField
+    val ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
+        sysPropBooleanFlag(
+            1116, "persist.wm.debug.enable_move_floating_window_in_tabletop", default = false)
+
     // 1200 - predictive back
     @Keep
     @JvmField
@@ -672,5 +684,5 @@ object Flags {
     // TODO(b/272036292): Tracking Bug
     @JvmField
     val LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION =
-            unreleasedFlag(2602, "large_shade_granular_alpha_interpolation")
+            unreleasedFlag(2602, "large_shade_granular_alpha_interpolation", teamfood = true)
 }

@@ -19,6 +19,7 @@ package com.android.systemui.controls.start
 
 import android.content.Context
 import android.os.UserHandle
+import androidx.annotation.WorkerThread
 import com.android.systemui.CoreStartable
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.dagger.ControlsComponent
@@ -75,11 +76,13 @@ constructor(
             // Controls is disabled, we don't need this anymore
             return
         }
-        startForUser()
+        executor.execute(this::startForUser)
         userTracker.addCallback(userTrackerCallback, executor)
     }
 
+    @WorkerThread
     private fun startForUser() {
+        controlsListingController.forceReload()
         selectDefaultPanelIfNecessary()
         bindToPanel()
     }

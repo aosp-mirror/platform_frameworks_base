@@ -2377,7 +2377,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_BEHIND)
                 .build();
         final int topOrientation = activityTop.getRequestedConfigurationOrientation();
-        assertEquals(SCREEN_ORIENTATION_PORTRAIT, topOrientation);
+        assertEquals(ORIENTATION_PORTRAIT, topOrientation);
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,

@@ -233,6 +233,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // True if should use light sensor to automatically determine doze screen brightness.
     private final boolean mAllowAutoBrightnessWhileDozingConfig;
 
+    // True if we want to persist the brightness value in nits even if the underlying display
+    // device changes.
+    private final boolean mPersistBrightnessNitsForDefaultDisplay;
+
     // True if the brightness config has changed and the short-term model needs to be reset
     private boolean mShouldResetShortTermModel;
 
@@ -583,6 +587,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
 
+        mPersistBrightnessNitsForDefaultDisplay = resources.getBoolean(
+                com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay);
+
         mDisplayDeviceConfig = logicalDisplay.getPrimaryDisplayDeviceLocked()
                 .getDisplayDeviceConfig();
 
@@ -651,7 +658,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         loadProximitySensor();
 
-        mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
+        loadNitBasedBrightnessSetting();
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
@@ -829,6 +836,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
                 loadFromDisplayDeviceConfig(token, info, hbmMetadata);
+                loadNitBasedBrightnessSetting();
 
                 /// Since the underlying display-device changed, we really don't know the
                 // last command that was sent to change it's state. Lets assume it is unknown so
@@ -2498,10 +2506,33 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return clampScreenBrightnessForVr(brightnessFloat);
     }
 
+    private void loadNitBasedBrightnessSetting() {
+        if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
+            float brightnessNitsForDefaultDisplay =
+                    mBrightnessSetting.getBrightnessNitsForDefaultDisplay();
+            if (brightnessNitsForDefaultDisplay >= 0) {
+                float brightnessForDefaultDisplay = convertToFloatScale(
+                        brightnessNitsForDefaultDisplay);
+                if (isValidBrightnessValue(brightnessForDefaultDisplay)) {
+                    mBrightnessSetting.setBrightness(brightnessForDefaultDisplay);
+                    mCurrentScreenBrightnessSetting = brightnessForDefaultDisplay;
+                    return;
+                }
+            }
+        }
+        mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
+    }
+
     void setBrightness(float brightnessValue) {
         // Update the setting, which will eventually call back into DPC to have us actually update
         // the display with the new value.
         mBrightnessSetting.setBrightness(brightnessValue);
+        if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
+            float nits = convertToNits(brightnessValue);
+            if (nits >= 0) {
+                mBrightnessSetting.setBrightnessNitsForDefaultDisplay(nits);
+            }
+        }
     }
 
     void onBootCompleted() {
@@ -2514,7 +2545,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return;
         }
         setCurrentScreenBrightness(brightnessValue);
-        mBrightnessSetting.setBrightness(brightnessValue);
+        setBrightness(brightnessValue);
     }
 
     private void setCurrentScreenBrightness(float brightnessValue) {
@@ -2591,6 +2622,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return -1f;
         }
         return mAutomaticBrightnessController.convertToNits(brightness);
+    }
+
+    private float convertToFloatScale(float nits) {
+        if (mAutomaticBrightnessController == null) {
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        }
+        return mAutomaticBrightnessController.convertToFloatScale(nits);
     }
 
     @GuardedBy("mLock")
@@ -2690,25 +2728,27 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mScreenBrightnessForVrRangeMaximum=" + mScreenBrightnessForVrRangeMaximum);
         pw.println("  mScreenBrightnessForVrDefault=" + mScreenBrightnessForVrDefault);
         pw.println("  mUseSoftwareAutoBrightnessConfig=" + mUseSoftwareAutoBrightnessConfig);
-        pw.println("  mAllowAutoBrightnessWhileDozingConfig=" +
-                mAllowAutoBrightnessWhileDozingConfig);
+        pw.println("  mAllowAutoBrightnessWhileDozingConfig="
+                + mAllowAutoBrightnessWhileDozingConfig);
+        pw.println("  mPersistBrightnessNitsForDefaultDisplay="
+                + mPersistBrightnessNitsForDefaultDisplay);
         pw.println("  mSkipScreenOnBrightnessRamp=" + mSkipScreenOnBrightnessRamp);
         pw.println("  mColorFadeFadesConfig=" + mColorFadeFadesConfig);
         pw.println("  mColorFadeEnabled=" + mColorFadeEnabled);
         synchronized (mCachedBrightnessInfo) {
-            pw.println("  mCachedBrightnessInfo.brightness=" +
-                    mCachedBrightnessInfo.brightness.value);
-            pw.println("  mCachedBrightnessInfo.adjustedBrightness=" +
-                    mCachedBrightnessInfo.adjustedBrightness.value);
-            pw.println("  mCachedBrightnessInfo.brightnessMin=" +
-                    mCachedBrightnessInfo.brightnessMin.value);
-            pw.println("  mCachedBrightnessInfo.brightnessMax=" +
-                    mCachedBrightnessInfo.brightnessMax.value);
+            pw.println("  mCachedBrightnessInfo.brightness="
+                    + mCachedBrightnessInfo.brightness.value);
+            pw.println("  mCachedBrightnessInfo.adjustedBrightness="
+                    + mCachedBrightnessInfo.adjustedBrightness.value);
+            pw.println("  mCachedBrightnessInfo.brightnessMin="
+                    + mCachedBrightnessInfo.brightnessMin.value);
+            pw.println("  mCachedBrightnessInfo.brightnessMax="
+                    + mCachedBrightnessInfo.brightnessMax.value);
             pw.println("  mCachedBrightnessInfo.hbmMode=" + mCachedBrightnessInfo.hbmMode.value);
-            pw.println("  mCachedBrightnessInfo.hbmTransitionPoint=" +
-                    mCachedBrightnessInfo.hbmTransitionPoint.value);
-            pw.println("  mCachedBrightnessInfo.brightnessMaxReason =" +
-                    mCachedBrightnessInfo.brightnessMaxReason.value);
+            pw.println("  mCachedBrightnessInfo.hbmTransitionPoint="
+                    + mCachedBrightnessInfo.hbmTransitionPoint.value);
+            pw.println("  mCachedBrightnessInfo.brightnessMaxReason ="
+                    + mCachedBrightnessInfo.brightnessMaxReason.value);
         }
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);

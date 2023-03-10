@@ -380,10 +380,7 @@ class KeyguardUnlockAnimationController @Inject constructor(
                 // If the launcher is underneath, but we're about to launch an activity, don't do
                 // the animations since they won't be visible.
                 !notificationShadeWindowController.isLaunchingActivity &&
-                launcherUnlockController != null &&
-                // Temporarily disable for foldables since foldable launcher has two first pages,
-                // which breaks the in-window animation.
-                !isFoldable(context)
+                launcherUnlockController != null
     }
 
     /**

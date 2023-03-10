@@ -1051,6 +1051,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
+    "-1104347731": {
+      "message": "Setting requested orientation %s for %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-1103716954": {
       "message": "Not removing %s due to exit animation",
       "level": "VERBOSE",

@@ -358,6 +358,50 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
         }
 
     @Test
+    fun `LOCKSCREEN to DREAMING`() =
+        testScope.runTest {
+            // GIVEN a device that is not dreaming or dozing
+            keyguardRepository.setDreamingWithOverlay(false)
+            keyguardRepository.setWakefulnessModel(startingToWake())
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
+            )
+            runCurrent()
+
+            // GIVEN a prior transition has run to LOCKSCREEN
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.LOCKSCREEN,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            reset(mockTransitionRepository)
+
+            // WHEN the device begins to dream
+            keyguardRepository.setDreamingWithOverlay(true)
+            advanceUntilIdle()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to DREAMING should occur
+            assertThat(info.ownerName).isEqualTo("FromLockscreenTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.to).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
     fun `LOCKSCREEN to DOZING`() =
         testScope.runTest {
             // GIVEN a device with AOD not available
@@ -961,6 +1005,92 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // THEN a transition to LOCKSCREEN should occur
             assertThat(info.ownerName).isEqualTo("FromPrimaryBouncerTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.PRIMARY_BOUNCER)
+            assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `OCCLUDED to GONE`() =
+        testScope.runTest {
+            // GIVEN a device on lockscreen
+            keyguardRepository.setKeyguardShowing(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to OCCLUDED
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // WHEN keyguard goes away
+            keyguardRepository.setKeyguardShowing(false)
+            // AND occlusion ends
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to GONE should occur
+            assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.to).isEqualTo(KeyguardState.GONE)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun `OCCLUDED to LOCKSCREEN`() =
+        testScope.runTest {
+            // GIVEN a device on lockscreen
+            keyguardRepository.setKeyguardShowing(true)
+            runCurrent()
+
+            // GIVEN a prior transition has run to OCCLUDED
+            runner.startTransition(
+                testScope,
+                TransitionInfo(
+                    ownerName = "",
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
+                    animator =
+                        ValueAnimator().apply {
+                            duration = 10
+                            interpolator = Interpolators.LINEAR
+                        },
+                )
+            )
+            keyguardRepository.setKeyguardOccluded(true)
+            runCurrent()
+            reset(mockTransitionRepository)
+
+            // WHEN occlusion ends
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(mockTransitionRepository).startTransition(capture(), anyBoolean())
+                }
+            // THEN a transition to LOCKSCREEN should occur
+            assertThat(info.ownerName).isEqualTo("FromOccludedTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.OCCLUDED)
             assertThat(info.to).isEqualTo(KeyguardState.LOCKSCREEN)
             assertThat(info.animator).isNotNull()
 

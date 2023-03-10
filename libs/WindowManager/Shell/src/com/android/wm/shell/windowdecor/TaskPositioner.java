@@ -40,6 +40,7 @@ class TaskPositioner implements DragPositioningCallback {
     private final DisplayController mDisplayController;
     private final WindowDecoration mWindowDecoration;
 
+    private final Rect mTempBounds = new Rect();
     private final Rect mTaskBoundsAtDragStart = new Rect();
     private final PointF mRepositionStartPoint = new PointF();
     private final Rect mRepositionTaskBounds = new Rect();
@@ -117,17 +118,32 @@ class TaskPositioner implements DragPositioningCallback {
         final float deltaX = x - mRepositionStartPoint.x;
         final float deltaY = y - mRepositionStartPoint.y;
         mRepositionTaskBounds.set(mTaskBoundsAtDragStart);
+
+        final Rect stableBounds = mTempBounds;
+        // Make sure the new resizing destination in any direction falls within the stable bounds.
+        // If not, set the bounds back to the old location that was valid to avoid conflicts with
+        // some regions such as the gesture area.
+        mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
+                .getStableBounds(stableBounds);
         if ((mCtrlType & CTRL_TYPE_LEFT) != 0) {
-            mRepositionTaskBounds.left += deltaX;
+            final int candidateLeft = mRepositionTaskBounds.left + (int) deltaX;
+            mRepositionTaskBounds.left = (candidateLeft > stableBounds.left)
+                    ? candidateLeft : oldLeft;
         }
         if ((mCtrlType & CTRL_TYPE_RIGHT) != 0) {
-            mRepositionTaskBounds.right += deltaX;
+            final int candidateRight = mRepositionTaskBounds.right + (int) deltaX;
+            mRepositionTaskBounds.right = (candidateRight < stableBounds.right)
+                    ? candidateRight : oldRight;
         }
         if ((mCtrlType & CTRL_TYPE_TOP) != 0) {
-            mRepositionTaskBounds.top += deltaY;
+            final int candidateTop = mRepositionTaskBounds.top + (int) deltaY;
+            mRepositionTaskBounds.top = (candidateTop > stableBounds.top)
+                    ? candidateTop : oldTop;
         }
         if ((mCtrlType & CTRL_TYPE_BOTTOM) != 0) {
-            mRepositionTaskBounds.bottom += deltaY;
+            final int candidateBottom = mRepositionTaskBounds.bottom + (int) deltaY;
+            mRepositionTaskBounds.bottom = (candidateBottom < stableBounds.bottom)
+                    ? candidateBottom : oldBottom;
         }
         if (mCtrlType == CTRL_TYPE_UNDEFINED) {
             mRepositionTaskBounds.offset((int) deltaX, (int) deltaY);

@@ -4577,7 +4577,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void requestUpdateWallpaperIfNeeded() {
         final DisplayContent dc = getDisplayContent();
-        if (dc != null && hasWallpaper()) {
+        if (dc != null && ((mIsWallpaper && !mLastConfigReportedToClient) || hasWallpaper())) {
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             dc.setLayoutNeeded();
             mWmService.mWindowPlacerLocked.requestTraversal();

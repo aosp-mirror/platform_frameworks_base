@@ -59,6 +59,17 @@ data class TableChange(
         int = value
     }
 
+    /** Updates this to store the same value as [change]. */
+    fun updateTo(change: TableChange) {
+        reset(change.timestamp, change.columnPrefix, change.columnName)
+        when (change.type) {
+            DataType.STRING -> set(change.str)
+            DataType.INT -> set(change.int)
+            DataType.BOOLEAN -> set(change.bool)
+            DataType.EMPTY -> {}
+        }
+    }
+
     /** Returns true if this object has a change. */
     fun hasData(): Boolean {
         return columnName.isNotBlank() && type != DataType.EMPTY
