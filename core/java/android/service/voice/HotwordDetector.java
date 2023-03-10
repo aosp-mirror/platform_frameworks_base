@@ -232,24 +232,34 @@ public interface HotwordDetector {
         /**
          * Called when the detection fails due to an error.
          *
-         * @deprecated On Android 14 and above, implement {@link #onFailure(DetectorFailure)}
-         * instead.
+         * @deprecated On {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above,
+         * implement {@link HotwordDetector.Callback#onFailure(HotwordDetectionServiceFailure)},
+         * {@link AlwaysOnHotwordDetector.Callback#onFailure(SoundTriggerFailure)},
+         * {@link HotwordDetector.Callback#onUnknownFailure(String)} instead.
          */
         @Deprecated
         void onError();
 
         /**
-         * Called when the detection fails due to an error, the subclasses of
-         * {@link DetectorFailure} will be reported to the detector.
+         * Called when the detection fails due to an error occurs in the
+         * {@link HotwordDetectionService}, {@link HotwordDetectionServiceFailure} will be reported
+         * to the detector.
          *
-         * @see android.service.voice.HotwordDetectionServiceFailure
-         * @see android.service.voice.SoundTriggerFailure
-         * @see android.service.voice.UnknownFailure
-         * @see android.service.voice.VisualQueryDetectionServiceFailure
-         *
-         * @param detectorFailure It provides the error code, error message and suggested action.
+         * @param hotwordDetectionServiceFailure It provides the error code, error message and
+         *                                       suggested action.
          */
-        default void onFailure(@NonNull DetectorFailure detectorFailure) {
+        default void onFailure(
+                @NonNull HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+            onError();
+        }
+
+        /**
+         * Called when the detection fails due to an unknown error occurs, an error message
+         * will be reported to the detector.
+         *
+         * @param errorMessage It provides the error message.
+         */
+        default void onUnknownFailure(@NonNull String errorMessage) {
             onError();
         }
 

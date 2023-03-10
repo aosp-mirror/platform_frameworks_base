@@ -13034,6 +13034,7 @@ package android.service.voice {
   public abstract static class AlwaysOnHotwordDetector.Callback implements android.service.voice.HotwordDetector.Callback {
     ctor public AlwaysOnHotwordDetector.Callback();
     method public abstract void onAvailabilityChanged(int);
+    method public void onFailure(@NonNull android.service.voice.SoundTriggerFailure);
     method public void onHotwordDetectionServiceInitialized(int);
     method public void onHotwordDetectionServiceRestarted();
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
@@ -13072,17 +13073,12 @@ package android.service.voice {
     method @NonNull public android.service.voice.DetectedPhrase.Builder setPhrase(@NonNull String);
   }
 
-  public abstract class DetectorFailure implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public String getErrorMessage();
-    method public abstract int getSuggestedAction();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.DetectorFailure> CREATOR;
-    field public static final int SUGGESTED_ACTION_DISABLE_DETECTION = 2; // 0x2
-    field public static final int SUGGESTED_ACTION_NONE = 1; // 0x1
-    field public static final int SUGGESTED_ACTION_RECREATE_DETECTOR = 3; // 0x3
-    field public static final int SUGGESTED_ACTION_RESTART_RECOGNITION = 4; // 0x4
-    field public static final int SUGGESTED_ACTION_UNKNOWN = 0; // 0x0
+  public final class FailureSuggestedAction {
+    field public static final int DISABLE_DETECTION = 2; // 0x2
+    field public static final int NONE = 1; // 0x1
+    field public static final int RECREATE_DETECTOR = 3; // 0x3
+    field public static final int RESTART_RECOGNITION = 4; // 0x4
+    field public static final int UNKNOWN = 0; // 0x0
   }
 
   public final class HotwordAudioStream implements android.os.Parcelable {
@@ -13177,9 +13173,12 @@ package android.service.voice {
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
   }
 
-  public final class HotwordDetectionServiceFailure extends android.service.voice.DetectorFailure {
+  public final class HotwordDetectionServiceFailure implements android.os.Parcelable {
+    method public int describeContents();
     method public int getErrorCode();
+    method @NonNull public String getErrorMessage();
     method public int getSuggestedAction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordDetectionServiceFailure> CREATOR;
     field public static final int ERROR_CODE_BINDING_DIED = 2; // 0x2
     field public static final int ERROR_CODE_BIND_FAILURE = 1; // 0x1
@@ -13202,12 +13201,13 @@ package android.service.voice {
   public static interface HotwordDetector.Callback {
     method public void onDetected(@NonNull android.service.voice.AlwaysOnHotwordDetector.EventPayload);
     method @Deprecated public void onError();
-    method public default void onFailure(@NonNull android.service.voice.DetectorFailure);
+    method public default void onFailure(@NonNull android.service.voice.HotwordDetectionServiceFailure);
     method public void onHotwordDetectionServiceInitialized(int);
     method public void onHotwordDetectionServiceRestarted();
     method public void onRecognitionPaused();
     method public void onRecognitionResumed();
     method public void onRejected(@NonNull android.service.voice.HotwordRejectedResult);
+    method public default void onUnknownFailure(@NonNull String);
   }
 
   public static class HotwordDetector.IllegalDetectorStateException extends android.util.AndroidException {
@@ -13237,19 +13237,17 @@ package android.service.voice {
     field public static final int INITIALIZATION_STATUS_UNKNOWN = 100; // 0x64
   }
 
-  public final class SoundTriggerFailure extends android.service.voice.DetectorFailure {
+  public final class SoundTriggerFailure implements android.os.Parcelable {
+    method public int describeContents();
     method public int getErrorCode();
+    method @NonNull public String getErrorMessage();
     method public int getSuggestedAction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.SoundTriggerFailure> CREATOR;
     field public static final int ERROR_CODE_MODULE_DIED = 1; // 0x1
     field public static final int ERROR_CODE_RECOGNITION_RESUME_FAILED = 2; // 0x2
     field public static final int ERROR_CODE_UNEXPECTED_PREEMPTION = 3; // 0x3
     field public static final int ERROR_CODE_UNKNOWN = 0; // 0x0
-  }
-
-  public final class UnknownFailure extends android.service.voice.DetectorFailure {
-    method public int getSuggestedAction();
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.UnknownFailure> CREATOR;
   }
 
   public abstract class VisualQueryDetectionService extends android.app.Service implements android.service.voice.SandboxedDetectionInitializer {
@@ -13266,9 +13264,12 @@ package android.service.voice {
     field public static final String SERVICE_INTERFACE = "android.service.voice.VisualQueryDetectionService";
   }
 
-  public final class VisualQueryDetectionServiceFailure extends android.service.voice.DetectorFailure {
+  public final class VisualQueryDetectionServiceFailure implements android.os.Parcelable {
+    method public int describeContents();
     method public int getErrorCode();
+    method @NonNull public String getErrorMessage();
     method public int getSuggestedAction();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.VisualQueryDetectionServiceFailure> CREATOR;
     field public static final int ERROR_CODE_BINDING_DIED = 2; // 0x2
     field public static final int ERROR_CODE_BIND_FAILURE = 1; // 0x1
@@ -13286,10 +13287,11 @@ package android.service.voice {
   }
 
   public static interface VisualQueryDetector.Callback {
-    method public void onFailure(@NonNull android.service.voice.DetectorFailure);
+    method public void onFailure(@NonNull android.service.voice.VisualQueryDetectionServiceFailure);
     method public void onQueryDetected(@NonNull String);
     method public void onQueryFinished();
     method public void onQueryRejected();
+    method public void onUnknownFailure(@NonNull String);
     method public void onVisualQueryDetectionServiceInitialized(int);
     method public void onVisualQueryDetectionServiceRestarted();
   }

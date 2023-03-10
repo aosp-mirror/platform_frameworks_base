@@ -110,11 +110,12 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error delivering attention gained event.", e);
                     try {
-                        callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
-                                ERROR_CODE_ILLEGAL_ATTENTION_STATE,
-                                "Attention listener failed to switch to GAINED state."));
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_ATTENTION_STATE,
+                                        "Attention listener failed to switch to GAINED state."));
                     } catch (RemoteException ex) {
-                        Slog.v(TAG, "Fail to call onDetectionFailure");
+                        Slog.v(TAG, "Fail to call onVisualQueryDetectionServiceFailure");
                     }
                     return;
                 }
@@ -132,11 +133,12 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error delivering attention lost event.", e);
                     try {
-                        callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
-                                ERROR_CODE_ILLEGAL_ATTENTION_STATE,
-                                "Attention listener failed to switch to LOST state."));
+                        callback.onVisualQueryDetectionServiceFailure(
+                                new VisualQueryDetectionServiceFailure(
+                                        ERROR_CODE_ILLEGAL_ATTENTION_STATE,
+                                        "Attention listener failed to switch to LOST state."));
                     } catch (RemoteException ex) {
-                        Slog.v(TAG, "Fail to call onDetectionFailure");
+                        Slog.v(TAG, "Fail to call onVisualQueryDetectionServiceFailure");
                     }
                     return;
                 }
@@ -148,9 +150,10 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 Slog.v(TAG, "BinderCallback#onQueryDetected");
                 if (!mEgressingData) {
                     Slog.v(TAG, "Query should not be egressed within the unattention state.");
-                    callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
-                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
-                            "Cannot stream queries without attention signals."));
+                    callback.onVisualQueryDetectionServiceFailure(
+                            new VisualQueryDetectionServiceFailure(
+                                    ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                    "Cannot stream queries without attention signals."));
                     return;
                 }
                 mQueryStreaming = true;
@@ -164,9 +167,10 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 if (!mQueryStreaming) {
                     Slog.v(TAG, "Query streaming state signal FINISHED is block since there is"
                             + " no active query being streamed.");
-                    callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
-                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
-                            "Cannot send FINISHED signal with no query streamed."));
+                    callback.onVisualQueryDetectionServiceFailure(
+                            new VisualQueryDetectionServiceFailure(
+                                    ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                    "Cannot send FINISHED signal with no query streamed."));
                     return;
                 }
                 callback.onQueryFinished();
@@ -179,9 +183,10 @@ final class VisualQueryDetectorSession extends DetectorSession {
                 if (!mQueryStreaming) {
                     Slog.v(TAG, "Query streaming state signal REJECTED is block since there is"
                             + " no active query being streamed.");
-                    callback.onDetectionFailure(new VisualQueryDetectionServiceFailure(
-                            ERROR_CODE_ILLEGAL_STREAMING_STATE,
-                            "Cannot send REJECTED signal with no query streamed."));
+                    callback.onVisualQueryDetectionServiceFailure(
+                            new VisualQueryDetectionServiceFailure(
+                                    ERROR_CODE_ILLEGAL_STREAMING_STATE,
+                                    "Cannot send REJECTED signal with no query streamed."));
                     return;
                 }
                 callback.onQueryRejected();

@@ -280,6 +280,9 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private static final int MSG_HOTWORD_REJECTED = 6;
     private static final int MSG_HOTWORD_STATUS_REPORTED = 7;
     private static final int MSG_PROCESS_RESTARTED = 8;
+    private static final int MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE = 9;
+    private static final int MSG_DETECTION_SOUND_TRIGGER_FAILURE = 10;
+    private static final int MSG_DETECTION_UNKNOWN_FAILURE = 11;
 
     private final String mText;
     private final Locale mLocale;
@@ -773,11 +776,27 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         /**
          * {@inheritDoc}
          *
-         * @deprecated Use {@link HotwordDetector.Callback#onError(DetectorFailure)} instead.
+         * @deprecated On {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above,
+         * implement {@link HotwordDetector.Callback#onFailure(HotwordDetectionServiceFailure)},
+         * {@link AlwaysOnHotwordDetector.Callback#onFailure(SoundTriggerFailure)},
+         * {@link HotwordDetector.Callback#onUnknownFailure(String)} instead.
          */
         @Deprecated
         @Override
         public abstract void onError();
+
+        /**
+         * Called when the detection fails due to an error occurs in the
+         * {@link com.android.server.soundtrigger.SoundTriggerService} and
+         * {@link com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareService},
+         * {@link SoundTriggerFailure} will be reported to the detector.
+         *
+         * @param soundTriggerFailure It provides the error code, error message and suggested
+         *                            action.
+         */
+        public void onFailure(@NonNull SoundTriggerFailure soundTriggerFailure) {
+            onError();
+        }
 
         /** {@inheritDoc} */
         public abstract void onRecognitionPaused();
@@ -1703,18 +1722,43 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         @Override
         public void onError(int status) {
             Slog.i(TAG, "onError: " + status);
-            // This is a workaround before the sound trigger uses the onDetectionFailure method.
-            Message.obtain(mHandler, MSG_DETECTION_ERROR,
-                    new SoundTriggerFailure(status, "Sound trigger error")).sendToTarget();
+            // TODO(b/271534248): This is a workaround before the sound trigger uses the new error
+            // method.
+            Message.obtain(mHandler, MSG_DETECTION_SOUND_TRIGGER_FAILURE,
+                    new SoundTriggerFailure(SoundTriggerFailure.ERROR_CODE_UNKNOWN,
+                            "Sound trigger error")).sendToTarget();
         }
 
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) {
-            Slog.v(TAG, "onDetectionFailure detectorFailure: " + detectorFailure);
-            Message.obtain(mHandler, MSG_DETECTION_ERROR,
-                    detectorFailure != null ? detectorFailure
-                            : new UnknownFailure("Error data is null")).sendToTarget();
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure) {
+            Slog.v(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
+            if (hotwordDetectionServiceFailure != null) {
+                Message.obtain(mHandler, MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE,
+                        hotwordDetectionServiceFailure).sendToTarget();
+            } else {
+                Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE,
+                        "Error data is null").sendToTarget();
+            }
         }
+
+        @Override
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.w(TAG,
+                    "onVisualQueryDetectionServiceFailure: " + visualQueryDetectionServiceFailure);
+        }
+
+        @Override
+        public void onUnknownFailure(String errorMessage) throws RemoteException {
+            Slog.v(TAG, "onUnknownFailure: " + errorMessage);
+            Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE,
+                    !TextUtils.isEmpty(errorMessage) ? errorMessage
+                            : "Error data is null").sendToTarget();
+        }
+
         @Override
         public void onRecognitionPaused() {
             Slog.i(TAG, "onRecognitionPaused");
@@ -1747,7 +1791,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     }
 
     void onDetectorRemoteException() {
-        Message.obtain(mHandler, MSG_DETECTION_ERROR,
+        Message.obtain(mHandler, MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE,
                 new HotwordDetectionServiceFailure(
                         HotwordDetectionServiceFailure.ERROR_CODE_REMOTE_EXCEPTION,
                         "Detector remote exception occurs")).sendToTarget();
@@ -1777,7 +1821,9 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         mExternalCallback.onDetected((EventPayload) message.obj);
                         break;
                     case MSG_DETECTION_ERROR:
-                        mExternalCallback.onFailure((DetectorFailure) message.obj);
+                        // TODO(b/271534248): After reverting the workaround, this logic is still
+                        // necessary.
+                        mExternalCallback.onError();
                         break;
                     case MSG_DETECTION_PAUSE:
                         mExternalCallback.onRecognitionPaused();
@@ -1793,6 +1839,15 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         break;
                     case MSG_PROCESS_RESTARTED:
                         mExternalCallback.onHotwordDetectionServiceRestarted();
+                        break;
+                    case MSG_DETECTION_HOTWORD_DETECTION_SERVICE_FAILURE:
+                        mExternalCallback.onFailure((HotwordDetectionServiceFailure) message.obj);
+                        break;
+                    case MSG_DETECTION_SOUND_TRIGGER_FAILURE:
+                        mExternalCallback.onFailure((SoundTriggerFailure) message.obj);
+                        break;
+                    case MSG_DETECTION_UNKNOWN_FAILURE:
+                        mExternalCallback.onUnknownFailure((String) message.obj);
                         break;
                     default:
                         super.handleMessage(message);
