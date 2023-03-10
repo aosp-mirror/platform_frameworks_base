@@ -1,7 +1,6 @@
 # Plugin hooks
 ### Action: com.android.systemui.action.PLUGIN_OVERLAY
-Expected interface: [OverlayPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android
-/systemui/plugins/OverlayPlugin.java)
+Expected interface: [OverlayPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/OverlayPlugin.java)
 
 Use: Allows plugin access to the status bar and nav bar window for whatever nefarious purposes you can imagine.
 
@@ -52,10 +51,10 @@ Expected interface: [NotificationSwipeActionHelper](/frameworks/base/packages/Sy
 
 Use: Control over swipes/input for notification views, can be used to control what happens when you swipe/long-press
 
-### Action: com.android.systemui.action.PLUGIN_CLOCK
-Expected interface: [ClockPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/ClockPlugin.java)
+### Action: com.android.systemui.action.PLUGIN_CLOCK_PROVIDER
+Expected interface: [ClockProviderPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/ClockProviderPlugin.kt)
 
-Use: Allows replacement of the keyguard main clock.
+Use: Allows replacement of the keyguard main clock. See [additional Documentation](./clock-plugins.md).
 
 ### Action: com.android.systemui.action.PLUGIN_TOAST
 Expected interface: [ToastPlugin](/frameworks/base/packages/SystemUI/plugin/src/com/android/systemui/plugins/ToastPlugin.java)
