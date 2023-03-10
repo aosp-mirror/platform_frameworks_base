@@ -737,8 +737,8 @@ public class AlarmManagerServiceTest {
         verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class),
                 onFinishedCaptor.capture(), any(Handler.class), isNull(),
                 optionsCaptor.capture());
-        assertTrue(optionsCaptor.getValue()
-                .getBoolean(BroadcastOptions.KEY_ALARM_BROADCAST, false));
+        final BroadcastOptions options = new BroadcastOptions(optionsCaptor.getValue());
+        assertTrue(options.isAlarmBroadcast());
     }
 
     @Test
