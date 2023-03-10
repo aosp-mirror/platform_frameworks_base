@@ -221,12 +221,12 @@ public class CredentialDescriptionRegistry {
         return false;
     }
 
-    private static boolean checkForMatch(Set<String> registeredUnflattenedStrings,
+    static boolean checkForMatch(Set<String> registeredUnflattenedStrings,
             Set<String> requestedUnflattenedString) {
         return registeredUnflattenedStrings.containsAll(requestedUnflattenedString);
     }
 
-    private static Set<String> flatStringToSet(String flatString) {
+    static Set<String> flatStringToSet(String flatString) {
         return new HashSet<>(Arrays
                 .asList(flatString.split(FLAT_STRING_SPLIT_REGEX)));
     }
