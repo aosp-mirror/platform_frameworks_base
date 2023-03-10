@@ -135,11 +135,11 @@ interface ISub {
 
     /**
      * Set SIM icon tint color by simInfo index
-     * @param tint the icon tint color of the SIM
      * @param subId the unique SubscriptionInfo index in database
+     * @param tint the icon tint color of the SIM
      * @return the number of records updated
      */
-    int setIconTint(int tint, int subId);
+    int setIconTint(int subId, int tint);
 
     /**
      * Set display name by simInfo index with name source
