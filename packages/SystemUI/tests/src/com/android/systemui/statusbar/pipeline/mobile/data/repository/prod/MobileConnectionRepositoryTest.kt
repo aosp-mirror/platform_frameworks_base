@@ -18,12 +18,10 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.content.Intent
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
-import android.telephony.CellSignalStrengthCdma
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.ServiceState
 import android.telephony.ServiceState.STATE_IN_SERVICE
 import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
-import android.telephony.SignalStrength
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
@@ -69,6 +67,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.SystemUiCarrier
 import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.signalStrength
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
@@ -76,7 +75,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -126,7 +124,7 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
                 systemUiCarrierConfig,
                 fakeBroadcastDispatcher,
                 mobileMappings,
-                IMMEDIATE,
+                testDispatcher,
                 logger,
                 tableLogger,
                 testScope.backgroundScope,
@@ -156,13 +154,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.isEmergencyOnly.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<ServiceStateListener>()
-            val serviceState = ServiceState()
-            serviceState.isEmergencyOnly = true
-            callback.onServiceStateChanged(serviceState)
+            callback.onServiceStateChanged(ServiceState().also { it.isEmergencyOnly = true })
             assertThat(latest).isTrue()
 
-            serviceState.isEmergencyOnly = false
-            callback.onServiceStateChanged(serviceState)
+            callback.onServiceStateChanged(ServiceState().also { it.isEmergencyOnly = false })
 
             assertThat(latest).isFalse()
 
@@ -520,18 +515,15 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val cb = getTelephonyCallbackForType<ServiceStateListener>()
 
-            val serviceState = ServiceState()
-            serviceState.roaming = false
-
-            // CDMA roaming is off, GSM roaming is off
+            // CDMA roaming is off, GSM roaming is on
             whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_OFF)
-            cb.onServiceStateChanged(serviceState)
+            cb.onServiceStateChanged(ServiceState().also { it.roaming = true })
 
             assertThat(latest).isFalse()
 
-            // CDMA roaming is off, GSM roaming is on
+            // CDMA roaming is on, GSM roaming is off
             whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_ON)
-            cb.onServiceStateChanged(serviceState)
+            cb.onServiceStateChanged(ServiceState().also { it.roaming = false })
 
             assertThat(latest).isTrue()
 
@@ -568,20 +560,16 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
 
-            val serviceState = ServiceState()
-            serviceState.roaming = false
-
             val cb = getTelephonyCallbackForType<ServiceStateListener>()
 
             // CDMA roaming is off, GSM roaming is off
             whenever(telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber).thenReturn(ERI_OFF)
-            cb.onServiceStateChanged(serviceState)
+            cb.onServiceStateChanged(ServiceState().also { it.roaming = false })
 
             assertThat(latest).isFalse()
 
             // CDMA roaming is off, GSM roaming is on
-            serviceState.roaming = true
-            cb.onServiceStateChanged(serviceState)
+            cb.onServiceStateChanged(ServiceState().also { it.roaming = true })
 
             assertThat(latest).isTrue()
 
@@ -733,20 +721,32 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
-            val serviceState = ServiceState()
-            serviceState.voiceRegState = STATE_IN_SERVICE
-            serviceState.dataRegState = STATE_IN_SERVICE
-
-            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+            getTelephonyCallbackForType<ServiceStateListener>()
+                .onServiceStateChanged(
+                    ServiceState().also {
+                        it.voiceRegState = STATE_IN_SERVICE
+                        it.dataRegState = STATE_IN_SERVICE
+                    }
+                )
 
             assertThat(latest).isTrue()
 
-            serviceState.voiceRegState = STATE_OUT_OF_SERVICE
-            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+            getTelephonyCallbackForType<ServiceStateListener>()
+                .onServiceStateChanged(
+                    ServiceState().also {
+                        it.dataRegState = STATE_IN_SERVICE
+                        it.voiceRegState = STATE_OUT_OF_SERVICE
+                    }
+                )
             assertThat(latest).isTrue()
 
-            serviceState.dataRegState = STATE_OUT_OF_SERVICE
-            getTelephonyCallbackForType<ServiceStateListener>().onServiceStateChanged(serviceState)
+            getTelephonyCallbackForType<ServiceStateListener>()
+                .onServiceStateChanged(
+                    ServiceState().also {
+                        it.voiceRegState = STATE_OUT_OF_SERVICE
+                        it.dataRegState = STATE_OUT_OF_SERVICE
+                    }
+                )
             assertThat(latest).isFalse()
 
             job.cancel()
@@ -804,19 +804,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         return MobileTelephonyHelpers.getTelephonyCallbackForType(telephonyManager)
     }
 
-    /** Convenience constructor for SignalStrength */
-    private fun signalStrength(gsmLevel: Int, cdmaLevel: Int, isGsm: Boolean): SignalStrength {
-        val signalStrength = mock<SignalStrength>()
-        whenever(signalStrength.isGsm).thenReturn(isGsm)
-        whenever(signalStrength.level).thenReturn(gsmLevel)
-        val cdmaStrength =
-            mock<CellSignalStrengthCdma>().also { whenever(it.level).thenReturn(cdmaLevel) }
-        whenever(signalStrength.getCellSignalStrengths(CellSignalStrengthCdma::class.java))
-            .thenReturn(listOf(cdmaStrength))
-
-        return signalStrength
-    }
-
     private fun spnIntent(
         subId: Int = SUB_1_ID,
         showSpn: Boolean = true,
@@ -833,7 +820,6 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
         private const val SUB_1_ID = 1
 
         private val DEFAULT_NAME = NetworkNameModel.Default("default name")
