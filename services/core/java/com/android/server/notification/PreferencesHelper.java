@@ -135,7 +135,6 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_APP_USER_LOCKED_FIELDS = "app_user_locked_fields";
     private static final String ATT_ENABLED = "enabled";
-    private static final String ATT_USER_ALLOWED = "allowed";
     private static final String ATT_HIDE_SILENT = "hide_gentle";
     private static final String ATT_SENT_INVALID_MESSAGE = "sent_invalid_msg";
     private static final String ATT_SENT_VALID_MESSAGE = "sent_valid_msg";
@@ -363,15 +362,12 @@ public class PreferencesHelper implements RankingConfig {
                     String delegateName = XmlUtils.readStringAttribute(parser, ATT_NAME);
                     boolean delegateEnabled = parser.getAttributeBoolean(
                             null, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
-                    boolean userAllowed = parser.getAttributeBoolean(
-                            null, ATT_USER_ALLOWED, Delegate.DEFAULT_USER_ALLOWED);
                     Delegate d = null;
                     if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(delegateName)) {
-                        d = new Delegate(delegateName, delegateId, delegateEnabled, userAllowed);
+                        d = new Delegate(delegateName, delegateId, delegateEnabled);
                     }
                     r.delegate = d;
                 }
-
             }
 
             try {
@@ -640,9 +636,6 @@ public class PreferencesHelper implements RankingConfig {
                     if (r.delegate.mEnabled != Delegate.DEFAULT_ENABLED) {
                         out.attributeBoolean(null, ATT_ENABLED, r.delegate.mEnabled);
                     }
-                    if (r.delegate.mUserAllowed != Delegate.DEFAULT_USER_ALLOWED) {
-                        out.attributeBoolean(null, ATT_USER_ALLOWED, r.delegate.mUserAllowed);
-                    }
                     out.endTag(null, TAG_DELEGATE);
                 }
 
@@ -725,10 +718,17 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public void setShowBadge(String packageName, int uid, boolean showBadge) {
+        boolean changed = false;
         synchronized (mPackagePreferences) {
-            getOrCreatePackagePreferencesLocked(packageName, uid).showBadge = showBadge;
+            PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
+            if (pkgPrefs.showBadge != showBadge) {
+                pkgPrefs.showBadge = showBadge;
+                changed = true;
+            }
         }
-        updateConfig();
+        if (changed) {
+            updateConfig();
+        }
     }
 
     public boolean isInInvalidMsgState(String packageName, int uid) {
@@ -985,7 +985,9 @@ public class PreferencesHelper implements RankingConfig {
                     needsPolicyFileChange = true;
                 }
 
-                updateConfig();
+                if (needsPolicyFileChange) {
+                    updateConfig();
+                }
                 if (needsPolicyFileChange && !wasUndeleted) {
                     mNotificationChannelLogger.logNotificationChannelModified(existing, uid, pkg,
                             previousLoggingImportance, false);
@@ -1072,6 +1074,7 @@ public class PreferencesHelper implements RankingConfig {
             boolean fromUser) {
         Objects.requireNonNull(updatedChannel);
         Objects.requireNonNull(updatedChannel.getId());
+        boolean changed = false;
         boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
@@ -1105,6 +1108,7 @@ public class PreferencesHelper implements RankingConfig {
                         ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
                 r.visibility = updatedChannel.getLockscreenVisibility();
                 r.showBadge = updatedChannel.canShowBadge();
+                changed = true;
             }
 
             if (!channel.equals(updatedChannel)) {
@@ -1113,17 +1117,21 @@ public class PreferencesHelper implements RankingConfig {
                         .setSubtype(fromUser ? 1 : 0));
                 mNotificationChannelLogger.logNotificationChannelModified(updatedChannel, uid, pkg,
                         NotificationChannelLogger.getLoggingImportance(channel), fromUser);
+                changed = true;
             }
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
                     || channel.getImportance() != updatedChannel.getImportance()) {
                 needsDndChange = true;
+                changed = true;
             }
         }
         if (needsDndChange) {
             updateChannelsBypassingDnd();
         }
-        updateConfig();
+        if (changed) {
+            updateConfig();
+        }
     }
 
     @Override
@@ -1788,7 +1796,7 @@ public class PreferencesHelper implements RankingConfig {
             if (prefs == null || prefs.delegate == null) {
                 return null;
             }
-            if (!prefs.delegate.mUserAllowed || !prefs.delegate.mEnabled) {
+            if (!prefs.delegate.mEnabled) {
                 return null;
             }
             return prefs.delegate.mPkg;
@@ -1802,45 +1810,19 @@ public class PreferencesHelper implements RankingConfig {
             String delegatePkg, int delegateUid) {
         synchronized (mPackagePreferences) {
             PackagePreferences prefs = getOrCreatePackagePreferencesLocked(sourcePkg, sourceUid);
-
-            boolean userAllowed = prefs.delegate == null || prefs.delegate.mUserAllowed;
-            Delegate delegate = new Delegate(delegatePkg, delegateUid, true, userAllowed);
-            prefs.delegate = delegate;
+            prefs.delegate = new Delegate(delegatePkg, delegateUid, true);
         }
-        updateConfig();
     }
 
     /**
      * Used by an app to turn off its notification delegate.
      */
     public void revokeNotificationDelegate(String sourcePkg, int sourceUid) {
-        boolean changed = false;
         synchronized (mPackagePreferences) {
             PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
             if (prefs != null && prefs.delegate != null) {
                 prefs.delegate.mEnabled = false;
-                changed = true;
             }
-        }
-        if (changed) {
-            updateConfig();
-        }
-    }
-
-    /**
-     * Toggles whether an app can have a notification delegate on behalf of a user.
-     */
-    public void toggleNotificationDelegate(String sourcePkg, int sourceUid, boolean userAllowed) {
-        boolean changed = false;
-        synchronized (mPackagePreferences) {
-            PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
-            if (prefs != null && prefs.delegate != null) {
-                prefs.delegate.mUserAllowed = userAllowed;
-                changed = true;
-            }
-        }
-        if (changed) {
-            updateConfig();
         }
     }
 
@@ -2726,17 +2708,15 @@ public class PreferencesHelper implements RankingConfig {
 
     private static class Delegate {
         static final boolean DEFAULT_ENABLED = true;
-        static final boolean DEFAULT_USER_ALLOWED = true;
-        String mPkg;
-        int mUid = UNKNOWN_UID;
-        boolean mEnabled = DEFAULT_ENABLED;
-        boolean mUserAllowed = DEFAULT_USER_ALLOWED;
 
-        Delegate(String pkg, int uid, boolean enabled, boolean userAllowed) {
+        final String mPkg;
+        final int mUid;
+        boolean mEnabled;
+
+        Delegate(String pkg, int uid, boolean enabled) {
             mPkg = pkg;
             mUid = uid;
             mEnabled = enabled;
-            mUserAllowed = userAllowed;
         }
 
         public boolean isAllowed(String pkg, int uid) {
@@ -2745,7 +2725,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             return pkg.equals(mPkg)
                     && uid == mUid
-                    && (mUserAllowed && mEnabled);
+                    && mEnabled;
         }
     }
 }
