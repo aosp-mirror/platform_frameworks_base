@@ -55,7 +55,7 @@ oneway interface ITvInputClient {
     void onCueingMessageAvailability(boolean available, int seq);
     void onTimeShiftMode(int mode, int seq);
     void onAvailableSpeeds(in float[] speeds, int seq);
-    void onTvMessage(in String type, in Bundle data, int seq);
+    void onTvMessage(int type, in Bundle data, int seq);
 
     void onTuned(in Uri channelUri, int seq);
     // For the recording session

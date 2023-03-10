@@ -38,6 +38,8 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
+import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
+import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
@@ -178,6 +180,7 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.BindServiceEventListener;
 import android.app.ActivityManagerInternal.BroadcastEventListener;
 import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
+import android.app.ActivityManagerInternal.MediaProjectionTokenEvent;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AnrController;
@@ -1507,6 +1510,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final SparseIntArray mUidNetworkBlockedReasons = new SparseIntArray();
 
     final AppRestrictionController mAppRestrictionController;
+
+    /**
+     * The collection of the MediaProjection tokens per UID, for the apps that are allowed to
+     * start FGS with the type "mediaProjection"; this permission is granted via the request over
+     * the call to {@link android.media.project.MediaProjectionManager#createScreenCaptureIntent()}.
+     *
+     * <p>Note, the "token" here is actually an instance of
+     * {@link android.media.projection.IMediaProjection}.</p>
+     */
+    @GuardedBy("mMediaProjectionTokenMap")
+    private final SparseArray<ArraySet<IBinder>> mMediaProjectionTokenMap = new SparseArray();
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
@@ -4929,8 +4943,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            mOomAdjuster.setAttachingProcessStatesLSP(app);
+            app.mState.setCurAdj(ProcessList.INVALID_ADJ);
+            app.mState.setSetAdj(ProcessList.INVALID_ADJ);
+            app.mState.setVerifiedAdj(ProcessList.INVALID_ADJ);
+            mOomAdjuster.setAttachingSchedGroupLSP(app);
+            app.mState.setForcingToImportant(null);
             clearProcessForegroundLocked(app);
+            app.mState.setHasShownUi(false);
+            app.mState.setCached(false);
             app.setDebugging(false);
             app.setKilledByAm(false);
             app.setKilled(false);
@@ -5098,14 +5118,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(thread, mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
-            app.setPendingFinishAttach(true);
-
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
-
-            updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
-            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
-
             final long now = SystemClock.uptimeMillis();
             synchronized (mAppProfiler.mProfilerLock) {
                 app.mProfile.setLastRequestedGc(now);
@@ -5121,6 +5135,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
+            } else {
+                app.setPendingFinishAttach(true);
             }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
@@ -18137,7 +18153,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
                 final Bundle configChangedOptions = new BroadcastOptions()
                         .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                        .setDeferUntilActive(true)
+                        .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                         .toBundle();
                 broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
                         null, null, OP_NONE, configChangedOptions, false, false, MY_PID, SYSTEM_UID,
@@ -18156,7 +18172,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             PowerExemptionManager.REASON_LOCALE_CHANGED, "");
                     bOptions.setDeliveryGroupPolicy(
                             BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
-                    bOptions.setDeferUntilActive(true);
+                    bOptions.setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
                     broadcastIntentLocked(null, null, null, intent, null, null, 0, null, null, null,
                             null, null, OP_NONE, bOptions.toBundle(), false, false, MY_PID,
                             SYSTEM_UID, Binder.getCallingUid(), Binder.getCallingPid(),
@@ -18201,7 +18217,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final BroadcastOptions options = new BroadcastOptions()
                         .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
-                        .setDeferUntilActive(true);
+                        .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE);
                 if (reason != null) {
                     options.setDeliveryGroupMatchingKey(Intent.ACTION_CLOSE_SYSTEM_DIALOGS, reason);
                 }
@@ -18736,6 +18752,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void logFgsApiEnd(@ForegroundServiceApiType int apiType,
                 int uid, int pid) {
             ActivityManagerService.this.logFgsApiEnd(apiType, uid, pid);
+        }
+
+        @Override
+        public void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+                @MediaProjectionTokenEvent int event) {
+            ActivityManagerService.this.notifyMediaProjectionEvent(uid, projectionToken, event);
         }
     }
 
@@ -19968,6 +19990,43 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (Exception e) {
             pw.printf("Non-numeric argument at index %d: %s\n", index, arg);
             return invalidValue;
+        }
+    }
+
+    private void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+            @MediaProjectionTokenEvent int event) {
+        synchronized (mMediaProjectionTokenMap) {
+            final int index = mMediaProjectionTokenMap.indexOfKey(uid);
+            ArraySet<IBinder> tokens;
+            if (event == MEDIA_PROJECTION_TOKEN_EVENT_CREATED) {
+                if (index < 0) {
+                    tokens = new ArraySet();
+                    mMediaProjectionTokenMap.put(uid, tokens);
+                } else {
+                    tokens = mMediaProjectionTokenMap.valueAt(index);
+                }
+                tokens.add(projectionToken);
+            } else if (event == MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED && index >= 0) {
+                tokens = mMediaProjectionTokenMap.valueAt(index);
+                tokens.remove(projectionToken);
+                if (tokens.isEmpty()) {
+                    mMediaProjectionTokenMap.removeAt(index);
+                }
+            }
+        }
+    }
+
+    /**
+     * @return {@code true} if the MediaProjectionManagerService has created a media projection
+     *         for the given {@code uid} because the user has granted the permission;
+     *         it doesn't necessarily mean it has started the projection.
+     *
+     * <p>It doesn't check the {@link AppOpsManager#OP_PROJECT_MEDIA}.</p>
+     */
+    boolean isAllowedMediaProjectionNoOpCheck(int uid) {
+        synchronized (mMediaProjectionTokenMap) {
+            final int index = mMediaProjectionTokenMap.indexOfKey(uid);
+            return index >= 0 && !mMediaProjectionTokenMap.valueAt(index).isEmpty();
         }
     }
 }

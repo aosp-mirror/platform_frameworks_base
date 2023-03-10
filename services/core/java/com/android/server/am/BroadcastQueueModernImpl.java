@@ -52,7 +52,6 @@ import android.app.usage.UsageEvents.Event;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -224,20 +223,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private static final int MSG_DELIVERY_TIMEOUT_HARD = 3;
     private static final int MSG_BG_ACTIVITY_START_TIMEOUT = 4;
     private static final int MSG_CHECK_HEALTH = 5;
-    private static final int MSG_FINISH_RECEIVER = 6;
 
     private void enqueueUpdateRunningList() {
         mLocalHandler.removeMessages(MSG_UPDATE_RUNNING_LIST);
         mLocalHandler.sendEmptyMessage(MSG_UPDATE_RUNNING_LIST);
-    }
-
-    private void enqueueFinishReceiver(@NonNull BroadcastProcessQueue queue,
-            @DeliveryState int deliveryState, @NonNull String reason) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = queue;
-        args.argi1 = deliveryState;
-        args.arg2 = reason;
-        mLocalHandler.sendMessage(Message.obtain(mLocalHandler, MSG_FINISH_RECEIVER, args));
     }
 
     private final Handler mLocalHandler;
@@ -275,17 +264,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             case MSG_CHECK_HEALTH: {
                 synchronized (mService) {
                     checkHealthLocked();
-                }
-                return true;
-            }
-            case MSG_FINISH_RECEIVER: {
-                synchronized (mService) {
-                    final SomeArgs args = (SomeArgs) msg.obj;
-                    final BroadcastProcessQueue queue = (BroadcastProcessQueue) args.arg1;
-                    final int deliveryState = args.argi1;
-                    final String reason = (String) args.arg2;
-                    args.recycle();
-                    finishReceiverActiveLocked(queue, deliveryState, reason);
                 }
                 return true;
             }
@@ -727,7 +705,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         // Ignore registered receivers from a previous PID
         if (receiver instanceof BroadcastFilter) {
             mRunningColdStart = null;
-            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED,
+            finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_SKIPPED,
                     "BroadcastFilter for cold app");
             return;
         }
@@ -758,7 +736,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, false);
         if (queue.app == null) {
             mRunningColdStart = null;
-            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE,
+            finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
                     "startProcessLocked failed");
             return;
         }
@@ -800,7 +778,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             @NonNull BroadcastRecord r, int index) {
         final String reason = shouldSkipReceiver(queue, r, index);
         if (reason != null) {
-            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_SKIPPED, reason);
+            finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_SKIPPED, reason);
             return true;
         }
         return false;
@@ -914,7 +892,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     // TODO: consider making registered receivers of unordered
                     // broadcasts report results to detect ANRs
                     if (assumeDelivered) {
-                        enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_DELIVERED,
+                        finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_DELIVERED,
                                 "assuming delivered");
                     }
                 } else {
@@ -932,10 +910,10 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 logw(msg);
                 app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
                         ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
-                enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE, "remote app");
+                finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE, "remote app");
             }
         } else {
-            enqueueFinishReceiver(queue, BroadcastRecord.DELIVERY_FAILURE,
+            finishReceiverActiveLocked(queue, BroadcastRecord.DELIVERY_FAILURE,
                     "missing IApplicationThread");
         }
     }

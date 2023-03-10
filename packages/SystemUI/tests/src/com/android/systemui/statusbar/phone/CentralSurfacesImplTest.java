@@ -1091,6 +1091,34 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOccludingQSNotExpanded_transitionToAuthScrimmed() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and panel is NOT expanded
+        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        mCentralSurfaces.mPanelExpanded = false;
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED));
+    }
+
+    @Test
+    public void testOccludingQSExpanded_transitionToAuthScrimmedShade() {
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // GIVEN device occluded and qs IS expanded
+        mCentralSurfaces.setBarStateForTest(SHADE); // occluding on LS has StatusBarState = SHADE
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        mCentralSurfaces.mPanelExpanded = true;
+
+        mCentralSurfaces.updateScrimController();
+
+        verify(mScrimController).transitionTo(eq(ScrimState.AUTH_SCRIMMED_SHADE));
+    }
+
+    @Test
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 
@@ -1312,6 +1340,15 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // THEN power manager receives wakeup
         verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());
+    }
+
+    @Test
+    public void frpLockedDevice_shadeDisabled() {
+        when(mDeviceProvisionedController.isFrpActive()).thenReturn(true);
+        when(mDozeServiceHost.isPulsing()).thenReturn(true);
+        mCentralSurfaces.updateNotificationPanelTouchState();
+
+        verify(mNotificationPanelViewController).setTouchAndAnimationDisabled(true);
     }
 
     /**

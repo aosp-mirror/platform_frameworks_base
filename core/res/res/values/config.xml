@@ -2772,7 +2772,8 @@
 
     <!-- Whether the device allows users to start in background visible on the default display.
          Should be false for most devices, except passenger-only automotive build (i.e., when
-         Android runs in a separate system in the back seat to manage the passenger displays) -->
+         Android runs in a separate system in the back seat to manage the passenger displays).
+         When set to true, config_multiuserVisibleBackgroundUsers must also be true. -->
     <bool name="config_multiuserVisibleBackgroundUsersOnDefaultDisplay">false</bool>
 
     <!-- Whether to automatically switch to the designated Dock User (the user chosen for

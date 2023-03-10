@@ -42,6 +42,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
@@ -80,9 +82,10 @@ class ControlsStartableTest : SysuiTestCase() {
     fun testNoPreferredPackagesNoDefaultSelected_noNewSelection() {
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
     }
@@ -92,9 +95,10 @@ class ControlsStartableTest : SysuiTestCase() {
         whenever(authorizedPanelsRepository.getPreferredPackages())
             .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
-        `when`(controlsListingController.getCurrentServices()).thenReturn(emptyList())
+        setUpControlsListingControls(emptyList())
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
     }
@@ -105,9 +109,10 @@ class ControlsStartableTest : SysuiTestCase() {
             .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT, "not panel", hasPanel = false))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
     }
@@ -119,9 +124,10 @@ class ControlsStartableTest : SysuiTestCase() {
         `when`(controlsController.getPreferredSelection())
             .thenReturn(mock<SelectedItem.PanelItem>())
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController, never()).setPreferredSelection(any())
     }
@@ -132,9 +138,10 @@ class ControlsStartableTest : SysuiTestCase() {
             .thenReturn(setOf(TEST_PACKAGE_PANEL))
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController).setPreferredSelection(listings[0].toPanelItem())
     }
@@ -149,9 +156,10 @@ class ControlsStartableTest : SysuiTestCase() {
                 ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true),
                 ControlsServiceInfo(ComponentName("other_package", "cls"), "non panel", false)
             )
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController).setPreferredSelection(listings[0].toPanelItem())
     }
@@ -166,9 +174,10 @@ class ControlsStartableTest : SysuiTestCase() {
                 ControlsServiceInfo(ComponentName("other_package", "cls"), "panel", true),
                 ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true)
             )
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController).setPreferredSelection(listings[1].toPanelItem())
     }
@@ -176,10 +185,11 @@ class ControlsStartableTest : SysuiTestCase() {
     @Test
     fun testPreferredSelectionIsPanel_bindOnStart() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = true))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
         `when`(controlsController.getPreferredSelection()).thenReturn(listings[0].toPanelItem())
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController).bindComponentForPanel(TEST_COMPONENT_PANEL)
     }
@@ -187,11 +197,12 @@ class ControlsStartableTest : SysuiTestCase() {
     @Test
     fun testPreferredSelectionPanel_listingNoPanel_notBind() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = false))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
         `when`(controlsController.getPreferredSelection())
             .thenReturn(SelectedItem.PanelItem("panel", TEST_COMPONENT_PANEL))
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController, never()).bindComponentForPanel(any())
     }
@@ -199,10 +210,11 @@ class ControlsStartableTest : SysuiTestCase() {
     @Test
     fun testNotPanelSelection_noBind() {
         val listings = listOf(ControlsServiceInfo(TEST_COMPONENT_PANEL, "panel", hasPanel = false))
-        `when`(controlsListingController.getCurrentServices()).thenReturn(listings)
+        setUpControlsListingControls(listings)
         `when`(controlsController.getPreferredSelection()).thenReturn(SelectedItem.EMPTY_SELECTION)
 
         createStartable(enabled = true).start()
+        fakeExecutor.runAllReady()
 
         verify(controlsController, never()).bindComponentForPanel(any())
     }
@@ -219,6 +231,12 @@ class ControlsStartableTest : SysuiTestCase() {
         createStartable(enabled = true).start()
 
         verify(controlsController, never()).setPreferredSelection(any())
+    }
+
+    private fun setUpControlsListingControls(listings: List<ControlsServiceInfo>) {
+        doAnswer { doReturn(listings).`when`(controlsListingController).getCurrentServices() }
+            .`when`(controlsListingController)
+            .forceReload()
     }
 
     private fun createStartable(enabled: Boolean): ControlsStartable {

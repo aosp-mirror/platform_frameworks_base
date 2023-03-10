@@ -1493,7 +1493,26 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @Configuration.Orientation
     int getRequestedConfigurationOrientation(boolean forDisplay) {
-        int requestedOrientation = getOverrideOrientation();
+        return getRequestedConfigurationOrientation(forDisplay, getOverrideOrientation());
+    }
+
+    /**
+     * Gets the configuration orientation by the requested screen orientation
+     *
+     * @param forDisplay whether it is the requested config orientation for display.
+     *                   If {@code true}, we may reverse the requested orientation if the root is
+     *                   different from the display, so that when the display rotates to the
+     *                   reversed orientation, the requested app will be in the requested
+     *                   orientation.
+     * @param requestedOrientation the screen orientation({@link ScreenOrientation}) that is
+     *                   requested
+     * @return orientation in ({@link Configuration#ORIENTATION_LANDSCAPE},
+     *         {@link Configuration#ORIENTATION_PORTRAIT},
+     *         {@link Configuration#ORIENTATION_UNDEFINED}).
+     */
+    @Configuration.Orientation
+    int getRequestedConfigurationOrientation(boolean forDisplay,
+            @ScreenOrientation int requestedOrientation) {
         final RootDisplayArea root = getRootDisplayArea();
         if (forDisplay && root != null && root.isOrientationDifferentFromDisplay()) {
             // Reverse the requested orientation if the orientation of its root is different from
@@ -1503,7 +1522,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // (portrait).
             // When an app below the DAG is requesting landscape, it should actually request the
             // display to be portrait, so that the DAG and the app will be in landscape.
-            requestedOrientation = reverseOrientation(getOverrideOrientation());
+            requestedOrientation = reverseOrientation(requestedOrientation);
         }
 
         if (requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_NOSENSOR) {
