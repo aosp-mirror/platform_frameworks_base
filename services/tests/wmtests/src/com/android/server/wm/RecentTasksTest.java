@@ -448,12 +448,15 @@ public class RecentTasksTest extends WindowTestsBase {
         final String taskAffinity = "affinity";
         final int uid = 10123;
         final Task task1 = createTaskBuilder(".Task1").build();
-        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        final ComponentName componentName = getUniqueComponentName();
+        task1.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
+                componentName);
         mRecentTasks.add(task1);
 
         // Add another task to recents, and make sure the previous task was removed.
         final Task task2 = createTaskBuilder(".Task2").build();
-        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE);
+        task2.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid, LAUNCH_MULTIPLE,
+                componentName);
         mRecentTasks.add(task2);
         assertEquals(1, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
@@ -461,7 +464,7 @@ public class RecentTasksTest extends WindowTestsBase {
         // Add another single-instance task to recents, and make sure no task is removed.
         final Task task3 = createTaskBuilder(".Task3").build();
         task3.affinity = ActivityRecord.computeTaskAffinity(taskAffinity, uid,
-                LAUNCH_SINGLE_INSTANCE);
+                LAUNCH_SINGLE_INSTANCE, componentName);
         mRecentTasks.add(task3);
         assertEquals(2, mRecentTasks.getRecentTasks(MAX_VALUE, 0 /* flags */,
                 true /* getTasksAllowed */, TEST_USER_0_ID, 0).getList().size());
