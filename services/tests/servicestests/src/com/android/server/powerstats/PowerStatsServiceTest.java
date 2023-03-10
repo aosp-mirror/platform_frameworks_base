@@ -16,6 +16,8 @@
 
 package com.android.server.powerstats;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -30,10 +32,15 @@ import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
 import android.hardware.power.stats.StateResidencyResult;
+import android.os.Bundle;
+import android.os.IPowerStatsService;
 import android.os.Looper;
+import android.os.PowerMonitor;
+import android.os.ResultReceiver;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.internal.os.Clock;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
@@ -58,13 +65,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Tests for {@link com.android.server.powerstats.PowerStatsService}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:PowerStatsServiceTest
+ * atest FrameworksServicesTests:PowerStatsServiceTest
  */
 public class PowerStatsServiceTest {
     private static final String TAG = PowerStatsServiceTest.class.getSimpleName();
@@ -90,13 +99,29 @@ public class PowerStatsServiceTest {
 
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     private PowerStatsService mService;
+    private TestPowerStatsHALWrapper mPowerStatsHALWrapper = new TestPowerStatsHALWrapper();
     private File mDataStorageDir;
     private TimerTrigger mTimerTrigger;
     private BatteryTrigger mBatteryTrigger;
     private PowerStatsLogger mPowerStatsLogger;
+    private MockClock mMockClock = new MockClock();
+
+    private class MockClock extends Clock {
+        public long realtime;
+
+        @Override
+        public long elapsedRealtime() {
+            return realtime;
+        }
+    }
 
     private final PowerStatsService.Injector mInjector = new PowerStatsService.Injector() {
-        private TestPowerStatsHALWrapper mTestPowerStatsHALWrapper = new TestPowerStatsHALWrapper();
+
+        @Override
+        Clock getClock() {
+            return mMockClock;
+        }
+
         @Override
         File createDataStoragePath() {
             if (mDataStorageDir == null) {
@@ -142,7 +167,7 @@ public class PowerStatsServiceTest {
 
         @Override
         IPowerStatsHALWrapper getPowerStatsHALWrapperImpl() {
-            return mTestPowerStatsHALWrapper;
+            return mPowerStatsHALWrapper;
         }
 
         @Override
@@ -152,29 +177,32 @@ public class PowerStatsServiceTest {
                 String residencyFilename, String residencyCacheFilename,
                 IPowerStatsHALWrapper powerStatsHALWrapper) {
             mPowerStatsLogger = new PowerStatsLogger(context, looper, dataStoragePath,
-                meterFilename, meterCacheFilename,
-                modelFilename, modelCacheFilename,
-                residencyFilename, residencyCacheFilename,
-                powerStatsHALWrapper);
+                    meterFilename, meterCacheFilename,
+                    modelFilename, modelCacheFilename,
+                    residencyFilename, residencyCacheFilename,
+                    powerStatsHALWrapper);
             return mPowerStatsLogger;
         }
 
         @Override
         BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
             mBatteryTrigger = new BatteryTrigger(context, powerStatsLogger,
-                false /* trigger enabled */);
+                    false /* trigger enabled */);
             return mBatteryTrigger;
         }
 
         @Override
         TimerTrigger createTimerTrigger(Context context, PowerStatsLogger powerStatsLogger) {
             mTimerTrigger = new TimerTrigger(context, powerStatsLogger,
-                false /* trigger enabled */);
+                    false /* trigger enabled */);
             return mTimerTrigger;
         }
     };
 
     public static final class TestPowerStatsHALWrapper implements IPowerStatsHALWrapper {
+        public EnergyConsumerResult[] energyConsumerResults;
+        public EnergyMeasurement[] energyMeasurements;
+
         @Override
         public PowerEntity[] getPowerEntityInfo() {
             PowerEntity[] powerEntityList = new PowerEntity[POWER_ENTITY_COUNT];
@@ -195,12 +223,12 @@ public class PowerStatsServiceTest {
         @Override
         public StateResidencyResult[] getStateResidency(int[] powerEntityIds) {
             StateResidencyResult[] stateResidencyResultList =
-                new StateResidencyResult[POWER_ENTITY_COUNT];
+                    new StateResidencyResult[POWER_ENTITY_COUNT];
             for (int i = 0; i < stateResidencyResultList.length; i++) {
                 stateResidencyResultList[i] = new StateResidencyResult();
                 stateResidencyResultList[i].id = i;
                 stateResidencyResultList[i].stateResidencyData =
-                    new StateResidency[STATE_RESIDENCY_COUNT];
+                        new StateResidency[STATE_RESIDENCY_COUNT];
                 for (int j = 0; j < stateResidencyResultList[i].stateResidencyData.length; j++) {
                     stateResidencyResultList[i].stateResidencyData[j] = new StateResidency();
                     stateResidencyResultList[i].stateResidencyData[j].id = j;
@@ -226,24 +254,26 @@ public class PowerStatsServiceTest {
             return energyConsumerList;
         }
 
-        @Override
-        public EnergyConsumerResult[] getEnergyConsumed(int[] energyConsumerIds) {
-            EnergyConsumerResult[] energyConsumedList =
-                new EnergyConsumerResult[ENERGY_CONSUMER_COUNT];
-            for (int i = 0; i < energyConsumedList.length; i++) {
-                energyConsumedList[i] = new EnergyConsumerResult();
-                energyConsumedList[i].id = i;
-                energyConsumedList[i].timestampMs = i;
-                energyConsumedList[i].energyUWs = i;
-                energyConsumedList[i].attribution =
-                    new EnergyConsumerAttribution[ENERGY_CONSUMER_ATTRIBUTION_COUNT];
-                for (int j = 0; j < energyConsumedList[i].attribution.length; j++) {
-                    energyConsumedList[i].attribution[j] = new EnergyConsumerAttribution();
-                    energyConsumedList[i].attribution[j].uid = j;
-                    energyConsumedList[i].attribution[j].energyUWs = j;
+        private void buildEnergyConsumerResult() {
+            energyConsumerResults = new EnergyConsumerResult[ENERGY_CONSUMER_COUNT];
+            for (int i = 0; i < energyConsumerResults.length; i++) {
+                energyConsumerResults[i] = new EnergyConsumerResult();
+                energyConsumerResults[i].id = i;
+                energyConsumerResults[i].timestampMs = i;
+                energyConsumerResults[i].energyUWs = i;
+                energyConsumerResults[i].attribution =
+                        new EnergyConsumerAttribution[ENERGY_CONSUMER_ATTRIBUTION_COUNT];
+                for (int j = 0; j < energyConsumerResults[i].attribution.length; j++) {
+                    energyConsumerResults[i].attribution[j] = new EnergyConsumerAttribution();
+                    energyConsumerResults[i].attribution[j].uid = j;
+                    energyConsumerResults[i].attribution[j].energyUWs = j;
                 }
             }
-            return energyConsumedList;
+        }
+
+        @Override
+        public EnergyConsumerResult[] getEnergyConsumed(int[] energyConsumerIds) {
+            return energyConsumerResults;
         }
 
         @Override
@@ -258,17 +288,20 @@ public class PowerStatsServiceTest {
             return energyMeterList;
         }
 
+        private void buildEnergyMeasurements() {
+            energyMeasurements = new EnergyMeasurement[ENERGY_METER_COUNT];
+            for (int i = 0; i < energyMeasurements.length; i++) {
+                energyMeasurements[i] = new EnergyMeasurement();
+                energyMeasurements[i].id = i;
+                energyMeasurements[i].timestampMs = i;
+                energyMeasurements[i].durationMs = i;
+                energyMeasurements[i].energyUWs = i;
+            }
+        }
+
         @Override
         public EnergyMeasurement[] readEnergyMeter(int[] channelIds) {
-            EnergyMeasurement[] energyMeasurementList = new EnergyMeasurement[ENERGY_METER_COUNT];
-            for (int i = 0; i < energyMeasurementList.length; i++) {
-                energyMeasurementList[i] = new EnergyMeasurement();
-                energyMeasurementList[i].id = i;
-                energyMeasurementList[i].timestampMs = i;
-                energyMeasurementList[i].durationMs = i;
-                energyMeasurementList[i].energyUWs = i;
-            }
-            return energyMeasurementList;
+            return energyMeasurements;
         }
 
         @Override
@@ -286,6 +319,7 @@ public class PowerStatsServiceTest {
     public void testWrittenMeterDataMatchesReadIncidentReportData()
             throws InterruptedException, IOException {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        mPowerStatsHALWrapper.buildEnergyMeasurements();
 
         // Write data to on-device storage.
         mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY);
@@ -331,6 +365,8 @@ public class PowerStatsServiceTest {
             throws InterruptedException, IOException {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
+        mPowerStatsHALWrapper.buildEnergyConsumerResult();
+
         // Write data to on-device storage.
         mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY);
 
@@ -368,7 +404,7 @@ public class PowerStatsServiceTest {
                     == ENERGY_CONSUMER_ATTRIBUTION_COUNT);
             for (int j = 0; j < pssProto.energyConsumerResult[i].attribution.length; j++) {
                 assertTrue(pssProto.energyConsumerResult[i].attribution[j].uid == j);
-                assertTrue(pssProto.energyConsumerResult[i].attribution[j].energyUws  == j);
+                assertTrue(pssProto.energyConsumerResult[i].attribution[j].energyUws == j);
             }
         }
     }
@@ -1007,5 +1043,112 @@ public class PowerStatsServiceTest {
         assertTrue(meterFile.exists());
         assertTrue(modelFile.exists());
         assertTrue(residencyFile.exists());
+    }
+
+    private static class GetSupportedPowerMonitorsResult extends ResultReceiver {
+        public PowerMonitor[] powerMonitors;
+
+        GetSupportedPowerMonitorsResult() {
+            super(null);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            powerMonitors = resultData.getParcelableArray(IPowerStatsService.KEY_MONITORS,
+                    PowerMonitor.class);
+        }
+    }
+
+    @Test
+    public void getSupportedPowerMonitors() {
+        GetSupportedPowerMonitorsResult result = new GetSupportedPowerMonitorsResult();
+        mService.getSupportedPowerMonitorsImpl(result);
+        assertThat(result.powerMonitors).isNotNull();
+        assertThat(Arrays.stream(result.powerMonitors).map(pm -> pm.name).toList())
+                .containsAtLeast(
+                        "energyconsumer0",
+                        "BLUETOOTH/1",
+                        "[channelname0]:channelsubsystem0",
+                        "[channelname1]:channelsubsystem1");
+    }
+
+    private static class GetPowerMonitorsResult extends ResultReceiver {
+        public long[] energyUws;
+        public long[] timestamps;
+
+        GetPowerMonitorsResult() {
+            super(null);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            energyUws = resultData.getLongArray(IPowerStatsService.KEY_ENERGY);
+            timestamps = resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS);
+        }
+    }
+
+    @Test
+    public void getPowerMonitors() {
+        mMockClock.realtime = 10 * 60_000;
+
+        mPowerStatsHALWrapper.buildEnergyConsumerResult();
+        EnergyConsumerResult[] energyConsumerResults = mPowerStatsHALWrapper.energyConsumerResults;
+        for (int i = 0; i < energyConsumerResults.length; i++) {
+            energyConsumerResults[i].energyUWs = 42 + 100 * i;
+            energyConsumerResults[i].timestampMs = mMockClock.realtime + 100 * i;
+        }
+
+        mPowerStatsHALWrapper.buildEnergyMeasurements();
+        EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.energyMeasurements;
+        for (int i = 0; i < energyMeasurements.length; i++) {
+            energyMeasurements[i].energyUWs = 314 + 200 * i;
+            energyMeasurements[i].timestampMs = mMockClock.realtime + 200 * i;
+        }
+
+        GetSupportedPowerMonitorsResult supportedPowerMonitorsResult =
+                new GetSupportedPowerMonitorsResult();
+        mService.getSupportedPowerMonitorsImpl(supportedPowerMonitorsResult);
+        Map<String, PowerMonitor> map =
+                Arrays.stream(supportedPowerMonitorsResult.powerMonitors)
+                        .collect(Collectors.toMap(pm -> pm.name, pm -> pm));
+        PowerMonitor consumer1 = map.get("energyconsumer0");
+        PowerMonitor consumer2 = map.get("BLUETOOTH/1");
+        PowerMonitor measurement1 = map.get("[channelname0]:channelsubsystem0");
+        PowerMonitor measurement2 = map.get("[channelname1]:channelsubsystem1");
+
+        GetPowerMonitorsResult result = new GetPowerMonitorsResult();
+        mService.getPowerMonitorReadingsImpl(
+                new int[]{consumer1.index, consumer2.index, measurement1.index,
+                        measurement2.index}, result);
+
+        assertThat(result.energyUws).isEqualTo(new long[]{42, 142, 314, 514});
+        assertThat(result.timestamps).isEqualTo(new long[]{600_000, 600_100, 600_000, 600_200});
+
+        // Test caching/throttling
+        mMockClock.realtime += 1;
+
+        for (EnergyConsumerResult energyConsumerResult : energyConsumerResults) {
+            energyConsumerResult.energyUWs = 300;
+            energyConsumerResult.timestampMs = mMockClock.realtime + 300;
+        }
+
+        for (EnergyMeasurement energyMeasurement : energyMeasurements) {
+            energyMeasurement.energyUWs = 400;
+            energyMeasurement.timestampMs = mMockClock.realtime + 400;
+        }
+
+        mService.getPowerMonitorReadingsImpl(new int[]{consumer1.index, measurement1.index},
+                result);
+
+        assertThat(result.energyUws).isEqualTo(new long[]{42, 314});
+        assertThat(result.timestamps).isEqualTo(new long[]{600_000, 600_000});
+
+        mMockClock.realtime += 10 * 60000;
+
+        mService.getPowerMonitorReadingsImpl(new int[]{consumer1.index, measurement1.index},
+                result);
+
+        assertThat(result.energyUws).isEqualTo(new long[]{300, 400});
+        assertThat(result.timestamps).isEqualTo(new long[]{600_301, 600_401});
     }
 }

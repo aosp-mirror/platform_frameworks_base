@@ -16,27 +16,34 @@
 
 package com.android.server.powerstats;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyConsumerType;
 import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.StateResidencyResult;
-import android.os.Binder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.IPowerStatsService;
 import android.os.Looper;
+import android.os.PowerMonitor;
+import android.os.PowerMonitorReadings;
+import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.power.PowerStatsInternal;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.Clock;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
@@ -46,6 +53,8 @@ import com.android.server.powerstats.ProtoStreamUtils.PowerEntityUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -65,8 +74,10 @@ public class PowerStatsService extends SystemService {
     private static final String METER_CACHE_FILENAME = "meterCache";
     private static final String MODEL_CACHE_FILENAME = "modelCache";
     private static final String RESIDENCY_CACHE_FILENAME = "residencyCache";
+    private static final long MAX_POWER_MONITOR_AGE_MILLIS = 30_000;
 
     private final Injector mInjector;
+    private final Clock mClock;
     private File mDataStoragePath;
 
     private Context mContext;
@@ -83,14 +94,22 @@ public class PowerStatsService extends SystemService {
     @Nullable
     @GuardedBy("this")
     private Looper mLooper;
+    private Handler mHandler;
     @Nullable
     @GuardedBy("this")
     private EnergyConsumer[] mEnergyConsumers = null;
+    @Nullable
+    @GuardedBy("this")
+    private Channel[] mEnergyMeters = null;
 
     @VisibleForTesting
     static class Injector {
         @GuardedBy("this")
         private IPowerStatsHALWrapper mPowerStatsHALWrapper;
+
+        Clock getClock() {
+            return Clock.SYSTEM_CLOCK;
+        }
 
         File createDataStoragePath() {
             return new File(Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM),
@@ -160,7 +179,18 @@ public class PowerStatsService extends SystemService {
         }
     }
 
-    private final class BinderService extends Binder {
+    private final IBinder mService = new IPowerStatsService.Stub() {
+
+        @Override
+        public void getSupportedPowerMonitors(ResultReceiver resultReceiver) {
+            getHandler().post(() -> getSupportedPowerMonitorsImpl(resultReceiver));
+        }
+
+        @Override
+        public void getPowerMonitorReadings(int[] powerMonitorIds, ResultReceiver resultReceiver) {
+            getHandler().post(() -> getPowerMonitorReadingsImpl(powerMonitorIds, resultReceiver));
+        }
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
@@ -191,7 +221,7 @@ public class PowerStatsService extends SystemService {
                 }
             }
         }
-    }
+    };
 
     @Override
     public void onBootPhase(int phase) {
@@ -208,7 +238,7 @@ public class PowerStatsService extends SystemService {
             mPowerStatsInternal = new LocalService();
             publishLocalService(PowerStatsInternal.class, mPowerStatsInternal);
         }
-        publishBinderService(Context.POWER_STATS_SERVICE, new BinderService());
+        publishBinderService(Context.POWER_STATS_SERVICE, mService);
     }
 
     private void onSystemServicesReady() {
@@ -263,12 +293,30 @@ public class PowerStatsService extends SystemService {
         }
     }
 
+    private Handler getHandler() {
+        synchronized (this) {
+            if (mHandler == null) {
+                mHandler = new Handler(getLooper());
+            }
+            return mHandler;
+        }
+    }
+
     private EnergyConsumer[] getEnergyConsumerInfo() {
         synchronized (this) {
             if (mEnergyConsumers == null) {
                 mEnergyConsumers = getPowerStatsHal().getEnergyConsumerInfo();
             }
             return mEnergyConsumers;
+        }
+    }
+
+    private Channel[] getEnergyMeterInfo() {
+        synchronized (this) {
+            if (mEnergyMeters == null) {
+                mEnergyMeters = getPowerStatsHal().getEnergyMeterInfo();
+            }
+            return mEnergyMeters;
         }
     }
 
@@ -281,15 +329,10 @@ public class PowerStatsService extends SystemService {
         super(context);
         mContext = context;
         mInjector = injector;
+        mClock = injector.getClock();
     }
 
     private final class LocalService extends PowerStatsInternal {
-        private final Handler mHandler;
-
-        LocalService() {
-            mHandler = new Handler(getLooper());
-        }
-
 
         @Override
         public EnergyConsumer[] getEnergyConsumerInfo() {
@@ -300,9 +343,8 @@ public class PowerStatsService extends SystemService {
         public CompletableFuture<EnergyConsumerResult[]> getEnergyConsumedAsync(
                 int[] energyConsumerIds) {
             final CompletableFuture<EnergyConsumerResult[]> future = new CompletableFuture<>();
-            mHandler.sendMessage(
-                    PooledLambda.obtainMessage(PowerStatsService.this::getEnergyConsumedAsync,
-                            future, energyConsumerIds));
+            getHandler().post(
+                    () -> PowerStatsService.this.getEnergyConsumedAsync(future, energyConsumerIds));
             return future;
         }
 
@@ -315,9 +357,8 @@ public class PowerStatsService extends SystemService {
         public CompletableFuture<StateResidencyResult[]> getStateResidencyAsync(
                 int[] powerEntityIds) {
             final CompletableFuture<StateResidencyResult[]> future = new CompletableFuture<>();
-            mHandler.sendMessage(
-                    PooledLambda.obtainMessage(PowerStatsService.this::getStateResidencyAsync,
-                            future, powerEntityIds));
+            getHandler().post(
+                    () -> PowerStatsService.this.getStateResidencyAsync(future, powerEntityIds));
             return future;
         }
 
@@ -330,9 +371,8 @@ public class PowerStatsService extends SystemService {
         public CompletableFuture<EnergyMeasurement[]> readEnergyMeterAsync(
                 int[] channelIds) {
             final CompletableFuture<EnergyMeasurement[]> future = new CompletableFuture<>();
-            mHandler.sendMessage(
-                    PooledLambda.obtainMessage(PowerStatsService.this::readEnergyMeterAsync,
-                            future, channelIds));
+            getHandler().post(
+                    () -> PowerStatsService.this.readEnergyMeterAsync(future, channelIds));
             return future;
         }
     }
@@ -412,5 +452,238 @@ public class PowerStatsService extends SystemService {
     private void readEnergyMeterAsync(CompletableFuture<EnergyMeasurement[]> future,
             int[] channelIds) {
         future.complete(getPowerStatsHal().readEnergyMeter(channelIds));
+    }
+
+    private static class PowerMonitorState {
+        public final PowerMonitor powerMonitor;
+        public final int id;
+        public long timestampMs;
+        public long energyUws = PowerMonitorReadings.ENERGY_UNAVAILABLE;
+
+        private PowerMonitorState(PowerMonitor powerMonitor, int id) {
+            this.powerMonitor = powerMonitor;
+            this.id = id;
+        }
+    }
+
+    private volatile PowerMonitor[] mPowerMonitors;
+    private volatile PowerMonitorState[] mPowerMonitorStates;
+
+    private void ensurePowerMonitors() {
+        if (mPowerMonitors != null) {
+            return;
+        }
+
+        synchronized (this) {
+            if (mPowerMonitors != null) {
+                return;
+            }
+
+            List<PowerMonitor> monitors = new ArrayList<>();
+            List<PowerMonitorState> states = new ArrayList<>();
+
+            int index = 0;
+
+            Channel[] channels = getEnergyMeterInfo();
+            for (Channel channel : channels) {
+                PowerMonitor monitor = new PowerMonitor(index++,
+                        PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT,
+                        getChannelName(channel));
+                monitors.add(monitor);
+                states.add(new PowerMonitorState(monitor, channel.id));
+            }
+
+            EnergyConsumer[] energyConsumers = getEnergyConsumerInfo();
+            for (EnergyConsumer consumer : energyConsumers) {
+                PowerMonitor monitor = new PowerMonitor(index++,
+                        PowerMonitor.POWER_MONITOR_TYPE_CONSUMER,
+                        getEnergyConsumerName(consumer, energyConsumers));
+                monitors.add(monitor);
+                states.add(new PowerMonitorState(monitor, consumer.id));
+            }
+
+            mPowerMonitors = monitors.toArray(new PowerMonitor[monitors.size()]);
+            mPowerMonitorStates = states.toArray(new PowerMonitorState[monitors.size()]);
+        }
+    }
+
+    @NonNull
+    private String getChannelName(Channel c) {
+        StringBuilder sb = new StringBuilder();
+        sb.append('[').append(c.name).append("]:");
+        if (c.subsystem != null) {
+            sb.append(c.subsystem);
+        }
+        return sb.toString();
+    }
+
+    @NonNull
+    private String getEnergyConsumerName(EnergyConsumer consumer,
+            EnergyConsumer[] energyConsumers) {
+        if (consumer.type != EnergyConsumerType.OTHER) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(energyConsumerTypeToString(consumer.type));
+            boolean hasOrdinal = consumer.ordinal != 0;
+            if (!hasOrdinal) {
+                // See if any other EnergyConsumer of the same type has an ordinal
+                for (EnergyConsumer aConsumer : energyConsumers) {
+                    if (aConsumer.type == consumer.type && aConsumer.ordinal != 0) {
+                        hasOrdinal = true;
+                        break;
+                    }
+                }
+            }
+            if (hasOrdinal) {
+                sb.append('/').append(consumer.ordinal);
+            }
+            return sb.toString();
+        } else {
+            return consumer.name;
+        }
+    }
+
+    private static String energyConsumerTypeToString(int type) {
+        switch(type) {
+            case EnergyConsumerType.BLUETOOTH: return "BLUETOOTH";
+            case EnergyConsumerType.CPU_CLUSTER: return "CPU";
+            case EnergyConsumerType.DISPLAY: return "DISPLAY";
+            case EnergyConsumerType.GNSS: return "GNSS";
+            case EnergyConsumerType.MOBILE_RADIO: return "MOBILE_RADIO";
+            case EnergyConsumerType.WIFI: return "WIFI";
+            case EnergyConsumerType.OTHER: return "";
+            default:
+                throw new IllegalStateException("Unrecognized EnergyConsumerType: " + type);
+        }
+    }
+
+    /**
+     * Returns names of supported power monitors, including Channels and EnergyConsumers.
+     */
+    @VisibleForTesting
+    public void getSupportedPowerMonitorsImpl(ResultReceiver resultReceiver) {
+        ensurePowerMonitors();
+        Bundle result = new Bundle();
+        result.putParcelableArray(IPowerStatsService.KEY_MONITORS, mPowerMonitors);
+        resultReceiver.send(IPowerStatsService.RESULT_SUCCESS, result);
+    }
+
+    /**
+     * Returns the latest readings for the specified power monitors.
+     */
+    @VisibleForTesting
+    public void getPowerMonitorReadingsImpl(@NonNull int[] powerMonitorIndices,
+            ResultReceiver resultReceiver) {
+        ensurePowerMonitors();
+
+        long earliestTimestamp = Long.MAX_VALUE;
+        PowerMonitorState[] powerMonitorStates = new PowerMonitorState[powerMonitorIndices.length];
+        for (int i = 0; i < powerMonitorIndices.length; i++) {
+            int index = powerMonitorIndices[i];
+            if (index < 0 || index >= mPowerMonitorStates.length) {
+                resultReceiver.send(IPowerStatsService.RESULT_UNSUPPORTED_POWER_MONITOR, null);
+                return;
+            }
+
+            powerMonitorStates[i] = mPowerMonitorStates[index];
+            if (mPowerMonitorStates[index] != null
+                    && mPowerMonitorStates[index].timestampMs < earliestTimestamp) {
+                earliestTimestamp = mPowerMonitorStates[index].timestampMs;
+            }
+        }
+
+        if (earliestTimestamp == 0
+                || mClock.elapsedRealtime() - earliestTimestamp > MAX_POWER_MONITOR_AGE_MILLIS) {
+            updateEnergyConsumers(powerMonitorStates);
+            updateEnergyMeasurements(powerMonitorStates);
+        }
+
+        long[] energy = new long[powerMonitorStates.length];
+        long[] timestamps = new long[powerMonitorStates.length];
+        for (int i = 0; i < powerMonitorStates.length; i++) {
+            PowerMonitorState state = powerMonitorStates[i];
+
+            // TODO(273310268): add random noise
+            energy[i] = state.energyUws;
+            timestamps[i] = state.timestampMs;
+        }
+
+        Bundle result = new Bundle();
+        result.putLongArray(IPowerStatsService.KEY_ENERGY, energy);
+        result.putLongArray(IPowerStatsService.KEY_TIMESTAMPS, timestamps);
+        resultReceiver.send(IPowerStatsService.RESULT_SUCCESS, result);
+    }
+
+    private void updateEnergyConsumers(PowerMonitorState[] powerMonitorStates) {
+        int[] ids = collectIds(powerMonitorStates, PowerMonitor.POWER_MONITOR_TYPE_CONSUMER);
+        if (ids == null) {
+            return;
+        }
+
+        EnergyConsumerResult[] energyConsumerResults = getPowerStatsHal().getEnergyConsumed(ids);
+        if (energyConsumerResults == null) {
+            return;
+        }
+
+        for (PowerMonitorState powerMonitorState : powerMonitorStates) {
+            if (powerMonitorState.powerMonitor.type
+                    == PowerMonitor.POWER_MONITOR_TYPE_CONSUMER) {
+                for (EnergyConsumerResult energyConsumerResult : energyConsumerResults) {
+                    if (energyConsumerResult.id == powerMonitorState.id) {
+                        powerMonitorState.energyUws = energyConsumerResult.energyUWs;
+                        powerMonitorState.timestampMs = energyConsumerResult.timestampMs;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateEnergyMeasurements(PowerMonitorState[] powerMonitorStates) {
+        int[] ids = collectIds(powerMonitorStates, PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT);
+        if (ids == null) {
+            return;
+        }
+
+        EnergyMeasurement[] energyMeasurements = getPowerStatsHal().readEnergyMeter(ids);
+        if (energyMeasurements == null) {
+            return;
+        }
+
+        for (PowerMonitorState powerMonitorState : powerMonitorStates) {
+            if (powerMonitorState.powerMonitor.type
+                    == PowerMonitor.POWER_MONITOR_TYPE_MEASUREMENT) {
+                for (EnergyMeasurement energyMeasurement : energyMeasurements) {
+                    if (energyMeasurement.id == powerMonitorState.id) {
+                        powerMonitorState.energyUws = energyMeasurement.energyUWs;
+                        powerMonitorState.timestampMs = energyMeasurement.timestampMs;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    @Nullable
+    private int[] collectIds(PowerMonitorState[] powerMonitorStates,
+            @PowerMonitor.PowerMonitorType int type) {
+        int count = 0;
+        for (PowerMonitorState monitorState : powerMonitorStates) {
+            if (monitorState.powerMonitor.type == type) {
+                count++;
+            }
+        }
+
+        if (count == 0) {
+            return null;
+        }
+
+        int[] ids = new int[count];
+        int index = 0;
+        for (PowerMonitorState monitorState : powerMonitorStates) {
+            if (monitorState.powerMonitor.type == type) {
+                ids[index++] = monitorState.id;
+            }
+        }
+        return ids;
     }
 }
