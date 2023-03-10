@@ -41,7 +41,7 @@ import android.Manifest;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.RemoteLockscreenValidationResult;
-import android.app.RemoteLockscreenValidationSession;
+import android.app.StartLockscreenValidationRequest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -1326,10 +1326,11 @@ public class RecoverableKeyStoreManagerTest {
         when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
                 LockPatternUtils.CREDENTIAL_TYPE_PIN);
 
-        RemoteLockscreenValidationSession request =
+        StartLockscreenValidationRequest request =
                 mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
 
-        assertThat(request.getLockType()).isEqualTo(KeyguardManager.PIN);
+        int credetialsType = request.getLockscreenUiType();
+        assertThat(credetialsType).isEqualTo(KeyguardManager.PIN);
         assertThat(request.getRemainingAttempts()).isEqualTo(5);
         verify(mLockSettingsService).getCredentialType(anyInt());
     }
@@ -1339,10 +1340,11 @@ public class RecoverableKeyStoreManagerTest {
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
         mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 3);
 
-        RemoteLockscreenValidationSession request =
+        StartLockscreenValidationRequest request =
                 mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
 
-        assertThat(request.getLockType()).isEqualTo(KeyguardManager.PATTERN);
+        int credetialsType = request.getLockscreenUiType();
+        assertThat(credetialsType).isEqualTo(KeyguardManager.PATTERN);
         assertThat(request.getRemainingAttempts()).isEqualTo(2);
     }
     @Test
@@ -1351,23 +1353,24 @@ public class RecoverableKeyStoreManagerTest {
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
         mRecoverableKeyStoreDb.setBadRemoteGuessCounter(mUserId, 7);
 
-        RemoteLockscreenValidationSession request =
+        StartLockscreenValidationRequest request =
                 mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
 
+        int credetialsType = request.getLockscreenUiType();
         assertThat(request.getRemainingAttempts()).isEqualTo(0);
-        assertThat(request.getLockType()).isEqualTo(KeyguardManager.PASSWORD);
+        assertThat(credetialsType).isEqualTo(KeyguardManager.PASSWORD);
     }
     @Test
     public void validateRemoteLockscreen_noActiveSession() throws Exception {
         when(mLockSettingsService.getCredentialType(anyInt())).thenReturn(
-                LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
-
-        RemoteLockscreenValidationResult result =
-                mRecoverableKeyStoreManager.validateRemoteLockscreen(INVALID_GUESS,
-                        mLockSettingsService);
-
-        assertThat(result.getResultCode()).isEqualTo(
-                RemoteLockscreenValidationResult.RESULT_SESSION_EXPIRED);
+                LockPatternUtils.CREDENTIAL_TYPE_NONE);
+        try {
+            mRecoverableKeyStoreManager.validateRemoteLockscreen(INVALID_GUESS,
+                    mLockSettingsService);
+            fail("should have thrown");
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage()).contains("session");
+        }
     }
     @Test
     public void validateRemoteLockscreen_decryptionError() throws Exception {
@@ -1453,7 +1456,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     private byte[] encryptCredentialsForNewSession(byte[] credentials) throws Exception {
-        RemoteLockscreenValidationSession request =
+        StartLockscreenValidationRequest request =
                 mRecoverableKeyStoreManager.startRemoteLockscreenValidation(mLockSettingsService);
         PublicKey publicKey = SecureBox.decodePublicKey(request.getSourcePublicKey());
         return SecureBox.encrypt(
