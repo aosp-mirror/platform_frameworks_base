@@ -371,6 +371,10 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"সমস্ত স্থানের জন্য RTL এ স্ক্রিন লেআউট দিকনির্দেশে জোর দেয়"</string>
+    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
+    <skip />
+    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
+    <skip />
     <string name="window_blurs" msgid="6831008984828425106">"উইন্ডো-লেভেল অস্পষ্ট করার সুবিধা চালু করুন"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA-এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 অ্যাপের মধ্যে 4x MSAA চালু করুন"</string>
@@ -679,4 +683,6 @@
     <item msgid="7728484337962740316">"ডানদিকে সরান"</item>
     <item msgid="324200556467459329">"উপরে সরান"</item>
   </string-array>
+    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
+    <skip />
 </resources>

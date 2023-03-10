@@ -371,6 +371,10 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
+    <!-- no translation found for transparent_navigation_bar (1933192171384678484) -->
+    <skip />
+    <!-- no translation found for transparent_navigation_bar_summary (5454359021817330722) -->
+    <skip />
     <string name="window_blurs" msgid="6831008984828425106">"창 수준 블러 허용"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
@@ -679,4 +683,6 @@
     <item msgid="7728484337962740316">"오른쪽으로 이동"</item>
     <item msgid="324200556467459329">"위로 이동"</item>
   </string-array>
+    <!-- no translation found for font_scale_percentage (2624057443622817886) -->
+    <skip />
 </resources>
