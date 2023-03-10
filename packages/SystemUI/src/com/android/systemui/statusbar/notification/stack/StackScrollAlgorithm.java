@@ -763,7 +763,7 @@ public class StackScrollAlgorithm {
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
                 if (row.mustStayOnScreen() && !childState.headsUpIsVisible
-                        && !row.showingPulsing()) {
+                        && !row.showingPulsing() && !ambientState.isOnKeyguard()) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);
