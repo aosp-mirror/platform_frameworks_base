@@ -46,6 +46,7 @@ import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
@@ -2254,7 +2255,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         boolean wait = false;
         String opt;
         int displayId = Display.INVALID_DISPLAY;
-        boolean forceInvisible = false;
         while ((opt = getNextOption()) != null) {
             switch(opt) {
                 case "-w":
@@ -2263,27 +2263,31 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 case "--display":
                     displayId = getDisplayIdFromNextArg();
                     break;
-                case "--force-invisible":
-                    forceInvisible = true;
-                    break;
                 default:
                     getErrPrintWriter().println("Error: unknown option: " + opt);
                     return -1;
             }
         }
         final int userId = Integer.parseInt(getNextArgRequired());
-        final boolean callStartProfile = !forceInvisible && isProfile(userId);
         final ProgressWaiter waiter = wait ? new ProgressWaiter(userId) : null;
-        Slogf.d(TAG, "runStartUser(): userId=%d, display=%d, waiter=%s, callStartProfile=%b, "
-                + "forceInvisible=%b", userId,  displayId, waiter, callStartProfile,
-                forceInvisible);
+
+        // For backwards compatibility, if the user is a profile, we need to define whether it
+        // should be started visible (when its parent is the current user) or not (when it isn't)
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final ActivityManagerInternal ami = LocalServices.getService(ActivityManagerInternal.class);
+        final int parentUserId = umi.getProfileParentId(userId);
+        final int currentUserId = ami.getCurrentUserId();
+        final boolean isProfile = parentUserId != userId;
+        final boolean isVisibleProfile = isProfile && parentUserId == currentUserId;
+        Slogf.d(TAG, "runStartUser(): userId=%d, parentUserId=%d, currentUserId=%d, isProfile=%b, "
+                + "isVisibleProfile=%b, display=%d, waiter=%s", userId, parentUserId, currentUserId,
+                isProfile, isVisibleProfile, displayId, waiter);
 
         boolean success;
         String displaySuffix = "";
-
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "shell_runStartUser" + userId);
         try {
-            if (callStartProfile) {
+            if (isVisibleProfile) {
                 Slogf.d(TAG, "calling startProfileWithListener(%d, %s)", userId, waiter);
                 // startProfileWithListener() will start the profile visible (as long its parent is
                 // the current user), while startUserInBackgroundWithListener() will always start
@@ -3938,11 +3942,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return new Resources(AssetManager.getSystem(), metrics, config);
     }
 
-    private boolean isProfile(@UserIdInt int userId) {
-        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-        return umi.getProfileParentId(userId) != userId;
-    }
-
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -4195,7 +4194,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      execution of that user if it is currently stopped.");
             pw.println("  get-current-user");
             pw.println("      Returns id of the current foreground user.");
-            pw.println("  start-user [-w] [--display DISPLAY_ID] [--force-invisible] <USER_ID>");
+            pw.println("  start-user [-w] [--display DISPLAY_ID] <USER_ID>");
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
@@ -4203,10 +4202,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     + "which allows the user to launch activities on it.");
             pw.println("        (not supported on all devices; typically only on automotive builds "
                     + "where the vehicle has passenger displays)");
-            pw.println("      --force-invisible: always start the user invisible, even if it's a "
-                    + "profile.");
-            pw.println("        (by default, a profile is visible in the default display when its "
-                    + "parent is the current foreground user)");
             pw.println("  unlock-user <USER_ID>");
             pw.println("      Unlock the given user.  This will only work if the user doesn't");
             pw.println("      have an LSKF (PIN/pattern/password).");
