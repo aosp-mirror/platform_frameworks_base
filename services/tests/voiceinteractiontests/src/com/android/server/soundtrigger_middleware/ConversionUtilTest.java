@@ -16,7 +16,10 @@
 
 package com.android.server.soundtrigger_middleware;
 
+import static android.hardware.soundtrigger.ConversionUtil.aidl2apiAudioFormatWithDefault;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import android.hardware.audio.common.V2_0.Uuid;
 
@@ -43,5 +46,15 @@ public class ConversionUtilTest {
 
         Uuid reconstructed = ConversionUtil.aidl2hidlUuid(aidl);
         assertEquals(hidl, reconstructed);
+    }
+
+    @Test
+    public void testDefaultAudioFormatConstruction() {
+        // This method should generate a real format when passed null
+        final var format = aidl2apiAudioFormatWithDefault(
+                null /** exercise default **/,
+                true /** isInput **/
+                );
+        assertNotNull(format);
     }
 }

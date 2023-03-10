@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.UUID;
 
 /** @hide */
-class ConversionUtil {
+public class ConversionUtil {
     public static SoundTrigger.ModuleProperties aidl2apiModuleDescriptor(
             SoundTriggerModuleDescriptor aidlDesc) {
         Properties properties = aidlDesc.properties;
@@ -233,7 +233,11 @@ class ConversionUtil {
         if (audioConfig != null) {
             return AidlConversion.aidl2api_AudioConfig_AudioFormat(audioConfig, isInput);
         }
-        return new AudioFormat.Builder().build();
+        return new AudioFormat.Builder()
+            .setSampleRate(48000)
+            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+            .build();
     }
 
     public static int api2aidlModelParameter(int apiParam) {
