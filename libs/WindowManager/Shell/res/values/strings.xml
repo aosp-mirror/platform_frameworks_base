@@ -146,6 +146,8 @@
     <string name="bubbles_app_settings"><xliff:g id="notification_title" example="Android Messages">%1$s</xliff:g> settings</string>
     <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->
     <string name="bubble_dismiss_text">Dismiss bubble</string>
+    <!-- Button text to stop an app from bubbling [CHAR LIMIT=60]-->
+    <string name="bubbles_dont_bubble">Don\u2019t bubble</string>
     <!-- Button text to stop a conversation from bubbling [CHAR LIMIT=60]-->
     <string name="bubbles_dont_bubble_conversation">Don\u2019t bubble conversation</string>
     <!-- Title text for the bubbles feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
