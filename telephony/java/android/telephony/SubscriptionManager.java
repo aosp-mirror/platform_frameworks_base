@@ -731,6 +731,15 @@ public class SubscriptionManager {
     /** Indicates that data roaming is disabled for a subscription */
     public static final int DATA_ROAMING_DISABLE = SimInfo.DATA_ROAMING_DISABLE;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"DATA_ROAMING_"},
+            value = {
+                    DATA_ROAMING_ENABLE,
+                    DATA_ROAMING_DISABLE
+            })
+    public @interface DataRoamingMode {}
+
     /**
      * TelephonyProvider column name for subscription carrier id.
      * @see TelephonyManager#getSimCarrierId()
@@ -3671,10 +3680,15 @@ public class SubscriptionManager {
     }
 
     /**
-     * DO NOT USE.
-     * This API is designed for features that are not finished at this point. Do not call this API.
+     * Check if a subscription is active.
+     *
+     * @param subscriptionId The subscription id to check.
+     *
+     * @return {@code true} if the subscription is active.
+     *
+     * @throws IllegalArgumentException if the provided slot index is invalid.
+     *
      * @hide
-     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3695,8 +3709,12 @@ public class SubscriptionManager {
      * Set the device to device status sharing user preference for a subscription ID. The setting
      * app uses this method to indicate with whom they wish to share device to device status
      * information.
-     * @param sharing the status sharing preference
-     * @param subscriptionId the unique Subscription ID in database
+     *
+     * @param subscriptionId the unique Subscription ID in database.
+     * @param sharing the status sharing preference.
+     *
+     * @throws IllegalArgumentException if the subscription does not exist, or the sharing
+     * preference is invalid.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setDeviceToDeviceStatusSharingPreference(int subscriptionId,
@@ -3727,8 +3745,12 @@ public class SubscriptionManager {
      * Set the list of contacts that allow device to device status sharing for a subscription ID.
      * The setting app uses this method to indicate with whom they wish to share device to device
      * status information.
-     * @param contacts The list of contacts that allow device to device status sharing
-     * @param subscriptionId The unique Subscription ID in database
+     *
+     * @param subscriptionId The unique Subscription ID in database.
+     * @param contacts The list of contacts that allow device to device status sharing.
+     *
+     * @throws IllegalArgumentException if the subscription does not exist, or contacts is
+     * {@code null}.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setDeviceToDeviceStatusSharingContacts(int subscriptionId,
@@ -3758,15 +3780,23 @@ public class SubscriptionManager {
     }
 
     /**
-     * DO NOT USE.
-     * This API is designed for features that are not finished at this point. Do not call this API.
+     * Get the active subscription id by logical SIM slot index.
+     *
+     * @param slotIndex The logical SIM slot index.
+     * @return The active subscription id.
+     *
+     * @throws IllegalArgumentException if the provided slot index is invalid.
+     *
      * @hide
-     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getEnabledSubscriptionId(int slotIndex) {
         int subId = INVALID_SUBSCRIPTION_ID;
+
+        if (!isValidSlotIndex(slotIndex)) {
+            throw new IllegalArgumentException("Invalid slot index " + slotIndex);
+        }
 
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
@@ -3809,12 +3839,12 @@ public class SubscriptionManager {
     /**
      * Get active data subscription id. Active data subscription refers to the subscription
      * currently chosen to provide cellular internet connection to the user. This may be
-     * different from getDefaultDataSubscriptionId(). Eg. Opportunistics data
+     * different from getDefaultDataSubscriptionId().
      *
-     * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
+     * @return Active data subscription id if any is chosen, or {@link #INVALID_SUBSCRIPTION_ID} if
+     * not.
      *
-     * @return Active data subscription id if any is chosen, or
-     * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
+     * @see TelephonyCallback.ActiveDataSubscriptionIdListener
      */
     public static int getActiveDataSubscriptionId() {
         if (isSubscriptionManagerServiceEnabled()) {
