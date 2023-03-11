@@ -545,7 +545,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             String id = generateUniqueId();
             Entry entry = new Entry(REMOTE_ENTRY_KEY,
                     id, remoteEntry.getSlice(), setUpFillInIntentForRemoteEntry());
-            mUiRemoteEntry = new Pair<>(generateUniqueId(), new Pair<>(remoteEntry, entry));
+            mUiRemoteEntry = new Pair<>(id, new Pair<>(remoteEntry, entry));
         }
 
 
