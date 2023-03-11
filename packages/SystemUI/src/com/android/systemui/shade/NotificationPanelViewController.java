@@ -120,6 +120,7 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
@@ -163,14 +164,12 @@ import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
@@ -371,6 +370,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQsController;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final TouchHandler mTouchHandler = new TouchHandler();
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
@@ -557,7 +557,7 @@ public final class NotificationPanelViewController implements Dumpable {
     private final KeyguardBottomAreaViewModel mKeyguardBottomAreaViewModel;
     private final KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     private float mMinExpandHeight;
-    private ShadeHeightLogger mShadeHeightLogger;
+    private final ShadeHeightLogger mShadeHeightLogger;
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mHasVibratedOnOpen = false;
     private int mFixedDuration = NO_FIXED_DURATION;
@@ -602,15 +602,15 @@ public final class NotificationPanelViewController implements Dumpable {
     private boolean mGestureWaitForTouchSlop;
     private boolean mIgnoreXTouchSlop;
     private boolean mExpandLatencyTracking;
-    private DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
-    private OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
-    private LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
-    private GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
-    private LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
+    private final DreamingToLockscreenTransitionViewModel mDreamingToLockscreenTransitionViewModel;
+    private final OccludedToLockscreenTransitionViewModel mOccludedToLockscreenTransitionViewModel;
+    private final LockscreenToDreamingTransitionViewModel mLockscreenToDreamingTransitionViewModel;
+    private final GoneToDreamingTransitionViewModel mGoneToDreamingTransitionViewModel;
+    private final LockscreenToOccludedTransitionViewModel mLockscreenToOccludedTransitionViewModel;
 
-    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
-    private CoroutineDispatcher mMainDispatcher;
+    private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsOcclusionTransitionRunning = false;
     private int mDreamingToLockscreenTransitionTranslationY;
     private int mOccludedToLockscreenTransitionTranslationY;
@@ -724,12 +724,10 @@ public final class NotificationPanelViewController implements Dumpable {
             QuickSettingsController quickSettingsController,
             FragmentService fragmentService,
             ContentResolver contentResolver,
-            RecordingController recordingController,
             ShadeHeaderController shadeHeaderController,
             ScreenOffAnimationController screenOffAnimationController,
             LockscreenGestureLogger lockscreenGestureLogger,
             ShadeExpansionStateManager shadeExpansionStateManager,
-            NotificationRemoteInputManager remoteInputManager,
             Optional<SysUIUnfoldComponent> unfoldComponent,
             SysUiState sysUiState,
             Provider<KeyguardBottomAreaViewController> keyguardBottomAreaViewControllerProvider,
@@ -787,7 +785,7 @@ public final class NotificationPanelViewController implements Dumpable {
         });
 
         mView.addOnLayoutChangeListener(new ShadeLayoutChangeListener());
-        mView.setOnTouchListener(createTouchHandler());
+        mView.setOnTouchListener(getTouchHandler());
         mView.setOnConfigurationChangedListener(config -> loadDimens());
 
         mResources = mView.getResources();
@@ -1659,10 +1657,6 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private boolean isOnAod() {
         return mDozing && mDozeParameters.getAlwaysOn();
-    }
-
-    boolean isDozing() {
-        return mDozing;
     }
 
     private boolean hasVisibleNotifications() {
@@ -3409,8 +3403,8 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     @VisibleForTesting
-    TouchHandler createTouchHandler() {
-        return new TouchHandler();
+    TouchHandler getTouchHandler() {
+        return mTouchHandler;
     }
 
     public NotificationStackScrollLayoutController getNotificationStackScrollLayoutController() {
@@ -4058,14 +4052,14 @@ public final class NotificationPanelViewController implements Dumpable {
         return mView.post(action);
     }
 
-    /** */
-    public boolean sendInterceptTouchEventToView(MotionEvent event) {
-        return mView.onInterceptTouchEvent(event);
+    /** Sends an external (e.g. Status Bar) intercept touch event to the Shade touch handler. */
+    public boolean handleExternalInterceptTouch(MotionEvent event) {
+        return mTouchHandler.onInterceptTouchEvent(event);
     }
 
-    /** */
-    public boolean sendTouchEventToView(MotionEvent event) {
-        return mView.dispatchTouchEvent(event);
+    /** Sends an external (e.g. Status Bar) touch event to the Shade touch handler. */
+    public boolean handleExternalTouch(MotionEvent event) {
+        return mTouchHandler.onTouchEvent(event);
     }
 
     /** */
@@ -4083,24 +4077,12 @@ public final class NotificationPanelViewController implements Dumpable {
         return mView.isEnabled();
     }
 
-    int getDisplayRightInset() {
-        return mDisplayRightInset;
-    }
-
-    int getDisplayLeftInset() {
-        return mDisplayLeftInset;
-    }
-
     float getOverStretchAmount() {
         return mOverStretchAmount;
     }
 
     float getMinFraction() {
         return mMinFraction;
-    }
-
-    boolean getCollapsedOnDown() {
-        return mCollapsedOnDown;
     }
 
     int getNavigationBarBottomHeight() {
@@ -4666,7 +4648,7 @@ public final class NotificationPanelViewController implements Dumpable {
     }
 
     /** Handles MotionEvents for the Shade. */
-    public final class TouchHandler implements View.OnTouchListener {
+    public final class TouchHandler implements View.OnTouchListener, Gefingerpoken {
         private long mLastTouchDownTime = -1L;
 
         /** @see ViewGroup#onInterceptTouchEvent(MotionEvent) */
@@ -4816,6 +4798,11 @@ public final class NotificationPanelViewController implements Dumpable {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            return onTouchEvent(event);
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (event.getDownTime() == mLastTouchDownTime) {
                     // An issue can occur when swiping down after unlock, where multiple down
