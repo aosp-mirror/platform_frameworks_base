@@ -1328,8 +1328,8 @@
     <string name="sms_control_yes" msgid="4858845109269524622">"Permet"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"Denega"</string>
     <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; vol enviar un missatge a &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt;."</string>
-    <string name="sms_short_code_details" msgid="2723725738333388351">"Aquesta acció "<b>"pot produir càrrecs"</b>" al teu compte per a mòbils."</string>
-    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Aquesta acció produirà càrrecs al teu compte per a mòbils."</b></string>
+    <string name="sms_short_code_details" msgid="2723725738333388351">"Aquesta acció "<b>"pot produir càrrecs"</b>" al teu compte mòbil."</string>
+    <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"Aquesta acció produirà càrrecs al teu compte mòbil."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"Envia"</string>
     <string name="sms_short_code_confirm_deny" msgid="1356917469323768230">"Cancel·la"</string>
     <string name="sms_short_code_remember_choice" msgid="1374526438647744862">"Recorda la meva selecció"</string>
@@ -1369,7 +1369,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"S\'ha detectat un accessori d\'àudio analògic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuració per USB activada"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Depuració per USB connectada"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca per desactivar la depuració per USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Selecciona per desactivar la depuració per USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"S\'ha connectat la depuració sense fil"</string>
@@ -1394,7 +1394,10 @@
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un mètode d\'introducció"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mantén-lo en pantalla mentre el teclat físic està actiu"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostra el teclat virtual"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configura el teclat físic"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
+    <skip />
+    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
+    <skip />
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca per seleccionar l\'idioma i la disposició"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1719,7 +1722,8 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Audiòfons"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"S\'han mantingut premudes les tecles de volum. S\'ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"S\'han mantingut premudes les tecles de volum. S\'ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premudes les dues tecles de volum durant 3 segons per fer servir <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
+    <skip />
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Tria la funció que vols utilitzar quan toquis el botó d\'accessibilitat:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Tria la funció que vols utilitzar amb el gest d\'accessibilitat (llisca cap amunt amb dos dits des de la part inferior de la pantalla):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Tria la funció que vols utilitzar amb el gest d\'accessibilitat (fes lliscar tres dits cap amunt des de la part inferior de la pantalla):"</string>
@@ -2324,4 +2328,18 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositiu està massa calent"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"La pantalla dual no està disponible perquè el telèfon està massa calent"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desactiva"</string>
+    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
+    <skip />
 </resources>
