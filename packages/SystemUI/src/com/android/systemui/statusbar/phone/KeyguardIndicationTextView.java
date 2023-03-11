@@ -76,6 +76,7 @@ public class KeyguardIndicationTextView extends TextView {
         if (mLastAnimator != null) {
             mLastAnimator.cancel();
         }
+        mMessage = "";
         setText("");
     }
 
