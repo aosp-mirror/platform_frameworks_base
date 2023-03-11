@@ -39,6 +39,7 @@ import static com.android.internal.accessibility.util.AccessibilityStatsLogUtils
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.accessibility.AccessibilityUserState.doesShortcutTargetsStringContain;
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityGestureEvent;
@@ -54,8 +55,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
+import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.app.admin.DevicePolicyManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -156,6 +159,7 @@ import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.settingslib.RestrictedLockUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -3869,6 +3873,51 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @Override
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_ADMIN_POLICY})
+    public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
+        final DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+        final List<String> permittedServices = dpm.getPermittedAccessibilityServices(userId);
+
+        // permittedServices null means all accessibility services are allowed.
+        boolean allowed = permittedServices == null || permittedServices.contains(packageName);
+        if (allowed) {
+            final AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+            final int mode = appOps.noteOpNoThrow(
+                    AppOpsManager.OP_ACCESS_RESTRICTED_SETTINGS,
+                    uid, packageName, /* attributionTag= */ null, /* message= */ null);
+            final boolean ecmEnabled = mContext.getResources().getBoolean(
+                    R.bool.config_enhancedConfirmationModeEnabled);
+            return !ecmEnabled || mode == AppOpsManager.MODE_ALLOWED;
+        }
+        return false;
+    }
+
+    @Override
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.QUERY_ADMIN_POLICY})
+    public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
+        // The accessibility service is allowed. Don't show the restricted dialog.
+        if (isAccessibilityTargetAllowed(packageName, uid, userId)) {
+            return false;
+        }
+
+        final EnforcedAdmin admin =
+                RestrictedLockUtilsInternal.checkIfAccessibilityServiceDisallowed(
+                        mContext, packageName, userId);
+        if (admin != null) {
+            RestrictedLockUtils.sendShowAdminSupportDetailsIntent(mContext, admin);
+            return true;
+        }
+
+        RestrictedLockUtils.sendShowRestrictedSettingDialogIntent(mContext,
+                packageName, uid);
+        return true;
     }
 
     @Override
