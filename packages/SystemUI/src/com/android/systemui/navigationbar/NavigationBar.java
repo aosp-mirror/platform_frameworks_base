@@ -164,7 +164,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -209,7 +208,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final Optional<Recents> mRecentsOptional;
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final NavigationBarTransitions mNavigationBarTransitions;
-    private final EdgeBackGestureHandler mEdgeBackGestureHandler;
     private final Optional<BackAnimation> mBackAnimation;
     private final Handler mHandler;
     private final UiEventLogger mUiEventLogger;
@@ -221,6 +219,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private final DisplayTracker mDisplayTracker;
     private final RegionSamplingHelper mRegionSamplingHelper;
     private final int mNavColorSampleMargin;
+    private EdgeBackGestureHandler mEdgeBackGestureHandler;
     private NavigationBarFrame mFrame;
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
@@ -356,6 +355,21 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                     }
                     mLongPressHomeEnabled = longPressHomeEnabled;
                     updateAssistantEntrypoints(available, longPressHomeEnabled);
+                }
+
+                @Override
+                public void updateWallpaperVisibility(boolean visible, int displayId) {
+                    mNavigationBarTransitions.setWallpaperVisibility(visible);
+                }
+
+                @Override
+                public void updateRotationWatcherState(int rotation) {
+                    if (mIsOnDefaultDisplay && mView != null) {
+                        mView.getRotationButtonController().onRotationWatcherChanged(rotation);
+                        if (mView.needsReorient(rotation)) {
+                            repositionNavigationBar(rotation);
+                        }
+                    }
                 }
             };
 
@@ -550,7 +564,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             DeadZone deadZone,
             DeviceConfigProxy deviceConfigProxy,
             NavigationBarTransitions navigationBarTransitions,
-            EdgeBackGestureHandler edgeBackGestureHandler,
             Optional<BackAnimation> backAnimation,
             UserContextProvider userContextProvider,
             WakefulnessLifecycle wakefulnessLifecycle,
@@ -580,7 +593,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mDeadZone = deadZone;
         mDeviceConfigProxy = deviceConfigProxy;
         mNavigationBarTransitions = navigationBarTransitions;
-        mEdgeBackGestureHandler = edgeBackGestureHandler;
         mBackAnimation = backAnimation;
         mHandler = mainHandler;
         mUiEventLogger = uiEventLogger;
@@ -596,6 +608,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mTaskStackChangeListeners = taskStackChangeListeners;
         mDisplayTracker = displayTracker;
+        mEdgeBackGestureHandler = navBarHelper.getEdgeBackGestureHandler();
 
         mNavColorSampleMargin = getResources()
                 .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
@@ -688,13 +701,14 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         // start firing, since the latter is source of truth
         parseCurrentSysuiState();
         mCommandQueue.addCallback(this);
-        mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
-        mNavBarHelper.init();
         mHomeButtonLongPressDurationMs = Optional.of(mDeviceConfigProxy.getLong(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 HOME_BUTTON_LONG_PRESS_DURATION_MS,
                 /* defaultValue = */ 0
         )).filter(duration -> duration != 0);
+        // This currently MUST be called after mHomeButtonLongPressDurationMs is initialized since
+        // the registration callbacks will trigger code that uses it
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         mDeviceConfigProxy.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI, mHandler::post, mOnPropertiesChangedListener);
 
@@ -718,9 +732,9 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mCommandQueue.removeCallback(this);
         mWindowManager.removeViewImmediate(mView.getRootView());
         mNavigationModeController.removeListener(mModeChangedListener);
+        mEdgeBackGestureHandler.setStateChangeCallback(null);
 
         mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        mNavBarHelper.destroy();
         mNotificationShadeDepthController.removeListener(mDepthListener);
 
         mDeviceConfigProxy.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
@@ -758,8 +772,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         mView.getViewRootImpl().addSurfaceChangedCallback(mSurfaceChangedCallback);
         notifyNavigationBarSurface();
 
-        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-
         mPipOptional.ifPresent(mView::addPipExclusionBoundsChangeListener);
         mBackAnimation.ifPresent(mView::registerBackAnimation);
 
@@ -777,7 +789,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         if (mIsOnDefaultDisplay) {
             final RotationButtonController rotationButtonController =
                     mView.getRotationButtonController();
-            rotationButtonController.setRotationCallback(mRotationWatcher);
 
             // Reset user rotation pref to match that of the WindowManager if starting in locked
             // mode. This will automatically happen when switching from auto-rotate to locked mode.
@@ -811,9 +822,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     @Override
     public void onViewDetached() {
-        final RotationButtonController rotationButtonController =
-                mView.getRotationButtonController();
-        rotationButtonController.setRotationCallback(null);
         mView.setUpdateActiveTouchRegionsCallback(null);
         getBarTransitions().destroy();
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
@@ -1503,6 +1511,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     void updateAccessibilityStateFlags() {
+        mLongPressHomeEnabled = mNavBarHelper.getLongPressHomeEnabled();
         if (mView != null) {
             int a11yFlags = mNavBarHelper.getA11yButtonState();
             boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
@@ -1752,12 +1761,6 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     private boolean canShowSecondaryHandle() {
         return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null;
     }
-
-    private final Consumer<Integer> mRotationWatcher = rotation -> {
-        if (mView != null && mView.needsReorient(rotation)) {
-            repositionNavigationBar(rotation);
-        }
-    };
 
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
