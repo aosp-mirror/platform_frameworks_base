@@ -20,9 +20,6 @@ import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -34,6 +31,8 @@ import android.util.TypedValue;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.window.TaskSnapshot;
+
+import java.util.function.Supplier;
 
 /**
  * Represents the content overlay used during the entering PiP animation.
@@ -177,7 +176,9 @@ public abstract class PipContentOverlay {
     /** A {@link PipContentOverlay} shows app icon on solid color background. */
     public static final class PipAppIconOverlay extends PipContentOverlay {
         private static final String TAG = PipAppIconOverlay.class.getSimpleName();
-        private static final int APP_ICON_SIZE_DP = 48;
+        // Align with the practical / reasonable launcher:iconImageSize as in
+        // vendor/unbundled_google/packages/NexusLauncher/res/xml/device_profiles.xml
+        private static final int APP_ICON_SIZE_DP = 66;
 
         private final Context mContext;
         private final int mAppIconSizePx;
@@ -187,14 +188,14 @@ public abstract class PipContentOverlay {
 
         private Bitmap mBitmap;
 
-        public PipAppIconOverlay(Context context, Rect appBounds, ActivityInfo activityInfo) {
+        public PipAppIconOverlay(Context context, Rect appBounds, Supplier<Drawable> iconSupplier) {
             mContext = context;
             mAppIconSizePx = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, APP_ICON_SIZE_DP,
                     context.getResources().getDisplayMetrics());
             mAppBounds = new Rect(appBounds);
             mBitmap = Bitmap.createBitmap(appBounds.width(), appBounds.height(),
                     Bitmap.Config.ARGB_8888);
-            prepareAppIconOverlay(activityInfo);
+            prepareAppIconOverlay(iconSupplier);
             mLeash = new SurfaceControl.Builder(new SurfaceSession())
                     .setCallsite(TAG)
                     .setName(LAYER_NAME)
@@ -237,7 +238,7 @@ public abstract class PipContentOverlay {
             }
         }
 
-        private void prepareAppIconOverlay(ActivityInfo activityInfo) {
+        private void prepareAppIconOverlay(Supplier<Drawable> iconSupplier) {
             final Canvas canvas = new Canvas();
             canvas.setBitmap(mBitmap);
             final TypedArray ta = mContext.obtainStyledAttributes(new int[] {
@@ -251,8 +252,7 @@ public abstract class PipContentOverlay {
             } finally {
                 ta.recycle();
             }
-            final Drawable appIcon = loadActivityInfoIcon(activityInfo,
-                    mContext.getResources().getConfiguration().densityDpi);
+            final Drawable appIcon = iconSupplier.get();
             final Rect appIconBounds = new Rect(
                     mAppBounds.centerX() - mAppIconSizePx / 2,
                     mAppBounds.centerY() - mAppIconSizePx / 2,
@@ -261,25 +261,6 @@ public abstract class PipContentOverlay {
             appIcon.setBounds(appIconBounds);
             appIcon.draw(canvas);
             mBitmap = mBitmap.copy(Bitmap.Config.HARDWARE, false /* mutable */);
-        }
-
-        // Copied from com.android.launcher3.icons.IconProvider#loadActivityInfoIcon
-        private Drawable loadActivityInfoIcon(ActivityInfo ai, int density) {
-            final int iconRes = ai.getIconResource();
-            Drawable icon = null;
-            // Get the preferred density icon from the app's resources
-            if (density != 0 && iconRes != 0) {
-                try {
-                    final Resources resources = mContext.getPackageManager()
-                            .getResourcesForApplication(ai.applicationInfo);
-                    icon = resources.getDrawableForDensity(iconRes, density);
-                } catch (PackageManager.NameNotFoundException | Resources.NotFoundException exc) { }
-            }
-            // Get the default density icon
-            if (icon == null) {
-                icon = ai.loadIcon(mContext.getPackageManager());
-            }
-            return icon;
         }
     }
 }
