@@ -1861,8 +1861,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Bateria-aurreztaileak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurreztaileak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk murrizten edo desaktibatzen ditu."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Bateria-aurreztaileak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk mugatzen edo desaktibatzen ditu."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurreztaileak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk mugatzen edo desaktibatzen ditu."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurreztaileak aplikazio batzuei. Erabiltzen ari zaren aplikazioek datuak atzitu ahalko dituzte, baina baliteke maiztasun txikiagoarekin atzitzea. Ondorioz, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurreztailea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>

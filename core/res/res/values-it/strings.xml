@@ -298,7 +298,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Passa al profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>

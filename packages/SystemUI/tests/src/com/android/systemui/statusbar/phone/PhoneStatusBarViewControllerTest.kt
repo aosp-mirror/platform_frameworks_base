@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone
 
 import android.view.LayoutInflater
 import android.view.MotionEvent
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.OnPreDrawListener
 import android.widget.FrameLayout
@@ -54,8 +53,6 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
     @Mock
     private lateinit var notificationPanelViewController: NotificationPanelViewController
-    @Mock
-    private lateinit var panelView: ViewGroup
     @Mock
     private lateinit var moveFromCenterAnimation: StatusBarMoveFromCenterAnimationController
     @Mock
@@ -116,7 +113,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         val returnVal = view.onTouchEvent(
                         MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         assertThat(returnVal).isFalse()
-        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
+        verify(notificationPanelViewController, never()).handleExternalTouch(any())
     }
 
     @Test
@@ -128,7 +125,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         val returnVal = view.onTouchEvent(
                 MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
         assertThat(returnVal).isTrue()
-        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
+        verify(notificationPanelViewController, never()).handleExternalTouch(any())
     }
 
     @Test
@@ -141,7 +138,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController).sendTouchEventToView(event)
+        verify(notificationPanelViewController).handleExternalTouch(event)
     }
 
     @Test
@@ -154,7 +151,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController).sendTouchEventToView(event)
+        verify(notificationPanelViewController).handleExternalTouch(event)
     }
 
     @Test
@@ -167,7 +164,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
 
         view.onTouchEvent(event)
 
-        verify(notificationPanelViewController, never()).sendTouchEventToView(any())
+        verify(notificationPanelViewController, never()).handleExternalTouch(any())
     }
 
     private fun createViewMock(): PhoneStatusBarView {
