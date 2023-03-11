@@ -224,7 +224,6 @@ java_library {
         "android.hardware.radio.messaging-V2-java",
         "android.hardware.radio.modem-V2-java",
         "android.hardware.radio.network-V2-java",
-        "android.hardware.radio.satellite-V1-java",
         "android.hardware.radio.sim-V2-java",
         "android.hardware.radio.voice-V2-java",
         "android.hardware.thermal-V1.0-java-constants",
