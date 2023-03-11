@@ -3030,7 +3030,6 @@ package android.telephony {
     field public static final int HAL_SERVICE_MESSAGING = 2; // 0x2
     field public static final int HAL_SERVICE_MODEM = 3; // 0x3
     field public static final int HAL_SERVICE_NETWORK = 4; // 0x4
-    field public static final int HAL_SERVICE_SATELLITE = 8; // 0x8
     field public static final int HAL_SERVICE_SIM = 5; // 0x5
     field public static final int HAL_SERVICE_VOICE = 6; // 0x6
     field public static final android.util.Pair HAL_VERSION_UNKNOWN;

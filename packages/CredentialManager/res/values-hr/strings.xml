@@ -16,14 +16,14 @@
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Tehnologija bez upotrebe zaporke"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"Pristupni ključevi omogućuju prijavu bez upotrebe zaporki. Treba vam samo otisak prsta, prepoznavanje lica, PIN ili uzorak pokreta prstom da biste potvrdili svoj identitet i izradili pristupni ključ."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kriptografija javnog ključa"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Na temelju saveza FIDO (koji uključuje Google, Apple, Microsoft i mnoge druge) i standarda W3C pristupni ključevi koriste kriptografske ključeve. Za razliku od korisničkog imena i niza znakova za zaporke, privatno-javni ključ izrađen je za aplikaciju ili web-lokaciju. Privatni ključ pohranjen je na vašem uređaju ili upravitelju zaporki i potvrđuje vaš identitet. Javni se ključ dijeli s poslužiteljem aplikacije ili web-lokacije. Uz odgovarajuće ključeve možete se odmah registrirati i prijaviti."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Na temelju organizacije FIDO Alliance (koja uključuje Google, Apple, Microsoft i mnoge druge) i standarda W3C pristupni ključevi koriste kriptografske ključeve. Za razliku od korisničkog imena i niza znakova za zaporke, privatno-javni ključ izrađen je za aplikaciju ili web-lokaciju. Privatni ključ pohranjen je na vašem uređaju ili upravitelju zaporki i potvrđuje vaš identitet. Javni se ključ dijeli s poslužiteljem aplikacije ili web-lokacije. Uz odgovarajuće ključeve možete se odmah registrirati i prijaviti."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Poboljšana sigurnost računa"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Svaki ključ povezan isključivo s aplikacijom ili web-lokacijom za koju je izrađen, stoga se nikad ne možete pogreškom prijaviti u prijevarnu aplikaciju ili na web-lokaciju. Osim toga, kad je riječ o poslužiteljima na kojem se nalaze samo javni ključevi, hakiranje je mnogo teže."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Besprijekorni prijelaz"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"Kako idemo u smjeru budućnosti bez zaporki, one će i dalje biti dostupne uz pristupne ključeve."</string>
-    <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite mjesto za spremanje: <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
+    <string name="seamless_transition_detail" msgid="3440478759491650823">"Kako idemo u smjeru budućnosti bez zaporki, one će i dalje biti dostupne uz pristupne ključeve"</string>
+    <string name="choose_provider_title" msgid="8870795677024868108">"Odaberite gdje će se spremati <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Odaberite upravitelja zaporki kako biste spremili svoje informacije i drugi se put brže prijavili"</string>
-    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Izraditi pristupni ključ za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Želite li izraditi pristupni ključ za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_password_title" msgid="7097275038523578687">"Spremiti zaporku za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Spremiti informacije o prijavi za <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"pristupni ključ"</string>
@@ -35,7 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"Spremi <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> u"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Želite li izraditi pristupni ključ na drugom uređaju?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Želite li upotrebljavati uslugu <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> za sve prijave?"</string>
-    <string name="use_provider_for_all_description" msgid="8466427781848268490">"Upravitelj zaporki pohranit će vaše zaporke i pristupne ključeve radi jednostavnije prijave"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Upravitelj zaporki za korisničko ime <xliff:g id="USERNAME">%1$s</xliff:g> pohranit će vaše zaporke i pristupne ključeve radi jednostavnije prijave"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Postavi kao zadano"</string>
     <string name="use_once" msgid="9027366575315399714">"Upotrijebi jednom"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Broj zaporki: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • broj pristupnih ključeva: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
@@ -48,8 +48,7 @@
     <string name="close_sheet" msgid="1393792015338908262">"Zatvaranje lista"</string>
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Vratite se na prethodnu stranicu"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zatvori"</string>
-    <!-- no translation found for accessibility_snackbar_dismiss (3456598374801836120) -->
-    <skip />
+    <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Odbaci"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Želite li upotrijebiti spremljeni pristupni ključ za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Želite li upotrijebiti spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Odaberite spremljene podatke za prijavu za aplikaciju <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>

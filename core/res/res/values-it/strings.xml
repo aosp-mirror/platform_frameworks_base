@@ -297,7 +297,7 @@
     <string name="safeMode" msgid="8974401416068943888">"Modalità provvisoria"</string>
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"Passa a profilo di lavoro"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"Passa al profilo di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
@@ -1394,7 +1394,10 @@
     <string name="select_input_method" msgid="3971267998568587025">"Scegli il metodo di immissione"</string>
     <string name="show_ime" msgid="6406112007347443383">"Tieni sullo schermo quando è attiva la tastiera fisica"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostra tastiera virtuale"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configura la tastiera fisica"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
+    <skip />
+    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
+    <skip />
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tocca per selezionare la lingua e il layout"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1719,7 +1722,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Apparecchi acustici"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tieni premuti entrambi i tasti del volume per tre secondi per utilizzare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Scegli una funzionalità da usare quando tocchi il pulsante Accessibilità:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Scegli una funzionalità da usare con il gesto di accessibilità (scorrimento verso l\'alto dalla parte inferiore dello schermo con due dita):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Scegli una funzionalità da usare con il gesto di accessibilità (scorrimento verso l\'alto dalla parte inferiore dello schermo con tre dita):"</string>
@@ -2324,4 +2327,18 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Il dispositivo è troppo caldo"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Il doppio schermo non è disponibile perché il telefono si sta surriscaldando"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Disattiva"</string>
+    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
+    <skip />
 </resources>

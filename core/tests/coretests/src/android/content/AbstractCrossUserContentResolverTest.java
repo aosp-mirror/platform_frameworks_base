@@ -18,6 +18,7 @@ package android.content;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import org.junit.Ignore;
 
 import android.app.ActivityManager;
 import android.app.activity.LocalProvider;
@@ -123,6 +124,7 @@ abstract class AbstractCrossUserContentResolverTest {
      * Register an observer for an URI in another user and verify that it receives
      * onChange callback when data at the URI changes.
      */
+    @Ignore("b/272733874")
     @Test
     public void testRegisterContentObserver() throws Exception {
         Context crossUserContext = null;
@@ -152,6 +154,7 @@ abstract class AbstractCrossUserContentResolverTest {
      * Register an observer for an URI in the current user and verify that another user can
      * notify changes for this URI.
      */
+    @Ignore("b/272733874")
     @Test
     public void testNotifyChange() throws Exception {
         final CountDownLatch notifyLatch = new CountDownLatch(1);

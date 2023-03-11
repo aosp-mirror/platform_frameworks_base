@@ -31,6 +31,8 @@ import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WIN
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DOZING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DEVICE_DREAMING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_ON;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_TRANSITION;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_TRACING_ENABLED;
@@ -121,7 +123,8 @@ import dagger.Lazy;
 public class OverviewProxyService implements CallbackController<OverviewProxyListener>,
         NavigationModeController.ModeChangedListener, Dumpable {
 
-    private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
+    @VisibleForTesting
+    static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
 
     public static final String TAG_OPS = "OverviewProxyService";
     private static final long BACKOFF_MILLIS = 1000;
@@ -548,6 +551,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mUiEventLogger = uiEventLogger;
         mDisplayTracker = displayTracker;
         mUnfoldTransitionProgressForwarder = unfoldTransitionProgressForwarder;
+        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
@@ -596,7 +600,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         // Connect to the service
         updateEnabledState();
         startConnectionToCurrentUser();
-        mSysuiUnlockAnimationController = sysuiUnlockAnimationController;
 
         // Listen for assistant changes
         assistUtils.registerVoiceInteractionSessionListener(mVoiceInteractionSessionListener);
@@ -726,10 +729,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
-        Intent launcherServiceIntent = new Intent(ACTION_QUICKSTEP)
-                .setPackage(mRecentsComponentName.getPackageName());
         try {
-            mBound = mContext.bindServiceAsUser(launcherServiceIntent,
+            mBound = mContext.bindServiceAsUser(mQuickStepIntent,
                     mOverviewServiceConnection,
                     Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
                     UserHandle.of(mUserTracker.getUserId()));
@@ -862,6 +863,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
          */
         @Override
         public void onScreenTurnedOn() {
+            mSysUiState
+                .setFlag(SYSUI_STATE_SCREEN_ON, true)
+                .setFlag(SYSUI_STATE_SCREEN_TRANSITION, false)
+                .commitUpdate(mContext.getDisplayId());
+
             try {
                 if (mOverviewProxy != null) {
                     mOverviewProxy.onScreenTurnedOn();
@@ -874,10 +880,26 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         /**
+         * Notifies the Launcher that screen turned off.
+         */
+        @Override
+        public void onScreenTurnedOff() {
+            mSysUiState
+                .setFlag(SYSUI_STATE_SCREEN_ON, false)
+                .setFlag(SYSUI_STATE_SCREEN_TRANSITION, false)
+                .commitUpdate(mContext.getDisplayId());
+        }
+
+        /**
          * Notifies the Launcher that screen is starting to turn on.
          */
         @Override
         public void onScreenTurningOff() {
+            mSysUiState
+                .setFlag(SYSUI_STATE_SCREEN_ON, false)
+                .setFlag(SYSUI_STATE_SCREEN_TRANSITION, true)
+                .commitUpdate(mContext.getDisplayId());
+
             try {
                 if (mOverviewProxy != null) {
                     mOverviewProxy.onScreenTurningOff();
@@ -894,6 +916,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
          */
         @Override
         public void onScreenTurningOn() {
+            mSysUiState
+                .setFlag(SYSUI_STATE_SCREEN_ON, true)
+                .setFlag(SYSUI_STATE_SCREEN_TRANSITION, true)
+                .commitUpdate(mContext.getDisplayId());
+
             try {
                 if (mOverviewProxy != null) {
                     mOverviewProxy.onScreenTurningOn();
@@ -1004,5 +1031,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         default void onAssistantProgress(@FloatRange(from = 0.0, to = 1.0) float progress) {}
         default void onAssistantGestureCompletion(float velocity) {}
         default void startAssistant(Bundle bundle) {}
+    }
+
+    /**
+     * Shuts down this service at the end of a testcase.
+     * <p>
+     * The in-production service is never shuts down, and it was not designed with testing in mind.
+     * This unregisters the mechanisms by which the service will be revived after a testcase.
+     * <p>
+     * NOTE: This is a stop-gap introduced when first added some tests to this class. It should
+     * probably be replaced by proper lifecycle management on this class.
+     */
+    @VisibleForTesting()
+    void shutdownForTest() {
+        mContext.unregisterReceiver(mLauncherStateChangedReceiver);
+        mIsEnabled = false;
+        mHandler.removeCallbacks(mConnectionRunnable);
+        disconnectFromLauncherService();
     }
 }

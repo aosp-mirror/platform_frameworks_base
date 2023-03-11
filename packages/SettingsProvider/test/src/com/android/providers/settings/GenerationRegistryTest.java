@@ -151,6 +151,26 @@ public class GenerationRegistryTest {
         checkBundle(b, 0, 1, false);
     }
 
+    @Test
+    public void testUnsetSettings() throws IOException {
+        final GenerationRegistry generationRegistry = new GenerationRegistry(new Object());
+        final int secureKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_SECURE, 0);
+        final String testSecureSetting = "test_secure_setting";
+        Bundle b = new Bundle();
+        generationRegistry.addGenerationData(b, secureKey, testSecureSetting);
+        checkBundle(b, 0, 1, false);
+        generationRegistry.addGenerationDataForUnsetSettings(b, secureKey);
+        checkBundle(b, 1, 1, false);
+        generationRegistry.addGenerationDataForUnsetSettings(b, secureKey);
+        // Test that unset settings always have the same index
+        checkBundle(b, 1, 1, false);
+        generationRegistry.incrementGenerationForUnsetSettings(secureKey);
+        // Test that the generation number of the unset settings have increased
+        generationRegistry.addGenerationDataForUnsetSettings(b, secureKey);
+        checkBundle(b, 1, 2, false);
+    }
+
+
     private void checkBundle(Bundle b, int expectedIndex, int expectedGeneration, boolean isNull)
             throws IOException {
         final MemoryIntArray array = getArray(b);

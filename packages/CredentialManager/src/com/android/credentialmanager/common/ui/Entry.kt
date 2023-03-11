@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
@@ -315,6 +316,7 @@ fun CtaButtonRow(
 fun MoreOptionTopAppBar(
     text: String,
     onNavigationIconClicked: () -> Unit,
+    bottomPadding: Dp,
 ) {
     TopAppBar(
         title = {
@@ -341,6 +343,6 @@ fun MoreOptionTopAppBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
+        modifier = Modifier.padding(top = 12.dp, bottom = bottomPadding)
     )
 }
