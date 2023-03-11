@@ -97,6 +97,21 @@ constructor(
         )
     }
 
+    fun logUpdateBatteryIndication(
+        powerIndication: String,
+        pluggedIn: Boolean,
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = powerIndication
+                bool1 = pluggedIn
+            },
+            { "updateBatteryIndication powerIndication:$str1 pluggedIn:$bool1" }
+        )
+    }
+
     fun logKeyguardSwitchIndication(
         type: Int,
         message: String?,
@@ -109,6 +124,28 @@ constructor(
                 str1 = message
             },
             { "keyguardSwitchIndication ${getKeyguardSwitchIndicationNonSensitiveLog(int1, str1)}" }
+        )
+    }
+
+    fun logRefreshBatteryInfo(
+        isChargingOrFull: Boolean,
+        powerPluggedIn: Boolean,
+        batteryLevel: Int,
+        batteryOverheated: Boolean
+    ) {
+        buffer.log(
+            KeyguardIndicationController.TAG,
+            LogLevel.DEBUG,
+            {
+                bool1 = isChargingOrFull
+                bool2 = powerPluggedIn
+                bool3 = batteryOverheated
+                int1 = batteryLevel
+            },
+            {
+                "refreshBatteryInfo isChargingOrFull:$bool1 powerPluggedIn:$bool2" +
+                    " batteryOverheated:$bool3 batteryLevel:$int1"
+            }
         )
     }
 
