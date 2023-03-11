@@ -3558,10 +3558,22 @@ public class Vpn {
                     + mCurrentToken
                     + " to network "
                     + underlyingNetwork);
-            final int ipVersion = mProfile.isAutomaticIpVersionSelectionEnabled()
-                    ? guessEspIpVersionForNetwork() : ESP_IP_VERSION_AUTO;
-            final int encapType = mProfile.isAutomaticIpVersionSelectionEnabled()
-                    ? guessEspEncapTypeForNetwork() : ESP_ENCAP_TYPE_AUTO;
+
+            final int ipVersion;
+            final int encapType;
+            if (mProfile.isAutomaticIpVersionSelectionEnabled()) {
+                ipVersion = guessEspIpVersionForNetwork();
+                encapType = guessEspEncapTypeForNetwork();
+            } else if (mProfile.getIkeTunnelConnectionParams() != null) {
+                ipVersion = mProfile.getIkeTunnelConnectionParams()
+                        .getIkeSessionParams().getIpVersion();
+                encapType = mProfile.getIkeTunnelConnectionParams()
+                        .getIkeSessionParams().getEncapType();
+            } else {
+                ipVersion = ESP_IP_VERSION_AUTO;
+                encapType = ESP_ENCAP_TYPE_AUTO;
+            }
+
             final int keepaliveDelaySeconds;
             if (mProfile.isAutomaticNattKeepaliveTimerEnabled()) {
                 keepaliveDelaySeconds = guessNattKeepaliveTimerForNetwork();
