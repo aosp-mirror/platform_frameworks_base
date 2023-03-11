@@ -453,7 +453,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     /**
-     * @see NavigationBarView#onAttachedToWindow()
+     * Called when the nav/task bar is attached.
      */
     public void onNavBarAttached() {
         mIsAttached = true;
@@ -465,7 +465,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     }
 
     /**
-     * @see NavigationBarView#onDetachedFromWindow()
+     * Called when the nav/task bar is detached.
      */
     public void onNavBarDetached() {
         mIsAttached = false;
