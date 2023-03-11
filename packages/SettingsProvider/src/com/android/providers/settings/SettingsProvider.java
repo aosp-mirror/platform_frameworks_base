@@ -2378,11 +2378,15 @@ public class SettingsProvider extends ContentProvider {
         result.putString(Settings.NameValueTable.VALUE,
                 (setting != null && !setting.isNull()) ? setting.getValue() : null);
 
-        if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
-            // Don't track generation for non-existent settings unless the name is predefined
-            synchronized (mLock) {
+        synchronized (mLock) {
+            if ((setting != null && !setting.isNull()) || isSettingPreDefined(name, type)) {
+                // Individual generation tracking for predefined settings even if they are unset
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
                         SettingsState.makeKey(type, userId), name);
+            } else {
+                // All non-predefined, unset settings are tracked using the same generation number
+                mSettingsRegistry.mGenerationRegistry.addGenerationDataForUnsetSettings(result,
+                        SettingsState.makeKey(type, userId));
             }
         }
         return result;
@@ -2396,7 +2400,8 @@ public class SettingsProvider extends ContentProvider {
         } else if (type == SETTINGS_TYPE_SYSTEM) {
             return sAllSystemSettings.contains(name);
         } else {
-            return false;
+            // Consider all config settings predefined because they are used by system apps only
+            return type == SETTINGS_TYPE_CONFIG;
         }
     }
 
@@ -2405,14 +2410,13 @@ public class SettingsProvider extends ContentProvider {
         Bundle result = new Bundle();
         result.putSerializable(Settings.NameValueTable.VALUE, keyValues);
         if (trackingGeneration) {
-            // Track generation even if the namespace is empty because this is for system apps
             synchronized (mLock) {
+                // Track generation even if namespace is empty because this is for system apps only
                 mSettingsRegistry.mGenerationRegistry.addGenerationData(result,
-                        mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_CONFIG,
-                                UserHandle.USER_SYSTEM).mKey, prefix);
+                        SettingsState.makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM),
+                        prefix);
             }
         }
-
         return result;
     }
 
@@ -3103,10 +3107,15 @@ public class SettingsProvider extends ContentProvider {
             final int key = makeKey(type, userId);
 
             boolean success = false;
+            boolean wasUnsetNonPredefinedSetting = false;
             SettingsState settingsState = peekSettingsStateLocked(key);
             if (settingsState != null) {
+                if (!isSettingPreDefined(name, type) && !settingsState.hasSetting(name)) {
+                    wasUnsetNonPredefinedSetting = true;
+                }
                 success = settingsState.insertSettingLocked(name, value,
-                        tag, makeDefault, forceNonSystemPackage, packageName, overrideableByRestore);
+                        tag, makeDefault, forceNonSystemPackage, packageName,
+                        overrideableByRestore);
             }
 
             if (success && criticalSettings != null && criticalSettings.contains(name)) {
@@ -3115,6 +3124,11 @@ public class SettingsProvider extends ContentProvider {
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
+                if (wasUnsetNonPredefinedSetting) {
+                    // Increment the generation number for all non-predefined, unset settings,
+                    // because a new non-predefined setting has been inserted
+                    mGenerationRegistry.incrementGenerationForUnsetSettings(key);
+                }
             }
             if (success) {
                 logSettingChanged(userId, name, type, CHANGE_TYPE_INSERT);
@@ -3746,7 +3760,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 214;
+            private static final int SETTINGS_VERSION = 215;
 
             private final int mUserId;
 
@@ -5699,6 +5713,49 @@ public class SettingsProvider extends ContentProvider {
                                 Secure.ENABLED_ACCESSIBILITY_SERVICES, toRemove, toAdd);
                     }
                     currentVersion = 214;
+                }
+
+                if (currentVersion == 214) {
+                    // Version 214: Set a default value for Credential Manager service.
+
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings
+                            .getSettingLocked(Settings.Secure.CREDENTIAL_SERVICE);
+                    if (currentSetting.isNull()) {
+                        final int resourceId =
+                            com.android.internal.R.string.config_defaultCredentialProviderService;
+                        final Resources resources = getContext().getResources();
+                        // If the config has not be defined we might get an exception. We also get
+                        // values from both the string array type and the single string in case the
+                        // OEM uses the wrong one.
+                        final List<String> providers = new ArrayList<>();
+                        try {
+                            providers.addAll(Arrays.asList(resources.getStringArray(resourceId)));
+                        } catch (Resources.NotFoundException e) {
+                            Slog.w(LOG_TAG,
+                                "Get default array Cred Provider not found: " + e.toString());
+                        }
+                        try {
+                            final String storedValue = resources.getString(resourceId);
+                            if (!TextUtils.isEmpty(storedValue)) {
+                                providers.add(storedValue);
+                            }
+                        } catch (Resources.NotFoundException e) {
+                            Slog.w(LOG_TAG,
+                                "Get default Cred Provider not found: " + e.toString());
+                        }
+
+                        if (!providers.isEmpty()) {
+                            final String defaultValue = String.join(":", providers);
+                            Slog.d(LOG_TAG, "Setting [" + defaultValue + "] as CredMan Service "
+                                    + "for user " + userId);
+                            secureSettings.insertSettingOverrideableByRestoreLocked(
+                                    Settings.Secure.CREDENTIAL_SERVICE, defaultValue, null, true,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+
+                    currentVersion = 215;
                 }
 
                 // vXXX: Add new settings above this point.

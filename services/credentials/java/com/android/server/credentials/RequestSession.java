@@ -38,6 +38,7 @@ import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderMetric;
+import com.android.server.credentials.metrics.InitialPhaseMetric;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,7 +76,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
 
     protected final Map<String, ProviderSession> mProviders = new HashMap<>();
     protected ChosenProviderMetric mChosenProviderMetric = new ChosenProviderMetric();
-    //TODO improve design to allow grouped metrics per request
+    protected InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
     protected final String mHybridService;
 
     @NonNull
@@ -96,7 +97,7 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
             @UserIdInt int userId, int callingUid, @NonNull T clientRequest, U clientCallback,
             @NonNull String requestType,
             CallingAppInfo callingAppInfo,
-            CancellationSignal cancellationSignal) {
+            CancellationSignal cancellationSignal, long timestampStarted) {
         mContext = context;
         mUserId = userId;
         mCallingUid = callingUid;
@@ -111,12 +112,25 @@ abstract class RequestSession<T, U> implements CredentialManagerUi.CredentialMan
                 mUserId, this);
         mHybridService = context.getResources().getString(
                 R.string.config_defaultCredentialManagerHybridService);
+        mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
+        mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
+        mInitialPhaseMetric.setCallerUid(mCallingUid);
     }
 
     public abstract ProviderSession initiateProviderSession(CredentialProviderInfo providerInfo,
             RemoteCredentialService remoteCredentialService);
 
     protected abstract void launchUiWithProviderData(ArrayList<ProviderData> providerDataList);
+
+    // Sets up the initial metric collector for use across all request session impls
+    protected void setupInitialPhaseMetric(int metricCode, int requestClassType) {
+        this.mInitialPhaseMetric.setApiName(metricCode);
+        this.mInitialPhaseMetric.setCountRequestClassType(requestClassType);
+    }
+
+    public void addProviderSession(ComponentName componentName, ProviderSession providerSession) {
+        mProviders.put(componentName.flattenToString(), providerSession);
+    }
 
     // UI callbacks
 

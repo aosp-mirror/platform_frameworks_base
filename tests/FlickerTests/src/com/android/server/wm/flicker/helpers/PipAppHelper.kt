@@ -58,7 +58,48 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     }
 
     /**
-     * Expands the PIP window my using the pinch out gesture.
+     * Drags the PIP window away from the screen edge while not crossing the display center.
+     *
+     * @throws IllegalStateException if default display bounds are not available
+     */
+    fun dragPipWindowAwayFromEdge(wmHelper: WindowManagerStateHelper, steps: Int) {
+        val initWindowRect = getWindowRect(wmHelper).clone()
+
+        // initial pointer at the center of the window
+        val startX = initWindowRect.centerX()
+        val y = initWindowRect.centerY()
+
+        val displayRect = wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
+                ?: throw IllegalStateException("Default display is null")
+
+        // the offset to the right of the display center to drag the window to
+        val offset = 20
+
+        // the actual final x coordinate with the offset included
+        // if the pip window is closer to the right edge of the display the offset is positive
+        // otherwise the offset is negative
+        val endX = displayRect.centerX() + offset * (if (isCloserToRightEdge(wmHelper)) 1 else -1)
+
+        // drag the window to the left but not beyond the center of the display
+        uiDevice.drag(startX, y, endX, y, steps)
+    }
+
+    /**
+     * Returns true if PIP window is closer to the right edge of the display than left.
+     *
+     * @throws IllegalStateException if default display bounds are not available
+     */
+    fun isCloserToRightEdge(wmHelper: WindowManagerStateHelper): Boolean {
+        val windowRect = getWindowRect(wmHelper)
+
+        val displayRect = wmHelper.currentState.wmState.getDefaultDisplay()?.displayRect
+                ?: throw IllegalStateException("Default display is null")
+
+        return windowRect.centerX() > displayRect.centerX()
+    }
+
+    /**
+     * Expands the PIP window by using the pinch out gesture.
      *
      * @param percent The percentage by which to increase the pip window size.
      * @throws IllegalArgumentException if percentage isn't between 0.0f and 1.0f
@@ -106,7 +147,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
     }
 
     /**
-     * Minimizes the PIP window my using the pinch in gesture.
+     * Minimizes the PIP window by using the pinch in gesture.
      *
      * @param percent The percentage by which to decrease the pip window size.
      * @throws IllegalArgumentException if percentage isn't between 0.0f and 1.0f
@@ -223,7 +264,10 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         closePipWindow(WindowManagerStateHelper(mInstrumentation))
     }
 
-    private fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
+    /**
+     * Returns the pip window bounds.
+     */
+    fun getWindowRect(wmHelper: WindowManagerStateHelper): Rect {
         val windowRegion = wmHelper.getWindowRegion(this)
         require(!windowRegion.isEmpty) { "Unable to find a PIP window in the current state" }
         return windowRegion.bounds
@@ -304,6 +348,28 @@ open class PipAppHelper(instrumentation: Instrumentation) :
                 val pipRegion = pipAppWindow.frameRegion
                 return@add windowRect.coversMoreThan(pipRegion)
             }
+            .waitForAndVerify()
+    }
+
+    /**
+     * Waits until the PIP window snaps horizontally to the provided bounds.
+     *
+     * @param finalBounds the bounds to wait for PIP window to snap to
+     */
+    fun waitForPipToSnapTo(wmHelper: WindowManagerStateHelper, finalBounds: android.graphics.Rect) {
+        wmHelper
+            .StateSyncBuilder()
+            .add("pipWindowSnapped") {
+                val pipAppWindow =
+                    it.wmState.visibleWindows.firstOrNull { window ->
+                        this.windowMatchesAnyOf(window)
+                    }
+                        ?: return@add false
+                val pipRegionBounds = pipAppWindow.frameRegion.bounds
+                return@add pipRegionBounds.left == finalBounds.left &&
+                    pipRegionBounds.right == finalBounds.right
+            }
+            .add(ConditionsFactory.isWMStateComplete())
             .waitForAndVerify()
     }
 

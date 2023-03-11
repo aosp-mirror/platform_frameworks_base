@@ -2402,7 +2402,6 @@ public class DeviceIdleController extends SystemService
             return mConstants;
         }
 
-
         /** Returns the current elapsed realtime in milliseconds. */
         long getElapsedRealtime() {
             return SystemClock.elapsedRealtime();
@@ -3819,6 +3818,7 @@ public class DeviceIdleController extends SystemService
 
                 // Everything is in place to go into IDLE state.
             case STATE_IDLE_MAINTENANCE:
+                moveToStateLocked(STATE_IDLE, reason);
                 scheduleAlarmLocked(mNextIdleDelay, true);
                 if (DEBUG) Slog.d(TAG, "Moved to STATE_IDLE. Next alarm in " + mNextIdleDelay +
                         " ms.");
@@ -3829,7 +3829,6 @@ public class DeviceIdleController extends SystemService
                 if (mNextIdleDelay < mConstants.IDLE_TIMEOUT) {
                     mNextIdleDelay = mConstants.IDLE_TIMEOUT;
                 }
-                moveToStateLocked(STATE_IDLE, reason);
                 if (mLightState != LIGHT_STATE_OVERRIDE) {
                     moveToLightStateLocked(LIGHT_STATE_OVERRIDE, "deep");
                     cancelLightAlarmLocked();
@@ -3842,6 +3841,7 @@ public class DeviceIdleController extends SystemService
                 // We have been idling long enough, now it is time to do some work.
                 mActiveIdleOpCount = 1;
                 mActiveIdleWakeLock.acquire();
+                moveToStateLocked(STATE_IDLE_MAINTENANCE, reason);
                 scheduleAlarmLocked(mNextIdlePendingDelay, false);
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_IDLE to STATE_IDLE_MAINTENANCE. " +
                         "Next alarm in " + mNextIdlePendingDelay + " ms.");
@@ -3851,7 +3851,6 @@ public class DeviceIdleController extends SystemService
                 if (mNextIdlePendingDelay < mConstants.IDLE_PENDING_TIMEOUT) {
                     mNextIdlePendingDelay = mConstants.IDLE_PENDING_TIMEOUT;
                 }
-                moveToStateLocked(STATE_IDLE_MAINTENANCE, reason);
                 addEvent(EVENT_DEEP_MAINTENANCE, null);
                 mHandler.sendEmptyMessage(MSG_REPORT_IDLE_OFF);
                 break;

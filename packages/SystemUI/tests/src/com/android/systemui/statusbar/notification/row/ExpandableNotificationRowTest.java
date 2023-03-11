@@ -67,6 +67,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.phone.KeyguardBypassController;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -102,6 +103,61 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         fakeFeatureFlags.set(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE, true);
         fakeFeatureFlags.set(Flags.SENSITIVE_REVEAL_ANIM, false);
         mNotificationTestHelper.setFeatureFlags(fakeFeatureFlags);
+    }
+
+    @Test
+    public void testCanShowHeadsUp_notOnKeyguard_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.setOnKeyguard(false);
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_dozing_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        StatusBarStateController statusBarStateControllerMock =
+                mNotificationTestHelper.getStatusBarStateController();
+        when(statusBarStateControllerMock.isDozing()).thenReturn(true);
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_bypassEnabled_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        KeyguardBypassController keyguardBypassControllerMock =
+                mNotificationTestHelper.getKeyguardBypassController();
+        when(keyguardBypassControllerMock.getBypassEnabled()).thenReturn(true);
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_stickyAndNotDemoted_true() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createStickyRow();
+
+        assertTrue(row.canShowHeadsUp());
+    }
+
+    @Test
+    public void testCanShowHeadsUp_false() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.setOnKeyguard(true);
+
+        StatusBarStateController statusBarStateControllerMock =
+                mNotificationTestHelper.getStatusBarStateController();
+        when(statusBarStateControllerMock.isDozing()).thenReturn(false);
+
+        KeyguardBypassController keyguardBypassControllerMock =
+                mNotificationTestHelper.getKeyguardBypassController();
+        when(keyguardBypassControllerMock.getBypassEnabled()).thenReturn(false);
+
+        assertFalse(row.canShowHeadsUp());
     }
 
     @Test

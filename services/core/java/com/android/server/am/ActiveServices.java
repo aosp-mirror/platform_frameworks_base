@@ -2067,7 +2067,9 @@ public final class ActiveServices {
                     final boolean isOldTypeShortFgs = r.isShortFgs();
                     final boolean isNewTypeShortFgs =
                             foregroundServiceType == FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
-                    final boolean isOldTypeShortFgsAndTimedOut = r.shouldTriggerShortFgsTimeout();
+                    final long nowUptime = SystemClock.uptimeMillis();
+                    final boolean isOldTypeShortFgsAndTimedOut =
+                            r.shouldTriggerShortFgsTimeout(nowUptime);
 
                     // If true, we skip the BFSL check.
                     boolean bypassBfslCheck = false;
@@ -3225,9 +3227,11 @@ public final class ActiveServices {
 
     void onShortFgsTimeout(ServiceRecord sr) {
         synchronized (mAm) {
-            if (!sr.shouldTriggerShortFgsTimeout()) {
+            final long nowUptime = SystemClock.uptimeMillis();
+            if (!sr.shouldTriggerShortFgsTimeout(nowUptime)) {
                 if (DEBUG_SHORT_SERVICE) {
-                    Slog.d(TAG_SERVICE, "[STALE] Short FGS timed out: " + sr);
+                    Slog.d(TAG_SERVICE, "[STALE] Short FGS timed out: " + sr
+                            + " " + sr.getShortFgsTimedEventDescription(nowUptime));
                 }
                 return;
             }
@@ -3261,7 +3265,8 @@ public final class ActiveServices {
             if (sr == null) {
                 return false;
             }
-            return sr.shouldTriggerShortFgsTimeout();
+            final long nowUptime = SystemClock.uptimeMillis();
+            return sr.shouldTriggerShortFgsTimeout(nowUptime);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -3269,9 +3274,11 @@ public final class ActiveServices {
 
     void onShortFgsProcstateTimeout(ServiceRecord sr) {
         synchronized (mAm) {
-            if (!sr.shouldDemoteShortFgsProcState()) {
+            final long nowUptime = SystemClock.uptimeMillis();
+            if (!sr.shouldDemoteShortFgsProcState(nowUptime)) {
                 if (DEBUG_SHORT_SERVICE) {
-                    Slog.d(TAG_SERVICE, "[STALE] Short FGS procstate demotion: " + sr);
+                    Slog.d(TAG_SERVICE, "[STALE] Short FGS procstate demotion: " + sr
+                            + " " + sr.getShortFgsTimedEventDescription(nowUptime));
                 }
                 return;
             }
@@ -3292,9 +3299,11 @@ public final class ActiveServices {
         synchronized (mAm) {
             tr.mLatencyTracker.waitingOnAMSLockEnded();
 
-            if (!sr.shouldTriggerShortFgsAnr()) {
+            final long nowUptime = SystemClock.uptimeMillis();
+            if (!sr.shouldTriggerShortFgsAnr(nowUptime)) {
                 if (DEBUG_SHORT_SERVICE) {
-                    Slog.d(TAG_SERVICE, "[STALE] Short FGS ANR'ed: " + sr);
+                    Slog.d(TAG_SERVICE, "[STALE] Short FGS ANR'ed: " + sr
+                            + " " + sr.getShortFgsTimedEventDescription(nowUptime));
                 }
                 return;
             }

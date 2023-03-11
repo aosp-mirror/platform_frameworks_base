@@ -207,9 +207,13 @@ public final class HotspotNetwork implements Parcelable {
         }
     }
 
-    private static void validate(long deviceId, @NetworkType int networkType, String networkName) {
+    private static void validate(long deviceId, @NetworkType int networkType, String networkName,
+            NetworkProviderInfo networkProviderInfo) {
         if (deviceId < 0) {
             throw new IllegalArgumentException("DeviceId must be set");
+        }
+        if (Objects.isNull(networkProviderInfo)) {
+            throw new IllegalArgumentException("NetworkProviderInfo must be set");
         }
         if (networkType != NETWORK_TYPE_CELLULAR && networkType != NETWORK_TYPE_WIFI
                 && networkType != NETWORK_TYPE_ETHERNET && networkType != NETWORK_TYPE_UNKNOWN) {
@@ -230,7 +234,8 @@ public final class HotspotNetwork implements Parcelable {
             @Nullable @SecurityType ArraySet<Integer> hotspotSecurityTypes) {
         validate(deviceId,
                 networkType,
-                networkName);
+                networkName,
+                networkProviderInfo);
         mDeviceId = deviceId;
         mNetworkProviderInfo = networkProviderInfo;
         mNetworkType = networkType;

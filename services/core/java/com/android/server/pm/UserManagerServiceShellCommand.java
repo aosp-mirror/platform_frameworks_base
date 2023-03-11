@@ -380,6 +380,7 @@ public class UserManagerServiceShellCommand extends ShellCommand {
             final int pid = Process.myPid();
             Slogf.i(LOG_TAG, "Restarting Android runtime(PID=%d) to finalize changes", pid);
             pw.println("Restarting Android runtime to finalize changes");
+            pw.println("The restart may trigger a 'Broken pipe' message; this is to be expected.");
             pw.flush();
 
             // Ideally there should be a cleaner / safer option to restart system_server, but

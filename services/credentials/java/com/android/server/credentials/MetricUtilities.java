@@ -26,6 +26,7 @@ import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderMetric;
+import com.android.server.credentials.metrics.InitialPhaseMetric;
 
 import java.util.Map;
 
@@ -39,7 +40,10 @@ public class MetricUtilities {
 
     public static final int DEFAULT_INT_32 = -1;
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
-
+    // Used for single count metric emits, such as singular amounts of various types
+    public static final int UNIT = 1;
+    // Used for zero count metric emits, such as zero amounts of various types
+    public static final int ZERO = 0;
 
     /**
      * This retrieves the uid of any package name, given a context and a component name for the
@@ -153,6 +157,20 @@ public class MetricUtilities {
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
+    }
+
+    /**
+     * Handles the metric emit for the initial phase.
+     *
+     * @param initialPhaseMetric contains all the data for this emit
+     */
+    protected static void logApiCalled(InitialPhaseMetric initialPhaseMetric) {
+        /*
+        FrameworkStatsLog.write(FrameworkStatsLog.INITIAL_PHASE,
+        .. session_id .. initialPhaseMetric.getSessionId(),
+        ...
+        TODO Immediately - Fill in asap now that the split atom is checked in.
+         */
     }
 
 }

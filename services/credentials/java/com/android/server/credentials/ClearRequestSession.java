@@ -46,9 +46,11 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
 
     public ClearRequestSession(Context context, int userId, int callingUid,
             IClearCredentialStateCallback callback, ClearCredentialStateRequest request,
-            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal) {
+            CallingAppInfo callingAppInfo, CancellationSignal cancellationSignal,
+            long startedTimestamp) {
         super(context, userId, callingUid, request, callback, RequestInfo.TYPE_UNDEFINED,
-                callingAppInfo, cancellationSignal);
+                callingAppInfo, cancellationSignal, startedTimestamp);
+        setupInitialPhaseMetric(ApiName.CLEAR_CREDENTIAL.getMetricCode(), MetricUtilities.ZERO);
     }
 
     /**

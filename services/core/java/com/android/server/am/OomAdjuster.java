@@ -1260,17 +1260,10 @@ public class OomAdjuster {
         for (int i = numLru - 1; i >= 0; i--) {
             ProcessRecord app = lruList.get(i);
             final ProcessStateRecord state = app.mState;
-            if (!app.isKilledByAm() && app.getThread() != null) {
+            if (!app.isKilledByAm() && app.getThread() != null && !app.isPendingFinishAttach()) {
                 // We don't need to apply the update for the process which didn't get computed
                 if (state.getCompletedAdjSeq() == mAdjSeq) {
                     applyOomAdjLSP(app, true, now, nowElapsed, oomAdjReason);
-                }
-
-                if (app.isPendingFinishAttach()) {
-                    // Avoid trimming processes that are still initializing. If they aren't
-                    // hosting any components yet because they may be unfairly killed.
-                    // We however apply any computed previously computed oom scores before skipping.
-                    continue;
                 }
 
                 final ProcessServiceRecord psr = app.mServices;
@@ -1703,19 +1696,6 @@ public class OomAdjuster {
             state.setCurRawAdj(CACHED_APP_MAX_ADJ);
             state.setCompletedAdjSeq(state.getAdjSeq());
             state.setCurCapability(PROCESS_CAPABILITY_NONE);
-            return false;
-        }
-
-        if (app.isPendingFinishAttach()) {
-            state.setAdjSeq(mAdjSeq);
-            state.setCompletedAdjSeq(mAdjSeq);
-            // If the process is still initializing, we skip computing any states because we
-            // don't want to override the special states that have been set at
-            // AMS#attachApplication with OomAdjuster#setAttachingProcessStates.
-            // In this limbo state, the app has |PROC_START_TIMEOUT| to finish attach application
-            // and receive updated proc_state based on its importance.
-            // Note that in this state, the oom_score is INVALID_ADJ which is outside the standard
-            // oom score range and the app is safe from lmkd kills.
             return false;
         }
 
@@ -3239,7 +3219,7 @@ public class OomAdjuster {
     }
 
     @GuardedBy({"mService", "mProcLock"})
-    void setAttachingProcessStatesLSP(ProcessRecord app) {
+    void setAttachingSchedGroupLSP(ProcessRecord app) {
         int initialSchedGroup = SCHED_GROUP_DEFAULT;
         final ProcessStateRecord state = app.mState;
         // If the process has been marked as foreground, it is starting as the top app (with
@@ -3259,15 +3239,6 @@ public class OomAdjuster {
 
         state.setSetSchedGroup(initialSchedGroup);
         state.setCurrentSchedulingGroup(initialSchedGroup);
-        state.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
-        state.setCurCapability(PROCESS_CAPABILITY_NONE);
-
-        state.setCurAdj(ProcessList.FOREGROUND_APP_ADJ);
-        state.setSetAdj(ProcessList.FOREGROUND_APP_ADJ);
-        state.setVerifiedAdj(ProcessList.FOREGROUND_APP_ADJ);
-        state.setForcingToImportant(null);
-        state.setHasShownUi(false);
-        state.setCached(true);
     }
 
     // ONLY used for unit testing in OomAdjusterTests.java
