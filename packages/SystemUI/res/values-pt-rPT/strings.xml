@@ -139,8 +139,8 @@
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueio com a face. Prima o ícone de desb. p/ continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Usar PIN"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilizar padrão"</string>
-    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Utilizar palavra-passe"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Usar padrão"</string>
+    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Usar palavra-passe"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN incorreto."</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Padrão incorreto."</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Palavra-passe incorreta."</string>
@@ -670,7 +670,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ecrã de bloqueio"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telem. deslig. devido ao calor"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"O seu telemóvel já está a funcionar normalmente.\nToque para obter mais informações."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O telemóvel estava muito quente, por isso desligou-se para arrefecer. Agora funciona normalmente.\n\nO telemóvel pode sobreaquecer se:\n	• Utilizar aplicações que utilizam mais recursos (jogos, vídeo ou aplicações de navegação)\n	• Transferir ou carregar ficheiros grandes\n	• Utilizar em altas temperaturas"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O telemóvel estava muito quente, por isso desligou-se para arrefecer. Agora funciona normalmente.\n\nO telemóvel pode sobreaquecer se:\n	• Usar aplicações que utilizam mais recursos (jogos, vídeo ou aplicações de navegação)\n	• Transferir ou carregar ficheiros grandes\n	• Usar em altas temperaturas"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Veja os passos de manutenção"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"O telemóvel está a aquecer"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Algumas funcionalidades são limitadas enquanto o telemóvel arrefece.\nToque para obter mais informações."</string>
