@@ -30,6 +30,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.settingslib.graph.SignalDrawable
+import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.common.ui.binder.ContentDescriptionViewBinder
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -41,6 +42,8 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewBinding
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.ModernStatusBarViewVisibilityHelper
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarViewBinderConstants.ALPHA_ACTIVE
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarViewBinderConstants.ALPHA_INACTIVE
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -190,10 +193,29 @@ object MobileIconBinder {
                         }
                     }
 
-                    // Set the activity indicators
-                    launch { viewModel.activityInVisible.collect { activityIn.isVisible = it } }
+                    if (statusBarStaticInoutIndicators()) {
+                        // Set the opacity of the activity indicators
+                        launch {
+                            viewModel.activityInVisible.collect { visible ->
+                                activityIn.imageAlpha =
+                                    (if (visible) ALPHA_ACTIVE else ALPHA_INACTIVE)
+                            }
+                        }
 
-                    launch { viewModel.activityOutVisible.collect { activityOut.isVisible = it } }
+                        launch {
+                            viewModel.activityOutVisible.collect { visible ->
+                                activityOut.imageAlpha =
+                                    (if (visible) ALPHA_ACTIVE else ALPHA_INACTIVE)
+                            }
+                        }
+                    } else {
+                        // Set the activity indicators
+                        launch { viewModel.activityInVisible.collect { activityIn.isVisible = it } }
+
+                        launch {
+                            viewModel.activityOutVisible.collect { activityOut.isVisible = it }
+                        }
+                    }
 
                     launch {
                         viewModel.activityContainerVisible.collect {
