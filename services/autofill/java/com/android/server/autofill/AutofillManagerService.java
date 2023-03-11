@@ -200,7 +200,11 @@ public final class AutofillManagerService
     final AugmentedAutofillState mAugmentedAutofillState = new AugmentedAutofillState();
 
     /**
-     * Lock used to synchronize access to flags.
+     * Lock used to synchronize access to the flags.
+     * DO NOT USE ANY OTHER LOCK while holding this lock.
+     * NOTE: This lock should only be used for accessing flags. It should never call into other
+     * methods holding another lock. It can lead to potential deadlock if it calls into a method
+     * holding mLock.
      */
     private final Object mFlagLock = new Object();
 
@@ -1914,6 +1918,16 @@ public final class AutofillManagerService
                 synchronized (mLock) {
                     pw.print("sDebug: "); pw.print(realDebug);
                     pw.print(" sVerbose: "); pw.println(realVerbose);
+                    pw.print("Flags: ");
+                    synchronized (mFlagLock) {
+                        pw.print("mPccClassificationEnabled="); pw.print(mPccClassificationEnabled);
+                        pw.print(";");
+                        pw.print("mPccPreferProviderOverPcc="); pw.print(mPccPreferProviderOverPcc);
+                        pw.print(";");
+                        pw.print("mPccUseFallbackDetection="); pw.print(mPccUseFallbackDetection);
+                        pw.print(";");
+                        pw.print("mPccProviderHints="); pw.println(mPccProviderHints);
+                    }
                     // Dump per-user services
                     dumpLocked("", pw);
                     mAugmentedAutofillResolver.dumpShort(pw); pw.println();
