@@ -30,7 +30,8 @@ public final class AppLocaleChangedAtomRecord {
     String mPrevLocales = "";
     int mStatus = FrameworkStatsLog
             .APPLICATION_LOCALES_CHANGED__STATUS__STATUS_UNSPECIFIED;
-
+    int mCaller = FrameworkStatsLog
+            .APPLICATION_LOCALES_CHANGED__CALLER__CALLER_UNKNOWN;
     AppLocaleChangedAtomRecord(int callingUid) {
         this.mCallingUid = callingUid;
     }
@@ -49,5 +50,9 @@ public final class AppLocaleChangedAtomRecord {
 
     void setStatus(int status) {
         this.mStatus = status;
+    }
+
+    void setCaller(int caller) {
+        this.mCaller = caller;
     }
 }

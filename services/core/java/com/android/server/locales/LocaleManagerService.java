@@ -554,7 +554,8 @@ public class LocaleManagerService extends SystemService {
                 atomRecordForMetrics.mTargetUid,
                 atomRecordForMetrics.mNewLocales,
                 atomRecordForMetrics.mPrevLocales,
-                atomRecordForMetrics.mStatus);
+                atomRecordForMetrics.mStatus,
+                atomRecordForMetrics.mCaller);
     }
 
     /**
