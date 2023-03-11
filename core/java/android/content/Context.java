@@ -2399,7 +2399,6 @@ public abstract class Context {
         sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions, null);
     }
 
-
     /**
      * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[])}, but also allows
      * specification of a list of excluded packages.
@@ -2409,6 +2408,19 @@ public abstract class Context {
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
             @Nullable String[] excludedPackages) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions,
+                excludedPackages, null);
+    }
+
+    /**
+     * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[], String[])}, but
+     * also allows specification of options generated from {@link android.app.BroadcastOptions}.
+     *
+     * @hide
+     */
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
+            @Nullable String[] excludedPackages, @Nullable BroadcastOptions options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
