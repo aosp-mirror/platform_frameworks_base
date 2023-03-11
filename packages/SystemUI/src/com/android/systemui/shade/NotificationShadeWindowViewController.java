@@ -344,7 +344,7 @@ public class NotificationShadeWindowViewController {
                 MotionEvent cancellation = MotionEvent.obtain(ev);
                 cancellation.setAction(MotionEvent.ACTION_CANCEL);
                 mStackScrollLayout.onInterceptTouchEvent(cancellation);
-                mNotificationPanelViewController.sendInterceptTouchEventToView(cancellation);
+                mNotificationPanelViewController.handleExternalInterceptTouch(cancellation);
                 cancellation.recycle();
             }
 
