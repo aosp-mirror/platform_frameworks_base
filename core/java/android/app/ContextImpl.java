@@ -1299,7 +1299,7 @@ class ContextImpl extends Context {
 
     @Override
     public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
-            String[] excludedPermissions, String[] excludedPackages) {
+            String[] excludedPermissions, String[] excludedPackages, BroadcastOptions options) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
@@ -1307,7 +1307,8 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions, excludedPermissions,
-                    excludedPackages, AppOpsManager.OP_NONE, null, false, false, getUserId());
+                    excludedPackages, AppOpsManager.OP_NONE,
+                    options == null ? null : options.toBundle(), false, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

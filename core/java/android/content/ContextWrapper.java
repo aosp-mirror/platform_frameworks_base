@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.compat.CompatChanges;
@@ -519,9 +520,9 @@ public class ContextWrapper extends Context {
     @Override
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
-            @Nullable String[] excludedPackages) {
+            @Nullable String[] excludedPackages, @Nullable BroadcastOptions options) {
         mBase.sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions,
-                excludedPackages);
+                excludedPackages, options);
     }
 
     /** @hide */
