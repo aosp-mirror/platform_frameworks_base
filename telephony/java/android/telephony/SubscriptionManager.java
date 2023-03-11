@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.provider.Telephony.SimInfo;
 import android.telephony.euicc.EuiccManager;
 import android.telephony.ims.ImsMmTelManager;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -730,6 +731,15 @@ public class SubscriptionManager {
 
     /** Indicates that data roaming is disabled for a subscription */
     public static final int DATA_ROAMING_DISABLE = SimInfo.DATA_ROAMING_DISABLE;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"DATA_ROAMING_"},
+            value = {
+                    DATA_ROAMING_ENABLE,
+                    DATA_ROAMING_DISABLE
+            })
+    public @interface DataRoamingMode {}
 
     /**
      * TelephonyProvider column name for subscription carrier id.
@@ -2582,17 +2592,27 @@ public class SubscriptionManager {
     }
 
     /**
-     * Store properties associated with SubscriptionInfo in database
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in database associated with SubscriptionInfo
-     * @param propValue Value to store in DB for particular subId & column name
+     * Set a field in the subscription database. Note not all fields are supported.
+     *
+     * @param subscriptionId Subscription Id of Subscription.
+     * @param columnName Column name in the database. Note not all fields are supported.
+     * @param value Value to store in the database.
+     *
+     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
+     * exposed.
+     * @throws SecurityException if callers do not hold the required permission.
+     *
+     * @see android.provider.Telephony.SimInfo for all the columns.
+     *
      * @hide
      */
-    public static void setSubscriptionProperty(int subId, String propKey, String propValue) {
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    public static void setSubscriptionProperty(int subscriptionId, @NonNull String columnName,
+            @NonNull String value) {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                iSub.setSubscriptionProperty(subId, propKey, propValue);
+                iSub.setSubscriptionProperty(subscriptionId, columnName, value);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2621,118 +2641,149 @@ public class SubscriptionManager {
     }
 
     /**
-     * Return list of contacts uri corresponding to query result.
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in SubscriptionInfo database
-     * @return list of contacts uri to be returned
+     * Get specific field in string format from the subscription info database.
+     *
+     * @param context The calling context.
+     * @param subscriptionId Subscription id of the subscription.
+     * @param columnName Column name in subscription database.
+     *
+     * @return Value in string format associated with {@code subscriptionId} and {@code columnName}
+     * from the database.
+     *
+     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
+     * exposed.
+     *
+     * @see android.provider.Telephony.SimInfo for all the columns.
+     *
      * @hide
      */
-    private static List<Uri> getContactsFromSubscriptionProperty(int subId, String propKey,
-            Context context) {
-        String result = getSubscriptionProperty(subId, propKey, context);
-        if (result != null) {
-            try {
-                byte[] b = Base64.decode(result, Base64.DEFAULT);
-                ByteArrayInputStream bis = new ByteArrayInputStream(b);
-                ObjectInputStream ois = new ObjectInputStream(bis);
-                List<String> contacts = ArrayList.class.cast(ois.readObject());
-                List<Uri> uris = new ArrayList<>();
-                for (String contact : contacts) {
-                    uris.add(Uri.parse(contact));
-                }
-                return uris;
-            } catch (IOException e) {
-                logd("getContactsFromSubscriptionProperty IO exception");
-            } catch (ClassNotFoundException e) {
-                logd("getContactsFromSubscriptionProperty ClassNotFound exception");
-            }
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Store properties associated with SubscriptionInfo in database
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in SubscriptionInfo database
-     * @return Value associated with subId and propKey column in database
-     * @hide
-     */
-    private static String getSubscriptionProperty(int subId, String propKey,
-            Context context) {
+    @NonNull
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
+    })
+    private static String getStringSubscriptionProperty(@NonNull Context context,
+            int subscriptionId, @NonNull String columnName) {
         String resultValue = null;
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                resultValue = iSub.getSubscriptionProperty(subId, propKey,
+                resultValue = iSub.getSubscriptionProperty(subscriptionId, columnName,
                         context.getOpPackageName(), context.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
         }
-        return resultValue;
+        return TextUtils.emptyIfNull(resultValue);
     }
 
     /**
-     * Returns boolean value corresponding to query result.
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in SubscriptionInfo database
-     * @param defValue Default boolean value to be returned
-     * @return boolean result value to be returned
+     * Get specific field in {@code boolean} format from the subscription info database.
+     *
+     * @param subscriptionId Subscription id of the subscription.
+     * @param columnName Column name in subscription database.
+     * @param defaultValue Default value in case not found or error.
+     * @param context The calling context.
+     *
+     * @return Value in {@code boolean} format associated with {@code subscriptionId} and
+     * {@code columnName} from the database, or {@code defaultValue} if not found or error.
+     *
+     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
+     * exposed.
+     *
+     * @see android.provider.Telephony.SimInfo for all the columns.
+     *
      * @hide
      */
-    public static boolean getBooleanSubscriptionProperty(int subId, String propKey,
-            boolean defValue, Context context) {
-        String result = getSubscriptionProperty(subId, propKey, context);
-        if (result != null) {
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
+    })
+    public static boolean getBooleanSubscriptionProperty(int subscriptionId,
+            @NonNull String columnName, boolean defaultValue, @NonNull Context context) {
+        String result = getStringSubscriptionProperty(context, subscriptionId, columnName);
+        if (!result.isEmpty()) {
             try {
                 return Integer.parseInt(result) == 1;
             } catch (NumberFormatException err) {
                 logd("getBooleanSubscriptionProperty NumberFormat exception");
             }
         }
-        return defValue;
+        return defaultValue;
     }
 
     /**
-     * Returns integer value corresponding to query result.
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in SubscriptionInfo database
-     * @param defValue Default integer value to be returned
-     * @return integer result value to be returned
+     * Get specific field in {@code integer} format from the subscription info database.
+     *
+     * @param subscriptionId Subscription id of the subscription.
+     * @param columnName Column name in subscription database.
+     * @param defaultValue Default value in case not found or error.
+     * @param context The calling context.
+     *
+     * @return Value in {@code integer} format associated with {@code subscriptionId} and
+     * {@code columnName} from the database, or {@code defaultValue} if not found or error.
+     *
+     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
+     * exposed.
+     *
+     * @see android.provider.Telephony.SimInfo for all the columns.
+     *
      * @hide
      */
-    public static int getIntegerSubscriptionProperty(int subId, String propKey, int defValue,
-            Context context) {
-        String result = getSubscriptionProperty(subId, propKey, context);
-        if (result != null) {
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
+    })
+    public static int getIntegerSubscriptionProperty(int subscriptionId, @NonNull String columnName,
+            int defaultValue, @NonNull Context context) {
+        String result = getStringSubscriptionProperty(context, subscriptionId, columnName);
+        if (!result.isEmpty()) {
             try {
                 return Integer.parseInt(result);
             } catch (NumberFormatException err) {
                 logd("getIntegerSubscriptionProperty NumberFormat exception");
             }
         }
-        return defValue;
+        return defaultValue;
     }
 
     /**
-     * Returns long value corresponding to query result.
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in SubscriptionInfo database
-     * @param defValue Default long value to be returned
-     * @return long result value to be returned
+     * Get specific field in {@code long} format from the subscription info database.
+     *
+     * @param subscriptionId Subscription id of the subscription.
+     * @param columnName Column name in subscription database.
+     * @param defaultValue Default value in case not found or error.
+     * @param context The calling context.
+     *
+     * @return Value in {@code long} format associated with {@code subscriptionId} and
+     * {@code columnName} from the database, or {@code defaultValue} if not found or error.
+     *
+     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
+     * exposed.
+     *
+     * @see android.provider.Telephony.SimInfo for all the columns.
+     *
      * @hide
      */
-    public static long getLongSubscriptionProperty(int subId, String propKey, long defValue,
-                                                     Context context) {
-        String result = getSubscriptionProperty(subId, propKey, context);
-        if (result != null) {
+    @RequiresPermission(anyOf = {
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            "carrier privileges",
+    })
+    public static long getLongSubscriptionProperty(int subscriptionId, @NonNull String columnName,
+            long defaultValue, @NonNull Context context) {
+        String result = getStringSubscriptionProperty(context, subscriptionId, columnName);
+        if (!result.isEmpty()) {
             try {
                 return Long.parseLong(result);
             } catch (NumberFormatException err) {
                 logd("getLongSubscriptionProperty NumberFormat exception");
             }
         }
-        return defValue;
+        return defaultValue;
     }
 
     /**
@@ -3460,7 +3511,6 @@ public class SubscriptionManager {
      * @param groupUuid of which list of subInfo will be returned.
      * @return list of subscriptionInfo that belong to the same group, including the given
      * subscription itself. It will return an empty list if no subscription belongs to the group.
-     *
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
@@ -3500,7 +3550,8 @@ public class SubscriptionManager {
      * want to see their own hidden subscriptions.
      *
      * @param info the subscriptionInfo to check against.
-     * @return true if this subscription should be visible to the API caller.
+     *
+     * @return {@code true} if this subscription should be visible to the API caller.
      *
      * @hide
      */
@@ -3573,9 +3624,9 @@ public class SubscriptionManager {
      * <p>
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      *
+     * @param subscriptionId Subscription to be enabled or disabled. It could be a eSIM or pSIM
+     * subscription.
      * @param enable whether user is turning it on or off.
-     * @param subscriptionId Subscription to be enabled or disabled.
-     *                       It could be a eSIM or pSIM subscription.
      *
      * @return whether the operation is successful.
      *
@@ -3607,8 +3658,6 @@ public class SubscriptionManager {
      * to the request, but typically this should only take a few seconds. The user visible setting
      * available from SubscriptionInfo.areUiccApplicationsEnabled() will be updated
      * immediately.)
-     *
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      *
      * @param subscriptionId which subscription to operate on.
      * @param enabled whether uicc applications are enabled or disabled.
@@ -3642,8 +3691,6 @@ public class SubscriptionManager {
      * It provides whether a physical SIM card can be disabled without taking it out, which is done
      * via {@link #setSubscriptionEnabled(int, boolean)} API.
      *
-     * Requires Permission: READ_PRIVILEGED_PHONE_STATE.
-     *
      * @return whether can disable subscriptions on physical SIMs.
      *
      * @hide
@@ -3671,10 +3718,11 @@ public class SubscriptionManager {
     }
 
     /**
-     * DO NOT USE.
-     * This API is designed for features that are not finished at this point. Do not call this API.
+     * Check if the subscription is currently active in any slot.
+     *
+     * @param subscriptionId The subscription id.
+     *
      * @hide
-     * TODO b/135547512: further clean up
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3692,11 +3740,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set the device to device status sharing user preference for a subscription ID. The setting
+     * Set the device to device status sharing user preference for a subscription id. The setting
      * app uses this method to indicate with whom they wish to share device to device status
      * information.
-     * @param sharing the status sharing preference
-     * @param subscriptionId the unique Subscription ID in database
+     *
+     * @param subscriptionId The subscription id.
+     * @param sharing The status sharing preference.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setDeviceToDeviceStatusSharingPreference(int subscriptionId,
@@ -3713,6 +3764,8 @@ public class SubscriptionManager {
      * Returns the user-chosen device to device status sharing preference
      * @param subscriptionId Subscription id of subscription
      * @return The device to device status sharing preference
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
      */
     public @DeviceToDeviceStatusSharingPreference int getDeviceToDeviceStatusSharingPreference(
             int subscriptionId) {
@@ -3724,11 +3777,14 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set the list of contacts that allow device to device status sharing for a subscription ID.
+     * Set the list of contacts that allow device to device status sharing for a subscription id.
      * The setting app uses this method to indicate with whom they wish to share device to device
      * status information.
-     * @param contacts The list of contacts that allow device to device status sharing
-     * @param subscriptionId The unique Subscription ID in database
+     *
+     * @param subscriptionId The subscription id.
+     * @param contacts The list of contacts that allow device to device status sharing.
+     *
+     * @throws SecurityException if the caller doesn't have permissions required.
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public void setDeviceToDeviceStatusSharingContacts(int subscriptionId,
@@ -3744,17 +3800,33 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns the list of contacts that allow device to device status sharing.
-     * @param subscriptionId Subscription id of subscription
-     * @return The list of contacts that allow device to device status sharing
+     * Get the list of contacts that allow device to device status sharing.
+     *
+     * @param subscriptionId Subscription id.
+     *
+     * @return The list of contacts that allow device to device status sharing.
      */
-    public @NonNull List<Uri> getDeviceToDeviceStatusSharingContacts(
-            int subscriptionId) {
-        if (VDBG) {
-            logd("[getDeviceToDeviceStatusSharingContacts] + subId: " + subscriptionId);
+    public @NonNull List<Uri> getDeviceToDeviceStatusSharingContacts(int subscriptionId) {
+        String result = getStringSubscriptionProperty(mContext, subscriptionId,
+                D2D_STATUS_SHARING_SELECTED_CONTACTS);
+        if (result != null) {
+            try {
+                byte[] b = Base64.decode(result, Base64.DEFAULT);
+                ByteArrayInputStream bis = new ByteArrayInputStream(b);
+                ObjectInputStream ois = new ObjectInputStream(bis);
+                List<String> contacts = ArrayList.class.cast(ois.readObject());
+                List<Uri> uris = new ArrayList<>();
+                for (String contact : contacts) {
+                    uris.add(Uri.parse(contact));
+                }
+                return uris;
+            } catch (IOException e) {
+                logd("getDeviceToDeviceStatusSharingContacts IO exception");
+            } catch (ClassNotFoundException e) {
+                logd("getDeviceToDeviceStatusSharingContacts ClassNotFound exception");
+            }
         }
-        return getContactsFromSubscriptionProperty(subscriptionId,
-                D2D_STATUS_SHARING_SELECTED_CONTACTS, mContext);
+        return new ArrayList<>();
     }
 
     /**
@@ -3809,12 +3881,12 @@ public class SubscriptionManager {
     /**
      * Get active data subscription id. Active data subscription refers to the subscription
      * currently chosen to provide cellular internet connection to the user. This may be
-     * different from getDefaultDataSubscriptionId(). Eg. Opportunistics data
+     * different from {@link #getDefaultDataSubscriptionId()}.
      *
-     * See {@link PhoneStateListener#onActiveDataSubscriptionIdChanged(int)} for the details.
+     * @return Active data subscription id if any is chosen, or {@link #INVALID_SUBSCRIPTION_ID} if
+     * not.
      *
-     * @return Active data subscription id if any is chosen, or
-     * SubscriptionManager.INVALID_SUBSCRIPTION_ID if not.
+     * @see TelephonyCallback.ActiveDataSubscriptionIdListener
      */
     public static int getActiveDataSubscriptionId() {
         if (isSubscriptionManagerServiceEnabled()) {
