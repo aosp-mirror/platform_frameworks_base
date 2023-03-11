@@ -30,6 +30,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -92,6 +93,7 @@ public final class DisplayPowerController2Test {
     private static final String FOLLOWER_UNIQUE_ID = "unique_id_456";
     private static final int SECOND_FOLLOWER_DISPLAY_ID = FOLLOWER_DISPLAY_ID + 1;
     private static final String SECOND_FOLLOWER_UNIQUE_DISPLAY_ID = "unique_id_789";
+    private static final float PROX_SENSOR_MAX_RANGE = 5;
 
     private MockitoSession mSession;
     private OffsettableClock mClock;
@@ -160,7 +162,7 @@ public final class DisplayPowerController2Test {
     @Test
     public void testReleaseProxSuspendBlockersOnExit() throws Exception {
         when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
-        // send a display power request
+        // Send a display power request
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
         dpr.useProximitySensor = true;
@@ -172,7 +174,7 @@ public final class DisplayPowerController2Test {
         SensorEventListener listener = getSensorEventListener(mProxSensor);
         assertNotNull(listener);
 
-        listener.onSensorChanged(TestUtils.createSensorEvent(mProxSensor, 5 /* lux */));
+        listener.onSensorChanged(TestUtils.createSensorEvent(mProxSensor, /* value= */ 5));
         advanceTime(1);
 
         // two times, one for unfinished business and one for proximity
@@ -188,6 +190,83 @@ public final class DisplayPowerController2Test {
                 WakelockController.WAKE_LOCK_UNFINISHED_BUSINESS);
         verify(mHolder.wakelockController).acquireWakelock(
                 WakelockController.WAKE_LOCK_PROXIMITY_DEBOUNCE);
+    }
+
+    @Test
+    public void testScreenOffBecauseOfProximity() throws Exception {
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState to start listener for the prox sensor
+        advanceTime(1);
+
+        SensorEventListener listener = getSensorEventListener(mProxSensor);
+        assertNotNull(listener);
+
+        // Send a positive proximity event
+        listener.onSensorChanged(TestUtils.createSensorEvent(mProxSensor, /* value= */ 1));
+        advanceTime(1);
+
+        // The display should have been turned off
+        verify(mHolder.displayPowerState).setScreenState(Display.STATE_OFF);
+
+        clearInvocations(mHolder.displayPowerState);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_OFF);
+        // Send a negative proximity event
+        listener.onSensorChanged(TestUtils.createSensorEvent(mProxSensor,
+                (int) PROX_SENSOR_MAX_RANGE + 1));
+        // Advance time by less than PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY
+        advanceTime(1);
+
+        // The prox sensor is debounced so the display should not have been turned back on yet
+        verify(mHolder.displayPowerState, never()).setScreenState(Display.STATE_ON);
+
+        // Advance time by more than PROXIMITY_SENSOR_NEGATIVE_DEBOUNCE_DELAY
+        advanceTime(1000);
+
+        // The display should have been turned back on
+        verify(mHolder.displayPowerState).setScreenState(Display.STATE_ON);
+    }
+
+    @Test
+    public void testScreenOffBecauseOfProximity_ProxSensorGone() throws Exception {
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        // Send a display power request
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useProximitySensor = true;
+        mHolder.dpc.requestPowerState(dpr, false /* waitForNegativeProximity */);
+
+        // Run updatePowerState to start listener for the prox sensor
+        advanceTime(1);
+
+        SensorEventListener listener = getSensorEventListener(mProxSensor);
+        assertNotNull(listener);
+
+        // Send a positive proximity event
+        listener.onSensorChanged(TestUtils.createSensorEvent(mProxSensor, /* value= */ 1));
+        advanceTime(1);
+
+        // The display should have been turned off
+        verify(mHolder.displayPowerState).setScreenState(Display.STATE_OFF);
+
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_OFF);
+        // The display device changes and we no longer have a prox sensor
+        reset(mSensorManagerMock);
+        setUpDisplay(DISPLAY_ID, "new_unique_id", mHolder.display, mock(DisplayDevice.class),
+                mock(DisplayDeviceConfig.class), /* isEnabled= */ true);
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+
+        advanceTime(1); // Run updatePowerState
+
+        // The display should have been turned back on and the listener should have been
+        // unregistered
+        verify(mHolder.displayPowerState).setScreenState(Display.STATE_ON);
+        verify(mSensorManagerMock).unregisterListener(listener);
     }
 
     @Test
@@ -222,8 +301,8 @@ public final class DisplayPowerController2Test {
     }
 
     private void setUpSensors() throws Exception {
-        mProxSensor = TestUtils.createSensor(
-                Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_PROXIMITY);
+        mProxSensor = TestUtils.createSensor(Sensor.TYPE_PROXIMITY, Sensor.STRING_TYPE_PROXIMITY,
+                PROX_SENSOR_MAX_RANGE);
         Sensor screenOffBrightnessSensor = TestUtils.createSensor(
                 Sensor.TYPE_LIGHT, Sensor.STRING_TYPE_LIGHT);
         when(mSensorManagerMock.getSensorList(eq(Sensor.TYPE_ALL)))
@@ -801,7 +880,13 @@ public final class DisplayPowerController2Test {
                 SensorManager sensorManager) {
             return new DisplayPowerProximityStateController(wakelockController,
                     displayDeviceConfig, looper, nudgeUpdatePowerState, displayId,
-                    sensorManager, /* injector= */ null);
+                    sensorManager,
+                    new DisplayPowerProximityStateController.Injector() {
+                        @Override
+                        DisplayPowerProximityStateController.Clock createClock() {
+                            return mClock::now;
+                        }
+                    });
         }
 
         @Override
