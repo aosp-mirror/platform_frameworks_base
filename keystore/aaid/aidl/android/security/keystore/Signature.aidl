@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package android.security.keymaster;
-
-import android.security.keymaster.KeyAttestationApplicationId;
-import android.security.keymaster.KeyAttestationPackageInfo;
-import android.content.pm.Signature;
+package android.security.keystore;
 
 /**
- * This must be kept manually in sync with system/security/keystore until AIDL
- * can generate both Java and C++ bindings.
- *
  * @hide
+ * Represents a signature data read from the package file. Extracted from from the PackageManager's
+ * PackageInfo for the purpose of key attestation. It is part of the KeyAttestationPackageInfo,
+ * which is used by keystore to identify the caller of the keystore API towards a remote party.
  */
-interface IKeyAttestationApplicationIdProvider {
-    /* keep in sync with /system/security/keystore/keystore_attestation_id.cpp */
-    KeyAttestationApplicationId getKeyAttestationApplicationId(int uid);
+parcelable Signature {
+    /**
+     * Represents signing certificate data associated with application package, signatures are
+     * expected to be a hex-encoded ASCII string representing valid X509 certificate.
+     */
+    byte[] data;
 }

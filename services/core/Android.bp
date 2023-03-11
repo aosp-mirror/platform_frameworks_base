@@ -175,6 +175,7 @@ java_library_static {
         "capture_state_listener-aidl-java",
         "cbor-java",
         "icu4j_calendar_astronomer",
+        "android.security.aaid_aidl-java",
         "netd-client",
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",

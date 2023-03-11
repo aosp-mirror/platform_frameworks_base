@@ -6301,12 +6301,6 @@ android.security.Scrypt
 android.security.attestationverification.AttestationVerificationManager
 android.security.keymaster.ExportResult$1
 android.security.keymaster.ExportResult
-android.security.keymaster.IKeyAttestationApplicationIdProvider$Stub
-android.security.keymaster.IKeyAttestationApplicationIdProvider
-android.security.keymaster.KeyAttestationApplicationId$1
-android.security.keymaster.KeyAttestationApplicationId
-android.security.keymaster.KeyAttestationPackageInfo$1
-android.security.keymaster.KeyAttestationPackageInfo
 android.security.keymaster.KeyCharacteristics$1
 android.security.keymaster.KeyCharacteristics
 android.security.keymaster.KeymasterArgument$1
@@ -6331,7 +6325,13 @@ android.security.keystore.AttestationUtils
 android.security.keystore.BackendBusyException
 android.security.keystore.DelegatingX509Certificate
 android.security.keystore.DeviceIdAttestationException
+android.security.keystore.IKeyAttestationApplicationIdProvider$Stub
+android.security.keystore.IKeyAttestationApplicationIdProvider
+android.security.keystore.KeyAttestationApplicationId$Stub
+android.security.keystore.KeyAttestationApplicationId
 android.security.keystore.KeyAttestationException
+android.security.keystore.KeyAttestationPackageInfo$Stub
+android.security.keystore.KeyAttestationPackageInfo
 android.security.keystore.KeyExpiredException
 android.security.keystore.KeyGenParameterSpec$Builder
 android.security.keystore.KeyGenParameterSpec
@@ -6354,6 +6354,8 @@ android.security.keystore.KeystoreResponse$1
 android.security.keystore.KeystoreResponse
 android.security.keystore.ParcelableKeyGenParameterSpec$1
 android.security.keystore.ParcelableKeyGenParameterSpec
+android.security.keystore.Signature$Stub
+android.security.keystore.Signature
 android.security.keystore.SecureKeyImportUnavailableException
 android.security.keystore.StrongBoxUnavailableException
 android.security.keystore.UserAuthArgs

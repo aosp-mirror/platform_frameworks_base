@@ -31,11 +31,6 @@ filegroup {
     visibility: ["//frameworks/base"],
 }
 
-filegroup {
-    name: "IKeyAttestationApplicationIdProvider.aidl",
-    srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
-}
-
 aidl_library {
     name: "IDropBoxManagerService_aidl",
     srcs: [
