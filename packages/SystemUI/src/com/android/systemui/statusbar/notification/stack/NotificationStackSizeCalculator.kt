@@ -264,12 +264,18 @@ constructor(
         onLockscreen: Boolean
     ): Float {
         assert(view.isShowable(onLockscreen))
+
         var size =
             if (onLockscreen) {
-                view.getMinHeight(/* ignoreTemporaryStates= */ true).toFloat()
+                if (view is ExpandableNotificationRow && view.entry.isStickyAndNotDemoted) {
+                    view.intrinsicHeight.toFloat()
+                } else {
+                    view.getMinHeight(/* ignoreTemporaryStates= */ true).toFloat()
+                }
             } else {
                 view.intrinsicHeight.toFloat()
             }
+
         size += calculateGapAndDividerHeight(stack, previousView, current = view, visibleIndex)
         return size
     }

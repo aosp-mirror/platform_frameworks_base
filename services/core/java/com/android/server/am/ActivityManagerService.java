@@ -4943,8 +4943,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            mOomAdjuster.setAttachingProcessStatesLSP(app);
+            app.mState.setCurAdj(ProcessList.INVALID_ADJ);
+            app.mState.setSetAdj(ProcessList.INVALID_ADJ);
+            app.mState.setVerifiedAdj(ProcessList.INVALID_ADJ);
+            mOomAdjuster.setAttachingSchedGroupLSP(app);
+            app.mState.setForcingToImportant(null);
             clearProcessForegroundLocked(app);
+            app.mState.setHasShownUi(false);
+            app.mState.setCached(false);
             app.setDebugging(false);
             app.setKilledByAm(false);
             app.setKilled(false);
@@ -5112,14 +5118,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(thread, mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
-            app.setPendingFinishAttach(true);
-
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
-
-            updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_PROCESS_BEGIN);
-            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
-
             final long now = SystemClock.uptimeMillis();
             synchronized (mAppProfiler.mProfilerLock) {
                 app.mProfile.setLastRequestedGc(now);
@@ -5135,6 +5135,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
+            } else {
+                app.setPendingFinishAttach(true);
             }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
@@ -17277,6 +17279,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         public ComponentName startSdkSandboxService(Intent service, int clientAppUid,
                 String clientAppPackage, String processName) throws RemoteException {
             validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+                throw new IllegalArgumentException("uid does not belong to provided package");
+            }
             // TODO(b/269598719): Is passing the application thread of the system_server alright?
             // e.g. the sandbox getting privileged access due to this.
             ComponentName cn = ActivityManagerService.this.startService(
@@ -17343,6 +17348,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String processName, long flags)
                 throws RemoteException {
             validateSdkSandboxParams(service, clientAppUid, clientAppPackage, processName);
+            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
+                throw new IllegalArgumentException("uid does not belong to provided package");
+            }
             if (conn == null) {
                 throw new IllegalArgumentException("connection is null");
             }
@@ -17394,9 +17402,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (!UserHandle.isApp(clientAppUid)) {
                 throw new IllegalArgumentException("uid is not within application range");
-            }
-            if (mAppOpsService.checkPackage(clientAppUid, clientAppPackage) != MODE_ALLOWED) {
-                throw new IllegalArgumentException("uid does not belong to provided package");
             }
         }
 

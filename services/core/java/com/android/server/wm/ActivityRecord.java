@@ -2098,7 +2098,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor = supervisor;
 
         info.taskAffinity = computeTaskAffinity(info.taskAffinity, info.applicationInfo.uid,
-                launchMode);
+                info.launchMode, mActivityComponent);
         taskAffinity = info.taskAffinity;
         final String uid = Integer.toString(info.applicationInfo.uid);
         if (info.windowLayout != null && info.windowLayout.windowLayoutAffinity != null
@@ -2199,12 +2199,18 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * @param affinity The affinity of the activity.
      * @param uid The user-ID that has been assigned to this application.
      * @param launchMode The activity launch mode
+     * @param componentName The activity component name. This is only useful when the given
+     *                      launchMode is {@link ActivityInfo#LAUNCH_SINGLE_INSTANCE}
      * @return The task affinity
      */
-    static String computeTaskAffinity(String affinity, int uid, int launchMode) {
+    static String computeTaskAffinity(String affinity, int uid, int launchMode,
+            ComponentName componentName) {
         final String uidStr = Integer.toString(uid);
         if (affinity != null && !affinity.startsWith(uidStr)) {
-            affinity = uidStr + (launchMode == LAUNCH_SINGLE_INSTANCE ? "-si:" : ":") + affinity;
+            affinity = uidStr + ":" + affinity;
+            if (launchMode == LAUNCH_SINGLE_INSTANCE && componentName != null) {
+                affinity += ":" + componentName.hashCode();
+            }
         }
         return affinity;
     }
@@ -7855,7 +7861,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (task != null && requestedOrientation == SCREEN_ORIENTATION_BEHIND) {
             // We use Task here because we want to be consistent with what happens in
             // multi-window mode where other tasks orientations are ignored.
-            android.util.Log.d("orientation", "We are here");
             final ActivityRecord belowCandidate = task.getActivity(
                     a -> a.canDefineOrientationForActivitiesAbove() /* callback */,
                     this /* boundary */, false /* includeBoundary */,

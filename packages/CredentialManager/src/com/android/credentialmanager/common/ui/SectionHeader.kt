@@ -38,7 +38,7 @@ fun MoreAboutPasskeySectionHeader(text: String) {
 
 @Composable
 private fun InternalSectionHeader(text: String, color: Color) {
-    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(top = 8.dp)) {
         SectionHeaderText(
             text,
             modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),

@@ -219,6 +219,25 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     }
 
     @Test
+    fun spaceNeeded_fsiHunOnLockscreen_usesIntrinsicHeight() {
+        setGapHeight(0f)
+        // No divider height since we're testing one element where index = 0
+
+        val expandableView = createMockStickyRow(rowHeight)
+        whenever(expandableView.getMinHeight(any())).thenReturn(5)
+        whenever(expandableView.intrinsicHeight).thenReturn(10)
+
+        val space =
+                sizeCalculator.spaceNeeded(
+                        expandableView,
+                        visibleIndex = 0,
+                        previousView = null,
+                        stack = stackLayout,
+                        onLockscreen = true)
+        assertThat(space).isEqualTo(10)
+    }
+
+    @Test
     fun spaceNeeded_notOnLockscreen_usesIntrinsicHeight() {
         setGapHeight(0f)
         // No divider height since we're testing one element where index = 0
@@ -266,6 +285,25 @@ class NotificationStackSizeCalculatorTest : SysuiTestCase() {
     ): ExpandableNotificationRow {
         val row = mock(ExpandableNotificationRow::class.java)
         val entry = mock(NotificationEntry::class.java)
+        val sbn = mock(StatusBarNotification::class.java)
+        whenever(entry.sbn).thenReturn(sbn)
+        whenever(row.entry).thenReturn(entry)
+        whenever(row.isRemoved).thenReturn(isRemoved)
+        whenever(row.visibility).thenReturn(visibility)
+        whenever(row.getMinHeight(any())).thenReturn(height.toInt())
+        whenever(row.intrinsicHeight).thenReturn(height.toInt())
+        return row
+    }
+
+    private fun createMockStickyRow(
+            height: Float = rowHeight,
+            isRemoved: Boolean = false,
+            visibility: Int = VISIBLE
+    ): ExpandableNotificationRow {
+        val row = mock(ExpandableNotificationRow::class.java)
+        val entry = mock(NotificationEntry::class.java)
+        whenever(entry.isStickyAndNotDemoted).thenReturn(true)
+
         val sbn = mock(StatusBarNotification::class.java)
         whenever(entry.sbn).thenReturn(sbn)
         whenever(row.entry).thenReturn(entry)

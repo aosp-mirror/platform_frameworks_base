@@ -53,9 +53,11 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             CreateCredentialRequest request,
             ICreateCredentialCallback callback,
             CallingAppInfo callingAppInfo,
-            CancellationSignal cancellationSignal) {
+            CancellationSignal cancellationSignal,
+            long startedTimestamp) {
         super(context, userId, callingUid, request, callback, RequestInfo.TYPE_CREATE,
-                callingAppInfo, cancellationSignal);
+                callingAppInfo, cancellationSignal, startedTimestamp);
+        setupInitialPhaseMetric(ApiName.CREATE_CREDENTIAL.getMetricCode(), MetricUtilities.UNIT);
     }
 
     /**

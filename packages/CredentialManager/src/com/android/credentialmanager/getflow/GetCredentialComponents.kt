@@ -287,6 +287,7 @@ fun AllSignInOptionCard(
         MoreOptionTopAppBar(
             text = stringResource(R.string.get_dialog_title_sign_in_options),
             onNavigationIconClicked = if (isNoAccount) onCancel else onBackButtonClicked,
+            bottomPadding = 0.dp,
         )
     }) {
         // For username

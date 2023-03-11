@@ -3504,15 +3504,15 @@ public class UserManagerService extends IUserManager.Stub {
                     return;
                 }
                 final int oldMainUserId = getMainUserIdUnchecked();
-                final int oldFlags = systemUserData.info.flags;
-                final int newFlags;
+                final int oldSysFlags = systemUserData.info.flags;
+                final int newSysFlags;
                 final String newUserType;
                 if (newHeadlessSystemUserMode) {
                     newUserType = UserManager.USER_TYPE_SYSTEM_HEADLESS;
-                    newFlags = oldFlags & ~UserInfo.FLAG_FULL & ~UserInfo.FLAG_MAIN;
+                    newSysFlags = oldSysFlags & ~UserInfo.FLAG_FULL & ~UserInfo.FLAG_MAIN;
                 } else {
                     newUserType = UserManager.USER_TYPE_FULL_SYSTEM;
-                    newFlags = oldFlags | UserInfo.FLAG_FULL;
+                    newSysFlags = oldSysFlags | UserInfo.FLAG_FULL | UserInfo.FLAG_MAIN;
                 }
 
                 if (systemUserData.info.userType.equals(newUserType)) {
@@ -3523,18 +3523,19 @@ public class UserManagerService extends IUserManager.Stub {
                 Slogf.i(LOG_TAG, "Persisting emulated system user data: type changed from %s to "
                         + "%s, flags changed from %s to %s",
                         systemUserData.info.userType, newUserType,
-                        UserInfo.flagsToString(oldFlags), UserInfo.flagsToString(newFlags));
+                        UserInfo.flagsToString(oldSysFlags), UserInfo.flagsToString(newSysFlags));
 
                 systemUserData.info.userType = newUserType;
-                systemUserData.info.flags = newFlags;
+                systemUserData.info.flags = newSysFlags;
                 writeUserLP(systemUserData);
 
-                // Switch the MainUser to a reasonable choice if needed.
-                // (But if there was no MainUser, we deliberately continue to have no MainUser.)
+                // Designate the MainUser to a reasonable choice if needed.
                 final UserData oldMain = getUserDataNoChecks(oldMainUserId);
                 if (newHeadlessSystemUserMode) {
-                    if (oldMain != null && (oldMain.info.flags & UserInfo.FLAG_SYSTEM) != 0) {
-                        // System was MainUser. So we need a new choice for Main. Pick the oldest.
+                    final boolean mainIsAlreadyNonSystem =
+                            oldMain != null && (oldMain.info.flags & UserInfo.FLAG_SYSTEM) == 0;
+                    if (!mainIsAlreadyNonSystem && isMainUserPermanentAdmin()) {
+                        // We need a new choice for Main. Pick the oldest.
                         // If no oldest, don't set any. Let the BootUserInitializer do that later.
                         final UserInfo newMainUser = getEarliestCreatedFullUser();
                         if (newMainUser != null) {
@@ -3544,16 +3545,16 @@ public class UserManagerService extends IUserManager.Stub {
                         }
                     }
                 } else {
+                    // We already made user 0 Main above. Now strip it from the old Main user.
                     // TODO(b/256624031): For now, we demand the Main user (if there is one) is
                     //  always the system in non-HSUM. In the future, when we relax this, change how
                     //  we handle MAIN.
                     if (oldMain != null && (oldMain.info.flags & UserInfo.FLAG_SYSTEM) == 0) {
-                        // Someone else was the MainUser; transfer it to System.
                         Slogf.i(LOG_TAG, "Transferring Main to user 0 from " + oldMain.info.id);
                         oldMain.info.flags &= ~UserInfo.FLAG_MAIN;
-                        systemUserData.info.flags |= UserInfo.FLAG_MAIN;
                         writeUserLP(oldMain);
-                        writeUserLP(systemUserData);
+                    } else {
+                        Slogf.i(LOG_TAG, "Designated user 0 to be Main");
                     }
                 }
             }
@@ -3817,12 +3818,14 @@ public class UserManagerService extends IUserManager.Stub {
         if (userVersion < 11) {
             // Add FLAG_MAIN
             if (isHeadlessSystemUserMode()) {
-                final UserInfo earliestCreatedUser = getEarliestCreatedFullUser();
-                if (earliestCreatedUser != null) {
-                    earliestCreatedUser.flags |= UserInfo.FLAG_MAIN;
-                    userIdsToWrite.add(earliestCreatedUser.id);
+                if (isMainUserPermanentAdmin()) {
+                    final UserInfo earliestCreatedUser = getEarliestCreatedFullUser();
+                    if (earliestCreatedUser != null) {
+                        earliestCreatedUser.flags |= UserInfo.FLAG_MAIN;
+                        userIdsToWrite.add(earliestCreatedUser.id);
+                    }
                 }
-            } else {
+            } else { // not isHeadlessSystemUserMode
                 synchronized (mUsersLock) {
                     final UserData userData = mUsers.get(UserHandle.USER_SYSTEM);
                     userData.info.flags |= UserInfo.FLAG_MAIN;
