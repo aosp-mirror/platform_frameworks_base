@@ -657,4 +657,15 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
             }
         )
     }
+
+    fun logHandleBatteryUpdate(isInteresting: Boolean) {
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                bool1 = isInteresting
+            },
+            { "handleBatteryUpdate: $bool1" }
+        )
+    }
 }
