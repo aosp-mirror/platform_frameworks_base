@@ -797,8 +797,15 @@ public class PipTransition extends PipTransitionController {
             if (sourceHintRect == null) {
                 // We use content overlay when there is no source rect hint to enter PiP use bounds
                 // animation.
+                // TODO(b/272819817): cleanup the null-check and extra logging.
+                final boolean hasTopActivityInfo = taskInfo.topActivityInfo != null;
+                if (!hasTopActivityInfo) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "%s: TaskInfo.topActivityInfo is null", TAG);
+                }
                 if (SystemProperties.getBoolean(
-                        "persist.wm.debug.enable_pip_app_icon_overlay", true)) {
+                        "persist.wm.debug.enable_pip_app_icon_overlay", true)
+                        && hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
                             mContext, currentBounds, taskInfo.topActivityInfo);
                 } else {
