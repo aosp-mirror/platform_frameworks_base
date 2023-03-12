@@ -64,10 +64,19 @@ public class HandwritingInitiatorTest {
     private static final int HW_BOUNDS_OFFSETS_BOTTOM_PX = 40;
     private int mHandwritingSlop = 4;
 
-    private static final Rect sHwArea = new Rect(100, 200, 500, 500);
+    private static final Rect sHwArea1;
+    private static final Rect sHwArea2;
+
+    static {
+        sHwArea1 = new Rect(100, 200, 500, 500);
+        // The extended handwriting area bounds of the two views are overlapping.
+        int hwArea2Top = sHwArea1.bottom + HW_BOUNDS_OFFSETS_TOP_PX / 2;
+        sHwArea2 = new Rect(sHwArea1.left, hwArea2Top, sHwArea1.right, hwArea2Top + 300);
+    }
 
     private HandwritingInitiator mHandwritingInitiator;
-    private View mTestView;
+    private View mTestView1;
+    private View mTestView2;
     private Context mContext;
 
     @Before
@@ -82,20 +91,27 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator =
                 spy(new HandwritingInitiator(viewConfiguration, inputMethodManager));
 
-        mTestView = createView(sHwArea, true /* autoHandwritingEnabled */,
-                true /* isStylusHandwritingAvailable */,
+        mTestView1 = createView(sHwArea1, /* autoHandwritingEnabled= */ true,
+                /* isStylusHandwritingAvailable= */ true,
                 HW_BOUNDS_OFFSETS_LEFT_PX,
                 HW_BOUNDS_OFFSETS_TOP_PX,
                 HW_BOUNDS_OFFSETS_RIGHT_PX,
                 HW_BOUNDS_OFFSETS_BOTTOM_PX);
-        mHandwritingInitiator.updateHandwritingAreasForView(mTestView);
+        mTestView2 = createView(sHwArea2, /* autoHandwritingEnabled= */ true,
+                /* isStylusHandwritingAvailable= */ true,
+                HW_BOUNDS_OFFSETS_LEFT_PX,
+                HW_BOUNDS_OFFSETS_TOP_PX,
+                HW_BOUNDS_OFFSETS_RIGHT_PX,
+                HW_BOUNDS_OFFSETS_BOTTOM_PX);
+        mHandwritingInitiator.updateHandwritingAreasForView(mTestView1);
+        mHandwritingInitiator.updateHandwritingAreasForView(mTestView2);
     }
 
     @Test
     public void onTouchEvent_startHandwriting_when_stylusMoveOnce_withinHWArea() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         boolean onTouchEventResult1 = mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -106,7 +122,7 @@ public class HandwritingInitiatorTest {
         boolean onTouchEventResult2 = mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // Stylus movement within HandwritingArea should trigger IMM.startHandwriting once.
-        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
         assertThat(onTouchEventResult1).isFalse();
         // After IMM.startHandwriting is triggered, onTouchEvent should return true for ACTION_MOVE
         // events so that the events are not dispatched to the view tree.
@@ -115,9 +131,9 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwritingOnce_when_stylusMoveMultiTimes_withinHWArea() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         boolean onTouchEventResult1 = mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -140,7 +156,7 @@ public class HandwritingInitiatorTest {
         boolean onTouchEventResult5 = mHandwritingInitiator.onTouchEvent(stylusEvent5);
 
         // It only calls startHandwriting once for each ACTION_DOWN.
-        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
         assertThat(onTouchEventResult1).isFalse();
         // stylusEvent2 does not trigger IMM.startHandwriting since the touch slop distance has not
         // been exceeded. onTouchEvent should return false so that the event is dispatched to the
@@ -155,9 +171,9 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onTouchEvent_startHandwriting_when_stylusMove_withinExtendedHWArea() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        final int x1 = sHwArea.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
-        final int y1 = sHwArea.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        final int x1 = sHwArea1.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
+        final int y1 = sHwArea1.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -168,13 +184,13 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // Stylus movement within extended HandwritingArea should trigger IMM.startHandwriting once.
-        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
     }
 
     @Test
     public void onTouchEvent_startHandwriting_inputConnectionBuiltAfterStylusMove() {
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -184,15 +200,15 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // InputConnection is created after stylus movement.
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
 
-        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
     }
 
     @Test
     public void onTouchEvent_startHandwriting_inputConnectionBuilt_stylusMoveInExtendedHWArea() {
-        final int x1 = sHwArea.right + HW_BOUNDS_OFFSETS_RIGHT_PX / 2;
-        final int y1 = sHwArea.bottom + HW_BOUNDS_OFFSETS_BOTTOM_PX / 2;
+        final int x1 = sHwArea1.right + HW_BOUNDS_OFFSETS_RIGHT_PX / 2;
+        final int y1 = sHwArea1.bottom + HW_BOUNDS_OFFSETS_BOTTOM_PX / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -202,9 +218,9 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // InputConnection is created after stylus movement.
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
 
-        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
     }
 
     @Test
@@ -212,11 +228,11 @@ public class HandwritingInitiatorTest {
         View delegateView = new View(mContext);
         delegateView.setIsHandwritingDelegate(true);
 
-        mTestView.setHandwritingDelegatorCallback(
+        mTestView1.setHandwritingDelegatorCallback(
                 () -> mHandwritingInitiator.onInputConnectionCreated(delegateView));
 
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -249,12 +265,12 @@ public class HandwritingInitiatorTest {
 
         // Stylus movement within HandwritingArea should not trigger IMM.startHandwriting since
         // the current IME doesn't support handwriting.
-        verify(mHandwritingInitiator, never()).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView1);
     }
 
     @Test
     public void onTouchEvent_notStartHandwriting_when_stylusTap_withinHWArea() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         final int x1 = 200;
         final int y1 = 200;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
@@ -265,12 +281,12 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_UP, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
-        verify(mHandwritingInitiator, never()).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView1);
     }
 
     @Test
     public void onTouchEvent_notStartHandwriting_when_stylusMove_outOfHWArea() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         final int x1 = 10;
         final int y1 = 10;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
@@ -281,12 +297,12 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
-        verify(mHandwritingInitiator, never()).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView1);
     }
 
     @Test
     public void onTouchEvent_notStartHandwriting_when_stylusMove_afterTimeOut() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         final int x1 = 10;
         final int y1 = 10;
         final long time1 = 10L;
@@ -300,13 +316,13 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // stylus movement is after TAP_TIMEOUT it shouldn't call startHandwriting.
-        verify(mHandwritingInitiator, never()).startHandwriting(mTestView);
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView1);
     }
 
     @Test
     public void onTouchEvent_focusView_stylusMoveOnce_withinHWArea() {
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -317,13 +333,13 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // HandwritingInitiator will request focus for the registered view.
-        verify(mTestView, times(1)).requestFocus();
+        verify(mTestView1, times(1)).requestFocus();
     }
 
     @Test
     public void onTouchEvent_focusView_stylusMoveOnce_withinExtendedHWArea() {
-        final int x1 = sHwArea.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
-        final int y1 = sHwArea.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
+        final int x1 = sHwArea1.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
+        final int y1 = sHwArea1.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -334,16 +350,16 @@ public class HandwritingInitiatorTest {
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
         // HandwritingInitiator will request focus for the registered view.
-        verify(mTestView, times(1)).requestFocus();
+        verify(mTestView1, times(1)).requestFocus();
     }
 
     @Test
-    public void autoHandwriting_whenDisabled_wontStartHW() {
-        View mockView = createView(sHwArea, false /* autoHandwritingEnabled */,
-                true /* isStylusHandwritingAvailable */);
-        mHandwritingInitiator.onInputConnectionCreated(mockView);
-        final int x1 = (sHwArea.left + sHwArea.right) / 2;
-        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+    public void onTouchEvent_handwritingAreaOverlapped_initiateForCloserView() {
+        // The ACTION_DOWN location is within the handwriting bounds of both mTestView1 and
+        // mTestView2. Because it's closer to mTestView2's handwriting bounds, handwriting is
+        // initiated for mTestView2.
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = sHwArea1.bottom + HW_BOUNDS_OFFSETS_BOTTOM_PX - 1;
         MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent1);
 
@@ -353,14 +369,57 @@ public class HandwritingInitiatorTest {
         MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
         mHandwritingInitiator.onTouchEvent(stylusEvent2);
 
-        verify(mHandwritingInitiator, never()).startHandwriting(mTestView);
+        verify(mTestView2, times(1)).requestFocus();
+
+        mHandwritingInitiator.onInputConnectionCreated(mTestView2);
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView2);
+    }
+
+    @Test
+    public void onTouchEvent_handwritingAreaOverlapped_focusedViewHasPriority() {
+        // Simulate the case where mTestView1 is focused.
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        // The ACTION_DOWN location is within the handwriting bounds of both mTestView1 and
+        // mTestView2. Although it's closer to mTestView2's handwriting bounds, handwriting is
+        // initiated for mTestView1 because it's focused.
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = sHwArea1.bottom + HW_BOUNDS_OFFSETS_BOTTOM_PX - 1;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        verify(mHandwritingInitiator, times(1)).startHandwriting(mTestView1);
+    }
+
+    @Test
+    public void autoHandwriting_whenDisabled_wontStartHW() {
+        View mockView = createView(sHwArea1, false /* autoHandwritingEnabled */,
+                true /* isStylusHandwritingAvailable */);
+        mHandwritingInitiator.onInputConnectionCreated(mockView);
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView1);
     }
 
     @Test
     public void onInputConnectionCreated() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
         assertThat(mHandwritingInitiator.mConnectedView).isNotNull();
-        assertThat(mHandwritingInitiator.mConnectedView.get()).isEqualTo(mTestView);
+        assertThat(mHandwritingInitiator.mConnectedView.get()).isEqualTo(mTestView1);
     }
 
     @Test
@@ -375,8 +434,8 @@ public class HandwritingInitiatorTest {
 
     @Test
     public void onInputConnectionClosed() {
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        mHandwritingInitiator.onInputConnectionClosed(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        mHandwritingInitiator.onInputConnectionClosed(mTestView1);
 
         assertThat(mHandwritingInitiator.mConnectedView).isNull();
     }
@@ -396,12 +455,12 @@ public class HandwritingInitiatorTest {
         // When IMM restarts input connection, View#onInputConnectionCreatedInternal might be
         // called before View#onInputConnectionClosedInternal. As a result, we need to handle the
         // case where "one view "2 InputConnections".
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        mHandwritingInitiator.onInputConnectionCreated(mTestView);
-        mHandwritingInitiator.onInputConnectionClosed(mTestView);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+        mHandwritingInitiator.onInputConnectionClosed(mTestView1);
 
         assertThat(mHandwritingInitiator.mConnectedView).isNotNull();
-        assertThat(mHandwritingInitiator.mConnectedView.get()).isEqualTo(mTestView);
+        assertThat(mHandwritingInitiator.mConnectedView.get()).isEqualTo(mTestView1);
     }
 
     private MotionEvent createStylusEvent(int action, int x, int y, long eventTime) {
