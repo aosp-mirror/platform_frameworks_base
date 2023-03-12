@@ -61,8 +61,12 @@ class HighBrightnessModeController {
     @VisibleForTesting
     static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
 
+    private static final float DEFAULT_MAX_DESIRED_HDR_SDR_RATIO = 1.0f;
+
     public interface HdrBrightnessDeviceConfig {
-        float getHdrBrightnessFromSdr(float sdrBrightness);
+        // maxDesiredHdrSdrRatio will restrict the HDR brightness if the ratio is less than
+        // Float.POSITIVE_INFINITY
+        float getHdrBrightnessFromSdr(float sdrBrightness, float maxDesiredHdrSdrRatio);
     }
 
     private final float mBrightnessMin;
@@ -96,6 +100,9 @@ class HighBrightnessModeController {
 
     private int mHbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
     private boolean mIsHdrLayerPresent = false;
+
+    // mMaxDesiredHdrSdrRatio should only be applied when there is a valid backlight->nits mapping
+    private float mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
     private boolean mIsThermalStatusWithinLimit = true;
     private boolean mIsBlockedByLowPowerMode = false;
     private int mWidth;
@@ -177,7 +184,8 @@ class HighBrightnessModeController {
 
     float getHdrBrightnessValue() {
         if (mHdrBrightnessCfg != null) {
-            float hdrBrightness = mHdrBrightnessCfg.getHdrBrightnessFromSdr(mBrightness);
+            float hdrBrightness = mHdrBrightnessCfg.getHdrBrightnessFromSdr(
+                    mBrightness, mMaxDesiredHdrSdrRatio);
             if (hdrBrightness != PowerManager.BRIGHTNESS_INVALID) {
                 return hdrBrightness;
             }
@@ -457,6 +465,7 @@ class HighBrightnessModeController {
                     + ", isLuxHigh: " + mIsInAllowedAmbientRange
                     + ", isHBMCurrentlyAllowed: " + isCurrentlyAllowed()
                     + ", isHdrLayerPresent: " + mIsHdrLayerPresent
+                    + ", mMaxDesiredHdrSdrRatio: " + mMaxDesiredHdrSdrRatio
                     + ", isAutoBrightnessEnabled: " +  mIsAutoBrightnessEnabled
                     + ", mIsTimeAvailable: " + mIsTimeAvailable
                     + ", mIsInAllowedAmbientRange: " + mIsInAllowedAmbientRange
@@ -600,11 +609,25 @@ class HighBrightnessModeController {
     class HdrListener extends SurfaceControlHdrLayerInfoListener {
         @Override
         public void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers,
-                int maxW, int maxH, int flags) {
+                int maxW, int maxH, int flags, float maxDesiredHdrSdrRatio) {
             mHandler.post(() -> {
                 mIsHdrLayerPresent = numberOfHdrLayers > 0
                         && (float) (maxW * maxH) >= ((float) (mWidth * mHeight)
                                    * mHbmData.minimumHdrPercentOfScreen);
+
+                final float candidateDesiredHdrSdrRatio =
+                        mIsHdrLayerPresent && mHdrBrightnessCfg != null
+                                ? maxDesiredHdrSdrRatio
+                                : DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+
+                if (candidateDesiredHdrSdrRatio >= 1.0f) {
+                    mMaxDesiredHdrSdrRatio = candidateDesiredHdrSdrRatio;
+                } else {
+                    Slog.w(TAG, "Ignoring invalid desired HDR/SDR Ratio: "
+                            + candidateDesiredHdrSdrRatio);
+                    mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
+                }
+
                 // Calling the brightness update so that we can recalculate
                 // brightness with HDR in mind.
                 onBrightnessChanged(mBrightness, mUnthrottledBrightness, mThrottlingReason);
