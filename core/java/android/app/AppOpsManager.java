@@ -2217,8 +2217,7 @@ public class AppOpsManager {
     /** Whether noting for an appop should be collected */
     private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
 
-    private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
-            // RUNTIME PERMISSIONS
+    private static final int[] RUNTIME_PERMISSION_OPS = {
             // Contacts
             OP_READ_CONTACTS,
             OP_WRITE_CONTACTS,
@@ -2275,8 +2274,13 @@ public class AppOpsManager {
             OP_NEARBY_WIFI_DEVICES,
             // Notifications
             OP_POST_NOTIFICATION,
+    };
 
-            // APPOP PERMISSIONS
+    /**
+     * Ops for app op permissions that are setting the per-package mode for certain reasons. Most
+     * app op permissions should set the per-UID mode instead.
+     */
+    private static final int[] APP_OP_PERMISSION_PACKAGE_OPS = {
             OP_ACCESS_NOTIFICATIONS,
             OP_SYSTEM_ALERT_WINDOW,
             OP_WRITE_SETTINGS,
@@ -2285,9 +2289,16 @@ public class AppOpsManager {
             OP_SMS_FINANCIAL_TRANSACTIONS,
             OP_MANAGE_IPSEC_TUNNELS,
             OP_INSTANT_APP_START_FOREGROUND,
+            OP_LOADER_USAGE_STATS
+    };
+
+    /**
+     * Ops for app op permissions that are setting the per-UID mode for certain reasons. This should
+     * be preferred over the per-package mode for new app op permissions.
+     */
+    private static final int[] APP_OP_PERMISSION_UID_OPS = {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
-            OP_LOADER_USAGE_STATS,
             OP_MANAGE_ONGOING_CALLS,
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
@@ -2777,7 +2788,17 @@ public class AppOpsManager {
                 sOpStrToOp.put(sAppOpInfos[i].name, i);
             }
         }
-        for (int op : RUNTIME_AND_APPOP_PERMISSIONS_OPS) {
+        for (int op : RUNTIME_PERMISSION_OPS) {
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
+            }
+        }
+        for (int op : APP_OP_PERMISSION_PACKAGE_OPS) {
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
+            }
+        }
+        for (int op : APP_OP_PERMISSION_UID_OPS) {
             if (sAppOpInfos[op].permission != null) {
                 sPermToOp.put(sAppOpInfos[op].permission, op);
             }
@@ -2944,6 +2965,22 @@ public class AppOpsManager {
      */
     public static boolean opAllowsReset(int op) {
         return !sAppOpInfos[op].disableReset;
+    }
+
+    /**
+     * Retrieve whether the op is a per-package op for an app op permission.
+     * @hide
+     */
+    public static boolean opIsPackageAppOpPermission(int op) {
+        return ArrayUtils.contains(APP_OP_PERMISSION_PACKAGE_OPS, op);
+    }
+
+    /**
+     * Retrieve whether the op is a per-package op for an app op permission.
+     * @hide
+     */
+    public static boolean opIsUidAppOpPermission(int op) {
+        return ArrayUtils.contains(APP_OP_PERMISSION_UID_OPS, op);
     }
 
     /**
