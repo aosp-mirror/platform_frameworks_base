@@ -9,7 +9,7 @@
   <color name="volume_color">#7ae3d4</color>
   <color name="notifications_color">#f496ac</color>
   <color name="screenshot_color">#adcbff</color>
-  <color name="assistant_color">#F1F3F4</color>
+  <color name="assistant_color">#adcbff</color>
   <color name="brightness_color">#fdd663</color>
 
   <color name="ripple_material_color">#10FFFFFF</color>

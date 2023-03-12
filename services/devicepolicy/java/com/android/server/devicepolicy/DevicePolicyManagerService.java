@@ -2237,6 +2237,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             isOrgOwned = mOwners.isProfileOwnerOfOrganizationOwnedDevice(userHandle);
 
+            // Clear any restrictions set by the a profile owner and the parent admin.
+            final ActiveAdmin admin = getProfileOwnerLocked(userHandle);
+            if (admin != null) {
+                admin.userRestrictions = null;
+                final ActiveAdmin parentAdmin = admin.getParentActiveAdmin();
+                if (parentAdmin != null) {
+                    parentAdmin.userRestrictions = null;
+                }
+                pushUserRestrictions(userHandle);
+            }
             mOwners.removeProfileOwner(userHandle);
             mOwners.writeProfileOwner(userHandle);
             pushScreenCapturePolicy(userHandle);

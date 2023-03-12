@@ -601,6 +601,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @VisibleForTesting
     final DeviceStateController mDeviceStateController;
+    final Consumer<DeviceStateController.DeviceState> mDeviceStateConsumer;
     private final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
     final RemoteDisplayChangeController mRemoteDisplayChangeController;
 
@@ -1166,12 +1167,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayRotation = new DisplayRotation(mWmService, this, mDisplayInfo.address,
                 mDeviceStateController, root.getDisplayRotationCoordinator());
 
-        final Consumer<DeviceStateController.DeviceState> deviceStateConsumer =
+        mDeviceStateConsumer =
                 (@NonNull DeviceStateController.DeviceState newFoldState) -> {
                     mDisplaySwitchTransitionLauncher.foldStateChanged(newFoldState);
                     mDisplayRotation.foldStateChanged(newFoldState);
                 };
-        mDeviceStateController.registerDeviceStateCallback(deviceStateConsumer);
+        mDeviceStateController.registerDeviceStateCallback(mDeviceStateConsumer);
 
         mCloseToSquareMaxAspectRatio = mWmService.mContext.getResources().getFloat(
                 R.dimen.config_closeToSquareDisplayMaxAspectRatio);
@@ -3283,6 +3284,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             handleAnimatingStoppedAndTransition();
             mWmService.stopFreezingDisplayLocked();
             mDisplayRotation.removeDefaultDisplayRotationChangedCallback();
+            mDeviceStateController.unregisterDeviceStateCallback(mDeviceStateConsumer);
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
