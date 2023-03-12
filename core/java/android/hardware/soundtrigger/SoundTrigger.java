@@ -1529,6 +1529,45 @@ public class SoundTrigger {
                     + Arrays.toString(keyphrases) + ", data=" + Arrays.toString(data)
                     + ", audioCapabilities=" + Integer.toHexString(audioCapabilities) + "]";
         }
+
+        @Override
+        public final boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (!(obj instanceof RecognitionConfig))
+                return false;
+            RecognitionConfig other = (RecognitionConfig) obj;
+            if (captureRequested != other.captureRequested) {
+                return false;
+            }
+            if (allowMultipleTriggers != other.allowMultipleTriggers) {
+                return false;
+            }
+            if (!Arrays.equals(keyphrases, other.keyphrases)) {
+                return false;
+            }
+            if (!Arrays.equals(data, other.data)) {
+                return false;
+            }
+            if (audioCapabilities != other.audioCapabilities) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public final int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (captureRequested ? 1 : 0);
+            result = prime * result + (allowMultipleTriggers ? 1 : 0);
+            result = prime * result + Arrays.hashCode(keyphrases);
+            result = prime * result + Arrays.hashCode(data);
+            result = prime * result + audioCapabilities;
+            return result;
+        }
     }
 
     /**
