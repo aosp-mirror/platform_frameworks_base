@@ -235,6 +235,18 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMajorVersion(), 2);
         assertEquals(mDisplayDeviceConfig.getHostUsiVersion().getMinorVersion(), 0);
 
+        // Max desired Hdr/SDR ratio upper-bounds the HDR brightness.
+        assertEquals(1.0f,
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, Float.POSITIVE_INFINITY),
+                ZERO_DELTA);
+        assertEquals(0.62f,
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, 1.0f),
+                ZERO_DELTA);
+        assertEquals(0.77787f,
+                mDisplayDeviceConfig.getHdrBrightnessFromSdr(0.62f, 1.25f),
+                SMALL_DELTA);
+
+
         // Todo: Add asserts for BrightnessThrottlingData, DensityMapping,
         // HighBrightnessModeData AmbientLightSensor, RefreshRateLimitations and ProximitySensor.
     }
@@ -417,6 +429,16 @@ public final class DisplayDeviceConfigTest {
                 +       "</refreshRate>\n"
                 +       "<thermalStatusLimit>light</thermalStatusLimit>\n"
                 +       "<allowInLowPowerMode>false</allowInLowPowerMode>\n"
+                +       "<sdrHdrRatioMap>\n"
+                +            "<point>\n"
+                +                "<sdrNits>2.000</sdrNits>\n"
+                +                "<hdrRatio>4.000</hdrRatio>\n"
+                +            "</point>\n"
+                +            "<point>\n"
+                +                "<sdrNits>500.0</sdrNits>\n"
+                +                "<hdrRatio>1.6</hdrRatio>\n"
+                +            "</point>\n"
+                +       "</sdrHdrRatioMap>\n"
                 +   "</highBrightnessMode>\n"
                 +   "<screenOffBrightnessSensor>\n"
                 +       "<type>sensor_12345</type>\n"
