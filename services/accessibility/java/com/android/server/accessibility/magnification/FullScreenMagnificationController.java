@@ -63,6 +63,7 @@ import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.wm.WindowManagerInternal;
 
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.function.Supplier;
 
@@ -90,7 +91,9 @@ public class FullScreenMagnificationController implements
 
     private final ScreenStateObserver mScreenStateObserver;
 
-    private final MagnificationInfoChangedCallback mMagnificationInfoChangedCallback;
+    @GuardedBy("mLock")
+    private final ArrayList<MagnificationInfoChangedCallback>
+            mMagnificationInfoChangedCallbacks = new ArrayList<>();
 
     private final MagnificationScaleProvider mScaleProvider;
 
@@ -393,8 +396,10 @@ public class FullScreenMagnificationController implements
                     .setScale(scale)
                     .setCenterX(centerX)
                     .setCenterY(centerY).build();
-            mMagnificationInfoChangedCallback.onFullScreenMagnificationChanged(mDisplayId,
-                    mMagnificationRegion, config);
+            mMagnificationInfoChangedCallbacks.forEach(callback -> {
+                callback.onFullScreenMagnificationChanged(mDisplayId,
+                        mMagnificationRegion, config);
+            });
             if (mUnregisterPending && !isActivated()) {
                 unregister(mDeleteAfterUnregister);
             }
@@ -502,8 +507,10 @@ public class FullScreenMagnificationController implements
 
             if (changed) {
                 mMagnificationActivated = activated;
-                mMagnificationInfoChangedCallback.onFullScreenMagnificationActivationState(
-                        mDisplayId, mMagnificationActivated);
+                mMagnificationInfoChangedCallbacks.forEach(callback -> {
+                    callback.onFullScreenMagnificationActivationState(
+                            mDisplayId, mMagnificationActivated);
+                });
                 mControllerCtx.getWindowManager().setForceShowMagnifiableBounds(
                         mDisplayId, activated);
             }
@@ -580,8 +587,10 @@ public class FullScreenMagnificationController implements
             sendSpecToAnimation(mCurrentMagnificationSpec, animationCallback);
             if (isActivated() && (id != INVALID_SERVICE_ID)) {
                 mIdOfLastServiceToMagnify = id;
-                mMagnificationInfoChangedCallback.onRequestMagnificationSpec(mDisplayId,
-                        mIdOfLastServiceToMagnify);
+                mMagnificationInfoChangedCallbacks.forEach(callback -> {
+                    callback.onRequestMagnificationSpec(mDisplayId,
+                            mIdOfLastServiceToMagnify);
+                });
             }
             return changed;
         }
@@ -787,7 +796,7 @@ public class FullScreenMagnificationController implements
         mLock = lock;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
         mScreenStateObserver = new ScreenStateObserver(mControllerCtx.getContext(), this);
-        mMagnificationInfoChangedCallback = magnificationInfoChangedCallback;
+        addInfoChangedCallback(magnificationInfoChangedCallback);
         mScaleProvider = scaleProvider;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mThumbnailSupplier = thumbnailSupplier;
@@ -1349,7 +1358,11 @@ public class FullScreenMagnificationController implements
      *                           hidden.
      */
     void notifyImeWindowVisibilityChanged(int displayId, boolean shown) {
-        mMagnificationInfoChangedCallback.onImeWindowVisibilityChanged(displayId, shown);
+        synchronized (mLock) {
+            mMagnificationInfoChangedCallbacks.forEach(callback -> {
+                callback.onImeWindowVisibilityChanged(displayId, shown);
+            });
+        }
     }
 
     private void onScreenTurnedOff() {
@@ -1408,6 +1421,18 @@ public class FullScreenMagnificationController implements
         }
         if (!hasRegister) {
             mScreenStateObserver.unregister();
+        }
+    }
+
+    void addInfoChangedCallback(@NonNull MagnificationInfoChangedCallback callback) {
+        synchronized (mLock) {
+            mMagnificationInfoChangedCallbacks.add(callback);
+        }
+    }
+
+    void removeInfoChangedCallback(@NonNull MagnificationInfoChangedCallback callback) {
+        synchronized (mLock) {
+            mMagnificationInfoChangedCallbacks.remove(callback);
         }
     }
 
@@ -1709,7 +1734,7 @@ public class FullScreenMagnificationController implements
         return animate ? STUB_ANIMATION_CALLBACK : null;
     }
 
-    interface  MagnificationInfoChangedCallback {
+    interface MagnificationInfoChangedCallback {
 
         /**
          * Called when the {@link MagnificationSpec} is changed with non-default
@@ -1722,7 +1747,6 @@ public class FullScreenMagnificationController implements
 
         /**
          * Called when the state of the magnification activation is changed.
-         * It is for the logging data of the magnification activation state.
          *
          * @param displayId the logical display id
          * @param activated {@code true} if the magnification is activated, otherwise {@code false}.
