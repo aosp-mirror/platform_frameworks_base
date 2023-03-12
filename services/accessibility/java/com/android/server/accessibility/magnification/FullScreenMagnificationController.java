@@ -901,6 +901,10 @@ public class FullScreenMagnificationController implements
      */
     void onUserContextChanged(int displayId) {
         synchronized (mLock) {
+            if (!isActivated(displayId)) {
+                return;
+            }
+
             if (isAlwaysOnMagnificationEnabled()) {
                 setScaleAndCenter(displayId, 1.0f, Float.NaN, Float.NaN,
                         true,
