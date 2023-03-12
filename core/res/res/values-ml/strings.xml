@@ -1393,7 +1393,10 @@
     <string name="select_input_method" msgid="3971267998568587025">"ഇൻപുട്ട് രീതി തിരഞ്ഞെടുക്കുക"</string>
     <string name="show_ime" msgid="6406112007347443383">"ഫിസിക്കൽ കീബോർഡ് സജീവമായിരിക്കുമ്പോൾ സ്ക്രീനിൽ നിലനിർത്തുക"</string>
     <string name="hardware" msgid="1800597768237606953">"വെർച്വൽ കീബോർഡ് കാണിക്കുക"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ഫിസിക്കൽ കീബോർഡ് കോൺഫിഗർ ചെയ്യുക"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
+    <skip />
+    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
+    <skip />
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ഭാഷയും ലേഔട്ടും തിരഞ്ഞെടുക്കുന്നതിന് ടാപ്പ് ചെയ്യുക"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1718,7 +1721,8 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ശ്രവണ ഉപകരണങ്ങൾ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ അമർത്തിപ്പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഉപയോഗിക്കാൻ, രണ്ട് വോളിയം കീകളും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക"</string>
+    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
+    <skip />
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"നിങ്ങൾ ഉപയോഗസഹായി ബട്ടൺ ടാപ്പ് ചെയ്യുമ്പോൾ ഉപയോഗിക്കുന്നതിന് ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ഉപയോഗസഹായി വിരൽചലനത്തോടൊപ്പം ഉപയോഗിക്കാൻ ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക (രണ്ട് വിരലുകളുപയോഗിച്ച് സ്‌ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ഉപയോഗസഹായി വിരൽചലനത്തോടൊപ്പം ഉപയോഗിക്കാൻ ഒരു ഫീച്ചർ തിരഞ്ഞെടുക്കുക (മൂന്ന് വിരലുകളുപയോഗിച്ച് സ്‌ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലോട്ട് സ്വൈപ്പ് ചെയ്യുക):"</string>
@@ -2323,4 +2327,18 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ഉപകരണത്തിന് ചൂട് കൂടുതലാണ്"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"നിങ്ങളുടെ ഫോൺ വളരെയധികം ചൂടാകുന്നതിനാൽ ഡ്യുവൽ സ്‌ക്രീൻ ലഭ്യമല്ല"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ഓഫാക്കുക"</string>
+    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
+    <skip />
 </resources>

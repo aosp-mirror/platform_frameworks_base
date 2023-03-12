@@ -10,7 +10,7 @@
   <!-- String defining the label for the assistant button -->
   <string name="assistant_label">Assistant</string>
   <!-- String defining utterance for the assistant button for screen readers -->
-  <string name="assistant_utterance">Google Assistant</string>
+  <string name="assistant_utterance">Assistant</string>
   <!-- String defining the label for the accessibility settings button -->
   <string name="a11y_settings_label">Accessibility Settings</string>
   <!-- String defining the label for the volume button -->

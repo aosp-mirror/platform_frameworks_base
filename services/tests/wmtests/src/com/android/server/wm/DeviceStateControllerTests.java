@@ -21,6 +21,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 import android.content.Context;
@@ -55,6 +56,7 @@ public class DeviceStateControllerTests {
     private DeviceStateManager mMockDeviceStateManager;
     private DeviceStateController.DeviceState mCurrentState =
             DeviceStateController.DeviceState.UNKNOWN;
+    private Consumer<DeviceStateController.DeviceState> mDelegate;
 
     @Before
     public void setUp() {
@@ -64,10 +66,10 @@ public class DeviceStateControllerTests {
 
     private void initialize(boolean supportFold, boolean supportHalfFold) {
         mBuilder.setSupportFold(supportFold, supportHalfFold);
-        Consumer<DeviceStateController.DeviceState> delegate = (newFoldState) -> {
+        mDelegate = (newFoldState) -> {
             mCurrentState = newFoldState;
         };
-        mBuilder.setDelegate(delegate);
+        mBuilder.setDelegate(mDelegate);
         mBuilder.build();
         verify(mMockDeviceStateManager).registerCallback(any(), any());
     }
@@ -109,6 +111,24 @@ public class DeviceStateControllerTests {
         assertEquals(DeviceStateController.DeviceState.HALF_FOLDED, mCurrentState);
         mTarget.onStateChanged(mConcurrentDisplayState);
         assertEquals(DeviceStateController.DeviceState.CONCURRENT, mCurrentState);
+    }
+
+    @Test
+    public void testUnregisterDeviceStateCallback() {
+        initialize(true /* supportFold */, true /* supportHalfFolded */);
+        assertEquals(1, mTarget.mDeviceStateCallbacks.size());
+        assertEquals(mDelegate, mTarget.mDeviceStateCallbacks.get(0));
+
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.OPEN, mCurrentState);
+        mTarget.onStateChanged(mFoldedStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED, mCurrentState);
+
+        // The callback should not receive state change when the it is unregistered.
+        mTarget.unregisterDeviceStateCallback(mDelegate);
+        assertTrue(mTarget.mDeviceStateCallbacks.isEmpty());
+        mTarget.onStateChanged(mOpenDeviceStates[0]);
+        assertEquals(DeviceStateController.DeviceState.FOLDED /* unchanged */, mCurrentState);
     }
 
     private final int[] mFoldedStates = {0};

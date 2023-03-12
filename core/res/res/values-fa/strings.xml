@@ -634,7 +634,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"حرکت انگشت خیلی آهسته بود. لطفاً دوباره امتحان کنید."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"اثر انگشت دیگری را امتحان کنید"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"خیلی روشن است"</string>
-    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"فشردن دکمه روشن/ خاموش شناسایی شد"</string>
+    <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"فشردن دکمه روشن/خاموش شناسایی شد"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"اثر انگشت را تنظیم کنید"</string>
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"هربار موقعیت انگشتتان را کمی تغییر دهید"</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -656,7 +656,7 @@
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"این دستگاه حسگر اثر انگشت ندارد."</string>
     <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"حسگر به‌طور موقت غیرفعال است."</string>
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"امکان استفاده از حسگر اثر انگشت وجود ندارد. به ارائه‌دهنده خدمات تعمیر مراجعه کنید"</string>
-    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"دکمه روشن/ خاموش فشار داده شد"</string>
+    <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"دکمه روشن/خاموش فشار داده شد"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"انگشت <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"استفاده از اثر انگشت"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"استفاده از اثر انگشت یا قفل صفحه"</string>
@@ -1254,11 +1254,11 @@
     <string name="android_preparing_apk" msgid="589736917792300956">"آماده‌سازی <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
-    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
     <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"برای اتمام راه‌اندازی، صفحه را خاموش کنید"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"خاموش کردن"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
@@ -1393,7 +1393,10 @@
     <string name="select_input_method" msgid="3971267998568587025">"انتخاب روش ورودی"</string>
     <string name="show_ime" msgid="6406112007347443383">"وقتی صفحه‌کلید فیزیکی فعال است این ویرایشگر را روی صفحه نگه‌می‌دارد"</string>
     <string name="hardware" msgid="1800597768237606953">"نمایش صفحه‌کلید مجازی"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"پیکربندی صفحه‌کلید فیزیکی"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
+    <skip />
+    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
+    <skip />
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"برای انتخاب زبان و چیدمان ضربه بزنید"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1718,7 +1721,8 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"دستگاه‌های کمک‌شنوایی"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> روشن شد."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"کلیدهای میزان صدا پایین نگه داشته شد. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> خاموش شد."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"برای استفاده از <xliff:g id="SERVICE_NAME">%1$s</xliff:g>، هر دو کلید صدا را فشار دهید و سه ثانیه نگه دارید"</string>
+    <!-- no translation found for accessibility_shortcut_spoken_feedback (3760999147597564314) -->
+    <skip />
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ویژگی را انتخاب کنید که هنگام ضربه زدن روی دکمه دسترس‌پذیری استفاده می‌شود:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ویژگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با دو انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ویزگی را برای استفاده با اشاره دسترس‌پذیری انتخاب کنید (با سه انگشت صفحه را از پایین تند به‌بالا بکشید):"</string>
@@ -2323,4 +2327,18 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"دستگاه بیش‌ازحد گرم شده است"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"«صفحه دوتایی» دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
+    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
+    <skip />
 </resources>

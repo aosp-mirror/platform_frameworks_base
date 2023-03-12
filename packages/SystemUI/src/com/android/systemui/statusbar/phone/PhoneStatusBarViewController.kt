@@ -24,11 +24,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeLogger
 import com.android.systemui.shared.animation.UnfoldMoveFromCenterAnimator
-import com.android.systemui.statusbar.phone.PhoneStatusBarView.TouchEventHandler
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.UNFOLD_STATUS_BAR
@@ -131,7 +131,7 @@ class PhoneStatusBarViewController private constructor(
     }
 
     /** Called when a touch event occurred on {@link PhoneStatusBarView}. */
-    fun onTouchEvent(event: MotionEvent) {
+    fun onTouch(event: MotionEvent) {
         if (centralSurfaces.statusBarWindowState == WINDOW_STATE_SHOWING) {
             val upOrCancel =
                     event.action == MotionEvent.ACTION_UP ||
@@ -141,13 +141,14 @@ class PhoneStatusBarViewController private constructor(
         }
     }
 
-    inner class PhoneStatusBarViewTouchHandler : TouchEventHandler {
-        override fun onInterceptTouchEvent(event: MotionEvent) {
-            onTouchEvent(event)
+    inner class PhoneStatusBarViewTouchHandler : Gefingerpoken {
+        override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
+            onTouch(event)
+            return false
         }
 
-        override fun handleTouchEvent(event: MotionEvent): Boolean {
-            onTouchEvent(event)
+        override fun onTouchEvent(event: MotionEvent): Boolean {
+            onTouch(event)
 
             // If panels aren't enabled, ignore the gesture and don't pass it down to the
             // panel view.
@@ -174,7 +175,7 @@ class PhoneStatusBarViewController private constructor(
                     return true
                 }
             }
-            return centralSurfaces.notificationPanelViewController.sendTouchEventToView(event)
+            return centralSurfaces.notificationPanelViewController.handleExternalTouch(event)
         }
     }
 

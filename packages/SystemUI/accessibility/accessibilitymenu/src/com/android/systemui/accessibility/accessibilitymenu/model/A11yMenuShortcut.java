@@ -54,7 +54,7 @@ public class A11yMenuShortcut {
     /** Map stores all shortcut resource IDs that is in matching order of defined shortcut. */
     private static final Map<ShortcutId, int[]> sShortcutResource = new HashMap<>() {{
             put(ShortcutId.ID_ASSISTANT_VALUE, new int[] {
-                    R.drawable.ic_logo_assistant_32dp,
+                    R.drawable.ic_logo_a11y_assistant_24dp,
                     R.color.assistant_color,
                     R.string.assistant_utterance,
                     R.string.assistant_label,
