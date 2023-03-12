@@ -281,7 +281,7 @@ public class UiccSlotInfo implements Parcelable {
                 + ", mIsEuicc="
                 + mIsEuicc
                 + ", mCardId="
-                + SubscriptionInfo.givePrintableIccid(mCardId)
+                + SubscriptionInfo.getPrintableId(mCardId)
                 + ", cardState="
                 + mCardStateInfo
                 + ", mIsExtendedApduSupported="
