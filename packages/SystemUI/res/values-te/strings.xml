@@ -829,7 +829,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను చెక్ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"యాప్‌ను తెరువు"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"యాప్‌‌ను తెరవండి"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"స్టేటస్ లోడ్ చేయడం సాధ్యపడలేదు"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"కంట్రోల్స్‌ను జోడించండి"</string>
