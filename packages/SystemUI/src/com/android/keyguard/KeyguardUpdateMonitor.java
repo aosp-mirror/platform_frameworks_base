@@ -3408,8 +3408,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     private void handleBatteryUpdate(BatteryStatus status) {
         Assert.isMainThread();
-        mLogger.d("handleBatteryUpdate");
         final boolean batteryUpdateInteresting = isBatteryUpdateInteresting(mBatteryStatus, status);
+        mLogger.logHandleBatteryUpdate(batteryUpdateInteresting);
         mBatteryStatus = status;
         if (batteryUpdateInteresting) {
             for (int i = 0; i < mCallbacks.size(); i++) {

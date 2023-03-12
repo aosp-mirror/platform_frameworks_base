@@ -30,8 +30,8 @@
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzen"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bizkor kargatzen"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Mantso kargatzen"</string>
-    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargatzea optimizatu da bateria ez kaltetzeko"</string>
-    <string name="keyguard_plugged_in_incompatible_charger" msgid="5712938022567388098">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Kargagailua ez da bateragarria"</string>
+    <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Bateria ez kaltetzeko, kargatzeko modua optimizatu da"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Arazo bat dago kargatzeko osagarriarekin"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"Desblokeatzeko, sakatu Menua."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"Sarea blokeatuta dago"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"Ez dago SIMik"</string>

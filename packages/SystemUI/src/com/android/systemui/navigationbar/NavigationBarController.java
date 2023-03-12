@@ -90,6 +90,7 @@ public class NavigationBarController implements
     private final DisplayTracker mDisplayTracker;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
+    private final NavBarHelper mNavBarHelper;
     private int mNavMode;
     @VisibleForTesting boolean mIsLargeScreen;
 
@@ -133,6 +134,7 @@ public class NavigationBarController implements
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
+        mNavBarHelper = navBarHelper;
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
@@ -241,10 +243,15 @@ public class NavigationBarController implements
 
         if (taskbarEnabled) {
             Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
+            final int displayId = mContext.getDisplayId();
+            // Hint to NavBarHelper if we are replacing an existing bar to skip extra work
+            mNavBarHelper.setTogglingNavbarTaskbar(mNavigationBars.contains(displayId));
             // Remove navigation bar when taskbar is showing
-            removeNavigationBar(mContext.getDisplayId());
-            mTaskbarDelegate.init(mContext.getDisplayId());
+            removeNavigationBar(displayId);
+            mTaskbarDelegate.init(displayId);
+            mNavBarHelper.setTogglingNavbarTaskbar(false);
             Trace.endSection();
+
         } else {
             mTaskbarDelegate.destroy();
         }

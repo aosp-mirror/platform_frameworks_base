@@ -600,7 +600,7 @@
     <string name="permdesc_postNotification" msgid="5974977162462877075">"Permite à app mostrar notificações"</string>
     <string name="permlab_turnScreenOn" msgid="219344053664171492">"ativar o ecrã"</string>
     <string name="permdesc_turnScreenOn" msgid="4394606875897601559">"Permite que a app ative o ecrã."</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"Utilizar hardware biométrico"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"Usar hardware biométrico"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permite que a app utilize hardware biométrico para autenticação."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gerir o hardware de impressão digital"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permite que a app invoque métodos para adicionar e eliminar modelos de impressão digital para utilização."</string>
@@ -614,8 +614,8 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Permite que a app modifique a sua coleção de fotos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"ler as localizações a partir da sua coleção de multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Permite que a app leia as localizações a partir da sua coleção de multimédia."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Utilizar a biometria"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Utilizar a biometria ou o bloqueio de ecrã"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Usar a biometria"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Usar a biometria ou o bloqueio de ecrã"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirme a sua identidade"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Utilize a biometria para continuar."</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Utilize a biometria ou o bloqueio de ecrã para continuar"</string>
@@ -625,7 +625,7 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autenticação cancelada"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenhum PIN, padrão ou palavra-passe definidos."</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro ao autenticar."</string>
-    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Utilizar o bloqueio de ecrã"</string>
+    <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Usar o bloqueio de ecrã"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Introduza o bloqueio de ecrã para continuar"</string>
     <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Prima firmemente o sensor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Não é possível reconhecer a impressão digital. Tente novamente."</string>
@@ -659,8 +659,8 @@
     <string name="fingerprint_error_bad_calibration" msgid="4385512597740168120">"Não é possível usar o sensor de impressões digitais. Visite um fornecedor de serviços de reparação"</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Botão ligar/desligar premido"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"Dedo <xliff:g id="FINGERID">%d</xliff:g>"</string>
-    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Utilizar a impressão digital"</string>
-    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Utilizar o bloqueio de ecrã ou a impressão digital"</string>
+    <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usar a impressão digital"</string>
+    <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usar o bloqueio de ecrã ou a impressão digital"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utilize a sua impressão digital para continuar."</string>
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Utilize a impressão digital ou o bloqueio de ecrã para continuar"</string>
   <string-array name="fingerprint_error_vendor">
@@ -720,8 +720,8 @@
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"O Desbloqueio facial não é suportado neste dispositivo"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"Sensor temporariamente desativado."</string>
     <string name="face_name_template" msgid="3877037340223318119">"Rosto <xliff:g id="FACEID">%d</xliff:g>"</string>
-    <string name="face_app_setting_name" msgid="5854024256907828015">"Utilizar o Desbloqueio facial"</string>
-    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Utilizar o bloqueio através do rosto ou de ecrã"</string>
+    <string name="face_app_setting_name" msgid="5854024256907828015">"Usar o Desbloqueio facial"</string>
+    <string name="face_or_screen_lock_app_setting_name" msgid="1603149075605709106">"Usar o bloqueio através do rosto ou de ecrã"</string>
     <string name="face_dialog_default_subtitle" msgid="6620492813371195429">"Utilize o rosto para continuar"</string>
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Utilize o rosto ou o bloqueio de ecrã para continuar"</string>
   <string-array name="face_error_vendor">
@@ -1200,13 +1200,13 @@
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"Enviar com %1$s"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"Enviar"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"Selecione uma app Página inicial"</string>
-    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"Utilizar %1$s como Página inicial"</string>
+    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"Usar %1$s como Página inicial"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"Capturar imagem"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"Capturar imagem com"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Capturar imagem com o %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Capturar imagem"</string>
-    <string name="alwaysUse" msgid="3153558199076112903">"Utilizar por predefinição para esta ação."</string>
-    <string name="use_a_different_app" msgid="4987790276170972776">"Utilizar outra app"</string>
+    <string name="alwaysUse" msgid="3153558199076112903">"Usar por predefinição para esta ação."</string>
+    <string name="use_a_different_app" msgid="4987790276170972776">"Usar outra app"</string>
     <string name="clearDefaultHintMsg" msgid="1325866337702524936">"Limpar a predefinição nas Definições do Sistema &gt; Apps &gt; Transferidas."</string>
     <string name="chooseActivity" msgid="8563390197659779956">"Escolha uma ação"</string>
     <string name="chooseUsbActivity" msgid="2096269989990986612">"Escolher uma app para o dispositivo USB"</string>
@@ -1394,7 +1394,10 @@
     <string name="select_input_method" msgid="3971267998568587025">"Escolher o método de entrada"</string>
     <string name="show_ime" msgid="6406112007347443383">"Manter no ecrã enquanto o teclado físico estiver ativo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar o teclado virtual"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configurar teclado físico"</string>
+    <!-- no translation found for select_keyboard_layout_notification_title (5823199895322205589) -->
+    <skip />
+    <!-- no translation found for select_multiple_keyboards_layout_notification_title (6999491025126641938) -->
+    <skip />
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toque para selecionar o idioma e o esquema"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1711,7 +1714,7 @@
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desativar atalho"</string>
-    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atalho"</string>
+    <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar atalho"</string>
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Correção da cor"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modo para uma mão"</string>
@@ -1719,7 +1722,7 @@
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dispositivos auditivos"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"prima sem soltar as teclas de volume durante três segundos para usar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Solte as teclas de volume. Para ativar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, prima sem soltar ambas as teclas de volume novamente durante 3 segundos."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolha uma funcionalidade para utilizar quando tocar no botão Acessibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolha a funcionalidade a utilizar com o gesto de acessibilidade (deslize rapidamente com dois dedos para cima a partir da parte inferior do ecrã):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Escolha a funcionalidade a utilizar com o gesto de acessibilidade (deslize rapidamente com três dedos para cima a partir da parte inferior do ecrã):"</string>
@@ -2167,8 +2170,8 @@
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Sem apps pessoais"</string>
     <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Abrir a app <xliff:g id="APP">%s</xliff:g> no seu perfil pessoal?"</string>
     <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Abrir a app <xliff:g id="APP">%s</xliff:g> no seu perfil de trabalho?"</string>
-    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilizar navegador pessoal"</string>
-    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilizar navegador de trabalho"</string>
+    <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador pessoal"</string>
+    <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio de rede do cartão SIM"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY" msgid="7164399703751688214">"PIN para desbloqueio do subconjunto da rede do cartão SIM"</string>
     <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY" msgid="4447629474818217364">"PIN para desbloqueio empresarial do cartão SIM"</string>
@@ -2324,4 +2327,18 @@
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"O dispositivo está a ficar demasiado quente"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"A funcionalidade Dois ecrãs está indisponível porque o seu telemóvel está a ficar demasiado quente"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desativar"</string>
+    <!-- no translation found for keyboard_layout_notification_selected_title (1202560174252421219) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_one_selected_message (4314216053129257197) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_two_selected_message (1876349944065922950) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_three_selected_message (280734264593115419) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_more_than_three_selected_message (1581834181578206937) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_title (5242444914367024499) -->
+    <skip />
+    <!-- no translation found for keyboard_layout_notification_multiple_selected_message (6576533454124419202) -->
+    <skip />
 </resources>
