@@ -406,6 +406,8 @@ class ActivityStarter {
         PendingIntentRecord originatingPendingIntent;
         BackgroundStartPrivileges backgroundStartPrivileges;
 
+        final StringBuilder logMessage = new StringBuilder();
+
         /**
          * The error callback token passed in {@link android.window.WindowContainerTransaction}
          * for TaskFragment operation error handling via
@@ -734,7 +736,14 @@ class ActivityStarter {
                 if (res != START_SUCCESS) {
                     return res;
                 }
-                res = executeRequest(mRequest);
+
+                try {
+                    res = executeRequest(mRequest);
+                } finally {
+                    mRequest.logMessage.append(" result code=").append(res);
+                    Slog.i(TAG, mRequest.logMessage.toString());
+                    mRequest.logMessage.setLength(0);
+                }
 
                 Binder.restoreCallingIdentity(origId);
 
@@ -933,8 +942,14 @@ class ActivityStarter {
                 ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
         final int launchMode = aInfo != null ? aInfo.launchMode : 0;
         if (err == ActivityManager.START_SUCCESS) {
-            Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
-                    + "} with " + launchModeToString(launchMode) + " from uid " + callingUid);
+            request.logMessage.append("START u").append(userId).append(" {")
+                    .append(intent.toShortString(true, true, true, false))
+                    .append("} with ").append(launchModeToString(launchMode))
+                    .append(" from uid ").append(callingUid);
+            if (callingUid != realCallingUid
+                    && realCallingUid != Request.DEFAULT_REAL_CALLING_UID) {
+                request.logMessage.append(" (realCallingUid=").append(realCallingUid).append(")");
+            }
         }
 
         ActivityRecord sourceRecord = null;
@@ -1103,6 +1118,11 @@ class ActivityStarter {
                                 request.backgroundStartPrivileges,
                                 intent,
                                 checkedOptions);
+                if (balCode != BAL_ALLOW_DEFAULT) {
+                    request.logMessage.append(" (").append(
+                                    BackgroundActivityStartController.balCodeToString(balCode))
+                            .append(")");
+                }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             }

@@ -389,9 +389,6 @@ public class HandwritingInitiator {
      */
     @Nullable
     private View findBestCandidateView(float x, float y) {
-        float minDistance = Float.MAX_VALUE;
-        View bestCandidate = null;
-
         // If the connectedView is not null and do not set any handwriting area, it will check
         // whether the connectedView's boundary contains the initial stylus position. If true,
         // directly return the connectedView.
@@ -400,14 +397,12 @@ public class HandwritingInitiator {
             Rect handwritingArea = getViewHandwritingArea(connectedView);
             if (isInHandwritingArea(handwritingArea, x, y, connectedView)
                     && shouldTriggerStylusHandwritingForView(connectedView)) {
-                final float distance = distance(handwritingArea, x, y);
-                if (distance == 0f) return connectedView;
-
-                bestCandidate = connectedView;
-                minDistance = distance;
+                return connectedView;
             }
         }
 
+        float minDistance = Float.MAX_VALUE;
+        View bestCandidate = null;
         // Check the registered handwriting areas.
         final List<HandwritableViewInfo> handwritableViewInfos =
                 mHandwritingAreasTracker.computeViewInfos();

@@ -889,11 +889,12 @@ public class DisplayDeviceConfig {
     }
 
     /**
-     * Calculate the HDR brightness for the specified SDR brightenss.
+     * Calculate the HDR brightness for the specified SDR brightenss, restricted by the
+     * maxDesiredHdrSdrRatio (the ratio between the HDR luminance and SDR luminance)
      *
      * @return the HDR brightness or BRIGHTNESS_INVALID when no mapping exists.
      */
-    public float getHdrBrightnessFromSdr(float brightness) {
+    public float getHdrBrightnessFromSdr(float brightness, float maxDesiredHdrSdrRatio) {
         if (mSdrToHdrRatioSpline == null) {
             return PowerManager.BRIGHTNESS_INVALID;
         }
@@ -904,7 +905,7 @@ public class DisplayDeviceConfig {
             return PowerManager.BRIGHTNESS_INVALID;
         }
 
-        float ratio = mSdrToHdrRatioSpline.interpolate(nits);
+        float ratio = Math.min(mSdrToHdrRatioSpline.interpolate(nits), maxDesiredHdrSdrRatio);
         float hdrNits = nits * ratio;
         if (mNitsToBacklightSpline == null) {
             return PowerManager.BRIGHTNESS_INVALID;

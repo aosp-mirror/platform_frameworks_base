@@ -33,6 +33,9 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.endsWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -54,6 +57,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,6 +75,7 @@ public class AccessibilityShortcutChooserActivityTest {
     private static final String ONE_HANDED_MODE = "One-Handed mode";
     private static final String TEST_LABEL = "TEST_LABEL";
     private static final ComponentName TEST_COMPONENT_NAME = new ComponentName("package", "class");
+    private TestAccessibilityShortcutChooserActivity mActivity;
 
     @Rule
     public final MockitoRule mMockitoRule = MockitoJUnit.rule();
@@ -85,10 +90,22 @@ public class AccessibilityShortcutChooserActivityTest {
     @Mock
     private IAccessibilityManager mAccessibilityManagerService;
 
+    @Before
+    public void setUp() throws Exception {
+        when(mAccessibilityServiceInfo.getResolveInfo()).thenReturn(mResolveInfo);
+        mResolveInfo.serviceInfo = mServiceInfo;
+        mServiceInfo.applicationInfo = mApplicationInfo;
+        when(mResolveInfo.loadLabel(any(PackageManager.class))).thenReturn(TEST_LABEL);
+        when(mAccessibilityServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
+        when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(
+                anyInt())).thenReturn(Collections.singletonList(mAccessibilityServiceInfo));
+        when(mAccessibilityManagerService.isAccessibilityTargetAllowed(
+                anyString(), anyInt(), anyInt())).thenReturn(true);
+        TestAccessibilityShortcutChooserActivity.setupForTesting(mAccessibilityManagerService);
+    }
+
     @Test
-    public void doubleClickTestServiceAndClickDenyButton_permissionDialogDoesNotExist()
-            throws Exception {
-        configureTestService();
+    public void doubleClickTestServiceAndClickDenyButton_permissionDialogDoesNotExist() {
         final ActivityScenario<TestAccessibilityShortcutChooserActivity> scenario =
                 ActivityScenario.launch(TestAccessibilityShortcutChooserActivity.class);
         scenario.moveToState(Lifecycle.State.CREATED);
@@ -101,9 +118,33 @@ public class AccessibilityShortcutChooserActivityTest {
         onView(withText(TEST_LABEL)).perform(scrollTo(), doubleClick());
         onView(withId(R.id.accessibility_permission_enable_deny_button)).perform(scrollTo(),
                 click());
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
         onView(withId(R.id.accessibility_permissionDialog_title)).inRoot(isDialog()).check(
                 doesNotExist());
+        scenario.moveToState(Lifecycle.State.DESTROYED);
+    }
+
+    @Test
+    public void clickServiceTarget_notPermittedByAdmin_sendRestrictedDialogIntent()
+            throws Exception {
+        when(mAccessibilityManagerService.isAccessibilityTargetAllowed(
+                eq(TEST_COMPONENT_NAME.getPackageName()), anyInt(), anyInt())).thenReturn(false);
+        final ActivityScenario<TestAccessibilityShortcutChooserActivity> scenario =
+                ActivityScenario.launch(TestAccessibilityShortcutChooserActivity.class);
+        scenario.onActivity(activity -> mActivity = activity);
+        scenario.moveToState(Lifecycle.State.CREATED);
+        scenario.moveToState(Lifecycle.State.STARTED);
+        scenario.moveToState(Lifecycle.State.RESUMED);
+
+        onView(withText(R.string.accessibility_select_shortcut_menu_title)).inRoot(
+                isDialog()).check(matches(isDisplayed()));
+        onView(withText(R.string.edit_accessibility_shortcut_menu_button)).perform(click());
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+        onView(withText(TEST_LABEL)).perform(scrollTo(), click());
+        verify(mAccessibilityManagerService).sendRestrictedDialogIntent(
+                eq(TEST_COMPONENT_NAME.getPackageName()), anyInt(), anyInt());
         scenario.moveToState(Lifecycle.State.DESTROYED);
     }
 
@@ -143,18 +184,6 @@ public class AccessibilityShortcutChooserActivityTest {
 
         onView(withText(ONE_HANDED_MODE)).inRoot(isDialog()).check(doesNotExist());
         scenario.moveToState(Lifecycle.State.DESTROYED);
-    }
-
-    private void configureTestService() throws Exception {
-        when(mAccessibilityServiceInfo.getResolveInfo()).thenReturn(mResolveInfo);
-        mResolveInfo.serviceInfo = mServiceInfo;
-        mServiceInfo.applicationInfo = mApplicationInfo;
-        when(mResolveInfo.loadLabel(any(PackageManager.class))).thenReturn(TEST_LABEL);
-        when(mAccessibilityServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
-        when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(
-                anyInt())).thenReturn(Collections.singletonList(mAccessibilityServiceInfo));
-
-        TestAccessibilityShortcutChooserActivity.setupForTesting(mAccessibilityManagerService);
     }
 
     /**
