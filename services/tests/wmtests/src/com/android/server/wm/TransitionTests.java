@@ -1704,7 +1704,8 @@ public class TransitionTests extends WindowTestsBase {
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final Transition transition = new Transition(TRANSIT_OPEN, 0 /* flags */,
                 app.mTransitionController, mWm.mSyncEngine);
-        app.mTransitionController.moveToCollecting(transition, BLASTSyncEngine.METHOD_NONE);
+        app.mTransitionController.moveToCollecting(transition);
+        mWm.mSyncEngine.setSyncMethod(transition.getSyncId(), BLASTSyncEngine.METHOD_NONE);
         final ArrayList<WindowContainer> freezeCalls = new ArrayList<>();
         transition.setContainerFreezer(new Transition.IContainerFreezer() {
             @Override
@@ -1755,7 +1756,8 @@ public class TransitionTests extends WindowTestsBase {
                 mDisplayContent, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final Transition transition = new Transition(TRANSIT_CHANGE, 0 /* flags */,
                 app.mTransitionController, mWm.mSyncEngine);
-        app.mTransitionController.moveToCollecting(transition, BLASTSyncEngine.METHOD_NONE);
+        app.mTransitionController.moveToCollecting(transition);
+        mWm.mSyncEngine.setSyncMethod(transition.getSyncId(), BLASTSyncEngine.METHOD_NONE);
         final SurfaceControl mockSnapshot = mock(SurfaceControl.class);
         transition.setContainerFreezer(new Transition.IContainerFreezer() {
             @Override
