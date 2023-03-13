@@ -297,8 +297,6 @@ public class SpeechRecognizer {
     private static final int MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT = 5;
     private static final int MSG_CHECK_RECOGNITION_SUPPORT = 6;
     private static final int MSG_TRIGGER_MODEL_DOWNLOAD = 7;
-    private static final int MSG_SET_MODEL_DOWNLOAD_LISTENER = 8;
-    private static final int MSG_CLEAR_MODEL_DOWNLOAD_LISTENER = 9;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
@@ -341,18 +339,12 @@ public class SpeechRecognizer {
                             args.mIntent, args.mCallbackExecutor, args.mCallback);
                     break;
                 case MSG_TRIGGER_MODEL_DOWNLOAD:
-                    handleTriggerModelDownload((Intent) msg.obj);
-                    break;
-                case MSG_SET_MODEL_DOWNLOAD_LISTENER:
                     ModelDownloadListenerArgs modelDownloadListenerArgs =
                             (ModelDownloadListenerArgs) msg.obj;
-                    handleSetModelDownloadListener(
+                    handleTriggerModelDownload(
                             modelDownloadListenerArgs.mIntent,
                             modelDownloadListenerArgs.mExecutor,
                             modelDownloadListenerArgs.mModelDownloadListener);
-                    break;
-                case MSG_CLEAR_MODEL_DOWNLOAD_LISTENER:
-                    handleClearModelDownloadListener((Intent) msg.obj);
                     break;
             }
         }
@@ -657,17 +649,13 @@ public class SpeechRecognizer {
      * user interaction to approve the download. Callers can verify the status of the request via
      * {@link #checkRecognitionSupport(Intent, Executor, RecognitionSupportCallback)}.
      *
-     * <p>Listeners set via
-     * {@link #setModelDownloadListener(Intent, Executor, ModelDownloadListener)} will receive
-     * updates about this download request.</p>
-     *
      * @param recognizerIntent contains parameters for the recognition to be performed. The intent
      *        may also contain optional extras, see {@link RecognizerIntent}.
      */
     public void triggerModelDownload(@NonNull Intent recognizerIntent) {
         Objects.requireNonNull(recognizerIntent, "intent must not be null");
         if (DBG) {
-            Slog.i(TAG, "#triggerModelDownload called");
+            Slog.i(TAG, "#triggerModelDownload without a listener called");
             if (mService == null) {
                 Slog.i(TAG, "Connection is not established yet");
             }
@@ -676,23 +664,47 @@ public class SpeechRecognizer {
             // First time connection: first establish a connection, then dispatch.
             connectToSystemService();
         }
-        putMessage(Message.obtain(mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
+        putMessage(Message.obtain(
+                mHandler, MSG_TRIGGER_MODEL_DOWNLOAD,
+                new ModelDownloadListenerArgs(recognizerIntent, null, null)));
     }
 
     /**
-     * Sets a listener to model download updates. Clients will have to call this method before
-     * {@link #triggerModelDownload(Intent)}.
+     * Attempts to download the support for the given {@code recognizerIntent}. This might trigger
+     * user interaction to approve the download. Callers can verify the status of the request via
+     * {@link #checkRecognitionSupport(Intent, Executor, RecognitionSupportCallback)}.
      *
-     * @param recognizerIntent the request to monitor support for.
+     * <p> The updates about the model download request are received via the given
+     * {@link ModelDownloadListener}:
+     *
+     * <li> If the model is already available, {@link ModelDownloadListener#onSuccess()} will be
+     * called directly. The model can be safely used afterwards.
+     *
+     * <li> If the {@link RecognitionService} has started the download,
+     * {@link ModelDownloadListener#onProgress(int)} will be called an unspecified (zero or more)
+     * number of times until the download is complete.
+     * When the download finishes, {@link ModelDownloadListener#onSuccess()} will be called.
+     * The model can be safely used afterwards.
+     *
+     * <li> If the {@link RecognitionService} has only scheduled the download, but won't satisfy it
+     * immediately, {@link ModelDownloadListener#onScheduled()} will be called.
+     * There will be no further updates on this listener.
+     *
+     * <li> If the request fails at any time due to a network or scheduling error,
+     * {@link ModelDownloadListener#onError(int)} will be called.
+     *
+     * @param recognizerIntent contains parameters for the recognition to be performed. The intent
+     *        may also contain optional extras, see {@link RecognizerIntent}.
+     * @param executor for dispatching listener callbacks
      * @param listener on which to receive updates about the model download request.
      */
-    public void setModelDownloadListener(
+    public void triggerModelDownload(
             @NonNull Intent recognizerIntent,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull ModelDownloadListener listener) {
         Objects.requireNonNull(recognizerIntent, "intent must not be null");
         if (DBG) {
-            Slog.i(TAG, "#setModelDownloadListener called");
+            Slog.i(TAG, "#triggerModelDownload with a listener called");
             if (mService == null) {
                 Slog.i(TAG, "Connection is not established yet");
             }
@@ -702,29 +714,8 @@ public class SpeechRecognizer {
             connectToSystemService();
         }
         putMessage(Message.obtain(
-                mHandler, MSG_SET_MODEL_DOWNLOAD_LISTENER,
+                mHandler, MSG_TRIGGER_MODEL_DOWNLOAD,
                 new ModelDownloadListenerArgs(recognizerIntent, executor, listener)));
-    }
-
-    /**
-     * Clears the listener for model download updates if any.
-     *
-     * @param recognizerIntent the request to monitor support for.
-     */
-    public void clearModelDownloadListener(@NonNull Intent recognizerIntent) {
-        Objects.requireNonNull(recognizerIntent, "intent must not be null");
-        if (DBG) {
-            Slog.i(TAG, "#clearModelDownloadListener called");
-            if (mService == null) {
-                Slog.i(TAG, "Connection is not established yet");
-            }
-        }
-        if (mService == null) {
-            // First time connection: first establish a connection, then dispatch.
-            connectToSystemService();
-        }
-        putMessage(Message.obtain(
-                mHandler, MSG_CLEAR_MODEL_DOWNLOAD_LISTENER, recognizerIntent));
     }
 
     /**
@@ -836,51 +827,36 @@ public class SpeechRecognizer {
         }
     }
 
-    private void handleTriggerModelDownload(Intent recognizerIntent) {
-        if (!maybeInitializeManagerService()) {
-            return;
-        }
-        try {
-            mService.triggerModelDownload(recognizerIntent, mContext.getAttributionSource());
-        } catch (final RemoteException e) {
-            Log.e(TAG, "downloadModel() failed", e);
-            mListener.onError(ERROR_CLIENT);
-        }
-    }
-
-    private void handleSetModelDownloadListener(
+    private void handleTriggerModelDownload(
             Intent recognizerIntent,
-            Executor callbackExecutor,
+            @Nullable Executor callbackExecutor,
             @Nullable ModelDownloadListener modelDownloadListener) {
         if (!maybeInitializeManagerService()) {
             return;
         }
-        try {
-            InternalModelDownloadListener listener =
-                    modelDownloadListener == null
-                            ? null
-                            : new InternalModelDownloadListener(
-                                    callbackExecutor,
-                                    modelDownloadListener);
-            mService.setModelDownloadListener(
-                    recognizerIntent, mContext.getAttributionSource(), listener);
-            if (DBG) Log.d(TAG, "setModelDownloadListener()");
-        } catch (final RemoteException e) {
-            Log.e(TAG, "setModelDownloadListener() failed", e);
-            callbackExecutor.execute(() -> modelDownloadListener.onError(ERROR_CLIENT));
-        }
-    }
 
-    private void handleClearModelDownloadListener(Intent recognizerIntent) {
-        if (!maybeInitializeManagerService()) {
-            return;
+        // Trigger model download without a listener.
+        if (modelDownloadListener == null) {
+            try {
+                mService.triggerModelDownload(
+                        recognizerIntent, mContext.getAttributionSource(), null);
+                if (DBG) Log.d(TAG, "triggerModelDownload() without a listener");
+            } catch (final RemoteException e) {
+                Log.e(TAG, "triggerModelDownload() without a listener failed", e);
+                mListener.onError(ERROR_CLIENT);
+            }
         }
-        try {
-            mService.clearModelDownloadListener(
-                    recognizerIntent, mContext.getAttributionSource());
-            if (DBG) Log.d(TAG, "clearModelDownloadListener()");
-        } catch (final RemoteException e) {
-            Log.e(TAG, "clearModelDownloadListener() failed", e);
+        // Trigger model download with a listener.
+        else {
+            try {
+                mService.triggerModelDownload(
+                        recognizerIntent, mContext.getAttributionSource(),
+                        new InternalModelDownloadListener(callbackExecutor, modelDownloadListener));
+                if (DBG) Log.d(TAG, "triggerModelDownload() with a listener");
+            } catch (final RemoteException e) {
+                Log.e(TAG, "triggerModelDownload() with a listener failed", e);
+                callbackExecutor.execute(() -> modelDownloadListener.onError(ERROR_CLIENT));
+            }
         }
     }
 
