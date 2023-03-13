@@ -5888,8 +5888,11 @@ class Task extends TaskFragment {
             final int taskId = activity != null
                     ? mTaskSupervisor.getNextTaskIdForUser(activity.mUserId)
                     : mTaskSupervisor.getNextTaskIdForUser();
+            final int activityType = getActivityType();
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
+                    .setActivityType(activityType != ACTIVITY_TYPE_UNDEFINED ? activityType
+                            : ACTIVITY_TYPE_STANDARD)
                     .setActivityInfo(info)
                     .setActivityOptions(options)
                     .setIntent(intent)
