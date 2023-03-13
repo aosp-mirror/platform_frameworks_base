@@ -435,11 +435,9 @@ public class AnimatorSetActivityTest {
         mActivityRule.runOnUiThread(s::start);
 
         while (!listener.endIsCalled) {
-            mActivityRule.runOnUiThread(() -> {
-                boolean passedStartDelay = a1.isStarted() || a2.isStarted() || a3.isStarted()
-                        || a4.isStarted() || a5.isStarted();
-                assertEquals(passedStartDelay, s.isRunning());
-            });
+            boolean passedStartDelay = a1.isStarted() || a2.isStarted() || a3.isStarted() ||
+                    a4.isStarted() || a5.isStarted();
+            assertEquals(passedStartDelay, s.isRunning());
             Thread.sleep(50);
         }
         assertFalse(s.isRunning());
