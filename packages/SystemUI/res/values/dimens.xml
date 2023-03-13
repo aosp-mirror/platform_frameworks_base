@@ -1585,6 +1585,10 @@
     <!-- Dream overlay complications related dimensions -->
     <!-- The blur radius applied to the dream overlay when entering and exiting dreams -->
     <dimen name="dream_overlay_anim_blur_radius">50dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_height">64dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_width">64dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_radius">32dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_padding">14dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_translation_y">28dp</dimen>
     <dimen name="dream_overlay_complication_home_controls_padding">28dp</dimen>
