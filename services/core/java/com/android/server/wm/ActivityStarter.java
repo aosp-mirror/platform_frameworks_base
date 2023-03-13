@@ -2269,13 +2269,14 @@ class ActivityStarter {
      */
     private void clearTopIfNeeded(@NonNull Task targetTask, int callingUid, int realCallingUid,
             int startingUid, int launchFlags) {
-        if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != FLAG_ACTIVITY_NEW_TASK) {
-            // Launch is from the same task, so must be a top or privileged UID
+        if ((launchFlags & FLAG_ACTIVITY_NEW_TASK) != FLAG_ACTIVITY_NEW_TASK
+                || mBalCode == BAL_ALLOW_ALLOWLISTED_UID) {
+            // Launch is from the same task, (a top or privileged UID), or is directly privileged.
             return;
         }
 
-        Predicate<ActivityRecord> isLaunchingOrLaunched = ar -> !ar.finishing
-                && (ar.isUid(startingUid) || ar.isUid(callingUid) || ar.isUid(realCallingUid));
+        Predicate<ActivityRecord> isLaunchingOrLaunched = ar ->
+                ar.isUid(startingUid) || ar.isUid(callingUid) || ar.isUid(realCallingUid);
 
         // Return early if we know for sure we won't need to clear any activities by just checking
         // the top activity.
