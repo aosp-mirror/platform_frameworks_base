@@ -29,7 +29,6 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.provider.NotificationDismissibilityProvider
 import com.android.systemui.statusbar.notification.collection.render.FakeNodeController
@@ -74,7 +73,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val logBufferLogger: NotificationRowLogger = mock()
     private val listContainer: NotificationListContainer = mock()
     private val childrenContainer: NotificationChildrenContainer = mock()
-    private val mediaManager: NotificationMediaManager = mock()
     private val smartReplyConstants: SmartReplyConstants = mock()
     private val smartReplyController: SmartReplyController = mock()
     private val pluginManager: PluginManager = mock()
@@ -97,6 +95,7 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val dragController: ExpandableNotificationRowDragController = mock()
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
     private val statusBarService: IStatusBarService = mock()
+
     private lateinit var controller: ExpandableNotificationRowController
 
     @Before
@@ -110,7 +109,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 metricsLogger,
                 logBufferLogger,
                 listContainer,
-                mediaManager,
                 smartReplyConstants,
                 smartReplyController,
                 pluginManager,

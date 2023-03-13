@@ -571,7 +571,6 @@ public class NotificationTestHelper {
                 mHeadsUpManager,
                 mBindStage,
                 mock(OnExpandClickListener.class),
-                mock(NotificationMediaManager.class),
                 mock(ExpandableNotificationRow.CoordinateOnClickListener.class),
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
