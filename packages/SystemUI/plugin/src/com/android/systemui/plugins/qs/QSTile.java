@@ -189,10 +189,12 @@ public interface QSTile {
 
         /** Get the text for secondaryLabel. */
         public String getSecondaryLabel(String stateText) {
-            if (TextUtils.isEmpty(secondaryLabel)) {
+            // Use a local reference as the value might change from other threads
+            CharSequence localSecondaryLabel = secondaryLabel;
+            if (TextUtils.isEmpty(localSecondaryLabel)) {
                 return stateText;
             }
-            return secondaryLabel.toString();
+            return localSecondaryLabel.toString();
         }
 
         public boolean copyTo(State other) {
