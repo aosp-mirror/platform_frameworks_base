@@ -45,8 +45,8 @@ public class Account implements Parcelable {
     @GuardedBy("sAccessedAccounts")
     private static final Set<Account> sAccessedAccounts = new ArraySet<>();
 
-    public final String name;
-    public final String type;
+    public final @NonNull String name;
+    public final @NonNull String type;
     private String mSafeName;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final @Nullable String accessId;
@@ -65,7 +65,7 @@ public class Account implements Parcelable {
         return result;
     }
 
-    public Account(String name, String type) {
+    public Account(@NonNull String name, @NonNull String type) {
         this(name, type, null);
     }
 
@@ -79,7 +79,7 @@ public class Account implements Parcelable {
     /**
      * @hide
      */
-    public Account(String name, String type, String accessId) {
+    public Account(@NonNull String name, @NonNull String type, String accessId) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("the name must not be empty: " + name);
         }
