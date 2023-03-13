@@ -26,18 +26,21 @@ import android.util.ArrayMap
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class KeyguardRemotePreviewManager
 @Inject
 constructor(
     private val previewRendererFactory: KeyguardPreviewRendererFactory,
+    @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Background private val backgroundHandler: Handler,
 ) {
@@ -55,7 +58,13 @@ constructor(
 
             // Destroy any previous renderer associated with this token.
             activePreviews[renderer.hostToken]?.let { destroyObserver(it) }
-            observer = PreviewLifecycleObserver(renderer, mainDispatcher, ::destroyObserver)
+            observer =
+                PreviewLifecycleObserver(
+                    renderer,
+                    applicationScope,
+                    mainDispatcher,
+                    ::destroyObserver,
+                )
             activePreviews[renderer.hostToken] = observer
             renderer.render()
             renderer.hostToken?.linkToDeath(observer, 0)
@@ -92,13 +101,18 @@ constructor(
 
     private class PreviewLifecycleObserver(
         private val renderer: KeyguardPreviewRenderer,
+        private val scope: CoroutineScope,
         private val mainDispatcher: CoroutineDispatcher,
         private val requestDestruction: (PreviewLifecycleObserver) -> Unit,
     ) : Handler.Callback, IBinder.DeathRecipient {
 
-        private var isDestroyed = false
+        private var isDestroyedOrDestroying = false
 
         override fun handleMessage(message: Message): Boolean {
+            if (isDestroyedOrDestroying) {
+                return true
+            }
+
             when (message.what) {
                 KeyguardQuickAffordancePreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
                     message.data
@@ -118,14 +132,14 @@ constructor(
         }
 
         fun onDestroy(): IBinder? {
-            if (isDestroyed) {
+            if (isDestroyedOrDestroying) {
                 return null
             }
 
-            isDestroyed = true
+            isDestroyedOrDestroying = true
             val hostToken = renderer.hostToken
             hostToken?.unlinkToDeath(this, 0)
-            runBlocking(mainDispatcher) { renderer.destroy() }
+            scope.launch(mainDispatcher) { renderer.destroy() }
             return hostToken
         }
     }
