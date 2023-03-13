@@ -279,10 +279,6 @@ class DesktopTasksController(
         }
     }
 
-    private fun isDesktopDensityOverrideSet(): Boolean {
-        return DESKTOP_DENSITY_OVERRIDE in DESKTOP_DENSITY_ALLOWED_RANGE
-    }
-
     private fun getFullscreenDensityDpi(): Int {
         return context.resources.displayMetrics.densityDpi
     }
@@ -354,5 +350,13 @@ class DesktopTasksController(
         private val DESKTOP_DENSITY_OVERRIDE =
             SystemProperties.getInt("persist.wm.debug.desktop_mode_density", 0)
         private val DESKTOP_DENSITY_ALLOWED_RANGE = (100..1000)
+
+        /**
+         * Check if desktop density override is enabled
+         */
+        @JvmStatic
+        fun isDesktopDensityOverrideSet(): Boolean {
+            return DESKTOP_DENSITY_OVERRIDE in DESKTOP_DENSITY_ALLOWED_RANGE
+        }
     }
 }
