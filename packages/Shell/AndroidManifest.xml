@@ -828,6 +828,8 @@
     <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
+    <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
