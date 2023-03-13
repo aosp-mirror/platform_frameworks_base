@@ -145,7 +145,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository.setKeyguardOccluded(true)
             assertThat(secureCameraActive()).isTrue()
 
-            bouncerRepository.setPrimaryVisible(true)
+            bouncerRepository.setPrimaryShow(true)
             assertThat(secureCameraActive()).isFalse()
         }
 
