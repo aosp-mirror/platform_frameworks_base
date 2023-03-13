@@ -25,7 +25,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
-import com.android.server.credentials.metrics.ChosenProviderMetric;
+import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
 import com.android.server.credentials.metrics.InitialPhaseMetric;
 
 import java.util.Map;
@@ -89,11 +89,11 @@ public class MetricUtilities {
      * @param apiStatus            the api status to log
      * @param providers            a map with known providers
      * @param callingUid           the calling UID of the client app
-     * @param chosenProviderMetric the metric data type of the final chosen provider
+     * @param chosenProviderFinalPhaseMetric the metric data type of the final chosen provider
      */
     protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
             Map<String, ProviderSession> providers, int callingUid,
-            ChosenProviderMetric chosenProviderMetric) {
+            ChosenProviderFinalPhaseMetric chosenProviderFinalPhaseMetric) {
         try {
             var providerSessions = providers.values();
             int providerSize = providerSessions.size();
@@ -102,7 +102,7 @@ public class MetricUtilities {
             int[] candidateStatusList = new int[providerSize];
             int index = 0;
             for (var session : providerSessions) {
-                CandidatePhaseMetric metric = session.mCandidateProviderMetric;
+                CandidatePhaseMetric metric = session.mCandidatePhasePerProviderMetric;
                 candidateUidList[index] = metric.getCandidateUid();
                 candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
                 candidateStatusList[index] = metric.getProviderQueryStatus();
@@ -116,12 +116,13 @@ public class MetricUtilities {
                     /* repeated_candidate_provider_round_trip_time_query_microseconds */
                     candidateQueryRoundTripTimeList,
                     /* repeated_candidate_provider_status */ candidateStatusList,
-                    /* chosen_provider_uid */ chosenProviderMetric.getChosenUid(),
+                    /* chosen_provider_uid */ chosenProviderFinalPhaseMetric.getChosenUid(),
                     /* chosen_provider_round_trip_time_overall_microseconds */
-                    chosenProviderMetric.getEntireProviderLatencyMicroseconds(),
+                    chosenProviderFinalPhaseMetric.getEntireProviderLatencyMicroseconds(),
                     /* chosen_provider_final_phase_microseconds (backwards compat only) */
                     DEFAULT_INT_32,
-                    /* chosen_provider_status */ chosenProviderMetric.getChosenProviderStatus());
+                    /* chosen_provider_status */ chosenProviderFinalPhaseMetric
+                            .getChosenProviderStatus());
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
         }
