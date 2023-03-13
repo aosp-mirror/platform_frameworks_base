@@ -124,7 +124,8 @@ constructor(
                     isDefault -> icon
                     wifiConstants.alwaysShowIconIfEnabled -> icon
                     !connectivityConstants.hasDataCapabilities -> icon
-                    wifiNetwork is WifiNetworkModel.Active && wifiNetwork.isValidated -> icon
+                    // See b/272509965: Even if we have an active and validated wifi network, we
+                    // don't want to show the icon if wifi isn't the default network.
                     else -> WifiIcon.Hidden
                 }
             }
