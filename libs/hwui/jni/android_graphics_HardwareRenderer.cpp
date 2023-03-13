@@ -27,7 +27,7 @@
 #include <SkColorSpace.h>
 #include <SkData.h>
 #include <SkImage.h>
-#include <SkImagePriv.h>
+#include <SkImageAndroid.h>
 #include <SkPicture.h>
 #include <SkPixmap.h>
 #include <SkSerialProcs.h>
@@ -493,7 +493,7 @@ public:
                 return sk_ref_sp(img);
             }
             bm.setImmutable();
-            return SkMakeImageFromRasterBitmap(bm, kNever_SkCopyPixelsMode);
+            return sk_image_factory::MakePinnableFromRasterBitmap(bm);
         }
         return sk_ref_sp(img);
     }

@@ -40,6 +40,7 @@
 #include <SkEncodedImageFormat.h>
 #include <SkHighContrastFilter.h>
 #include <SkImageEncoder.h>
+#include <SkImageAndroid.h>
 #include <SkImagePriv.h>
 #include <SkJpegGainmapEncoder.h>
 #include <SkPixmap.h>
@@ -370,7 +371,12 @@ sk_sp<SkImage> Bitmap::makeImage() {
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.
+#ifdef __ANDROID__
+        // pinnable images are only supported with the Ganesh GPU backend compiled in.
+        image = sk_image_factory::MakePinnableFromRasterBitmap(skiaBitmap);
+#else
         image = SkMakeImageFromRasterBitmap(skiaBitmap, kNever_SkCopyPixelsMode);
+#endif
     }
     return image;
 }

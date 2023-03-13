@@ -21,9 +21,9 @@
 #include <SkColorSpace.h>
 #include <SkData.h>
 #include <SkImage.h>
+#include <SkImageAndroid.h>
 #include <SkImageEncoder.h>
 #include <SkImageInfo.h>
-#include <SkImagePriv.h>
 #include <SkMatrix.h>
 #include <SkMultiPictureDocument.h>
 #include <SkOverdrawCanvas.h>
@@ -75,7 +75,7 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
         return false;
     }
     for (SkImage* image : mutableImages) {
-        if (SkImage_pinAsTexture(image, mRenderThread.getGrContext())) {
+        if (skgpu::ganesh::PinAsTexture(mRenderThread.getGrContext(), image)) {
             mPinnedImages.emplace_back(sk_ref_sp(image));
         } else {
             return false;
@@ -86,7 +86,7 @@ bool SkiaPipeline::pinImages(std::vector<SkImage*>& mutableImages) {
 
 void SkiaPipeline::unpinImages() {
     for (auto& image : mPinnedImages) {
-        SkImage_unpinAsTexture(image.get(), mRenderThread.getGrContext());
+        skgpu::ganesh::UnpinTexture(mRenderThread.getGrContext(), image.get());
     }
     mPinnedImages.clear();
 }
@@ -222,8 +222,8 @@ void SkiaPipeline::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
         ATRACE_FORMAT("Bitmap#prepareToDraw %dx%d", bitmap->width(), bitmap->height());
         auto image = bitmap->makeImage();
         if (image.get()) {
-            SkImage_pinAsTexture(image.get(), context);
-            SkImage_unpinAsTexture(image.get(), context);
+            skgpu::ganesh::PinAsTexture(context, image.get());
+            skgpu::ganesh::UnpinTexture(context, image.get());
             // A submit is necessary as there may not be a frame coming soon, so without a call
             // to submit these texture uploads can just sit in the queue building up until
             // we run out of RAM
