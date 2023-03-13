@@ -39,20 +39,12 @@ public class Layout {
     public static final String DEFAULT_DISPLAY_GROUP_NAME = "";
 
     private static final String TAG = "Layout";
-    private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
 
     // Lead display Id is set to this if this is not a follower display, and therefore
     // has no lead.
     public static final int NO_LEAD_DISPLAY = -1;
 
     private final List<Display> mDisplays = new ArrayList<>(2);
-
-    /**
-     *  @return The default display ID, or a new unique one to use.
-     */
-    public static int assignDisplayIdLocked(boolean isDefault) {
-        return isDefault ? DEFAULT_DISPLAY : sNextNonDefaultDisplayId++;
-    }
 
     @Override
     public String toString() {
@@ -76,25 +68,17 @@ public class Layout {
     }
 
     /**
-     * Creates a simple 1:1 LogicalDisplay mapping for the specified DisplayDevice.
+     * Creates the default 1:1 LogicalDisplay mapping for the specified DisplayDevice.
      *
      * @param address Address of the device.
-     * @param isDefault Indicates if the device is meant to be the default display.
-     * @param isEnabled Indicates if this display is usable and can be switched on
-     * @param displayGroupName Name of the display group to which the display is assigned.
      * @param idProducer Produces the logical display id.
-     * @param brightnessThrottlingMapId Name of which throttling policy should be used.
-     * @param leadDisplayId Display that this one follows (-1 if none).
-     * @exception IllegalArgumentException When a default display owns a display group other than
-     *            DEFAULT_DISPLAY_GROUP.
-     * @return The new Display.
      */
-    public Display createDisplayLocked(
-            @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
-            String displayGroupName, DisplayIdProducer idProducer, String brightnessThrottlingMapId,
-            int leadDisplayId) {
-        return createDisplayLocked(address, isDefault, isEnabled, displayGroupName, idProducer,
-                brightnessThrottlingMapId, POSITION_UNKNOWN, leadDisplayId);
+    public void createDefaultDisplayLocked(@NonNull DisplayAddress address,
+            DisplayIdProducer idProducer) {
+        createDisplayLocked(address, /* isDefault= */ true, /* isEnabled= */ true,
+                DEFAULT_DISPLAY_GROUP_NAME, idProducer, POSITION_UNKNOWN,
+                NO_LEAD_DISPLAY, /* brightnessThrottlingMapId= */ null,
+                /* refreshRateZoneId= */ null, /* refreshRateThermalThrottlingMapId= */ null);
     }
 
     /**
@@ -105,26 +89,30 @@ public class Layout {
      * @param isEnabled Indicates if this display is usable and can be switched on
      * @param displayGroupName Name of the display group to which the display is assigned.
      * @param idProducer Produces the logical display id.
-     * @param brightnessThrottlingMapId Name of which throttling policy should be used.
      * @param position Indicates the position this display is facing in this layout.
      * @param leadDisplayId Display that this one follows (-1 if none).
+     * @param brightnessThrottlingMapId Name of which brightness throttling policy should be used.
+     * @param refreshRateZoneId Layout limited refresh rate zone name.
+     * @param refreshRateThermalThrottlingMapId Name of which refresh rate throttling
+     *                                          policy should be used.
+
      * @exception IllegalArgumentException When a default display owns a display group other than
      *            DEFAULT_DISPLAY_GROUP.
-     * @return The new Display.
      */
-    public Display createDisplayLocked(
+    public void createDisplayLocked(
             @NonNull DisplayAddress address, boolean isDefault, boolean isEnabled,
-            String displayGroupName, DisplayIdProducer idProducer, String brightnessThrottlingMapId,
-            int position, int leadDisplayId) {
+            String displayGroupName, DisplayIdProducer idProducer, int position, int leadDisplayId,
+            String brightnessThrottlingMapId, @Nullable String refreshRateZoneId,
+            @Nullable String refreshRateThermalThrottlingMapId) {
         if (contains(address)) {
             Slog.w(TAG, "Attempting to add second definition for display-device: " + address);
-            return null;
+            return;
         }
 
         // See if we're dealing with the "default" display
         if (isDefault && getById(DEFAULT_DISPLAY) != null) {
             Slog.w(TAG, "Ignoring attempt to add a second default display: " + address);
-            return null;
+            return;
         }
 
         // Assign a logical display ID and create the new display.
@@ -138,11 +126,13 @@ public class Layout {
             throw new IllegalArgumentException("Default display should own DEFAULT_DISPLAY_GROUP");
         }
         final int logicalDisplayId = idProducer.getId(isDefault);
+        leadDisplayId = isDefault ? NO_LEAD_DISPLAY : leadDisplayId;
+
         final Display display = new Display(address, logicalDisplayId, isEnabled, displayGroupName,
-                brightnessThrottlingMapId, position, leadDisplayId);
+                brightnessThrottlingMapId, position, leadDisplayId, refreshRateZoneId,
+                refreshRateThermalThrottlingMapId);
 
         mDisplays.add(display);
-        return display;
     }
 
     /**
@@ -242,7 +232,7 @@ public class Layout {
         // {@link DeviceStateToLayoutMap.POSITION_FRONT} or
         // {@link DeviceStateToLayoutMap.POSITION_REAR}.
         // {@link DeviceStateToLayoutMap.POSITION_UNKNOWN} is unspecified.
-        private int mPosition;
+        private final int mPosition;
 
         // The ID of the brightness throttling map that should be used. This can change e.g. in
         // concurrent displays mode in which a stricter brightness throttling policy might need to
@@ -251,31 +241,28 @@ public class Layout {
         private final String mBrightnessThrottlingMapId;
 
         // The ID of the lead display that this display will follow in a layout. -1 means no lead.
-        private int mLeadDisplayId;
+        private final int mLeadDisplayId;
 
         // Refresh rate zone id for specific layout
         @Nullable
-        private String mRefreshRateZoneId;
+        private final String mRefreshRateZoneId;
 
         @Nullable
-        private String mRefreshRateThermalThrottlingMapId;
+        private final String mRefreshRateThermalThrottlingMapId;
 
-        Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
+        private Display(@NonNull DisplayAddress address, int logicalDisplayId, boolean isEnabled,
                 @NonNull String displayGroupName, String brightnessThrottlingMapId, int position,
-                int leadDisplayId) {
+                int leadDisplayId, @Nullable String refreshRateZoneId,
+                @Nullable String refreshRateThermalThrottlingMapId) {
             mAddress = address;
             mLogicalDisplayId = logicalDisplayId;
             mIsEnabled = isEnabled;
             mDisplayGroupName = displayGroupName;
             mPosition = position;
             mBrightnessThrottlingMapId = brightnessThrottlingMapId;
-
-            if (leadDisplayId == mLogicalDisplayId) {
-                mLeadDisplayId = NO_LEAD_DISPLAY;
-            } else {
-                mLeadDisplayId = leadDisplayId;
-            }
-
+            mRefreshRateZoneId = refreshRateZoneId;
+            mRefreshRateThermalThrottlingMapId = refreshRateThermalThrottlingMapId;
+            mLeadDisplayId = leadDisplayId;
         }
 
         @Override
@@ -345,21 +332,9 @@ public class Layout {
             return mDisplayGroupName;
         }
 
-        public void setRefreshRateZoneId(@Nullable String refreshRateZoneId) {
-            mRefreshRateZoneId = refreshRateZoneId;
-        }
-
         @Nullable
         public String getRefreshRateZoneId() {
             return mRefreshRateZoneId;
-        }
-
-        /**
-         * Sets the position that this display is facing.
-         * @param position the display is facing.
-         */
-        public void setPosition(int position) {
-            mPosition = position;
         }
 
         /**
@@ -370,7 +345,6 @@ public class Layout {
         }
 
         /**
-         *
          * @return the position that this display is facing.
          */
         public int getPosition() {
@@ -378,26 +352,10 @@ public class Layout {
         }
 
         /**
-         * Set the display that this display should follow certain properties of, for example,
-         * brightness
-         * @param displayId of the lead display.
-         */
-        public void setLeadDisplay(int displayId) {
-            if (displayId != mLogicalDisplayId) {
-                mLeadDisplayId = displayId;
-            }
-        }
-
-        /**
-         *
          * @return logical displayId of the display that this one follows.
          */
         public int getLeadDisplayId() {
             return mLeadDisplayId;
-        }
-
-        public void setRefreshRateThermalThrottlingMapId(String refreshRateThermalThrottlingMapId) {
-            mRefreshRateThermalThrottlingMapId = refreshRateThermalThrottlingMapId;
         }
 
         public String getRefreshRateThermalThrottlingMapId() {
