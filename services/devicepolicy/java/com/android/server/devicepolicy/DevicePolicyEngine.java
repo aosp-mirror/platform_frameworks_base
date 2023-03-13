@@ -18,9 +18,9 @@ package com.android.server.devicepolicy;
 
 import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
 import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
-import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
+import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_SET;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
@@ -167,7 +167,8 @@ final class DevicePolicyEngine {
                         enforcingAdmin,
                         policyDefinition,
                         // TODO: we're always sending this for now, should properly handle errors.
-                        policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                        policyEnforced
+                                ? RESULT_POLICY_SET : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                         userId);
             }
 
@@ -400,7 +401,7 @@ final class DevicePolicyEngine {
                         enforcingAdmin,
                         policyDefinition,
                         // TODO: we're always sending this for now, should properly handle errors.
-                        policyApplied ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                        policyApplied ? RESULT_POLICY_SET : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                         UserHandle.USER_ALL);
             }
 
@@ -792,7 +793,7 @@ final class DevicePolicyEngine {
             int result = Objects.equals(
                     policyState.getPoliciesSetByAdmins().get(admin),
                     policyState.getCurrentResolvedPolicy())
-                    ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
+                    ? RESULT_POLICY_SET : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
             maybeSendOnPolicyChanged(
                     admin, policyDefinition, result, userId);
         }

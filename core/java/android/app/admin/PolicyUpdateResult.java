@@ -39,7 +39,7 @@ public final class PolicyUpdateResult {
      * Result code to indicate that the policy has been changed to the desired value set by
      * the admin.
      */
-    public static final int RESULT_SUCCESS = 0;
+    public static final int RESULT_POLICY_SET = 0;
 
     /**
      * Result code to indicate that the policy has not been enforced or has changed because another
@@ -82,7 +82,7 @@ public final class PolicyUpdateResult {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RESULT_" }, value = {
             RESULT_FAILURE_UNKNOWN,
-            RESULT_SUCCESS,
+            RESULT_POLICY_SET,
             RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
             RESULT_POLICY_CLEARED,
             RESULT_FAILURE_STORAGE_LIMIT_REACHED,
