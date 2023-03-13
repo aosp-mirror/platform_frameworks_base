@@ -56,7 +56,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.RemoteLockscreenValidationResult;
-import android.app.StartLockscreenValidationRequest;
+import android.app.RemoteLockscreenValidationSession;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
@@ -2503,7 +2503,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * Starts a session to verify lock screen credentials provided by a remote device.
      */
     @NonNull
-    public StartLockscreenValidationRequest startRemoteLockscreenValidation() {
+    public RemoteLockscreenValidationSession startRemoteLockscreenValidation() {
         return mRecoverableKeyStoreManager.startRemoteLockscreenValidation(this);
     }
 
