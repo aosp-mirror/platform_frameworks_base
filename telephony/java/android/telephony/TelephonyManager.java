@@ -3504,7 +3504,7 @@ public class TelephonyManager {
                     "state as absent");
             return SIM_STATE_ABSENT;
         }
-        return getSimStateForSlotIndex(slotIndex);
+        return SubscriptionManager.getSimStateForSlotIndex(slotIndex);
     }
 
     /**
@@ -3651,7 +3651,9 @@ public class TelephonyManager {
     @Deprecated
     public @SimState int getSimApplicationState(int physicalSlotIndex) {
         int activePort = getFirstActivePortIndex(physicalSlotIndex);
-        int simState = getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex, activePort));
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        activePort));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -3677,7 +3679,9 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public @SimState int getSimApplicationState(int physicalSlotIndex, int portIndex) {
-        int simState = getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex, portIndex));
+        int simState =
+                SubscriptionManager.getSimStateForSlotIndex(getLogicalSlotIndex(physicalSlotIndex,
+                        portIndex));
         return getSimApplicationStateFromSimState(simState);
     }
 
@@ -3746,7 +3750,7 @@ public class TelephonyManager {
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public @SimState int getSimState(int slotIndex) {
-        int simState = getSimStateForSlotIndex(slotIndex);
+        int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
         if (simState == SIM_STATE_LOADED) {
             simState = SIM_STATE_READY;
         }
@@ -17001,31 +17005,5 @@ public class TelephonyManager {
             Log.e(TAG, "Error in isRemovableEsimDefaultEuicc: " + e);
         }
         return false;
-    }
-
-    /**
-     * Returns a constant indicating the state of sim for the slot index.
-     *
-     * @param slotIndex Logical SIM slot index.
-     *
-     * @see TelephonyManager.SimState
-     *
-     * @hide
-     */
-    @SimState
-    public static int getSimStateForSlotIndex(int slotIndex) {
-        try {
-            ITelephony telephony = ITelephony.Stub.asInterface(
-                    TelephonyFrameworkInitializer
-                            .getTelephonyServiceManager()
-                            .getTelephonyServiceRegisterer()
-                            .get());
-            if (telephony != null) {
-                return telephony.getSimStateForSlotIndex(slotIndex);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error in getSimStateForSlotIndex: " + e);
-        }
-        return TelephonyManager.SIM_STATE_UNKNOWN;
     }
 }
