@@ -11776,6 +11776,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(canManageUsers(caller) || canQueryAdminPolicy(caller));
 
+        // Move AccessibilityManager out of lock to prevent potential deadlock
+        final List<AccessibilityServiceInfo> installedServices;
+        long id = mInjector.binderClearCallingIdentity();
+        try {
+            UserInfo user = getUserInfo(userId);
+            if (user.isManagedProfile()) {
+                userId = user.profileGroupId;
+            }
+            installedServices = withAccessibilityManager(userId,
+                    AccessibilityManager::getInstalledAccessibilityServiceList);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+
         synchronized (getLockObject()) {
             List<String> result = null;
             // If we have multiple profiles we return the intersection of the
@@ -11802,27 +11816,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // If we have a permitted list add all system accessibility services.
             if (result != null) {
-                long id = mInjector.binderClearCallingIdentity();
-                try {
-                    UserInfo user = getUserInfo(userId);
-                    if (user.isManagedProfile()) {
-                        userId = user.profileGroupId;
-                    }
-                    final List<AccessibilityServiceInfo> installedServices =
-                            withAccessibilityManager(userId,
-                                    AccessibilityManager::getInstalledAccessibilityServiceList);
-
-                    if (installedServices != null) {
-                        for (AccessibilityServiceInfo service : installedServices) {
-                            ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
-                            ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
-                            if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                                result.add(serviceInfo.packageName);
-                            }
+                if (installedServices != null) {
+                    for (AccessibilityServiceInfo service : installedServices) {
+                        ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
+                        ApplicationInfo applicationInfo = serviceInfo.applicationInfo;
+                        if ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            result.add(serviceInfo.packageName);
                         }
                     }
-                } finally {
-                    mInjector.binderRestoreCallingIdentity(id);
                 }
             }
 
