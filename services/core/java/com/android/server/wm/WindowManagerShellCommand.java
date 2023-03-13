@@ -42,6 +42,7 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.view.Display;
+import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.ViewDebug;
 
@@ -554,6 +555,22 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private void dumpLocalWindowAsync(IWindow client, ParcelFileDescriptor pfd) {
+        // Make it asynchronous to avoid writer from being blocked
+        // by waiting for the buffer to be consumed in the same process.
+        IoThread.getExecutor().execute(() -> {
+            synchronized (mInternal.mGlobalLock) {
+                try {
+                    client.executeCommand(ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null, pfd);
+                } catch (Exception e) {
+                    // Ignore RemoteException for local call. Just print trace for other
+                    // exceptions caused by RC with tolerable low possibility.
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private int runDumpVisibleWindowViews(PrintWriter pw) {
         if (!mInternal.checkCallingPermission(android.Manifest.permission.DUMP,
                 "runDumpVisibleWindowViews()")) {
@@ -576,16 +593,7 @@ public class WindowManagerShellCommand extends ShellCommand {
                             pipe = new ByteTransferPipe();
                             final ParcelFileDescriptor pfd = pipe.getWriteFd();
                             if (w.isClientLocal()) {
-                                // Make it asynchronous to avoid writer from being blocked
-                                // by waiting for the buffer to be consumed in the same process.
-                                IoThread.getExecutor().execute(() -> {
-                                    try {
-                                        w.mClient.executeCommand(
-                                                ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null, pfd);
-                                    } catch (RemoteException e) {
-                                        // Ignore for local call.
-                                    }
-                                });
+                                dumpLocalWindowAsync(w.mClient, pfd);
                             } else {
                                 w.mClient.executeCommand(
                                         ViewDebug.REMOTE_COMMAND_DUMP_ENCODED, null, pfd);
