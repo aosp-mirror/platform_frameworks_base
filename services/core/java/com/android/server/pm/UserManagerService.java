@@ -1495,7 +1495,8 @@ public class UserManagerService extends IUserManager.Stub {
         // intentSender
         unlockIntent.putExtra(Intent.EXTRA_INTENT, pendingIntent.getIntentSender());
         unlockIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        mContext.startActivity(unlockIntent);
+        mContext.startActivityAsUser(
+                unlockIntent, UserHandle.of(getProfileParentIdUnchecked(userId)));
     }
 
     @Override
