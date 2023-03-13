@@ -21,7 +21,6 @@ import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
@@ -38,14 +37,11 @@ constructor(
     /** Observe on bouncer expansion amount. */
     val bouncerExpansionAmount: Flow<Float> = interactor.panelExpansionAmount
 
-    /** Observe on bouncer visibility. */
-    val isBouncerVisible: Flow<Boolean> = interactor.isVisible
-
     /** Can the user interact with the view? */
     val isInteractable: Flow<Boolean> = interactor.isInteractable
 
     /** Observe whether bouncer is showing. */
-    val show: Flow<KeyguardBouncerModel> = interactor.show
+    val show: Flow<Unit> = interactor.show
 
     /** Observe whether bouncer is hiding. */
     val hide: Flow<Unit> = interactor.hide
@@ -75,7 +71,7 @@ constructor(
     val shouldUpdateSideFps: Flow<Unit> =
         merge(
             interactor.startingToHide,
-            interactor.isVisible.map {},
+            interactor.show,
             interactor.startingDisappearAnimation.filterNotNull().map {}
         )
 
