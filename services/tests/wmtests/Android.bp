@@ -58,7 +58,6 @@ android_test {
         "testng",
         "truth-prebuilt",
         "testables",
-        "ub-uiautomator",
         "hamcrest-library",
         "platform-compat-test-rules",
         "CtsSurfaceValidatorLib",
