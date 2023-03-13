@@ -436,7 +436,7 @@ public final class MediaCas implements AutoCloseable {
                     if (mEventHandler != null) {
                         mEventHandler.sendMessage(
                                 mEventHandler.obtainMessage(
-                                        EventHandler.MSG_CAS_EVENT, event, arg, data));
+                                        EventHandler.MSG_CAS_EVENT, event, arg, toBytes(data)));
                     }
                 }
 
