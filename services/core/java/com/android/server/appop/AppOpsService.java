@@ -399,6 +399,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private AppOpsUidStateTracker mUidStateTracker;
 
+    /** Callback to skip on next appop update.*/
+    @GuardedBy("this")
+    private IAppOpsCallback mIgnoredCallback = null;
+
     /** Hands the definition of foreground and uid states */
     @GuardedBy("this")
     public AppOpsUidStateTracker getUidStateTracker() {
@@ -923,6 +927,59 @@ public class AppOpsService extends IAppOpsService.Stub {
         mAppOpsCheckingService = new AppOpsCheckingServiceTracingDecorator(
                 new AppOpsCheckingServiceImpl(
                         storageFile, this, handler, context,  mSwitchedOps));
+        mAppOpsCheckingService.addAppOpsModeChangedListener(
+                new AppOpsCheckingServiceInterface.AppOpsModeChangedListener() {
+                    @Override
+                    public void onUidModeChanged(int uid, int code, int mode) {
+                        notifyOpChangedForAllPkgsInUid(code, uid, false);
+                    }
+
+                    @Override
+                    public void onPackageModeChanged(String packageName, int userId, int code,
+                            int mode) {
+                        ArraySet<OnOpModeChangedListener> repCbs = null;
+                        int uid = -1;
+                        synchronized (AppOpsService.this) {
+                            ArraySet<OnOpModeChangedListener> cbs =
+                                    mOpModeWatchers.get(code);
+                            if (cbs != null) {
+                                if (repCbs == null) {
+                                    repCbs = new ArraySet<>();
+                                }
+                                repCbs.addAll(cbs);
+                            }
+                            cbs = mPackageModeWatchers.get(packageName);
+                            if (cbs != null) {
+                                if (repCbs == null) {
+                                    repCbs = new ArraySet<>();
+                                }
+                                repCbs.addAll(cbs);
+                            }
+                            if (repCbs != null && mIgnoredCallback != null) {
+                                repCbs.remove(mModeWatchers.get(mIgnoredCallback.asBinder()));
+                            }
+                            uid = getPackageManagerInternal().getPackageUid(packageName,
+                                    PackageManager.MATCH_KNOWN_PACKAGES, userId);
+                            Op op = getOpLocked(code, uid, packageName, null, false, null,
+                                    /* edit */ false);
+                            if (op != null && mode == AppOpsManager.opToDefaultMode(op.op)) {
+                                // If going into the default mode, prune this op
+                                // if there is nothing else interesting in it.
+                                pruneOpLocked(op, uid, packageName);
+                            }
+                            scheduleFastWriteLocked();
+                            if (mode != MODE_ERRORED) {
+                                updateStartedOpModeForUidLocked(code, mode == MODE_IGNORED, uid);
+                            }
+                        }
+
+                        if (repCbs != null && uid != -1) {
+                            mHandler.sendMessage(PooledLambda.obtainMessage(
+                                    AppOpsService::notifyOpChanged,
+                                    AppOpsService.this, repCbs, code, uid, packageName));
+                        }
+                    }
+                });
         //mAppOpsCheckingService = new AppOpsCheckingServiceLoggingDecorator(
         //        LocalServices.getService(AppOpsCheckingServiceInterface.class));
         mAppOpsRestrictions = new AppOpsRestrictionsImpl(context, handler,
@@ -1363,7 +1420,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                             && uidState.getUidMode(code) == AppOpsManager.MODE_FOREGROUND) {
                         mHandler.sendMessage(PooledLambda.obtainMessage(
                                 AppOpsService::notifyOpChangedForAllPkgsInUid,
-                                this, code, uidState.uid, true, null));
+                                this, code, uidState.uid, true));
                     } else if (!uidState.pkgOps.isEmpty()) {
                         final ArraySet<OnOpModeChangedListener> listenerSet =
                                 mOpModeWatchers.get(code);
@@ -1830,6 +1887,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 previousMode = MODE_DEFAULT;
             }
 
+            mIgnoredCallback = permissionPolicyCallback;
             if (!uidState.setUidMode(code, mode)) {
                 return;
             }
@@ -1838,8 +1896,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
-        notifyOpChangedForAllPkgsInUid(code, uid, false, permissionPolicyCallback);
-        notifyOpChangedSync(code, uid, null, mode, previousMode);
+        notifyStorageManagerOpModeChangedSync(code, uid, null, mode, previousMode);
     }
 
     /**
@@ -1849,8 +1906,7 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param uid The uid the op was changed for
      * @param onlyForeground Only notify watchers that watch for foreground changes
      */
-    private void notifyOpChangedForAllPkgsInUid(int code, int uid, boolean onlyForeground,
-            @Nullable IAppOpsCallback callbackToIgnore) {
+    private void notifyOpChangedForAllPkgsInUid(int code, int uid, boolean onlyForeground) {
         String[] uidPackageNames = getPackagesForUid(uid);
         ArrayMap<OnOpModeChangedListener, ArraySet<String>> callbackSpecs = null;
         synchronized (this) {
@@ -1903,8 +1959,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
 
-            if (callbackSpecs != null && callbackToIgnore != null) {
-                callbackSpecs.remove(mModeWatchers.get(callbackToIgnore.asBinder()));
+            if (callbackSpecs != null && mIgnoredCallback != null) {
+                callbackSpecs.remove(mModeWatchers.get(mIgnoredCallback.asBinder()));
             }
         }
 
@@ -2023,8 +2079,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private void notifyOpChangedSync(int code, int uid, @NonNull String packageName, int mode,
-            int previousMode) {
+    private void notifyStorageManagerOpModeChangedSync(int code, int uid,
+            @NonNull String packageName, int mode, int previousMode) {
         final StorageManagerInternal storageManagerInternal =
                 LocalServices.getService(StorageManagerInternal.class);
         if (storageManagerInternal != null) {
@@ -2053,7 +2109,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             return;
         }
 
-        ArraySet<OnOpModeChangedListener> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
 
         PackageVerificationResult pvr;
@@ -2070,49 +2125,17 @@ public class AppOpsService extends IAppOpsService.Stub {
 
         int previousMode = MODE_DEFAULT;
         synchronized (this) {
-            UidState uidState = getUidStateLocked(uid, false);
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ true);
             if (op != null) {
                 if (op.getMode() != mode) {
                     previousMode = op.getMode();
+                    mIgnoredCallback = permissionPolicyCallback;
                     op.setMode(mode);
-                    ArraySet<OnOpModeChangedListener> cbs =
-                            mOpModeWatchers.get(code);
-                    if (cbs != null) {
-                        if (repCbs == null) {
-                            repCbs = new ArraySet<>();
-                        }
-                        repCbs.addAll(cbs);
-                    }
-                    cbs = mPackageModeWatchers.get(packageName);
-                    if (cbs != null) {
-                        if (repCbs == null) {
-                            repCbs = new ArraySet<>();
-                        }
-                        repCbs.addAll(cbs);
-                    }
-                    if (repCbs != null && permissionPolicyCallback != null) {
-                        repCbs.remove(mModeWatchers.get(permissionPolicyCallback.asBinder()));
-                    }
-                    if (mode == AppOpsManager.opToDefaultMode(op.op)) {
-                        // If going into the default mode, prune this op
-                        // if there is nothing else interesting in it.
-                        pruneOpLocked(op, uid, packageName);
-                    }
-                    scheduleFastWriteLocked();
-                    if (mode != MODE_ERRORED) {
-                        updateStartedOpModeForUidLocked(code, mode == MODE_IGNORED, uid);
-                    }
                 }
             }
         }
-        if (repCbs != null) {
-            mHandler.sendMessage(PooledLambda.obtainMessage(
-                    AppOpsService::notifyOpChanged,
-                    this, repCbs, code, uid, packageName));
-        }
 
-        notifyOpChangedSync(code, uid, packageName, mode, previousMode);
+        notifyStorageManagerOpModeChangedSync(code, uid, packageName, mode, previousMode);
     }
 
     private void notifyOpChanged(ArraySet<OnOpModeChangedListener> callbacks, int code,
@@ -2349,7 +2372,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int numChanges = allChanges.size();
         for (int i = 0; i < numChanges; i++) {
             ChangeRec change = allChanges.get(i);
-            notifyOpChangedSync(change.op, change.uid, change.pkg,
+            notifyStorageManagerOpModeChangedSync(change.op, change.uid, change.pkg,
                     AppOpsManager.opToDefaultMode(change.op), change.previous_mode);
         }
     }

@@ -141,4 +141,16 @@ public class AppOpsCheckingServiceLoggingDecorator implements AppOpsCheckingServ
                 + ")");
         return mService.getForegroundOps(packageName, userId);
     }
+
+    @Override
+    public boolean addAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        Log.i(LOG_TAG, "addAppOpsModeChangedListener(listener = " + listener + ")");
+        return mService.addAppOpsModeChangedListener(listener);
+    }
+
+    @Override
+    public boolean removeAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        Log.i(LOG_TAG, "removeAppOpsModeChangedListener(listener = " + listener + ")");
+        return mService.removeAppOpsModeChangedListener(listener);
+    }
 }

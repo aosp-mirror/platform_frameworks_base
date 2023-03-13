@@ -201,4 +201,28 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
 
         return newVal;
     }
+
+    @Override
+    public boolean addAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        boolean oldVal = mOldImplementation.addAppOpsModeChangedListener(listener);
+        boolean newVal = mNewImplementation.addAppOpsModeChangedListener(listener);
+
+        if (oldVal != newVal) {
+            signalImplDifference("addAppOpsModeChangedListener");
+        }
+
+        return newVal;
+    }
+
+    @Override
+    public boolean removeAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        boolean oldVal = mOldImplementation.removeAppOpsModeChangedListener(listener);
+        boolean newVal = mNewImplementation.removeAppOpsModeChangedListener(listener);
+
+        if (oldVal != newVal) {
+            signalImplDifference("removeAppOpsModeChangedListener");
+        }
+
+        return newVal;
+    }
 }

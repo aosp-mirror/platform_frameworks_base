@@ -221,4 +221,26 @@ public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServ
             Trace.traceEnd(TRACE_TAG);
         }
     }
+
+    @Override
+    public boolean addAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#addAppOpsModeChangedListener");
+        try {
+            return mService.addAppOpsModeChangedListener(listener);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
+
+    @Override
+    public boolean removeAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        Trace.traceBegin(TRACE_TAG,
+                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#removeAppOpsModeChangedListener");
+        try {
+            return mService.removeAppOpsModeChangedListener(listener);
+        } finally {
+            Trace.traceEnd(TRACE_TAG);
+        }
+    }
 }

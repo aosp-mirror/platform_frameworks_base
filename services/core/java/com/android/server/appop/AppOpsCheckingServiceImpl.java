@@ -102,6 +102,8 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     final SparseArray<ArrayMap<String, SparseIntArray>> mUserPackageModes = new SparseArray<>();
 
     private final LegacyAppOpStateParser mAppOpsStateParser = new LegacyAppOpStateParser();
+    @GuardedBy("mLock")
+    private List<AppOpsModeChangedListener> mModeChangedListeners = new ArrayList<>();
 
     final AtomicFile mFile;
     final Runnable mWriteRunner = new Runnable() {
@@ -183,31 +185,39 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     @Override
     public boolean setUidMode(int uid, int op, int mode) {
         final int defaultMode = AppOpsManager.opToDefaultMode(op);
+        List<AppOpsModeChangedListener> listenersCopy;
         synchronized (mLock) {
             SparseIntArray opModes = mUidModes.get(uid, null);
-            if (opModes == null) {
-                if (mode != defaultMode) {
-                    opModes = new SparseIntArray();
-                    mUidModes.put(uid, opModes);
-                    opModes.put(op, mode);
-                    scheduleWriteLocked();
+
+            int previousMode = defaultMode;
+            if (opModes != null) {
+                previousMode = opModes.get(op, defaultMode);
+            }
+            if (mode == previousMode) {
+                return false;
+            }
+
+            if (mode == defaultMode) {
+                opModes.delete(op);
+                if (opModes.size() == 0) {
+                    mUidModes.remove(uid);
                 }
             } else {
-                if (opModes.indexOfKey(op) >= 0 && opModes.get(op) == mode) {
-                    return false;
+                if (opModes == null) {
+                    opModes = new SparseIntArray();
+                    mUidModes.put(uid, opModes);
                 }
-                if (mode == defaultMode) {
-                    opModes.delete(op);
-                    if (opModes.size() <= 0) {
-                        opModes = null;
-                        mUidModes.delete(uid);
-                    }
-                } else {
-                    opModes.put(op, mode);
-                }
-                scheduleWriteLocked();
+                opModes.put(op, mode);
             }
+
+            scheduleWriteLocked();
+            listenersCopy = new ArrayList<>(mModeChangedListeners);
         }
+
+        for (int i = 0; i < listenersCopy.size(); i++) {
+            listenersCopy.get(i).onUidModeChanged(uid, op, mode);
+        }
+
         return true;
     }
 
@@ -229,35 +239,52 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
     @Override
     public void setPackageMode(String packageName, int op, @Mode int mode, @UserIdInt int userId) {
         final int defaultMode = AppOpsManager.opToDefaultMode(op);
+        List<AppOpsModeChangedListener> listenersCopy;
         synchronized (mLock) {
             ArrayMap<String, SparseIntArray> packageModes = mUserPackageModes.get(userId, null);
-            if (packageModes == null) {
+            if (packageModes == null && mode != defaultMode) {
                 packageModes = new ArrayMap<>();
                 mUserPackageModes.put(userId, packageModes);
             }
-            SparseIntArray opModes = packageModes.get(packageName);
-            if (opModes == null) {
-                if (mode != defaultMode) {
-                    opModes = new SparseIntArray();
-                    packageModes.put(packageName, opModes);
-                    opModes.put(op, mode);
-                    scheduleWriteLocked();
+            SparseIntArray opModes = null;
+            int previousMode = defaultMode;
+            if (packageModes != null) {
+                opModes = packageModes.get(packageName);
+                if (opModes != null) {
+                    previousMode = opModes.get(op, defaultMode);
+                }
+            }
+
+            if (mode == previousMode) {
+                return;
+            }
+
+            if (mode == defaultMode) {
+                opModes.delete(op);
+                if (opModes.size() == 0) {
+                    packageModes.remove(packageName);
+                    if (packageModes.size() == 0) {
+                        mUserPackageModes.remove(userId);
+                    }
                 }
             } else {
-                if (opModes.indexOfKey(op) >= 0 && opModes.get(op) == mode) {
-                    return;
+                if (packageModes == null) {
+                    packageModes = new ArrayMap<>();
+                    mUserPackageModes.put(userId, packageModes);
                 }
-                if (mode == defaultMode) {
-                    opModes.delete(op);
-                    if (opModes.size() <= 0) {
-                        opModes = null;
-                        packageModes.remove(packageName);
-                    }
-                } else {
-                    opModes.put(op, mode);
+                if (opModes == null) {
+                    opModes = new SparseIntArray();
+                    packageModes.put(packageName, opModes);
                 }
-                scheduleWriteLocked();
+                opModes.put(op, mode);
             }
+
+            scheduleFastWriteLocked();
+            listenersCopy = new ArrayList<>(mModeChangedListeners);
+        }
+
+        for (int i = 0; i < listenersCopy.size(); i++) {
+            listenersCopy.get(i).onPackageModeChanged(packageName, userId, op, mode);
         }
     }
 
@@ -632,5 +659,19 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
         }
 
         return result;
+    }
+
+    @Override
+    public boolean addAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        synchronized (mLock) {
+            return mModeChangedListeners.add(listener);
+        }
+    }
+
+    @Override
+    public boolean removeAppOpsModeChangedListener(AppOpsModeChangedListener listener) {
+        synchronized (mLock) {
+            return mModeChangedListeners.remove(listener);
+        }
     }
 }

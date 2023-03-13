@@ -20,43 +20,40 @@ import android.app.AppOpsManager
 import android.os.Handler
 import android.os.UserHandle
 import android.util.ArrayMap
-import android.util.SparseArray
+import android.util.ArraySet
 import android.util.SparseBooleanArray
 import android.util.SparseIntArray
 import com.android.internal.annotations.VisibleForTesting
-import com.android.internal.util.ArrayUtils
 import com.android.server.appop.AppOpsCheckingServiceInterface
+import com.android.server.appop.AppOpsCheckingServiceInterface.AppOpsModeChangedListener
 import com.android.server.permission.access.AccessCheckingService
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.PackageUri
 import com.android.server.permission.access.UidUri
-import com.android.server.permission.access.collection.* // ktlint-disable no-wildcard-imports
+import com.android.server.permission.access.collection.forEachIndexed
+import com.android.server.permission.access.collection.set
 
 class AppOpService(
     private val service: AccessCheckingService
 ) : AppOpsCheckingServiceInterface {
     private val packagePolicy = service.getSchemePolicy(PackageUri.SCHEME, AppOpUri.SCHEME)
         as PackageAppOpPolicy
-    private val uidPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME)
+    private val appIdPolicy = service.getSchemePolicy(UidUri.SCHEME, AppOpUri.SCHEME)
         as AppIdAppOpPolicy
 
     private val context = service.context
     private lateinit var handler: Handler
-    private lateinit var lock: Any
-    private lateinit var switchedOps: SparseArray<IntArray>
+
+    @Volatile
+    private var listeners = ArraySet<AppOpsModeChangedListener>()
+    private val listenersLock = Any()
 
     fun initialize() {
         // TODO(b/252883039): Wrong handler. Inject main thread handler here.
         handler = Handler(context.mainLooper)
-        // TODO(b/252883039): Wrong lock object. Inject AppOpsService here.
-        lock = Any()
 
-        switchedOps = SparseArray()
-        for (switchedCode in 0 until AppOpsManager._NUM_OP) {
-            val switchCode = AppOpsManager.opToSwitch(switchedCode)
-            switchedOps.put(switchCode,
-                ArrayUtils.appendInt(switchedOps.get(switchCode), switchedCode))
-        }
+        appIdPolicy.addOnAppOpModeChangedListener(OnAppIdAppOpModeChangedListener())
+        packagePolicy.addOnAppOpModeChangedListener(OnPackageAppOpModeChangedListener())
     }
 
     @VisibleForTesting
@@ -90,16 +87,14 @@ class AppOpService(
         val userId = UserHandle.getUserId(uid)
         val opName = AppOpsManager.opToPublicName(op)
         return service.getState {
-            with(uidPolicy) { getAppOpMode(appId, userId, opName) }
+            with(appIdPolicy) { getAppOpMode(appId, userId, opName) }
         }
     }
 
     private fun getUidModes(uid: Int): ArrayMap<String, Int>? {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
-        return service.getState {
-            with(uidPolicy) { getAppOpModes(appId, userId) }
-        }?.map
+        return service.getState { with(appIdPolicy) { getAppOpModes(appId, userId) } }?.map
     }
 
     override fun setUidMode(uid: Int, op: Int, mode: Int): Boolean {
@@ -108,7 +103,7 @@ class AppOpService(
         val opName = AppOpsManager.opToPublicName(op)
         var wasChanged = false
         service.mutateState {
-            wasChanged = with(uidPolicy) { setAppOpMode(appId, userId, opName, mode) }
+            wasChanged = with(appIdPolicy) { setAppOpMode(appId, userId, opName, mode) }
         }
         return wasChanged
     }
@@ -137,7 +132,7 @@ class AppOpService(
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         service.mutateState {
-            with(uidPolicy) { removeAppOpModes(appId, userId) }
+            with(appIdPolicy) { removeAppOpModes(appId, userId) }
         }
     }
 
@@ -192,6 +187,91 @@ class AppOpService(
                     this[AppOpsManager.strOpToOp(op)] = true
                 }
             }
+        }
+    }
+
+    override fun addAppOpsModeChangedListener(listener: AppOpsModeChangedListener): Boolean {
+        synchronized(listenersLock) {
+            val newListeners = ArraySet(listeners)
+            val result = newListeners.add(listener)
+            listeners = newListeners
+            return result
+        }
+    }
+
+    override fun removeAppOpsModeChangedListener(listener: AppOpsModeChangedListener): Boolean {
+        synchronized(listenersLock) {
+            val newListeners = ArraySet(listeners)
+            val result = newListeners.remove(listener)
+            listeners = newListeners
+            return result
+        }
+    }
+
+    inner class OnAppIdAppOpModeChangedListener : AppIdAppOpPolicy.OnAppOpModeChangedListener() {
+        // (uid, appOpCode) -> newMode
+        val pendingChanges = ArrayMap<Pair<Int, Int>, Int>()
+
+        override fun onAppOpModeChanged(
+            appId: Int,
+            userId: Int,
+            appOpName: String,
+            oldMode: Int,
+            newMode: Int
+        ) {
+            val uid = UserHandle.getUid(userId, appId)
+            val appOpCode = AppOpsManager.strOpToOp(appOpName)
+            val key = Pair(uid, appOpCode)
+
+            pendingChanges[key] = newMode
+        }
+
+        override fun onStateMutated() {
+            val listenersLocal = listeners
+            pendingChanges.forEachIndexed { _, key, mode ->
+                listenersLocal.forEachIndexed { _, listener ->
+                    val uid = key.first
+                    val appOpCode = key.second
+
+                    listener.onUidModeChanged(uid, appOpCode, mode)
+                }
+            }
+
+            pendingChanges.clear()
+        }
+    }
+
+    private inner class OnPackageAppOpModeChangedListener :
+        PackageAppOpPolicy.OnAppOpModeChangedListener() {
+        // (packageName, userId, appOpCode) -> newMode
+        val pendingChanges = ArrayMap<Triple<String, Int, Int>, Int>()
+
+        override fun onAppOpModeChanged(
+            packageName: String,
+            userId: Int,
+            appOpName: String,
+            oldMode: Int,
+            newMode: Int
+        ) {
+            val appOpCode = AppOpsManager.strOpToOp(appOpName)
+            val key = Triple(packageName, userId, appOpCode)
+
+            pendingChanges[key] = newMode
+        }
+
+        override fun onStateMutated() {
+            val listenersLocal = listeners
+            pendingChanges.forEachIndexed { _, key, mode ->
+                listenersLocal.forEachIndexed { _, listener ->
+                    val packageName = key.first
+                    val userId = key.second
+                    val appOpCode = key.third
+
+                    listener.onPackageModeChanged(packageName, userId, appOpCode, mode)
+                }
+            }
+
+            pendingChanges.clear()
         }
     }
 }

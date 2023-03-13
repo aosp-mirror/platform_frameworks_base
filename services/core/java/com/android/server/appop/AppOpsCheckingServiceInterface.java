@@ -158,4 +158,46 @@ public interface AppOpsCheckingServiceInterface {
      * MODE_FOREGROUND for the passed package name and user ID.
      */
     SparseBooleanArray getForegroundOps(String packageName, int userId);
+
+    /**
+     * Adds a listener for changes in appop modes. These callbacks should be dispatched
+     * synchronously.
+     *
+     * @param listener The listener to be added.
+     * @return true if the listener was added.
+     */
+    boolean addAppOpsModeChangedListener(@NonNull AppOpsModeChangedListener listener);
+
+    /**
+     * Removes a listener for changes in appop modes.
+     *
+     * @param listener The listener to be removed.
+     * @return true if the listener was removed.
+     */
+    boolean removeAppOpsModeChangedListener(@NonNull AppOpsModeChangedListener listener);
+
+    /**
+     * A listener for changes to the AppOps mode.
+     */
+    interface AppOpsModeChangedListener {
+
+        /**
+         * Invoked when a UID's appop mode is changed.
+         *
+         * @param uid The UID whose appop mode was changed.
+         * @param code The op code that was changed.
+         * @param mode The new mode.
+         */
+        void onUidModeChanged(int uid, int code, int mode);
+
+        /**
+         * Invoked when a package's appop mode is changed.
+         *
+         * @param packageName The package name whose appop mode was changed.
+         * @param userId The user ID for the package.
+         * @param code The op code that was changed.
+         * @param mode The new mode.
+         */
+        void onPackageModeChanged(@NonNull String packageName, int userId, int code, int mode);
+    }
 }
