@@ -283,6 +283,8 @@
     <public name="system_tertiary_fixed_dim" />
     <public name="system_on_tertiary_fixed" />
     <public name="system_on_tertiary_fixed_variant" />
+    <public name="system_outline_variant_light" />
+    <public name="system_outline_variant_dark" />
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01c80000">
