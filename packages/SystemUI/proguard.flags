@@ -5,7 +5,7 @@
     *;
 }
 
--keep class com.android.systemui.TVSystemUIInitializer {
+-keep class com.android.systemui.tv.TVSystemUIInitializer {
     *;
 }
 
