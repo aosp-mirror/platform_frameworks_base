@@ -24,6 +24,7 @@ import com.android.internal.R as AndroidR
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
 import com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen
+import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
@@ -61,8 +62,15 @@ constructor(
         val width = windowMetrics.bounds.width()
         var height = maximumWindowHeight
 
+        // TODO(b/271410803): Read isTransientTaskbar from Launcher
         val isLargeScreen = isLargeScreen(context)
-        if (isLargeScreen) {
+        val isTransientTaskbar =
+            QuickStepContract.isGesturalMode(
+                context.resources.getInteger(
+                    com.android.internal.R.integer.config_navBarInteractionMode
+                )
+            )
+        if (isLargeScreen && !isTransientTaskbar) {
             val taskbarSize =
                 context.resources.getDimensionPixelSize(AndroidR.dimen.taskbar_frame_height)
             height -= taskbarSize
