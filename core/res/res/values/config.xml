@@ -6296,10 +6296,6 @@
     -->
     <integer name="config_deviceStateRearDisplay">-1</integer>
 
-    <!-- Whether the lock screen is allowed to run its own live wallpaper,
-         different from the home screen wallpaper. -->
-    <bool name="config_independentLockscreenLiveWallpaper">false</bool>
-
     <!-- Device state that corresponds to concurrent display mode where the default display
          is the internal display. Public API for the feature is provided through Jetpack
          WindowManager.

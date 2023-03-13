@@ -4956,7 +4956,6 @@
   <java-symbol type="string" name="concurrent_display_notification_power_save_content"/>
   <java-symbol type="string" name="device_state_notification_turn_off_button"/>
   <java-symbol type="string" name="device_state_notification_settings_button"/>
-  <java-symbol type="bool" name="config_independentLockscreenLiveWallpaper"/>
   <java-symbol type="integer" name="config_deviceStateConcurrentRearDisplay" />
   <java-symbol type="string" name="config_rearDisplayPhysicalAddress" />
 

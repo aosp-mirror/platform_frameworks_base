@@ -243,4 +243,11 @@ interface IWallpaperManager {
      * @hide
      */
     boolean lockScreenWallpaperExists();
+
+    /**
+     * Temporary method for project b/197814683.
+     * Return true if the lockscreen wallpaper always uses a WallpaperService, not a static image.
+     * @hide
+     */
+     boolean isLockscreenLiveWallpaperEnabled();
 }
