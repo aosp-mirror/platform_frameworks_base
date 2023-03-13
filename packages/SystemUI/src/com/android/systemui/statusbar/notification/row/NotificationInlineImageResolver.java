@@ -26,6 +26,7 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -48,6 +49,9 @@ import java.util.Set;
  */
 public class NotificationInlineImageResolver implements ImageResolver {
     private static final String TAG = NotificationInlineImageResolver.class.getSimpleName();
+
+    // Timeout for loading images from ImageCache when calling from UI thread
+    private static final long MAX_UI_THREAD_TIMEOUT_MS = 100L;
 
     private final Context mContext;
     private final ImageCache mImageCache;
@@ -132,16 +136,20 @@ public class NotificationInlineImageResolver implements ImageResolver {
         return image;
     }
 
+    /**
+     * Loads an image from the Uri.
+     * This method is synchronous and is usually called from the Main thread.
+     * It will time-out after MAX_UI_THREAD_TIMEOUT_MS.
+     *
+     * @param uri Uri of the target image.
+     * @return drawable of the image, null if loading failed/timeout
+     */
     @Override
     public Drawable loadImage(Uri uri) {
         Drawable result = null;
         try {
             if (hasCache()) {
-                // if the uri isn't currently cached, try caching it first
-                if (!mImageCache.hasEntry(uri)) {
-                    mImageCache.preload((uri));
-                }
-                result = mImageCache.get(uri);
+                result = loadImageFromCache(uri, MAX_UI_THREAD_TIMEOUT_MS);
             } else {
                 result = resolveImage(uri);
             }
@@ -149,6 +157,14 @@ public class NotificationInlineImageResolver implements ImageResolver {
             Log.d(TAG, "loadImage: Can't load image from " + uri, ex);
         }
         return result;
+    }
+
+    private Drawable loadImageFromCache(Uri uri, long timeoutMs) {
+        // if the uri isn't currently cached, try caching it first
+        if (!mImageCache.hasEntry(uri)) {
+            mImageCache.preload((uri));
+        }
+        return mImageCache.get(uri, timeoutMs);
     }
 
     /**
@@ -223,6 +239,30 @@ public class NotificationInlineImageResolver implements ImageResolver {
     }
 
     /**
+     * Wait for a maximum timeout for images to finish preloading
+     * @param timeoutMs total timeout time
+     */
+    void waitForPreloadedImages(long timeoutMs) {
+        if (!hasCache()) {
+            return;
+        }
+        Set<Uri> preloadedUris = getWantedUriSet();
+        if (preloadedUris != null) {
+            // Decrement remaining timeout after each image check
+            long endTimeMs = SystemClock.elapsedRealtime() + timeoutMs;
+            preloadedUris.forEach(
+                    uri -> loadImageFromCache(uri, endTimeMs - SystemClock.elapsedRealtime()));
+        }
+    }
+
+    void cancelRunningTasks() {
+        if (!hasCache()) {
+            return;
+        }
+        mImageCache.cancelRunningTasks();
+    }
+
+    /**
      * A interface for internal cache implementation of this resolver.
      */
     interface ImageCache {
@@ -231,7 +271,7 @@ public class NotificationInlineImageResolver implements ImageResolver {
          * @param uri The uri of the image.
          * @return Drawable of the image.
          */
-        Drawable get(Uri uri);
+        Drawable get(Uri uri, long timeoutMs);
 
         /**
          * Set the image resolver that actually resolves image from specified uri.
@@ -256,6 +296,11 @@ public class NotificationInlineImageResolver implements ImageResolver {
          * Purge unnecessary entries in the cache.
          */
         void purge();
+
+        /**
+         * Cancel all unfinished image loading tasks
+         */
+        void cancelRunningTasks();
     }
 
 }
