@@ -122,7 +122,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     private void respondToClientWithResponseAndFinish() {
         Log.i(TAG, "respondToClientWithResponseAndFinish");
         if (isSessionCancelled()) {
-            mChosenProviderMetric.setChosenProviderStatus(
+            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
             logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
                     ApiStatus.CLIENT_CANCELED);
@@ -134,7 +134,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
             logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */
                     ApiStatus.SUCCESS);
         } catch (RemoteException e) {
-            mChosenProviderMetric.setChosenProviderStatus(
+            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
             Log.i(TAG, "Issue while propagating the response to the client");
             logApiCall(ApiName.CLEAR_CREDENTIAL, /* apiStatus */

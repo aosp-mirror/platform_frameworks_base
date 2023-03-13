@@ -82,12 +82,14 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     protected void launchUiWithProviderData(ArrayList<ProviderData> providerDataList) {
+        mChosenProviderFinalPhaseMetric.setUiCallStartTimeNanoseconds(System.nanoTime());
         try {
             mClientCallback.onPendingIntent(mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
                     mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
                     providerDataList));
         } catch (RemoteException e) {
+            mChosenProviderFinalPhaseMetric.setUiReturned(false);
             respondToClientWithErrorAndFinish(
                     GetCredentialException.TYPE_UNKNOWN, "Unable to instantiate selector");
         }
@@ -96,14 +98,16 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
+        mChosenProviderFinalPhaseMetric.setUiReturned(true);
+        mChosenProviderFinalPhaseMetric.setUiCallEndTimeNanoseconds(System.nanoTime());
         Log.i(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
         setChosenMetric(componentName);
         if (response != null) {
-            mChosenProviderMetric.setChosenProviderStatus(
+            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
             respondToClientWithResponseAndFinish(response);
         } else {
-            mChosenProviderMetric.setChosenProviderStatus(
+            mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_FAILURE.getMetricCode());
             respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
                     "Invalid response from provider");
