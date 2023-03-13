@@ -30,10 +30,8 @@ import com.android.server.credentials.MetricUtilities;
 public class CandidatePhaseMetric {
 
     private static final String TAG = "CandidateProviderMetric";
-    // Since this will always be the second in the split sequence, this is statically 2
-    private static final int SESSION_ID = 2;
-    // The sequence number of this emit of the API call, default -1, equal for all candidates
-    private int mSequenceId = -1;
+    // The session id of this provider, default set to -1
+    private int mSessionId = -1;
     // Indicates if this provider returned from the query phase, default false
     private boolean mQueryReturned = false;
 
@@ -150,18 +148,13 @@ public class CandidatePhaseMetric {
     }
 
     /* -------------- Session Id ---------------- */
+
+    public void setSessionId(int sessionId) {
+        mSessionId = sessionId;
+    }
+
     public int getSessionId() {
-        return SESSION_ID;
-    }
-
-    /* -------------- Sequence Id ---------------- */
-
-    public void setSequenceId(int sequenceId) {
-        mSequenceId = sequenceId;
-    }
-
-    public int getSequenceId() {
-        return mSequenceId;
+        return mSessionId;
     }
 
     /* -------------- Query Returned Status ---------------- */
