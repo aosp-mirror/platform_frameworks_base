@@ -2721,7 +2721,7 @@ public final class SystemServer implements Dumpable {
         // on it in their setup, but likely needs to be done after LockSettingsService is ready.
         final HsumBootUserInitializer hsumBootUserInitializer =
                 HsumBootUserInitializer.createInstance(
-                        mActivityManagerService, mContentResolver,
+                        mActivityManagerService, mPackageManagerService, mContentResolver,
                         context.getResources().getBoolean(R.bool.config_isMainUserPermanentAdmin));
         if (hsumBootUserInitializer != null) {
             t.traceBegin("HsumBootUserInitializer.init");
@@ -3021,8 +3021,7 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startBootPhase(t, SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
             t.traceEnd();
 
-            if (hsumBootUserInitializer != null && !isAutomotive) {
-                // TODO(b/261924826): remove isAutomotive check once the workflow is finalized
+            if (hsumBootUserInitializer != null) {
                 t.traceBegin("HsumBootUserInitializer.systemRunning");
                 hsumBootUserInitializer.systemRunning(t);
                 t.traceEnd();
