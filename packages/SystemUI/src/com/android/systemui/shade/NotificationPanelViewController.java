@@ -1201,6 +1201,12 @@ public final class NotificationPanelViewController implements Dumpable {
 
     private void onSplitShadeEnabledChanged() {
         mShadeLog.logSplitShadeChanged(mSplitShadeEnabled);
+        // Reset any left over overscroll state. It is a rare corner case but can happen.
+        mQsController.setOverScrollAmount(0);
+        mScrimController.setNotificationsOverScrollAmount(0);
+        mNotificationStackScrollLayoutController.setOverExpansion(0);
+        mNotificationStackScrollLayoutController.setOverScrollAmount(0);
+
         // when we switch between split shade and regular shade we want to enforce setting qs to
         // the default state: expanded for split shade and collapsed otherwise
         if (!isOnKeyguard() && mPanelExpanded) {
