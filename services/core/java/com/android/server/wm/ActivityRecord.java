@@ -5226,6 +5226,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: " + token);
             return;
         }
+        if (visible == mVisibleRequested && visible == mVisible
+                && mTransitionController.isShellTransitionsEnabled()) {
+            // For shell transition, it is no-op if there is no state change.
+            return;
+        }
         if (visible) {
             mDeferHidingClient = false;
         }
