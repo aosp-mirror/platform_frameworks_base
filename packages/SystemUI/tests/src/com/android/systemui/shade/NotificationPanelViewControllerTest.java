@@ -37,6 +37,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -938,6 +939,38 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
         verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
 
+    }
+
+    @Test
+    public void onSplitShadeChanged_duringShadeExpansion_resetsOverScrollState() {
+        // There was a bug where there was left-over overscroll state after going from split shade
+        // to single shade.
+        // Since on single shade we don't set overscroll values on QS nor Scrim, those values that
+        // were there from split shade were never reset.
+        // To prevent this, we will reset all overscroll state.
+        enableSplitShade(true);
+        reset(mQsController, mScrimController, mNotificationStackScrollLayoutController);
+
+        mNotificationPanelViewController.setOverExpansion(123);
+        verify(mQsController).setOverScrollAmount(123);
+        verify(mScrimController).setNotificationsOverScrollAmount(123);
+        verify(mNotificationStackScrollLayoutController).setOverExpansion(123);
+
+        enableSplitShade(false);
+        verify(mQsController).setOverScrollAmount(0);
+        verify(mScrimController).setNotificationsOverScrollAmount(0);
+        verify(mNotificationStackScrollLayoutController).setOverExpansion(0);
+    }
+
+    @Test
+    public void onSplitShadeChanged_alwaysResetsOverScrollState() {
+        enableSplitShade(true);
+        enableSplitShade(false);
+
+        verify(mQsController, times(2)).setOverScrollAmount(0);
+        verify(mScrimController, times(2)).setNotificationsOverScrollAmount(0);
+        verify(mNotificationStackScrollLayoutController, times(2)).setOverExpansion(0);
+        verify(mNotificationStackScrollLayoutController, times(2)).setOverScrollAmount(0);
     }
 
     /**
