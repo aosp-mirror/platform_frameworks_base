@@ -170,6 +170,9 @@ public class HandwritingInitiator {
                             findBestCandidateView(mState.mStylusDownX, mState.mStylusDownY);
                     if (candidateView != null) {
                         if (candidateView == getConnectedView()) {
+                            if (!candidateView.hasFocus()) {
+                                requestFocusWithoutReveal(candidateView);
+                            }
                             startHandwriting(candidateView);
                         } else if (candidateView.getHandwritingDelegatorCallback() != null) {
                             String delegatePackageName =
@@ -181,13 +184,7 @@ public class HandwritingInitiator {
                                     candidateView, delegatePackageName);
                             candidateView.getHandwritingDelegatorCallback().run();
                         } else {
-                            if (candidateView.getRevealOnFocusHint()) {
-                                candidateView.setRevealOnFocusHint(false);
-                                candidateView.requestFocus();
-                                candidateView.setRevealOnFocusHint(true);
-                            } else {
-                                candidateView.requestFocus();
-                            }
+                            requestFocusWithoutReveal(candidateView);
                         }
                     }
                 }
@@ -378,6 +375,16 @@ public class HandwritingInitiator {
 
         mCachedHoverTarget = null;
         return false;
+    }
+
+    private static void requestFocusWithoutReveal(View view) {
+        if (view.getRevealOnFocusHint()) {
+            view.setRevealOnFocusHint(false);
+            view.requestFocus();
+            view.setRevealOnFocusHint(true);
+        } else {
+            view.requestFocus();
+        }
     }
 
     /**
