@@ -1353,6 +1353,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilityServiceInfo accessibilityServiceInfo;
             try {
                 accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
+                if (!accessibilityServiceInfo.isWithinParcelableSize()) {
+                    Slog.e(LOG_TAG, "Skipping service "
+                            + accessibilityServiceInfo.getResolveInfo().getComponentInfo()
+                            + " because service info size is larger than safe parcelable limits.");
+                    continue;
+                }
                 if (userState.mCrashedServices.contains(serviceInfo.getComponentName())) {
                     // Restore the crashed attribute.
                     accessibilityServiceInfo.crashed = true;
