@@ -19,21 +19,16 @@ package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Fake implementation of [KeyguardRepository] */
 class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
-    private val _primaryBouncerVisible = MutableStateFlow(false)
-    override val primaryBouncerVisible = _primaryBouncerVisible.asStateFlow()
-    private val _primaryBouncerShow = MutableStateFlow<KeyguardBouncerModel?>(null)
+    private val _primaryBouncerShow = MutableStateFlow(false)
     override val primaryBouncerShow = _primaryBouncerShow.asStateFlow()
     private val _primaryBouncerShowingSoon = MutableStateFlow(false)
     override val primaryBouncerShowingSoon = _primaryBouncerShowingSoon.asStateFlow()
-    private val _primaryBouncerHide = MutableStateFlow(false)
-    override val primaryBouncerHide = _primaryBouncerHide.asStateFlow()
     private val _primaryBouncerStartingToHide = MutableStateFlow(false)
     override val primaryBouncerStartingToHide = _primaryBouncerStartingToHide.asStateFlow()
     private val _primaryBouncerDisappearAnimation = MutableStateFlow<Runnable?>(null)
@@ -67,10 +62,6 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
         _primaryBouncerScrimmed.value = isScrimmed
     }
 
-    override fun setPrimaryVisible(isVisible: Boolean) {
-        _primaryBouncerVisible.value = isVisible
-    }
-
     override fun setAlternateVisible(isVisible: Boolean) {
         _isAlternateBouncerVisible.value = isVisible
     }
@@ -79,16 +70,12 @@ class FakeKeyguardBouncerRepository : KeyguardBouncerRepository {
         _isAlternateBouncerUIAvailable.value = isAvailable
     }
 
-    override fun setPrimaryShow(keyguardBouncerModel: KeyguardBouncerModel?) {
-        _primaryBouncerShow.value = keyguardBouncerModel
+    override fun setPrimaryShow(isShowing: Boolean) {
+        _primaryBouncerShow.value = isShowing
     }
 
     override fun setPrimaryShowingSoon(showingSoon: Boolean) {
         _primaryBouncerShowingSoon.value = showingSoon
-    }
-
-    override fun setPrimaryHide(hide: Boolean) {
-        _primaryBouncerHide.value = hide
     }
 
     override fun setPrimaryStartingToHide(startingToHide: Boolean) {
