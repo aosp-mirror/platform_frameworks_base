@@ -70,23 +70,11 @@ public class InsetsState implements Parcelable {
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "ITYPE", value = {
-            ITYPE_STATUS_BAR,
-            ITYPE_NAVIGATION_BAR,
             ITYPE_CAPTION_BAR,
-            ITYPE_TOP_GESTURES,
-            ITYPE_BOTTOM_GESTURES,
-            ITYPE_LEFT_GESTURES,
-            ITYPE_RIGHT_GESTURES,
-            ITYPE_TOP_MANDATORY_GESTURES,
-            ITYPE_BOTTOM_MANDATORY_GESTURES,
-            ITYPE_LEFT_MANDATORY_GESTURES,
-            ITYPE_RIGHT_MANDATORY_GESTURES,
             ITYPE_LEFT_TAPPABLE_ELEMENT,
             ITYPE_TOP_TAPPABLE_ELEMENT,
             ITYPE_RIGHT_TAPPABLE_ELEMENT,
             ITYPE_BOTTOM_TAPPABLE_ELEMENT,
-            ITYPE_CLIMATE_BAR,
-            ITYPE_EXTRA_NAVIGATION_BAR,
             ITYPE_LEFT_GENERIC_OVERLAY,
             ITYPE_TOP_GENERIC_OVERLAY,
             ITYPE_RIGHT_GENERIC_OVERLAY,
@@ -94,34 +82,17 @@ public class InsetsState implements Parcelable {
     })
     public @interface InternalInsetsType {}
 
-    public static final int ITYPE_STATUS_BAR = 0;
-    public static final int ITYPE_NAVIGATION_BAR = 1;
-    public static final int ITYPE_CAPTION_BAR = 2;
+    public static final int ITYPE_CAPTION_BAR = 0;
 
-    public static final int ITYPE_TOP_GESTURES = 3;
-    public static final int ITYPE_BOTTOM_GESTURES = 4;
-    public static final int ITYPE_LEFT_GESTURES = 5;
-    public static final int ITYPE_RIGHT_GESTURES = 6;
+    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 1;
+    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 2;
+    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 3;
+    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 4;
 
-    public static final int ITYPE_TOP_MANDATORY_GESTURES = 7;
-    public static final int ITYPE_BOTTOM_MANDATORY_GESTURES = 8;
-    public static final int ITYPE_LEFT_MANDATORY_GESTURES = 9;
-    public static final int ITYPE_RIGHT_MANDATORY_GESTURES = 10;
-
-    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 15;
-    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 16;
-    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 17;
-    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 18;
-
-    /** Additional system decorations inset type. */
-    public static final int ITYPE_CLIMATE_BAR = 20;
-    public static final int ITYPE_EXTRA_NAVIGATION_BAR = 21;
-
-    /** Additional types for local insets. **/
-    public static final int ITYPE_LEFT_GENERIC_OVERLAY = 22;
-    public static final int ITYPE_TOP_GENERIC_OVERLAY = 23;
-    public static final int ITYPE_RIGHT_GENERIC_OVERLAY = 24;
-    public static final int ITYPE_BOTTOM_GENERIC_OVERLAY = 25;
+    public static final int ITYPE_LEFT_GENERIC_OVERLAY = 5;
+    public static final int ITYPE_TOP_GENERIC_OVERLAY = 6;
+    public static final int ITYPE_RIGHT_GENERIC_OVERLAY = 7;
+    public static final int ITYPE_BOTTOM_GENERIC_OVERLAY = 8;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "ISIDE", value = {
@@ -713,12 +684,6 @@ public class InsetsState implements Parcelable {
      */
     public static @Type.InsetsType int toPublicType(@InternalInsetsType int type) {
         switch (type) {
-            case ITYPE_STATUS_BAR:
-            case ITYPE_CLIMATE_BAR:
-                return Type.STATUS_BARS;
-            case ITYPE_NAVIGATION_BAR:
-            case ITYPE_EXTRA_NAVIGATION_BAR:
-                return Type.NAVIGATION_BARS;
             case ITYPE_LEFT_GENERIC_OVERLAY:
             case ITYPE_TOP_GENERIC_OVERLAY:
             case ITYPE_RIGHT_GENERIC_OVERLAY:
@@ -726,16 +691,6 @@ public class InsetsState implements Parcelable {
                 return Type.SYSTEM_OVERLAYS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
-            case ITYPE_TOP_MANDATORY_GESTURES:
-            case ITYPE_BOTTOM_MANDATORY_GESTURES:
-            case ITYPE_LEFT_MANDATORY_GESTURES:
-            case ITYPE_RIGHT_MANDATORY_GESTURES:
-                return Type.MANDATORY_SYSTEM_GESTURES;
-            case ITYPE_TOP_GESTURES:
-            case ITYPE_BOTTOM_GESTURES:
-            case ITYPE_LEFT_GESTURES:
-            case ITYPE_RIGHT_GESTURES:
-                return Type.SYSTEM_GESTURES;
             case ITYPE_LEFT_TAPPABLE_ELEMENT:
             case ITYPE_TOP_TAPPABLE_ELEMENT:
             case ITYPE_RIGHT_TAPPABLE_ELEMENT:
@@ -769,55 +724,6 @@ public class InsetsState implements Parcelable {
         mDisplayFrame.dumpDebug(proto, DISPLAY_FRAME);
         mDisplayCutout.get().dumpDebug(proto, DISPLAY_CUTOUT);
         proto.end(token);
-    }
-
-    public static String typeToString(@InternalInsetsType int type) {
-        switch (type) {
-            case ITYPE_STATUS_BAR:
-                return "ITYPE_STATUS_BAR";
-            case ITYPE_NAVIGATION_BAR:
-                return "ITYPE_NAVIGATION_BAR";
-            case ITYPE_CAPTION_BAR:
-                return "ITYPE_CAPTION_BAR";
-            case ITYPE_TOP_GESTURES:
-                return "ITYPE_TOP_GESTURES";
-            case ITYPE_BOTTOM_GESTURES:
-                return "ITYPE_BOTTOM_GESTURES";
-            case ITYPE_LEFT_GESTURES:
-                return "ITYPE_LEFT_GESTURES";
-            case ITYPE_RIGHT_GESTURES:
-                return "ITYPE_RIGHT_GESTURES";
-            case ITYPE_TOP_MANDATORY_GESTURES:
-                return "ITYPE_TOP_MANDATORY_GESTURES";
-            case ITYPE_BOTTOM_MANDATORY_GESTURES:
-                return "ITYPE_BOTTOM_MANDATORY_GESTURES";
-            case ITYPE_LEFT_MANDATORY_GESTURES:
-                return "ITYPE_LEFT_MANDATORY_GESTURES";
-            case ITYPE_RIGHT_MANDATORY_GESTURES:
-                return "ITYPE_RIGHT_MANDATORY_GESTURES";
-            case ITYPE_LEFT_TAPPABLE_ELEMENT:
-                return "ITYPE_LEFT_TAPPABLE_ELEMENT";
-            case ITYPE_TOP_TAPPABLE_ELEMENT:
-                return "ITYPE_TOP_TAPPABLE_ELEMENT";
-            case ITYPE_RIGHT_TAPPABLE_ELEMENT:
-                return "ITYPE_RIGHT_TAPPABLE_ELEMENT";
-            case ITYPE_BOTTOM_TAPPABLE_ELEMENT:
-                return "ITYPE_BOTTOM_TAPPABLE_ELEMENT";
-            case ITYPE_CLIMATE_BAR:
-                return "ITYPE_CLIMATE_BAR";
-            case ITYPE_EXTRA_NAVIGATION_BAR:
-                return "ITYPE_EXTRA_NAVIGATION_BAR";
-            case ITYPE_LEFT_GENERIC_OVERLAY:
-                return "ITYPE_LEFT_GENERIC_OVERLAY";
-            case ITYPE_TOP_GENERIC_OVERLAY:
-                return "ITYPE_TOP_GENERIC_OVERLAY";
-            case ITYPE_RIGHT_GENERIC_OVERLAY:
-                return "ITYPE_RIGHT_GENERIC_OVERLAY";
-            case ITYPE_BOTTOM_GENERIC_OVERLAY:
-                return "ITYPE_BOTTOM_GENERIC_OVERLAY";
-            default:
-                return "ITYPE_UNKNOWN_" + type;
-        }
     }
 
     @Override
