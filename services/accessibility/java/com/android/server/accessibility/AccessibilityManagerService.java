@@ -636,6 +636,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private void onPackageRemovedLocked(String packageName) {
+        final AccessibilityUserState userState = getCurrentUserState();
+        final Predicate<ComponentName> filter =
+                component -> component != null && component.getPackageName().equals(
+                        packageName);
+        userState.mBindingServices.removeIf(filter);
+        userState.mCrashedServices.removeIf(filter);
+        final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
+        boolean anyServiceRemoved = false;
+        while (it.hasNext()) {
+            final ComponentName comp = it.next();
+            final String compPkg = comp.getPackageName();
+            if (compPkg.equals(packageName)) {
+                it.remove();
+                userState.mTouchExplorationGrantedServices.remove(comp);
+                anyServiceRemoved = true;
+            }
+        }
+        if (anyServiceRemoved) {
+            // Update the enabled services setting.
+            persistComponentNamesToSettingLocked(
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                    userState.mEnabledServices, mCurrentUserId);
+            // Update the touch exploration granted services setting.
+            persistComponentNamesToSettingLocked(
+                    Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                    userState.mTouchExplorationGrantedServices, mCurrentUserId);
+            onUserStateChangedLocked(userState);
+        }
+    }
+
     private void registerBroadcastReceivers() {
         PackageMonitor monitor = new PackageMonitor() {
             @Override
@@ -708,34 +739,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (userId != mCurrentUserId) {
                         return;
                     }
-                    final AccessibilityUserState userState = getUserStateLocked(userId);
-                    final Predicate<ComponentName> filter =
-                            component -> component != null && component.getPackageName().equals(
-                                    packageName);
-                    userState.mBindingServices.removeIf(filter);
-                    userState.mCrashedServices.removeIf(filter);
-                    final Iterator<ComponentName> it = userState.mEnabledServices.iterator();
-                    boolean anyServiceRemoved = false;
-                    while (it.hasNext()) {
-                        final ComponentName comp = it.next();
-                        final String compPkg = comp.getPackageName();
-                        if (compPkg.equals(packageName)) {
-                            it.remove();
-                            userState.mTouchExplorationGrantedServices.remove(comp);
-                            anyServiceRemoved = true;
-                        }
-                    }
-                    if (anyServiceRemoved) {
-                        // Update the enabled services setting.
-                        persistComponentNamesToSettingLocked(
-                                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                                userState.mEnabledServices, userId);
-                        // Update the touch exploration granted services setting.
-                        persistComponentNamesToSettingLocked(
-                                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                                userState.mTouchExplorationGrantedServices, userId);
-                        onUserStateChangedLocked(userState);
-                    }
+                    onPackageRemovedLocked(packageName);
                 }
             }
 
@@ -795,6 +799,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     synchronized (mLock) {
                         if (userId == mCurrentUserId) {
                             onSomePackagesChangedLocked();
+                        }
+                    }
+                }
+
+                @Override
+                public void onPackageRemoved(String packageName, int uid) {
+                    final int userId = UserHandle.getUserId(uid);
+                    synchronized (mLock) {
+                        if (userId == mCurrentUserId) {
+                            onPackageRemovedLocked(packageName);
                         }
                     }
                 }
