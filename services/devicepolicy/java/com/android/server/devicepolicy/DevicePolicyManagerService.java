@@ -16530,9 +16530,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!mUserManager.isUserRunning(new UserHandle(deviceOwnerUserId))) {
             return STATUS_USER_NOT_RUNNING;
         }
-        if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
-            return STATUS_HAS_PAIRED;
-        }
 
         boolean isHeadlessSystemUserMode = mInjector.userManagerIsHeadlessSystemUserMode();
 
@@ -16556,7 +16553,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         if (isAdb) {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
-            if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 // DO can be setup only if there are no users which are neither created by default
                 // nor marked as FOR_TESTING
 
