@@ -174,12 +174,9 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     @NonNull
     TaskFragmentContainer createNewSplitWithEmptySideContainer(
             @NonNull WindowContainerTransaction wct, @NonNull Activity primaryActivity,
-            @NonNull Intent secondaryIntent, @NonNull SplitPairRule rule) {
+            @NonNull Intent secondaryIntent, @NonNull SplitPairRule rule,
+            @NonNull SplitAttributes splitAttributes) {
         final TaskProperties taskProperties = getTaskProperties(primaryActivity);
-        final Pair<Size, Size> minDimensionsPair = getActivityIntentMinDimensionsPair(
-                primaryActivity, secondaryIntent);
-        final SplitAttributes splitAttributes = computeSplitAttributes(taskProperties, rule,
-                rule.getDefaultSplitAttributes(), minDimensionsPair);
         final Rect primaryRelBounds = getRelBoundsForPosition(POSITION_START, taskProperties,
                 splitAttributes);
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
@@ -217,15 +214,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
      *                          same container as the primary activity, a new container will be
      *                          created and the activity will be re-parented to it.
      * @param rule The split rule to be applied to the container.
+     * @param splitAttributes The {@link SplitAttributes} to apply
      */
     void createNewSplitContainer(@NonNull WindowContainerTransaction wct,
             @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity,
-            @NonNull SplitPairRule rule) {
+            @NonNull SplitPairRule rule, @NonNull SplitAttributes splitAttributes) {
         final TaskProperties taskProperties = getTaskProperties(primaryActivity);
-        final Pair<Size, Size> minDimensionsPair = getActivitiesMinDimensionsPair(primaryActivity,
-                secondaryActivity);
-        final SplitAttributes splitAttributes = computeSplitAttributes(taskProperties, rule,
-                rule.getDefaultSplitAttributes(), minDimensionsPair);
         final Rect primaryRelBounds = getRelBoundsForPosition(POSITION_START, taskProperties,
                 splitAttributes);
         final TaskFragmentContainer primaryContainer = prepareContainerForActivity(wct,
@@ -654,7 +648,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    private static Pair<Size, Size> getActivitiesMinDimensionsPair(
+    static Pair<Size, Size> getActivitiesMinDimensionsPair(
             @NonNull Activity primaryActivity, @NonNull Activity secondaryActivity) {
         return new Pair<>(getMinDimensions(primaryActivity), getMinDimensions(secondaryActivity));
     }
@@ -1027,7 +1021,7 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
     }
 
     @NonNull
-    private static WindowMetrics getTaskWindowMetrics(@NonNull Configuration taskConfiguration) {
+    static WindowMetrics getTaskWindowMetrics(@NonNull Configuration taskConfiguration) {
         final Rect taskBounds = taskConfiguration.windowConfiguration.getBounds();
         // TODO(b/190433398): Supply correct insets.
         final float density = taskConfiguration.densityDpi * DisplayMetrics.DENSITY_DEFAULT_SCALE;
