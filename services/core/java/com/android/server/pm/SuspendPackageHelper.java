@@ -619,10 +619,10 @@ public final class SuspendPackageHelper {
         final Bundle extras = new Bundle(3);
         extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
         extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, uidList);
+        final int flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND;
         handler.post(() -> mBroadcastHelper.sendPackageBroadcast(intent, null /* pkg */,
-                extras, Intent.FLAG_RECEIVER_REGISTERED_ONLY, null /* targetPkg */,
-                null /* finishedReceiver */, new int[]{userId}, null /* instantUserIds */,
-                null /* broadcastAllowList */,
+                extras, flags, null /* targetPkg */, null /* finishedReceiver */,
+                new int[]{userId}, null /* instantUserIds */, null /* broadcastAllowList */,
                 (callingUid, intentExtras) -> BroadcastHelper.filterExtrasChangedPackageList(
                         mPm.snapshotComputer(), callingUid, intentExtras),
                 null /* bOptions */));
