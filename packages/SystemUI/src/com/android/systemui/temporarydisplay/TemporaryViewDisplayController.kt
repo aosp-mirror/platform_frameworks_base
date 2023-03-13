@@ -274,6 +274,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
             it.title = newInfo.windowTitle
         }
         newView.keepScreenOn = true
+        logger.logViewAddedToWindowManager(displayInfo.info, newView)
         windowManager.addView(newView, paramsWithTitle)
         animateViewIn(newView)
     }
@@ -286,12 +287,21 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         val view = checkNotNull(currentDisplayInfo.view) {
             "First item in activeViews list must have a valid view"
         }
+        logger.logViewRemovedFromWindowManager(
+            currentDisplayInfo.info,
+            view,
+            isReinflation = true,
+        )
         windowManager.removeView(view)
         inflateAndUpdateView(currentDisplayInfo)
     }
 
     private val displayScaleListener = object : ConfigurationController.ConfigurationListener {
         override fun onDensityOrFontScaleChanged() {
+            reinflateView()
+        }
+
+        override fun onThemeChanged() {
             reinflateView()
         }
     }
@@ -378,6 +388,7 @@ abstract class TemporaryViewDisplayController<T : TemporaryViewInfo, U : Tempora
         }
         displayInfo.view = null // Need other places??
         animateViewOut(view, removalReason) {
+            logger.logViewRemovedFromWindowManager(displayInfo.info, view)
             windowManager.removeView(view)
             displayInfo.wakeLock?.release(displayInfo.info.wakeReason)
         }
