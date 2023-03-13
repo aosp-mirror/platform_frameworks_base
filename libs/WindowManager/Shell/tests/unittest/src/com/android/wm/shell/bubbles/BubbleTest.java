@@ -29,8 +29,6 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.ShortcutInfo;
-import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
@@ -163,28 +161,5 @@ public class BubbleTest extends ShellTestCase {
         mBubble.setSuppressNotification(false);
 
         verify(mBubbleMetadataFlagListener, never()).onBubbleMetadataFlagChanged(any());
-    }
-
-    @Test
-    public void testBubbleIsConversation_hasConversationShortcut() {
-        Bubble bubble = createBubbleWithShortcut();
-        assertThat(bubble.getShortcutInfo()).isNotNull();
-        assertThat(bubble.isConversation()).isTrue();
-    }
-
-    @Test
-    public void testBubbleIsConversation_hasNoShortcut() {
-        Bubble bubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor);
-        assertThat(bubble.getShortcutInfo()).isNull();
-        assertThat(bubble.isConversation()).isFalse();
-    }
-
-    private Bubble createBubbleWithShortcut() {
-        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext)
-                .setId("mockShortcutId")
-                .build();
-        return new Bubble("mockKey", shortcutInfo, 10, Resources.ID_NULL,
-                "mockTitle", 0 /* taskId */, "mockLocus", true /* isDismissible */,
-                mMainExecutor, mBubbleMetadataFlagListener);
     }
 }

@@ -638,13 +638,6 @@ public class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * Whether this bubble is conversation
-     */
-    public boolean isConversation() {
-        return null != mShortcutInfo;
-    }
-
-    /**
      * Sets whether this notification should be suppressed in the shade.
      */
     @VisibleForTesting
