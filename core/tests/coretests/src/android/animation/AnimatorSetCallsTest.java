@@ -40,7 +40,6 @@ public class AnimatorSetCallsTest {
 
     private AnimatorSetActivity mActivity;
     private AnimatorSet mSet1;
-    private AnimatorSet mSet2;
     private ObjectAnimator mAnimator;
     private CountListener mListener1;
     private CountListener mListener2;
@@ -57,10 +56,10 @@ public class AnimatorSetCallsTest {
             mSet1.addListener(mListener1);
             mSet1.addPauseListener(mListener1);
 
-            mSet2 = new AnimatorSet();
+            AnimatorSet set2 = new AnimatorSet();
             mListener2 = new CountListener();
-            mSet2.addListener(mListener2);
-            mSet2.addPauseListener(mListener2);
+            set2.addListener(mListener2);
+            set2.addPauseListener(mListener2);
 
             mAnimator = ObjectAnimator.ofFloat(square, "translationX", 0f, 100f);
             mListener3 = new CountListener();
@@ -68,8 +67,8 @@ public class AnimatorSetCallsTest {
             mAnimator.addPauseListener(mListener3);
             mAnimator.setDuration(1);
 
-            mSet2.play(mAnimator);
-            mSet1.play(mSet2);
+            set2.play(mAnimator);
+            mSet1.play(set2);
         });
     }
 
@@ -176,7 +175,6 @@ public class AnimatorSetCallsTest {
         assertEquals(1, updateValues.size());
         assertEquals(0f, updateValues.get(0), 0f);
     }
-
     @Test
     public void updateOnlyWhileRunning() {
         ArrayList<Float> updateValues = new ArrayList<>();
@@ -207,118 +205,6 @@ public class AnimatorSetCallsTest {
             float expected = isAtEnd ? 100f : 0f;
             assertEquals(expected, actual, 0f);
         }
-    }
-
-    @Test
-    public void pauseResumeSeekingAnimators() {
-        ValueAnimator animator2 = ValueAnimator.ofFloat(0f, 1f);
-        mSet2.play(animator2).after(mAnimator);
-        mSet2.setStartDelay(100);
-        mSet1.setStartDelay(100);
-        mAnimator.setDuration(100);
-
-        mActivity.runOnUiThread(() -> {
-            mSet1.setCurrentPlayTime(0);
-            mSet1.pause();
-
-            // only startForward and pause should have been called once
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 0
-            );
-            mListener2.assertValues(
-                    0, 0, 0, 0, 0, 0, 0, 0
-            );
-            mListener3.assertValues(
-                    0, 0, 0, 0, 0, 0, 0, 0
-            );
-
-            mSet1.resume();
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 1
-            );
-            mListener2.assertValues(
-                    0, 0, 0, 0, 0, 0, 0, 0
-            );
-            mListener3.assertValues(
-                    0, 0, 0, 0, 0, 0, 0, 0
-            );
-
-            mSet1.setCurrentPlayTime(200);
-
-            // resume and endForward should have been called once
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 1
-            );
-            mListener2.assertValues(
-                    1, 0, 0, 0, 0, 0, 0, 0
-            );
-            mListener3.assertValues(
-                    1, 0, 0, 0, 0, 0, 0, 0
-            );
-
-            mSet1.pause();
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 2, 1
-            );
-            mListener2.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 0
-            );
-            mListener3.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 0
-            );
-            mSet1.resume();
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 2, 2
-            );
-            mListener2.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 1
-            );
-            mListener3.assertValues(
-                    1, 0, 0, 0, 0, 0, 1, 1
-            );
-
-            // now go to animator2
-            mSet1.setCurrentPlayTime(400);
-            mSet1.pause();
-            mSet1.resume();
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 3, 3
-            );
-            mListener2.assertValues(
-                    1, 0, 0, 0, 0, 0, 2, 2
-            );
-            mListener3.assertValues(
-                    1, 0, 1, 0, 0, 0, 1, 1
-            );
-
-            // now go back to mAnimator
-            mSet1.setCurrentPlayTime(250);
-            mSet1.pause();
-            mSet1.resume();
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 4, 4
-            );
-            mListener2.assertValues(
-                    1, 0, 0, 0, 0, 0, 3, 3
-            );
-            mListener3.assertValues(
-                    1, 1, 1, 0, 0, 0, 2, 2
-            );
-
-            // now go back to before mSet2 was being run
-            mSet1.setCurrentPlayTime(1);
-            mSet1.pause();
-            mSet1.resume();
-            mListener1.assertValues(
-                    1, 0, 0, 0, 0, 0, 5, 5
-            );
-            mListener2.assertValues(
-                    1, 0, 0, 1, 0, 0, 3, 3
-            );
-            mListener3.assertValues(
-                    1, 1, 1, 1, 0, 0, 2, 2
-            );
-        });
     }
 
     private void waitForOnUiThread(PollingCheck.PollingCheckCondition condition) {
@@ -352,16 +238,16 @@ public class AnimatorSetCallsTest {
                 int pause,
                 int resume
         ) {
-            assertEquals("onAnimationStart() without direction", 0, startNoParam);
-            assertEquals("onAnimationEnd() without direction", 0, endNoParam);
-            assertEquals("onAnimationStart(forward)", startForward, this.startForward);
-            assertEquals("onAnimationStart(reverse)", startReverse, this.startReverse);
-            assertEquals("onAnimationEnd(forward)", endForward, this.endForward);
-            assertEquals("onAnimationEnd(reverse)", endReverse, this.endReverse);
-            assertEquals("onAnimationCancel()", cancel, this.cancel);
-            assertEquals("onAnimationRepeat()", repeat, this.repeat);
-            assertEquals("onAnimationPause()", pause, this.pause);
-            assertEquals("onAnimationResume()", resume, this.resume);
+            assertEquals(0, startNoParam);
+            assertEquals(0, endNoParam);
+            assertEquals(startForward, this.startForward);
+            assertEquals(startReverse, this.startReverse);
+            assertEquals(endForward, this.endForward);
+            assertEquals(endReverse, this.endReverse);
+            assertEquals(cancel, this.cancel);
+            assertEquals(repeat, this.repeat);
+            assertEquals(pause, this.pause);
+            assertEquals(resume, this.resume);
         }
 
         @Override

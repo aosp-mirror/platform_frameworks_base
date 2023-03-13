@@ -79,13 +79,6 @@ public abstract class Animator implements Cloneable {
     private Object[] mCachedList;
 
     /**
-     * Tracks whether we've notified listeners of the onAnimationStart() event. This can be
-     * complex to keep track of since we notify listeners at different times depending on
-     * startDelay and whether start() was called before end().
-     */
-    boolean mStartListenersCalled = false;
-
-    /**
      * Sets the duration for delaying pausing animators when apps go into the background.
      * Used by AnimationHandler when requested to pause animators.
      *
@@ -172,9 +165,7 @@ public abstract class Animator implements Cloneable {
      * @see AnimatorPauseListener
      */
     public void pause() {
-        // We only want to pause started Animators or animators that setCurrentPlayTime()
-        // have been called on. mStartListenerCalled will be true if seek has happened.
-        if ((isStarted() || mStartListenersCalled) && !mPaused) {
+        if (isStarted() && !mPaused) {
             mPaused = true;
             notifyPauseListeners(AnimatorCaller.ON_PAUSE);
         }
@@ -453,7 +444,6 @@ public abstract class Animator implements Cloneable {
                 anim.mPauseListeners = new ArrayList<AnimatorPauseListener>(mPauseListeners);
             }
             anim.mCachedList = null;
-            anim.mStartListenersCalled = false;
             return anim;
         } catch (CloneNotSupportedException e) {
            throw new AssertionError();
@@ -616,20 +606,6 @@ public abstract class Animator implements Cloneable {
      */
     void notifyPauseListeners(AnimatorCaller<AnimatorPauseListener, Animator> notification) {
         callOnList(mPauseListeners, notification, this, false);
-    }
-
-    void notifyStartListeners(boolean isReversing) {
-        if (mListeners != null && !mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_START, isReversing);
-        }
-        mStartListenersCalled = true;
-    }
-
-    void notifyEndListeners(boolean isReversing) {
-        if (mListeners != null && mStartListenersCalled) {
-            notifyListeners(AnimatorCaller.ON_END, isReversing);
-        }
-        mStartListenersCalled = false;
     }
 
     /**
