@@ -86,6 +86,10 @@ public class PermissionMigrationHelperImpl implements PermissionMigrationHelper 
         Map<Integer, Map<String, LegacyPermissionState>> appIdPermissionStates = new ArrayMap<>();
 
         RuntimePermissionsState legacyState = legacyPersistence.readForUser(UserHandle.of(userId));
+        if (legacyState == null) {
+            return appIdPermissionStates;
+        }
+
         PackageManagerLocal packageManagerLocal =
                 LocalManagerRegistry.getManager(PackageManagerLocal.class);
 
