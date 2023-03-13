@@ -25,7 +25,6 @@ import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.TelephonyCallback
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.ServiceStateListener
-import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
@@ -68,6 +67,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.model.toNetworkNameMo
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository.Companion.DEFAULT_NUM_LEVELS
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.signalStrength
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileTelephonyHelpers.telephonyDisplayInfo
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.model.toMobileDataActivityModel
@@ -392,13 +392,17 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val job = underTest.resolvedNetworkType.onEach { latest = it }.launchIn(this)
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
-            val type = NETWORK_TYPE_UNKNOWN
-            val expected = UnknownNetworkType
-            val ti = mock<TelephonyDisplayInfo>().also { whenever(it.networkType).thenReturn(type) }
+            val ti =
+                telephonyDisplayInfo(
+                    networkType = NETWORK_TYPE_UNKNOWN,
+                    overrideNetworkType = NETWORK_TYPE_UNKNOWN,
+                )
+
             callback.onDisplayInfoChanged(ti)
 
+            val expected = UnknownNetworkType
             assertThat(latest).isEqualTo(expected)
-            assertThat(latest!!.lookupKey).isEqualTo(MobileMappings.toIconKey(type))
+            assertThat(latest!!.lookupKey).isEqualTo(MobileMappings.toIconKey(NETWORK_TYPE_UNKNOWN))
 
             job.cancel()
         }
@@ -412,14 +416,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val overrideType = OVERRIDE_NETWORK_TYPE_NONE
             val type = NETWORK_TYPE_LTE
-            val expected = DefaultNetworkType(mobileMappings.toIconKey(type))
-            val ti =
-                mock<TelephonyDisplayInfo>().also {
-                    whenever(it.overrideNetworkType).thenReturn(overrideType)
-                    whenever(it.networkType).thenReturn(type)
-                }
+            val ti = telephonyDisplayInfo(networkType = type, overrideNetworkType = overrideType)
             callback.onDisplayInfoChanged(ti)
 
+            val expected = DefaultNetworkType(mobileMappings.toIconKey(type))
             assertThat(latest).isEqualTo(expected)
 
             job.cancel()
@@ -433,14 +433,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val type = OVERRIDE_NETWORK_TYPE_LTE_CA
-            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
-            val ti =
-                mock<TelephonyDisplayInfo>().also {
-                    whenever(it.networkType).thenReturn(type)
-                    whenever(it.overrideNetworkType).thenReturn(type)
-                }
+            val ti = telephonyDisplayInfo(networkType = type, overrideNetworkType = type)
             callback.onDisplayInfoChanged(ti)
 
+            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
             assertThat(latest).isEqualTo(expected)
 
             job.cancel()
@@ -455,14 +451,10 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             val callback = getTelephonyCallbackForType<TelephonyCallback.DisplayInfoListener>()
             val unknown = NETWORK_TYPE_UNKNOWN
             val type = OVERRIDE_NETWORK_TYPE_LTE_CA
-            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
-            val ti =
-                mock<TelephonyDisplayInfo>().also {
-                    whenever(it.networkType).thenReturn(unknown)
-                    whenever(it.overrideNetworkType).thenReturn(type)
-                }
+            val ti = telephonyDisplayInfo(unknown, type)
             callback.onDisplayInfoChanged(ti)
 
+            val expected = OverrideNetworkType(mobileMappings.toIconKeyOverride(type))
             assertThat(latest).isEqualTo(expected)
 
             job.cancel()
