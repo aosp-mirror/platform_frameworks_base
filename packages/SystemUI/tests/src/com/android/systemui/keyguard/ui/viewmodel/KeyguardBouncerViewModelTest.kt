@@ -96,7 +96,7 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     fun shouldUpdateSideFps() = runTest {
         var count = 0
         val job = underTest.shouldUpdateSideFps.onEach { count++ }.launchIn(this)
-        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(true)
         // Run the tasks that are pending at this point of virtual time.
         runCurrent()
         assertThat(count).isEqualTo(1)
