@@ -51,7 +51,6 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.FgThread;
@@ -200,12 +199,6 @@ class TransitionController {
 
     /** Starts Collecting */
     void moveToCollecting(@NonNull Transition transition) {
-        moveToCollecting(transition, SYNC_METHOD);
-    }
-
-    /** Starts Collecting */
-    @VisibleForTesting
-    void moveToCollecting(@NonNull Transition transition, int method) {
         if (mCollectingTransition != null) {
             throw new IllegalStateException("Simultaneous transition collection not supported.");
         }
@@ -219,7 +212,7 @@ class TransitionController {
         // Distinguish change type because the response time is usually expected to be not too long.
         final long timeoutMs =
                 transition.mType == TRANSIT_CHANGE ? CHANGE_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
-        mCollectingTransition.startCollecting(timeoutMs, method);
+        mCollectingTransition.startCollecting(timeoutMs);
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
                 mCollectingTransition);
         dispatchLegacyAppTransitionPending();
@@ -492,6 +485,15 @@ class TransitionController {
         } else {
             newTransition = requestStartTransition(createTransition(type, flags),
                     trigger != null ? trigger.asTask() : null, remoteTransition, displayChange);
+            if (newTransition != null && displayChange != null && (displayChange.getStartRotation()
+                    + displayChange.getEndRotation()) % 2 == 0) {
+                // 180 degrees rotation change may not change screen size. So the clients may draw
+                // some frames before and after the display projection transaction is applied by the
+                // remote player. That may cause some buffers to show in different rotation. So use
+                // sync method to pause clients drawing until the projection transaction is applied.
+                mAtm.mWindowManager.mSyncEngine.setSyncMethod(newTransition.getSyncId(),
+                        BLASTSyncEngine.METHOD_BLAST);
+            }
         }
         if (trigger != null) {
             if (isExistenceType(type)) {

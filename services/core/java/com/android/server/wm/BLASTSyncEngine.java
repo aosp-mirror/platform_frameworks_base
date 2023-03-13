@@ -95,7 +95,7 @@ class BLASTSyncEngine {
      */
     class SyncGroup {
         final int mSyncId;
-        final int mSyncMethod;
+        int mSyncMethod = METHOD_BLAST;
         final TransactionReadyListener mListener;
         final Runnable mOnTimeout;
         boolean mReady = false;
@@ -103,9 +103,8 @@ class BLASTSyncEngine {
         private SurfaceControl.Transaction mOrphanTransaction = null;
         private String mTraceName;
 
-        private SyncGroup(TransactionReadyListener listener, int id, String name, int method) {
+        private SyncGroup(TransactionReadyListener listener, int id, String name) {
             mSyncId = id;
-            mSyncMethod = method;
             mListener = listener;
             mOnTimeout = () -> {
                 Slog.w(TAG, "Sync group " + mSyncId + " timeout");
@@ -288,13 +287,12 @@ class BLASTSyncEngine {
      * Prepares a {@link SyncGroup} that is not active yet. Caller must call {@link #startSyncSet}
      * before calling {@link #addToSyncSet(int, WindowContainer)} on any {@link WindowContainer}.
      */
-    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name, int method) {
-        return new SyncGroup(listener, mNextSyncId++, name, method);
+    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name) {
+        return new SyncGroup(listener, mNextSyncId++, name);
     }
 
-    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name,
-            int method) {
-        final SyncGroup s = prepareSyncSet(listener, name, method);
+    int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
+        final SyncGroup s = prepareSyncSet(listener, name);
         startSyncSet(s, timeoutMs);
         return s.mSyncId;
     }
@@ -332,6 +330,15 @@ class BLASTSyncEngine {
 
     void addToSyncSet(int id, WindowContainer wc) {
         getSyncGroup(id).addToSync(wc);
+    }
+
+    void setSyncMethod(int id, int method) {
+        final SyncGroup syncGroup = getSyncGroup(id);
+        if (!syncGroup.mRootMembers.isEmpty()) {
+            throw new IllegalStateException(
+                    "Not allow to change sync method after adding group member, id=" + id);
+        }
+        syncGroup.mSyncMethod = method;
     }
 
     void setReady(int id, boolean ready) {
