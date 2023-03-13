@@ -637,6 +637,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mLockNowPending = false;
 
+    // Timeout for showing the keyguard after the screen is on, in case no "ready" is received.
+    private int mKeyguardDrawnTimeout = 1000;
+
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
     private static final int MSG_KEYGUARD_DRAWN_COMPLETE = 5;
@@ -2176,6 +2179,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         });
 
+        mKeyguardDrawnTimeout = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_keyguardDrawnTimeout);
         mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
                 new StateCallback() {
                     @Override
@@ -4813,7 +4818,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean bootCompleted =
                 LocalServices.getService(SystemServiceManager.class).isBootCompleted();
         // Set longer timeout if it has not booted yet to prevent showing empty window.
-        return bootCompleted ? 1000 : 5000;
+        return bootCompleted ? mKeyguardDrawnTimeout : 5000;
     }
 
     // Called on the DisplayManager's DisplayPowerController thread.

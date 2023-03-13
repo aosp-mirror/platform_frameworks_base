@@ -711,6 +711,9 @@
          mode. -->
     <integer name="config_unfoldTransitionHalfFoldedTimeout">1000</integer>
 
+    <!-- Timeout for receiving the keyguard drawn event from System UI.  -->
+    <integer name="config_keyguardDrawnTimeout">1000</integer>
+
     <!-- Indicates that the device supports having more than one internal display on at the same
          time. Only applicable to devices with more than one internal display. If this option is
          set to false, DisplayManager will make additional effort to ensure no more than 1 internal
