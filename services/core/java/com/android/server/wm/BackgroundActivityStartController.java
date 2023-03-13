@@ -430,7 +430,7 @@ public class BackgroundActivityStartController {
         // anything that has fallen through would currently be aborted
         Slog.w(
                 TAG,
-                "Background activity start [callingPackage: "
+                "Background activity launch blocked [callingPackage: "
                         + callingPackage
                         + "; callingUid: "
                         + callingUid
@@ -502,7 +502,7 @@ public class BackgroundActivityStartController {
             }
             builder.append("Activity start allowed: " + msg + ". callingUid: " + callingUid + ". ");
             builder.append("BAL Code: ");
-            builder.append(code);
+            builder.append(balCodeToString(code));
             Slog.d(TAG,  builder.toString());
         }
         return code;

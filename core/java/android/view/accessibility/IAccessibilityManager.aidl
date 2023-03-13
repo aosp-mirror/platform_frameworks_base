@@ -124,6 +124,9 @@ interface IAccessibilityManager {
     boolean stopFlashNotificationSequence(String opPkg);
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
 
+    boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
+    boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
+
     parcelable WindowTransformationSpec {
         float[] transformationMatrix;
         MagnificationSpec magnificationSpec;

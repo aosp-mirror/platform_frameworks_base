@@ -238,7 +238,7 @@ public class FullScreenMagnificationControllerTest {
     }
 
     private void notRegistered_publicMethodsShouldBeBenign(int displayId) {
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, displayId);
 
         assertFalse(
                 mFullScreenMagnificationController.magnificationRegionContains(displayId, 100,
@@ -673,9 +673,9 @@ public class FullScreenMagnificationControllerTest {
                 .setScale(displayId, 1.5f, startCenter.x, startCenter.y, false,
                         SERVICE_ID_2);
         assertFalse(mFullScreenMagnificationController.resetIfNeeded(displayId, SERVICE_ID_1));
-        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */true, displayId);
+        checkActivatedAndMagnifying(/* activated= */ true, /* magnifying= */ true, displayId);
         assertTrue(mFullScreenMagnificationController.resetIfNeeded(displayId, SERVICE_ID_2));
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, displayId);
     }
 
     @Test
@@ -694,7 +694,7 @@ public class FullScreenMagnificationControllerTest {
         assertTrue(mFullScreenMagnificationController.resetIfNeeded(displayId, false));
         verify(mRequestObserver).onFullScreenMagnificationChanged(eq(displayId),
                 eq(INITIAL_MAGNIFICATION_REGION), any(MagnificationConfig.class));
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, displayId);
         assertFalse(mFullScreenMagnificationController.resetIfNeeded(displayId, false));
     }
 
@@ -758,7 +758,7 @@ public class FullScreenMagnificationControllerTest {
         mTargetAnimationListener.onAnimationUpdate(mMockValueAnimator);
         mStateListener.onAnimationEnd(mMockValueAnimator);
 
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, displayId);
         verify(lastAnimationCallback).onResult(true);
     }
 
@@ -776,26 +776,72 @@ public class FullScreenMagnificationControllerTest {
         mMessageCapturingHandler.sendAllMessages();
         br.onReceive(mMockContext, null);
         mMessageCapturingHandler.sendAllMessages();
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, DISPLAY_0);
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, DISPLAY_1);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, DISPLAY_0);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, DISPLAY_1);
     }
 
     @Test
-    public void testUserContextChange_resetsMagnification() {
+    public void testUserContextChange_magnifierActivated_resetMagnification() {
         for (int i = 0; i < DISPLAY_COUNT; i++) {
-            contextChange_resetsMagnification(i);
+            contextChange_expectedValues(
+                    /* displayId= */ i,
+                    /* isMagnifierActivated= */ true,
+                    /* isAlwaysOnEnabled= */ false,
+                    /* expectedActivated= */ false);
             resetMockWindowManager();
         }
     }
 
-    private void contextChange_resetsMagnification(int displayId) {
+    @Test
+    public void testUserContextChange_magnifierActivatedAndAlwaysOnEnabled_stayActivated() {
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            contextChange_expectedValues(
+                    /* displayId= */ i,
+                    /* isMagnifierActivated= */ true,
+                    /* isAlwaysOnEnabled= */ true,
+                    /* expectedActivated= */ true);
+            resetMockWindowManager();
+        }
+    }
+
+    @Test
+    public void testUserContextChange_magnifierDeactivated_stayDeactivated() {
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            contextChange_expectedValues(
+                    /* displayId= */ i,
+                    /* isMagnifierActivated= */ false,
+                    /* isAlwaysOnEnabled= */ false,
+                    /* expectedActivated= */ false);
+            resetMockWindowManager();
+        }
+    }
+
+    @Test
+    public void testUserContextChange_magnifierDeactivatedAndAlwaysOnEnabled_stayDeactivated() {
+        for (int i = 0; i < DISPLAY_COUNT; i++) {
+            contextChange_expectedValues(
+                    /* displayId= */ i,
+                    /* isMagnifierActivated= */ false,
+                    /* isAlwaysOnEnabled= */ true,
+                    /* expectedActivated= */ false);
+            resetMockWindowManager();
+        }
+    }
+
+    private void contextChange_expectedValues(
+            int displayId, boolean isMagnifierActivated, boolean isAlwaysOnEnabled,
+            boolean expectedActivated) {
+        mFullScreenMagnificationController.setAlwaysOnMagnificationEnabled(isAlwaysOnEnabled);
         register(displayId);
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
-        zoomIn2xToMiddle(displayId);
-        mMessageCapturingHandler.sendAllMessages();
+        if (isMagnifierActivated) {
+            zoomIn2xToMiddle(displayId);
+            mMessageCapturingHandler.sendAllMessages();
+        }
         callbacks.onUserContextChanged();
         mMessageCapturingHandler.sendAllMessages();
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, displayId);
+        checkActivatedAndMagnifying(
+                /* activated= */ expectedActivated, /* magnifying= */ false, displayId);
     }
 
     @Test
@@ -811,10 +857,10 @@ public class FullScreenMagnificationControllerTest {
         MagnificationCallbacks callbacks = getMagnificationCallbacks(displayId);
         zoomIn2xToMiddle(displayId);
         mMessageCapturingHandler.sendAllMessages();
-        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */true, displayId);
+        checkActivatedAndMagnifying(/* activated= */ true, /* magnifying= */ true, displayId);
         callbacks.onDisplaySizeChanged();
         mMessageCapturingHandler.sendAllMessages();
-        checkActivatedAndMagnifyingState(/* activated= */false, /* magnifying= */false, DISPLAY_0);
+        checkActivatedAndMagnifying(/* activated= */ false, /* magnifying= */ false, DISPLAY_0);
     }
 
     @Test
@@ -1169,7 +1215,7 @@ public class FullScreenMagnificationControllerTest {
         mFullScreenMagnificationController.setScaleAndCenter(
                 DISPLAY_0, scale, Float.NaN, Float.NaN, true, SERVICE_ID_1);
 
-        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */false, DISPLAY_0);
+        checkActivatedAndMagnifying(/* activated= */ true, /* magnifying= */ false, DISPLAY_0);
         verify(mMockWindowManager).setForceShowMagnifiableBounds(DISPLAY_0, true);
     }
 
@@ -1280,11 +1326,10 @@ public class FullScreenMagnificationControllerTest {
         float scale = 2.0f;
         mFullScreenMagnificationController.setScale(displayId, scale, startCenter.x, startCenter.y,
                 false, SERVICE_ID_1);
-        checkActivatedAndMagnifyingState(/* activated= */true, /* magnifying= */true, displayId);
+        checkActivatedAndMagnifying(/* activated= */ true, /* magnifying= */ true, displayId);
     }
 
-    private void checkActivatedAndMagnifyingState(
-            boolean activated, boolean magnifying, int displayId) {
+    private void checkActivatedAndMagnifying(boolean activated, boolean magnifying, int displayId) {
         final boolean isActivated = mFullScreenMagnificationController.isActivated(displayId);
         final boolean isMagnifying = mFullScreenMagnificationController.getScale(displayId) > 1.0f;
         assertTrue(isActivated == activated);

@@ -769,9 +769,7 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /** {@hide} */
-    @SystemApi
     @Deprecated
-    // STOPSHIP: remove entirely after this API change lands in AOSP
     public @NonNull BroadcastOptions setDeferUntilActive(boolean shouldDefer) {
         if (shouldDefer) {
             setDeferralPolicy(DEFERRAL_POLICY_UNTIL_ACTIVE);
@@ -782,9 +780,7 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /** {@hide} */
-    @SystemApi
     @Deprecated
-    // STOPSHIP: remove entirely after this API change lands in AOSP
     public boolean isDeferUntilActive() {
         return (mDeferralPolicy == DEFERRAL_POLICY_UNTIL_ACTIVE);
     }

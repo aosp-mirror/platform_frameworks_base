@@ -42,10 +42,13 @@ public abstract class SurfaceControlHdrLayerInfoListener {
      * @param maxH The height of the HDR layer with the largest area
      * @param flags Additional metadata flags, currently always 0
      *              TODO(b/182312559): Add some flags
+     * @param maxDesiredHdrSdrRatio The max desired HDR/SDR ratio. Unbounded if the ratio is
+     *                              positive infinity.
      *
-     * @hide */
+     * @hide
+     */
     public abstract void onHdrInfoChanged(IBinder displayToken, int numberOfHdrLayers,
-            int maxW, int maxH, int flags);
+            int maxW, int maxH, int flags, float maxDesiredHdrSdrRatio);
 
     /**
      * Registers this as an HDR info listener on the provided display
