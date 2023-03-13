@@ -35,7 +35,6 @@ import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -92,7 +91,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 keyguardBypassController,
             )
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
-        `when`(repository.primaryBouncerShow.value).thenReturn(null)
+        `when`(repository.primaryBouncerShow.value).thenReturn(false)
         `when`(bouncerView.delegate).thenReturn(bouncerViewDelegate)
         resources = context.orCreateTestableResources
     }
@@ -101,15 +100,13 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testShow_isScrimmed() {
         underTest.show(true)
         verify(repository).setKeyguardAuthenticated(null)
-        verify(repository).setPrimaryHide(false)
         verify(repository).setPrimaryStartingToHide(false)
         verify(repository).setPrimaryScrimmed(true)
         verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
         verify(repository).setPrimaryShowingSoon(true)
         verify(keyguardStateController).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor).dispatchStartingToShow()
-        verify(repository).setPrimaryVisible(true)
-        verify(repository).setPrimaryShow(any(KeyguardBouncerModel::class.java))
+        verify(repository).setPrimaryShow(true)
         verify(repository).setPrimaryShowingSoon(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.VISIBLE)
     }
@@ -132,9 +129,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(falsingCollector).onBouncerHidden()
         verify(keyguardStateController).notifyPrimaryBouncerShowing(false)
         verify(repository).setPrimaryShowingSoon(false)
-        verify(repository).setPrimaryVisible(false)
-        verify(repository).setPrimaryHide(true)
-        verify(repository).setPrimaryShow(null)
+        verify(repository).setPrimaryShow(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.INVISIBLE)
     }
 
@@ -160,9 +155,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         underTest.setPanelExpansion(EXPANSION_HIDDEN)
-        verify(repository).setPrimaryVisible(false)
-        verify(repository).setPrimaryShow(null)
-        verify(repository).setPrimaryHide(true)
+        verify(repository).setPrimaryShow(false)
         verify(falsingCollector).onBouncerHidden()
         verify(mPrimaryBouncerCallbackInteractor).dispatchReset()
         verify(mPrimaryBouncerCallbackInteractor).dispatchFullyHidden()
@@ -243,11 +236,11 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testIsFullShowing() {
-        `when`(repository.primaryBouncerVisible.value).thenReturn(true)
+        `when`(repository.primaryBouncerShow.value).thenReturn(true)
         `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
         `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         assertThat(underTest.isFullyShowing()).isTrue()
-        `when`(repository.primaryBouncerVisible.value).thenReturn(false)
+        `when`(repository.primaryBouncerShow.value).thenReturn(false)
         assertThat(underTest.isFullyShowing()).isFalse()
     }
 
@@ -370,7 +363,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         isUnlockingWithFpAllowed: Boolean,
         isAnimatingAway: Boolean
     ) {
-        `when`(repository.primaryBouncerVisible.value).thenReturn(isVisible)
+        `when`(repository.primaryBouncerShow.value).thenReturn(isVisible)
         resources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer, sfpsEnabled)
         `when`(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(fpsDetectionRunning)
         `when`(keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)

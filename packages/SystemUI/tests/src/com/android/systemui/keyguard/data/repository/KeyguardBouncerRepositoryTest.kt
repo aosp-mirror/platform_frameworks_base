@@ -55,7 +55,7 @@ class KeyguardBouncerRepositoryTest : SysuiTestCase() {
 
     @Test
     fun changingFlowValueTriggersLogging() = runBlocking {
-        underTest.setPrimaryHide(true)
-        verify(bouncerLogger).logChange("", "PrimaryBouncerHide", false)
+        underTest.setPrimaryShow(true)
+        verify(bouncerLogger).logChange("", "PrimaryBouncerShow", false)
     }
 }
