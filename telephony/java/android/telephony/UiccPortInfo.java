@@ -165,7 +165,7 @@ public final class UiccPortInfo implements Parcelable{
         return "UiccPortInfo (isActive="
                 + mIsActive
                 + ", iccId="
-                + SubscriptionInfo.givePrintableIccid(mIccId)
+                + SubscriptionInfo.getPrintableId(mIccId)
                 + ", portIndex="
                 + mPortIndex
                 + ", mLogicalSlotIndex="
