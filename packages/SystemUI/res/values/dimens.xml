@@ -1111,14 +1111,15 @@
     <dimen name="qs_media_rec_album_title_bottom_margin">22dp</dimen>
     <dimen name="qs_media_rec_album_subtitle_height">12dp</dimen>
 
-    <!-- Media tap-to-transfer chip for sender device -->
-    <dimen name="media_ttt_chip_outer_padding">16dp</dimen>
-    <dimen name="media_ttt_text_size">16sp</dimen>
-    <dimen name="media_ttt_app_icon_size">24dp</dimen>
-    <dimen name="media_ttt_status_icon_size">20dp</dimen>
-    <dimen name="media_ttt_undo_button_vertical_padding">8dp</dimen>
-    <dimen name="media_ttt_undo_button_vertical_negative_margin">-8dp</dimen>
-    <dimen name="media_ttt_last_item_start_margin">12dp</dimen>
+    <!-- Chipbar -->
+    <!-- (Used for media tap-to-transfer chip for sender device and active unlock) -->
+    <dimen name="chipbar_outer_padding">16dp</dimen>
+    <dimen name="chipbar_text_size">16sp</dimen>
+    <dimen name="chipbar_start_icon_size">24dp</dimen>
+    <dimen name="chipbar_end_icon_size">20dp</dimen>
+    <dimen name="chipbar_end_button_vertical_padding">8dp</dimen>
+    <dimen name="chipbar_end_button_vertical_negative_margin">-8dp</dimen>
+    <dimen name="chipbar_end_item_start_margin">12dp</dimen>
 
     <!-- Media tap-to-transfer chip for receiver device -->
     <dimen name="media_ttt_icon_size_receiver">112dp</dimen>
@@ -1584,6 +1585,10 @@
     <!-- Dream overlay complications related dimensions -->
     <!-- The blur radius applied to the dream overlay when entering and exiting dreams -->
     <dimen name="dream_overlay_anim_blur_radius">50dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_height">64dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_width">64dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_radius">32dp</dimen>
+    <dimen name="dream_overlay_bottom_affordance_padding">14dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_translation_y">28dp</dimen>
     <dimen name="dream_overlay_complication_home_controls_padding">28dp</dimen>

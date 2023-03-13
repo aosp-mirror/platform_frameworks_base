@@ -240,7 +240,9 @@ public class NotificationShadeWindowViewController {
 
                 mFalsingCollector.onTouchEvent(ev);
                 mPulsingWakeupGestureHandler.onTouchEvent(ev);
-                mStatusBarKeyguardViewManager.onTouch(ev);
+                if (mStatusBarKeyguardViewManager.onTouch(ev)) {
+                    return true;
+                }
                 if (mBrightnessMirror != null
                         && mBrightnessMirror.getVisibility() == View.VISIBLE) {
                     // Disallow new pointers while the brightness mirror is visible. This is so that

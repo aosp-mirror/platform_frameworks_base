@@ -20,7 +20,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -60,6 +62,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -254,6 +257,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         // Inform the overlay service of dream starting.
         client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
                 true /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
 
         assertThat(mService.shouldShowComplications()).isTrue();
     }
@@ -294,6 +298,48 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         verify(mStateController).setOverlayActive(false);
         verify(mStateController).setLowLightActive(false);
         verify(mStateController).setEntryAnimationsFinished(false);
+    }
+
+    @Test
+    public void testImmediateEndDream() throws Exception {
+        final IDreamOverlayClient client = getClient();
+
+        // Start the dream, but don't execute any Runnables put on the executor yet. We delay
+        // executing Runnables as the timing isn't guaranteed and we want to verify that the overlay
+        // starts and finishes in the proper order even if Runnables are delayed.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        // Immediately end the dream.
+        client.endDream();
+        // Run any scheduled Runnables.
+        mMainExecutor.runAllReady();
+
+        // The overlay starts then finishes.
+        InOrder inOrder = inOrder(mWindowManager);
+        inOrder.verify(mWindowManager).addView(mViewCaptor.capture(), any());
+        inOrder.verify(mWindowManager).removeView(mViewCaptor.getValue());
+    }
+
+    @Test
+    public void testEndDreamDuringStartDream() throws Exception {
+        final IDreamOverlayClient client = getClient();
+
+        // Schedule the endDream call in the middle of the startDream implementation, as any
+        // ordering is possible.
+        doAnswer(invocation -> {
+            client.endDream();
+            return null;
+        }).when(mStateController).setOverlayActive(true);
+
+        // Start the dream.
+        client.startDream(mWindowParams, mDreamOverlayCallback, DREAM_COMPONENT,
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+
+        // The overlay starts then finishes.
+        InOrder inOrder = inOrder(mWindowManager);
+        inOrder.verify(mWindowManager).addView(mViewCaptor.capture(), any());
+        inOrder.verify(mWindowManager).removeView(mViewCaptor.getValue());
     }
 
     @Test

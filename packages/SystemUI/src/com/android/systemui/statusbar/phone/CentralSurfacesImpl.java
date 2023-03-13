@@ -605,7 +605,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     private Runnable mLaunchTransitionEndRunnable;
     private Runnable mLaunchTransitionCancelRunnable;
-    private boolean mLaunchingAffordance;
     private boolean mLaunchCameraWhenFinishedWaking;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private boolean mLaunchEmergencyActionWhenFinishedWaking;
@@ -3744,8 +3743,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
-        boolean launchingAffordanceWithPreview = mLaunchingAffordance;
-        mScrimController.setLaunchingAffordanceWithPreview(launchingAffordanceWithPreview);
         if (mAlternateBouncerInteractor.isVisibleState()) {
             if ((!isOccluded() || isPanelExpanded())
                     && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
@@ -3764,9 +3761,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             ScrimState state = mStatusBarKeyguardViewManager.primaryBouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
-        } else if (launchingAffordanceWithPreview) {
-            // We want to avoid animating when launching with a preview.
-            mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
         } else if (mState == StatusBarState.SHADE_LOCKED) {
