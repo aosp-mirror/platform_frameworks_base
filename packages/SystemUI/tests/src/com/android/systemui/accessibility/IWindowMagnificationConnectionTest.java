@@ -94,7 +94,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
-                mDisplayTracker);
+                mDisplayTracker, getContext().getSystemService(DisplayManager.class));
         mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class));
 

@@ -322,6 +322,10 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         showSettingPanel(true);
     }
 
+    public boolean isSettingPanelShowing() {
+        return mIsVisible;
+    }
+
     public void setScaleSeekbar(float scale) {
         setSeekbarProgress(scale);
     }
