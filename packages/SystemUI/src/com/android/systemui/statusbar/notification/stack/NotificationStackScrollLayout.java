@@ -200,6 +200,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private final boolean mDebugRemoveAnimation;
     private final boolean mSimplifiedAppearFraction;
     private final boolean mUseRoundnessSourceTypes;
+    private final boolean mSensitiveRevealAnimEndabled;
     private boolean mAnimatedInsets;
 
     private int mContentHeight;
@@ -580,6 +581,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 }
             };
 
+    private final NotificationEntry.OnSensitivityChangedListener
+            mOnChildSensitivityChangedListener =
+            new NotificationEntry.OnSensitivityChangedListener() {
+                @Override
+                public void onSensitivityChanged(NotificationEntry entry) {
+                    if (mAnimationsEnabled) {
+                        mHideSensitiveNeedsAnimation = true;
+                        requestChildrenUpdate();
+                    }
+                }
+            };
+
     private Consumer<Integer> mScrollListener;
     private final ScrollAdapter mScrollAdapter = new ScrollAdapter() {
         @Override
@@ -611,6 +624,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
         mSimplifiedAppearFraction = featureFlags.isEnabled(Flags.SIMPLIFIED_APPEAR_FRACTION);
         mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
+        mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         setAnimatedInsetsEnabled(featureFlags.isEnabled(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS));
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
         mScreenOffAnimationController =
@@ -2860,6 +2874,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return;
         }
         child.setOnHeightChangedListener(null);
+        if (child instanceof ExpandableNotificationRow && mSensitiveRevealAnimEndabled) {
+            NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
+            entry.removeOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
+        }
         updateScrollStateForRemovedChild(child);
         boolean animationGenerated = container != null && generateRemoveAnimation(child);
         if (animationGenerated) {
@@ -3121,6 +3139,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void onViewAddedInternal(ExpandableView child) {
         updateHideSensitiveForChild(child);
         child.setOnHeightChangedListener(mOnChildHeightChangedListener);
+        if (child instanceof ExpandableNotificationRow && mSensitiveRevealAnimEndabled) {
+            NotificationEntry entry = ((ExpandableNotificationRow) child).getEntry();
+            entry.addOnSensitivityChangedListener(mOnChildSensitivityChangedListener);
+        }
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
