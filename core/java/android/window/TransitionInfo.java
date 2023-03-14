@@ -24,6 +24,7 @@ import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
@@ -58,6 +59,7 @@ import java.util.List;
  * @hide
  */
 public final class TransitionInfo implements Parcelable {
+    private static final String TAG = "TransitionInfo";
 
     /**
      * Modes are only a sub-set of all the transit-types since they are per-container
@@ -184,9 +186,7 @@ public final class TransitionInfo implements Parcelable {
     private final @TransitionType int mType;
     private final @TransitionFlags int mFlags;
     private final ArrayList<Change> mChanges = new ArrayList<>();
-
-    private SurfaceControl mRootLeash;
-    private final Point mRootOffset = new Point();
+    private final ArrayList<Root> mRoots = new ArrayList<>();
 
     private AnimationOptions mOptions;
 
@@ -200,10 +200,7 @@ public final class TransitionInfo implements Parcelable {
         mType = in.readInt();
         mFlags = in.readInt();
         in.readTypedList(mChanges, Change.CREATOR);
-        mRootLeash = new SurfaceControl();
-        mRootLeash.readFromParcel(in);
-        mRootLeash.setUnreleasedWarningCallSite("TransitionInfo");
-        mRootOffset.readFromParcel(in);
+        in.readTypedList(mRoots, Root.CREATOR);
         mOptions = in.readTypedObject(AnimationOptions.CREATOR);
     }
 
@@ -213,8 +210,7 @@ public final class TransitionInfo implements Parcelable {
         dest.writeInt(mType);
         dest.writeInt(mFlags);
         dest.writeTypedList(mChanges);
-        mRootLeash.writeToParcel(dest, flags);
-        mRootOffset.writeToParcel(dest, flags);
+        dest.writeTypedList(mRoots, flags);
         dest.writeTypedObject(mOptions, flags);
     }
 
@@ -238,10 +234,15 @@ public final class TransitionInfo implements Parcelable {
         return 0;
     }
 
-    /** @see #getRootLeash() */
-    public void setRootLeash(@NonNull SurfaceControl leash, int offsetLeft, int offsetTop) {
-        mRootLeash = leash;
-        mRootOffset.set(offsetLeft, offsetTop);
+    /** @see #getRoot */
+    public void addRootLeash(int displayId, @NonNull SurfaceControl leash,
+            int offsetLeft, int offsetTop) {
+        mRoots.add(new Root(displayId, leash, offsetLeft, offsetTop));
+    }
+
+    /** @see #getRoot */
+    public void addRoot(Root other) {
+        mRoots.add(other);
     }
 
     public void setAnimationOptions(AnimationOptions options) {
@@ -257,23 +258,52 @@ public final class TransitionInfo implements Parcelable {
     }
 
     /**
+     * @return The number of animation roots. Most transitions should have 1, but there may be more
+     *         in some cases (such as a transition spanning multiple displays).
+     */
+    public int getRootCount() {
+        return mRoots.size();
+    }
+
+    /**
+     * @return the transition-root at a specific index.
+     */
+    @NonNull
+    public Root getRoot(int idx) {
+        return mRoots.get(idx);
+    }
+
+    /**
+     * @return the index of the transition-root associated with `displayId` or -1 if not found.
+     */
+    public int findRootIndex(int displayId) {
+        for (int i = 0; i < mRoots.size(); ++i) {
+            if (mRoots.get(i).mDisplayId == displayId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
      * @return a surfacecontrol that can serve as a parent surfacecontrol for all the changing
      * participants to animate within. This will generally be placed at the highest-z-order
      * shared ancestor of all participants. While this is non-null, it's possible for the rootleash
      * to be invalid if the transition is a no-op.
+     *
+     * @deprecated Use {@link #getRoot} instead. This call assumes there is only one root.
      */
+    @Deprecated
     @NonNull
     public SurfaceControl getRootLeash() {
-        if (mRootLeash == null) {
-            throw new IllegalStateException("Trying to get a leash which wasn't set");
+        if (mRoots.isEmpty()) {
+            throw new IllegalStateException("Trying to get a root leash from a no-op transition.");
         }
-        return mRootLeash;
-    }
-
-    /** @return the offset (relative to the screen) of the root leash. */
-    @NonNull
-    public Point getRootOffset() {
-        return mRootOffset;
+        if (mRoots.size() > 1) {
+            android.util.Log.e(TAG, "Assuming one animation root when there are more.",
+                    new Throwable());
+        }
+        return mRoots.get(0).mLeash;
     }
 
     public AnimationOptions getAnimationOptions() {
@@ -320,8 +350,15 @@ public final class TransitionInfo implements Parcelable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{t=" + transitTypeToString(mType) + " f=0x" + Integer.toHexString(mFlags)
-                + " ro=" + mRootOffset + " c=[");
+        sb.append("{t=").append(transitTypeToString(mType)).append(" f=0x")
+                .append(Integer.toHexString(mFlags)).append(" r=[");
+        for (int i = 0; i < mRoots.size(); ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append(mRoots.get(i).mDisplayId).append("@").append(mRoots.get(i).mOffset);
+        }
+        sb.append("] c=[");
         for (int i = 0; i < mChanges.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -448,8 +485,8 @@ public final class TransitionInfo implements Parcelable {
                 c.mSnapshot = null;
             }
         }
-        if (mRootLeash != null) {
-            mRootLeash.release();
+        for (int i = 0; i < mRoots.size(); ++i) {
+            mRoots.get(i).mLeash.release();
         }
     }
 
@@ -476,10 +513,11 @@ public final class TransitionInfo implements Parcelable {
         for (int i = 0; i < mChanges.size(); ++i) {
             out.mChanges.add(mChanges.get(i).localRemoteCopy());
         }
-        out.mRootLeash = mRootLeash != null ? new SurfaceControl(mRootLeash, "localRemote") : null;
+        for (int i = 0; i < mRoots.size(); ++i) {
+            out.mRoots.add(mRoots.get(i).localRemoteCopy());
+        }
         // Doesn't have any native stuff, so no need for actual copy
         out.mOptions = mOptions;
-        out.mRootOffset.set(mRootOffset);
         return out;
     }
 
@@ -496,6 +534,8 @@ public final class TransitionInfo implements Parcelable {
         private final Point mEndRelOffset = new Point();
         private ActivityManager.RunningTaskInfo mTaskInfo = null;
         private boolean mAllowEnterPip;
+        private int mStartDisplayId = INVALID_DISPLAY;
+        private int mEndDisplayId = INVALID_DISPLAY;
         private @Surface.Rotation int mStartRotation = ROTATION_UNDEFINED;
         private @Surface.Rotation int mEndRotation = ROTATION_UNDEFINED;
         /**
@@ -526,6 +566,8 @@ public final class TransitionInfo implements Parcelable {
             mEndRelOffset.readFromParcel(in);
             mTaskInfo = in.readTypedObject(ActivityManager.RunningTaskInfo.CREATOR);
             mAllowEnterPip = in.readBoolean();
+            mStartDisplayId = in.readInt();
+            mEndDisplayId = in.readInt();
             mStartRotation = in.readInt();
             mEndRotation = in.readInt();
             mEndFixedRotation = in.readInt();
@@ -546,6 +588,8 @@ public final class TransitionInfo implements Parcelable {
             out.mEndRelOffset.set(mEndRelOffset);
             out.mTaskInfo = mTaskInfo;
             out.mAllowEnterPip = mAllowEnterPip;
+            out.mStartDisplayId = mStartDisplayId;
+            out.mEndDisplayId = mEndDisplayId;
             out.mStartRotation = mStartRotation;
             out.mEndRotation = mEndRotation;
             out.mEndFixedRotation = mEndFixedRotation;
@@ -605,6 +649,12 @@ public final class TransitionInfo implements Parcelable {
         /** Sets the allowEnterPip flag which represents AppOpsManager check on PiP permission */
         public void setAllowEnterPip(boolean allowEnterPip) {
             mAllowEnterPip = allowEnterPip;
+        }
+
+        /** Sets the start and end rotation of this container. */
+        public void setDisplayId(int start, int end) {
+            mStartDisplayId = start;
+            mEndDisplayId = end;
         }
 
         /** Sets the start and end rotation of this container. */
@@ -725,6 +775,14 @@ public final class TransitionInfo implements Parcelable {
             return mAllowEnterPip;
         }
 
+        public int getStartDisplayId() {
+            return mStartDisplayId;
+        }
+
+        public int getEndDisplayId() {
+            return mEndDisplayId;
+        }
+
         @Surface.Rotation
         public int getStartRotation() {
             return mStartRotation;
@@ -776,6 +834,8 @@ public final class TransitionInfo implements Parcelable {
             mEndRelOffset.writeToParcel(dest, flags);
             dest.writeTypedObject(mTaskInfo, flags);
             dest.writeBoolean(mAllowEnterPip);
+            dest.writeInt(mStartDisplayId);
+            dest.writeInt(mEndDisplayId);
             dest.writeInt(mStartRotation);
             dest.writeInt(mEndRotation);
             dest.writeInt(mEndFixedRotation);
@@ -822,6 +882,11 @@ public final class TransitionInfo implements Parcelable {
             if (mEndRelOffset.x != 0 || mEndRelOffset.y != 0) {
                 sb.append(" eo="); sb.append(mEndRelOffset);
             }
+            sb.append(" d=");
+            if (mStartDisplayId != mEndDisplayId) {
+                sb.append(mStartDisplayId).append("->");
+            }
+            sb.append(mEndDisplayId);
             if (mStartRotation != mEndRotation) {
                 sb.append(" r="); sb.append(mStartRotation);
                 sb.append("->"); sb.append(mEndRotation);
@@ -1106,6 +1171,88 @@ public final class TransitionInfo implements Parcelable {
                             return new CustomActivityTransition[size];
                         }
                     };
+        }
+    }
+
+    /**
+     * An animation root in a transition. There is one of these for each display that contains
+     * participants. It will be placed, in z-order, right above the top-most participant and at the
+     * same position in the hierarchy. As a result, if all participants are animating within a
+     * part of the screen, the root-leash will only be in that part of the screen. In these cases,
+     * it's relative position (from the screen) is stored in {@link Root#getOffset}.
+     */
+    public static final class Root implements Parcelable {
+        private final int mDisplayId;
+        private final SurfaceControl mLeash;
+        private final Point mOffset = new Point();
+
+        public Root(int displayId, @NonNull SurfaceControl leash, int offsetLeft, int offsetTop) {
+            mDisplayId = displayId;
+            mLeash = leash;
+            mOffset.set(offsetLeft, offsetTop);
+        }
+
+        private Root(Parcel in) {
+            mDisplayId = in.readInt();
+            mLeash = new SurfaceControl();
+            mLeash.readFromParcel(in);
+            mLeash.setUnreleasedWarningCallSite("TransitionInfo.Root");
+            mOffset.readFromParcel(in);
+        }
+
+        private Root localRemoteCopy() {
+            return new Root(mDisplayId, new SurfaceControl(mLeash, "localRemote"),
+                    mOffset.x, mOffset.y);
+        }
+
+        /** @return the id of the display this root is on. */
+        public int getDisplayId() {
+            return mDisplayId;
+        }
+
+        /** @return the root's leash. Surfaces should be parented to this while animating. */
+        @NonNull
+        public SurfaceControl getLeash() {
+            return mLeash;
+        }
+
+        /** @return the offset (relative to its screen) of the root leash. */
+        @NonNull
+        public Point getOffset() {
+            return mOffset;
+        }
+
+        /** @hide */
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeInt(mDisplayId);
+            mLeash.writeToParcel(dest, flags);
+            mOffset.writeToParcel(dest, flags);
+        }
+
+        @NonNull
+        public static final Creator<Root> CREATOR =
+                new Creator<Root>() {
+                    @Override
+                    public Root createFromParcel(Parcel in) {
+                        return new Root(in);
+                    }
+
+                    @Override
+                    public Root[] newArray(int size) {
+                        return new Root[size];
+                    }
+                };
+
+        /** @hide */
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public String toString() {
+            return mDisplayId + "@" + mOffset + ":" + mLeash;
         }
     }
 }

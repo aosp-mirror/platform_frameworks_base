@@ -179,7 +179,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler {
                 out.getChanges().add(info.getChanges().get(i));
             }
         }
-        out.setRootLeash(info.getRootLeash(), info.getRootOffset().x, info.getRootOffset().y);
+        for (int i = 0; i < info.getRootCount(); ++i) {
+            out.addRoot(info.getRoot(i));
+        }
         out.setAnimationOptions(info.getAnimationOptions());
         return out;
     }

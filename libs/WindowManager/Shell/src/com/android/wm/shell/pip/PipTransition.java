@@ -489,10 +489,11 @@ public class PipTransition extends PipTransitionController {
         // Reparent the pip leash to the root with max layer so that we can animate it outside of
         // parent crop, and make sure it is not covered by other windows.
         final SurfaceControl pipLeash = pipChange.getLeash();
-        startTransaction.reparent(pipLeash, info.getRootLeash());
+        final int rootIdx = TransitionUtil.rootIndexFor(pipChange, info);
+        startTransaction.reparent(pipLeash, info.getRoot(rootIdx).getLeash());
         startTransaction.setLayer(pipLeash, Integer.MAX_VALUE);
         // Note: because of this, the bounds to animate should be translated to the root coordinate.
-        final Point offset = info.getRootOffset();
+        final Point offset = info.getRoot(rootIdx).getOffset();
         final Rect currentBounds = mPipBoundsState.getBounds();
         currentBounds.offset(-offset.x, -offset.y);
         startTransaction.setPosition(pipLeash, currentBounds.left, currentBounds.top);
