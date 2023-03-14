@@ -113,7 +113,7 @@ public class FingerprintManagerTest {
         List<FingerprintSensorPropertiesInternal> actual =
                 mFingerprintManager.getSensorPropertiesInternal();
 
-        assertThat(actual).isEqualTo(mProps);
+        assertThat(actual).containsExactlyElementsIn(mProps);
         verify(mService, never()).getSensorPropertiesInternal(any());
     }
 
