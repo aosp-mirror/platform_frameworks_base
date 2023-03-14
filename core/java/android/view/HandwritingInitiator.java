@@ -205,6 +205,16 @@ public class HandwritingInitiator {
     }
 
     /**
+     * Notify HandwritingInitiator that a delegate view (see {@link View#isHandwritingDelegate})
+     * gained focus.
+     */
+    public void onDelegateViewFocused(@NonNull View view) {
+        if (view == getConnectedView()) {
+            tryAcceptStylusHandwritingDelegation(view);
+        }
+    }
+
+    /**
      * Notify HandwritingInitiator that a new InputConnection is created.
      * The caller of this method should guarantee that each onInputConnectionCreated call
      * is paired with a onInputConnectionClosed call.
