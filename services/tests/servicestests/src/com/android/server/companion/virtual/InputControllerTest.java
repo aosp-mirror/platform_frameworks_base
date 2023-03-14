@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -109,7 +109,7 @@ public class InputControllerTest {
                 device1Id).isNotEqualTo(device2Id);
 
 
-        int[] deviceIds = InputManager.getInstance().getInputDeviceIds();
+        int[] deviceIds = InputManagerGlobal.getInstance().getInputDeviceIds();
         assertWithMessage("InputManager's deviceIds list should contain id of device 1").that(
                 deviceIds).asList().contains(device1Id);
         assertWithMessage("InputManager's deviceIds list should contain id of device 2").that(
@@ -153,7 +153,7 @@ public class InputControllerTest {
                 deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
 
         int deviceId = mInputController.getInputDeviceId(deviceToken);
-        int[] deviceIds = InputManager.getInstance().getInputDeviceIds();
+        int[] deviceIds = InputManagerGlobal.getInstance().getInputDeviceIds();
 
         assertWithMessage("InputManager's deviceIds list should contain id of the device").that(
             deviceIds).asList().contains(deviceId);
