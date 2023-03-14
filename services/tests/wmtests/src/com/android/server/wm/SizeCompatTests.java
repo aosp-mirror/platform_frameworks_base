@@ -573,11 +573,11 @@ public class SizeCompatTests extends WindowTestsBase {
         // The scale is 2000/2500=0.8. The horizontal centered offset is (1000-(1000*0.8))/2=100.
         final float scale = (float) display.mBaseDisplayHeight / currentBounds.height();
         final int offsetX = (int) (display.mBaseDisplayWidth - (origBounds.width() * scale)) / 2;
-        assertEquals(offsetX, currentBounds.left);
+        final int screenX = mActivity.getBounds().left;
+        assertEquals(offsetX, screenX);
 
-        // The position of configuration bounds should be the same as compat bounds.
-        assertEquals(mActivity.getBounds().left, currentBounds.left);
-        assertEquals(mActivity.getBounds().top, currentBounds.top);
+        // The position of configuration bounds should be in app space.
+        assertEquals(screenX, (int) (currentBounds.left * scale + 0.5f));
         // Activity is sandboxed to the offset size compat bounds.
         assertActivityMaxBoundsSandboxed();
 
@@ -607,7 +607,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The size should still be in portrait [100, 0 - 1100, 2500] = 1000x2500.
         assertEquals(origBounds.width(), currentBounds.width());
         assertEquals(origBounds.height(), currentBounds.height());
-        assertEquals(offsetX, currentBounds.left);
+        assertEquals(offsetX, mActivity.getBounds().left);
         assertScaled();
         // Activity is sandboxed due to size compat mode.
         assertActivityMaxBoundsSandboxed();
@@ -770,9 +770,11 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(origAppBounds.height(), appBounds.height());
         // The activity is 1000x1400 and the display is 2500x1000.
         assertScaled();
-        // The position in configuration should be global coordinates.
-        assertEquals(mActivity.getBounds().left, currentBounds.left);
-        assertEquals(mActivity.getBounds().top, currentBounds.top);
+        final float scale = mActivity.getCompatScale();
+        // The position in configuration should be in app coordinates.
+        final Rect screenBounds = mActivity.getBounds();
+        assertEquals(screenBounds.left, (int) (currentBounds.left * scale + 0.5f));
+        assertEquals(screenBounds.top, (int) (currentBounds.top * scale + 0.5f));
 
         // Activity max bounds are sandboxed due to size compat mode.
         assertActivityMaxBoundsSandboxed();
