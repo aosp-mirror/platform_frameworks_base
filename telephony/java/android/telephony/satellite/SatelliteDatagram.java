@@ -17,7 +17,6 @@
 package android.telephony.satellite;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,7 +27,7 @@ public final class SatelliteDatagram implements Parcelable {
     /**
      * Datagram to be sent or received over satellite.
      */
-    private byte[] mData;
+    @NonNull private byte[] mData;
 
     /**
      * @hide
@@ -51,8 +50,8 @@ public final class SatelliteDatagram implements Parcelable {
         out.writeByteArray(mData);
     }
 
-    public static final @android.annotation.NonNull Creator<SatelliteDatagram> CREATOR =
-            new Creator<SatelliteDatagram>() {
+    @NonNull public static final Creator<SatelliteDatagram> CREATOR =
+            new Creator<>() {
                 @Override
                 public SatelliteDatagram createFromParcel(Parcel in) {
                     return new SatelliteDatagram(in);
@@ -64,8 +63,7 @@ public final class SatelliteDatagram implements Parcelable {
                 }
             };
 
-    @Nullable
-    public byte[] getSatelliteDatagram() {
+    @NonNull public byte[] getSatelliteDatagram() {
         return mData;
     }
 
