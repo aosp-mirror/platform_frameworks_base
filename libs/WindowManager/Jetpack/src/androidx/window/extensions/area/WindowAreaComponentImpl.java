@@ -187,6 +187,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentStatus() {
+        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+            return WindowAreaComponent.STATUS_UNSUPPORTED;
+        }
+
         if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
                 || isRearDisplayActive()) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
