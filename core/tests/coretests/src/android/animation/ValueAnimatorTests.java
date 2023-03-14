@@ -40,6 +40,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
 @MediumTest
@@ -1065,6 +1067,64 @@ public class ValueAnimatorTests {
                 assertEquals(0f, a3.getAnimatedFraction());
             }
         });
+    }
+
+    @Test
+    public void reentrantStart() throws Throwable {
+        CountDownLatch latch = new CountDownLatch(1);
+        a1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation, boolean isReverse) {
+                a1.start();
+                latch.countDown();
+            }
+        });
+        mActivityRule.runOnUiThread(() -> a1.start());
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+        // Make sure that the UI thread isn't blocked by an infinite loop:
+        mActivityRule.runOnUiThread(() -> {});
+    }
+
+    @Test
+    public void reentrantPause() throws Throwable {
+        CountDownLatch latch = new CountDownLatch(1);
+        a1.addPauseListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationPause(Animator animation) {
+                a1.pause();
+                latch.countDown();
+            }
+        });
+        mActivityRule.runOnUiThread(() -> {
+            a1.start();
+            a1.pause();
+        });
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+        // Make sure that the UI thread isn't blocked by an infinite loop:
+        mActivityRule.runOnUiThread(() -> {});
+    }
+
+    @Test
+    public void reentrantResume() throws Throwable {
+        CountDownLatch latch = new CountDownLatch(1);
+        a1.addPauseListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationResume(Animator animation) {
+                a1.resume();
+                latch.countDown();
+            }
+        });
+        mActivityRule.runOnUiThread(() -> {
+            a1.start();
+            a1.pause();
+            a1.resume();
+        });
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+
+        // Make sure that the UI thread isn't blocked by an infinite loop:
+        mActivityRule.runOnUiThread(() -> {});
     }
 
     class MyUpdateListener implements ValueAnimator.AnimatorUpdateListener {
