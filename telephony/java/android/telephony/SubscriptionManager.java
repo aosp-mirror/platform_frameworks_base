@@ -2586,41 +2586,18 @@ public class SubscriptionManager {
     }
 
     /**
-     * Returns a constant indicating the state of sim for the slot index.
+     * Set a field in the subscription database. Note not all fields are supported.
      *
-     * @param slotIndex
+     * @param subscriptionId Subscription Id of Subscription.
+     * @param columnName Column name in the database. Note not all fields are supported.
+     * @param value Value to store in the database.
      *
-     * {@See TelephonyManager#SIM_STATE_UNKNOWN}
-     * {@See TelephonyManager#SIM_STATE_ABSENT}
-     * {@See TelephonyManager#SIM_STATE_PIN_REQUIRED}
-     * {@See TelephonyManager#SIM_STATE_PUK_REQUIRED}
-     * {@See TelephonyManager#SIM_STATE_NETWORK_LOCKED}
-     * {@See TelephonyManager#SIM_STATE_READY}
-     * {@See TelephonyManager#SIM_STATE_NOT_READY}
-     * {@See TelephonyManager#SIM_STATE_PERM_DISABLED}
-     * {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR}
+     * @throws IllegalArgumentException if {@code subscriptionId} is invalid, or the field is not
+     * exposed.
+     * @throws SecurityException if callers do not hold the required permission.
      *
-     * {@hide}
-     */
-    public static int getSimStateForSlotIndex(int slotIndex) {
-        int simState = TelephonyManager.SIM_STATE_UNKNOWN;
-
-        try {
-            ISub iSub = TelephonyManager.getSubscriptionService();
-            if (iSub != null) {
-                simState = iSub.getSimStateForSlotIndex(slotIndex);
-            }
-        } catch (RemoteException ex) {
-        }
-
-        return simState;
-    }
-
-    /**
-     * Store properties associated with SubscriptionInfo in database
-     * @param subId Subscription Id of Subscription
-     * @param propKey Column name in database associated with SubscriptionInfo
-     * @param propValue Value to store in DB for particular subId & column name
+     * @see android.provider.Telephony.SimInfo for all the columns.
+     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
