@@ -574,10 +574,8 @@ public class SoundDoseHelper {
 
     /*package*/ void configureSafeMedia(boolean forced, String caller) {
         int msg = MSG_CONFIGURE_SAFE_MEDIA;
-        if (forced) {
-            // unforced should not cancel forced configure messages
-            mAudioHandler.removeMessages(msg);
-        }
+
+        mAudioHandler.removeMessages(msg);
 
         long time = 0;
         if (forced) {

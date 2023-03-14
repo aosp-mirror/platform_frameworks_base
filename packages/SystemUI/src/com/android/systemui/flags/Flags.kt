@@ -308,7 +308,8 @@ object Flags {
         unreleasedFlag(611, "new_status_bar_icons_debug_coloring")
 
     // TODO(b/265892345): Tracking Bug
-    val PLUG_IN_STATUS_BAR_CHIP = unreleasedFlag(265892345, "plug_in_status_bar_chip")
+    val PLUG_IN_STATUS_BAR_CHIP =
+            unreleasedFlag(265892345, "plug_in_status_bar_chip", teamfood = true)
 
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
@@ -668,7 +669,8 @@ object Flags {
 
     // TODO(b/259428678): Tracking Bug
     @JvmField
-    val KEYBOARD_BACKLIGHT_INDICATOR = unreleasedFlag(2601, "keyboard_backlight_indicator")
+    val KEYBOARD_BACKLIGHT_INDICATOR =
+            unreleasedFlag(2601, "keyboard_backlight_indicator", teamfood = true)
 
     // TODO(b/272036292): Tracking Bug
     @JvmField

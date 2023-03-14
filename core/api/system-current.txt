@@ -161,7 +161,7 @@ package android {
     field public static final String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
     field public static final String LOCATION_BYPASS = "android.permission.LOCATION_BYPASS";
     field public static final String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
-    field public static final String LOG_PROCESS_ACTIVITIES = "android.permission.LOG_PROCESS_ACTIVITIES";
+    field public static final String LOG_FOREGROUND_RESOURCE_USE = "android.permission.LOG_FOREGROUND_RESOURCE_USE";
     field public static final String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
@@ -538,15 +538,15 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void killProcessesWhenImperceptible(@NonNull int[], @NonNull String);
     method @RequiresPermission(android.Manifest.permission.KILL_UID) public void killUid(int, String);
-    method @RequiresPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES) public void noteForegroundResourceUse(int, int, int, int);
+    method @RequiresPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE) public void noteForegroundResourceUseBegin(int, int, int) throws java.lang.SecurityException;
+    method @RequiresPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE) public void noteForegroundResourceUseEnd(int, int, int) throws java.lang.SecurityException;
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public void setDeviceLocales(@NonNull android.os.LocaleList);
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean startProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean stopProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean switchUser(@NonNull android.os.UserHandle);
-    field public static final int FOREGROUND_SERVICE_API_EVENT_BEGIN = 1; // 0x1
-    field public static final int FOREGROUND_SERVICE_API_EVENT_END = 2; // 0x2
+    field public static final int FOREGROUND_SERVICE_API_TYPE_AUDIO = 5; // 0x5
     field public static final int FOREGROUND_SERVICE_API_TYPE_BLUETOOTH = 2; // 0x2
     field public static final int FOREGROUND_SERVICE_API_TYPE_CAMERA = 1; // 0x1
     field public static final int FOREGROUND_SERVICE_API_TYPE_CDM = 9; // 0x9

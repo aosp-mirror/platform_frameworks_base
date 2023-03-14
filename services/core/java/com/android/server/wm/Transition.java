@@ -369,7 +369,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mState;
     }
 
-    @VisibleForTesting
     int getSyncId() {
         return mSyncId;
     }
@@ -409,18 +408,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mState == STATE_FINISHED;
     }
 
-    @VisibleForTesting
-    void startCollecting(long timeoutMs) {
-        startCollecting(timeoutMs, TransitionController.SYNC_METHOD);
-    }
-
     /** Starts collecting phase. Once this starts, all relevant surface operations are sync. */
-    void startCollecting(long timeoutMs, int method) {
+    void startCollecting(long timeoutMs) {
         if (mState != STATE_PENDING) {
             throw new IllegalStateException("Attempting to re-use a transition");
         }
         mState = STATE_COLLECTING;
-        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG, method);
+        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG);
+        mSyncEngine.setSyncMethod(mSyncId, TransitionController.SYNC_METHOD);
 
         mLogger.mSyncId = mSyncId;
         mLogger.mCollectTimeNs = SystemClock.elapsedRealtimeNanos();

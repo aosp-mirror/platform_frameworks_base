@@ -286,34 +286,34 @@ public class SatelliteManager {
     public @interface SatelliteError {}
 
     /**
-     * 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
-     */
-    public static final int NT_RADIO_TECHNOLOGY_NB_IOT_NTN = 0;
-    /**
-     * 3GPP 5G NR over Non-Terrestrial-Networks technology.
-     */
-    public static final int NT_RADIO_TECHNOLOGY_NR_NTN = 1;
-    /**
-     * 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology.
-     */
-    public static final int NT_RADIO_TECHNOLOGY_EMTC_NTN = 2;
-    /**
-     * Proprietary technology.
-     */
-    public static final int NT_RADIO_TECHNOLOGY_PROPRIETARY = 3;
-    /**
      * Unknown Non-Terrestrial radio technology. This generic radio technology should be used
      * only when the radio technology cannot be mapped to other specific radio technologies.
      */
-    public static final int NT_RADIO_TECHNOLOGY_UNKNOWN = -1;
+    public static final int NT_RADIO_TECHNOLOGY_UNKNOWN = 0;
+    /**
+     * 3GPP NB-IoT (Narrowband Internet of Things) over Non-Terrestrial-Networks technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_NB_IOT_NTN = 1;
+    /**
+     * 3GPP 5G NR over Non-Terrestrial-Networks technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_NR_NTN = 2;
+    /**
+     * 3GPP eMTC (enhanced Machine-Type Communication) over Non-Terrestrial-Networks technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_EMTC_NTN = 3;
+    /**
+     * Proprietary technology.
+     */
+    public static final int NT_RADIO_TECHNOLOGY_PROPRIETARY = 4;
 
     /** @hide */
     @IntDef(prefix = "NT_RADIO_TECHNOLOGY_", value = {
+            NT_RADIO_TECHNOLOGY_UNKNOWN,
             NT_RADIO_TECHNOLOGY_NB_IOT_NTN,
             NT_RADIO_TECHNOLOGY_NR_NTN,
             NT_RADIO_TECHNOLOGY_EMTC_NTN,
-            NT_RADIO_TECHNOLOGY_PROPRIETARY,
-            NT_RADIO_TECHNOLOGY_UNKNOWN
+            NT_RADIO_TECHNOLOGY_PROPRIETARY
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NTRadioTechnology {}
