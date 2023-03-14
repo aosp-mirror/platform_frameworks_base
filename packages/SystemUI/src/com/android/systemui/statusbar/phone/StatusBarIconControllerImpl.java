@@ -32,7 +32,6 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -350,33 +349,6 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
-    // TODO(b/265307726): Determine why we have two [setExternalIcon] methods and why they're
-    // different.
-    @Override
-    public void setExternalIcon(String slot) {
-        String slotName = createExternalSlotName(slot);
-        int viewIndex = mStatusBarIconList.getViewIndex(slotName, 0);
-        int height = mContext.getResources().getDimensionPixelSize(
-                R.dimen.status_bar_icon_drawing_size);
-        mIconGroups.forEach(l -> l.onIconExternal(viewIndex, height));
-    }
-
-    @Override
-    public void setIcon(String slot, StatusBarIcon icon) {
-        setExternalIcon(slot, icon);
-    }
-
-    private void setExternalIcon(String slot, StatusBarIcon icon) {
-        String slotName = createExternalSlotName(slot);
-        if (icon == null) {
-            removeAllIconsForSlot(slotName);
-            return;
-        }
-
-        StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
-        setIcon(slotName, holder);
-    }
-
     private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {
         @Override
         public void setIcon(String slot, StatusBarIcon icon) {
@@ -389,6 +361,26 @@ public class StatusBarIconControllerImpl implements Tunable,
             removeAllIconsForExternalSlot(slot);
         }
     };
+
+    @Override
+    public void setIconFromTile(String slot, StatusBarIcon icon) {
+        setExternalIcon(slot, icon);
+    }
+
+    @Override
+    public void removeIconForTile(String slot) {
+        removeAllIconsForExternalSlot(slot);
+    }
+
+    private void setExternalIcon(String slot, StatusBarIcon icon) {
+        if (icon == null) {
+            removeAllIconsForExternalSlot(slot);
+            return;
+        }
+        String slotName = createExternalSlotName(slot);
+        StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
+        setIcon(slotName, holder);
+    }
 
     private void setIcon(String slot, @NonNull StatusBarIconHolder holder) {
         boolean isNew = mStatusBarIconList.getIconHolder(slot, holder.getTag()) == null;
@@ -452,8 +444,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
     }
 
-    @Override
-    public void removeAllIconsForExternalSlot(String slotName) {
+    private void removeAllIconsForExternalSlot(String slotName) {
         removeAllIconsForSlot(createExternalSlotName(slotName));
     }
 

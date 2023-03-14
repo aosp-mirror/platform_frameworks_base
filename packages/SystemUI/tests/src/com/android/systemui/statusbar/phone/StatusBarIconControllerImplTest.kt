@@ -66,7 +66,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     /** Regression test for b/255428281. */
     @Test
-    fun internalAndExternalIconWithSameName_bothDisplayed() {
+    fun internalAndExternalIconWithSameName_externalFromTile_bothDisplayed() {
         val slotName = "mute"
 
         // Internal
@@ -82,7 +82,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* number= */ 0,
                 "contentDescription",
             )
-        underTest.setIcon(slotName, externalIcon)
+        underTest.setIconFromTile(slotName, externalIcon)
 
         assertThat(iconList.slots).hasSize(2)
         // Whichever was added last comes first
@@ -148,17 +148,17 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     /** Regression test for b/255428281. */
     @Test
-    fun internalAndExternalIconWithSameName_externalRemoved_viaRemoveAll_internalStays() {
+    fun internalAndExternalIconWithSameName_externalRemoved_fromTileRemove_internalStays() {
         val slotName = "mute"
 
         // Internal
         underTest.setIcon(slotName, /* resourceId= */ 10, "contentDescription")
 
         // External
-        underTest.setIcon(slotName, createExternalIcon())
+        underTest.setIconFromTile(slotName, createExternalIcon())
 
-        // WHEN the external icon is removed via #removeAllIconsForExternalSlot
-        underTest.removeAllIconsForExternalSlot(slotName)
+        // WHEN the external icon is removed via #removeIconForTile
+        underTest.removeIconForTile(slotName)
 
         // THEN the external icon is removed but the internal icon remains
         assertThat(iconList.slots).hasSize(2)
@@ -172,17 +172,17 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     /** Regression test for b/255428281. */
     @Test
-    fun internalAndExternalIconWithSameName_externalRemoved_viaSetNull_internalStays() {
+    fun internalAndExternalIconWithSameName_externalRemoved_fromTileSetNull_internalStays() {
         val slotName = "mute"
 
         // Internal
         underTest.setIcon(slotName, /* resourceId= */ 10, "contentDescription")
 
         // External
-        underTest.setIcon(slotName, createExternalIcon())
+        underTest.setIconFromTile(slotName, createExternalIcon())
 
-        // WHEN the external icon is removed via a #setIcon(null)
-        underTest.setIcon(slotName, /* icon= */ null)
+        // WHEN the external icon is removed via a #setIconFromTile(null)
+        underTest.setIconFromTile(slotName, /* icon= */ null)
 
         // THEN the external icon is removed but the internal icon remains
         assertThat(iconList.slots).hasSize(2)
@@ -203,12 +203,12 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
         underTest.setIcon(slotName, /* resourceId= */ 10, "contentDescription")
 
         // External
-        underTest.setIcon(slotName, createExternalIcon())
+        underTest.setIconFromTile(slotName, createExternalIcon())
 
         // WHEN the internal icon is removed via #removeIcon
         underTest.removeIcon(slotName, /* tag= */ 0)
 
-        // THEN the external icon is removed but the internal icon remains
+        // THEN the internal icon is removed but the external icon remains
         assertThat(iconList.slots).hasSize(2)
         assertThat(iconList.slots[0].name).isEqualTo(slotName + EXTERNAL_SLOT_SUFFIX)
         assertThat(iconList.slots[1].name).isEqualTo(slotName)
@@ -227,12 +227,12 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
         underTest.setIcon(slotName, /* resourceId= */ 10, "contentDescription")
 
         // External
-        underTest.setIcon(slotName, createExternalIcon())
+        underTest.setIconFromTile(slotName, createExternalIcon())
 
         // WHEN the internal icon is removed via #removeAllIconsForSlot
         underTest.removeAllIconsForSlot(slotName)
 
-        // THEN the external icon is removed but the internal icon remains
+        // THEN the internal icon is removed but the external icon remains
         assertThat(iconList.slots).hasSize(2)
         assertThat(iconList.slots[0].name).isEqualTo(slotName + EXTERNAL_SLOT_SUFFIX)
         assertThat(iconList.slots[1].name).isEqualTo(slotName)
@@ -260,7 +260,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* number= */ 0,
                 "externalDescription",
             )
-        underTest.setIcon(slotName, startingExternalIcon)
+        underTest.setIconFromTile(slotName, startingExternalIcon)
 
         // WHEN the internal icon is updated
         underTest.setIcon(slotName, /* resourceId= */ 11, "newContentDescription")
@@ -282,7 +282,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
 
     /** Regression test for b/255428281. */
     @Test
-    fun internalAndExternalIconWithSameName_externalUpdatedIndependently() {
+    fun internalAndExternalIconWithSameName_fromTile_externalUpdatedIndependently() {
         val slotName = "mute"
 
         // Internal
@@ -298,7 +298,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* number= */ 0,
                 "externalDescription",
             )
-        underTest.setIcon(slotName, startingExternalIcon)
+        underTest.setIconFromTile(slotName, startingExternalIcon)
 
         // WHEN the external icon is updated
         val newExternalIcon =
@@ -310,7 +310,7 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
                 /* number= */ 0,
                 "newExternalDescription",
             )
-        underTest.setIcon(slotName, newExternalIcon)
+        underTest.setIconFromTile(slotName, newExternalIcon)
 
         // THEN only the external slot gets the updates
         val externalSlot = iconList.slots[0]
@@ -375,8 +375,8 @@ class StatusBarIconControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun externalSlot_alreadyEndsWithSuffix_suffixNotAddedTwice() {
-        underTest.setIcon("myslot$EXTERNAL_SLOT_SUFFIX", createExternalIcon())
+    fun externalSlot_fromTile_alreadyEndsWithSuffix_suffixNotAddedTwice() {
+        underTest.setIconFromTile("myslot$EXTERNAL_SLOT_SUFFIX", createExternalIcon())
 
         assertThat(iconList.slots).hasSize(1)
         assertThat(iconList.slots[0].name).isEqualTo("myslot$EXTERNAL_SLOT_SUFFIX")
