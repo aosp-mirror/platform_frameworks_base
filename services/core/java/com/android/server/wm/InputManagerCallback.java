@@ -25,7 +25,6 @@ import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
 import android.util.Slog;
@@ -218,11 +217,6 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             // Look for the topmost non-default display
             return firstExternalDisplayId;
         }
-    }
-
-    @Override
-    public PointF getCursorPosition() {
-        return mService.getLatestMousePosition();
     }
 
     @Override
