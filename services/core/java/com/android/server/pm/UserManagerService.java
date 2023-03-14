@@ -7175,6 +7175,11 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         @Override
+        public @Nullable int[] getDisplaysAssignedToUser(@UserIdInt int userId) {
+            return mUserVisibilityMediator.getDisplaysAssignedToUser(userId);
+        }
+
+        @Override
         public @UserIdInt int getUserAssignedToDisplay(int displayId) {
             return mUserVisibilityMediator.getUserAssignedToDisplay(displayId);
         }
