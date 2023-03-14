@@ -62,7 +62,7 @@ import javax.inject.Inject;
  */
 @SysUISingleton
 public class StatusBarIconControllerImpl implements Tunable,
-        ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController, DemoMode {
+        ConfigurationListener, Dumpable, StatusBarIconController, DemoMode {
 
     private static final String TAG = "StatusBarIconController";
     // Use this suffix to prevent external icon slot names from unintentionally overriding our
@@ -93,7 +93,7 @@ public class StatusBarIconControllerImpl implements Tunable,
         mStatusBarPipelineFlags = statusBarPipelineFlags;
 
         configurationController.addCallback(this);
-        commandQueue.addCallback(this);
+        commandQueue.addCallback(mCommandQueueCallbacks);
         tunerService.addTunable(this, ICON_HIDE_LIST);
         demoModeController.addCallback(this);
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -350,6 +350,8 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
     }
 
+    // TODO(b/265307726): Determine why we have two [setExternalIcon] methods and why they're
+    // different.
     @Override
     public void setExternalIcon(String slot) {
         String slotName = createExternalSlotName(slot);
@@ -359,11 +361,12 @@ public class StatusBarIconControllerImpl implements Tunable,
         mIconGroups.forEach(l -> l.onIconExternal(viewIndex, height));
     }
 
-    // Override for *both* CommandQueue.Callbacks AND StatusBarIconController.
-    // TODO(b/265307726): Pull out the CommandQueue callbacks into a member variable to
-    //  differentiate between those callback methods and StatusBarIconController methods.
     @Override
     public void setIcon(String slot, StatusBarIcon icon) {
+        setExternalIcon(slot, icon);
+    }
+
+    private void setExternalIcon(String slot, StatusBarIcon icon) {
         String slotName = createExternalSlotName(slot);
         if (icon == null) {
             removeAllIconsForSlot(slotName);
@@ -373,6 +376,19 @@ public class StatusBarIconControllerImpl implements Tunable,
         StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
         setIcon(slotName, holder);
     }
+
+    private final CommandQueue.Callbacks mCommandQueueCallbacks = new CommandQueue.Callbacks() {
+        @Override
+        public void setIcon(String slot, StatusBarIcon icon) {
+            // Icons that come from CommandQueue are from external services.
+            setExternalIcon(slot, icon);
+        }
+
+        @Override
+        public void removeIcon(String slot) {
+            removeAllIconsForExternalSlot(slot);
+        }
+    };
 
     private void setIcon(String slot, @NonNull StatusBarIconHolder holder) {
         boolean isNew = mStatusBarIconList.getIconHolder(slot, holder.getTag()) == null;
@@ -415,14 +431,6 @@ public class StatusBarIconControllerImpl implements Tunable,
             mIconGroups.forEach(l -> l.mGroup.getChildAt(viewIndex)
                     .setAccessibilityLiveRegion(accessibilityLiveRegion));
         }
-    }
-
-    // CommandQueue.Callbacks override
-    // TODO(b/265307726): Pull out the CommandQueue callbacks into a member variable to
-    //  differentiate between those callback methods and StatusBarIconController methods.
-    @Override
-    public void removeIcon(String slot) {
-        removeAllIconsForExternalSlot(slot);
     }
 
     /** */
