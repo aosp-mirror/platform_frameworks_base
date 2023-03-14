@@ -30,31 +30,12 @@ public final class PointingInfo implements Parcelable {
     /** Satellite elevation in degrees */
     private float mSatelliteElevationDegrees;
 
-    /** Antenna azimuth in degrees */
-    private float mAntennaAzimuthDegrees;
-
-    /**
-     * Angle of rotation about the x axis. This value represents the angle between a plane
-     * parallel to the device's screen and a plane parallel to the ground.
-     */
-    private float mAntennaPitchDegrees;
-
-    /**
-     * Angle of rotation about the y axis. This value represents the angle between a plane
-     * perpendicular to the device's screen and a plane parallel to the ground.
-     */
-    private float mAntennaRollDegrees;
-
     /**
      * @hide
      */
-    public PointingInfo(float satelliteAzimuthDegrees, float satelliteElevationDegrees,
-            float antennaAzimuthDegrees, float antennaPitchDegrees, float antennaRollDegrees) {
+    public PointingInfo(float satelliteAzimuthDegrees, float satelliteElevationDegrees) {
         mSatelliteAzimuthDegrees = satelliteAzimuthDegrees;
         mSatelliteElevationDegrees = satelliteElevationDegrees;
-        mAntennaAzimuthDegrees = antennaAzimuthDegrees;
-        mAntennaPitchDegrees = antennaPitchDegrees;
-        mAntennaRollDegrees = antennaRollDegrees;
     }
 
     private PointingInfo(Parcel in) {
@@ -70,9 +51,6 @@ public final class PointingInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeFloat(mSatelliteAzimuthDegrees);
         out.writeFloat(mSatelliteElevationDegrees);
-        out.writeFloat(mAntennaAzimuthDegrees);
-        out.writeFloat(mAntennaPitchDegrees);
-        out.writeFloat(mAntennaRollDegrees);
     }
 
     public static final @android.annotation.NonNull Creator<PointingInfo> CREATOR =
@@ -99,18 +77,6 @@ public final class PointingInfo implements Parcelable {
 
         sb.append("SatelliteElevationDegrees:");
         sb.append(mSatelliteElevationDegrees);
-        sb.append(",");
-
-        sb.append("AntennaAzimuthDegrees:");
-        sb.append(mAntennaAzimuthDegrees);
-        sb.append(",");
-
-        sb.append("AntennaPitchDegrees:");
-        sb.append(mAntennaPitchDegrees);
-        sb.append(",");
-
-        sb.append("AntennaRollDegrees:");
-        sb.append(mAntennaRollDegrees);
         return sb.toString();
     }
 
@@ -122,23 +88,8 @@ public final class PointingInfo implements Parcelable {
         return mSatelliteElevationDegrees;
     }
 
-    public float getAntennaAzimuthDegrees() {
-        return mAntennaAzimuthDegrees;
-    }
-
-    public float getAntennaPitchDegrees() {
-        return mAntennaPitchDegrees;
-    }
-
-    public float getAntennaRollDegrees() {
-        return mAntennaRollDegrees;
-    }
-
     private void readFromParcel(Parcel in) {
         mSatelliteAzimuthDegrees = in.readFloat();
         mSatelliteElevationDegrees = in.readFloat();
-        mAntennaAzimuthDegrees = in.readFloat();
-        mAntennaPitchDegrees = in.readFloat();
-        mAntennaRollDegrees = in.readFloat();
     }
 }
