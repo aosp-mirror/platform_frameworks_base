@@ -51,6 +51,7 @@ public interface RegisteredComplicationsModule {
     int DREAM_MEDIA_COMPLICATION_WEIGHT = 0;
     int DREAM_HOME_CONTROLS_CHIP_COMPLICATION_WEIGHT = 4;
     int DREAM_MEDIA_ENTRY_COMPLICATION_WEIGHT = 3;
+    int DREAM_WEATHER_COMPLICATION_WEIGHT = 0;
 
     /**
      * Provides layout parameters for the clock time complication.

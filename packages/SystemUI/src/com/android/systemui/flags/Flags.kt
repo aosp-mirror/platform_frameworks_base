@@ -238,6 +238,11 @@ object Flags {
     @JvmField
     val HIDE_SMARTSPACE_ON_DREAM_OVERLAY = unreleasedFlag(404, "hide_smartspace_on_dream_overlay")
 
+    // TODO(b/271460958): Tracking Bug
+    @JvmField
+    val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY = unreleasedFlag(405,
+        "show_weather_complication_on_dream_overlay")
+
     // 500 - quick settings
 
     val PEOPLE_TILE = resourceBooleanFlag(502, R.bool.flag_conversations, "people_tile")
