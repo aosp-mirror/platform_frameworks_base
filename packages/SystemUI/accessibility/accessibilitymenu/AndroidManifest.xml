@@ -58,5 +58,8 @@
         <intent>
             <action android:name="android.intent.action.VOICE_COMMAND" />
         </intent>
+        <!--intent>
+            <action android:name="android.settings.ACCESSIBILITY_SETTINGS" />
+        </intent-->
     </queries>
 </manifest>
