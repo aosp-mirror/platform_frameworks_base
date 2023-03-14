@@ -94,6 +94,11 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
+    public void removeMagnificationSettingsPanel(int display) {
+        mHandler.post(() -> mWindowMagnification.hideMagnificationSettingsPanel(display));
+    }
+
+    @Override
     public void setConnectionCallback(IWindowMagnificationConnectionCallback callback) {
         mConnectionCallback = callback;
     }

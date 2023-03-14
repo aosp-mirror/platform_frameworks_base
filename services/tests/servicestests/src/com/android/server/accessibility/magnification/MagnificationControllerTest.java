@@ -1035,6 +1035,25 @@ public class MagnificationControllerTest {
     }
 
     @Test
+    public void disableWindowMode_windowEnabled_removeMagnificationSettingsPanel()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_WINDOW);
+
+        mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
+
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
+    }
+
+    @Test
+    public void onFullScreenDeactivated_fullScreenEnabled_removeMagnificationSettingsPanel()
+            throws RemoteException {
+        setMagnificationEnabled(MODE_FULLSCREEN);
+        mScreenMagnificationController.reset(TEST_DISPLAY, /* animate= */ true);
+
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
+    }
+
+    @Test
     public void imeWindowStateShown_windowMagnifying_logWindowMode() {
         MagnificationController spyController = spy(mMagnificationController);
         spyController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
