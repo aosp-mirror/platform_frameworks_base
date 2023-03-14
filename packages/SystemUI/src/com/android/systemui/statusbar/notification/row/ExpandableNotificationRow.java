@@ -185,7 +185,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mMaxSmallHeight;
     private int mMaxSmallHeightLarge;
     private int mMaxExpandedHeight;
-    private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
     private boolean mMustStayOnScreen;
 
@@ -3066,14 +3065,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         //  layout during shade expansion.
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
-    }
-
-    @Override
-    public int getExtraBottomPadding() {
-        if (mIsSummaryWithChildren && isGroupExpanded()) {
-            return mIncreasedPaddingBetweenElements;
-        }
-        return 0;
     }
 
     public void setInlineReplyAnimationFlagEnabled(boolean isEnabled) {
