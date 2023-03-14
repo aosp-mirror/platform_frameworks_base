@@ -29,6 +29,8 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -112,6 +114,9 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             .thenReturn(keyguardSecurityContainerController)
         whenever(keyguardTransitionInteractor.lockscreenToDreamingTransition)
             .thenReturn(emptyFlow<TransitionStep>())
+
+        val featureFlags = FakeFeatureFlags();
+        featureFlags.set(Flags.TRACKPAD_GESTURE_BACK, false)
         underTest =
             NotificationShadeWindowViewController(
                 lockscreenShadeTransitionController,
@@ -138,6 +143,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 udfpsOverlayInteractor,
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
+                featureFlags,
             )
         underTest.setupExpandedStatusBar()
 
