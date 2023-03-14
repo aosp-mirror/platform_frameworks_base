@@ -1797,6 +1797,10 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
+        t.traceBegin("StartAppHibernationService");
+        mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
+        t.traceEnd();
+
         t.traceBegin("ArtManagerLocal");
         DexOptHelper.initializeArtManagerLocal(context, mPackageManagerService);
         t.traceEnd();
@@ -2318,10 +2322,6 @@ public final class SystemServer implements Dumpable {
             // based on that feature.
             t.traceBegin("StartVoiceRecognitionManager");
             mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
-            t.traceEnd();
-
-            t.traceBegin("StartAppHibernationService");
-            mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
             t.traceEnd();
 
             if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
