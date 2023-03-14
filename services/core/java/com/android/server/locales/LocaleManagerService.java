@@ -129,11 +129,8 @@ public class LocaleManagerService extends SystemService {
 
         mBackupHelper = new LocaleManagerBackupHelper(this,
                 mPackageManager, broadcastHandlerThread);
-        AppUpdateTracker appUpdateTracker =
-                new AppUpdateTracker(mContext, this, mBackupHelper);
-
         mPackageMonitor = new LocaleManagerServicePackageMonitor(mBackupHelper,
-                systemAppUpdateTracker, appUpdateTracker, this);
+                systemAppUpdateTracker, this);
         mPackageMonitor.register(context, broadcastHandlerThread.getLooper(),
                 UserHandle.ALL,
                 true);
@@ -554,7 +551,8 @@ public class LocaleManagerService extends SystemService {
                 atomRecordForMetrics.mTargetUid,
                 atomRecordForMetrics.mNewLocales,
                 atomRecordForMetrics.mPrevLocales,
-                atomRecordForMetrics.mStatus);
+                atomRecordForMetrics.mStatus,
+                atomRecordForMetrics.mCaller);
     }
 
     /**
@@ -598,7 +596,7 @@ public class LocaleManagerService extends SystemService {
     }
 
     private void setOverrideLocaleConfigUnchecked(@NonNull String appPackageName,
-            @UserIdInt int userId, @Nullable LocaleConfig overridelocaleConfig,
+            @UserIdInt int userId, @Nullable LocaleConfig overrideLocaleConfig,
             @NonNull AppSupportedLocalesChangedAtomRecord atomRecord) {
         synchronized (mWriteLock) {
             if (DEBUG) {
@@ -606,26 +604,35 @@ public class LocaleManagerService extends SystemService {
                         "set the override LocaleConfig for package " + appPackageName + " and user "
                                 + userId);
             }
+            LocaleConfig resLocaleConfig = null;
+            try {
+                resLocaleConfig = LocaleConfig.fromContextIgnoringOverride(
+                        mContext.createPackageContext(appPackageName, 0));
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Unknown package name " + appPackageName);
+                return;
+            }
             final File file = getXmlFileNameForUser(appPackageName, userId);
 
-            if (overridelocaleConfig == null) {
+            if (overrideLocaleConfig == null) {
                 if (file.exists()) {
                     Slog.d(TAG, "remove the override LocaleConfig");
                     file.delete();
                 }
+                removeUnsupportedAppLocales(appPackageName, userId, resLocaleConfig);
                 atomRecord.setOverrideRemoved(true);
                 atomRecord.setStatus(FrameworkStatsLog
                         .APP_SUPPORTED_LOCALES_CHANGED__STATUS__SUCCESS);
                 return;
             } else {
-                if (overridelocaleConfig.isSameLocaleConfig(
+                if (overrideLocaleConfig.isSameLocaleConfig(
                         getOverrideLocaleConfig(appPackageName, userId))) {
                     Slog.d(TAG, "the same override, ignore it");
                     atomRecord.setSameAsPrevConfig(true);
                     return;
                 }
 
-                LocaleList localeList = overridelocaleConfig.getSupportedLocales();
+                LocaleList localeList = overrideLocaleConfig.getSupportedLocales();
                 // Normally the LocaleList object should not be null. However we reassign it as the
                 // empty list in case it happens.
                 if (localeList == null) {
@@ -654,16 +661,10 @@ public class LocaleManagerService extends SystemService {
                 }
                 atomicFile.finishWrite(stream);
                 // Clear per-app locales if they are not in the override LocaleConfig.
-                removeUnsupportedAppLocales(appPackageName, userId, overridelocaleConfig);
-                try {
-                    Context appContext = mContext.createPackageContext(appPackageName, 0);
-                    if (overridelocaleConfig.isSameLocaleConfig(
-                            LocaleConfig.fromContextIgnoringOverride(appContext))) {
-                        Slog.d(TAG, "setOverrideLocaleConfig, same as the app's LocaleConfig");
-                        atomRecord.setSameAsResConfig(true);
-                    }
-                } catch (PackageManager.NameNotFoundException e) {
-                    Slog.e(TAG, "Unknown package name " + appPackageName);
+                removeUnsupportedAppLocales(appPackageName, userId, overrideLocaleConfig);
+                if (overrideLocaleConfig.isSameLocaleConfig(resLocaleConfig)) {
+                    Slog.d(TAG, "setOverrideLocaleConfig, same as the app's LocaleConfig");
+                    atomRecord.setSameAsResConfig(true);
                 }
                 atomRecord.setStatus(FrameworkStatsLog
                         .APP_SUPPORTED_LOCALES_CHANGED__STATUS__SUCCESS);
@@ -675,23 +676,29 @@ public class LocaleManagerService extends SystemService {
     }
 
     /**
-     * Checks if the per-app locales are in the new override LocaleConfig. Per-app locales
-     * missing from the new LocaleConfig will be removed.
+     * Checks if the per-app locales are in the LocaleConfig. Per-app locales missing from the
+     * LocaleConfig will be removed.
      */
-    private void removeUnsupportedAppLocales(String appPackageName, int userId,
+    void removeUnsupportedAppLocales(String appPackageName, int userId,
             LocaleConfig localeConfig) {
         LocaleList appLocales = getApplicationLocalesUnchecked(appPackageName, userId);
-        // Remove the app locale from the locale list if it doesn't exist in the override
-        // LocaleConfig.
+        // Remove the per-app locales from the locale list if they don't exist in the LocaleConfig.
         boolean resetAppLocales = false;
         List<Locale> newAppLocales = new ArrayList<Locale>();
-        for (int i = 0; i < appLocales.size(); i++) {
-            if (!localeConfig.containsLocale(appLocales.get(i))) {
-                Slog.i(TAG, "reset the app locales");
-                resetAppLocales = true;
-                continue;
+
+        if (localeConfig == null) {
+            //Reset the app locales to the system default
+            Slog.i(TAG, "There is no LocaleConfig, reset app locales");
+            resetAppLocales = true;
+        } else {
+            for (int i = 0; i < appLocales.size(); i++) {
+                if (!localeConfig.containsLocale(appLocales.get(i))) {
+                    Slog.i(TAG, "Missing from the LocaleConfig, reset app locales");
+                    resetAppLocales = true;
+                    continue;
+                }
+                newAppLocales.add(appLocales.get(i));
             }
-            newAppLocales.add(appLocales.get(i));
         }
 
         if (resetAppLocales) {
@@ -699,7 +706,8 @@ public class LocaleManagerService extends SystemService {
             Locale[] locales = new Locale[newAppLocales.size()];
             try {
                 setApplicationLocales(appPackageName, userId,
-                        new LocaleList(newAppLocales.toArray(locales)), false);
+                        new LocaleList(newAppLocales.toArray(locales)),
+                        mBackupHelper.areLocalesSetFromDelegate(userId, appPackageName));
             } catch (RemoteException | IllegalArgumentException e) {
                 Slog.e(TAG, "Could not set locales for " + appPackageName, e);
             }
@@ -829,7 +837,7 @@ public class LocaleManagerService extends SystemService {
     @NonNull
     private File getXmlFileNameForUser(@NonNull String appPackageName, @UserIdInt int userId) {
         // TODO(b/262752965): use per-package data directory
-        final File dir = new File(Environment.getDataSystemDeDirectory(userId), LOCALE_CONFIGS);
+        final File dir = new File(Environment.getDataSystemCeDirectory(userId), LOCALE_CONFIGS);
         return new File(dir, appPackageName + SUFFIX_FILE_NAME);
     }
 

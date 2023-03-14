@@ -666,6 +666,7 @@ public class ActivityManager {
      * Used to log FGS API events from Audio API
      * @hide
      */
+    @SystemApi
     public static final int FOREGROUND_SERVICE_API_TYPE_AUDIO = 5;
     /**
      * Used to log FGS API events from microphone API
@@ -715,13 +716,11 @@ public class ActivityManager {
      * Used to log a start event for an FGS API
      * @hide
      */
-    @SystemApi
     public static final int FOREGROUND_SERVICE_API_EVENT_BEGIN = 1;
     /**
      * Used to log a stop event for an FGS API
      * @hide
      */
-    @SystemApi
     public static final int FOREGROUND_SERVICE_API_EVENT_END = 2;
     /**
      * Constants used to denote API state
@@ -5617,23 +5616,32 @@ public class ActivityManager {
      *
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.LOG_PROCESS_ACTIVITIES)
-    public void noteForegroundResourceUse(@ForegroundServiceApiType int apiType,
-            @ForegroundServiceApiEvent int apiEvent, int uid, int pid) {
+    @RequiresPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE)
+    public void noteForegroundResourceUseBegin(@ForegroundServiceApiType int apiType,
+            int uid, int pid) throws SecurityException {
         try {
-            switch (apiEvent) {
-                case FOREGROUND_SERVICE_API_EVENT_BEGIN:
-                    getService().logFgsApiBegin(apiType, uid, pid);
-                    break;
-                case FOREGROUND_SERVICE_API_EVENT_END:
-                    getService().logFgsApiEnd(apiType, uid, pid);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Argument of "
-                            + apiType + " not supported for foreground resource use logging");
-            }
+            getService().logFgsApiBegin(apiType, uid, pid);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Internal method for logging API end. Used with
+     * FGS metrics logging. Is called by APIs that are
+     * used with FGS to log an API event (eg when
+     * the camera starts).
+     * @hide
+     *
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.LOG_FOREGROUND_RESOURCE_USE)
+    public void noteForegroundResourceUseEnd(@ForegroundServiceApiType int apiType,
+            int uid, int pid) throws SecurityException {
+        try {
+            getService().logFgsApiEnd(apiType, uid, pid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

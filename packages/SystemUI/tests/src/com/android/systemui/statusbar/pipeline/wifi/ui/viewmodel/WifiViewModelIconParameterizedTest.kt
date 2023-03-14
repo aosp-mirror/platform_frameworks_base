@@ -368,40 +368,37 @@ internal class WifiViewModelIconParameterizedTest(private val testCase: TestCase
 
                 // network = CarrierMerged => not shown
                 TestCase(
+                    enabled = true,
+                    isDefault = true,
+                    forceHidden = false,
                     network =
                         WifiNetworkModel.CarrierMerged(NETWORK_ID, subscriptionId = 1, level = 1),
                     expected = null,
                 ),
 
-                // network = Inactive => not shown
+                // isDefault = false => no networks shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Inactive,
                     expected = null,
                 ),
-
-                // network = Unavailable => not shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Unavailable,
                     expected = null,
                 ),
-
-                // network = Active & validated = false => not shown
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = false, level = 3),
                     expected = null,
                 ),
 
-                // network = Active & validated = true => shown
+                // Even though this network is active and validated, we still doesn't want it shown
+                // because wifi isn't the default connection (b/272509965).
                 TestCase(
+                    isDefault = false,
                     network = WifiNetworkModel.Active(NETWORK_ID, isValidated = true, level = 4),
-                    expected =
-                        Expected(
-                            iconResource = WIFI_FULL_ICONS[4],
-                            contentDescription = { context ->
-                                context.getString(WIFI_CONNECTION_STRENGTH[4])
-                            },
-                            description = "Full internet level 4 icon",
-                        ),
+                    expected = null,
                 ),
             )
     }

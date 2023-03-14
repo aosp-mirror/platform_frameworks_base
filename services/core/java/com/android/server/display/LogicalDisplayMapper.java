@@ -18,8 +18,6 @@ package com.android.server.display;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.server.display.layout.Layout.NO_LEAD_DISPLAY;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -646,10 +644,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 if ((nextDeviceInfo.flags
                         & DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY) != 0
                         && !nextDeviceInfo.address.equals(deviceInfo.address)) {
-                    layout.createDisplayLocked(nextDeviceInfo.address,
-                            /* isDefault= */ true, /* isEnabled= */ true,
-                            Layout.DEFAULT_DISPLAY_GROUP_NAME, mIdProducer,
-                            /* brightnessThrottlingMapId= */ null, DEFAULT_DISPLAY);
+                    layout.createDefaultDisplayLocked(nextDeviceInfo.address, mIdProducer);
                     applyLayoutLocked();
                     return;
                 }
@@ -1110,9 +1105,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             return;
         }
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
-        layout.createDisplayLocked(info.address, /* isDefault= */ true, /* isEnabled= */ true,
-                Layout.DEFAULT_DISPLAY_GROUP_NAME, mIdProducer,
-                /* brightnessThrottlingMapId= */ null, NO_LEAD_DISPLAY);
+        layout.createDefaultDisplayLocked(info.address, mIdProducer);
     }
 
     private int assignLayerStackLocked(int displayId) {
