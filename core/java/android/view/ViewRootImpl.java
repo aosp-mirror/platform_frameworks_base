@@ -11630,7 +11630,8 @@ public final class ViewRootImpl implements ViewParent,
 
         mNumPausedForSync++;
         mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
-        mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT, 1000);
+        mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT,
+                1000 * Build.HW_TIMEOUT_MULTIPLIER);
         return mActiveSurfaceSyncGroup;
     };
 
