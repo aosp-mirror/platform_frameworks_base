@@ -18,6 +18,7 @@ package com.android.providers.settings;
 
 import android.annotation.NonNull;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.MemoryIntArray;
@@ -81,6 +82,10 @@ final class GenerationRegistry {
     }
 
     private void incrementGenerationInternal(int key, @NonNull String indexMapKey) {
+        if (SettingsState.isGlobalSettingsKey(key)) {
+            // Global settings are shared across users, so ignore the userId in the key
+            key = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
+        }
         synchronized (mLock) {
             final MemoryIntArray backingStore = getBackingStoreLocked(key,
                     /* createIfNotExist= */ false);
@@ -126,6 +131,10 @@ final class GenerationRegistry {
      *  returning the result.
      */
     public void addGenerationData(Bundle bundle, int key, String indexMapKey) {
+        if (SettingsState.isGlobalSettingsKey(key)) {
+            // Global settings are shared across users, so ignore the userId in the key
+            key = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
+        }
         synchronized (mLock) {
             final MemoryIntArray backingStore = getBackingStoreLocked(key,
                     /* createIfNotExist= */ true);
@@ -140,11 +149,9 @@ final class GenerationRegistry {
                     // Should not happen unless having error accessing the backing store
                     return;
                 }
-                bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
-                        backingStore);
+                bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY, backingStore);
                 bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
-                bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY,
-                        backingStore.get(index));
+                bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY, backingStore.get(index));
                 if (DEBUG) {
                     Slog.i(LOG_TAG, "Exported index:" + index + " for "
                             + (indexMapKey.isEmpty() ? "unset settings" : "setting:" + indexMapKey)
