@@ -22,6 +22,10 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BAL_PERMISSION;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,7 +75,8 @@ class BackgroundLaunchProcessController {
         mBackgroundActivityStartCallback = callback;
     }
 
-    boolean areBackgroundActivityStartsAllowed(int pid, int uid, String packageName,
+    @BackgroundActivityStartController.BalCode
+    int areBackgroundActivityStartsAllowed(int pid, int uid, String packageName,
             int appSwitchState, boolean isCheckingForFgsStart,
             boolean hasActivityInVisibleTask, boolean hasBackgroundActivityStartPrivileges,
             long lastStopAppSwitchesTime, long lastActivityLaunchTime,
@@ -93,7 +98,7 @@ class BackgroundLaunchProcessController {
                                 + ")] Activity start allowed: within "
                                 + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
                     }
-                    return true;
+                    return BAL_ALLOW_GRACE_PERIOD;
                 }
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "[Process(" + pid + ")] Activity start within "
@@ -110,7 +115,7 @@ class BackgroundLaunchProcessController {
                         + ")] Activity start allowed: process instrumenting with background "
                         + "activity starts privileges");
             }
-            return true;
+            return BAL_ALLOW_BAL_PERMISSION;
         }
         // Allow if the caller has an activity in any foreground task.
         if (hasActivityInVisibleTask
@@ -119,7 +124,7 @@ class BackgroundLaunchProcessController {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process has activity in foreground task");
             }
-            return true;
+            return BAL_ALLOW_FOREGROUND;
         }
         // Allow if the caller is bound by a UID that's currently foreground.
         if (isBoundByForegroundUid()) {
@@ -127,7 +132,7 @@ class BackgroundLaunchProcessController {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process bound by foreground uid");
             }
-            return true;
+            return BAL_ALLOW_FOREGROUND;
         }
         // Allow if the flag was explicitly set.
         if (isBackgroundStartAllowedByToken(uid, packageName, isCheckingForFgsStart)) {
@@ -135,9 +140,9 @@ class BackgroundLaunchProcessController {
                 Slog.d(TAG, "[Process(" + pid
                         + ")] Activity start allowed: process allowed by token");
             }
-            return true;
+            return BAL_ALLOW_BAL_PERMISSION;
         }
-        return false;
+        return BAL_BLOCK;
     }
 
     /**
