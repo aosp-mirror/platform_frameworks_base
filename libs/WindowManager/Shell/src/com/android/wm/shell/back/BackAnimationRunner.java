@@ -75,7 +75,7 @@ class BackAnimationRunner {
                 };
         mWaitingAnimation = false;
         try {
-            mRunner.onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,
+            getRunner().onAnimationStart(TRANSIT_OLD_UNSET, apps, wallpapers,
                     nonApps, callback);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed call onAnimationStart", e);
