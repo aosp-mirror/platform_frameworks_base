@@ -35,6 +35,8 @@ import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -232,6 +234,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     // suppressor.
     //
     // If the entry was not suppressed by DND, just returns the given decision.
+    @NonNull
     private FullScreenIntentDecision getDecisionGivenSuppression(FullScreenIntentDecision decision,
             boolean suppressedByDND) {
         if (suppressedByDND) {
@@ -243,7 +246,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     }
 
     @Override
-    public FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry) {
+    public FullScreenIntentDecision getFullScreenIntentDecision(@NonNull NotificationEntry entry) {
         if (entry.getSbn().getNotification().fullScreenIntent == null) {
             if (entry.isStickyAndNotDemoted()) {
                 return FullScreenIntentDecision.NO_FSI_SHOW_STICKY_HUN;
@@ -336,52 +339,30 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         final int uid = entry.getSbn().getUid();
         final String packageName = entry.getSbn().getPackageName();
         switch (decision) {
-            case NO_FSI_SHOW_STICKY_HUN:
-                mLogger.logNoFullscreen(entry, "Permission denied, show sticky HUN");
-                return;
             case NO_FULL_SCREEN_INTENT:
-                return;
-            case NO_FSI_SUPPRESSED_BY_DND:
-            case NO_FSI_SUPPRESSED_ONLY_BY_DND:
-                mLogger.logNoFullscreen(entry, "Suppressed by DND");
-                return;
-            case NO_FSI_NOT_IMPORTANT_ENOUGH:
-                mLogger.logNoFullscreen(entry, "Not important enough");
+                // explicitly prevent logging for this (frequent) case
                 return;
             case NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR:
                 android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
                         "groupAlertBehavior");
                 mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR, uid,
                         packageName);
-                mLogger.logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
-                return;
-            case FSI_DEVICE_NOT_INTERACTIVE:
-                mLogger.logFullscreen(entry, "Device is not interactive");
-                return;
-            case FSI_DEVICE_IS_DREAMING:
-                mLogger.logFullscreen(entry, "Device is dreaming");
-                return;
-            case FSI_KEYGUARD_SHOWING:
-                mLogger.logFullscreen(entry, "Keyguard is showing");
-                return;
-            case NO_FSI_EXPECTED_TO_HUN:
-                mLogger.logNoFullscreen(entry, "Expected to HUN");
-                return;
-            case FSI_KEYGUARD_OCCLUDED:
-                mLogger.logFullscreen(entry,
-                        "Expected not to HUN while keyguard occluded");
-                return;
-            case FSI_LOCKED_SHADE:
-                mLogger.logFullscreen(entry, "Keyguard is showing and not occluded");
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": GroupAlertBehavior will prevent HUN");
                 return;
             case NO_FSI_NO_HUN_OR_KEYGUARD:
                 android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
                         "no hun or keyguard");
                 mUiEventLogger.log(FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD, uid, packageName);
-                mLogger.logNoFullscreenWarning(entry, "Expected not to HUN while not on keyguard");
+                mLogger.logNoFullscreenWarning(entry,
+                        decision + ": Expected not to HUN while not on keyguard");
                 return;
-            case FSI_EXPECTED_NOT_TO_HUN:
-                mLogger.logFullscreen(entry, "Expected not to HUN");
+            default:
+                if (decision.shouldLaunch) {
+                    mLogger.logFullscreen(entry, decision.name());
+                } else {
+                    mLogger.logNoFullscreen(entry, decision.name());
+                }
         }
     }
 
