@@ -843,11 +843,13 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             Identity identity = new Identity();
             identity.packageName = ActivityThread.currentOpPackageName();
             if (moduleProperties == null) {
-                List<SoundTrigger.ModuleProperties> modulePropList =
-                        mModelManagementService.listModuleProperties(identity);
-                if (modulePropList.size() > 0) {
-                    moduleProperties = modulePropList.get(0);
-                }
+                moduleProperties = mModelManagementService
+                        .listModuleProperties(identity)
+                        .stream()
+                        .filter(prop -> !prop.getSupportedModelArch()
+                                .equals(SoundTrigger.FAKE_HAL_ARCH))
+                        .findFirst()
+                        .orElse(null);
                 // (@atneya) intentionally let a null moduleProperties through until
                 // all CTS tests are fixed
             }

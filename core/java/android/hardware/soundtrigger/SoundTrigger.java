@@ -77,6 +77,11 @@ public class SoundTrigger {
     }
 
     /**
+     * @hide
+     */
+    public static final String FAKE_HAL_ARCH = "injection";
+
+    /**
      * Status code used when the operation succeeded
      */
     public static final int STATUS_OK = 0;
