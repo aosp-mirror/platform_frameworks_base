@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -128,13 +127,11 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
         verify(mAccessibilityManager).setWindowMagnificationConnection(any(
                 IWindowMagnificationConnection.class));
-        verify(mModeSwitchesController).setSwitchListenerDelegate(notNull());
 
         mCommandQueue.requestWindowMagnificationConnection(false);
         waitForIdleSync();
 
         verify(mAccessibilityManager).setWindowMagnificationConnection(isNull());
-        verify(mModeSwitchesController).setSwitchListenerDelegate(isNull());
     }
 
     @Test
@@ -263,7 +260,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
     }
 
     @Test
-    public void onSettingsPanelVisibilityChanged_delegateToMagnifier() {
+    public void onSettingsPanelVisibilityChanged_windowActivated_delegateToMagnifier() {
+        when(mWindowMagnificationController.isActivated()).thenReturn(true);
         final boolean shown = false;
         mWindowMagnification.mMagnificationSettingsControllerCallback
                 .onSettingsPanelVisibilityChanged(TEST_DISPLAY, shown);

@@ -108,41 +108,46 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     }
 
     @Test
-    public void performClick_smallSizeButton_changeMagnifierSizeSmall() {
+    public void performClick_smallSizeButton_changeMagnifierSizeSmallAndSwitchToWindowMode() {
         // Open view
         mWindowMagnificationSettings.showSettingPanel();
 
-        verifyOnSetMagnifierSize(R.id.magnifier_small_button, MAGNIFICATION_SIZE_SMALL);
+        verifyOnSetMagnifierSizeAndOnModeSwitch(
+                R.id.magnifier_small_button, MAGNIFICATION_SIZE_SMALL);
     }
 
     @Test
-    public void performClick_mediumSizeButton_changeMagnifierSizeMedium() {
+    public void performClick_mediumSizeButton_changeMagnifierSizeMediumAndSwitchToWindowMode() {
         // Open view
         mWindowMagnificationSettings.showSettingPanel();
 
-        verifyOnSetMagnifierSize(R.id.magnifier_medium_button, MAGNIFICATION_SIZE_MEDIUM);
+        verifyOnSetMagnifierSizeAndOnModeSwitch(
+                R.id.magnifier_medium_button, MAGNIFICATION_SIZE_MEDIUM);
     }
 
     @Test
-    public void performClick_largeSizeButton_changeMagnifierSizeLarge() {
+    public void performClick_largeSizeButton_changeMagnifierSizeLargeAndSwitchToWindowMode() {
         // Open view
         mWindowMagnificationSettings.showSettingPanel();
 
-        verifyOnSetMagnifierSize(R.id.magnifier_large_button, MAGNIFICATION_SIZE_LARGE);
+        verifyOnSetMagnifierSizeAndOnModeSwitch(
+                R.id.magnifier_large_button, MAGNIFICATION_SIZE_LARGE);
     }
 
-    private void verifyOnSetMagnifierSize(@IdRes int viewId, int expectedSizeIndex) {
+    private void verifyOnSetMagnifierSizeAndOnModeSwitch(@IdRes int viewId, int expectedSizeIndex) {
         View changeSizeButton = getInternalView(viewId);
 
         // Perform click
         changeSizeButton.performClick();
 
         verify(mWindowMagnificationSettingsCallback).onSetMagnifierSize(expectedSizeIndex);
+        verify(mWindowMagnificationSettingsCallback)
+                .onModeSwitch(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
 
 
     @Test
-    public void performClick_fullScreenModeButton_setEditMagnifierSizeMode() {
+    public void performClick_fullScreenModeButton_switchToFullScreenMode() {
         View fullScreenModeButton = getInternalView(R.id.magnifier_full_button);
         getInternalView(R.id.magnifier_panel_view);
 
@@ -152,7 +157,6 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         // Perform click
         fullScreenModeButton.performClick();
 
-        verify(mWindowManager).removeView(mSettingView);
         verify(mWindowMagnificationSettingsCallback)
                 .onModeSwitch(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }

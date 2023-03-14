@@ -167,8 +167,14 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     @Override
     public void onPerformScaleAction(int displayId, float scale) {
-        getWindowMagnificationMgr().setScale(displayId, scale);
-        getWindowMagnificationMgr().persistScale(displayId);
+        if (getFullScreenMagnificationController().isActivated(displayId)) {
+            getFullScreenMagnificationController().setScaleAndCenter(displayId, scale,
+                    Float.NaN, Float.NaN, false, MAGNIFICATION_GESTURE_HANDLER_ID);
+            getFullScreenMagnificationController().persistScale(displayId);
+        } else if (getWindowMagnificationMgr().isWindowMagnifierEnabled(displayId)) {
+            getWindowMagnificationMgr().setScale(displayId, scale);
+            getWindowMagnificationMgr().persistScale(displayId);
+        }
     }
 
     @Override

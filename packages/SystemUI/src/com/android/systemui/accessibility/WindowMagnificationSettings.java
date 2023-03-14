@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.annotation.IntDef;
@@ -91,7 +92,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     private ImageButton mLargeButton;
     private Button mDoneButton;
     private Button mEditButton;
-    private ImageButton mChangeModeButton;
+    private ImageButton mFullScreenButton;
     private int mLastSelectedButtonIndex = MagnificationSize.NONE;
     private boolean mAllowDiagonalScrolling = false;
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
@@ -104,6 +105,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             MagnificationSize.SMALL,
             MagnificationSize.MEDIUM,
             MagnificationSize.LARGE,
+            MagnificationSize.FULLSCREEN
     })
     /** Denotes the Magnification size type. */
     public @interface MagnificationSize {
@@ -111,6 +113,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         int SMALL = 1;
         int MEDIUM = 2;
         int LARGE = 3;
+        int FULLSCREEN = 4;
     }
 
     @VisibleForTesting
@@ -247,13 +250,12 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                 setMagnifierSize(MagnificationSize.MEDIUM);
             } else if (id == R.id.magnifier_large_button) {
                 setMagnifierSize(MagnificationSize.LARGE);
+            } else if (id == R.id.magnifier_full_button) {
+                setMagnifierSize(MagnificationSize.FULLSCREEN);
             } else if (id == R.id.magnifier_edit_button) {
                 editMagnifierSizeMode(true);
             } else if (id == R.id.magnifier_done_button) {
                 hideSettingPanel();
-            } else if (id == R.id.magnifier_full_button) {
-                hideSettingPanel();
-                toggleMagnificationMode();
             }
         }
     };
@@ -330,8 +332,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         setSeekbarProgress(scale);
     }
 
-    private void toggleMagnificationMode() {
-        mCallback.onModeSwitch(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    private void transitToMagnificationMode(int mode) {
+        mCallback.onModeSwitch(mode);
     }
 
     /**
@@ -388,7 +390,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mLargeButton = mSettingView.findViewById(R.id.magnifier_large_button);
         mDoneButton = mSettingView.findViewById(R.id.magnifier_done_button);
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
-        mChangeModeButton = mSettingView.findViewById(R.id.magnifier_full_button);
+        mFullScreenButton = mSettingView.findViewById(R.id.magnifier_full_button);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
         float scale = mSecureSettings.getFloatForUser(
@@ -416,8 +418,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mDoneButton.setAccessibilityDelegate(mButtonDelegate);
         mDoneButton.setOnClickListener(mButtonClickListener);
 
-        mChangeModeButton.setAccessibilityDelegate(mButtonDelegate);
-        mChangeModeButton.setOnClickListener(mButtonClickListener);
+        mFullScreenButton.setAccessibilityDelegate(mButtonDelegate);
+        mFullScreenButton.setOnClickListener(mButtonClickListener);
 
         mEditButton.setAccessibilityDelegate(mButtonDelegate);
         mEditButton.setOnClickListener(mButtonClickListener);
@@ -505,7 +507,18 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     private void setMagnifierSize(@MagnificationSize int index) {
-        mCallback.onSetMagnifierSize(index);
+        if (index == MagnificationSize.FULLSCREEN) {
+            // transit to fullscreen magnifier if needed
+            transitToMagnificationMode(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        } else if (index != MagnificationSize.NONE) {
+            // update the window magnifier size
+            mCallback.onSetMagnifierSize(index);
+            // transit to window magnifier if needed
+            transitToMagnificationMode(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        } else {
+            return;
+        }
+
         updateSelectedButton(index);
     }
 
@@ -577,6 +590,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             mMediumButton.setSelected(false);
         } else if (mLastSelectedButtonIndex == MagnificationSize.LARGE) {
             mLargeButton.setSelected(false);
+        } else if (mLastSelectedButtonIndex == MagnificationSize.FULLSCREEN) {
+            mFullScreenButton.setSelected(false);
         }
 
         // Set the state for selected button
@@ -586,6 +601,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
             mMediumButton.setSelected(true);
         } else if (index == MagnificationSize.LARGE) {
             mLargeButton.setSelected(true);
+        } else if (index == MagnificationSize.FULLSCREEN) {
+            mFullScreenButton.setSelected(true);
         }
 
         mLastSelectedButtonIndex = index;

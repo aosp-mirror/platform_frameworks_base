@@ -51,6 +51,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Range;
 import android.util.Size;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Choreographer;
 import android.view.Display;
@@ -103,7 +104,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private static final Range<Float> A11Y_ACTION_SCALE_RANGE = new Range<>(1.0f, 8.0f);
     private static final float A11Y_CHANGE_SCALE_DIFFERENCE = 1.0f;
     private static final float ANIMATION_BOUNCE_EFFECT_SCALE = 1.05f;
-    private static final float[] MAGNIFICATION_SCALE_OPTIONS = {1.0f, 1.4f, 1.8f, 2.5f};
+    private final SparseArray<Float> mMagnificationSizeScaleOptions = new SparseArray<>();
 
     private final Context mContext;
     private final Resources mResources;
@@ -258,6 +259,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 mResources.getInteger(R.integer.magnification_default_scale),
                 UserHandle.USER_CURRENT);
 
+        setupMagnificationSizeScaleOptions();
 
         mBounceEffectDuration = mResources.getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
@@ -328,6 +330,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mWindowInsetChangeRunnable = this::onWindowInsetChanged;
     }
 
+    private void setupMagnificationSizeScaleOptions() {
+        mMagnificationSizeScaleOptions.clear();
+        mMagnificationSizeScaleOptions.put(MagnificationSize.SMALL, 1.4f);
+        mMagnificationSizeScaleOptions.put(MagnificationSize.MEDIUM, 1.8f);
+        mMagnificationSizeScaleOptions.put(MagnificationSize.LARGE, 2.5f);
+    }
+
     private void updateDimensions() {
         mMirrorSurfaceMargin = mResources.getDimensionPixelSize(
                 R.dimen.magnification_mirror_surface_margin);
@@ -362,8 +371,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     void changeMagnificationSize(@MagnificationSize int index) {
+        if (!mMagnificationSizeScaleOptions.contains(index)) {
+            return;
+        }
+        final float scale = mMagnificationSizeScaleOptions.get(index, 1.0f);
         final int initSize = Math.min(mWindowBounds.width(), mWindowBounds.height()) / 3;
-        int size = (int) (initSize * MAGNIFICATION_SCALE_OPTIONS[index]);
+        int size = (int) (initSize * scale);
         setWindowSize(size, size);
     }
 
@@ -1382,6 +1395,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     void updateDragHandleResourcesIfNeeded(boolean settingsPanelIsShown) {
+        if (!isActivated()) {
+            return;
+        }
+
         mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
                 ? R.drawable.accessibility_window_magnification_drag_handle_background_change
                 : R.drawable.accessibility_window_magnification_drag_handle_background));

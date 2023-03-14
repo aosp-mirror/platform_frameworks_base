@@ -165,6 +165,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
                 displayManager, sysUiState, secureSettings);
         mMagnificationSettingsSupplier = new SettingsSupplier(context,
                 mMagnificationSettingsControllerCallback, displayManager, secureSettings);
+
+        mModeSwitchesController.setClickListenerDelegate(
+                displayId -> mHandler.post(() -> showMagnificationSettingsPanel(displayId)));
     }
 
     @Override
@@ -416,7 +419,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     private void onSettingsPanelVisibilityChangedInternal(int displayId, boolean shown) {
         final WindowMagnificationController windowMagnificationController =
                 mMagnificationControllerSupplier.get(displayId);
-        if (windowMagnificationController != null) {
+        if (windowMagnificationController != null && windowMagnificationController.isActivated()) {
             windowMagnificationController.updateDragHandleResourcesIfNeeded(shown);
         }
     }
@@ -442,15 +445,12 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
             mWindowMagnificationConnectionImpl = new WindowMagnificationConnectionImpl(this,
                     mHandler);
         }
-        mModeSwitchesController.setSwitchListenerDelegate(
-                mWindowMagnificationConnectionImpl::onChangeMagnificationMode);
         mAccessibilityManager.setWindowMagnificationConnection(
                 mWindowMagnificationConnectionImpl);
     }
 
     private void clearWindowMagnificationConnection() {
         mAccessibilityManager.setWindowMagnificationConnection(null);
-        mModeSwitchesController.setSwitchListenerDelegate(null);
         //TODO: destroy controllers.
     }
 }
