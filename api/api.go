@@ -194,55 +194,6 @@ func createMergedAnnotationsFilegroups(ctx android.LoadHookContext, modules, sys
 	}
 }
 
-func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
-	// For the filtered api versions, we prune all APIs except art module's APIs. because
-	// 1) ART apis are available by default to all modules, while other module-to-module deps are
-	//    explicit and probably receive more scrutiny anyway
-	// 2) The number of ART/libcore APIs is large, so not linting them would create a large gap
-	// 3) It's a compromise. Ideally we wouldn't be filtering out any module APIs, and have
-	//    per-module lint databases that excludes just that module's APIs. Alas, that's more
-	//    difficult to achieve.
-	modules = remove(modules, art)
-
-	for _, i := range []struct{
-		name string
-		out  string
-		in   string
-	}{
-		{
-			// We shouldn't need public-filtered or system-filtered.
-			// public-filtered is currently used to lint things that
-			// use the module sdk or the system server sdk, but those
-			// should be switched over to module-filtered and
-			// system-server-filtered, and then public-filtered can
-			// be removed.
-			name: "api-versions-xml-public-filtered",
-			out:  "api-versions-public-filtered.xml",
-			in:   ":api_versions_public{.api_versions.xml}",
-		}, {
-			name: "api-versions-xml-module-lib-filtered",
-			out:  "api-versions-module-lib-filtered.xml",
-			in:   ":api_versions_module_lib{.api_versions.xml}",
-		}, {
-			name: "api-versions-xml-system-server-filtered",
-			out:  "api-versions-system-server-filtered.xml",
-			in:   ":api_versions_system_server{.api_versions.xml}",
-		},
-	} {
-		props := genruleProps{}
-		props.Name = proptools.StringPtr(i.name)
-		props.Out = []string{i.out}
-		// Note: order matters: first parameter is the full api-versions.xml
-		// after that the stubs files in any order
-		// stubs files are all modules that export API surfaces EXCEPT ART
-		props.Srcs = append([]string{i.in}, createSrcs(modules, ".stubs{.jar}")...)
-		props.Tools = []string{"api_versions_trimmer"}
-		props.Cmd = proptools.StringPtr("$(location api_versions_trimmer) $(out) $(in)")
-		props.Dists = []android.Dist{{Targets: []string{"sdk"}}}
-		ctx.CreateModule(genrule.GenRuleFactory, &props, &bp2buildNotAvailable)
-	}
-}
-
 func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("all-modules-public-stubs")
@@ -394,8 +345,6 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 	createMergedFrameworkImpl(ctx, bootclasspath)
 
 	createMergedAnnotationsFilegroups(ctx, bootclasspath, system_server_classpath)
-
-	createFilteredApiVersions(ctx, bootclasspath)
 
 	createPublicStubsSourceFilegroup(ctx, bootclasspath)
 }
