@@ -453,7 +453,7 @@ public final class EuiccProfileInfo implements Parcelable {
                 + ", accessRules="
                 + Arrays.toString(mAccessRules)
                 + ", iccid="
-                + SubscriptionInfo.givePrintableIccid(mIccid)
+                + SubscriptionInfo.getPrintableId(mIccid)
                 + ")";
     }
 }

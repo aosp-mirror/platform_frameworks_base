@@ -275,6 +275,7 @@ applications that come with the platform
         <!-- Permission required to test onPermissionsChangedListener -->
         <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.QUERY_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_ACCESSIBILITY"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
@@ -511,6 +512,8 @@ applications that come with the platform
         <permission name="android.permission.WRITE_APN_SETTINGS"/>
         <!-- Permission required for GTS test - GtsStatsdHostTestCases -->
         <permission name="android.permission.READ_RESTRICTED_STATS"/>
+        <!-- Permission required for CTS test -->
+        <permission name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

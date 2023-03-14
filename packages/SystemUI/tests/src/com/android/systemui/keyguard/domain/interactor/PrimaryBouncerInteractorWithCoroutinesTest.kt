@@ -77,7 +77,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     fun notInteractableWhenExpansionIsBelow90Percent() = runTest {
         val isInteractable = collectLastValue(underTest.isInteractable)
 
-        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(true)
         repository.setPanelExpansion(0.15f)
 
         assertThat(isInteractable()).isFalse()
@@ -87,7 +87,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     fun notInteractableWhenExpansionAbove90PercentButNotVisible() = runTest {
         val isInteractable = collectLastValue(underTest.isInteractable)
 
-        repository.setPrimaryVisible(false)
+        repository.setPrimaryShow(false)
         repository.setPanelExpansion(0.05f)
 
         assertThat(isInteractable()).isFalse()
@@ -97,7 +97,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     fun isInteractableWhenExpansionAbove90PercentAndVisible() = runTest {
         var isInteractable = collectLastValue(underTest.isInteractable)
 
-        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(true)
         repository.setPanelExpansion(0.09f)
 
         assertThat(isInteractable()).isTrue()

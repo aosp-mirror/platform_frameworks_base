@@ -639,7 +639,9 @@ constructor(
     ) =
         traceSection("MediaHierarchyManager#updateDesiredLocation") {
             val desiredLocation = calculateLocation()
-            if (desiredLocation != this.desiredLocation || forceStateUpdate) {
+            if (
+                desiredLocation != this.desiredLocation || forceStateUpdate && !blockLocationChanges
+            ) {
                 if (this.desiredLocation >= 0 && desiredLocation != this.desiredLocation) {
                     // Only update previous location when it actually changes
                     previousLocation = this.desiredLocation

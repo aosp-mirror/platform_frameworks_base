@@ -337,6 +337,27 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
+    public void onTouchEvent_focusView_inputConnectionAlreadyBuilt_stylusMoveOnce_withinHWArea() {
+        mHandwritingInitiator.onInputConnectionCreated(mTestView1);
+
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        // View has input connection but not focus, so HandwritingInitiator will request focus
+        // before starting handwriting.
+        verify(mTestView1).requestFocus();
+        verify(mHandwritingInitiator).startHandwriting(mTestView1);
+    }
+
+    @Test
     public void onTouchEvent_focusView_stylusMoveOnce_withinExtendedHWArea() {
         final int x1 = sHwArea1.left - HW_BOUNDS_OFFSETS_LEFT_PX / 2;
         final int y1 = sHwArea1.top - HW_BOUNDS_OFFSETS_TOP_PX / 2;

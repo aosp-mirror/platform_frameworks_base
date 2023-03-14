@@ -204,6 +204,36 @@ public abstract class PackageManager {
             "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE";
 
     /**
+     * Application level {@link android.content.pm.PackageManager.Property PackageManager
+     * .Property} for an app to inform the system that the app can be opted-in or opted-out
+     * from the compatibility treatment that rotates camera output by 90 degrees on landscape
+     * sensors on devices known to have compatibility issues.
+     *
+     * <p>The treatment is disabled by default but device manufacturers can enable the treatment
+     * using their discretion to improve camera compatibility. With this property set to
+     * {@code false}, the rotation will not be applied. A value of {@code true}
+     * will ensure that rotation is applied, provided it is enabled for the device. In most cases,
+     * if rotation is the desired behavior this property need not be set. However, if your app
+     * experiences stretching or incorrect rotation on these devices, explicitly setting this to
+     * {@code true} may resolve that behavior. Apps should set this to {@code false} if there
+     * is confidence that the app handles
+     * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_ORIENTATION} correctly.
+     * See <a href="https://developer.android.com/training/camera2/camera-preview"> the
+     * documentation for best practice.</a>
+     *
+     * <p><b>Syntax:</b>
+     * <pre>
+     * &lt;application&gt;
+     *   &lt;property
+     *     android:name="android.camera.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT"
+     *     android:value="true|false"/&gt;
+     * &lt;/application&gt;
+     * </pre>
+     */
+    public static final String PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT =
+            "android.camera.PROPERTY_COMPAT_OVERRIDE_LANDSCAPE_TO_PORTRAIT";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by

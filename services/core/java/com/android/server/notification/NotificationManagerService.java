@@ -2055,8 +2055,8 @@ public class NotificationManagerService extends SystemService {
 
     // TODO - replace these methods with new fields in the VisibleForTesting constructor
     @VisibleForTesting
-    void setAudioManager(AudioManager audioMananger) {
-        mAudioManager = audioMananger;
+    void setAudioManager(AudioManager audioManager) {
+        mAudioManager = audioManager;
     }
 
     @VisibleForTesting
@@ -5772,7 +5772,7 @@ public class NotificationManagerService extends SystemService {
                 switch (report) {
                     case REPORT_REMOTE_VIEWS:
                         Slog.e(TAG, "pullStats REPORT_REMOTE_VIEWS from: "
-                                + startMs + "  wtih " + doAgg);
+                                + startMs + "  with " + doAgg);
                         PulledStats stats = mUsageStats.remoteViewStats(startMs, doAgg);
                         if (stats != null) {
                             out.add(stats.toParcelFileDescriptor(report));
@@ -6470,7 +6470,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // Don't allow client applications to cancel foreground service notis or autobundled
+        // Don't allow client applications to cancel foreground service notifs or autobundled
         // summaries.
         final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
                 (FLAG_FOREGROUND_SERVICE | FLAG_AUTOGROUP_SUMMARY);
@@ -8342,7 +8342,7 @@ public class NotificationManagerService extends SystemService {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
                     // Notifications might be canceled before it actually vibrates due to waitMs,
-                    // so need to check the notification still valide for vibrate.
+                    // so need to check that the notification is still valid for vibrate.
                     synchronized (mNotificationLock) {
                         if (mNotificationsByKey.get(record.getKey()) != null) {
                             if (record.getKey().equals(mVibrateNotificationKey)) {
@@ -11696,7 +11696,7 @@ public class NotificationManagerService extends SystemService {
                     }
                 } else if (PRIORITY_ARG.equals(a)) {
                     // Bugreport will call the service twice with priority arguments, first to dump
-                    // critical sections and then non critical ones. Set approriate filters
+                    // critical sections and then non critical ones. Set appropriate filters
                     // to generate the desired data.
                     if (ai < args.length - 1) {
                         ai++;

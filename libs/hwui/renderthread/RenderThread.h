@@ -235,7 +235,6 @@ private:
     bool mFrameCallbackTaskPending;
 
     TimeLord mTimeLord;
-    nsecs_t mDispatchFrameDelay = 4_ms;
     RenderState* mRenderState;
     EglManager* mEglManager;
     WebViewFunctorManager& mFunctorManager;

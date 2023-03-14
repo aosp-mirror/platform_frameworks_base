@@ -16,17 +16,19 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
-import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
-import static android.app.admin.PolicyUpdateResult.RESULT_SUCCESS;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_TARGET_USER_ID;
 import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_UPDATE_RESULT_KEY;
+import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
+import static android.app.admin.PolicyUpdateResult.RESULT_FAILURE_HARDWARE_LIMITATION;
+import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_CLEARED;
+import static android.app.admin.PolicyUpdateResult.RESULT_POLICY_SET;
 import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
 
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
 import android.app.admin.PolicyKey;
@@ -46,6 +48,7 @@ import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
+import android.telephony.TelephonyManager;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.SparseArray;
@@ -78,6 +81,10 @@ import java.util.Set;
  */
 final class DevicePolicyEngine {
     static final String TAG = "DevicePolicyEngine";
+
+    private static final String CELLULAR_2G_USER_RESTRICTION_ID =
+            DevicePolicyIdentifiers.getIdentifierForUserRestriction(
+                    UserManager.DISALLOW_CELLULAR_2G);
 
     private static final String ENABLE_COEXISTENCE_FLAG = "enable_coexistence";
     private static final boolean DEFAULT_ENABLE_COEXISTENCE_FLAG = true;
@@ -167,7 +174,8 @@ final class DevicePolicyEngine {
                         enforcingAdmin,
                         policyDefinition,
                         // TODO: we're always sending this for now, should properly handle errors.
-                        policyEnforced ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                        policyEnforced
+                                ? RESULT_POLICY_SET : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                         userId);
             }
 
@@ -379,6 +387,15 @@ final class DevicePolicyEngine {
         Objects.requireNonNull(value);
 
         synchronized (mLock) {
+            // TODO(b/270999567): Move error handling for DISALLOW_CELLULAR_2G into the code
+            //  that honors the restriction once there's an API available
+            if (checkFor2gFailure(policyDefinition, enforcingAdmin)) {
+                Log.i(TAG,
+                        "Device does not support capabilities required to disable 2g. Not setting"
+                                + " global policy state.");
+                return;
+            }
+
             PolicyState<V> globalPolicyState = getGlobalPolicyStateLocked(policyDefinition);
 
             boolean policyChanged = globalPolicyState.addPolicy(enforcingAdmin, value);
@@ -400,7 +417,7 @@ final class DevicePolicyEngine {
                         enforcingAdmin,
                         policyDefinition,
                         // TODO: we're always sending this for now, should properly handle errors.
-                        policyApplied ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
+                        policyApplied ? RESULT_POLICY_SET : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY,
                         UserHandle.USER_ALL);
             }
 
@@ -792,7 +809,7 @@ final class DevicePolicyEngine {
             int result = Objects.equals(
                     policyState.getPoliciesSetByAdmins().get(admin),
                     policyState.getCurrentResolvedPolicy())
-                    ? RESULT_SUCCESS : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
+                    ? RESULT_POLICY_SET : RESULT_FAILURE_CONFLICTING_ADMIN_POLICY;
             maybeSendOnPolicyChanged(
                     admin, policyDefinition, result, userId);
         }
@@ -1161,6 +1178,36 @@ final class DevicePolicyEngine {
                 DEFAULT_ENABLE_COEXISTENCE_FLAG);
     }
 
+    private <V> boolean checkFor2gFailure(@NonNull PolicyDefinition<V> policyDefinition,
+            @NonNull EnforcingAdmin enforcingAdmin) {
+        if (!policyDefinition.getPolicyKey().getIdentifier().equals(
+                CELLULAR_2G_USER_RESTRICTION_ID)) {
+            return false;
+        }
+
+        boolean isCapabilitySupported;
+        try {
+            isCapabilitySupported = mContext.getSystemService(
+                    TelephonyManager.class).isRadioInterfaceCapabilitySupported(
+                    TelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK);
+        } catch (IllegalStateException e) {
+            // isRadioInterfaceCapabilitySupported can throw if there is no Telephony
+            // service initialized.
+            isCapabilitySupported = false;
+        }
+
+        if (!isCapabilitySupported) {
+            sendPolicyResultToAdmin(
+                    enforcingAdmin,
+                    policyDefinition,
+                    RESULT_FAILURE_HARDWARE_LIMITATION,
+                    UserHandle.USER_ALL);
+            return true;
+        }
+
+        return false;
+    }
+
     private class DevicePoliciesReaderWriter {
         private static final String DEVICE_POLICIES_XML = "device_policy_state.xml";
         private static final String TAG_LOCAL_POLICY_ENTRY = "local-policy-entry";
@@ -1315,8 +1362,8 @@ final class DevicePolicyEngine {
             if (adminsPolicy != null) {
                 mLocalPolicies.get(userId).put(policyKey, adminsPolicy);
             } else {
-                Log.e(TAG, "Error parsing file, " + policyKey + "doesn't have an "
-                        + "AdminsPolicy.");
+                Log.e(TAG,
+                        "Error parsing file, " + policyKey + "doesn't have an " + "AdminsPolicy.");
             }
         }
 
@@ -1327,8 +1374,8 @@ final class DevicePolicyEngine {
             if (adminsPolicy != null) {
                 mGlobalPolicies.put(policyKey, adminsPolicy);
             } else {
-                Log.e(TAG, "Error parsing file, " + policyKey + "doesn't have an "
-                        + "AdminsPolicy.");
+                Log.e(TAG,
+                        "Error parsing file, " + policyKey + "doesn't have an " + "AdminsPolicy.");
             }
         }
 
