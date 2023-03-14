@@ -2863,9 +2863,6 @@ public class InputManagerService extends IInputManager.Stub
 
         int getPointerDisplayId();
 
-        /** Gets the x and y coordinates of the cursor's current position. */
-        PointF getCursorPosition();
-
         /**
          * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
          * occurred on a window that did not have focus.
@@ -3189,7 +3186,11 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public PointF getCursorPosition() {
-            return mWindowManagerCallbacks.getCursorPosition();
+            final float[] p = mNative.getMouseCursorPosition();
+            if (p == null || p.length != 2) {
+                throw new IllegalStateException("Failed to get mouse cursor position");
+            }
+            return new PointF(p[0], p[1]);
         }
 
         @Override

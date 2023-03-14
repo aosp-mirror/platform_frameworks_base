@@ -50,12 +50,12 @@ public:
 
     ~PointerController() override;
 
-    virtual bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
+    virtual std::optional<FloatRect> getBounds() const;
     virtual void move(float deltaX, float deltaY);
     virtual void setButtonState(int32_t buttonState);
     virtual int32_t getButtonState() const;
     virtual void setPosition(float x, float y);
-    virtual void getPosition(float* outX, float* outY) const;
+    virtual FloatPoint getPosition() const;
     virtual int32_t getDisplayId() const;
     virtual void fade(Transition transition);
     virtual void unfade(Transition transition);
