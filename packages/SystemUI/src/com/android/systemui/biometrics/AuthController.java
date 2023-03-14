@@ -198,31 +198,35 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
     final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (mCurrentDialog != null
-                    && Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
+            if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction())) {
                 String reason = intent.getStringExtra("reason");
                 reason = (reason != null) ? reason : "unknown";
-                Log.d(TAG, "ACTION_CLOSE_SYSTEM_DIALOGS received, reason: " + reason);
-
-                mCurrentDialog.dismissWithoutCallback(true /* animate */);
-                mCurrentDialog = null;
-
-                for (Callback cb : mCallbacks) {
-                    cb.onBiometricPromptDismissed();
-                }
-
-                try {
-                    if (mReceiver != null) {
-                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
-                                null /* credentialAttestation */);
-                        mReceiver = null;
-                    }
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Remote exception", e);
-                }
+                closeDioalog(reason);
             }
         }
     };
+
+    private void closeDioalog(String reason) {
+        if (isShowing()) {
+            Log.i(TAG, "Close BP, reason :" + reason);
+            mCurrentDialog.dismissWithoutCallback(true /* animate */);
+            mCurrentDialog = null;
+
+            for (Callback cb : mCallbacks) {
+                cb.onBiometricPromptDismissed();
+            }
+
+            try {
+                if (mReceiver != null) {
+                    mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                            null /* credentialAttestation */);
+                    mReceiver = null;
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote exception", e);
+            }
+        }
+    }
 
     private void cancelIfOwnerIsNotInForeground() {
         mExecution.assertIsMainThread();
@@ -544,6 +548,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 Log.e(TAG, "Unhandled reason: " + reason);
                 break;
         }
+    }
+
+    @Override
+    public void handleShowGlobalActionsMenu() {
+        closeDioalog("PowerMenu shown");
     }
 
     /**
