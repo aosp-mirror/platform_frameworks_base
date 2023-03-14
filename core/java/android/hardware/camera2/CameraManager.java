@@ -125,6 +125,23 @@ public final class CameraManager {
             "camera.enable_landscape_to_portrait";
 
     /**
+     * Enable physical camera availability callbacks when the logical camera is unavailable
+     *
+     * <p>Previously once a logical camera becomes unavailable, no {@link
+     * #onPhysicalCameraAvailable} or {@link #onPhysicalCameraUnavailable} will be called until
+     * the logical camera becomes available again. The results in the app opening the logical
+     * camera not able to receive physical camera availability change.</p>
+     *
+     * <p>With this change, the {@link #onPhysicalCameraAvailable} and {@link
+     * #onPhysicalCameraUnavailable} can still be called while the logical camera is unavailable.
+     * </p>
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private static final long ENABLE_PHYSICAL_CAMERA_CALLBACK_FOR_UNAVAILABLE_LOGICAL_CAMERA =
+            244358506L;
+
+    /**
      * @hide
      */
     public CameraManager(Context context) {
@@ -1194,6 +1211,14 @@ public final class CameraManager {
     }
 
     /**
+     * @hide
+     */
+    public static boolean physicalCallbacksAreEnabledForUnavailableCamera() {
+        return CompatChanges.isChangeEnabled(
+                ENABLE_PHYSICAL_CAMERA_CALLBACK_FOR_UNAVAILABLE_LOGICAL_CAMERA);
+    }
+
+    /**
      * A callback for camera devices becoming available or unavailable to open.
      *
      * <p>Cameras become available when they are no longer in use, or when a new
@@ -1270,9 +1295,10 @@ public final class CameraManager {
          * to begin with, {@link #onPhysicalCameraUnavailable} may be invoked after
          * {@link #onCameraAvailable}.</p>
          *
-         * <p>Limitation: Opening a logical camera disables the {@link #onPhysicalCameraAvailable}
-         * and {@link #onPhysicalCameraUnavailable} callbacks for its physical cameras. For example,
-         * if app A opens the camera device:</p>
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &lt; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, opening a logical camera
+         * disables the {@link #onPhysicalCameraAvailable} and {@link #onPhysicalCameraUnavailable}
+         * callbacks for its physical cameras. For example, if app A opens the camera device:</p>
          *
          * <ul>
          *
@@ -1283,6 +1309,33 @@ public final class CameraManager {
          * the logical camera is unavailable (some app is using it).</li>
          *
          * </ul>
+         *
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &ge; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}:</p>
+         *
+         * <ul>
+         *
+         * <li>A physical camera status change will trigger {@link #onPhysicalCameraAvailable}
+         * or {@link #onPhysicalCameraUnavailable} even after the logical camera becomes
+         * unavailable. A {@link #onCameraUnavailable} call for a logical camera doesn't reset the
+         * physical cameras' availability status. This makes it possible for an application opening
+         * the logical camera device to know which physical camera becomes unavailable or available
+         * to use.</li>
+         *
+         * <li>Similar to {@link android.os.Build.VERSION_CODES#TIRAMISU Android 13} and earlier,
+         * the logical camera's {@link #onCameraAvailable} callback implies all of its physical
+         * cameras' status become available. {@link #onPhysicalCameraUnavailable} will be called
+         * for any unavailable physical cameras upon the logical camera becoming available.</li>
+         *
+         * </ul>
+         *
+         * <p>Given the pipeline nature of the camera capture through {@link
+         * android.hardware.camera2.CaptureRequest}, there may be frame drops if the application
+         * requests images from a physical camera of a logical multi-camera and that physical camera
+         * becomes unavailable. The application should stop requesting directly from an unavailable
+         * physical camera as soon as {@link #onPhysicalCameraUnavailable} is received, and also be
+         * ready to robustly handle frame drop errors for requests targeting physical cameras,
+         * since those errors may arrive before the unavailability callback.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -1306,9 +1359,10 @@ public final class CameraManager {
          * cameras of its parent logical multi-camera, when {@link #onCameraUnavailable} for
          * the logical multi-camera is invoked.</p>
          *
-         * <p>Limitation: Opening a logical camera disables the {@link #onPhysicalCameraAvailable}
-         * and {@link #onPhysicalCameraUnavailable} callbacks for its physical cameras. For example,
-         * if app A opens the camera device:</p>
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &lt; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, opening a logical camera
+         * disables the {@link #onPhysicalCameraAvailable} and {@link #onPhysicalCameraUnavailable}
+         * callbacks for its physical cameras. For example, if app A opens the camera device:</p>
          *
          * <ul>
          *
@@ -1319,6 +1373,33 @@ public final class CameraManager {
          * the logical camera is unavailable (some app is using it).</li>
          *
          * </ul>
+         *
+         * <p>If {@link android.content.pm.ApplicationInfo#targetSdkVersion targetSdkVersion}
+         * &ge; {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}:</p>
+         *
+         * <ul>
+         *
+         * <li>A physical camera status change will trigger {@link #onPhysicalCameraAvailable}
+         * or {@link #onPhysicalCameraUnavailable} even after the logical camera becomes
+         * unavailable. A {@link #onCameraUnavailable} call for a logical camera doesn't reset the
+         * physical cameras' availability status. This makes it possible for an application opening
+         * the logical camera device to know which physical camera becomes unavailable or available
+         * to use.</li>
+         *
+         * <li>Similar to {@link android.os.Build.VERSION_CODES#TIRAMISU Android 13} and earlier,
+         * the logical camera's {@link #onCameraAvailable} callback implies all of its physical
+         * cameras' status become available. {@link #onPhysicalCameraUnavailable} will be called
+         * for any unavailable physical cameras upon the logical camera becoming available.</li>
+         *
+         * </ul>
+         *
+         * <p>Given the pipeline nature of the camera capture through {@link
+         * android.hardware.camera2.CaptureRequest}, there may be frame drops if the application
+         * requests images from a physical camera of a logical multi-camera and that physical camera
+         * becomes unavailable. The application should stop requesting directly from an unavailable
+         * physical camera as soon as {@link #onPhysicalCameraUnavailable} is received, and also be
+         * ready to robustly handle frame drop errors for requests targeting physical cameras,
+         * since those errors may arrive before the unavailability callback.</p>
          *
          * <p>The default implementation of this method does nothing.</p>
          *
@@ -2283,7 +2364,8 @@ public final class CameraManager {
                 postSingleUpdate(callback, executor, id, null /*physicalId*/, status);
 
                 // Send the NOT_PRESENT state for unavailable physical cameras
-                if (isAvailable(status) && mUnavailablePhysicalDevices.containsKey(id)) {
+                if ((isAvailable(status) || physicalCallbacksAreEnabledForUnavailableCamera())
+                        && mUnavailablePhysicalDevices.containsKey(id)) {
                     ArrayList<String> unavailableIds = mUnavailablePhysicalDevices.get(id);
                     for (String unavailableId : unavailableIds) {
                         postSingleUpdate(callback, executor, id, unavailableId,
@@ -2416,7 +2498,8 @@ public final class CameraManager {
                 return;
             }
 
-            if (!isAvailable(mDeviceStatus.get(id))) {
+            if (!physicalCallbacksAreEnabledForUnavailableCamera()
+                    && !isAvailable(mDeviceStatus.get(id))) {
                 Log.i(TAG, String.format("Camera %s is not available. Ignore physical camera "
                         + "status change callback(s)", id));
                 return;
