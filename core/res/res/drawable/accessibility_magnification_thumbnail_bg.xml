@@ -14,10 +14,13 @@
      limitations under the License.
 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-<item>
+  <item>
     <shape android:shape="rectangle">
-        <corners android:radius="2dp"/>
-        <solid android:color="@color/accessibility_magnification_thumbnail_color" />
+      <stroke
+          android:width="2dp"
+          android:color="@color/accessibility_magnification_thumbnail_stroke_color" />
+      <corners android:radius="2dp"/>
+      <solid android:color="@color/accessibility_magnification_thumbnail_background_color" />
     </shape>
-</item>
+  </item>
 </layer-list>

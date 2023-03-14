@@ -16,8 +16,12 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/accessibility_magnification_thumbnail_background_bg">
+    android:background="@drawable/accessibility_magnification_thumbnail_background_bg"
+    android:foreground="@drawable/accessibility_magnification_thumbnail_background_fg"
+    android:padding="@dimen/accessibility_magnification_thumbnail_container_stroke_width"
+>
     <View
+        android:padding="@dimen/accessibility_magnification_thumbnail_container_stroke_width"
         android:id="@+id/accessibility_magnification_thumbnail_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

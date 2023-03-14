@@ -63,7 +63,7 @@ public class MagnificationThumbnail {
     private final WindowManager.LayoutParams mBackgroundParams;
     private boolean mVisible = false;
 
-    private static final float ASPECT_RATIO = 28f;
+    private static final float ASPECT_RATIO = 14f;
     private static final float BG_ASPECT_RATIO = ASPECT_RATIO / 2f;
 
     private ObjectAnimator mThumbNailAnimator;
@@ -261,9 +261,10 @@ public class MagnificationThumbnail {
             mThumbNailView.setScaleY(scaleDown);
         }
         if (!Float.isNaN(centerX)) {
+            var padding = mThumbNailView.getPaddingTop();
             var ratio = 1f / BG_ASPECT_RATIO;
-            var centerXScaled = centerX * ratio - mThumbNailView.getWidth() / 2f;
-            var centerYScaled = centerY * ratio - mThumbNailView.getHeight() / 2f;
+            var centerXScaled = centerX * ratio - (mThumbNailView.getWidth() / 2f + padding);
+            var centerYScaled = centerY * ratio - (mThumbNailView.getHeight() / 2f + padding);
 
             if (DEBUG) {
                 Log.d(
