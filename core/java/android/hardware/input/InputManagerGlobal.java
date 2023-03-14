@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.input.InputManager.InputDeviceListener;
+import android.hardware.input.InputManager.OnTabletModeChangedListener;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -32,6 +33,7 @@ import android.view.Display;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.os.SomeArgs;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -48,16 +50,16 @@ public final class InputManagerGlobal {
     // (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final int MSG_DEVICE_ADDED = 1;
-    private static final int MSG_DEVICE_REMOVED = 2;
-    private static final int MSG_DEVICE_CHANGED = 3;
-
     @GuardedBy("mInputDeviceListeners")
     @Nullable private SparseArray<InputDevice> mInputDevices;
     @GuardedBy("mInputDeviceListeners")
     @Nullable private InputDevicesChangedListener mInputDevicesChangedListener;
     @GuardedBy("mInputDeviceListeners")
     private final ArrayList<InputDeviceListenerDelegate> mInputDeviceListeners = new ArrayList<>();
+
+    @GuardedBy("mOnTabletModeChangedListeners")
+    private final ArrayList<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners =
+            new ArrayList<>();
 
     private static InputManagerGlobal sInstance;
 
@@ -186,7 +188,8 @@ public final class InputManagerGlobal {
                         Log.d(TAG, "Device removed: " + deviceId);
                     }
                     mInputDevices.removeAt(i);
-                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_REMOVED, deviceId);
+                    sendMessageToInputDeviceListenersLocked(
+                            InputDeviceListenerDelegate.MSG_DEVICE_REMOVED, deviceId);
                 }
             }
 
@@ -202,7 +205,8 @@ public final class InputManagerGlobal {
                                 Log.d(TAG, "Device changed: " + deviceId);
                             }
                             mInputDevices.setValueAt(index, null);
-                            sendMessageToInputDeviceListenersLocked(MSG_DEVICE_CHANGED, deviceId);
+                            sendMessageToInputDeviceListenersLocked(
+                                    InputDeviceListenerDelegate.MSG_DEVICE_CHANGED, deviceId);
                         }
                     }
                 } else {
@@ -210,7 +214,8 @@ public final class InputManagerGlobal {
                         Log.d(TAG, "Device added: " + deviceId);
                     }
                     mInputDevices.put(deviceId, null);
-                    sendMessageToInputDeviceListenersLocked(MSG_DEVICE_ADDED, deviceId);
+                    sendMessageToInputDeviceListenersLocked(
+                            InputDeviceListenerDelegate.MSG_DEVICE_ADDED, deviceId);
                 }
             }
         }
@@ -218,6 +223,9 @@ public final class InputManagerGlobal {
 
     private static final class InputDeviceListenerDelegate extends Handler {
         public final InputDeviceListener mListener;
+        static final int MSG_DEVICE_ADDED = 1;
+        static final int MSG_DEVICE_REMOVED = 2;
+        static final int MSG_DEVICE_CHANGED = 3;
 
         InputDeviceListenerDelegate(InputDeviceListener listener, Handler handler) {
             super(handler != null ? handler.getLooper() : Looper.myLooper());
@@ -261,7 +269,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#registerInputDeviceListener
      */
-    public void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
+    void registerInputDeviceListener(InputDeviceListener listener, Handler handler) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -278,7 +286,7 @@ public final class InputManagerGlobal {
     /**
      * @see InputManager#unregisterInputDeviceListener
      */
-    public void unregisterInputDeviceListener(InputDeviceListener listener) {
+    void unregisterInputDeviceListener(InputDeviceListener listener) {
         if (listener == null) {
             throw new IllegalArgumentException("listener must not be null");
         }
@@ -384,5 +392,115 @@ public final class InputManagerGlobal {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
+        if (DEBUG) {
+            Log.d(TAG, "Received tablet mode changed: "
+                    + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
+        }
+        synchronized (mOnTabletModeChangedListeners) {
+            final int numListeners = mOnTabletModeChangedListeners.size();
+            for (int i = 0; i < numListeners; i++) {
+                OnTabletModeChangedListenerDelegate listener =
+                        mOnTabletModeChangedListeners.get(i);
+                listener.sendTabletModeChanged(whenNanos, inTabletMode);
+            }
+        }
+    }
+
+    private final class TabletModeChangedListener extends ITabletModeChangedListener.Stub {
+        @Override
+        public void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
+            InputManagerGlobal.this.onTabletModeChanged(whenNanos, inTabletMode);
+        }
+    }
+
+    private static final class OnTabletModeChangedListenerDelegate extends Handler {
+        private static final int MSG_TABLET_MODE_CHANGED = 0;
+
+        public final OnTabletModeChangedListener mListener;
+
+        OnTabletModeChangedListenerDelegate(
+                OnTabletModeChangedListener listener, Handler handler) {
+            super(handler != null ? handler.getLooper() : Looper.myLooper());
+            mListener = listener;
+        }
+
+        public void sendTabletModeChanged(long whenNanos, boolean inTabletMode) {
+            SomeArgs args = SomeArgs.obtain();
+            args.argi1 = (int) whenNanos;
+            args.argi2 = (int) (whenNanos >> 32);
+            args.arg1 = inTabletMode;
+            obtainMessage(MSG_TABLET_MODE_CHANGED, args).sendToTarget();
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == MSG_TABLET_MODE_CHANGED) {
+                SomeArgs args = (SomeArgs) msg.obj;
+                long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
+                boolean inTabletMode = (boolean) args.arg1;
+                mListener.onTabletModeChanged(whenNanos, inTabletMode);
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#registerInputDeviceListener(InputDeviceListener, Handler)
+     */
+    void registerOnTabletModeChangedListener(
+            OnTabletModeChangedListener listener, Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        synchronized (mOnTabletModeChangedListeners) {
+            if (mOnTabletModeChangedListeners == null) {
+                initializeTabletModeListenerLocked();
+            }
+            int idx = findOnTabletModeChangedListenerLocked(listener);
+            if (idx < 0) {
+                OnTabletModeChangedListenerDelegate d =
+                        new OnTabletModeChangedListenerDelegate(listener, handler);
+                mOnTabletModeChangedListeners.add(d);
+            }
+        }
+    }
+
+    /**
+     * @see InputManager#unregisterOnTabletModeChangedListener(OnTabletModeChangedListener)
+     */
+    void unregisterOnTabletModeChangedListener(OnTabletModeChangedListener listener) {
+        if (listener == null) {
+            throw new IllegalArgumentException("listener must not be null");
+        }
+        synchronized (mOnTabletModeChangedListeners) {
+            int idx = findOnTabletModeChangedListenerLocked(listener);
+            if (idx >= 0) {
+                OnTabletModeChangedListenerDelegate d = mOnTabletModeChangedListeners.remove(idx);
+                d.removeCallbacksAndMessages(null);
+            }
+        }
+    }
+
+    @GuardedBy("mOnTabletModeChangedListeners")
+    private void initializeTabletModeListenerLocked() {
+        final TabletModeChangedListener listener = new TabletModeChangedListener();
+        try {
+            mIm.registerTabletModeChangedListener(listener);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    @GuardedBy("mOnTabletModeChangedListeners")
+    private int findOnTabletModeChangedListenerLocked(OnTabletModeChangedListener listener) {
+        final int n = mOnTabletModeChangedListeners.size();
+        for (int i = 0; i < n; i++) {
+            if (mOnTabletModeChangedListeners.get(i).mListener == listener) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
