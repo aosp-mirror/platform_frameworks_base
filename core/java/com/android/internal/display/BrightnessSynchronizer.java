@@ -508,6 +508,5 @@ public class BrightnessSynchronizer {
                     DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
             mIsObserving = true;
         }
-
     }
 }

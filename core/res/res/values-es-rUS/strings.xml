@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Buzón de voz"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problema de conexión o código incorrecto de MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Función no compatible."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"La operación está limitada a números de marcación fija."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"No se puede cambiar la configuración de desvío de llamadas de tu teléfono mientras usas el servicio de roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Se ha activado el servicio."</string>

@@ -16,18 +16,19 @@
 package com.android.systemui.unfold.util
 
 import android.testing.AndroidTestingRunner
-import android.view.IRotationWatcher
-import android.view.IWindowManager
 import android.view.Surface
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.TestUnfoldTransitionProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.systemui.util.mockito.any
+import com.android.systemui.unfold.updates.RotationChangeProvider
+import com.android.systemui.unfold.updates.RotationChangeProvider.RotationListener
+import com.android.systemui.util.mockito.capture
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
@@ -38,32 +39,26 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
 
-    @Mock
-    lateinit var windowManager: IWindowManager
+    @Mock lateinit var rotationChangeProvider: RotationChangeProvider
 
     private val sourceProvider = TestUnfoldTransitionProvider()
 
-    @Mock
-    lateinit var transitionListener: TransitionProgressListener
+    @Mock lateinit var transitionListener: TransitionProgressListener
+
+    @Captor private lateinit var rotationListenerCaptor: ArgumentCaptor<RotationListener>
 
     lateinit var progressProvider: NaturalRotationUnfoldProgressProvider
-
-    private val rotationWatcherCaptor =
-        ArgumentCaptor.forClass(IRotationWatcher.Stub::class.java)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        progressProvider = NaturalRotationUnfoldProgressProvider(
-            context,
-            windowManager,
-            sourceProvider
-        )
+        progressProvider =
+            NaturalRotationUnfoldProgressProvider(context, rotationChangeProvider, sourceProvider)
 
         progressProvider.init()
 
-        verify(windowManager).watchRotation(rotationWatcherCaptor.capture(), any())
+        verify(rotationChangeProvider).addCallback(capture(rotationListenerCaptor))
 
         progressProvider.addCallback(transitionListener)
     }
@@ -127,6 +122,6 @@ class NaturalRotationUnfoldProgressProviderTest : SysuiTestCase() {
     }
 
     private fun onRotationChanged(rotation: Int) {
-        rotationWatcherCaptor.value.onRotationChanged(rotation)
+        rotationListenerCaptor.value.onRotationChanged(rotation)
     }
 }

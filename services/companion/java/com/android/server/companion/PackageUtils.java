@@ -54,12 +54,19 @@ final class PackageUtils {
     private static final String PROPERTY_PRIMARY_TAG =
             "android.companion.PROPERTY_PRIMARY_COMPANION_DEVICE_SERVICE";
 
-    static @Nullable PackageInfo getPackageInfo(@NonNull Context context,
+    @Nullable
+    static PackageInfo getPackageInfo(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
         final PackageManager pm = context.getPackageManager();
         final PackageInfoFlags flags = PackageInfoFlags.of(GET_PERMISSIONS | GET_CONFIGURATIONS);
-        return Binder.withCleanCallingIdentity(() ->
-                pm.getPackageInfoAsUser(packageName, flags , userId));
+        return Binder.withCleanCallingIdentity(() -> {
+            try {
+                return pm.getPackageInfoAsUser(packageName, flags, userId);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Package [" + packageName + "] is not found.");
+                return null;
+            }
+        });
     }
 
     static void enforceUsesCompanionDeviceFeature(@NonNull Context context,

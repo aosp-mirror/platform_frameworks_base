@@ -31,6 +31,7 @@ import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -74,15 +75,15 @@ public class SyncEngineTests extends WindowTestsBase {
 
         int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, mockWC);
-        // Make sure a traversal is requested
-        verify(mWm.mWindowPlacerLocked, times(1)).requestTraversal();
+        // The traversal is not requested because ready is not set.
+        verify(mWm.mWindowPlacerLocked, times(0)).requestTraversal();
 
         bse.onSurfacePlacement();
         verify(listener, times(0)).onTransactionReady(anyInt(), any());
 
         bse.setReady(id);
         // Make sure a traversal is requested
-        verify(mWm.mWindowPlacerLocked, times(2)).requestTraversal();
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
         bse.onSurfacePlacement();
         verify(listener, times(1)).onTransactionReady(eq(id), notNull());
 
@@ -103,14 +104,12 @@ public class SyncEngineTests extends WindowTestsBase {
         int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, mockWC);
         bse.setReady(id);
-        // Make sure traversals requested (one for add and another for setReady)
-        verify(mWm.mWindowPlacerLocked, times(2)).requestTraversal();
+        // Make sure traversals requested.
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
         bse.onSurfacePlacement();
         verify(listener, times(0)).onTransactionReady(anyInt(), any());
 
-        mockWC.onSyncFinishedDrawing();
-        // Make sure a (third) traversal is requested.
-        verify(mWm.mWindowPlacerLocked, times(3)).requestTraversal();
+        assertTrue(mockWC.onSyncFinishedDrawing());
         bse.onSurfacePlacement();
         verify(listener, times(1)).onTransactionReady(eq(id), notNull());
     }
@@ -127,8 +126,8 @@ public class SyncEngineTests extends WindowTestsBase {
         int id = startSyncSet(bse, listener);
         bse.addToSyncSet(id, mockWC);
         bse.setReady(id);
-        // Make sure traversals requested (one for add and another for setReady)
-        verify(mWm.mWindowPlacerLocked, times(2)).requestTraversal();
+        // Make sure traversals requested.
+        verify(mWm.mWindowPlacerLocked).requestTraversal();
         bse.onSurfacePlacement();
         verify(listener, times(0)).onTransactionReady(anyInt(), any());
 

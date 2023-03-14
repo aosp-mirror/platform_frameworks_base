@@ -106,4 +106,10 @@ public class KeyguardSecurityViewFlipperControllerTest extends SysuiTestCase {
             }
         }
     }
+
+    @Test
+    public void onDensityOrFontScaleChanged() {
+        mKeyguardSecurityViewFlipperController.clearViews();
+        verify(mView).removeAllViews();
+    }
 }

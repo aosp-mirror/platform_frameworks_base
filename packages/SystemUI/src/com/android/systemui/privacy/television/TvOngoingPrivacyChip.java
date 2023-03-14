@@ -67,7 +67,7 @@ import javax.inject.Inject;
  * recording audio, accessing the camera or accessing the location.
  */
 @SysUISingleton
-public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemController.Callback,
+public class TvOngoingPrivacyChip implements CoreStartable, PrivacyItemController.Callback,
         PrivacyChipDrawable.PrivacyChipDrawableListener {
     private static final String TAG = "TvOngoingPrivacyChip";
     private static final boolean DEBUG = false;
@@ -134,7 +134,6 @@ public class TvOngoingPrivacyChip extends CoreStartable implements PrivacyItemCo
     @Inject
     public TvOngoingPrivacyChip(Context context, PrivacyItemController privacyItemController,
             IWindowManager iWindowManager) {
-        super(context);
         if (DEBUG) Log.d(TAG, "Privacy chip running");
         mContext = context;
         mPrivacyItemController = privacyItemController;

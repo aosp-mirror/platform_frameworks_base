@@ -24,6 +24,7 @@ private const val FIELD_VALUE = "value"
 private const val FIELD_TYPE = "type"
 private const val TYPE_BOOLEAN = "boolean"
 private const val TYPE_STRING = "string"
+private const val TYPE_INT = "int"
 
 private const val TAG = "FlagSerializer"
 
@@ -75,6 +76,12 @@ object StringFlagSerializer : FlagSerializer<String>(
     TYPE_STRING,
     JSONObject::put,
     JSONObject::getString
+)
+
+object IntFlagSerializer : FlagSerializer<Int>(
+    TYPE_INT,
+    JSONObject::put,
+    JSONObject::getInt
 )
 
 class InvalidFlagStorageException : Exception("Data found but is invalid")

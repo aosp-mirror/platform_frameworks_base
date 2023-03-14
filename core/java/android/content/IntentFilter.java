@@ -2405,6 +2405,29 @@ public class IntentFilter implements Parcelable {
         */
     }
 
+    /**
+     * Perform a check on data paths and scheme specific parts of the intent filter.
+     * Return true if it passed.
+     * @hide
+     */
+    public boolean checkDataPathAndSchemeSpecificParts() {
+        final int numDataPath = mDataPaths == null
+                ? 0 : mDataPaths.size();
+        final int numDataSchemeSpecificParts = mDataSchemeSpecificParts == null
+                ? 0 : mDataSchemeSpecificParts.size();
+        for (int i = 0; i < numDataPath; i++) {
+            if (!mDataPaths.get(i).check()) {
+                return false;
+            }
+        }
+        for (int i = 0; i < numDataSchemeSpecificParts; i++) {
+            if (!mDataSchemeSpecificParts.get(i).check()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /** @hide */
     public IntentFilter(Parcel source) {
         mActions = new ArrayList<String>();

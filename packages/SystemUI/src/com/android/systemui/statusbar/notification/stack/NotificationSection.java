@@ -35,12 +35,12 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
  * bounds change.
  */
 public class NotificationSection {
-    private @PriorityBucket int mBucket;
-    private View mOwningView;
-    private Rect mBounds = new Rect();
-    private Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
-    private Rect mStartAnimationRect = new Rect();
-    private Rect mEndAnimationRect = new Rect();
+    private @PriorityBucket final int mBucket;
+    private final View mOwningView;
+    private final Rect mBounds = new Rect();
+    private final Rect mCurrentBounds = new Rect(-1, -1, -1, -1);
+    private final Rect mStartAnimationRect = new Rect();
+    private final Rect mEndAnimationRect = new Rect();
     private ObjectAnimator mTopAnimator = null;
     private ObjectAnimator mBottomAnimator = null;
     private ExpandableView mFirstVisibleChild;
@@ -277,7 +277,6 @@ public class NotificationSection {
                 }
             }
         }
-        top = Math.max(minTopPosition, top);
         ExpandableView lastView = getLastVisibleChild();
         if (lastView != null) {
             float finalTranslationY = ViewState.getFinalTranslationY(lastView);

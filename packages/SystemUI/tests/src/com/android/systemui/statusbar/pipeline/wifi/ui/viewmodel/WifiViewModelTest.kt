@@ -18,16 +18,23 @@ package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
+import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
+import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModelImpl
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityPipelineLogger
+import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
+import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.model.WifiNetworkModel
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractorImpl
 import com.android.systemui.statusbar.pipeline.wifi.shared.WifiConstants
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiActivityModel
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,21 +60,34 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Mock private lateinit var statusBarPipelineFlags: StatusBarPipelineFlags
     @Mock private lateinit var logger: ConnectivityPipelineLogger
+    @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var connectivityConstants: ConnectivityConstants
     @Mock private lateinit var wifiConstants: WifiConstants
+    private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var connectivityRepository: FakeConnectivityRepository
     private lateinit var wifiRepository: FakeWifiRepository
     private lateinit var interactor: WifiInteractor
+    private lateinit var airplaneModeViewModel: AirplaneModeViewModel
     private lateinit var scope: CoroutineScope
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        airplaneModeRepository = FakeAirplaneModeRepository()
         connectivityRepository = FakeConnectivityRepository()
         wifiRepository = FakeWifiRepository()
         wifiRepository.setIsWifiEnabled(true)
-        interactor = WifiInteractor(connectivityRepository, wifiRepository)
+        interactor = WifiInteractorImpl(connectivityRepository, wifiRepository)
         scope = CoroutineScope(IMMEDIATE)
+        airplaneModeViewModel = AirplaneModeViewModelImpl(
+            AirplaneModeInteractor(
+                airplaneModeRepository,
+                connectivityRepository,
+            ),
+            logger,
+            scope,
+        )
+
         createAndSetViewModel()
     }
 
@@ -76,6 +96,8 @@ class WifiViewModelTest : SysuiTestCase() {
         scope.cancel()
     }
 
+    // See [WifiViewModelIconParameterizedTest] for additional view model tests.
+
     // Note on testing: [WifiViewModel] exposes 3 different instances of
     // [LocationBasedWifiViewModel]. In practice, these 3 different instances will get the exact
     // same data for icon, activity, etc. flows. So, most of these tests will test just one of the
@@ -83,21 +105,21 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun wifiIcon_allLocationViewModelsReceiveSameData() = runBlocking(IMMEDIATE) {
-        var latestHome: Icon? = null
+        var latestHome: WifiIcon? = null
         val jobHome = underTest
             .home
             .wifiIcon
             .onEach { latestHome = it }
             .launchIn(this)
 
-        var latestKeyguard: Icon? = null
+        var latestKeyguard: WifiIcon? = null
         val jobKeyguard = underTest
             .keyguard
             .wifiIcon
             .onEach { latestKeyguard = it }
             .launchIn(this)
 
-        var latestQs: Icon? = null
+        var latestQs: WifiIcon? = null
         val jobQs = underTest
             .qs
             .wifiIcon
@@ -113,7 +135,7 @@ class WifiViewModelTest : SysuiTestCase() {
         )
         yield()
 
-        assertThat(latestHome).isInstanceOf(Icon.Resource::class.java)
+        assertThat(latestHome).isInstanceOf(WifiIcon.Visible::class.java)
         assertThat(latestHome).isEqualTo(latestKeyguard)
         assertThat(latestKeyguard).isEqualTo(latestQs)
 
@@ -124,7 +146,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_showActivityConfigFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(false)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(false)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -161,7 +183,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_showActivityConfigFalse_noUpdatesReceived() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(false)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(false)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -187,7 +209,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .launchIn(this)
 
         // WHEN we update the repo to have activity
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -203,10 +225,10 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_nullSsid_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
 
-        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, ssid = null))
+        wifiRepository.setWifiNetwork(WifiNetworkModel.Active(NETWORK_ID, ssid = null, level = 1))
 
         var activityIn: Boolean? = null
         val activityInJob = underTest
@@ -230,7 +252,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .launchIn(this)
 
         // WHEN we update the repo to have activity
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -246,7 +268,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activity_allLocationViewModelsReceiveSameData() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -271,7 +293,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latestQs = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -286,7 +308,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityIn_hasActivityInTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -297,7 +319,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -308,7 +330,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityIn_hasActivityInFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -319,7 +341,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -330,7 +352,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityOut_hasActivityOutTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -341,7 +363,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -352,7 +374,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityOut_hasActivityOutFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -363,7 +385,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -374,7 +396,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_hasActivityInTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -385,7 +407,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -396,7 +418,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_hasActivityOutTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -407,7 +429,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -418,7 +440,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_inAndOutTrue_outputsTrue() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -429,7 +451,7 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = true, hasActivityOut = true)
+        val activity = DataActivityModel(hasActivityIn = true, hasActivityOut = true)
         wifiRepository.setWifiActivity(activity)
         yield()
 
@@ -440,7 +462,7 @@ class WifiViewModelTest : SysuiTestCase() {
 
     @Test
     fun activityContainer_inAndOutFalse_outputsFalse() = runBlocking(IMMEDIATE) {
-        whenever(wifiConstants.shouldShowActivityConfig).thenReturn(true)
+        whenever(connectivityConstants.shouldShowActivityConfig).thenReturn(true)
         createAndSetViewModel()
         wifiRepository.setWifiNetwork(ACTIVE_VALID_WIFI_NETWORK)
 
@@ -451,11 +473,63 @@ class WifiViewModelTest : SysuiTestCase() {
             .onEach { latest = it }
             .launchIn(this)
 
-        val activity = WifiActivityModel(hasActivityIn = false, hasActivityOut = false)
+        val activity = DataActivityModel(hasActivityIn = false, hasActivityOut = false)
         wifiRepository.setWifiActivity(activity)
         yield()
 
         assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun airplaneSpacer_notAirplaneMode_outputsFalse() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .qs
+            .isAirplaneSpacerVisible
+            .onEach { latest = it }
+            .launchIn(this)
+
+        airplaneModeRepository.setIsAirplaneMode(false)
+        yield()
+
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun airplaneSpacer_airplaneForceHidden_outputsFalse() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .qs
+            .isAirplaneSpacerVisible
+            .onEach { latest = it }
+            .launchIn(this)
+
+        airplaneModeRepository.setIsAirplaneMode(true)
+        connectivityRepository.setForceHiddenIcons(setOf(ConnectivitySlot.AIRPLANE))
+        yield()
+
+        assertThat(latest).isFalse()
+
+        job.cancel()
+    }
+
+    @Test
+    fun airplaneSpacer_airplaneIconVisible_outputsTrue() = runBlocking(IMMEDIATE) {
+        var latest: Boolean? = null
+        val job = underTest
+            .qs
+            .isAirplaneSpacerVisible
+            .onEach { latest = it }
+            .launchIn(this)
+
+        airplaneModeRepository.setIsAirplaneMode(true)
+        yield()
+
+        assertThat(latest).isTrue()
 
         job.cancel()
     }
@@ -465,9 +539,11 @@ class WifiViewModelTest : SysuiTestCase() {
         // creations rely on certain config values that we mock out in individual tests. This method
         // allows tests to create the view model only after those configs are correctly set up.
         underTest = WifiViewModel(
+            airplaneModeViewModel,
             connectivityConstants,
             context,
             logger,
+            tableLogBuffer,
             interactor,
             scope,
             statusBarPipelineFlags,
@@ -477,7 +553,8 @@ class WifiViewModelTest : SysuiTestCase() {
 
     companion object {
         private const val NETWORK_ID = 2
-        private val ACTIVE_VALID_WIFI_NETWORK = WifiNetworkModel.Active(NETWORK_ID, ssid = "AB")
+        private val ACTIVE_VALID_WIFI_NETWORK =
+            WifiNetworkModel.Active(NETWORK_ID, ssid = "AB", level = 1)
     }
 }
 

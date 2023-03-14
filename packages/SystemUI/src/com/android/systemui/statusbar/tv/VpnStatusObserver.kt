@@ -35,9 +35,9 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class VpnStatusObserver @Inject constructor(
-    context: Context,
+    private val context: Context,
     private val securityController: SecurityController
-) : CoreStartable(context),
+) : CoreStartable,
         SecurityController.SecurityControllerCallback {
 
     private var vpnConnected = false
@@ -102,7 +102,7 @@ class VpnStatusObserver @Inject constructor(
                     .apply {
                         vpnName?.let {
                             setContentText(
-                                    mContext.getString(
+                                    context.getString(
                                             R.string.notification_disclosure_vpn_text, it
                                     )
                             )
@@ -111,23 +111,23 @@ class VpnStatusObserver @Inject constructor(
                     .build()
 
     private fun createVpnConnectedNotificationBuilder() =
-            Notification.Builder(mContext, NOTIFICATION_CHANNEL_TV_VPN)
+            Notification.Builder(context, NOTIFICATION_CHANNEL_TV_VPN)
                     .setSmallIcon(vpnIconId)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .extend(Notification.TvExtender())
                     .setOngoing(true)
-                    .setContentTitle(mContext.getString(R.string.notification_vpn_connected))
-                    .setContentIntent(VpnConfig.getIntentForStatusPanel(mContext))
+                    .setContentTitle(context.getString(R.string.notification_vpn_connected))
+                    .setContentIntent(VpnConfig.getIntentForStatusPanel(context))
 
     private fun createVpnDisconnectedNotification() =
-            Notification.Builder(mContext, NOTIFICATION_CHANNEL_TV_VPN)
+            Notification.Builder(context, NOTIFICATION_CHANNEL_TV_VPN)
                     .setSmallIcon(vpnIconId)
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setCategory(Notification.CATEGORY_SYSTEM)
                     .extend(Notification.TvExtender())
                     .setTimeoutAfter(VPN_DISCONNECTED_NOTIFICATION_TIMEOUT_MS)
-                    .setContentTitle(mContext.getString(R.string.notification_vpn_disconnected))
+                    .setContentTitle(context.getString(R.string.notification_vpn_disconnected))
                     .build()
 
     companion object {

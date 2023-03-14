@@ -22,7 +22,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.android.systemui.ripple.RippleView
+    <com.android.systemui.surfaceeffects.ripple.RippleView
         android:id="@+id/wireless_charging_ripple"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

@@ -55,7 +55,7 @@ public class ActivityEmbeddingControllerTests extends ActivityEmbeddingAnimation
     @Before
     public void setup() {
         super.setUp();
-        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any());
+        doReturn(mAnimator).when(mAnimRunner).createAnimator(any(), any(), any(), any(), any());
     }
 
     @Test

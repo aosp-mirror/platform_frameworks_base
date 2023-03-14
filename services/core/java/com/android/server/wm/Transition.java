@@ -55,7 +55,6 @@ import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_OCCLUDES_KEYGUARD;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
-import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
 
@@ -99,6 +98,7 @@ import com.android.server.wm.utils.RotationAnimationUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -108,7 +108,7 @@ import java.util.function.Predicate;
  * Represents a logical transition.
  * @see TransitionController
  */
-class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListener {
+class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
     private static final String TRACE_NAME_PLAY_TRANSITION = "PlayTransition";
 
@@ -159,6 +159,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private @TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
+    private final Token mToken;
     private RemoteTransition mRemoteTransition = null;
 
     /** Only use for clean-up after binder death! */
@@ -166,9 +167,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private SurfaceControl.Transaction mFinishTransaction = null;
 
     /**
-     * Contains change infos for both participants and all ancestors. We have to track ancestors
-     * because they are all promotion candidates and thus we need their start-states
-     * to be captured.
+     * Contains change infos for both participants and all remote-animatable ancestors. The
+     * ancestors can be the promotion candidates so their start-states need to be captured.
+     * @see #getAnimatableParent
      */
     final ArrayMap<WindowContainer, ChangeInfo> mChanges = new ArrayMap<>();
 
@@ -221,8 +222,25 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         mFlags = flags;
         mController = controller;
         mSyncEngine = syncEngine;
+        mToken = new Token(this);
 
         controller.mTransitionTracer.logState(this);
+    }
+
+    @Nullable
+    static Transition fromBinder(@Nullable IBinder token) {
+        if (token == null) return null;
+        try {
+            return ((Token) token).mTransition.get();
+        } catch (ClassCastException e) {
+            Slog.w(TAG, "Invalid transition token: " + token, e);
+            return null;
+        }
+    }
+
+    @NonNull
+    IBinder getToken() {
+        return mToken;
     }
 
     void addFlag(int flag) {
@@ -346,7 +364,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mFinishTransaction;
     }
 
-    private boolean isCollecting() {
+    boolean isCollecting() {
         return mState == STATE_COLLECTING || mState == STATE_STARTED;
     }
 
@@ -400,8 +418,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 mSyncId, wc);
         // "snapshot" all parents (as potential promotion targets). Do this before checking
         // if this is already a participant in case it has since been re-parented.
-        for (WindowContainer curr = wc.getParent(); curr != null && !mChanges.containsKey(curr);
-                curr = curr.getParent()) {
+        for (WindowContainer<?> curr = getAnimatableParent(wc);
+                curr != null && !mChanges.containsKey(curr);
+                curr = getAnimatableParent(curr)) {
             mChanges.put(curr, new ChangeInfo(curr));
             if (isReadyGroup(curr)) {
                 mReadyTracker.addGroup(curr);
@@ -474,6 +493,48 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (change == null || !change.mVisible || !wc.isVisibleRequested()) return;
         // Note: many more tests have already been done by caller.
         mContainerFreezer.freeze(wc, change.mAbsoluteBounds);
+    }
+
+    /**
+     * Records that a particular container has been reparented. This only effects windows that have
+     * already been collected in the transition. This should be called before reparenting because
+     * the old parent may be removed during reparenting, for example:
+     * {@link Task#shouldRemoveSelfOnLastChildRemoval}
+     */
+    void collectReparentChange(@NonNull WindowContainer wc, @NonNull WindowContainer newParent) {
+        if (!mChanges.containsKey(wc)) {
+            // #collectReparentChange() will be called when the window is reparented. Skip if it is
+            // a window that has not been collected, which means we don't care about this window for
+            // the current transition.
+            return;
+        }
+        final ChangeInfo change = mChanges.get(wc);
+        // Use the current common ancestor if there are multiple reparent, and the original parent
+        // has been detached. Otherwise, use the original parent before the transition.
+        final WindowContainer prevParent =
+                change.mStartParent == null || change.mStartParent.isAttached()
+                        ? change.mStartParent
+                        : change.mCommonAncestor;
+        if (prevParent == null || !prevParent.isAttached()) {
+            Slog.w(TAG, "Trying to collect reparenting of a window after the previous parent has"
+                    + " been detached: " + wc);
+            return;
+        }
+        if (prevParent == newParent) {
+            Slog.w(TAG, "Trying to collect reparenting of a window that has not been reparented: "
+                    + wc);
+            return;
+        }
+        if (!newParent.isAttached()) {
+            Slog.w(TAG, "Trying to collect reparenting of a window that is not attached after"
+                    + " reparenting: " + wc);
+            return;
+        }
+        WindowContainer ancestor = newParent;
+        while (prevParent != ancestor && !prevParent.isDescendantOf(ancestor)) {
+            ancestor = ancestor.getParent();
+        }
+        change.mCommonAncestor = ancestor;
     }
 
     /**
@@ -582,16 +643,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 // No need to clip the display in case seeing the clipped content when during the
                 // display rotation. No need to clip activities because they rely on clipping on
                 // task layers.
-                if (target.asDisplayContent() != null || target.asActivityRecord() != null) {
+                if (target.asTaskFragment() == null) {
                     t.setCrop(targetLeash, null /* crop */);
                 } else {
-                    // Crop to the requested bounds.
-                    final Rect clipRect = target.getRequestedOverrideBounds();
+                    // Crop to the resolved override bounds.
+                    final Rect clipRect = target.getResolvedOverrideBounds();
                     t.setWindowCrop(targetLeash, clipRect.width(), clipRect.height());
                 }
                 t.setCornerRadius(targetLeash, 0);
                 t.setShadowRadius(targetLeash, 0);
                 t.setMatrix(targetLeash, 1, 0, 0, 1);
+                t.setAlpha(targetLeash, 1);
                 // The bounds sent to the transition is always a real bounds. This means we lose
                 // information about "null" bounds (inheriting from parent). Core will fix-up
                 // non-organized window surface bounds; however, since Core can't touch organized
@@ -692,6 +754,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                     System.identityHashCode(this));
         }
+        // Close the transactions now. They were originally copied to Shell in case we needed to
+        // apply them due to a remote failure. Since we don't need to apply them anymore, free them
+        // immediately.
+        if (mStartTransaction != null) mStartTransaction.close();
+        if (mFinishTransaction != null) mFinishTransaction.close();
         mStartTransaction = mFinishTransaction = null;
         if (mState < STATE_PLAYING) {
             throw new IllegalStateException("Can't finish a non-playing transition " + mSyncId);
@@ -833,13 +900,14 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mController.mAtm.mWindowManager.updateRotation(false /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
         }
+        cleanUpInternal();
     }
 
     void abort() {
         // This calls back into itself via controller.abort, so just early return here.
         if (mState == STATE_ABORT) return;
-        if (mState != STATE_COLLECTING) {
-            throw new IllegalStateException("Too late to abort.");
+        if (mState != STATE_COLLECTING && mState != STATE_STARTED) {
+            throw new IllegalStateException("Too late to abort. state=" + mState);
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Aborting Transition: %d", mSyncId);
         mState = STATE_ABORT;
@@ -875,14 +943,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             dc.getPendingTransaction().merge(transaction);
             mSyncId = -1;
             mOverrideOptions = null;
+            cleanUpInternal();
             return;
-        }
-        // Ensure that wallpaper visibility is updated with the latest wallpaper target.
-        for (int i = mParticipants.size() - 1; i >= 0; --i) {
-            final WindowContainer<?> wc = mParticipants.valueAt(i);
-            if (isWallpaper(wc) && wc.getDisplayContent() != null) {
-                wc.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
-            }
         }
 
         mState = STATE_PLAYING;
@@ -932,7 +994,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // show here in the same way that we manually hide in finishTransaction.
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final ActivityRecord ar = mParticipants.valueAt(i).asActivityRecord();
-            if (ar == null || !ar.mVisibleRequested) continue;
+            if (ar == null || !ar.isVisibleRequested()) continue;
             transaction.show(ar.getSurfaceControl());
 
             // Also manually show any non-reported parents. This is necessary in a few cases
@@ -993,7 +1055,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
                 mController.getTransitionPlayer().onTransitionReady(
-                        this, info, transaction, mFinishTransaction);
+                        mToken, info, transaction, mFinishTransaction);
+                // Since we created root-leash but no longer reference it from core, release it now
+                info.releaseAnimSurfaces();
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
                     Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, TRACE_NAME_PLAY_TRANSITION,
                             System.identityHashCode(this));
@@ -1026,7 +1090,17 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         if (mFinishTransaction != null) {
             mFinishTransaction.apply();
         }
-        mController.finishTransition(this);
+        mController.finishTransition(mToken);
+    }
+
+    private void cleanUpInternal() {
+        // Clean-up any native references.
+        for (int i = 0; i < mChanges.size(); ++i) {
+            final ChangeInfo ci = mChanges.valueAt(i);
+            if (ci.mSnapshot != null) {
+                ci.mSnapshot.release();
+            }
+        }
     }
 
     /** @see RecentsAnimationController#attachNavigationBarToApp */
@@ -1201,7 +1275,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         ArrayMap<WindowContainer, Integer> reasons = new ArrayMap<>();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             ActivityRecord r = mParticipants.valueAt(i).asActivityRecord();
-            if (r == null || !r.mVisibleRequested) continue;
+            if (r == null || !r.isVisibleRequested()) continue;
             int transitionReason = APP_TRANSITION_WINDOWS_DRAWN;
             // At this point, r is "ready", but if it's not "ALL ready" then it is probably only
             // ready due to starting-window.
@@ -1226,6 +1300,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         sb.append(" flags=" + mFlags);
         sb.append('}');
         return sb.toString();
+    }
+
+    /** Returns the parent that the remote animator can animate or control. */
+    private static WindowContainer<?> getAnimatableParent(WindowContainer<?> wc) {
+        WindowContainer<?> parent = wc.getParent();
+        while (parent != null
+                && (!parent.canCreateRemoteAnimationTarget() && !parent.isOrganized())) {
+            parent = parent.getParent();
+        }
+        return parent;
     }
 
     private static boolean reportIfNotTop(WindowContainer wc) {
@@ -1331,7 +1415,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                     "        sibling is a participant with mode %s",
                     TransitionInfo.modeToString(siblingMode));
-            if (mode != siblingMode) {
+            if (reduceMode(mode) != reduceMode(siblingMode)) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "          SKIP: common mode mismatch. was %s",
                         TransitionInfo.modeToString(mode));
@@ -1339,6 +1423,16 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             }
         }
         return true;
+    }
+
+    /** "reduces" a mode into a smaller set of modes that uniquely represents visibility change. */
+    @TransitionInfo.TransitionMode
+    private static int reduceMode(@TransitionInfo.TransitionMode int mode) {
+        switch (mode) {
+            case TRANSIT_TO_BACK: return TRANSIT_CLOSE;
+            case TRANSIT_TO_FRONT: return TRANSIT_OPEN;
+            default: return mode;
+        }
     }
 
     /**
@@ -1441,7 +1535,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             intermediates.clear();
             boolean foundParentInTargets = false;
             // Collect the intermediate parents between target and top changed parent.
-            for (WindowContainer<?> p = wc.getParent(); p != null; p = p.getParent()) {
+            for (WindowContainer<?> p = getAnimatableParent(wc); p != null;
+                    p = getAnimatableParent(p)) {
                 final ChangeInfo parentChange = changes.get(p);
                 if (parentChange == null || !parentChange.hasChanged(p)) break;
                 if (p.mRemoteToken == null) {
@@ -1549,23 +1644,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             return out;
         }
 
-        // Find the top-most shared ancestor of app targets.
-        WindowContainer<?> ancestor = topApp.getParent();
-        // Go up ancestor parent chain until all targets are descendants.
-        ancestorLoop:
-        while (ancestor != null) {
-            for (int i = sortedTargets.size() - 1; i >= 0; --i) {
-                final WindowContainer wc = sortedTargets.get(i);
-                if (!isWallpaper(wc) && !wc.isDescendantOf(ancestor)) {
-                    ancestor = ancestor.getParent();
-                    continue ancestorLoop;
-                }
-            }
-            break;
-        }
+        WindowContainer<?> ancestor = findCommonAncestor(sortedTargets, changes, topApp);
 
-        // make leash based on highest (z-order) direct child of ancestor with a participant.
-        WindowContainer leashReference = sortedTargets.get(0);
+        // Make leash based on highest (z-order) direct child of ancestor with a participant.
+        // TODO(b/261418859): Handle the case when the target contains window containers which
+        // belong to a different display. As a workaround we use topApp, from which wallpaper
+        // window container is removed, instead of sortedTargets here.
+        WindowContainer leashReference = topApp;
         while (leashReference.getParent() != ancestor) {
             leashReference = leashReference.getParent();
         }
@@ -1586,10 +1671,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             if (info.mEndParent != null) {
                 change.setParent(info.mEndParent.mRemoteToken.toWindowContainerToken());
             }
+            if (info.mStartParent != null && info.mStartParent.mRemoteToken != null
+                    && target.getParent() != info.mStartParent) {
+                change.setLastParent(info.mStartParent.mRemoteToken.toWindowContainerToken());
+            }
             change.setMode(info.getTransitMode(target));
             change.setStartAbsBounds(info.mAbsoluteBounds);
             change.setFlags(info.getChangeFlags(target));
+
             final Task task = target.asTask();
+            final TaskFragment taskFragment = target.asTaskFragment();
+            final ActivityRecord activityRecord = target.asActivityRecord();
+
             if (task != null) {
                 final ActivityManager.RunningTaskInfo tinfo = new ActivityManager.RunningTaskInfo();
                 task.fillTaskInfo(tinfo);
@@ -1623,12 +1716,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             change.setEndRelOffset(bounds.left - parentBounds.left,
                     bounds.top - parentBounds.top);
             int endRotation = target.getWindowConfiguration().getRotation();
-            final ActivityRecord activityRecord = target.asActivityRecord();
             if (activityRecord != null) {
-                final Task arTask = activityRecord.getTask();
-                final int backgroundColor = ColorUtils.setAlphaComponent(
-                        arTask.getTaskDescription().getBackgroundColor(), 255);
-                change.setBackgroundColor(backgroundColor);
                 // TODO(b/227427984): Shell needs to aware letterbox.
                 // Always use parent bounds of activity because letterbox area (e.g. fixed aspect
                 // ratio or size compat mode) should be included in the animation.
@@ -1641,6 +1729,31 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             } else {
                 change.setEndAbsBounds(bounds);
             }
+
+            if (activityRecord != null || (taskFragment != null && taskFragment.isEmbedded())) {
+                final int backgroundColor;
+                final TaskFragment organizedTf = activityRecord != null
+                        ? activityRecord.getOrganizedTaskFragment()
+                        : taskFragment.getOrganizedTaskFragment();
+                if (organizedTf != null && organizedTf.getAnimationParams()
+                        .getAnimationBackgroundColor() != 0) {
+                    // This window is embedded and has an animation background color set on the
+                    // TaskFragment. Pass this color with this window, so the handler can use it as
+                    // the animation background color if needed,
+                    backgroundColor = organizedTf.getAnimationParams()
+                            .getAnimationBackgroundColor();
+                } else {
+                    // Set background color to Task theme color for activity and embedded
+                    // TaskFragment in case we want to show background during the animation.
+                    final Task parentTask = activityRecord != null
+                            ? activityRecord.getTask()
+                            : taskFragment.getTask();
+                    backgroundColor = ColorUtils.setAlphaComponent(
+                            parentTask.getTaskDescription().getBackgroundColor(), 255);
+                }
+                change.setBackgroundColor(backgroundColor);
+            }
+
             change.setRotation(info.mRotation, endRotation);
             if (info.mSnapshot != null) {
                 change.setSnapshot(info.mSnapshot, info.mSnapshotLuma);
@@ -1662,6 +1775,46 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
 
         return out;
+    }
+
+    /**
+     * Finds the top-most common ancestor of app targets.
+     *
+     * Makes sure that the previous parent is also a descendant to make sure the animation won't
+     * be covered by other windows below the previous parent. For example, when reparenting an
+     * activity from PiP Task to split screen Task.
+     */
+    @NonNull
+    private static WindowContainer<?> findCommonAncestor(
+            @NonNull ArrayList<WindowContainer> targets,
+            @NonNull ArrayMap<WindowContainer, ChangeInfo> changes,
+            @NonNull WindowContainer<?> topApp) {
+        WindowContainer<?> ancestor = topApp.getParent();
+        // Go up ancestor parent chain until all targets are descendants. Ancestor should never be
+        // null because all targets are attached.
+        for (int i = targets.size() - 1; i >= 0; i--) {
+            final WindowContainer wc = targets.get(i);
+            if (isWallpaper(wc)) {
+                // Skip the non-app window.
+                continue;
+            }
+            while (!wc.isDescendantOf(ancestor)) {
+                ancestor = ancestor.getParent();
+            }
+
+            // Make sure the previous parent is also a descendant to make sure the animation won't
+            // be covered by other windows below the previous parent. For example, when reparenting
+            // an activity from PiP Task to split screen Task.
+            final ChangeInfo change = changes.get(wc);
+            final WindowContainer prevParent = change.mCommonAncestor;
+            if (prevParent == null || !prevParent.isAttached()) {
+                continue;
+            }
+            while (prevParent != ancestor && !prevParent.isDescendantOf(ancestor)) {
+                ancestor = ancestor.getParent();
+            }
+        }
+        return ancestor;
     }
 
     private static WindowManager.LayoutParams getLayoutParamsForAnimationsStyle(int type,
@@ -1757,10 +1910,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return isCollecting() && mSyncId >= 0;
     }
 
-    static Transition fromBinder(IBinder binder) {
-        return (Transition) binder;
-    }
-
     @VisibleForTesting
     static class ChangeInfo {
         private static final int FLAG_NONE = 0;
@@ -1782,10 +1931,19 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
 
-        // Usually "post" change state.
+        /**
+         * "Parent" that is also included in the transition. When populating the parent changes, we
+         * may skip the intermediate parents, so this may not be the actual parent in the hierarchy.
+         */
         WindowContainer mEndParent;
-        // Parent before change state.
+        /** Actual parent window before change state. */
         WindowContainer mStartParent;
+        /**
+         * When the window is reparented during the transition, this is the common ancestor window
+         * of the {@link #mStartParent} and the current parent. This is needed because the
+         * {@link #mStartParent} may have been detached when the transition starts.
+         */
+        WindowContainer mCommonAncestor;
 
         // State tracking
         boolean mExistenceChanged = false;
@@ -1842,7 +2000,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         @TransitionInfo.TransitionMode
         int getTransitMode(@NonNull WindowContainer wc) {
             if ((mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
-                return TRANSIT_CLOSE;
+                return mExistenceChanged ? TRANSIT_CLOSE : TRANSIT_TO_BACK;
             }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
@@ -1865,26 +2023,24 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 flags |= FLAG_TRANSLUCENT;
             }
             final Task task = wc.asTask();
-            if (task != null && task.voiceSession != null) {
-                flags |= FLAG_IS_VOICE_INTERACTION;
-            }
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
                 if (topActivity != null && topActivity.mStartingData != null
                         && topActivity.mStartingData.hasImeSurface()) {
                     flags |= FLAG_WILL_IME_SHOWN;
                 }
+                if (task.voiceSession != null) {
+                    flags |= FLAG_IS_VOICE_INTERACTION;
+                }
             }
             Task parentTask = null;
             final ActivityRecord record = wc.asActivityRecord();
             if (record != null) {
                 parentTask = record.getTask();
-                if (record.mUseTransferredAnimation) {
-                    flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
-                }
                 if (record.mVoiceInteraction) {
                     flags |= FLAG_IS_VOICE_INTERACTION;
                 }
+                flags |= record.mTransitionChangeFlags;
             }
             final TaskFragment taskFragment = wc.asTaskFragment();
             if (taskFragment != null && task == null) {
@@ -1903,19 +2059,25 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     // Whether the container fills its parent Task bounds.
                     flags |= FLAG_FILLS_TASK;
                 }
-            }
-            final DisplayContent dc = wc.asDisplayContent();
-            if (dc != null) {
-                flags |= FLAG_IS_DISPLAY;
-                if (dc.hasAlertWindowSurfaces()) {
-                    flags |= FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+            } else {
+                final DisplayContent dc = wc.asDisplayContent();
+                if (dc != null) {
+                    flags |= FLAG_IS_DISPLAY;
+                    if (dc.hasAlertWindowSurfaces()) {
+                        flags |= FLAG_DISPLAY_HAS_ALERT_WINDOWS;
+                    }
+                } else if (isWallpaper(wc)) {
+                    flags |= FLAG_IS_WALLPAPER;
+                } else if (isInputMethod(wc)) {
+                    flags |= FLAG_IS_INPUT_METHOD;
+                } else {
+                    // In this condition, the wc can only be WindowToken or DisplayArea.
+                    final int type = wc.getWindowType();
+                    if (type >= WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW
+                            && type <= WindowManager.LayoutParams.LAST_SYSTEM_WINDOW) {
+                        flags |= TransitionInfo.FLAG_IS_SYSTEM_WINDOW;
+                    }
                 }
-            }
-            if (isWallpaper(wc)) {
-                flags |= FLAG_IS_WALLPAPER;
-            }
-            if (isInputMethod(wc)) {
-                flags |= FLAG_IS_INPUT_METHOD;
             }
             if (occludesKeyguard(wc)) {
                 flags |= FLAG_OCCLUDES_KEYGUARD;
@@ -2237,6 +2399,20 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 if (snap == null) continue;
                 t.reparent(snap, null /* newParent */);
             }
+        }
+    }
+
+    private static class Token extends Binder {
+        final WeakReference<Transition> mTransition;
+
+        Token(Transition transition) {
+            mTransition = new WeakReference<>(transition);
+        }
+
+        @Override
+        public String toString() {
+            return "Token{" + Integer.toHexString(System.identityHashCode(this)) + " "
+                    + mTransition.get() + "}";
         }
     }
 }

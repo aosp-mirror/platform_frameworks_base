@@ -33,19 +33,19 @@ public class TaskFragmentParentInfo implements Parcelable {
 
     private final int mDisplayId;
 
-    private final boolean mVisibleRequested;
+    private final boolean mVisible;
 
     public TaskFragmentParentInfo(@NonNull Configuration configuration, int displayId,
-            boolean visibleRequested) {
+            boolean visible) {
         mConfiguration.setTo(configuration);
         mDisplayId = displayId;
-        mVisibleRequested = visibleRequested;
+        mVisible = visible;
     }
 
     public TaskFragmentParentInfo(@NonNull TaskFragmentParentInfo info) {
         mConfiguration.setTo(info.getConfiguration());
         mDisplayId = info.mDisplayId;
-        mVisibleRequested = info.mVisibleRequested;
+        mVisible = info.mVisible;
     }
 
     /** The {@link Configuration} of the parent Task */
@@ -62,9 +62,9 @@ public class TaskFragmentParentInfo implements Parcelable {
         return mDisplayId;
     }
 
-    /** Whether the parent Task is requested to be visible or not */
-    public boolean isVisibleRequested() {
-        return mVisibleRequested;
+    /** Whether the parent Task is visible or not */
+    public boolean isVisible() {
+        return mVisible;
     }
 
     /**
@@ -80,7 +80,7 @@ public class TaskFragmentParentInfo implements Parcelable {
             return false;
         }
         return getWindowingMode() == that.getWindowingMode() && mDisplayId == that.mDisplayId
-                && mVisibleRequested == that.mVisibleRequested;
+                && mVisible == that.mVisible;
     }
 
     @WindowConfiguration.WindowingMode
@@ -93,7 +93,7 @@ public class TaskFragmentParentInfo implements Parcelable {
         return TaskFragmentParentInfo.class.getSimpleName() + ":{"
                 + "config=" + mConfiguration
                 + ", displayId=" + mDisplayId
-                + ", visibleRequested=" + mVisibleRequested
+                + ", visible=" + mVisible
                 + "}";
     }
 
@@ -114,14 +114,14 @@ public class TaskFragmentParentInfo implements Parcelable {
         final TaskFragmentParentInfo that = (TaskFragmentParentInfo) obj;
         return mConfiguration.equals(that.mConfiguration)
                 && mDisplayId == that.mDisplayId
-                && mVisibleRequested == that.mVisibleRequested;
+                && mVisible == that.mVisible;
     }
 
     @Override
     public int hashCode() {
         int result = mConfiguration.hashCode();
         result = 31 * result + mDisplayId;
-        result = 31 * result + (mVisibleRequested ? 1 : 0);
+        result = 31 * result + (mVisible ? 1 : 0);
         return result;
     }
 
@@ -129,13 +129,13 @@ public class TaskFragmentParentInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         mConfiguration.writeToParcel(dest, flags);
         dest.writeInt(mDisplayId);
-        dest.writeBoolean(mVisibleRequested);
+        dest.writeBoolean(mVisible);
     }
 
     private TaskFragmentParentInfo(Parcel in) {
         mConfiguration.readFromParcel(in);
         mDisplayId = in.readInt();
-        mVisibleRequested = in.readBoolean();
+        mVisible = in.readBoolean();
     }
 
     public static final Creator<TaskFragmentParentInfo> CREATOR =

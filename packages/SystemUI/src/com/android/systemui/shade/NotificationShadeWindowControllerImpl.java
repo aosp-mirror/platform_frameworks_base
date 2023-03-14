@@ -44,6 +44,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
@@ -70,7 +71,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import java.io.PrintWriter;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -95,6 +95,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
     private final KeyguardStateController mKeyguardStateController;
+    private final ShadeWindowLogger mLogger;
     private final LayoutParams mLpChanged;
     private final long mLockScreenDisplayTimeout;
     private final float mKeyguardPreferredRefreshRate; // takes precedence over max
@@ -135,12 +136,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             DumpManager dumpManager,
             KeyguardStateController keyguardStateController,
             ScreenOffAnimationController screenOffAnimationController,
-            AuthController authController) {
+            AuthController authController,
+            ShadeExpansionStateManager shadeExpansionStateManager,
+            ShadeWindowLogger logger) {
         mContext = context;
         mWindowManager = windowManager;
         mActivityManager = activityManager;
         mDozeParameters = dozeParameters;
         mKeyguardStateController = keyguardStateController;
+        mLogger = logger;
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
         mLpChanged = new LayoutParams();
         mKeyguardViewMediator = keyguardViewMediator;
@@ -156,6 +160,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 .addCallback(mStateListener,
                         SysuiStatusBarStateController.RANK_STATUS_BAR_WINDOW_CONTROLLER);
         configurationController.addCallback(this);
+        shadeExpansionStateManager.addQsExpansionListener(this::onQsExpansionChanged);
+        shadeExpansionStateManager.addFullExpansionListener(this::onShadeExpansionFullyChanged);
 
         float desiredPreferredRefreshRate = context.getResources()
                 .getInteger(R.integer.config_keyguardRefreshRate);
@@ -202,6 +208,14 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         }
     }
 
+    @VisibleForTesting
+    void onShadeExpansionFullyChanged(Boolean isExpanded) {
+        if (mCurrentState.mPanelExpanded != isExpanded) {
+            mCurrentState.mPanelExpanded = isExpanded;
+            apply(mCurrentState);
+        }
+    }
+
     /**
      * Register a listener to monitor scrims visibility
      * @param listener A listener to monitor scrims visibility
@@ -234,7 +248,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
         mLp.setFitInsetsTypes(0 /* types */);
-        mLp.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
         mLp.setTitle("NotificationShade");
         mLp.packageName = mContext.getPackageName();
         mLp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -372,8 +385,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             mLpChanged.flags |= LayoutParams.FLAG_NOT_FOCUSABLE;
             mLpChanged.flags &= ~LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         }
-
-        mLpChanged.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
     }
 
     private void applyForceShowNavigationFlag(State state) {
@@ -387,11 +398,13 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyVisibility(State state) {
         boolean visible = isExpanded(state);
+        mLogger.logApplyVisibility(visible);
         if (state.mForcePluginOpen) {
             if (mListener != null) {
                 mListener.setWouldOtherwiseCollapse(visible);
             }
             visible = true;
+            mLogger.d("Visibility forced to be true");
         }
         if (mNotificationShadeView != null) {
             if (visible) {
@@ -454,6 +467,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     private void applyWindowLayoutParams() {
         if (mDeferWindowLayoutParams == 0 && mLp != null && mLp.copyFrom(mLpChanged) != 0) {
+            mLogger.logApplyingWindowLayoutParams(mLp);
             Trace.beginSection("updateViewLayout");
             mWindowManager.updateViewLayout(mNotificationShadeView, mLp);
             Trace.endSection();
@@ -469,6 +483,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private void apply(State state) {
+        mLogger.logNewState(state);
         applyKeyguardFlags(state);
         applyFocusableFlag(state);
         applyForceShowNavigationFlag(state);
@@ -578,6 +593,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
                 && mCurrentState.mNotificationShadeFocusable == visible) {
             return;
         }
+        mLogger.logShadeVisibleAndFocusable(visible);
         mCurrentState.mPanelVisible = visible;
         mCurrentState.mNotificationShadeFocusable = visible;
         apply(mCurrentState);
@@ -585,6 +601,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
     @Override
     public void setNotificationShadeFocusable(boolean focusable) {
+        mLogger.logShadeFocusable(focusable);
         mCurrentState.mNotificationShadeFocusable = focusable;
         apply(mCurrentState);
     }
@@ -607,8 +624,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         apply(mCurrentState);
     }
 
-    @Override
-    public void setQsExpanded(boolean expanded) {
+    private void onQsExpansionChanged(Boolean expanded) {
         mCurrentState.mQsExpanded = expanded;
         apply(mCurrentState);
     }
@@ -698,15 +714,6 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     @Override
-    public void setPanelExpanded(boolean isExpanded) {
-        if (mCurrentState.mPanelExpanded == isExpanded) {
-            return;
-        }
-        mCurrentState.mPanelExpanded = isExpanded;
-        apply(mCurrentState);
-    }
-
-    @Override
     public void onRemoteInputActive(boolean remoteInputActive) {
         mCurrentState.mRemoteInputActive = remoteInputActive;
         apply(mCurrentState);
@@ -731,16 +738,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         apply(mCurrentState);
     }
 
-    private final Set<Object> mForceOpenTokens = new HashSet<>();
     @Override
     public void setForcePluginOpen(boolean forceOpen, Object token) {
         if (forceOpen) {
-            mForceOpenTokens.add(token);
+            mCurrentState.mForceOpenTokens.add(token);
         } else {
-            mForceOpenTokens.remove(token);
+            mCurrentState.mForceOpenTokens.remove(token);
         }
         final boolean previousForceOpenState = mCurrentState.mForcePluginOpen;
-        mCurrentState.mForcePluginOpen = !mForceOpenTokens.isEmpty();
+        mCurrentState.mForcePluginOpen = !mCurrentState.mForceOpenTokens.isEmpty();
         if (previousForceOpenState != mCurrentState.mForcePluginOpen) {
             apply(mCurrentState);
             if (mForcePluginOpenListener != null) {
@@ -865,6 +871,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         boolean mWallpaperSupportsAmbientMode;
         boolean mNotTouchable;
         Set<String> mComponentsForcingTopUi = new HashSet<>();
+        Set<Object> mForceOpenTokens = new HashSet<>();
 
         /**
          * The status bar state from {@link CentralSurfaces}.
@@ -883,28 +890,37 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
 
         @Override
         public String toString() {
-            StringBuilder result = new StringBuilder();
-            String newLine = "\n";
-            result.append("Window State {");
-            result.append(newLine);
-
-            Field[] fields = this.getClass().getDeclaredFields();
-
-            // Print field names paired with their values
-            for (Field field : fields) {
-                result.append("  ");
-                try {
-                    result.append(field.getName());
-                    result.append(": ");
-                    //requires access to private field:
-                    result.append(field.get(this));
-                } catch (IllegalAccessException ex) {
-                }
-                result.append(newLine);
-            }
-            result.append("}");
-
-            return result.toString();
+            return new StringBuilder()
+                    .append("State{")
+                    .append("  mKeyguardShowing=").append(mKeyguardShowing)
+                    .append(", mKeyguardOccluded=").append(mKeyguardOccluded)
+                    .append(", mKeyguardNeedsInput=").append(mKeyguardNeedsInput)
+                    .append(", mPanelVisible=").append(mPanelVisible)
+                    .append(", mPanelExpanded=").append(mPanelExpanded)
+                    .append(", mNotificationShadeFocusable=").append(mNotificationShadeFocusable)
+                    .append(", mBouncerShowing=").append(mBouncerShowing)
+                    .append(", mKeyguardFadingAway=").append(mKeyguardFadingAway)
+                    .append(", mKeyguardGoingAway=").append(mKeyguardGoingAway)
+                    .append(", mQsExpanded=").append(mQsExpanded)
+                    .append(", mHeadsUpShowing=").append(mHeadsUpShowing)
+                    .append(", mLightRevealScrimOpaque=").append(mLightRevealScrimOpaque)
+                    .append(", mForceCollapsed=").append(mForceCollapsed)
+                    .append(", mForceDozeBrightness=").append(mForceDozeBrightness)
+                    .append(", mForceUserActivity=").append(mForceUserActivity)
+                    .append(", mLaunchingActivity=").append(mLaunchingActivity)
+                    .append(", mBackdropShowing=").append(mBackdropShowing)
+                    .append(", mWallpaperSupportsAmbientMode=")
+                    .append(mWallpaperSupportsAmbientMode)
+                    .append(", mNotTouchable=").append(mNotTouchable)
+                    .append(", mComponentsForcingTopUi=").append(mComponentsForcingTopUi)
+                    .append(", mForceOpenTokens=").append(mForceOpenTokens)
+                    .append(", mStatusBarState=").append(mStatusBarState)
+                    .append(", mRemoteInputActive=").append(mRemoteInputActive)
+                    .append(", mForcePluginOpen=").append(mForcePluginOpen)
+                    .append(", mDozing=").append(mDozing)
+                    .append(", mScrimsVisibility=").append(mScrimsVisibility)
+                    .append(", mBackgroundBlurRadius=").append(mBackgroundBlurRadius)
+                    .append('}').toString();
         }
     }
 

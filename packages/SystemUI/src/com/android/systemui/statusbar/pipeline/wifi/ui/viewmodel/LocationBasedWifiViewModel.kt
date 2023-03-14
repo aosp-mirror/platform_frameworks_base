@@ -17,11 +17,10 @@
 package com.android.systemui.statusbar.pipeline.wifi.ui.viewmodel
 
 import android.graphics.Color
-import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
+import com.android.systemui.statusbar.pipeline.wifi.ui.model.WifiIcon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 
 /**
  * A view model for a wifi icon in a specific location. This allows us to control parameters that
@@ -33,8 +32,8 @@ abstract class LocationBasedWifiViewModel(
     statusBarPipelineFlags: StatusBarPipelineFlags,
     debugTint: Int,
 
-    /** The wifi icon that should be displayed. Null if we shouldn't display any icon. */
-    val wifiIcon: StateFlow<Icon.Resource?>,
+    /** The wifi icon that should be displayed. */
+    val wifiIcon: StateFlow<WifiIcon>,
 
     /** True if the activity in view should be visible. */
     val isActivityInViewVisible: Flow<Boolean>,
@@ -44,25 +43,16 @@ abstract class LocationBasedWifiViewModel(
 
     /** True if the activity container view should be visible. */
     val isActivityContainerVisible: Flow<Boolean>,
-) {
-    /** The color that should be used to tint the icon. */
-    val tint: Flow<Int> =
-        flowOf(
-            if (statusBarPipelineFlags.useNewPipelineDebugColoring()) {
-                debugTint
-            } else {
-                DEFAULT_TINT
-            }
-        )
 
-    companion object {
-        /**
-         * A default icon tint.
-         *
-         * TODO(b/238425913): The tint is actually controlled by
-         * [com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager]. We
-         * should use that logic instead of white as a default.
-         */
-        private const val DEFAULT_TINT = Color.WHITE
-    }
+    /** True if the airplane spacer view should be visible. */
+    val isAirplaneSpacerVisible: Flow<Boolean>,
+) {
+    val useDebugColoring: Boolean = statusBarPipelineFlags.useDebugColoring()
+
+    val defaultColor: Int =
+        if (useDebugColoring) {
+            debugTint
+        } else {
+            Color.WHITE
+        }
 }

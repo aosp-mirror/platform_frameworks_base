@@ -70,7 +70,7 @@ import java.util.List;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
- * expanded and heads up layout. This class is responsible for clipping the content and and
+ * expanded and heads up layout. This class is responsible for clipping the content and
  * switching between the expanded, contracted and the heads up view depending on its clipped size.
  */
 public class NotificationContentView extends FrameLayout implements NotificationFadeAware {
@@ -627,6 +627,13 @@ public class NotificationContentView extends FrameLayout implements Notification
         int hint;
         if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
             hint = getViewHeight(VISIBLE_TYPE_HEADSUP);
+            if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isAnimatingAppearance()
+                    && mHeadsUpRemoteInputController.isFocusAnimationFlagActive()) {
+                // While the RemoteInputView is animating its appearance, it should be allowed
+                // to overlap the hint, therefore no space is reserved for the hint during the
+                // appearance animation of the RemoteInputView
+                hint = 0;
+            }
         } else if (mExpandedChild != null) {
             hint = getViewHeight(VISIBLE_TYPE_EXPANDED);
         } else if (mContractedChild != null) {
@@ -1374,13 +1381,8 @@ public class NotificationContentView extends FrameLayout implements Notification
         if (bubbleButton == null || actionContainer == null) {
             return;
         }
-        boolean isPersonWithShortcut =
-                mPeopleIdentifier.getPeopleNotificationType(entry)
-                        >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
-        boolean showButton = BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
-                && isPersonWithShortcut
-                && entry.getBubbleMetadata() != null;
-        if (showButton) {
+
+        if (shouldShowBubbleButton(entry)) {
             // explicitly resolve drawable resource using SystemUI's theme
             Drawable d = mContext.getDrawable(entry.isBubble()
                     ? R.drawable.bubble_ic_stop_bubble
@@ -1408,6 +1410,16 @@ public class NotificationContentView extends FrameLayout implements Notification
         } else  {
             bubbleButton.setVisibility(GONE);
         }
+    }
+
+    @VisibleForTesting
+    boolean shouldShowBubbleButton(NotificationEntry entry) {
+        boolean isPersonWithShortcut =
+                mPeopleIdentifier.getPeopleNotificationType(entry)
+                        >= PeopleNotificationIdentifier.TYPE_FULL_PERSON;
+        return BubblesManager.areBubblesEnabled(mContext, entry.getSbn().getUser())
+                && isPersonWithShortcut
+                && entry.getBubbleMetadata() != null;
     }
 
     private void applySnoozeAction(View layout) {
@@ -1986,6 +1998,25 @@ public class NotificationContentView extends FrameLayout implements Notification
     public void setRemoteInputVisible(boolean remoteInputVisible) {
         mRemoteInputVisible = remoteInputVisible;
         setClipChildren(!remoteInputVisible);
+        setActionsImportanceForAccessibility(
+                remoteInputVisible ? View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                        : View.IMPORTANT_FOR_ACCESSIBILITY_AUTO);
+    }
+
+    private void setActionsImportanceForAccessibility(int mode) {
+        if (mExpandedChild != null) {
+            setActionsImportanceForAccessibility(mode, mExpandedChild);
+        }
+        if (mHeadsUpChild != null) {
+            setActionsImportanceForAccessibility(mode, mHeadsUpChild);
+        }
+    }
+
+    private void setActionsImportanceForAccessibility(int mode, View child) {
+        View actionsCandidate = child.findViewById(com.android.internal.R.id.actions);
+        if (actionsCandidate != null) {
+            actionsCandidate.setImportantForAccessibility(mode);
+        }
     }
 
     @Override

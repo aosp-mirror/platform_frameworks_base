@@ -43,6 +43,7 @@ import static com.android.server.wm.LetterboxConfiguration.LETTERBOX_BACKGROUND_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -190,19 +191,36 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         win.mViewVisibility = View.VISIBLE;
         win.mHasSurface = true;
         win.mActivityRecord.mAppStopped = true;
-        win.mActivityRecord.mVisibleRequested = false;
+        win.mActivityRecord.setVisibleRequested(false);
         win.mActivityRecord.setVisible(false);
         mWm.mWindowMap.put(win.mClient.asBinder(), win);
         final int w = 100;
         final int h = 200;
+        final ClientWindowFrames outFrames = new ClientWindowFrames();
+        final MergedConfiguration outConfig = new MergedConfiguration();
+        final SurfaceControl outSurfaceControl = new SurfaceControl();
+        final InsetsState outInsetsState = new InsetsState();
+        final InsetsSourceControl[] outControls = new InsetsSourceControl[0];
+        final Bundle outBundle = new Bundle();
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.GONE, 0, 0, 0,
-                new ClientWindowFrames(), new MergedConfiguration(), new SurfaceControl(),
-                new InsetsState(), new InsetsSourceControl[0], new Bundle());
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
         // Because the window is already invisible, it doesn't need to apply exiting animation
         // and WMS#tryStartExitingAnimation() will destroy the surface directly.
         assertFalse(win.mAnimatingExit);
         assertFalse(win.mHasSurface);
         assertNull(win.mWinAnimator.mSurfaceController);
+
+        doReturn(mSystemServicesTestRule.mTransaction).when(SurfaceControl::getGlobalTransaction);
+        // Invisible requested activity should not get the last config even if its view is visible.
+        mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
+                outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);
+        assertEquals(0, outConfig.getMergedConfiguration().densityDpi);
+        // Non activity window can still get the last config.
+        win.mActivityRecord = null;
+        win.fillClientWindowFramesAndConfiguration(outFrames, outConfig,
+                false /* useLatestConfig */, true /* relayoutVisible */);
+        assertEquals(win.getConfiguration().densityDpi,
+                outConfig.getMergedConfiguration().densityDpi);
     }
 
     @Test

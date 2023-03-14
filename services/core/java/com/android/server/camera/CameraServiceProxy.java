@@ -74,6 +74,7 @@ import android.view.Surface;
 import android.view.WindowManagerGlobal;
 
 import com.android.framework.protobuf.nano.MessageNano;
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
@@ -386,6 +387,16 @@ public class CameraServiceProxy extends SystemService
             @Nullable TaskInfo taskInfo, int displayRotation, int lensFacing,
             boolean ignoreResizableAndSdkCheck) {
         if (taskInfo == null) {
+            return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
+        }
+
+        // When config_isWindowManagerCameraCompatTreatmentEnabled is true,
+        // DisplayRotationCompatPolicy in WindowManager force rotates fullscreen activities with
+        // fixed orientation to align them with the natural orientation of the device.
+        if (ctx.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatTreatmentEnabled)) {
+            Slog.v(TAG, "Disable Rotate and Crop to avoid conflicts with"
+                    + " WM force rotation treatment.");
             return CaptureRequest.SCALER_ROTATE_AND_CROP_NONE;
         }
 

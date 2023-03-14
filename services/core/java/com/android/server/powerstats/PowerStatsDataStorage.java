@@ -53,7 +53,7 @@ public class PowerStatsDataStorage {
 
     private static class DataElement {
         private static final int LENGTH_FIELD_WIDTH = 4;
-        private static final int MAX_DATA_ELEMENT_SIZE = 1000;
+        private static final int MAX_DATA_ELEMENT_SIZE = 32768;
 
         private byte[] mData;
 

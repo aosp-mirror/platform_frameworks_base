@@ -95,6 +95,7 @@ cc_defaults {
     name: "hwui_static_deps",
     defaults: [
         "android.hardware.graphics.common-ndk_shared",
+        "android.hardware.graphics.composer3-ndk_shared",
     ],
     shared_libs: [
         "libbase",
@@ -110,7 +111,6 @@ cc_defaults {
         android: {
             shared_libs: [
                 "android.hardware.graphics.common@1.2",
-                "android.hardware.graphics.composer3-V1-ndk",
                 "liblog",
                 "libcutils",
                 "libutils",

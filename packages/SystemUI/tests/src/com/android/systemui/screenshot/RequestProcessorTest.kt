@@ -28,7 +28,6 @@ import android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
 import android.view.WindowManager.ScreenshotSource.SCREENSHOT_OTHER
 import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
-import android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION
 import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler
 import com.android.internal.util.ScreenshotHelper.HardwareBitmapBundler.bundleToHardwareBitmap
 import com.android.internal.util.ScreenshotHelper.ScreenshotRequest
@@ -100,13 +99,14 @@ class RequestProcessorTest {
             policy.getDefaultDisplayId(),
             DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
 
-        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_KEY_CHORD)
+        val request = ScreenshotRequest(TAKE_SCREENSHOT_FULLSCREEN, SCREENSHOT_OTHER)
         val processor = RequestProcessor(imageCapture, policy, flags, scope)
 
         val processedRequest = processor.process(request)
 
         // Request has topComponent added, but otherwise unchanged.
         assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
+        assertThat(processedRequest.source).isEqualTo(SCREENSHOT_OTHER)
         assertThat(processedRequest.topComponent).isEqualTo(component)
     }
 
@@ -129,66 +129,6 @@ class RequestProcessorTest {
         val processedRequest = processor.process(request)
 
         // Expect a task snapshot is taken, overriding the full screen mode
-        assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_PROVIDED_IMAGE)
-        assertThat(bitmap.equalsHardwareBitmapBundle(processedRequest.bitmapBundle)).isTrue()
-        assertThat(processedRequest.boundsInScreen).isEqualTo(bounds)
-        assertThat(processedRequest.insets).isEqualTo(Insets.NONE)
-        assertThat(processedRequest.taskId).isEqualTo(TASK_ID)
-        assertThat(imageCapture.requestedTaskId).isEqualTo(TASK_ID)
-        assertThat(processedRequest.userId).isEqualTo(USER_ID)
-        assertThat(processedRequest.topComponent).isEqualTo(component)
-    }
-
-    @Test
-    fun testSelectedRegionScreenshot_workProfilePolicyDisabled() = runBlocking {
-        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, false)
-
-        val request = ScreenshotRequest(TAKE_SCREENSHOT_SELECTED_REGION, SCREENSHOT_KEY_CHORD)
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
-
-        val processedRequest = processor.process(request)
-
-        // No changes
-        assertThat(processedRequest).isEqualTo(request)
-     }
-
-    @Test
-    fun testSelectedRegionScreenshot() = runBlocking {
-        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
-
-        val request = ScreenshotRequest(TAKE_SCREENSHOT_SELECTED_REGION, SCREENSHOT_KEY_CHORD)
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
-
-        policy.setManagedProfile(USER_ID, false)
-        policy.setDisplayContentInfo(policy.getDefaultDisplayId(),
-            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
-
-        val processedRequest = processor.process(request)
-
-        // Request has topComponent added, but otherwise unchanged.
-        assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_FULLSCREEN)
-        assertThat(processedRequest.topComponent).isEqualTo(component)
-    }
-
-    @Test
-    fun testSelectedRegionScreenshot_managedProfile() = runBlocking {
-        flags.set(Flags.SCREENSHOT_WORK_PROFILE_POLICY, true)
-
-        // Provide a fake task bitmap when asked
-        val bitmap = makeHardwareBitmap(100, 100)
-        imageCapture.image = bitmap
-
-        val request = ScreenshotRequest(TAKE_SCREENSHOT_SELECTED_REGION, SCREENSHOT_KEY_CHORD)
-        val processor = RequestProcessor(imageCapture, policy, flags, scope)
-
-        // Indicate that the primary content belongs to a manged profile
-        policy.setManagedProfile(USER_ID, true)
-        policy.setDisplayContentInfo(policy.getDefaultDisplayId(),
-            DisplayContentInfo(component, bounds, UserHandle.of(USER_ID), TASK_ID))
-
-        val processedRequest = processor.process(request)
-
-        // Expect a task snapshot is taken, overriding the selected region mode
         assertThat(processedRequest.type).isEqualTo(TAKE_SCREENSHOT_PROVIDED_IMAGE)
         assertThat(bitmap.equalsHardwareBitmapBundle(processedRequest.bitmapBundle)).isTrue()
         assertThat(processedRequest.boundsInScreen).isEqualTo(bounds)

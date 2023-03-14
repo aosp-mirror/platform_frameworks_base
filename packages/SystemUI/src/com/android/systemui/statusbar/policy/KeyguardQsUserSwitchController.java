@@ -36,6 +36,7 @@ import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -190,7 +191,8 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             mUiEventLogger.log(
                     LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
 
-            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground);
+            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground.getContext(),
+                    Expandable.fromView(mUserAvatarViewWithBackground));
         });
 
         mUserAvatarView.setAccessibilityDelegate(new View.AccessibilityDelegate() {

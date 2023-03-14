@@ -221,7 +221,7 @@ public final class BackgroundDexOptServiceUnitTest {
                 /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
                 /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
         runFullJob(mJobServiceForIdle, mJobParametersForIdle,
-                /* expectedReschedule= */ true, /* expectedStatus= */ STATUS_OK,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
                 /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ null);
     }
 
@@ -239,7 +239,7 @@ public final class BackgroundDexOptServiceUnitTest {
         assertThat(getFailedPackageNamesSecondary()).isEmpty();
 
         runFullJob(mJobServiceForIdle, mJobParametersForIdle,
-                /* expectedReschedule= */ true, /* expectedStatus= */ STATUS_OK,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
                 /* totalJobFinishedWithParams= */ 1, /* expectedSkippedPackage= */ PACKAGE_AAA);
 
         assertThat(getFailedPackageNamesPrimary()).containsExactly(PACKAGE_AAA);
@@ -254,7 +254,7 @@ public final class BackgroundDexOptServiceUnitTest {
         mDexOptResultForPackageAAA = PackageDexOptimizer.DEX_OPT_PERFORMED;
 
         runFullJob(mJobServiceForIdle, mJobParametersForIdle,
-                /* expectedReschedule= */ true, /* expectedStatus= */ STATUS_OK,
+                /* expectedReschedule= */ false, /* expectedStatus= */ STATUS_OK,
                 /* totalJobFinishedWithParams= */ 2, /* expectedSkippedPackage= */ null);
 
         assertThat(getFailedPackageNamesPrimary()).isEmpty();
@@ -391,7 +391,7 @@ public final class BackgroundDexOptServiceUnitTest {
         mCancelThread.join(TEST_WAIT_TIMEOUT_MS);
 
         // Always reschedule for periodic job
-        verify(mJobServiceForIdle).jobFinished(mJobParametersForIdle, true);
+        verify(mJobServiceForIdle).jobFinished(mJobParametersForIdle, false);
         verifyLastControlDexOptBlockingCall(false);
     }
 
@@ -419,7 +419,7 @@ public final class BackgroundDexOptServiceUnitTest {
         mCancelThread.join(TEST_WAIT_TIMEOUT_MS);
 
         // Always reschedule for periodic job
-        verify(mJobServiceForIdle).jobFinished(mJobParametersForIdle, true);
+        verify(mJobServiceForIdle).jobFinished(mJobParametersForIdle, false);
         verify(mDexOptHelper, never()).controlDexOptBlocking(true);
     }
 

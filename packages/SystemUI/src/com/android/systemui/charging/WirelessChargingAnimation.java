@@ -30,7 +30,7 @@ import android.view.WindowManager;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.ripple.RippleShader.RippleShape;
+import com.android.systemui.surfaceeffects.ripple.RippleShader.RippleShape;
 
 /**
  * A WirelessChargingAnimation is a view containing view + animation for wireless charging.

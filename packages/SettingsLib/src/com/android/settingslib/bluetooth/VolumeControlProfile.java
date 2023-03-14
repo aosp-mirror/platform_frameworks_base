@@ -16,18 +16,91 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothVolumeControl;
+import android.content.Context;
+import android.os.Build;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import androidx.annotation.RequiresApi;
 
 /**
  * VolumeControlProfile handles Bluetooth Volume Control Controller role
  */
 public class VolumeControlProfile implements LocalBluetoothProfile {
     private static final String TAG = "VolumeControlProfile";
+    private static boolean DEBUG = true;
     static final String NAME = "VCP";
     // Order of this profile in device profiles list
-    private static final int ORDINAL = 23;
+    private static final int ORDINAL = 1;
+
+    private Context mContext;
+    private final CachedBluetoothDeviceManager mDeviceManager;
+    private final LocalBluetoothProfileManager mProfileManager;
+
+    private BluetoothVolumeControl mService;
+    private boolean mIsProfileReady;
+
+    // These callbacks run on the main thread.
+    private final class VolumeControlProfileServiceListener
+            implements BluetoothProfile.ServiceListener {
+
+        @RequiresApi(Build.VERSION_CODES.S)
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (DEBUG) {
+                Log.d(TAG, "Bluetooth service connected");
+            }
+            mService = (BluetoothVolumeControl) proxy;
+            // We just bound to the service, so refresh the UI for any connected
+            // VolumeControlProfile devices.
+            List<BluetoothDevice> deviceList = mService.getConnectedDevices();
+            while (!deviceList.isEmpty()) {
+                BluetoothDevice nextDevice = deviceList.remove(0);
+                CachedBluetoothDevice device = mDeviceManager.findDevice(nextDevice);
+                // we may add a new device here, but generally this should not happen
+                if (device == null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "VolumeControlProfile found new device: " + nextDevice);
+                    }
+                    device = mDeviceManager.addDevice(nextDevice);
+                }
+                device.onProfileStateChanged(VolumeControlProfile.this,
+                        BluetoothProfile.STATE_CONNECTED);
+                device.refresh();
+            }
+
+            mProfileManager.callServiceConnectedListeners();
+            mIsProfileReady = true;
+        }
+
+        public void onServiceDisconnected(int profile) {
+            if (DEBUG) {
+                Log.d(TAG, "Bluetooth service disconnected");
+            }
+            mProfileManager.callServiceDisconnectedListeners();
+            mIsProfileReady = false;
+        }
+    }
+
+    VolumeControlProfile(Context context, CachedBluetoothDeviceManager deviceManager,
+            LocalBluetoothProfileManager profileManager) {
+        mContext = context;
+        mDeviceManager = deviceManager;
+        mProfileManager = profileManager;
+
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context,
+                new VolumeControlProfile.VolumeControlProfileServiceListener(),
+                BluetoothProfile.VOLUME_CONTROL);
+    }
 
     @Override
     public boolean accessProfileEnabled() {
@@ -39,29 +112,70 @@ public class VolumeControlProfile implements LocalBluetoothProfile {
         return true;
     }
 
+    /**
+     * Get VolumeControlProfile devices matching connection states{
+     *
+     * @return Matching device list
+     * @code BluetoothProfile.STATE_CONNECTED,
+     * @code BluetoothProfile.STATE_CONNECTING,
+     * @code BluetoothProfile.STATE_DISCONNECTING}
+     */
+    public List<BluetoothDevice> getConnectedDevices() {
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
+        return mService.getDevicesMatchingConnectionStates(
+                new int[]{BluetoothProfile.STATE_CONNECTED, BluetoothProfile.STATE_CONNECTING,
+                        BluetoothProfile.STATE_DISCONNECTING});
+    }
+
     @Override
     public int getConnectionStatus(BluetoothDevice device) {
-        return BluetoothProfile.STATE_DISCONNECTED; // Settings app doesn't handle VCP
+        if (mService == null) {
+            return BluetoothProfile.STATE_DISCONNECTED;
+        }
+        return mService.getConnectionState(device);
     }
 
     @Override
     public boolean isEnabled(BluetoothDevice device) {
-        return false;
+        if (mService == null || device == null) {
+            return false;
+        }
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
     @Override
     public int getConnectionPolicy(BluetoothDevice device) {
-        return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN; // Settings app doesn't handle VCP
+        if (mService == null || device == null) {
+            return CONNECTION_POLICY_FORBIDDEN;
+        }
+        return mService.getConnectionPolicy(device);
     }
 
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
-        return false;
+        boolean isSuccessful = false;
+        if (mService == null || device == null) {
+            return false;
+        }
+        if (DEBUG) {
+            Log.d(TAG, device.getAnonymizedAddress() + " setEnabled: " + enabled);
+        }
+        if (enabled) {
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+            }
+        } else {
+            isSuccessful = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+        }
+
+        return isSuccessful;
     }
 
     @Override
     public boolean isProfileReady() {
-        return true;
+        return mIsProfileReady;
     }
 
     @Override

@@ -76,7 +76,7 @@ class RequestProcessor @Inject constructor(
                 )
             } else {
                 // Create a new request of the same type which includes the top component
-                ScreenshotRequest(request.source, request.type, info.component)
+                ScreenshotRequest(request.type, request.source, info.component)
             }
         }
 

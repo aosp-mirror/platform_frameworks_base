@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_TASK_ID;
 
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
@@ -59,6 +60,7 @@ import android.service.voice.IVoiceInteractionSessionService;
 import android.service.voice.VisibleActivityInfo;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.IWindowManager;
 
@@ -128,7 +130,11 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     private boolean mListeningVisibleActivity;
     private final ScheduledExecutorService mScheduledExecutorService =
             Executors.newSingleThreadScheduledExecutor();
-    private final List<VisibleActivityInfo> mVisibleActivityInfos = new ArrayList<>();
+    // Records the visible activity information the system has already called onVisible, without
+    // confirming the result of callback. When activity visible state is changed, we use this to
+    // determine to call onVisible or onInvisible to assistant application.
+    private final ArrayMap<IBinder, VisibleActivityInfo> mVisibleActivityInfoForToken =
+            new ArrayMap<>();
     private final PowerManagerInternal mPowerManagerInternal;
     private final LowPowerStandbyControllerInternal mLowPowerStandbyControllerInternal;
     private final Runnable mRemoveFromLowPowerStandbyAllowlistRunnable =
@@ -530,7 +536,7 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
 
     public void cancelLocked(boolean finishTask) {
         mListeningVisibleActivity = false;
-        mVisibleActivityInfos.clear();
+        mVisibleActivityInfoForToken.clear();
         hideLocked();
         mCanceled = true;
         if (mBound) {
@@ -608,17 +614,24 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         if (DEBUG) {
             Slog.d(TAG, "startListeningVisibleActivityChangedLocked");
         }
-        mListeningVisibleActivity = true;
-        mVisibleActivityInfos.clear();
 
-        mScheduledExecutorService.execute(() -> {
-            if (DEBUG) {
-                Slog.d(TAG, "call updateVisibleActivitiesLocked from enable listening");
-            }
-            synchronized (mLock) {
-                updateVisibleActivitiesLocked();
-            }
-        });
+        if (!mShown || mCanceled || mSession == null) {
+            return;
+        }
+
+        mListeningVisibleActivity = true;
+        mVisibleActivityInfoForToken.clear();
+
+        // It should only need to report which activities are visible
+        final ArrayMap<IBinder, VisibleActivityInfo> newVisibleActivityInfos =
+                getTopVisibleActivityInfosLocked();
+
+        if (newVisibleActivityInfos == null || newVisibleActivityInfos.isEmpty()) {
+            return;
+        }
+        notifyVisibleActivitiesChangedLocked(newVisibleActivityInfos,
+                VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
+        mVisibleActivityInfoForToken.putAll(newVisibleActivityInfos);
     }
 
     void stopListeningVisibleActivityChangedLocked() {
@@ -626,12 +639,13 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             Slog.d(TAG, "stopListeningVisibleActivityChangedLocked");
         }
         mListeningVisibleActivity = false;
-        mVisibleActivityInfos.clear();
+        mVisibleActivityInfoForToken.clear();
     }
 
-    void notifyActivityEventChangedLocked() {
+    void notifyActivityEventChangedLocked(@NonNull IBinder activityToken, int type) {
         if (DEBUG) {
-            Slog.d(TAG, "notifyActivityEventChangedLocked");
+            Slog.d(TAG, "notifyActivityEventChangedLocked activityToken=" + activityToken
+                    + ", type=" + type);
         }
         if (!mListeningVisibleActivity) {
             if (DEBUG) {
@@ -640,99 +654,139 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             return;
         }
         mScheduledExecutorService.execute(() -> {
-            if (DEBUG) {
-                Slog.d(TAG, "call updateVisibleActivitiesLocked from activity event");
-            }
             synchronized (mLock) {
-                updateVisibleActivitiesLocked();
+                handleVisibleActivitiesLocked(activityToken, type);
             }
         });
     }
 
-    private List<VisibleActivityInfo> getVisibleActivityInfosLocked() {
+    private ArrayMap<IBinder, VisibleActivityInfo> getTopVisibleActivityInfosLocked() {
         if (DEBUG) {
-            Slog.d(TAG, "getVisibleActivityInfosLocked");
+            Slog.d(TAG, "getTopVisibleActivityInfosLocked");
         }
         List<ActivityAssistInfo> allVisibleActivities =
                 LocalServices.getService(ActivityTaskManagerInternal.class)
                         .getTopVisibleActivities();
         if (DEBUG) {
-            Slog.d(TAG,
-                    "getVisibleActivityInfosLocked: allVisibleActivities=" + allVisibleActivities);
+            Slog.d(TAG, "getTopVisibleActivityInfosLocked: allVisibleActivities="
+                    + allVisibleActivities);
         }
-        if (allVisibleActivities == null || allVisibleActivities.isEmpty()) {
+        if (allVisibleActivities.isEmpty()) {
             Slog.w(TAG, "no visible activity");
             return null;
         }
         final int count = allVisibleActivities.size();
-        final List<VisibleActivityInfo> visibleActivityInfos = new ArrayList<>(count);
+        final ArrayMap<IBinder, VisibleActivityInfo> visibleActivityInfoArrayMap =
+                new ArrayMap<>(count);
         for (int i = 0; i < count; i++) {
             ActivityAssistInfo info = allVisibleActivities.get(i);
             if (DEBUG) {
-                Slog.d(TAG, " : activityToken=" + info.getActivityToken()
+                Slog.d(TAG, "ActivityAssistInfo : activityToken=" + info.getActivityToken()
                         + ", assistToken=" + info.getAssistToken()
                         + ", taskId=" + info.getTaskId());
             }
-            visibleActivityInfos.add(
+            visibleActivityInfoArrayMap.put(info.getActivityToken(),
                     new VisibleActivityInfo(info.getTaskId(), info.getAssistToken()));
         }
-        return visibleActivityInfos;
+        return visibleActivityInfoArrayMap;
     }
 
-    private void updateVisibleActivitiesLocked() {
+    // TODO(b/242359988): Split this method up
+    private void handleVisibleActivitiesLocked(@NonNull IBinder activityToken, int type) {
         if (DEBUG) {
-            Slog.d(TAG, "updateVisibleActivitiesLocked");
+            Slog.d(TAG, "handleVisibleActivitiesLocked activityToken=" + activityToken
+                    + ", type=" + type);
         }
-        if (mSession == null) {
-            return;
-        }
-        if (!mShown || !mListeningVisibleActivity || mCanceled) {
-            return;
-        }
-        final List<VisibleActivityInfo> newVisibleActivityInfos = getVisibleActivityInfosLocked();
 
-        if (newVisibleActivityInfos == null || newVisibleActivityInfos.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(mVisibleActivityInfos,
-                    VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
-            mVisibleActivityInfos.clear();
+        if (!mListeningVisibleActivity) {
+            if (DEBUG) {
+                Slog.d(TAG, "not enable listening visible activity");
+            }
             return;
         }
-        if (mVisibleActivityInfos.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(newVisibleActivityInfos,
-                    VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
-            mVisibleActivityInfos.addAll(newVisibleActivityInfos);
+        if (!mShown || mCanceled || mSession == null) {
             return;
         }
 
-        final List<VisibleActivityInfo> addedActivities = new ArrayList<>();
-        final List<VisibleActivityInfo> removedActivities = new ArrayList<>();
+        // We use this local variable to determine to call onVisible or onInvisible.
+        boolean notifyOnVisible = false;
+        VisibleActivityInfo notifyVisibleActivityInfo = null;
 
-        removedActivities.addAll(mVisibleActivityInfos);
-        for (int i = 0; i < newVisibleActivityInfos.size(); i++) {
-            final VisibleActivityInfo candidateVisibleActivityInfo = newVisibleActivityInfos.get(i);
-            if (!removedActivities.isEmpty() && removedActivities.contains(
-                    candidateVisibleActivityInfo)) {
-                removedActivities.remove(candidateVisibleActivityInfo);
-            } else {
-                addedActivities.add(candidateVisibleActivityInfo);
+        if (type == VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_START
+                || type == VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_RESUME) {
+            // It seems that the onStart is unnecessary. But if we have it, the assistant
+            // application can request the directActions early. Even if we have the onStart,
+            // we still need the onResume because it is possible that the activity goes to
+            // onResume from onPause with invisible before the activity goes to onStop from
+            // onPause.
+
+            // Check if we have reported this activity as visible. If we have reported it as
+            // visible, do nothing.
+            if (mVisibleActivityInfoForToken.containsKey(activityToken)) {
+                return;
+            }
+
+            // Before reporting this activity as visible, we need to make sure the activity
+            // is really visible.
+            notifyVisibleActivityInfo = getVisibleActivityInfoFromTopVisibleActivity(
+                    activityToken);
+            if (notifyVisibleActivityInfo == null) {
+                return;
+            }
+            notifyOnVisible = true;
+        } else if (type == VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_PAUSE) {
+            // For the onPause stage, the Activity is not necessarily invisible now, so we need
+            // to check its state.
+            // Note: After syncing with Activity owner, before the onPause is called, the
+            // visibility state has been updated.
+            notifyVisibleActivityInfo = getVisibleActivityInfoFromTopVisibleActivity(
+                    activityToken);
+            if (notifyVisibleActivityInfo != null) {
+                return;
+            }
+
+            // Also make sure we previously reported this Activity as visible.
+            notifyVisibleActivityInfo = mVisibleActivityInfoForToken.get(activityToken);
+            if (notifyVisibleActivityInfo == null) {
+                return;
+            }
+        } else if (type == VoiceInteractionSession.VOICE_INTERACTION_ACTIVITY_EVENT_STOP) {
+            // For the onStop stage, the activity is in invisible state. We only need to consider if
+            // we have reported this activity as visible. If we have reported it as visible, we
+            // need to report it as invisible.
+            // Why we still need onStop? Because it is possible that the activity is in a visible
+            // state during onPause stage, when the activity enters onStop from onPause, we may
+            // need to notify onInvisible.
+            // Note: After syncing with Activity owner, before the onStop is called, the
+            // visibility state has been updated.
+            notifyVisibleActivityInfo = mVisibleActivityInfoForToken.get(activityToken);
+            if (notifyVisibleActivityInfo == null) {
+                return;
+            }
+        } else {
+            Slog.w(TAG, "notifyActivityEventChangedLocked unexpected type=" + type);
+            return;
+        }
+
+        try {
+            mSession.notifyVisibleActivityInfoChanged(notifyVisibleActivityInfo,
+                    notifyOnVisible ? VisibleActivityInfo.TYPE_ACTIVITY_ADDED
+                            : VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
+        } catch (RemoteException e) {
+            if (DEBUG) {
+                Slog.w(TAG, "handleVisibleActivitiesLocked RemoteException : " + e);
             }
         }
 
-        if (!addedActivities.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(addedActivities,
-                    VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
+        if (notifyOnVisible) {
+            mVisibleActivityInfoForToken.put(activityToken, notifyVisibleActivityInfo);
+        } else {
+            mVisibleActivityInfoForToken.remove(activityToken);
         }
-        if (!removedActivities.isEmpty()) {
-            updateVisibleActivitiesChangedLocked(removedActivities,
-                    VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
-        }
-
-        mVisibleActivityInfos.clear();
-        mVisibleActivityInfos.addAll(newVisibleActivityInfos);
     }
 
-    private void updateVisibleActivitiesChangedLocked(
-            List<VisibleActivityInfo> visibleActivityInfos, int type) {
+    private void notifyVisibleActivitiesChangedLocked(
+            ArrayMap<IBinder, VisibleActivityInfo> visibleActivityInfos, int type) {
         if (visibleActivityInfos == null || visibleActivityInfos.isEmpty()) {
             return;
         }
@@ -741,17 +795,62 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
         }
         try {
             for (int i = 0; i < visibleActivityInfos.size(); i++) {
-                mSession.updateVisibleActivityInfo(visibleActivityInfos.get(i), type);
+                mSession.notifyVisibleActivityInfoChanged(visibleActivityInfos.valueAt(i), type);
             }
         } catch (RemoteException e) {
             if (DEBUG) {
-                Slog.w(TAG, "updateVisibleActivitiesChangedLocked RemoteException : " + e);
+                Slog.w(TAG, "notifyVisibleActivitiesChangedLocked RemoteException : " + e);
             }
         }
         if (DEBUG) {
-            Slog.d(TAG, "updateVisibleActivitiesChangedLocked type=" + type + ", count="
+            Slog.d(TAG, "notifyVisibleActivitiesChangedLocked type=" + type + ", count="
                     + visibleActivityInfos.size());
         }
+    }
+
+    private VisibleActivityInfo getVisibleActivityInfoFromTopVisibleActivity(
+            @NonNull IBinder activityToken) {
+        final ArrayMap<IBinder, VisibleActivityInfo> visibleActivityInfos =
+                getTopVisibleActivityInfosLocked();
+        if (visibleActivityInfos == null) {
+            return null;
+        }
+        return visibleActivityInfos.get(activityToken);
+    }
+
+    void notifyActivityDestroyedLocked(@NonNull IBinder activityToken) {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActivityDestroyedLocked activityToken=" + activityToken);
+        }
+        if (!mListeningVisibleActivity) {
+            if (DEBUG) {
+                Slog.d(TAG, "not enable listening visible activity");
+            }
+            return;
+        }
+        mScheduledExecutorService.execute(() -> {
+            synchronized (mLock) {
+                if (!mListeningVisibleActivity) {
+                    return;
+                }
+                if (!mShown || mCanceled || mSession == null) {
+                    return;
+                }
+
+                VisibleActivityInfo visibleActivityInfo = mVisibleActivityInfoForToken.remove(
+                        activityToken);
+                if (visibleActivityInfo != null) {
+                    try {
+                        mSession.notifyVisibleActivityInfoChanged(visibleActivityInfo,
+                                VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
+                    } catch (RemoteException e) {
+                        if (DEBUG) {
+                            Slog.w(TAG, "notifyVisibleActivityInfoChanged RemoteException : " + e);
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void removeFromLowPowerStandbyAllowlist() {

@@ -28,13 +28,15 @@ class SystemUIIssueRegistry : IssueRegistry() {
 
     override val issues: List<Issue>
         get() = listOf(
-                BindServiceViaContextDetector.ISSUE,
+                BindServiceOnMainThreadDetector.ISSUE,
                 BroadcastSentViaContextDetector.ISSUE,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_ID_QUERY,
                 SlowUserQueryDetector.ISSUE_SLOW_USER_INFO_QUERY,
-                GetMainLooperViaContextDetector.ISSUE,
+                NonInjectedMainThreadDetector.ISSUE,
                 RegisterReceiverViaContextDetector.ISSUE,
                 SoftwareBitmapDetector.ISSUE,
+                NonInjectedServiceDetector.ISSUE,
+                StaticSettingsProviderDetector.ISSUE
         )
 
     override val api: Int

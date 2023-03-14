@@ -38,6 +38,9 @@ public abstract class StartingData {
      */
     Task mAssociatedTask;
 
+    /** Whether the starting window is drawn. */
+    boolean mIsDisplayed;
+
     protected StartingData(WindowManagerService service, int typeParams) {
         mService = service;
         mTypeParams = typeParams;

@@ -70,9 +70,13 @@ public class BluetoothEventManagerTest {
     @Mock
     private HearingAidProfile mHearingAidProfile;
     @Mock
+    private LeAudioProfile mLeAudioProfile;
+    @Mock
     private BluetoothDevice mDevice1;
     @Mock
     private BluetoothDevice mDevice2;
+    @Mock
+    private BluetoothDevice mDevice3;
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
     @Mock
@@ -83,6 +87,7 @@ public class BluetoothEventManagerTest {
     private BluetoothEventManager mBluetoothEventManager;
     private CachedBluetoothDevice mCachedDevice1;
     private CachedBluetoothDevice mCachedDevice2;
+    private CachedBluetoothDevice mCachedDevice3;
 
     @Before
     public void setUp() {
@@ -95,9 +100,10 @@ public class BluetoothEventManagerTest {
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
         when(mHearingAidProfile.isProfileReady()).thenReturn(true);
-
+        when(mLeAudioProfile.isProfileReady()).thenReturn(true);
         mCachedDevice1 = new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice1);
         mCachedDevice2 = new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice2);
+        mCachedDevice3 = new CachedBluetoothDevice(mContext, mLocalProfileManager, mDevice3);
         BluetoothUtils.setErrorListener(mErrorListener);
     }
 
@@ -291,6 +297,43 @@ public class BluetoothEventManagerTest {
         assertThat(mCachedDevice1.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
         assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
         assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
+    }
+
+    @Test
+    public void dispatchActiveDeviceChanged_connectedMemberDevices_activeDeviceChanged() {
+        final List<CachedBluetoothDevice> cachedDevices = new ArrayList<>();
+        cachedDevices.add(mCachedDevice1);
+        cachedDevices.add(mCachedDevice2);
+
+        int group1 = 1;
+        when(mDevice3.getAddress()).thenReturn("testAddress3");
+        mCachedDevice1.setGroupId(group1);
+        mCachedDevice3.setGroupId(group1);
+        mCachedDevice1.addMemberDevice(mCachedDevice3);
+
+        when(mDevice1.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice2.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mDevice3.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
+        when(mCachedDeviceManager.getCachedDevicesCopy()).thenReturn(cachedDevices);
+
+        // Connect device1 and device3 for LE and device2 for A2DP and HFP
+        mCachedDevice1.onProfileStateChanged(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice3.onProfileStateChanged(mLeAudioProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice2.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        mCachedDevice2.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
+
+        // Verify that both devices are connected and none is Active
+        assertThat(mCachedDevice1.isActiveDevice(BluetoothProfile.LE_AUDIO)).isFalse();
+        assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.A2DP)).isFalse();
+        assertThat(mCachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
+        assertThat(mCachedDevice3.isActiveDevice(BluetoothProfile.LE_AUDIO)).isFalse();
+
+        // The member device is active.
+        mBluetoothEventManager.dispatchActiveDeviceChanged(mCachedDevice3,
+                BluetoothProfile.LE_AUDIO);
+
+        // The main device is active since the member is active.
+        assertThat(mCachedDevice1.isActiveDevice(BluetoothProfile.LE_AUDIO)).isTrue();
     }
 
     /**

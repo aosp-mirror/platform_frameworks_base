@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"ଭଏସ୍‌ ମେଲ୍"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"ସଂଯୋଗରେ ସମସ୍ୟା ଅଛି କିମ୍ବା ଅମାନ୍ୟ MMI କୋଡ୍।"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ଫିଚର ସମର୍ଥିତ ନୁହେଁ।"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"କେବଳ ସ୍ଥାୟୀ ଡାୟଲିଙ୍ଗ ନମ୍ବର୍‌ ପାଇଁ କାର୍ଯ୍ୟ ସୀମିତ ଅଟେ।"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"ଆପଣ ରୋମିଙ୍ଗରେ ଥିବାବେଳେ କଲ୍‍ ଫର୍‌ୱର୍ଡିଙ୍ଗ ସେଟିଙ୍ଗ ବଦଳାଇପାରିବେ ନାହିଁ।"</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"ସେବା ସକ୍ଷମ କରାଯାଇଥିଲା।"</string>

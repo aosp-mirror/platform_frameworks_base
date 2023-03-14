@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DeviceOwnerType;
@@ -55,8 +54,9 @@ import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.settings.CurrentUserTracker;
+import com.android.systemui.settings.UserTracker;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -70,7 +70,7 @@ import javax.inject.Inject;
 /**
  */
 @SysUISingleton
-public class SecurityControllerImpl extends CurrentUserTracker implements SecurityController {
+public class SecurityControllerImpl implements SecurityController {
 
     private static final String TAG = "SecurityController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -84,11 +84,13 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     private static final int CA_CERT_LOADING_RETRY_TIME_IN_MS = 30_000;
 
     private final Context mContext;
+    private final UserTracker mUserTracker;
     private final ConnectivityManager mConnectivityManager;
     private final VpnManager mVpnManager;
     private final DevicePolicyManager mDevicePolicyManager;
     private final PackageManager mPackageManager;
     private final UserManager mUserManager;
+    private final Executor mMainExecutor;
     private final Executor mBgExecutor;
 
     @GuardedBy("mCallbacks")
@@ -102,18 +104,28 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     // Needs to be cached here since the query has to be asynchronous
     private ArrayMap<Integer, Boolean> mHasCACerts = new ArrayMap<Integer, Boolean>();
 
+    private final UserTracker.Callback mUserChangedCallback =
+            new UserTracker.Callback() {
+                @Override
+                public void onUserChanged(int newUser, @NonNull Context userContext) {
+                    onUserSwitched(newUser);
+                }
+            };
+
     /**
      */
     @Inject
     public SecurityControllerImpl(
             Context context,
+            UserTracker userTracker,
             @Background Handler bgHandler,
             BroadcastDispatcher broadcastDispatcher,
+            @Main Executor mainExecutor,
             @Background Executor bgExecutor,
             DumpManager dumpManager
     ) {
-        super(broadcastDispatcher);
         mContext = context;
+        mUserTracker = userTracker;
         mDevicePolicyManager = (DevicePolicyManager)
                 context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mConnectivityManager = (ConnectivityManager)
@@ -121,6 +133,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
         mVpnManager = context.getSystemService(VpnManager.class);
         mPackageManager = context.getPackageManager();
         mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
@@ -133,8 +146,8 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
 
         // TODO: re-register network callback on user change.
         mConnectivityManager.registerNetworkCallback(REQUEST, mNetworkCallback);
-        onUserSwitched(ActivityManager.getCurrentUser());
-        startTracking();
+        onUserSwitched(mUserTracker.getUserId());
+        mUserTracker.addCallback(mUserChangedCallback, mMainExecutor);
     }
 
     public void dump(PrintWriter pw, String[] args) {

@@ -63,6 +63,7 @@ class LockStateTrackingRule : TestRule {
     inner class Listener : TrustListener {
         override fun onTrustChanged(
             enabled: Boolean,
+            newlyUnlocked: Boolean,
             userId: Int,
             flags: Int,
             trustGrantedMessages: MutableList<String>

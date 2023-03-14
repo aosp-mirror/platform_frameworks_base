@@ -97,6 +97,8 @@ public class PipBoundsState {
     private int mShelfHeight;
     /** Whether the user has resized the PIP manually. */
     private boolean mHasUserResizedPip;
+    /** Whether the user has moved the PIP manually. */
+    private boolean mHasUserMovedPip;
     /**
      * Areas defined by currently visible apps that they prefer to keep clear from overlays such as
      * the PiP. Restricted areas may only move the PiP a limited amount from its anchor position.
@@ -279,6 +281,7 @@ public class PipBoundsState {
         if (changed) {
             clearReentryState();
             setHasUserResizedPip(false);
+            setHasUserMovedPip(false);
         }
     }
 
@@ -442,6 +445,16 @@ public class PipBoundsState {
         mHasUserResizedPip = hasUserResizedPip;
     }
 
+    /** Returns whether the user has moved the PIP. */
+    public boolean hasUserMovedPip() {
+        return mHasUserMovedPip;
+    }
+
+    /** Set whether the user has moved the PIP. */
+    public void setHasUserMovedPip(boolean hasUserMovedPip) {
+        mHasUserMovedPip = hasUserMovedPip;
+    }
+
     /**
      * Registers a callback when the minimal size of PIP that is set by the app changes.
      */
@@ -577,6 +590,8 @@ public class PipBoundsState {
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
+        pw.println(innerPrefix + "mHasUserMovedPip=" + mHasUserMovedPip);
+        pw.println(innerPrefix + "mHasUserResizedPip=" + mHasUserResizedPip);
         if (mPipReentryState == null) {
             pw.println(innerPrefix + "mPipReentryState=null");
         } else {

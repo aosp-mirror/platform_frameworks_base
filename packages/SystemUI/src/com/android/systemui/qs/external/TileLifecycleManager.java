@@ -36,6 +36,7 @@ import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -182,6 +183,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         setBindService(true);
     }
 
+    /**
+     * Binds or unbinds to IQSService
+     */
+    @WorkerThread
     public void setBindService(boolean bind) {
         if (mBound && mUnbindImmediate) {
             // If we are already bound and expecting to unbind, this means we should stay bound

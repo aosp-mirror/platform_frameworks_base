@@ -133,12 +133,6 @@ public class KeyguardSimPinViewController
     }
 
     @Override
-    public void reloadColors() {
-        super.reloadColors();
-        mView.reloadColors();
-    }
-
-    @Override
     protected void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText();
 

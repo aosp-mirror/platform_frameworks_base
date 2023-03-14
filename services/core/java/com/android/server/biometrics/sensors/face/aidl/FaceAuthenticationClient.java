@@ -100,9 +100,7 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
                 owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
                 isStrongBiometric, null /* taskStackListener */, lockoutCache,
                 allowBackgroundAuthentication,
-                context.getResources().getBoolean(
-                        com.android.internal.R.bool.system_server_plays_face_haptics)
-                /* shouldVibrate */,
+                false /* shouldVibrate */,
                 isKeyguardBypassEnabled);
         setRequestId(requestId);
         mUsageStats = usageStats;

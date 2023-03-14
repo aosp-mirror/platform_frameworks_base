@@ -16,13 +16,10 @@
 
 package com.android.systemui.controls.dagger
 
-import android.content.ContentResolver
 import android.content.Context
-import android.database.ContentObserver
-import android.os.UserHandle
-import android.provider.Settings
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT
+import com.android.systemui.controls.settings.ControlsSettingsRepository
 import com.android.systemui.controls.controller.ControlsController
 import com.android.systemui.controls.controller.ControlsTileResourceConfiguration
 import com.android.systemui.controls.controller.ControlsTileResourceConfigurationImpl
@@ -31,12 +28,10 @@ import com.android.systemui.controls.ui.ControlsUiController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.settings.SecureSettings
 import dagger.Lazy
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Optional
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Pseudo-component to inject into classes outside `com.android.systemui.controls`.
@@ -46,46 +41,25 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 @SysUISingleton
 class ControlsComponent @Inject constructor(
-    @ControlsFeatureEnabled private val featureEnabled: Boolean,
-    private val context: Context,
-    private val lazyControlsController: Lazy<ControlsController>,
-    private val lazyControlsUiController: Lazy<ControlsUiController>,
-    private val lazyControlsListingController: Lazy<ControlsListingController>,
-    private val lockPatternUtils: LockPatternUtils,
-    private val keyguardStateController: KeyguardStateController,
-    private val userTracker: UserTracker,
-    private val secureSettings: SecureSettings,
-    private val optionalControlsTileResourceConfiguration:
-        Optional<ControlsTileResourceConfiguration>
+        @ControlsFeatureEnabled private val featureEnabled: Boolean,
+        private val context: Context,
+        private val lazyControlsController: Lazy<ControlsController>,
+        private val lazyControlsUiController: Lazy<ControlsUiController>,
+        private val lazyControlsListingController: Lazy<ControlsListingController>,
+        private val lockPatternUtils: LockPatternUtils,
+        private val keyguardStateController: KeyguardStateController,
+        private val userTracker: UserTracker,
+        controlsSettingsRepository: ControlsSettingsRepository,
+        optionalControlsTileResourceConfiguration: Optional<ControlsTileResourceConfiguration>
 ) {
-    private val contentResolver: ContentResolver
-        get() = context.contentResolver
 
-    private val _canShowWhileLockedSetting = MutableStateFlow(false)
-    val canShowWhileLockedSetting = _canShowWhileLockedSetting.asStateFlow()
+    val canShowWhileLockedSetting: StateFlow<Boolean> =
+            controlsSettingsRepository.canShowControlsInLockscreen
 
     private val controlsTileResourceConfiguration: ControlsTileResourceConfiguration =
         optionalControlsTileResourceConfiguration.orElse(
             ControlsTileResourceConfigurationImpl()
         )
-
-    val showWhileLockedObserver = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean) {
-            updateShowWhileLocked()
-        }
-    }
-
-    init {
-        if (featureEnabled) {
-            secureSettings.registerContentObserverForUser(
-                Settings.Secure.getUriFor(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS),
-                false, /* notifyForDescendants */
-                showWhileLockedObserver,
-                UserHandle.USER_ALL
-            )
-            updateShowWhileLocked()
-        }
-    }
 
     fun getControlsController(): Optional<ControlsController> {
         return if (featureEnabled) Optional.of(lazyControlsController.get()) else Optional.empty()
@@ -125,11 +99,6 @@ class ControlsComponent @Inject constructor(
         }
 
         return Visibility.AVAILABLE
-    }
-
-    private fun updateShowWhileLocked() {
-        _canShowWhileLockedSetting.value = secureSettings.getIntForUser(
-            Settings.Secure.LOCKSCREEN_SHOW_CONTROLS, 0, UserHandle.USER_CURRENT) != 0
     }
 
     enum class Visibility {

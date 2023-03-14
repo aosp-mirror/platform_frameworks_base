@@ -68,6 +68,9 @@ data class ListAttachState private constructor(
      */
     var stableIndex: Int = -1
 
+    /** Access the index of the [section] or -1 if the entry does not have one */
+    val sectionIndex: Int get() = section?.index ?: -1
+
     /** Copies the state of another instance. */
     fun clone(other: ListAttachState) {
         parent = other.parent
@@ -95,11 +98,13 @@ data class ListAttachState private constructor(
      * This can happen if the entry is removed from a group that was broken up or if the entry was
      * filtered out during any of the filtering steps.
      */
-    fun detach() {
+    fun detach(includingStableIndex: Boolean) {
         parent = null
         section = null
         promoter = null
-        // stableIndex = -1  // TODO(b/241229236): Clear this once we fix the stability fragility
+        if (includingStableIndex) {
+            stableIndex = -1
+        }
     }
 
     companion object {

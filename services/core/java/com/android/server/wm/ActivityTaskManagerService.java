@@ -208,7 +208,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
-import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
@@ -669,11 +668,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private volatile boolean mSleeping;
 
     /**
-     * The mDreaming state is set by the {@link DreamManagerService} when it receives a request to
-     * start/stop the dream. It is set to true shortly  before the {@link DreamService} is started.
-     * It is set to false after the {@link DreamService} is stopped.
+     * The mActiveDreamComponent state is set by the {@link DreamManagerService} when it receives a
+     * request to start/stop the dream. It is set to the active dream shortly before the
+     * {@link DreamService} is started. It is set to null after the {@link DreamService} is stopped.
      */
-    private volatile boolean mDreaming;
+    @Nullable
+    private volatile ComponentName mActiveDreamComponent;
 
     /**
      * The process state used for processes that are running the top activities.
@@ -1442,31 +1442,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     boolean isDreaming() {
-        return mDreaming;
+        return mActiveDreamComponent != null;
     }
 
     boolean canLaunchDreamActivity(String packageName) {
-        if (!mDreaming || packageName == null) {
+        if (mActiveDreamComponent == null || packageName == null) {
             ProtoLog.e(WM_DEBUG_DREAM, "Cannot launch dream activity due to invalid state. "
-                    + "dreaming: %b packageName: %s", mDreaming, packageName);
+                    + "dream component: %s packageName: %s", mActiveDreamComponent, packageName);
             return false;
         }
-        final DreamManagerInternal dreamManager =
-                LocalServices.getService(DreamManagerInternal.class);
-        // Verify that the package is the current active dream or doze component. The
-        // getActiveDreamComponent() call path does not acquire the DreamManager lock and thus
-        // is safe to use.
-        final ComponentName activeDream = dreamManager.getActiveDreamComponent(false /* doze */);
-        if (activeDream != null && packageName.equals(activeDream.getPackageName())) {
-            return true;
-        }
-        final ComponentName activeDoze = dreamManager.getActiveDreamComponent(true /* doze */);
-        if (activeDoze != null && packageName.equals(activeDoze.getPackageName())) {
+        if (packageName.equals(mActiveDreamComponent.getPackageName())) {
             return true;
         }
         ProtoLog.e(WM_DEBUG_DREAM,
-                "Dream packageName does not match active dream. Package %s does not match %s or %s",
-                packageName, String.valueOf(activeDream), String.valueOf(activeDoze));
+                "Dream packageName does not match active dream. Package %s does not match %s",
+                packageName, String.valueOf(mActiveDreamComponent));
         return false;
     }
 
@@ -5685,9 +5675,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyDreamStateChanged(boolean dreaming) {
+        public void notifyActiveDreamChanged(@Nullable ComponentName dreamComponent) {
             synchronized (mGlobalLock) {
-                mDreaming = dreaming;
+                mActiveDreamComponent = dreamComponent;
             }
         }
 

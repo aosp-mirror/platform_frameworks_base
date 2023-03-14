@@ -231,7 +231,7 @@ public class LocalBluetoothProfileManager {
             if (DEBUG) {
                 Log.d(TAG, "Adding local Volume Control profile");
             }
-            mVolumeControlProfile = new VolumeControlProfile();
+            mVolumeControlProfile = new VolumeControlProfile(mContext, mDeviceManager, this);
             // Note: no event handler for VCP, only for being connectable.
             mProfileNameMap.put(VolumeControlProfile.NAME, mVolumeControlProfile);
         }
@@ -551,6 +551,10 @@ public class LocalBluetoothProfileManager {
 
     public CsipSetCoordinatorProfile getCsipSetCoordinatorProfile() {
         return mCsipSetCoordinatorProfile;
+    }
+
+    public VolumeControlProfile getVolumeControlProfile() {
+        return mVolumeControlProfile;
     }
 
     /**

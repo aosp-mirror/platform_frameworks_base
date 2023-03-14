@@ -16,9 +16,12 @@
 
 package com.android.systemui.log
 
-import android.app.ActivityManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBufferHelper.Companion.adjustMaxSize
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogcatEchoTracker
+
 import javax.inject.Inject
 
 @SysUISingleton
@@ -26,15 +29,6 @@ class LogBufferFactory @Inject constructor(
     private val dumpManager: DumpManager,
     private val logcatEchoTracker: LogcatEchoTracker
 ) {
-    /* limit the size of maxPoolSize for low ram (Go) devices */
-    private fun adjustMaxSize(requestedMaxSize: Int): Int {
-        return if (ActivityManager.isLowRamDeviceStatic()) {
-            minOf(requestedMaxSize, 20) /* low ram max log size*/
-        } else {
-            requestedMaxSize
-        }
-    }
-
     @JvmOverloads
     fun create(
         name: String,

@@ -38,12 +38,12 @@ import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shade.ShadeExpansionChangeEvent
+import com.android.systemui.shade.ShadeExpansionListener
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionChangeEvent
-import com.android.systemui.statusbar.phone.panelstate.PanelExpansionListener
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.LargeScreenUtils
@@ -69,7 +69,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val context: Context,
     dumpManager: DumpManager,
     configurationController: ConfigurationController
-) : PanelExpansionListener, Dumpable {
+) : ShadeExpansionListener, Dumpable {
     companion object {
         private const val WAKE_UP_ANIMATION_ENABLED = true
         private const val VELOCITY_SCALE = 100f
@@ -304,7 +304,7 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     init {
-        dumpManager.registerDumpable(javaClass.name, this)
+        dumpManager.registerCriticalDumpable(javaClass.name, this)
         if (WAKE_UP_ANIMATION_ENABLED) {
             keyguardStateController.addCallback(keyguardStateCallback)
         }
@@ -338,7 +338,7 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Update blurs when pulling down the shade
      */
-    override fun onPanelExpansionChanged(event: PanelExpansionChangeEvent) {
+    override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
         val rawFraction = event.fraction
         val tracking = event.tracking
         val timestamp = SystemClock.elapsedRealtimeNanos()

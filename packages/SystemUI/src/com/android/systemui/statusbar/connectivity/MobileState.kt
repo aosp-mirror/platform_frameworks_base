@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.connectivity
 
+import android.annotation.DrawableRes
+import android.content.Context
 import android.telephony.ServiceState
 import android.telephony.SignalStrength
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyManager
+import com.android.internal.annotations.VisibleForTesting
+import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.Utils
 import com.android.settingslib.mobile.MobileStatusTracker.MobileStatus
 import com.android.settingslib.mobile.TelephonyIcons
@@ -41,13 +45,18 @@ internal class MobileState(
     @JvmField var roaming: Boolean = false,
     @JvmField var dataState: Int = TelephonyManager.DATA_DISCONNECTED,
     // Tracks the on/off state of the defaultDataSubscription
-    @JvmField var defaultDataOff: Boolean = false
+    @JvmField var defaultDataOff: Boolean = false,
 ) : ConnectivityState() {
 
     @JvmField var telephonyDisplayInfo = TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
             TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE)
     @JvmField var serviceState: ServiceState? = null
     @JvmField var signalStrength: SignalStrength? = null
+
+    var carrierId = TelephonyManager.UNKNOWN_CARRIER_ID
+
+    @VisibleForTesting
+    var networkTypeResIdCache: NetworkTypeResIdCache = NetworkTypeResIdCache()
 
     /** @return true if this state is disabled or not default data */
     val isDataDisabledOrNotDefault: Boolean
@@ -125,6 +134,21 @@ internal class MobileState(
         return serviceState != null && serviceState!!.roaming
     }
 
+    /**
+     *
+     * Load the (potentially customized) icon resource id for the current network type. Note that
+     * this operation caches the result. Note that reading the [MobileIconGroup.dataType] field
+     * directly will not yield correct results in cases where the carrierId has an associated
+     * override. This is the preferred method for getting the network type indicator.
+     *
+     * @return a drawable res id appropriate for the current (carrierId, networkType) pair
+     */
+    @DrawableRes
+    fun getNetworkTypeIcon(context: Context): Int {
+        val icon = (iconGroup as MobileIconGroup)
+        return networkTypeResIdCache.get(icon, carrierId, context)
+    }
+
     fun setFromMobileStatus(mobileStatus: MobileStatus) {
         activityIn = mobileStatus.activityIn
         activityOut = mobileStatus.activityOut
@@ -140,6 +164,7 @@ internal class MobileState(
         super.toString(builder)
         builder.append(',')
         builder.append("dataSim=$dataSim,")
+        builder.append("carrierId=$carrierId")
         builder.append("networkName=$networkName,")
         builder.append("networkNameData=$networkNameData,")
         builder.append("dataConnected=$dataConnected,")
@@ -157,6 +182,8 @@ internal class MobileState(
         builder.append("voiceServiceState=${getVoiceServiceState()},")
         builder.append("isInService=${isInService()},")
 
+        builder.append("networkTypeIconCache=$networkTypeResIdCache")
+
         builder.append("serviceState=${serviceState?.minLog() ?: "(null)"},")
         builder.append("signalStrength=${signalStrength?.minLog() ?: "(null)"},")
         builder.append("displayInfo=$telephonyDisplayInfo")
@@ -164,6 +191,7 @@ internal class MobileState(
 
     override fun tableColumns(): List<String> {
         val columns = listOf("dataSim",
+            "carrierId",
             "networkName",
             "networkNameData",
             "dataConnected",
@@ -178,6 +206,7 @@ internal class MobileState(
             "showQuickSettingsRatIcon",
             "voiceServiceState",
             "isInService",
+            "networkTypeIconCache",
             "serviceState",
             "signalStrength",
             "displayInfo")
@@ -187,6 +216,7 @@ internal class MobileState(
 
     override fun tableData(): List<String> {
         val columns = listOf(dataSim,
+                carrierId,
                 networkName,
                 networkNameData,
                 dataConnected,
@@ -201,6 +231,7 @@ internal class MobileState(
                 showQuickSettingsRatIcon(),
                 getVoiceServiceState(),
                 isInService(),
+                networkTypeResIdCache,
                 serviceState?.minLog() ?: "(null)",
                 signalStrength?.minLog() ?: "(null)",
                 telephonyDisplayInfo).map { it.toString() }
@@ -217,6 +248,7 @@ internal class MobileState(
 
         if (networkName != other.networkName) return false
         if (networkNameData != other.networkNameData) return false
+        if (carrierId != other.carrierId) return false
         if (dataSim != other.dataSim) return false
         if (dataConnected != other.dataConnected) return false
         if (isEmergency != other.isEmergency) return false
@@ -238,6 +270,7 @@ internal class MobileState(
         var result = super.hashCode()
         result = 31 * result + (networkName?.hashCode() ?: 0)
         result = 31 * result + (networkNameData?.hashCode() ?: 0)
+        result = 31 * result + (carrierId.hashCode())
         result = 31 * result + dataSim.hashCode()
         result = 31 * result + dataConnected.hashCode()
         result = 31 * result + isEmergency.hashCode()

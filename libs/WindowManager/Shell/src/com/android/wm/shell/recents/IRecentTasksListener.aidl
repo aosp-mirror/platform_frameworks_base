@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.recents;
 
-import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 
 /**
  * Listener interface that Launcher attaches to SystemUI to get split-screen callbacks.
@@ -31,10 +31,10 @@ oneway interface IRecentTasksListener {
     /**
      * Called when a running task appears.
      */
-    void onRunningTaskAppeared(in ActivityManager.RunningTaskInfo taskInfo);
+    void onRunningTaskAppeared(in RunningTaskInfo taskInfo);
 
     /**
      * Called when a running task vanishes.
      */
-    void onRunningTaskVanished(in ActivityManager.RunningTaskInfo taskInfo);
+    void onRunningTaskVanished(in RunningTaskInfo taskInfo);
 }

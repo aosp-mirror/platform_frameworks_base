@@ -19,8 +19,8 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="oval">
     <size
-        android:height="@dimen/media_ttt_chip_size_receiver"
-        android:width="@dimen/media_ttt_chip_size_receiver"
+        android:height="@dimen/media_ttt_icon_size_receiver"
+        android:width="@dimen/media_ttt_icon_size_receiver"
         />
-    <solid android:color="?androidprv:attr/colorSurface" />
+    <solid android:color="?androidprv:attr/colorAccentPrimary" />
 </shape>

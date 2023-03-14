@@ -21,7 +21,6 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
@@ -29,8 +28,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
-import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherControllerImpl;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 
@@ -39,7 +36,6 @@ import java.util.Set;
 
 import javax.inject.Named;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.Multibinds;
@@ -126,21 +122,13 @@ public interface StatusBarFragmentModule {
     }
 
     /** */
-    @Binds
-    @StatusBarFragmentScope
-    StatusBarUserSwitcherController bindStatusBarUserSwitcherController(
-            StatusBarUserSwitcherControllerImpl controller);
-
-    /** */
     @Provides
     @StatusBarFragmentScope
     static PhoneStatusBarViewController providePhoneStatusBarViewController(
             PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
-            @RootView PhoneStatusBarView phoneStatusBarView,
-            NotificationPanelViewController notificationPanelViewController) {
+            @RootView PhoneStatusBarView phoneStatusBarView) {
         return phoneStatusBarViewControllerFactory.create(
-                phoneStatusBarView,
-                notificationPanelViewController.getStatusBarTouchEventHandler());
+                phoneStatusBarView);
     }
 
     /** */

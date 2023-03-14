@@ -92,7 +92,7 @@ public abstract class HotwordDetectionService extends Service {
      * TODO(b/247920386): Add TestApi annotation
      * @hide
      */
-    public static final boolean ENABLE_PROXIMITY_RESULT = false;
+    public static final boolean ENABLE_PROXIMITY_RESULT = true;
 
     /**
      * Indicates that the updated status is successful.

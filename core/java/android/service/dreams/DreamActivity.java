@@ -44,6 +44,8 @@ import android.text.TextUtils;
 public class DreamActivity extends Activity {
     static final String EXTRA_CALLBACK = "binder";
     static final String EXTRA_DREAM_TITLE = "title";
+    @Nullable
+    private DreamService.DreamActivityCallbacks mCallback;
 
     public DreamActivity() {}
 
@@ -57,11 +59,19 @@ public class DreamActivity extends Activity {
         }
 
         final Bundle extras = getIntent().getExtras();
-        final DreamService.DreamActivityCallback callback =
-                (DreamService.DreamActivityCallback) extras.getBinder(EXTRA_CALLBACK);
+        mCallback = (DreamService.DreamActivityCallbacks) extras.getBinder(EXTRA_CALLBACK);
 
-        if (callback != null) {
-            callback.onActivityCreated(this);
+        if (mCallback != null) {
+            mCallback.onActivityCreated(this);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mCallback != null) {
+            mCallback.onActivityDestroyed();
+        }
+
+        super.onDestroy();
     }
 }

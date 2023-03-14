@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"ممکن ہے کہ ایپ اسپلٹ اسکرین کے ساتھ کام نہ کرے۔"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"ایپ سپلٹ اسکرین کو سپورٹ نہیں کرتی۔"</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"یہ ایپ صرف 1 ونڈو میں کھولی جا سکتی ہے۔"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ممکن ہے ایپ ثانوی ڈسپلے پر کام نہ کرے۔"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ایپ ثانوی ڈسپلیز پر شروعات کا تعاون نہیں کرتی۔"</string>
     <string name="accessibility_divider" msgid="703810061635792791">"سپلٹ اسکرین تقسیم کار"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"بڑا کریں"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"چھوٹا کریں"</string>
     <string name="close_button_text" msgid="2913281996024033299">"بند کریں"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"پیچھے"</string>
+    <string name="handle_text" msgid="1766582106752184456">"ہینڈل"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"مکمل اسکرین"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"ڈیسک ٹاپ موڈ"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"اسپلٹ اسکرین"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"مزید"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"فلوٹ"</string>
 </resources>

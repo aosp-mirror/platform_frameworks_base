@@ -18,7 +18,7 @@ import android.testing.LeakCheck;
 
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.plugins.PluginManager;
 
 public class FakePluginManager implements PluginManager {
 

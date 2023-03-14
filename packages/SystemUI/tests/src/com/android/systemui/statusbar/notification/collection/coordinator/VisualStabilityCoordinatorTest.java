@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 
 import static org.junit.Assert.assertTrue;
@@ -36,7 +38,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotifPanelEvents;
+import com.android.systemui.shade.ShadeStateEvents;
+import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -71,12 +75,13 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private Pluggable.PluggableListener<NotifStabilityManager> mInvalidateListener;
     @Mock private HeadsUpManager mHeadsUpManager;
-    @Mock private NotifPanelEvents mNotifPanelEvents;
+    @Mock private ShadeStateEvents mShadeStateEvents;
+    @Mock private VisibilityLocationProvider mVisibilityLocationProvider;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
-    @Captor private ArgumentCaptor<NotifPanelEvents.Listener> mNotifPanelEventsCallbackCaptor;
+    @Captor private ArgumentCaptor<ShadeStateEventsListener> mNotifPanelEventsCallbackCaptor;
     @Captor private ArgumentCaptor<NotifStabilityManager> mNotifStabilityManagerCaptor;
 
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -84,7 +89,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
     private StatusBarStateController.StateListener mStatusBarStateListener;
-    private NotifPanelEvents.Listener mNotifPanelEventsCallback;
+    private ShadeStateEvents.ShadeStateEventsListener mNotifPanelEventsCallback;
     private NotifStabilityManager mNotifStabilityManager;
     private NotificationEntry mEntry;
     private GroupEntry mGroupEntry;
@@ -97,8 +102,9 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mFakeExecutor,
                 mDumpManager,
                 mHeadsUpManager,
-                mNotifPanelEvents,
+                mShadeStateEvents,
                 mStatusBarStateController,
+                mVisibilityLocationProvider,
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle);
 
@@ -111,7 +117,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
         verify(mStatusBarStateController).addCallback(mSBStateListenerCaptor.capture());
         mStatusBarStateListener = mSBStateListenerCaptor.getValue();
 
-        verify(mNotifPanelEvents).registerListener(mNotifPanelEventsCallbackCaptor.capture());
+        verify(mShadeStateEvents).addShadeStateEventsListener(
+                mNotifPanelEventsCallbackCaptor.capture());
         mNotifPanelEventsCallback = mNotifPanelEventsCallbackCaptor.getValue();
 
         verify(mNotifPipeline).setVisualStabilityManager(mNotifStabilityManagerCaptor.capture());
@@ -350,6 +357,38 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         // THEN invalidate isn't called a second time since reordering was already allowed
         verifyStabilityManagerWasInvalidated(times(1));
+    }
+
+    @Test
+    public void testMovingVisibleHeadsUpNotAllowed() {
+        // GIVEN stability enforcing conditions
+        setPanelExpanded(true);
+        setSleepy(false);
+
+        // WHEN a notification is alerting and visible
+        when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(true);
+        when(mVisibilityLocationProvider.isInVisibleLocation(any(NotificationEntry.class)))
+                .thenReturn(true);
+
+        // VERIFY the notification cannot be reordered
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(mEntry)).isFalse();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(mEntry)).isFalse();
+    }
+
+    @Test
+    public void testMovingInvisibleHeadsUpAllowed() {
+        // GIVEN stability enforcing conditions
+        setPanelExpanded(true);
+        setSleepy(false);
+
+        // WHEN a notification is alerting but not visible
+        when(mHeadsUpManager.isAlerting(mEntry.getKey())).thenReturn(true);
+        when(mVisibilityLocationProvider.isInVisibleLocation(any(NotificationEntry.class)))
+                .thenReturn(false);
+
+        // VERIFY the notification can be reordered
+        assertThat(mNotifStabilityManager.isEntryReorderingAllowed(mEntry)).isTrue();
+        assertThat(mNotifStabilityManager.isSectionChangeAllowed(mEntry)).isTrue();
     }
 
     @Test

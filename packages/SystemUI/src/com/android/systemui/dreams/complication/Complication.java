@@ -164,7 +164,8 @@ public interface Complication {
             COMPLICATION_TYPE_AIR_QUALITY,
             COMPLICATION_TYPE_CAST_INFO,
             COMPLICATION_TYPE_HOME_CONTROLS,
-            COMPLICATION_TYPE_SMARTSPACE
+            COMPLICATION_TYPE_SMARTSPACE,
+            COMPLICATION_TYPE_MEDIA_ENTRY
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ComplicationType {}
@@ -177,6 +178,7 @@ public interface Complication {
     int COMPLICATION_TYPE_CAST_INFO = 1 << 4;
     int COMPLICATION_TYPE_HOME_CONTROLS = 1 << 5;
     int COMPLICATION_TYPE_SMARTSPACE = 1 << 6;
+    int COMPLICATION_TYPE_MEDIA_ENTRY = 1 << 7;
 
     /**
      * The {@link Host} interface specifies a way a {@link Complication} to communicate with its
@@ -195,11 +197,11 @@ public interface Complication {
      */
     interface VisibilityController {
         /**
-         * Called to set the visibility of all shown and future complications.
+         * Called to set the visibility of all shown and future complications. Changes in visibility
+         * will always be animated.
          * @param visibility The desired future visibility.
-         * @param animate whether the change should be animated.
          */
-        void setVisibility(@View.Visibility int visibility, boolean animate);
+        void setVisibility(@View.Visibility int visibility);
     }
 
     /**

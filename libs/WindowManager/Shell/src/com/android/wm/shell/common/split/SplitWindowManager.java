@@ -166,9 +166,9 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         }
     }
 
-    void setInteractive(boolean interactive) {
+    void setInteractive(boolean interactive, String from) {
         if (mDividerView == null) return;
-        mDividerView.setInteractive(interactive);
+        mDividerView.setInteractive(interactive, from);
     }
 
     View getDividerView() {

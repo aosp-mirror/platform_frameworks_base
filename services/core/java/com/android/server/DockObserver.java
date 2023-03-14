@@ -19,6 +19,7 @@ package com.android.server;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -73,6 +74,7 @@ final class DockObserver extends SystemService {
     private final boolean mAllowTheaterModeWakeFromDock;
 
     private final List<ExtconStateConfig> mExtconStateConfigs;
+    private DeviceProvisionedObserver mDeviceProvisionedObserver;
 
     static final class ExtconStateProvider {
         private final Map<String, String> mState;
@@ -110,7 +112,7 @@ final class DockObserver extends SystemService {
                 Slog.w(TAG, "No state file found at: " + stateFilePath);
                 return new ExtconStateProvider(new HashMap<>());
             } catch (Exception e) {
-                Slog.e(TAG, "" , e);
+                Slog.e(TAG, "", e);
                 return new ExtconStateProvider(new HashMap<>());
             }
         }
@@ -136,7 +138,7 @@ final class DockObserver extends SystemService {
 
     private static List<ExtconStateConfig> loadExtconStateConfigs(Context context) {
         String[] rows = context.getResources().getStringArray(
-            com.android.internal.R.array.config_dockExtconStateMapping);
+                com.android.internal.R.array.config_dockExtconStateMapping);
         try {
             ArrayList<ExtconStateConfig> configs = new ArrayList<>();
             for (String row : rows) {
@@ -167,6 +169,7 @@ final class DockObserver extends SystemService {
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromDock);
         mKeepDreamingWhenUndocking = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_keepDreamingWhenUndocking);
+        mDeviceProvisionedObserver = new DeviceProvisionedObserver(mHandler);
 
         mExtconStateConfigs = loadExtconStateConfigs(context);
 
@@ -199,12 +202,16 @@ final class DockObserver extends SystemService {
         if (phase == PHASE_ACTIVITY_MANAGER_READY) {
             synchronized (mLock) {
                 mSystemReady = true;
-
-                // don't bother broadcasting undocked here
-                if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-                    updateLocked();
-                }
+                mDeviceProvisionedObserver.onSystemReady();
+                updateIfDockedLocked();
             }
+        }
+    }
+
+    private void updateIfDockedLocked() {
+        // don't bother broadcasting undocked here
+        if (mReportedDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+            updateLocked();
         }
     }
 
@@ -252,8 +259,7 @@ final class DockObserver extends SystemService {
 
             // Skip the dock intent if not yet provisioned.
             final ContentResolver cr = getContext().getContentResolver();
-            if (Settings.Global.getInt(cr,
-                    Settings.Global.DEVICE_PROVISIONED, 0) == 0) {
+            if (!mDeviceProvisionedObserver.isDeviceProvisioned()) {
                 Slog.i(TAG, "Device not provisioned, skipping dock broadcast");
                 return;
             }
@@ -302,6 +308,7 @@ final class DockObserver extends SystemService {
                                     getContext(), soundUri);
                             if (sfx != null) {
                                 sfx.setStreamType(AudioManager.STREAM_SYSTEM);
+                                sfx.preferBuiltinDevice(true);
                                 sfx.play();
                             }
                         }
@@ -416,6 +423,50 @@ final class DockObserver extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+    }
+
+    private final class DeviceProvisionedObserver extends ContentObserver {
+        private boolean mRegistered;
+
+        public DeviceProvisionedObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            synchronized (mLock) {
+                updateRegistration();
+                if (isDeviceProvisioned()) {
+                    // Send the dock broadcast if device is docked after provisioning.
+                    updateIfDockedLocked();
+                }
+            }
+        }
+
+        void onSystemReady() {
+            updateRegistration();
+        }
+
+        private void updateRegistration() {
+            boolean register = !isDeviceProvisioned();
+            if (register == mRegistered) {
+                return;
+            }
+            final ContentResolver resolver = getContext().getContentResolver();
+            if (register) {
+                resolver.registerContentObserver(
+                        Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED),
+                        false, this);
+            } else {
+                resolver.unregisterContentObserver(this);
+            }
+            mRegistered = register;
+        }
+
+        boolean isDeviceProvisioned() {
+            return Settings.Global.getInt(getContext().getContentResolver(),
+                    Settings.Global.DEVICE_PROVISIONED, 0) != 0;
         }
     }
 }

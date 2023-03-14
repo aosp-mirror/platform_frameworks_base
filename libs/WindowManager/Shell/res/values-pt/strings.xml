@@ -33,6 +33,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Exibir"</string>
     <string name="dock_forced_resizable" msgid="1749750436092293116">"É possível que o app não funcione com a tela dividida."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="7408396418008948957">"O app não é compatível com a divisão de tela."</string>
+    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Este app só pode ser aberto em uma única janela."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"É possível que o app não funcione em uma tela secundária."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"O app não é compatível com a inicialização em telas secundárias."</string>
     <string name="accessibility_divider" msgid="703810061635792791">"Divisor de tela"</string>
@@ -84,4 +85,11 @@
     <string name="maximize_button_text" msgid="1650859196290301963">"Maximizar"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"Minimizar"</string>
     <string name="close_button_text" msgid="2913281996024033299">"Fechar"</string>
+    <string name="back_button_text" msgid="1469718707134137085">"Voltar"</string>
+    <string name="handle_text" msgid="1766582106752184456">"Alça"</string>
+    <string name="fullscreen_text" msgid="1162316685217676079">"Tela cheia"</string>
+    <string name="desktop_text" msgid="1077633567027630454">"Modo área de trabalho"</string>
+    <string name="split_screen_text" msgid="1396336058129570886">"Tela dividida"</string>
+    <string name="more_button_text" msgid="3655388105592893530">"Mais"</string>
+    <string name="float_button_text" msgid="9221657008391364581">"Ponto flutuante"</string>
 </resources>
