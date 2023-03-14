@@ -16,6 +16,10 @@
 package com.android.settingslib.dream;
 
 
+import static com.android.settingslib.dream.DreamBackend.COMPLICATION_TYPE_DATE;
+import static com.android.settingslib.dream.DreamBackend.COMPLICATION_TYPE_HOME_CONTROLS;
+import static com.android.settingslib.dream.DreamBackend.COMPLICATION_TYPE_TIME;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -36,13 +40,16 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowSettings;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowSettings.ShadowSecure.class})
 public final class DreamBackendTest {
-    private static final int[] SUPPORTED_DREAM_COMPLICATIONS = {1, 2, 3};
+    private static final int[] SUPPORTED_DREAM_COMPLICATIONS =
+            {COMPLICATION_TYPE_HOME_CONTROLS, COMPLICATION_TYPE_DATE,
+                    COMPLICATION_TYPE_TIME};
     private static final List<Integer> SUPPORTED_DREAM_COMPLICATIONS_LIST = Arrays.stream(
             SUPPORTED_DREAM_COMPLICATIONS).boxed().collect(
             Collectors.toList());
@@ -93,8 +100,52 @@ public final class DreamBackendTest {
     @Test
     public void testDisableComplications() {
         mBackend.setComplicationsEnabled(false);
-        assertThat(mBackend.getEnabledComplications()).isEmpty();
+        assertThat(mBackend.getEnabledComplications())
+                .containsExactly(COMPLICATION_TYPE_HOME_CONTROLS);
         assertThat(mBackend.getComplicationsEnabled()).isFalse();
     }
-}
 
+    @Test
+    public void testHomeControlsDisabled_ComplicationsEnabled() {
+        mBackend.setComplicationsEnabled(true);
+        mBackend.setHomeControlsEnabled(false);
+        // Home controls should not be enabled, only date and time.
+        final List<Integer> enabledComplications =
+                Arrays.asList(COMPLICATION_TYPE_DATE, COMPLICATION_TYPE_TIME);
+        assertThat(mBackend.getEnabledComplications())
+                .containsExactlyElementsIn(enabledComplications);
+    }
+
+    @Test
+    public void testHomeControlsDisabled_ComplicationsDisabled() {
+        mBackend.setComplicationsEnabled(false);
+        mBackend.setHomeControlsEnabled(false);
+        assertThat(mBackend.getEnabledComplications()).isEmpty();
+    }
+
+    @Test
+    public void testHomeControlsEnabled_ComplicationsDisabled() {
+        mBackend.setComplicationsEnabled(false);
+        mBackend.setHomeControlsEnabled(true);
+        // Home controls should not be enabled, only date and time.
+        final List<Integer> enabledComplications =
+                Collections.singletonList(COMPLICATION_TYPE_HOME_CONTROLS);
+        assertThat(mBackend.getEnabledComplications())
+                .containsExactlyElementsIn(enabledComplications);
+    }
+
+    @Test
+    public void testHomeControlsEnabled_ComplicationsEnabled() {
+        mBackend.setComplicationsEnabled(true);
+        mBackend.setHomeControlsEnabled(true);
+        // Home controls should not be enabled, only date and time.
+        final List<Integer> enabledComplications =
+                Arrays.asList(
+                        COMPLICATION_TYPE_HOME_CONTROLS,
+                        COMPLICATION_TYPE_DATE,
+                        COMPLICATION_TYPE_TIME
+                );
+        assertThat(mBackend.getEnabledComplications())
+                .containsExactlyElementsIn(enabledComplications);
+    }
+}
