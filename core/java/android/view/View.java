@@ -8324,6 +8324,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if (hasWindowFocus()) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
+
+            if (mIsHandwritingDelegate) {
+                ViewRootImpl viewRoot = getViewRootImpl();
+                if (viewRoot != null) {
+                    viewRoot.getHandwritingInitiator().onDelegateViewFocused(this);
+                }
+            }
         }
 
         invalidate(true);

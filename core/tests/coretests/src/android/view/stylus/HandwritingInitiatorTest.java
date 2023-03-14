@@ -24,6 +24,7 @@ import static android.view.stylus.HandwritingTestUtil.createView;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -224,12 +225,35 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
-    public void onTouchEvent_startHandwriting_delegate() {
+    public void onTouchEvent_tryAcceptDelegation_delegatorCallbackCreatesInputConnection() {
         View delegateView = new View(mContext);
         delegateView.setIsHandwritingDelegate(true);
 
         mTestView1.setHandwritingDelegatorCallback(
                 () -> mHandwritingInitiator.onInputConnectionCreated(delegateView));
+
+        final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
+        final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + mHandwritingSlop * 2;
+        final int y2 = y1;
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        verify(mHandwritingInitiator, times(1)).tryAcceptStylusHandwritingDelegation(delegateView);
+    }
+
+    @Test
+    public void onTouchEvent_tryAcceptDelegation_delegatorCallbackFocusesDelegate() {
+        View delegateView = new View(mContext);
+        delegateView.setIsHandwritingDelegate(true);
+        mHandwritingInitiator.onInputConnectionCreated(delegateView);
+        reset(mHandwritingInitiator);
+
+        mTestView1.setHandwritingDelegatorCallback(
+                () -> mHandwritingInitiator.onDelegateViewFocused(delegateView));
 
         final int x1 = (sHwArea1.left + sHwArea1.right) / 2;
         final int y1 = (sHwArea1.top + sHwArea1.bottom) / 2;
