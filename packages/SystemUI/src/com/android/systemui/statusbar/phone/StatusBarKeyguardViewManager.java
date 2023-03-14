@@ -279,6 +279,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private int mLastBiometricMode;
     private boolean mLastScreenOffAnimationPlaying;
     private float mQsExpansion;
+    private boolean mAlternateBouncerReceivedDownTouch = false;
     final Set<KeyguardViewManagerCallback> mCallbacks = new HashSet<>();
     private boolean mIsModernAlternateBouncerEnabled;
     private boolean mIsBackAnimationEnabled;
@@ -1389,6 +1390,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         pw.println("  mPendingWakeupAction: " + mPendingWakeupAction);
         pw.println("  isBouncerShowing(): " + isBouncerShowing());
         pw.println("  bouncerIsOrWillBeShowing(): " + primaryBouncerIsOrWillBeShowing());
+        pw.println("  mAlternateBouncerReceivedDownTouch: " + mAlternateBouncerReceivedDownTouch);
         pw.println("  Registered KeyguardViewManagerCallbacks:");
         for (KeyguardViewManagerCallback callback : mCallbacks) {
             pw.println("      " + callback);
@@ -1449,11 +1451,17 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public boolean onTouch(MotionEvent event) {
         boolean handledTouch = false;
-        if (event.getAction() == MotionEvent.ACTION_UP
-                && mAlternateBouncerInteractor.isVisibleState()
-                && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()) {
-            showPrimaryBouncer(true);
+        if (mAlternateBouncerInteractor.isVisibleState()) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                mAlternateBouncerReceivedDownTouch = true;
+            } else if (event.getAction() == MotionEvent.ACTION_UP
+                    && mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()
+                    && mAlternateBouncerReceivedDownTouch) {
+                showPrimaryBouncer(true);
+            }
             handledTouch = true;
+        } else {
+            mAlternateBouncerReceivedDownTouch = false;
         }
 
         // Forward NPVC touches to callbacks in case they want to respond to touches
