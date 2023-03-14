@@ -35,7 +35,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -928,6 +927,15 @@ public class AuthControllerTest extends SysuiTestCase {
         mAuthController.onConfigurationChanged(null /* newConfig */);
 
         assertNotSame(firstFpLocation, mAuthController.getFingerprintSensorLocation());
+    }
+
+    @Test
+    public void testCloseDialog_whenGlobalActionsMenuShown() throws Exception {
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.handleShowGlobalActionsMenu();
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
     }
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
