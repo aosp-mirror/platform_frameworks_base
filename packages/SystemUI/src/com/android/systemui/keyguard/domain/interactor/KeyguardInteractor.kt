@@ -137,7 +137,7 @@ constructor(
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
     /** Whether the primary bouncer is showing or not. */
-    val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerVisible
+    val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
     /** Whether the alternate bouncer is showing or not. */
     val alternateBouncerShowing: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     /** Observable for the [StatusBarState] */
@@ -159,7 +159,7 @@ constructor(
         if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
             combine(
                     isKeyguardVisible,
-                    bouncerRepository.primaryBouncerVisible,
+                    primaryBouncerShowing,
                     onCameraLaunchDetected,
                 ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
                     when {

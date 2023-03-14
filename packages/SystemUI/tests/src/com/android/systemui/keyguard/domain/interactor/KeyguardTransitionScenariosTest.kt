@@ -259,7 +259,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN the primary bouncer is set to show
-            bouncerRepository.setPrimaryVisible(true)
+            bouncerRepository.setPrimaryShow(true)
             runCurrent()
 
             val info =
@@ -741,7 +741,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             reset(mockTransitionRepository)
 
             // WHEN the alternateBouncer stops showing and then the primary bouncer shows
-            bouncerRepository.setPrimaryVisible(true)
+            bouncerRepository.setPrimaryShow(true)
             runCurrent()
 
             val info =
@@ -779,7 +779,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             reset(mockTransitionRepository)
 
             // GIVEN the primary bouncer isn't showing, aod available and starting to sleep
-            bouncerRepository.setPrimaryVisible(false)
+            bouncerRepository.setPrimaryShow(false)
             keyguardRepository.setAodAvailable(true)
             keyguardRepository.setWakefulnessModel(startingToSleep())
 
@@ -823,7 +823,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
             // GIVEN the primary bouncer isn't showing, aod not available and starting to sleep
             // to sleep
-            bouncerRepository.setPrimaryVisible(false)
+            bouncerRepository.setPrimaryShow(false)
             keyguardRepository.setAodAvailable(false)
             keyguardRepository.setWakefulnessModel(startingToSleep())
 
@@ -866,7 +866,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             reset(mockTransitionRepository)
 
             // GIVEN the primary bouncer isn't showing and device not sleeping
-            bouncerRepository.setPrimaryVisible(false)
+            bouncerRepository.setPrimaryShow(false)
             keyguardRepository.setWakefulnessModel(startingToWake())
 
             // WHEN the alternateBouncer stops showing
@@ -890,7 +890,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     fun `PRIMARY_BOUNCER to AOD`() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
-            bouncerRepository.setPrimaryVisible(true)
+            bouncerRepository.setPrimaryShow(true)
             runner.startTransition(
                 testScope,
                 TransitionInfo(
@@ -912,7 +912,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(startingToSleep())
 
             // WHEN the primaryBouncer stops showing
-            bouncerRepository.setPrimaryVisible(false)
+            bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
             val info =
@@ -932,7 +932,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     fun `PRIMARY_BOUNCER to DOZING`() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
-            bouncerRepository.setPrimaryVisible(true)
+            bouncerRepository.setPrimaryShow(true)
             runner.startTransition(
                 testScope,
                 TransitionInfo(
@@ -954,7 +954,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(startingToSleep())
 
             // WHEN the primaryBouncer stops showing
-            bouncerRepository.setPrimaryVisible(false)
+            bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
             val info =
@@ -974,7 +974,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     fun `PRIMARY_BOUNCER to LOCKSCREEN`() =
         testScope.runTest {
             // GIVEN a prior transition has run to PRIMARY_BOUNCER
-            bouncerRepository.setPrimaryVisible(true)
+            bouncerRepository.setPrimaryShow(true)
             runner.startTransition(
                 testScope,
                 TransitionInfo(
@@ -995,7 +995,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             keyguardRepository.setWakefulnessModel(startingToWake())
 
             // WHEN the alternateBouncer stops showing
-            bouncerRepository.setPrimaryVisible(false)
+            bouncerRepository.setPrimaryShow(false)
             runCurrent()
 
             val info =
