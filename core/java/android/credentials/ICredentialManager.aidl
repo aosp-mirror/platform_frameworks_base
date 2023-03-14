@@ -27,6 +27,7 @@ import android.credentials.UnregisterCredentialDescriptionRequest;
 import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.IGetCredentialCallback;
+import android.credentials.IGetPendingCredentialCallback;
 import android.credentials.ISetEnabledProvidersCallback;
 import android.content.ComponentName;
 import android.os.ICancellationSignal;
@@ -39,6 +40,8 @@ import android.os.ICancellationSignal;
 interface ICredentialManager {
 
     @nullable ICancellationSignal executeGetCredential(in GetCredentialRequest request, in IGetCredentialCallback callback, String callingPackage);
+
+    @nullable ICancellationSignal executeGetPendingCredential(in GetCredentialRequest request, in IGetPendingCredentialCallback callback, String callingPackage);
 
     @nullable ICancellationSignal executeCreateCredential(in CreateCredentialRequest request, in ICreateCredentialCallback callback, String callingPackage);
 
