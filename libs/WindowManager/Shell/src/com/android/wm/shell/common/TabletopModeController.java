@@ -22,10 +22,12 @@ import static com.android.wm.shell.common.DevicePostureController.DEVICE_POSTURE
 import static com.android.wm.shell.common.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_FOLDABLE;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.SystemProperties;
 import android.util.ArraySet;
 import android.view.Surface;
 
@@ -34,6 +36,8 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +53,33 @@ import java.util.Set;
 public class TabletopModeController implements
         DevicePostureController.OnDevicePostureChangedListener,
         DisplayController.OnDisplaysChangedListener {
+    /**
+     * When {@code true}, floating windows like PiP would auto move to the position
+     * specified by {@link #PREFER_TOP_HALF_IN_TABLETOP} when in tabletop mode.
+     */
+    private static final boolean ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP =
+            SystemProperties.getBoolean(
+                    "persist.wm.debug.enable_move_floating_window_in_tabletop", false);
+
+    /**
+     * Prefer the {@link #PREFERRED_TABLETOP_HALF_TOP} if this flag is enabled,
+     * {@link #PREFERRED_TABLETOP_HALF_BOTTOM} otherwise.
+     * See also {@link #getPreferredHalfInTabletopMode()}.
+     */
+    private static final boolean PREFER_TOP_HALF_IN_TABLETOP =
+            SystemProperties.getBoolean("persist.wm.debug.prefer_top_half_in_tabletop", true);
+
     private static final long TABLETOP_MODE_DELAY_MILLIS = 1_000;
+
+    @IntDef(prefix = {"PREFERRED_TABLETOP_HALF_"}, value = {
+            PREFERRED_TABLETOP_HALF_TOP,
+            PREFERRED_TABLETOP_HALF_BOTTOM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PreferredTabletopHalf {}
+
+    public static final int PREFERRED_TABLETOP_HALF_TOP = 0;
+    public static final int PREFERRED_TABLETOP_HALF_BOTTOM = 1;
 
     private final Context mContext;
 
@@ -130,6 +160,22 @@ public class TabletopModeController implements
                     break;
             }
         }
+    }
+
+    /**
+     * @return {@code true} if floating windows like PiP would auto move to the position
+     * specified by {@link #getPreferredHalfInTabletopMode()} when in tabletop mode.
+     */
+    public boolean enableMoveFloatingWindowInTabletop() {
+        return ENABLE_MOVE_FLOATING_WINDOW_IN_TABLETOP;
+    }
+
+    /** @return Preferred half for floating windows like PiP when in tabletop mode. */
+    @PreferredTabletopHalf
+    public int getPreferredHalfInTabletopMode() {
+        return PREFER_TOP_HALF_IN_TABLETOP
+                ? PREFERRED_TABLETOP_HALF_TOP
+                : PREFERRED_TABLETOP_HALF_BOTTOM;
     }
 
     /** Register {@link OnTabletopModeChangedListener} to listen for tabletop mode change. */

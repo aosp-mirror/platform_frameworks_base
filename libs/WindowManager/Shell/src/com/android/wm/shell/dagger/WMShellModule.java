@@ -44,6 +44,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
@@ -353,6 +354,7 @@ public abstract class WMShellModule {
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayInsetsController displayInsetsController,
+            TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(
@@ -362,7 +364,7 @@ public abstract class WMShellModule {
                 pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
                 pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
                 taskStackListener, pipParamsChangedForwarder, displayInsetsController,
-                oneHandedController, mainExecutor));
+                pipTabletopController, oneHandedController, mainExecutor));
     }
 
     @WMSingleton
