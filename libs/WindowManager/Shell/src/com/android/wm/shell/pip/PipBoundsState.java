@@ -44,7 +44,9 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -115,6 +117,12 @@ public class PipBoundsState {
      * @see android.view.View#setPreferKeepClearRects
      */
     private final Set<Rect> mUnrestrictedKeepClearAreas = new ArraySet<>();
+    /**
+     * Additional to {@link #mUnrestrictedKeepClearAreas}, allow the caller to append named bounds
+     * as unrestricted keep clear area. Values in this map would be appended to
+     * {@link #getUnrestrictedKeepClearAreas()} and this is meant for internal usage only.
+     */
+    private final Map<String, Rect> mNamedUnrestrictedKeepClearAreas = new HashMap<>();
 
     private @Nullable Runnable mOnMinimalSizeChangeCallback;
     private @Nullable TriConsumer<Boolean, Integer, Boolean> mOnShelfVisibilityChangeCallback;
@@ -393,6 +401,16 @@ public class PipBoundsState {
         mUnrestrictedKeepClearAreas.addAll(unrestrictedAreas);
     }
 
+    /** Add a named unrestricted keep clear area. */
+    public void addNamedUnrestrictedKeepClearArea(@NonNull String name, Rect unrestrictedArea) {
+        mNamedUnrestrictedKeepClearAreas.put(name, unrestrictedArea);
+    }
+
+    /** Remove a named unrestricted keep clear area. */
+    public void removeNamedUnrestrictedKeepClearArea(@NonNull String name) {
+        mNamedUnrestrictedKeepClearAreas.remove(name);
+    }
+
     @NonNull
     public Set<Rect> getRestrictedKeepClearAreas() {
         return mRestrictedKeepClearAreas;
@@ -400,7 +418,10 @@ public class PipBoundsState {
 
     @NonNull
     public Set<Rect> getUnrestrictedKeepClearAreas() {
-        return mUnrestrictedKeepClearAreas;
+        if (mNamedUnrestrictedKeepClearAreas.isEmpty()) return mUnrestrictedKeepClearAreas;
+        final Set<Rect> unrestrictedAreas = new ArraySet<>(mUnrestrictedKeepClearAreas);
+        unrestrictedAreas.addAll(mNamedUnrestrictedKeepClearAreas.values());
+        return unrestrictedAreas;
     }
 
     /**
