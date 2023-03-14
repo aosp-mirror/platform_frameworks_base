@@ -16,31 +16,65 @@
 
 package com.android.server.rollback;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import android.content.Context;
 import android.content.pm.VersionedPackage;
+import android.content.rollback.PackageRollbackInfo;
+import android.content.rollback.RollbackInfo;
+import android.content.rollback.RollbackManager;
 import android.util.Log;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.server.PackageWatchdog;
 import com.android.server.SystemConfig;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
+import org.mockito.Mock;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
+import org.mockito.stubbing.Answer;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Scanner;
+
 
 @RunWith(AndroidJUnit4.class)
 public class RollbackPackageHealthObserverTest {
+    @Mock
+    private Context mMockContext;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private PackageWatchdog mMockPackageWatchdog;
+    @Mock
+    RollbackManager mRollbackManager;
+    @Mock
+    RollbackInfo mRollbackInfo;
+    @Mock
+    PackageRollbackInfo mPackageRollbackInfo;
+
+    private MockitoSession mSession;
+    private static final String APP_A = "com.package.a";
+    private static final long VERSION_CODE = 1L;
     private static final String LOG_TAG = "RollbackPackageHealthObserverTest";
 
     private SystemConfig mSysConfig;
@@ -50,15 +84,72 @@ public class RollbackPackageHealthObserverTest {
     @Before
     public void setup() {
         mSysConfig = new SystemConfigTestClass();
+
+        mSession = ExtendedMockito.mockitoSession()
+                .initMocks(this)
+                .strictness(Strictness.LENIENT)
+                .spyStatic(PackageWatchdog.class)
+                .startMocking();
+
+        // Mock PackageWatchdog
+        doAnswer((Answer<PackageWatchdog>) invocationOnMock -> mMockPackageWatchdog)
+                .when(() -> PackageWatchdog.getInstance(mMockContext));
+
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        mSession.finishMocking();
     }
 
     /**
-    * Subclass of SystemConfig without running the constructor.
-    */
+     * Subclass of SystemConfig without running the constructor.
+     */
     private class SystemConfigTestClass extends SystemConfig {
         SystemConfigTestClass() {
-          super(false);
+            super(false);
         }
+    }
+
+    @Test
+    public void testHealthCheckLevels() {
+        RollbackPackageHealthObserver observer =
+                spy(new RollbackPackageHealthObserver(mMockContext));
+        VersionedPackage testFailedPackage = new VersionedPackage(APP_A, VERSION_CODE);
+
+
+        when(mMockContext.getSystemService(RollbackManager.class)).thenReturn(mRollbackManager);
+
+        // Crashes with no rollbacks available
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
+                observer.onHealthCheckFailed(null,
+                        PackageWatchdog.FAILURE_REASON_NATIVE_CRASH, 1));
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
+                observer.onHealthCheckFailed(null,
+                        PackageWatchdog.FAILURE_REASON_APP_CRASH, 1));
+
+        // Make the rollbacks available
+        when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(mRollbackInfo));
+        when(mRollbackInfo.getPackages()).thenReturn(List.of(mPackageRollbackInfo));
+        when(mPackageRollbackInfo.getVersionRolledBackFrom()).thenReturn(testFailedPackage);
+
+        // native crash
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
+                observer.onHealthCheckFailed(null,
+                        PackageWatchdog.FAILURE_REASON_NATIVE_CRASH, 1));
+        // non-native crash
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_30,
+                observer.onHealthCheckFailed(testFailedPackage,
+                        PackageWatchdog.FAILURE_REASON_APP_CRASH, 1));
+        // Second non-native crash again
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_70,
+                observer.onHealthCheckFailed(testFailedPackage,
+                        PackageWatchdog.FAILURE_REASON_APP_CRASH, 2));
+        // Subsequent crashes when rollbacks have completed
+        when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of());
+        assertEquals(PackageWatchdog.PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
+                observer.onHealthCheckFailed(testFailedPackage,
+                        PackageWatchdog.FAILURE_REASON_APP_CRASH, 3));
     }
 
     /**
@@ -77,7 +168,7 @@ public class RollbackPackageHealthObserverTest {
         readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(RollbackPackageHealthObserver.isAutomaticRollbackDenied(mSysConfig,
-            new VersionedPackage("com.test.package", 1))).isEqualTo(false);
+                new VersionedPackage("com.test.package", 1))).isEqualTo(false);
     }
 
     /**
@@ -96,7 +187,7 @@ public class RollbackPackageHealthObserverTest {
         readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(RollbackPackageHealthObserver.isAutomaticRollbackDenied(mSysConfig,
-            new VersionedPackage("com.android.vending", 1))).isEqualTo(true);
+                new VersionedPackage("com.android.vending", 1))).isEqualTo(true);
     }
 
     /**
@@ -109,7 +200,7 @@ public class RollbackPackageHealthObserverTest {
         readPermissions(folder, /* Grant all permission flags */ ~0);
 
         assertThat(RollbackPackageHealthObserver.isAutomaticRollbackDenied(mSysConfig,
-            new VersionedPackage("com.android.vending", 1))).isEqualTo(false);
+                new VersionedPackage("com.android.vending", 1))).isEqualTo(false);
     }
 
     /**
