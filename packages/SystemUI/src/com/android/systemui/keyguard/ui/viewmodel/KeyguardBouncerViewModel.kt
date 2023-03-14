@@ -70,7 +70,7 @@ constructor(
     /** Observe whether we should update fps is showing. */
     val shouldUpdateSideFps: Flow<Unit> =
         merge(
-            interactor.startingToHide,
+            interactor.hide,
             interactor.show,
             interactor.startingDisappearAnimation.filterNotNull().map {}
         )
