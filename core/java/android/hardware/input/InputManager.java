@@ -44,8 +44,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionSync;
-import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -68,7 +66,6 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.SomeArgs;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -107,12 +104,6 @@ public final class InputManager {
      */
     @Nullable
     private Boolean mIsStylusPointerIconEnabled = null;
-
-    // Guarded by mTabletModeLock
-    private final Object mTabletModeLock = new Object();
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    private TabletModeChangedListener mTabletModeChangedListener;
-    private ArrayList<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
 
     private final Object mBatteryListenersLock = new Object();
     // Maps a deviceId whose battery is currently being monitored to an entry containing the
@@ -521,20 +512,7 @@ public final class InputManager {
      */
     public void registerOnTabletModeChangedListener(
             OnTabletModeChangedListener listener, Handler handler) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-        synchronized (mTabletModeLock) {
-            if (mOnTabletModeChangedListeners == null) {
-                initializeTabletModeListenerLocked();
-            }
-            int idx = findOnTabletModeChangedListenerLocked(listener);
-            if (idx < 0) {
-                OnTabletModeChangedListenerDelegate d =
-                    new OnTabletModeChangedListenerDelegate(listener, handler);
-                mOnTabletModeChangedListeners.add(d);
-            }
-        }
+        mGlobal.registerOnTabletModeChangedListener(listener, handler);
     }
 
     /**
@@ -544,37 +522,7 @@ public final class InputManager {
      * @hide
      */
     public void unregisterOnTabletModeChangedListener(OnTabletModeChangedListener listener) {
-        if (listener == null) {
-            throw new IllegalArgumentException("listener must not be null");
-        }
-        synchronized (mTabletModeLock) {
-            int idx = findOnTabletModeChangedListenerLocked(listener);
-            if (idx >= 0) {
-                OnTabletModeChangedListenerDelegate d = mOnTabletModeChangedListeners.remove(idx);
-                d.removeCallbacksAndMessages(null);
-            }
-        }
-    }
-
-    private void initializeTabletModeListenerLocked() {
-        final TabletModeChangedListener listener = new TabletModeChangedListener();
-        try {
-            mIm.registerTabletModeChangedListener(listener);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-        mTabletModeChangedListener = listener;
-        mOnTabletModeChangedListeners = new ArrayList<>();
-    }
-
-    private int findOnTabletModeChangedListenerLocked(OnTabletModeChangedListener listener) {
-        final int N = mOnTabletModeChangedListeners.size();
-        for (int i = 0; i < N; i++) {
-            if (mOnTabletModeChangedListeners.get(i).mListener == listener) {
-                return i;
-            }
-        }
-        return -1;
+        mGlobal.unregisterOnTabletModeChangedListener(listener);
     }
 
     /**
@@ -1449,21 +1397,6 @@ public final class InputManager {
         return mGlobal.getHostUsiVersion(display);
     }
 
-    private void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-        if (DEBUG) {
-            Log.d(TAG, "Received tablet mode changed: "
-                    + "whenNanos=" + whenNanos + ", inTabletMode=" + inTabletMode);
-        }
-        synchronized (mTabletModeLock) {
-            final int numListeners = mOnTabletModeChangedListeners.size();
-            for (int i = 0; i < numListeners; i++) {
-                OnTabletModeChangedListenerDelegate listener =
-                        mOnTabletModeChangedListeners.get(i);
-                listener.sendTabletModeChanged(whenNanos, inTabletMode);
-            }
-        }
-    }
-
     /**
      * Returns the Bluetooth address of this input device, if known.
      *
@@ -1995,43 +1928,6 @@ public final class InputManager {
          */
         void onKeyboardBacklightChanged(
                 int deviceId, @NonNull KeyboardBacklightState state, boolean isTriggeredByKeyPress);
-    }
-
-    private final class TabletModeChangedListener extends ITabletModeChangedListener.Stub {
-        @Override
-        public void onTabletModeChanged(long whenNanos, boolean inTabletMode) {
-            InputManager.this.onTabletModeChanged(whenNanos, inTabletMode);
-        }
-    }
-
-    private static final class OnTabletModeChangedListenerDelegate extends Handler {
-        private static final int MSG_TABLET_MODE_CHANGED = 0;
-
-        public final OnTabletModeChangedListener mListener;
-
-        public OnTabletModeChangedListenerDelegate(
-                OnTabletModeChangedListener listener, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
-            mListener = listener;
-        }
-
-        public void sendTabletModeChanged(long whenNanos, boolean inTabletMode) {
-            SomeArgs args = SomeArgs.obtain();
-            args.argi1 = (int) whenNanos;
-            args.argi2 = (int) (whenNanos >> 32);
-            args.arg1 = inTabletMode;
-            obtainMessage(MSG_TABLET_MODE_CHANGED, args).sendToTarget();
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == MSG_TABLET_MODE_CHANGED) {
-                SomeArgs args = (SomeArgs) msg.obj;
-                long whenNanos = (args.argi1 & 0xFFFFFFFFL) | ((long) args.argi2 << 32);
-                boolean inTabletMode = (boolean) args.arg1;
-                mListener.onTabletModeChanged(whenNanos, inTabletMode);
-            }
-        }
     }
 
     // Implementation of the android.hardware.BatteryState interface used to report the battery
