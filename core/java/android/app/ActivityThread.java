@@ -849,8 +849,10 @@ public final class ActivityThread extends ClientTransactionHandler
         @UnsupportedAppUsage
         Intent intent;
         boolean rebind;
+        long bindSeq;
         public String toString() {
-            return "BindServiceData{token=" + token + " intent=" + intent + "}";
+            return "BindServiceData{token=" + token + " intent=" + intent
+                    + " bindSeq=" + bindSeq + "}";
         }
     }
 
@@ -1107,12 +1109,13 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public final void scheduleBindService(IBinder token, Intent intent,
-                boolean rebind, int processState) {
+                boolean rebind, int processState, long bindSeq) {
             updateProcessState(processState, false);
             BindServiceData s = new BindServiceData();
             s.token = token;
             s.intent = intent;
             s.rebind = rebind;
+            s.bindSeq = bindSeq;
 
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
@@ -1124,6 +1127,7 @@ public final class ActivityThread extends ClientTransactionHandler
             BindServiceData s = new BindServiceData();
             s.token = token;
             s.intent = intent;
+            s.bindSeq = -1;
 
             sendMessage(H.UNBIND_SERVICE, s);
         }
