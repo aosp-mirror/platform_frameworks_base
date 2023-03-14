@@ -69,7 +69,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     // define the encoding of that data in an integer.
 
     static final int MAX_HISTORIC_STATES = 8;   // Maximum number of historic states we will keep.
-    static final String STATE_FILE_PREFIX = "state-"; // Prefix to use for state filenames.
+    static final String STATE_FILE_PREFIX = "state-v2-"; // Prefix to use for state filenames.
     static final String STATE_FILE_SUFFIX = ".bin"; // Suffix to use for state filenames.
     static final String STATE_FILE_CHECKIN_SUFFIX = ".ci"; // State files that have checked in.
     static long WRITE_PERIOD = 30*60*1000;      // Write file every 30 minutes or so.
@@ -462,6 +462,10 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             File file = files[i];
             String fileStr = file.getPath();
             if (DEBUG) Slog.d(TAG, "Collecting: " + fileStr);
+            if (!file.getName().startsWith(STATE_FILE_PREFIX)) {
+                if (DEBUG) Slog.d(TAG, "Skipping: mismatching prefix");
+                continue;
+            }
             if (!inclCheckedIn && fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX)) {
                 if (DEBUG) Slog.d(TAG, "Skipping: already checked in");
                 continue;
@@ -478,6 +482,14 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     @GuardedBy("mFileLock")
     private void trimHistoricStatesWriteLF() {
+        File[] files = mBaseDir.listFiles();
+        if (files != null) {
+            for (int i = 0; i < files.length; i++) {
+                if (!files[i].getName().startsWith(STATE_FILE_PREFIX)) {
+                    files[i].delete();
+                }
+            }
+        }
         ArrayList<String> filesArray = getCommittedFilesLF(MAX_HISTORIC_STATES, false, true);
         if (filesArray == null) {
             return;
