@@ -41,7 +41,6 @@ import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
-import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
 import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
@@ -1980,9 +1979,6 @@ public final class ActivityThread extends ClientTransactionHandler
         switch (typeId) {
             case ForegroundServiceDidNotStartInTimeException.TYPE_ID:
                 throw generateForegroundServiceDidNotStartInTimeException(message, extras);
-
-            case CannotDeliverBroadcastException.TYPE_ID:
-                throw new CannotDeliverBroadcastException(message);
 
             case CannotPostForegroundServiceNotificationException.TYPE_ID:
                 throw new CannotPostForegroundServiceNotificationException(message);
@@ -4183,7 +4179,8 @@ public final class ActivityThread extends ClientTransactionHandler
 
     private void scheduleResume(ActivityClientRecord r) {
         final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false));
+        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(/* isForward */ false,
+                /* shouldSendCompatFakeFocus */ false));
         executeTransaction(transaction);
     }
 
@@ -4810,7 +4807,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
     @Override
     public void handleResumeActivity(ActivityClientRecord r, boolean finalStateRequest,
-            boolean isForward, String reason) {
+            boolean isForward, boolean shouldSendCompatFakeFocus, String reason) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -4916,6 +4913,16 @@ public final class ActivityThread extends ClientTransactionHandler
             mNumVisibleActivities++;
             if (r.activity.mVisibleFromClient) {
                 r.activity.makeVisible();
+            }
+
+            if (shouldSendCompatFakeFocus) {
+                // Attaching to a window is asynchronous with the activity being resumed,
+                // so it's possible we will need to send a fake focus event after attaching
+                if (impl != null) {
+                    impl.dispatchCompatFakeFocus();
+                } else {
+                    r.window.getDecorView().fakeFocusAfterAttachingToWindow();
+                }
             }
         }
 
@@ -5266,6 +5273,11 @@ public final class ActivityThread extends ClientTransactionHandler
                 r.setState(ON_START);
             }
         }
+    }
+
+    @Override
+    public void reportRefresh(ActivityClientRecord r) {
+        ActivityClient.getInstance().activityRefreshed(r.token);
     }
 
     private void handleSetCoreSettings(Bundle coreSettings) {

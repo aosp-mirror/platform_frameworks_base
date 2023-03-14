@@ -41,3 +41,5 @@ in the `receiver` package, and code that's shared between them is in the `common
 ## Testing
 If you want to test out the tap-to-transfer chip without using the `@SystemApi`s, you can use adb
 commands instead. Refer to `MediaTttCommandLineHelper` for information about adb commands.
+
+TODO(b/245610654): Update this page once the chipbar migration is complete.

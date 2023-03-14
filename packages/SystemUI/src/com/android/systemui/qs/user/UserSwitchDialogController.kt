@@ -23,13 +23,13 @@ import android.content.DialogInterface.BUTTON_NEUTRAL
 import android.content.Intent
 import android.provider.Settings
 import android.view.LayoutInflater
-import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.R
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
@@ -77,10 +77,10 @@ class UserSwitchDialogController @VisibleForTesting constructor(
      * Show a [UserDialog].
      *
      * Populate the dialog with information from and adapter obtained from
-     * [userDetailViewAdapterProvider] and show it as launched from [view].
+     * [userDetailViewAdapterProvider] and show it as launched from [expandable].
      */
-    fun showDialog(view: View) {
-        with(dialogFactory(view.context)) {
+    fun showDialog(context: Context, expandable: Expandable) {
+        with(dialogFactory(context)) {
             setShowForAllUsers(true)
             setCanceledOnTouchOutside(true)
 
@@ -112,13 +112,19 @@ class UserSwitchDialogController @VisibleForTesting constructor(
 
             adapter.linkToViewGroup(gridFrame.findViewById(R.id.grid))
 
-            dialogLaunchAnimator.showFromView(
-                this, view,
-                cuj = DialogCuj(
-                    InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                    INTERACTION_JANK_TAG
+            val controller =
+                expandable.dialogLaunchController(
+                    DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
                 )
-            )
+            if (controller != null) {
+                dialogLaunchAnimator.show(
+                    this,
+                    controller,
+                )
+            } else {
+                show()
+            }
+
             uiEventLogger.log(QSUserSwitcherEvent.QS_USER_DETAIL_OPEN)
             adapter.injectDialogShower(DialogShowerImpl(this, dialogLaunchAnimator))
         }

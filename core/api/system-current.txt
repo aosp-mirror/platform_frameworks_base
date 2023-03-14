@@ -13617,7 +13617,6 @@ package android.telephony {
     field public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1; // 0xffffffff
     field public static final int KEY_TYPE_EPDG = 1; // 0x1
     field public static final int KEY_TYPE_WLAN = 2; // 0x2
-    field public static final int MOBILE_DATA_POLICY_AUTO_DATA_SWITCH = 3; // 0x3
     field public static final int MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL = 1; // 0x1
     field public static final int MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED = 2; // 0x2
     field public static final int NR_DUAL_CONNECTIVITY_DISABLE = 2; // 0x2

@@ -31,6 +31,7 @@ import android.widget.Toast;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.shared.system.UncaughtExceptionPreHandlerManager;
 
 import java.io.FileDescriptor;

@@ -27,7 +27,10 @@ import android.annotation.UiContext;
 import android.app.ActivityThread;
 import android.app.LoadedApk;
 import android.app.Service;
+import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacksController;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -54,6 +57,8 @@ public abstract class WindowProviderService extends Service implements WindowPro
     private final WindowContextController mController = new WindowContextController(mWindowToken);
     private WindowManager mWindowManager;
     private boolean mInitialized;
+    private final ComponentCallbacksController mCallbacksController =
+            new ComponentCallbacksController();
 
     /**
      * Returns {@code true} if the {@code windowContextOptions} declares that it is a
@@ -116,6 +121,48 @@ public abstract class WindowProviderService extends Service implements WindowPro
     @Override
     public Bundle getWindowContextOptions() {
         return mOptions;
+    }
+
+    @SuppressLint({"OnNameExpected", "ExecutorRegistration"})
+    // Suppress lint because this is a legacy named function and doesn't have an optional param
+    // for executor.
+    // TODO(b/259347943): Update documentation for U.
+    /**
+     * Here we override to prevent WindowProviderService from invoking
+     * {@link Application.registerComponentCallback}, which will result in callback registered
+     * for process-level Configuration change updates.
+     */
+    @Override
+    public void registerComponentCallbacks(@NonNull ComponentCallbacks callback) {
+        // For broadcasting Configuration Changes.
+        mCallbacksController.registerCallbacks(callback);
+    }
+
+    @SuppressLint("OnNameExpected")
+    @Override
+    public void unregisterComponentCallbacks(@NonNull ComponentCallbacks callback) {
+        mCallbacksController.unregisterCallbacks(callback);
+    }
+
+    @SuppressLint("OnNameExpected")
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration configuration) {
+        // This is only called from WindowTokenClient.
+        mCallbacksController.dispatchConfigurationChanged(configuration);
+    }
+
+    /**
+     * Override {@link Service}'s empty implementation and listen to {@link ActivityThread} for
+     * low memory and trim memory events.
+     */
+    @Override
+    public void onLowMemory() {
+        mCallbacksController.dispatchLowMemory();
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        mCallbacksController.dispatchTrimMemory(level);
     }
 
     /**
@@ -181,5 +228,6 @@ public abstract class WindowProviderService extends Service implements WindowPro
     public void onDestroy() {
         super.onDestroy();
         mController.detachIfNeeded();
+        mCallbacksController.clearCallbacks();
     }
 }

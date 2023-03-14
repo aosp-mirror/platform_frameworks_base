@@ -33,6 +33,13 @@ public class SensorUtils {
      */
     public static Sensor findSensor(SensorManager sensorManager, String sensorType,
             String sensorName, int fallbackType) {
+        if (sensorManager == null) {
+            return null;
+        }
+
+        if ("".equals(sensorName) && "".equals(sensorType)) {
+            return null;
+        }
         final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
         final boolean isTypeSpecified = !TextUtils.isEmpty(sensorType);
         if (isNameSpecified || isTypeSpecified) {

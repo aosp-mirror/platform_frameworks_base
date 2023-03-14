@@ -35,11 +35,8 @@ class WifiConstants @Inject constructor(
         dumpManager: DumpManager,
 ) : Dumpable {
     init {
-        dumpManager.registerDumpable("$SB_LOGGING_TAG:WifiConstants", this)
+        dumpManager.registerDumpable("${SB_LOGGING_TAG}WifiConstants", this)
     }
-
-    /** True if we should show the activityIn/activityOut icons and false otherwise. */
-    val shouldShowActivityConfig = context.resources.getBoolean(R.bool.config_showActivity)
 
     /** True if we should always show the wifi icon when wifi is enabled and false otherwise. */
     val alwaysShowIconIfEnabled =
@@ -47,7 +44,6 @@ class WifiConstants @Inject constructor(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {
-            println("shouldShowActivityConfig=$shouldShowActivityConfig")
             println("alwaysShowIconIfEnabled=$alwaysShowIconIfEnabled")
         }
     }

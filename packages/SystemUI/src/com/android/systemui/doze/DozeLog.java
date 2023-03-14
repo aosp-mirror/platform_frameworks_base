@@ -16,7 +16,14 @@
 
 package com.android.systemui.doze;
 
+import static android.os.PowerManager.WAKE_REASON_BIOMETRIC;
+import static android.os.PowerManager.WAKE_REASON_GESTURE;
+import static android.os.PowerManager.WAKE_REASON_LIFT;
+import static android.os.PowerManager.WAKE_REASON_PLUGGED_IN;
+import static android.os.PowerManager.WAKE_REASON_TAP;
+
 import android.annotation.IntDef;
+import android.os.PowerManager;
 import android.util.TimeUtils;
 
 import androidx.annotation.NonNull;
@@ -27,6 +34,8 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.statusbar.policy.DevicePostureController;
+
+import com.google.errorprone.annotations.CompileTimeConstant;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -80,12 +89,23 @@ public class DozeLog implements Dumpable {
     }
 
     /**
+     * Log debug message to LogBuffer.
+     */
+    public void d(@CompileTimeConstant String msg) {
+        mLogger.log(msg);
+    }
+
+    /**
      * Appends pickup wakeup event to the logs
      */
     public void tracePickupWakeUp(boolean withinVibrationThreshold) {
         mLogger.logPickupWakeup(withinVibrationThreshold);
         (withinVibrationThreshold ? mPickupPulseNearVibrationStats
                 : mPickupPulseNotNearVibrationStats).append();
+    }
+
+    public void traceSetIgnoreTouchWhilePulsing(boolean ignoreTouch) {
+        mLogger.logSetIgnoreTouchWhilePulsing(ignoreTouch);
     }
 
     /**
@@ -133,9 +153,9 @@ public class DozeLog implements Dumpable {
     /**
      * Appends fling event to the logs
      */
-    public void traceFling(boolean expand, boolean aboveThreshold, boolean thresholdNeeded,
+    public void traceFling(boolean expand, boolean aboveThreshold,
             boolean screenOnFromTouch) {
-        mLogger.logFling(expand, aboveThreshold, thresholdNeeded, screenOnFromTouch);
+        mLogger.logFling(expand, aboveThreshold, screenOnFromTouch);
     }
 
     /**
@@ -280,15 +300,22 @@ public class DozeLog implements Dumpable {
     /**
      * Appends pulse dropped event to logs
      */
-    public void tracePulseDropped(boolean pulsePending, DozeMachine.State state, boolean blocked) {
-        mLogger.logPulseDropped(pulsePending, state, blocked);
+    public void tracePulseDropped(String from, DozeMachine.State state) {
+        mLogger.logPulseDropped(from, state);
     }
 
     /**
      * Appends sensor event dropped event to logs
      */
-    public void traceSensorEventDropped(int sensorEvent, String reason) {
-        mLogger.logSensorEventDropped(sensorEvent, reason);
+    public void traceSensorEventDropped(@Reason int pulseReason, String reason) {
+        mLogger.logSensorEventDropped(pulseReason, reason);
+    }
+
+    /**
+     * Appends pulsing event to logs.
+     */
+    public void tracePulseEvent(String pulseEvent, boolean dozing, int pulseReason) {
+        mLogger.logPulseEvent(pulseEvent, dozing, DozeLog.reasonToString(pulseReason));
     }
 
     /**
@@ -379,6 +406,47 @@ public class DozeLog implements Dumpable {
         mLogger.logSetAodDimmingScrim((long) scrimOpacity);
     }
 
+    /**
+     * Appends sensor attempted to register and whether it was a successful registration.
+     */
+    public void traceSensorRegisterAttempt(String sensorName, boolean successfulRegistration) {
+        mLogger.logSensorRegisterAttempt(sensorName, successfulRegistration);
+    }
+
+    /**
+     * Appends sensor attempted to unregister and whether it was successfully unregistered.
+     */
+    public void traceSensorUnregisterAttempt(String sensorInfo, boolean successfullyUnregistered) {
+        mLogger.logSensorUnregisterAttempt(sensorInfo, successfullyUnregistered);
+    }
+
+    /**
+     * Appends sensor attempted to unregister and whether it was successfully unregistered
+     * with a reason the sensor is being unregistered.
+     */
+    public void traceSensorUnregisterAttempt(String sensorInfo, boolean successfullyUnregistered,
+            String reason) {
+        mLogger.logSensorUnregisterAttempt(sensorInfo, successfullyUnregistered, reason);
+    }
+
+    /**
+     * Appends the event of skipping a sensor registration since it's already registered.
+     */
+    public void traceSkipRegisterSensor(String sensorInfo) {
+        mLogger.logSkipSensorRegistration(sensorInfo);
+    }
+
+    /**
+     * Appends a plugin sensor was registered or unregistered event.
+     */
+    public void tracePluginSensorUpdate(boolean registered) {
+        if (registered) {
+            mLogger.log("register plugin sensor");
+        } else {
+            mLogger.log("unregister plugin sensor");
+        }
+    }
+
     private class SummaryStats {
         private int mCount;
 
@@ -424,8 +492,8 @@ public class DozeLog implements Dumpable {
         }
 
         @Override
-        public void onKeyguardVisibilityChanged(boolean showing) {
-            traceKeyguard(showing);
+        public void onKeyguardVisibilityChanged(boolean visible) {
+            traceKeyguard(visible);
         }
     };
 
@@ -447,6 +515,25 @@ public class DozeLog implements Dumpable {
             case REASON_SENSOR_UDFPS_LONG_PRESS: return "udfps";
             case REASON_SENSOR_QUICK_PICKUP: return "quickPickup";
             default: throw new IllegalArgumentException("invalid reason: " + pulseReason);
+        }
+    }
+
+    /**
+     * Converts {@link Reason} to {@link PowerManager.WakeReason}.
+     */
+    public static @PowerManager.WakeReason int getPowerManagerWakeReason(@Reason int wakeReason) {
+        switch (wakeReason) {
+            case REASON_SENSOR_DOUBLE_TAP:
+            case REASON_SENSOR_TAP:
+                return WAKE_REASON_TAP;
+            case REASON_SENSOR_PICKUP:
+                return WAKE_REASON_LIFT;
+            case REASON_SENSOR_UDFPS_LONG_PRESS:
+                return WAKE_REASON_BIOMETRIC;
+            case PULSE_REASON_DOCKING:
+                return WAKE_REASON_PLUGGED_IN;
+            default:
+                return WAKE_REASON_GESTURE;
         }
     }
 

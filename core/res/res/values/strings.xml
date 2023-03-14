@@ -46,6 +46,9 @@
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed. This will be displayed in a toast. -->
     <string name="mmiError">Connection problem or invalid MMI code.</string>
+    <!-- Displayed when the user dialed an MMI code whose function could not be performed because
+         the feature is not supported on the current mobile network. -->
+    <string name="mmiErrorNotSupported">Feature not supported.</string>
     <!-- Displayed when the user dialed an MMI code whose function
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>

@@ -30,7 +30,7 @@ android_library {
     ],
 
     static_libs: [
-        "SystemUIComposeCore",
+        "PlatformComposeCore",
         "SystemUIScreenshotLib",
 
         "androidx.compose.runtime_runtime",

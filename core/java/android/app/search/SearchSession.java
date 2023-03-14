@@ -23,9 +23,11 @@ import android.app.search.ISearchCallback.Stub;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.util.Log;
 
 import dalvik.system.CloseGuard;
@@ -70,7 +72,7 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-public final class SearchSession implements AutoCloseable{
+public final class SearchSession implements AutoCloseable {
 
     private static final String TAG = SearchSession.class.getSimpleName();
     private static final boolean DEBUG = false;
@@ -229,7 +231,14 @@ public final class SearchSession implements AutoCloseable{
                 if (DEBUG) {
                     Log.d(TAG, "CallbackWrapper.onResult result=" + result.getList());
                 }
-                mExecutor.execute(() -> mCallback.accept(result.getList()));
+                List<SearchTarget> list = result.getList();
+                if (list.size() > 0) {
+                    Bundle bundle = list.get(0).getExtras();
+                    if (bundle != null) {
+                        bundle.putLong("key_ipc_start", SystemClock.elapsedRealtime());
+                    }
+                }
+                mExecutor.execute(() -> mCallback.accept(list));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

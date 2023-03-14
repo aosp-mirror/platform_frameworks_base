@@ -1022,6 +1022,15 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Reports whether the device has a battery.
+     * @return true if the device has a battery, false otherwise.
+     * @hide
+     */
+    public boolean hasBattery() {
+        return mHasBattery;
+    }
+
+    /**
      * Provides information about the range of values for a particular {@link MotionEvent} axis.
      *
      * @see InputDevice#getMotionRange(int)

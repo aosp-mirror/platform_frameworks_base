@@ -45,7 +45,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.clearInvocations;
@@ -67,10 +66,12 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.IWindowContainerToken;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -86,7 +87,9 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.sysui.ShellSharedConstants;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -117,15 +120,28 @@ public class ShellTransitionTests extends ShellTestCase {
     @Before
     public void setUp() {
         doAnswer(invocation -> invocation.getArguments()[1])
-                .when(mOrganizer).startTransition(anyInt(), any(), any());
+                .when(mOrganizer).startTransition(any(), any());
     }
 
     @Test
     public void instantiate_addInitCallback() {
         ShellInit shellInit = mock(ShellInit.class);
-        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
-                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
         verify(shellInit, times(1)).addInitCallback(any(), eq(t));
+    }
+
+    @Test
+    public void instantiateController_addExternalInterface() {
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        ShellController shellController = mock(ShellController.class);
+        final Transitions t = new Transitions(mContext, shellInit, shellController,
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
+        shellInit.init();
+        verify(shellController, times(1)).addExternalInterface(
+                eq(ShellSharedConstants.KEY_EXTRA_SHELL_SHELL_TRANSITIONS), any(), any());
     }
 
     @Test
@@ -136,7 +152,7 @@ public class ShellTransitionTests extends ShellTestCase {
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
@@ -188,7 +204,7 @@ public class ShellTransitionTests extends ShellTestCase {
         // Make a request that will be rejected by the testhandler.
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), isNull());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), isNull());
         transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class));
         assertEquals(1, mDefaultHandler.activeCount());
@@ -199,10 +215,12 @@ public class ShellTransitionTests extends ShellTestCase {
         // Make a request that will be handled by testhandler but not animated by it.
         RunningTaskInfo mwTaskInfo =
                 createTaskInfo(1, WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
+        // Make the wct non-empty.
+        handlerWCT.setFocusable(new WindowContainerToken(mock(IWindowContainerToken.class)), true);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, mwTaskInfo, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(
-                eq(TRANSIT_OPEN), eq(transitToken), eq(handlerWCT));
+                eq(transitToken), eq(handlerWCT));
         transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class),
                 mock(SurfaceControl.Transaction.class));
         assertEquals(1, mDefaultHandler.activeCount());
@@ -217,8 +235,8 @@ public class ShellTransitionTests extends ShellTestCase {
         transitions.addHandler(topHandler);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_CHANGE, mwTaskInfo, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(
-                eq(TRANSIT_CHANGE), eq(transitToken), eq(handlerWCT));
+        verify(mOrganizer, times(2)).startTransition(
+                eq(transitToken), eq(handlerWCT));
         TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
                 .addChange(TRANSIT_CHANGE).build();
         transitions.onTransitionReady(transitToken, change, mock(SurfaceControl.Transaction.class),
@@ -256,7 +274,7 @@ public class ShellTransitionTests extends ShellTestCase {
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */,
                         new RemoteTransition(testRemote)));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
@@ -406,7 +424,7 @@ public class ShellTransitionTests extends ShellTestCase {
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        verify(mOrganizer, times(1)).startTransition(eq(TRANSIT_OPEN), eq(transitToken), any());
+        verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
@@ -918,7 +936,7 @@ public class ShellTransitionTests extends ShellTestCase {
         TransitionInfoBuilder addChange(@WindowManager.TransitionType int mode,
                 RunningTaskInfo taskInfo) {
             final TransitionInfo.Change change =
-                    new TransitionInfo.Change(null /* token */, null /* leash */);
+                    new TransitionInfo.Change(null /* token */, createMockSurface(true));
             change.setMode(mode);
             change.setTaskInfo(taskInfo);
             mInfo.addChange(change);
@@ -943,7 +961,7 @@ public class ShellTransitionTests extends ShellTestCase {
         final TransitionInfo.Change mChange;
 
         ChangeBuilder(@WindowManager.TransitionType int mode) {
-            mChange = new TransitionInfo.Change(null /* token */, null /* leash */);
+            mChange = new TransitionInfo.Change(null /* token */, createMockSurface(true));
             mChange.setMode(mode);
         }
 
@@ -1060,8 +1078,9 @@ public class ShellTransitionTests extends ShellTestCase {
 
     private Transitions createTestTransitions() {
         ShellInit shellInit = new ShellInit(mMainExecutor);
-        final Transitions t = new Transitions(mContext, shellInit, mOrganizer, mTransactionPool,
-                createTestDisplayController(), mMainExecutor, mMainHandler, mAnimExecutor);
+        final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
+                mOrganizer, mTransactionPool, createTestDisplayController(), mMainExecutor,
+                mMainHandler, mAnimExecutor);
         shellInit.init();
         return t;
     }

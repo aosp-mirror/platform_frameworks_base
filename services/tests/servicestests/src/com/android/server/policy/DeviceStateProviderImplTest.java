@@ -65,6 +65,7 @@ public final class DeviceStateProviderImplTest {
     private final ArgumentCaptor<DeviceState[]> mDeviceStateArrayCaptor = ArgumentCaptor.forClass(
             DeviceState[].class);
     private final ArgumentCaptor<Integer> mIntegerCaptor = ArgumentCaptor.forClass(Integer.class);
+    private static final int MAX_HINGE_ANGLE_EXCLUSIVE = 360;
 
     private Context mContext;
     private SensorManager mSensorManager;
@@ -268,11 +269,7 @@ public final class DeviceStateProviderImplTest {
         assertEquals(1, mIntegerCaptor.getValue().intValue());
     }
 
-    @Test
-    public void create_sensor() throws Exception {
-        Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
-        when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
-
+    private DeviceStateProviderImpl create_sensorBasedProvider(Sensor sensor) {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
                 + "        <identifier>1</identifier>\n"
@@ -310,14 +307,22 @@ public final class DeviceStateProviderImplTest {
                 + "                <name>" + sensor.getName() + "</name>\n"
                 + "                <value>\n"
                 + "                    <min-inclusive>180</min-inclusive>\n"
+                + "                    <max>" + MAX_HINGE_ANGLE_EXCLUSIVE + "</max>\n"
                 + "                </value>\n"
                 + "            </sensor>\n"
                 + "        </conditions>\n"
                 + "    </device-state>\n"
                 + "</device-state-config>\n";
         DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
-        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+        return DeviceStateProviderImpl.createFromConfig(mContext,
                 config);
+    }
+
+    @Test
+    public void create_sensor() throws Exception {
+        Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
+        when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
+        DeviceStateProviderImpl provider = create_sensorBasedProvider(sensor);
 
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
@@ -371,6 +376,40 @@ public final class DeviceStateProviderImplTest {
     }
 
     @Test
+    public void test_invalidSensorValues() throws Exception {
+        // onStateChanged() should not be triggered by invalid sensor values.
+
+        Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
+        when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of(sensor));
+        DeviceStateProviderImpl provider = create_sensorBasedProvider(sensor);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+        Mockito.clearInvocations(listener);
+
+        // First, switch to a non-default state.
+        SensorEvent event1 = mock(SensorEvent.class);
+        event1.sensor = sensor;
+        FieldSetter.setField(event1, event1.getClass().getField("values"), new float[]{90});
+        provider.onSensorChanged(event1);
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(2, mIntegerCaptor.getValue().intValue());
+
+        Mockito.clearInvocations(listener);
+
+        // Then, send an invalid sensor event, verify that onStateChanged() is not triggered.
+        SensorEvent event2 = mock(SensorEvent.class);
+        event2.sensor = sensor;
+        FieldSetter.setField(event2, event2.getClass().getField("values"),
+                new float[]{MAX_HINGE_ANGLE_EXCLUSIVE});
+
+        provider.onSensorChanged(event2);
+
+        verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
+    }
+
+    @Test
     public void create_invalidSensor() throws Exception {
         Sensor sensor = newSensor("sensor", Sensor.STRING_TYPE_HINGE_ANGLE);
         when(mSensorManager.getSensorList(anyInt())).thenReturn(List.of());
@@ -417,9 +456,8 @@ public final class DeviceStateProviderImplTest {
                         new DeviceState(1, "CLOSED", 0 /* flags */),
                         new DeviceState(2, "HALF_OPENED", 0 /* flags */)
                 }, mDeviceStateArrayCaptor.getValue());
-        // onStateChanged() should be called because the provider could not find the sensor.
-        verify(listener).onStateChanged(mIntegerCaptor.capture());
-        assertEquals(1, mIntegerCaptor.getValue().intValue());
+        // onStateChanged() should not be called because the provider could not find the sensor.
+        verify(listener, never()).onStateChanged(mIntegerCaptor.capture());
     }
 
     private static Sensor newSensor(String name, String type) throws Exception {

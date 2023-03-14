@@ -53,6 +53,7 @@ import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -91,11 +92,11 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
     private final KeyguardUpdateMonitorCallback mInfoCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
-                public void onKeyguardVisibilityChanged(boolean showing) {
-                    if (DEBUG) Log.d(TAG, String.format("onKeyguardVisibilityChanged %b", showing));
+                public void onKeyguardVisibilityChanged(boolean visible) {
+                    if (DEBUG) Log.d(TAG, String.format("onKeyguardVisibilityChanged %b", visible));
                     // Any time the keyguard is hidden, try to close the user switcher menu to
                     // restore keyguard to the default state
-                    if (!showing) {
+                    if (!visible) {
                         closeSwitcherIfOpenAndNotSimple(false);
                     }
                 }
@@ -456,7 +457,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         }
 
         void refreshUserOrder() {
-            ArrayList<UserRecord> users = super.getUsers();
+            List<UserRecord> users = super.getUsers();
             mUsersOrdered = new ArrayList<>(users.size());
             for (int i = 0; i < users.size(); i++) {
                 UserRecord record = users.get(i);
@@ -505,7 +506,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
                 v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
-            v.setDisabledByAdmin(getController().isDisabledByAdmin(item));
+            v.setDisabledByAdmin(item.isDisabledByAdmin());
             v.setEnabled(item.isSwitchToEnabled);
             UserSwitcherController.setSelectableAlpha(v);
 

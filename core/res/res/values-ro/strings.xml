@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Mesagerie vocală"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Problemă de conexiune sau cod MMI nevalid."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Funcția nu este acceptată."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Operația este limitată la numerele cu apelări restricționate."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Nu poți schimba setările de redirecționare a apelurilor de pe telefon când ești în roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Serviciul a fost activat."</string>

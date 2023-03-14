@@ -427,9 +427,6 @@ public abstract class DisplayManagerInternal {
         // 1 (brighter). Set to Float.NaN if there's no override.
         public float screenAutoBrightnessAdjustmentOverride;
 
-        // If true, enables automatic brightness control.
-        public boolean useAutoBrightness;
-
         // If true, scales the brightness to a fraction of desired (as defined by
         // screenLowPowerBrightnessFactor).
         public boolean lowPowerMode;
@@ -459,7 +456,6 @@ public abstract class DisplayManagerInternal {
             policy = POLICY_BRIGHT;
             useProximitySensor = false;
             screenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-            useAutoBrightness = false;
             screenAutoBrightnessAdjustmentOverride = Float.NaN;
             screenLowPowerBrightnessFactor = 0.5f;
             blockScreenOn = false;
@@ -483,7 +479,6 @@ public abstract class DisplayManagerInternal {
             policy = other.policy;
             useProximitySensor = other.useProximitySensor;
             screenBrightnessOverride = other.screenBrightnessOverride;
-            useAutoBrightness = other.useAutoBrightness;
             screenAutoBrightnessAdjustmentOverride = other.screenAutoBrightnessAdjustmentOverride;
             screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             blockScreenOn = other.blockScreenOn;
@@ -505,7 +500,6 @@ public abstract class DisplayManagerInternal {
                     && useProximitySensor == other.useProximitySensor
                     && floatEquals(screenBrightnessOverride,
                             other.screenBrightnessOverride)
-                    && useAutoBrightness == other.useAutoBrightness
                     && floatEquals(screenAutoBrightnessAdjustmentOverride,
                             other.screenAutoBrightnessAdjustmentOverride)
                     && screenLowPowerBrightnessFactor
@@ -531,7 +525,6 @@ public abstract class DisplayManagerInternal {
             return "policy=" + policyToString(policy)
                     + ", useProximitySensor=" + useProximitySensor
                     + ", screenBrightnessOverride=" + screenBrightnessOverride
-                    + ", useAutoBrightness=" + useAutoBrightness
                     + ", screenAutoBrightnessAdjustmentOverride="
                     + screenAutoBrightnessAdjustmentOverride
                     + ", screenLowPowerBrightnessFactor=" + screenLowPowerBrightnessFactor

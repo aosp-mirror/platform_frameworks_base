@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.shade
 
 import android.view.View
@@ -36,17 +52,12 @@ class NotificationsQSContainerController @Inject constructor(
     private val navigationModeController: NavigationModeController,
     private val overviewProxyService: OverviewProxyService,
     private val largeScreenShadeHeaderController: LargeScreenShadeHeaderController,
+    private val shadeExpansionStateManager: ShadeExpansionStateManager,
     private val featureFlags: FeatureFlags,
     @Main private val delayableExecutor: DelayableExecutor
 ) : ViewController<NotificationsQuickSettingsContainer>(view), QSContainerController {
 
-    var qsExpanded = false
-        set(value) {
-            if (field != value) {
-                field = value
-                mView.invalidate()
-            }
-        }
+    private var qsExpanded = false
     private var splitShadeEnabled = false
     private var isQSDetailShowing = false
     private var isQSCustomizing = false
@@ -71,6 +82,13 @@ class NotificationsQSContainerController @Inject constructor(
             taskbarVisible = visible
         }
     }
+    private val shadeQsExpansionListener: ShadeQsExpansionListener =
+        ShadeQsExpansionListener { isQsExpanded ->
+            if (qsExpanded != isQsExpanded) {
+                qsExpanded = isQsExpanded
+                mView.invalidate()
+            }
+        }
 
     // With certain configuration changes (like light/dark changes), the nav bar will disappear
     // for a bit, causing `bottomStableInsets` to be unstable for some time. Debounce the value
@@ -106,6 +124,7 @@ class NotificationsQSContainerController @Inject constructor(
     public override fun onViewAttached() {
         updateResources()
         overviewProxyService.addCallback(taskbarVisibilityListener)
+        shadeExpansionStateManager.addQsExpansionListener(shadeQsExpansionListener)
         mView.setInsetsChangedListener(delayedInsetSetter)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
         mView.setConfigurationChangedListener { updateResources() }
@@ -113,6 +132,7 @@ class NotificationsQSContainerController @Inject constructor(
 
     override fun onViewDetached() {
         overviewProxyService.removeCallback(taskbarVisibilityListener)
+        shadeExpansionStateManager.removeQsExpansionListener(shadeQsExpansionListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
         mView.setConfigurationChangedListener(null)

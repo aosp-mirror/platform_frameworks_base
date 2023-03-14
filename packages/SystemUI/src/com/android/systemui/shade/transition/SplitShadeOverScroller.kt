@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.shade.transition
 
 import android.animation.Animator
@@ -10,11 +26,11 @@ import com.android.systemui.R
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QS
+import com.android.systemui.shade.PanelState
+import com.android.systemui.shade.STATE_CLOSED
+import com.android.systemui.shade.STATE_OPENING
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.phone.ScrimController
-import com.android.systemui.statusbar.phone.panelstate.PanelState
-import com.android.systemui.statusbar.phone.panelstate.STATE_CLOSED
-import com.android.systemui.statusbar.phone.panelstate.STATE_OPENING
 import com.android.systemui.statusbar.policy.ConfigurationController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -37,6 +53,7 @@ constructor(
     private var previousOverscrollAmount = 0
     private var dragDownAmount: Float = 0f
     @PanelState private var panelState: Int = STATE_CLOSED
+
     private var releaseOverScrollAnimator: Animator? = null
 
     private val qS: QS
@@ -53,7 +70,7 @@ constructor(
                     updateResources()
                 }
             })
-        dumpManager.registerDumpable("SplitShadeOverScroller") { printWriter, _ ->
+        dumpManager.registerCriticalDumpable("SplitShadeOverScroller") { printWriter, _ ->
             dump(printWriter)
         }
     }

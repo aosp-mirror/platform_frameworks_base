@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"Галасавая пошта"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"Праблема падлучэння ці няправільны код MMI."</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"Функцыя не падтрымліваецца."</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"Выкарыстанне абмежаванае толькі дазволенымі нумарамі."</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Немагчыма змяніць налады пераадрасацыі выклікаў з тэлефона, пакуль вы знаходзіцеся ў роўмінгу."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"Служба была ўключана."</string>

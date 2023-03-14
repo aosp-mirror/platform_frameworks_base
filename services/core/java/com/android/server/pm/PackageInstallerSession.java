@@ -366,6 +366,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private boolean mStageDirInUse = false;
 
+    /**
+     * True if the verification is already in progress. This is used to prevent running
+     * verification again while one is already in progress which will break internal states.
+     *
+     * Worker thread only.
+     */
+    private boolean mVerificationInProgress = false;
+
     /** Permissions have been accepted by the user (see {@link #setPermissionsResult}) */
     @GuardedBy("mLock")
     private boolean mPermissionsManuallyAccepted = false;
@@ -2135,6 +2143,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (sendPendingUserActionIntentIfNeeded()) {
             return;
         }
+
+        if (mVerificationInProgress) {
+            Slog.w(TAG, "Verification is already in progress for session " + sessionId);
+            return;
+        }
+        mVerificationInProgress = true;
 
         if (params.isStaged) {
             mStagedSession.verifySession();

@@ -55,15 +55,20 @@ import java.util.List;
 import javax.inject.Inject;
 
 /**
- * A class which manages the bouncer on the lockscreen.
+ * A class which manages the primary (pin/pattern/password) bouncer on the lockscreen.
  * @deprecated Use KeyguardBouncerRepository
  */
 @Deprecated
 public class KeyguardBouncer {
 
-    private static final String TAG = "KeyguardBouncer";
+    private static final String TAG = "PrimaryKeyguardBouncer";
     static final long BOUNCER_FACE_DELAY = 1200;
     public static final float ALPHA_EXPANSION_THRESHOLD = 0.95f;
+    /**
+     * Values for the bouncer expansion represented as the panel expansion.
+     * Panel expansion 1f = panel fully showing = bouncer fully hidden
+     * Panel expansion 0f = panel fully hiding = bouncer fully showing
+     */
     public static final float EXPANSION_HIDDEN = 1f;
     public static final float EXPANSION_VISIBLE = 0f;
 
@@ -73,7 +78,7 @@ public class KeyguardBouncer {
     private final FalsingCollector mFalsingCollector;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
-    private final List<BouncerExpansionCallback> mExpansionCallbacks = new ArrayList<>();
+    private final List<PrimaryBouncerExpansionCallback> mExpansionCallbacks = new ArrayList<>();
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardSecurityModel mKeyguardSecurityModel;
@@ -90,6 +95,11 @@ public class KeyguardBouncer {
                     if (type == BiometricSourceType.FINGERPRINT) {
                         mBouncerPromptReason = mCallback.getBouncerPromptReason();
                     }
+                }
+
+                @Override
+                public void onNonStrongBiometricAllowedChanged(int userId) {
+                    mBouncerPromptReason = mCallback.getBouncerPromptReason();
                 }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
@@ -116,7 +126,7 @@ public class KeyguardBouncer {
     private KeyguardBouncer(Context context, ViewMediatorCallback callback,
             ViewGroup container,
             DismissCallbackRegistry dismissCallbackRegistry, FalsingCollector falsingCollector,
-            BouncerExpansionCallback expansionCallback,
+            PrimaryBouncerExpansionCallback expansionCallback,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             KeyguardBypassController keyguardBypassController, @Main Handler handler,
@@ -135,6 +145,14 @@ public class KeyguardBouncer {
         mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
         mKeyguardBypassController = keyguardBypassController;
         mExpansionCallbacks.add(expansionCallback);
+    }
+
+    /**
+     * Get the KeyguardBouncer expansion
+     * @return 1=HIDDEN, 0=SHOWING, in between 0 and 1 means the bouncer is in transition.
+     */
+    public float getExpansion() {
+        return mExpansion;
     }
 
     /**
@@ -222,8 +240,8 @@ public class KeyguardBouncer {
                     && !mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
                             KeyguardUpdateMonitor.getCurrentUser())
                     && !needsFullscreenBouncer()
-                    && !mKeyguardUpdateMonitor.isFaceLockedOut()
-                    && !mKeyguardUpdateMonitor.userNeedsStrongAuth()
+                    && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                            BiometricSourceType.FACE)
                     && !mKeyguardBypassController.getBypassEnabled()) {
                 mHandler.postDelayed(mShowRunnable, BOUNCER_FACE_DELAY);
             } else {
@@ -249,7 +267,7 @@ public class KeyguardBouncer {
     private void onFullyShown() {
         mFalsingCollector.onBouncerShown();
         if (mKeyguardViewController == null) {
-            Log.wtf(TAG, "onFullyShown when view was null");
+            Log.e(TAG, "onFullyShown when view was null");
         } else {
             mKeyguardViewController.onResume();
             mContainer.announceForAccessibility(
@@ -261,10 +279,7 @@ public class KeyguardBouncer {
      * @see #onFullyShown()
      */
     private void onFullyHidden() {
-        cancelShowRunnable();
-        setVisibility(View.INVISIBLE);
-        mFalsingCollector.onBouncerHidden();
-        DejankUtils.postAfterTraversal(mResetRunnable);
+
     }
 
     private void setVisibility(@View.Visibility int visibility) {
@@ -441,7 +456,13 @@ public class KeyguardBouncer {
             onFullyShown();
             dispatchFullyShown();
         } else if (fraction == EXPANSION_HIDDEN && oldExpansion != EXPANSION_HIDDEN) {
-            onFullyHidden();
+            DejankUtils.postAfterTraversal(mResetRunnable);
+            /*
+             * There are cases where #hide() was not invoked, such as when
+             * NotificationPanelViewController controls the hide animation. Make sure the state gets
+             * updated by calling #hide() directly.
+             */
+            hide(false /* destroyView */);
             dispatchFullyHidden();
         } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
             dispatchStartingToHide();
@@ -553,37 +574,37 @@ public class KeyguardBouncer {
     }
 
     private void dispatchFullyShown() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onFullyShown();
         }
     }
 
     private void dispatchStartingToHide() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onStartingToHide();
         }
     }
 
     private void dispatchStartingToShow() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onStartingToShow();
         }
     }
 
     private void dispatchFullyHidden() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onFullyHidden();
         }
     }
 
     private void dispatchExpansionChanged() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onExpansionChanged(mExpansion);
         }
     }
 
     private void dispatchVisibilityChanged() {
-        for (BouncerExpansionCallback callback : mExpansionCallbacks) {
+        for (PrimaryBouncerExpansionCallback callback : mExpansionCallbacks) {
             callback.onVisibilityChanged(mContainer.getVisibility() == View.VISIBLE);
         }
     }
@@ -629,7 +650,7 @@ public class KeyguardBouncer {
     /**
      * Adds a callback to listen to bouncer expansion updates.
      */
-    public void addBouncerExpansionCallback(BouncerExpansionCallback callback) {
+    public void addBouncerExpansionCallback(PrimaryBouncerExpansionCallback callback) {
         if (!mExpansionCallbacks.contains(callback)) {
             mExpansionCallbacks.add(callback);
         }
@@ -639,11 +660,14 @@ public class KeyguardBouncer {
      * Removes a previously added callback. If the callback was never added, this methood
      * does nothing.
      */
-    public void removeBouncerExpansionCallback(BouncerExpansionCallback callback) {
+    public void removeBouncerExpansionCallback(PrimaryBouncerExpansionCallback callback) {
         mExpansionCallbacks.remove(callback);
     }
 
-    public interface BouncerExpansionCallback {
+    /**
+     * Callback updated when the primary bouncer's show and hide states change.
+     */
+    public interface PrimaryBouncerExpansionCallback {
         /**
          * Invoked when the bouncer expansion reaches {@link KeyguardBouncer#EXPANSION_VISIBLE}.
          * This is NOT called each time the bouncer is shown, but rather only when the fully
@@ -727,7 +751,7 @@ public class KeyguardBouncer {
          * Construct a KeyguardBouncer that will exist in the given container.
          */
         public KeyguardBouncer create(ViewGroup container,
-                BouncerExpansionCallback expansionCallback) {
+                PrimaryBouncerExpansionCallback expansionCallback) {
             return new KeyguardBouncer(mContext, mCallback, container,
                     mDismissCallbackRegistry, mFalsingCollector, expansionCallback,
                     mKeyguardStateController, mKeyguardUpdateMonitor,

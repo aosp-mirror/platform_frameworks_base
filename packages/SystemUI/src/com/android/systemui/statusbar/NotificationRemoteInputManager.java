@@ -24,6 +24,7 @@ import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.UserInfo;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -64,14 +65,14 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.ListenerSet;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import dagger.Lazy;
 
 /**
  * Class for handling remote input state over a set of notifications. This class handles things
@@ -120,7 +121,8 @@ public class NotificationRemoteInputManager implements Dumpable {
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
             mCentralSurfacesOptionalLazy.get().ifPresent(
                     centralSurfaces -> centralSurfaces.wakeUpIfDozing(
-                            SystemClock.uptimeMillis(), view, "NOTIFICATION_CLICK"));
+                            SystemClock.uptimeMillis(), view, "NOTIFICATION_CLICK",
+                            PowerManager.WAKE_REASON_GESTURE));
 
             final NotificationEntry entry = getNotificationForParent(view.getParent());
             mLogger.logInitialClick(entry, pendingIntent);
@@ -463,7 +465,8 @@ public class NotificationRemoteInputManager implements Dumpable {
         riv.getController().setRemoteInput(input);
         riv.getController().setRemoteInputs(inputs);
         riv.getController().setEditedSuggestionInfo(editedSuggestionInfo);
-        riv.focusAnimated();
+        ViewGroup parent = view.getParent() != null ? (ViewGroup) view.getParent() : null;
+        riv.focusAnimated(parent);
         if (userMessageContent != null) {
             riv.setEditTextContent(userMessageContent);
         }

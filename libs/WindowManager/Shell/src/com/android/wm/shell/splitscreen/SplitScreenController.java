@@ -29,8 +29,11 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSIT
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -54,23 +57,24 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
+import android.widget.Toast;
 import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.IntDef;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.R;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -93,7 +97,6 @@ import com.android.wm.shell.transition.Transitions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -118,6 +121,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     public static final int EXIT_REASON_SCREEN_LOCKED = 7;
     public static final int EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP = 8;
     public static final int EXIT_REASON_CHILD_TASK_ENTER_PIP = 9;
+    public static final int EXIT_REASON_RECREATE_SPLIT = 10;
+    public static final int EXIT_REASON_FULLSCREEN_SHORTCUT = 11;
     @IntDef(value = {
             EXIT_REASON_UNKNOWN,
             EXIT_REASON_APP_DOES_NOT_SUPPORT_MULTIWINDOW,
@@ -129,6 +134,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             EXIT_REASON_SCREEN_LOCKED,
             EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP,
             EXIT_REASON_CHILD_TASK_ENTER_PIP,
+            EXIT_REASON_RECREATE_SPLIT,
+            EXIT_REASON_FULLSCREEN_SHORTCUT,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface ExitReason{}
@@ -164,8 +171,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final IconProvider mIconProvider;
     private final Optional<RecentTasksController> mRecentTasksOptional;
     private final SplitScreenShellCommandHandler mSplitScreenShellCommandHandler;
+    private final String[] mAppsSupportMultiInstances;
 
-    private StageCoordinator mStageCoordinator;
+    @VisibleForTesting
+    StageCoordinator mStageCoordinator;
+
     // Only used for the legacy recents animation from splitscreen to allow the tasks to be animated
     // outside the bounds of the roots by being reparented into a higher level fullscreen container
     private SurfaceControl mGoingToRecentsTasksLayer;
@@ -208,10 +218,59 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (ActivityTaskManager.supportsSplitScreenMultiWindow(context)) {
             shellInit.addInitCallback(this::onInit, this);
         }
+
+        // TODO(255224696): Remove the config once having a way for client apps to opt-in
+        //                  multi-instances split.
+        mAppsSupportMultiInstances = mContext.getResources()
+                .getStringArray(R.array.config_appsSupportMultiInstancesSplit);
+    }
+
+    @VisibleForTesting
+    SplitScreenController(Context context,
+            ShellInit shellInit,
+            ShellCommandHandler shellCommandHandler,
+            ShellController shellController,
+            ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue,
+            RootTaskDisplayAreaOrganizer rootTDAOrganizer,
+            DisplayController displayController,
+            DisplayImeController displayImeController,
+            DisplayInsetsController displayInsetsController,
+            DragAndDropController dragAndDropController,
+            Transitions transitions,
+            TransactionPool transactionPool,
+            IconProvider iconProvider,
+            RecentTasksController recentTasks,
+            ShellExecutor mainExecutor,
+            StageCoordinator stageCoordinator) {
+        mShellCommandHandler = shellCommandHandler;
+        mShellController = shellController;
+        mTaskOrganizer = shellTaskOrganizer;
+        mSyncQueue = syncQueue;
+        mContext = context;
+        mRootTDAOrganizer = rootTDAOrganizer;
+        mMainExecutor = mainExecutor;
+        mDisplayController = displayController;
+        mDisplayImeController = displayImeController;
+        mDisplayInsetsController = displayInsetsController;
+        mDragAndDropController = dragAndDropController;
+        mTransitions = transitions;
+        mTransactionPool = transactionPool;
+        mIconProvider = iconProvider;
+        mRecentTasksOptional = Optional.of(recentTasks);
+        mStageCoordinator = stageCoordinator;
+        mSplitScreenShellCommandHandler = new SplitScreenShellCommandHandler(this);
+        shellInit.addInitCallback(this::onInit, this);
+        mAppsSupportMultiInstances = mContext.getResources()
+                .getStringArray(R.array.config_appsSupportMultiInstancesSplit);
     }
 
     public SplitScreen asSplitScreen() {
         return mImpl;
+    }
+
+    private ExternalInterfaceBinder createExternalInterface() {
+        return new ISplitScreenImpl(this);
     }
 
     /**
@@ -224,6 +283,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mShellCommandHandler.addCommandCallback("splitscreen", mSplitScreenShellCommandHandler,
                 this);
         mShellController.addKeyguardChangeListener(this);
+        mShellController.addExternalInterface(KEY_EXTRA_SHELL_SPLIT_SCREEN,
+                this::createExternalInterface, this);
         if (mStageCoordinator == null) {
             // TODO: Multi-display
             mStageCoordinator = createStageCoordinator();
@@ -254,10 +315,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     public StageCoordinator getTransitionHandler() {
         return mStageCoordinator;
-    }
-
-    public ActivityManager.RunningTaskInfo getFocusingTaskInfo() {
-        return mStageCoordinator.getFocusingTaskInfo();
     }
 
     public boolean isValidToEnterSplitScreen(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
@@ -363,6 +420,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mStageCoordinator.unregisterSplitScreenListener(listener);
     }
 
+    public void goToFullscreenFromSplit() {
+        mStageCoordinator.goToFullscreenFromSplit();
+    }
+
     public void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
         final int[] result = new int[1];
         IRemoteAnimationRunner wrapper = new IRemoteAnimationRunner.Stub() {
@@ -411,7 +472,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void startShortcut(String packageName, String shortcutId, @SplitPosition int position,
             @Nullable Bundle options, UserHandle user, @NonNull InstanceId instanceId) {
-        mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
+        mStageCoordinator.onRequestToSplit(instanceId, ENTER_REASON_LAUNCHER);
         startShortcut(packageName, shortcutId, position, options, user);
     }
 
@@ -459,76 +520,191 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options, @NonNull InstanceId instanceId) {
-        mStageCoordinator.getLogger().enterRequested(instanceId, ENTER_REASON_LAUNCHER);
+        mStageCoordinator.onRequestToSplit(instanceId, ENTER_REASON_LAUNCHER);
         startIntent(intent, fillInIntent, position, options);
+    }
+
+    private void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent,
+            @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+            @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
+            InstanceId instanceId) {
+        Intent fillInIntent = null;
+        if (launchSameAppAdjacently(pendingIntent, taskId)) {
+            if (supportMultiInstancesSplit(pendingIntent.getIntent().getComponent())) {
+                fillInIntent = new Intent();
+                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                try {
+                    adapter.getRunner().onAnimationCancelled(false /* isKeyguardOccluded */);
+                    ActivityTaskManager.getService().startActivityFromRecents(taskId, options2);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Error starting remote animation", e);
+                }
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        mStageCoordinator.startIntentAndTaskWithLegacyTransition(pendingIntent, fillInIntent,
+                options1, taskId, options2, splitPosition, splitRatio, adapter, instanceId);
+    }
+
+    private void startIntentAndTask(PendingIntent pendingIntent, @Nullable Bundle options1,
+            int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
+            float splitRatio, @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+        Intent fillInIntent = null;
+        if (launchSameAppAdjacently(pendingIntent, taskId)) {
+            if (supportMultiInstancesSplit(pendingIntent.getIntent().getComponent())) {
+                fillInIntent = new Intent();
+                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+        mStageCoordinator.startIntentAndTask(pendingIntent, fillInIntent, options1, taskId,
+                options2, splitPosition, splitRatio, remoteTransition, instanceId);
+    }
+
+    private void startIntentsWithLegacyTransition(PendingIntent pendingIntent1,
+            @Nullable Bundle options1, PendingIntent pendingIntent2,
+            @Nullable Bundle options2, @SplitPosition int splitPosition,
+            float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
+        Intent fillInIntent1 = null;
+        Intent fillInIntent2 = null;
+        if (launchSameAppAdjacently(pendingIntent1, pendingIntent2)) {
+            if (supportMultiInstancesSplit(pendingIntent1.getIntent().getComponent())) {
+                fillInIntent1 = new Intent();
+                fillInIntent1.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                fillInIntent2 = new Intent();
+                fillInIntent2.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else {
+                try {
+                    adapter.getRunner().onAnimationCancelled(false /* isKeyguardOccluded */);
+                    pendingIntent1.send();
+                } catch (RemoteException | PendingIntent.CanceledException e) {
+                    Slog.e(TAG, "Error starting remote animation", e);
+                }
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+        mStageCoordinator.startIntentsWithLegacyTransition(pendingIntent1, fillInIntent1, options1,
+                pendingIntent2, fillInIntent2, options2, splitPosition, splitRatio, adapter,
+                instanceId);
     }
 
     @Override
     public void startIntent(PendingIntent intent, @Nullable Intent fillInIntent,
             @SplitPosition int position, @Nullable Bundle options) {
-        if (fillInIntent == null) {
-            fillInIntent = new Intent();
-        }
-        // Flag this as a no-user-action launch to prevent sending user leaving event to the
-        // current top activity since it's going to be put into another side of the split. This
-        // prevents the current top activity from going into pip mode due to user leaving event.
+        // Flag this as a no-user-action launch to prevent sending user leaving event to the current
+        // top activity since it's going to be put into another side of the split. This prevents the
+        // current top activity from going into pip mode due to user leaving event.
+        if (fillInIntent == null) fillInIntent = new Intent();
         fillInIntent.addFlags(FLAG_ACTIVITY_NO_USER_ACTION);
 
-        // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of the
-        // split and there is no reusable background task.
-        if (shouldAddMultipleTaskFlag(intent.getIntent(), position)) {
-            final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional.isPresent()
-                    ? mRecentTasksOptional.get().findTaskInBackground(
-                            intent.getIntent().getComponent())
-                    : null;
-            if (taskInfo != null) {
-                startTask(taskInfo.taskId, position, options);
+        if (launchSameAppAdjacently(position, intent)) {
+            final ComponentName launching = intent.getIntent().getComponent();
+            if (supportMultiInstancesSplit(launching)) {
+                // To prevent accumulating large number of instances in the background, reuse task
+                // in the background with priority.
+                final ActivityManager.RecentTaskInfo taskInfo = mRecentTasksOptional
+                        .map(recentTasks -> recentTasks.findTaskInBackground(launching))
+                        .orElse(null);
+                if (taskInfo != null) {
+                    startTask(taskInfo.taskId, position, options);
+                    ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                            "Start task in background");
+                    return;
+                }
+
+                // Flag with MULTIPLE_TASK if this is launching the same activity into both sides of
+                // the split and there is no reusable background task.
+                fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
+            } else if (isSplitScreenVisible()) {
+                mStageCoordinator.switchSplitPosition("startIntent");
+                return;
+            } else {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
+                        "Cancel entering split as not supporting multi-instances");
+                Toast.makeText(mContext, R.string.dock_multi_instances_not_supported_text,
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
-            fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Adding MULTIPLE_TASK");
         }
 
-        if (!ENABLE_SHELL_TRANSITIONS) {
-            mStageCoordinator.startIntentLegacy(intent, fillInIntent, position, options);
-            return;
-        }
         mStageCoordinator.startIntent(intent, fillInIntent, position, options);
     }
 
-    /** Returns {@code true} if it's launching the same component on both sides of the split. */
-    @VisibleForTesting
-    boolean shouldAddMultipleTaskFlag(@Nullable Intent startIntent, @SplitPosition int position) {
-        if (startIntent == null) {
-            return false;
+    @Nullable
+    private String getPackageName(Intent intent) {
+        if (intent == null || intent.getComponent() == null) {
+            return null;
         }
+        return intent.getComponent().getPackageName();
+    }
 
-        final ComponentName launchingActivity = startIntent.getComponent();
-        if (launchingActivity == null) {
-            return false;
-        }
-
+    private boolean launchSameAppAdjacently(@SplitPosition int position,
+            PendingIntent pendingIntent) {
+        ActivityManager.RunningTaskInfo adjacentTaskInfo = null;
         if (isSplitScreenVisible()) {
-            // To prevent users from constantly dropping the same app to the same side resulting in
-            // a large number of instances in the background.
-            final ActivityManager.RunningTaskInfo targetTaskInfo = getTaskInfo(position);
-            final ComponentName targetActivity = targetTaskInfo != null
-                    ? targetTaskInfo.baseIntent.getComponent() : null;
-            if (Objects.equals(launchingActivity, targetActivity)) {
+            adjacentTaskInfo = getTaskInfo(SplitLayout.reversePosition(position));
+        } else {
+            adjacentTaskInfo = mRecentTasksOptional
+                    .map(recentTasks -> recentTasks.getTopRunningTask()).orElse(null);
+            if (!isValidToEnterSplitScreen(adjacentTaskInfo)) {
                 return false;
             }
-
-            // Allow users to start a new instance the same to adjacent side.
-            final ActivityManager.RunningTaskInfo pairedTaskInfo =
-                    getTaskInfo(SplitLayout.reversePosition(position));
-            final ComponentName pairedActivity = pairedTaskInfo != null
-                    ? pairedTaskInfo.baseIntent.getComponent() : null;
-            return Objects.equals(launchingActivity, pairedActivity);
         }
 
-        final ActivityManager.RunningTaskInfo taskInfo = getFocusingTaskInfo();
-        if (taskInfo != null && isValidToEnterSplitScreen(taskInfo)) {
-            return Objects.equals(taskInfo.baseIntent.getComponent(), launchingActivity);
+        if (adjacentTaskInfo == null) {
+            return false;
+        }
+
+        final String targetPackageName = getPackageName(pendingIntent.getIntent());
+        final String adjacentPackageName = getPackageName(adjacentTaskInfo.baseIntent);
+        return targetPackageName != null && targetPackageName.equals(adjacentPackageName);
+    }
+
+    private boolean launchSameAppAdjacently(PendingIntent pendingIntent, int taskId) {
+        final ActivityManager.RunningTaskInfo adjacentTaskInfo =
+                mTaskOrganizer.getRunningTaskInfo(taskId);
+        if (adjacentTaskInfo == null) {
+            return false;
+        }
+        final String targetPackageName = getPackageName(pendingIntent.getIntent());
+        final String adjacentPackageName = getPackageName(adjacentTaskInfo.baseIntent);
+        return targetPackageName != null && targetPackageName.equals(adjacentPackageName);
+    }
+
+    private boolean launchSameAppAdjacently(PendingIntent pendingIntent1,
+            PendingIntent pendingIntent2) {
+        final String targetPackageName = getPackageName(pendingIntent1.getIntent());
+        final String adjacentPackageName = getPackageName(pendingIntent2.getIntent());
+        return targetPackageName != null && targetPackageName.equals(adjacentPackageName);
+    }
+
+    @VisibleForTesting
+    /** Returns {@code true} if the component supports multi-instances split. */
+    boolean supportMultiInstancesSplit(@Nullable ComponentName launching) {
+        if (launching == null) return false;
+
+        final String packageName = launching.getPackageName();
+        for (int i = 0; i < mAppsSupportMultiInstances.length; i++) {
+            if (mAppsSupportMultiInstances[i].equals(packageName)) {
+                return true;
+            }
         }
 
         return false;
@@ -610,10 +786,10 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return splitTasksLayer;
     }
     /**
-     * Sets drag info to be logged when splitscreen is entered.
+     * Drop callback when splitscreen is entered.
      */
-    public void logOnDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
-        mStageCoordinator.logOnDroppedToSplit(position, dragSessionId);
+    public void onDroppedToSplit(@SplitPosition int position, InstanceId dragSessionId) {
+        mStageCoordinator.onDroppedToSplit(position, dragSessionId);
     }
 
     /**
@@ -641,6 +817,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 return "APP_DOES_NOT_SUPPORT_MULTIWINDOW";
             case EXIT_REASON_CHILD_TASK_ENTER_PIP:
                 return "CHILD_TASK_ENTER_PIP";
+            case EXIT_REASON_RECREATE_SPLIT:
+                return "RECREATE_SPLIT";
             default:
                 return "unknown reason, reason int = " + exitReason;
         }
@@ -658,7 +836,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      */
     @ExternalThread
     private class SplitScreenImpl implements SplitScreen {
-        private ISplitScreenImpl mISplitScreen;
         private final ArrayMap<SplitScreenListener, Executor> mExecutors = new ArrayMap<>();
         private final SplitScreen.SplitScreenListener mListener = new SplitScreenListener() {
             @Override
@@ -704,15 +881,6 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         };
 
         @Override
-        public ISplitScreen createExternalInterface() {
-            if (mISplitScreen != null) {
-                mISplitScreen.invalidate();
-            }
-            mISplitScreen = new ISplitScreenImpl(SplitScreenController.this);
-            return mISplitScreen;
-        }
-
-        @Override
         public void registerSplitScreenListener(SplitScreenListener listener, Executor executor) {
             if (mExecutors.containsKey(listener)) return;
 
@@ -742,9 +910,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
         @Override
         public void onFinishedWakingUp() {
-            mMainExecutor.execute(() -> {
-                SplitScreenController.this.onFinishedWakingUp();
-            });
+            mMainExecutor.execute(SplitScreenController.this::onFinishedWakingUp);
+        }
+
+        @Override
+        public void goToFullscreenFromSplit() {
+            mMainExecutor.execute(SplitScreenController.this::goToFullscreenFromSplit);
         }
     }
 
@@ -752,7 +923,8 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
      * The interface for calls from outside the host process.
      */
     @BinderThread
-    private static class ISplitScreenImpl extends ISplitScreen.Stub {
+    private static class ISplitScreenImpl extends ISplitScreen.Stub
+            implements ExternalInterfaceBinder {
         private SplitScreenController mController;
         private final SingleInstanceRemoteListener<SplitScreenController,
                 ISplitScreenListener> mListener;
@@ -779,8 +951,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         /**
          * Invalidates this instance, preventing future calls from updating the controller.
          */
-        void invalidate() {
+        @Override
+        public void invalidate() {
             mController = null;
+            // Unregister the listener to ensure any registered binder death recipients are unlinked
+            mListener.unregister();
         }
 
         @Override
@@ -798,97 +973,126 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         @Override
         public void exitSplitScreen(int toTopTaskId) {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreen",
-                    (controller) -> {
-                        controller.exitSplitScreen(toTopTaskId, EXIT_REASON_UNKNOWN);
-                    });
+                    (controller) -> controller.exitSplitScreen(toTopTaskId, EXIT_REASON_UNKNOWN));
         }
 
         @Override
         public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreenOnHide",
-                    (controller) -> {
-                        controller.exitSplitScreenOnHide(exitSplitScreenOnHide);
-                    });
+                    (controller) -> controller.exitSplitScreenOnHide(exitSplitScreenOnHide));
         }
 
         @Override
         public void removeFromSideStage(int taskId) {
             executeRemoteCallWithTaskPermission(mController, "removeFromSideStage",
-                    (controller) -> {
-                        controller.removeFromSideStage(taskId);
-                    });
+                    (controller) -> controller.removeFromSideStage(taskId));
         }
 
         @Override
         public void startTask(int taskId, int position, @Nullable Bundle options) {
             executeRemoteCallWithTaskPermission(mController, "startTask",
-                    (controller) -> {
-                        controller.startTask(taskId, position, options);
-                    });
+                    (controller) -> controller.startTask(taskId, position, options));
         }
 
         @Override
-        public void startTasksWithLegacyTransition(int mainTaskId, @Nullable Bundle mainOptions,
-                int sideTaskId, @Nullable Bundle sideOptions, @SplitPosition int sidePosition,
+        public void startTasksWithLegacyTransition(int taskId1, @Nullable Bundle options1,
+                int taskId2, @Nullable Bundle options2, @SplitPosition int splitPosition,
                 float splitRatio, RemoteAnimationAdapter adapter, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
                     (controller) -> controller.mStageCoordinator.startTasksWithLegacyTransition(
-                            mainTaskId, mainOptions, sideTaskId, sideOptions, sidePosition,
+                            taskId1, options1, taskId2, options2, splitPosition,
                             splitRatio, adapter, instanceId));
         }
 
         @Override
         public void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent,
-                Intent fillInIntent, int taskId, Bundle mainOptions, Bundle sideOptions,
-                int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
-                InstanceId instanceId) {
+                Bundle options1, int taskId, Bundle options2, int splitPosition, float splitRatio,
+                RemoteAnimationAdapter adapter, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController,
                     "startIntentAndTaskWithLegacyTransition", (controller) ->
-                            controller.mStageCoordinator.startIntentAndTaskWithLegacyTransition(
-                                    pendingIntent, fillInIntent, taskId, mainOptions, sideOptions,
-                                    sidePosition, splitRatio, adapter, instanceId));
+                            controller.startIntentAndTaskWithLegacyTransition(pendingIntent,
+                                    options1, taskId, options2, splitPosition, splitRatio, adapter,
+                                    instanceId));
         }
 
         @Override
         public void startShortcutAndTaskWithLegacyTransition(ShortcutInfo shortcutInfo,
-                int taskId, @Nullable Bundle mainOptions, @Nullable Bundle sideOptions,
-                @SplitPosition int sidePosition, float splitRatio, RemoteAnimationAdapter adapter,
+                @Nullable Bundle options1, int taskId, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
                 InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController,
                     "startShortcutAndTaskWithLegacyTransition", (controller) ->
                             controller.mStageCoordinator.startShortcutAndTaskWithLegacyTransition(
-                                    shortcutInfo, taskId, mainOptions, sideOptions, sidePosition,
+                                    shortcutInfo, options1, taskId, options2, splitPosition,
                                     splitRatio, adapter, instanceId));
         }
 
         @Override
-        public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
-                int sideTaskId, @Nullable Bundle sideOptions,
-                @SplitPosition int sidePosition, float splitRatio,
+        public void startTasks(int taskId1, @Nullable Bundle options1, int taskId2,
+                @Nullable Bundle options2, @SplitPosition int splitPosition, float splitRatio,
                 @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startTasks",
-                    (controller) -> controller.mStageCoordinator.startTasks(mainTaskId, mainOptions,
-                            sideTaskId, sideOptions, sidePosition, splitRatio, remoteTransition,
+                    (controller) -> controller.mStageCoordinator.startTasks(taskId1, options1,
+                            taskId2, options2, splitPosition, splitRatio, remoteTransition,
                             instanceId));
+        }
+
+        @Override
+        public void startIntentAndTask(PendingIntent pendingIntent, @Nullable Bundle options1,
+                int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
+                float splitRatio, @Nullable RemoteTransition remoteTransition,
+                InstanceId instanceId) {
+            executeRemoteCallWithTaskPermission(mController, "startIntentAndTask",
+                    (controller) -> controller.startIntentAndTask(pendingIntent, options1, taskId,
+                            options2, splitPosition, splitRatio, remoteTransition, instanceId));
+        }
+
+        @Override
+        public void startShortcutAndTask(ShortcutInfo shortcutInfo, @Nullable Bundle options1,
+                int taskId, @Nullable Bundle options2, @SplitPosition int splitPosition,
+                float splitRatio, @Nullable RemoteTransition remoteTransition,
+                InstanceId instanceId) {
+            executeRemoteCallWithTaskPermission(mController, "startShortcutAndTask",
+                    (controller) -> controller.mStageCoordinator.startShortcutAndTask(shortcutInfo,
+                            options1, taskId, options2, splitPosition, splitRatio, remoteTransition,
+                            instanceId));
+        }
+
+        @Override
+        public void startIntentsWithLegacyTransition(PendingIntent pendingIntent1,
+                @Nullable Bundle options1, PendingIntent pendingIntent2, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio, RemoteAnimationAdapter adapter,
+                InstanceId instanceId) {
+            executeRemoteCallWithTaskPermission(mController, "startIntentsWithLegacyTransition",
+                    (controller) ->
+                        controller.startIntentsWithLegacyTransition(
+                                pendingIntent1, options1, pendingIntent2, options2, splitPosition,
+                                splitRatio, adapter, instanceId)
+                    );
+        }
+
+        @Override
+        public void startIntents(PendingIntent pendingIntent1, @Nullable Bundle options1,
+                PendingIntent pendingIntent2, @Nullable Bundle options2,
+                @SplitPosition int splitPosition, float splitRatio,
+                @Nullable RemoteTransition remoteTransition, InstanceId instanceId) {
+            // TODO(b/259368992): To be implemented.
         }
 
         @Override
         public void startShortcut(String packageName, String shortcutId, int position,
                 @Nullable Bundle options, UserHandle user, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startShortcut",
-                    (controller) -> {
-                        controller.startShortcut(packageName, shortcutId, position, options, user,
-                                instanceId);
-                    });
+                    (controller) -> controller.startShortcut(packageName, shortcutId, position,
+                            options, user, instanceId));
         }
 
         @Override
         public void startIntent(PendingIntent intent, Intent fillInIntent, int position,
                 @Nullable Bundle options, InstanceId instanceId) {
             executeRemoteCallWithTaskPermission(mController, "startIntent",
-                    (controller) -> {
-                        controller.startIntent(intent, fillInIntent, position, options, instanceId);
-                    });
+                    (controller) -> controller.startIntent(intent, fillInIntent, position, options,
+                            instanceId));
         }
 
         @Override

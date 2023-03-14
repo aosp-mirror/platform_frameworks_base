@@ -28,6 +28,7 @@
     <string name="defaultVoiceMailAlphaTag" msgid="2190754495304236490">"የድምፅ መልዕክት"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2285034592902077488">"MSISDN1"</string>
     <string name="mmiError" msgid="2862759606579822246">"የተያያዥ ችግር ወይም  ትክከል ያልሆነየMMI ኮድ ባህሪ።"</string>
+    <string name="mmiErrorNotSupported" msgid="5001803469335286099">"ባህሪ አይደገፍም።"</string>
     <string name="mmiFdnError" msgid="3975490266767565852">"ክዋኔ ለቋሚ መደወያ ቁጥሮች ብቻ ተገድቧል።"</string>
     <string name="mmiErrorWhileRoaming" msgid="1204173664713870114">"Can not change call forwarding settings from your phone while you are roaming."</string>
     <string name="serviceEnabled" msgid="7549025003394765639">"አገልግሎት ነቅቶ ነበር።"</string>

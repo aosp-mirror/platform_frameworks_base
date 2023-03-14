@@ -28,6 +28,7 @@ import android.view.View;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.util.ViewController;
 
 import java.util.Collection;
@@ -49,20 +50,34 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ComplicationLayoutEngine mLayoutEngine;
+    private final DreamOverlayStateController mDreamOverlayStateController;
     private final LifecycleOwner mLifecycleOwner;
     private final ComplicationCollectionViewModel mComplicationCollectionViewModel;
     private final HashMap<ComplicationId, Complication.ViewHolder> mComplications = new HashMap<>();
+
+    // Whether dream entry animations are finished.
+    private boolean mEntryAnimationsFinished = false;
 
     @Inject
     protected ComplicationHostViewController(
             @Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout view,
             ComplicationLayoutEngine layoutEngine,
+            DreamOverlayStateController dreamOverlayStateController,
             LifecycleOwner lifecycleOwner,
             @Named(SCOPED_COMPLICATIONS_MODEL) ComplicationCollectionViewModel viewModel) {
         super(view);
         mLayoutEngine = layoutEngine;
         mLifecycleOwner = lifecycleOwner;
         mComplicationCollectionViewModel = viewModel;
+        mDreamOverlayStateController = dreamOverlayStateController;
+
+        mDreamOverlayStateController.addCallback(new DreamOverlayStateController.Callback() {
+            @Override
+            public void onStateChanged() {
+                mEntryAnimationsFinished =
+                        mDreamOverlayStateController.areEntryAnimationsFinished();
+            }
+        });
     }
 
     @Override
@@ -123,14 +138,27 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
                     final ComplicationId id = complication.getId();
                     final Complication.ViewHolder viewHolder = complication.getComplication()
                             .createView(complication);
+
+                    final View view = viewHolder.getView();
+
+                    if (view == null) {
+                        Log.e(TAG, "invalid complication view. null view supplied by ViewHolder");
+                        return;
+                    }
+
+                    // Complications to be added before dream entry animations are finished are set
+                    // to invisible and are animated in.
+                    if (!mEntryAnimationsFinished) {
+                        view.setVisibility(View.INVISIBLE);
+                    }
                     mComplications.put(id, viewHolder);
-                    if (viewHolder.getView().getParent() != null) {
+                    if (view.getParent() != null) {
                         Log.e(TAG, "View for complication "
                                 + complication.getComplication().getClass()
                                 + " already has a parent. Make sure not to reuse complication "
                                 + "views!");
                     }
-                    mLayoutEngine.addComplication(id, viewHolder.getView(),
+                    mLayoutEngine.addComplication(id, view,
                             viewHolder.getLayoutParams(), viewHolder.getCategory());
                 });
     }

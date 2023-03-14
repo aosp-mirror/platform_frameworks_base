@@ -12209,7 +12209,7 @@ public class TelephonyManager {
             Log.e(TAG, "Error calling ITelephony#getServiceStateForSubscriber", e);
         } catch (NullPointerException e) {
             AnomalyReporter.reportAnomaly(
-                    UUID.fromString("a3ab0b9d-f2aa-4baf-911d-7096c0d4645a"),
+                    UUID.fromString("e2bed88e-def9-476e-bd71-3e572a8de6d1"),
                     "getServiceStateForSubscriber " + subId + " NPE");
         }
         return null;
@@ -15329,7 +15329,6 @@ public class TelephonyManager {
      * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabled}.
      * @hide
      */
-    @SystemApi
     public static final int MOBILE_DATA_POLICY_AUTO_DATA_SWITCH = 3;
 
     /**

@@ -1,8 +1,8 @@
 package com.android.systemui.statusbar.notification.stack
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.NotificationHeadsUpLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.statusbar.notification.logKey
 import javax.inject.Inject
 

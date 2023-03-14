@@ -44,7 +44,7 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.media.MediaHost;
+import com.android.systemui.media.controls.ui.MediaHost;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.customize.QSCustomizerController;
@@ -226,7 +226,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
                 + "    " + mockTileViewString + "\n"
                 + "  media bounds: null\n"
                 + "  horizontal layout: false\n"
-                + "  last orientation: 0\n";
+                + "  last orientation: 0\n"
+                + "  mShouldUseSplitNotificationShade: false\n";
         assertEquals(expected, w.getBuffer().toString());
     }
 

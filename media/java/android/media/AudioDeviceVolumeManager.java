@@ -41,8 +41,7 @@ import java.util.concurrent.Executor;
  */
 public class AudioDeviceVolumeManager {
 
-    // define when using Log.*
-    //private static final String TAG = "AudioDeviceVolumeManager";
+    private static final String TAG = "AudioDeviceVolumeManager";
 
     /** Indicates no special treatment in the handling of the volume adjustment */
     public static final int ADJUST_MODE_NORMAL = 0;
@@ -62,11 +61,15 @@ public class AudioDeviceVolumeManager {
     private static IAudioService sService;
 
     private final @NonNull String mPackageName;
-    private final @Nullable String mAttributionTag;
 
-    public AudioDeviceVolumeManager(Context context) {
+    /**
+     * @hide
+     * Constructor
+     * @param context the Context for the device volume operations
+     */
+    public AudioDeviceVolumeManager(@NonNull Context context) {
+        Objects.requireNonNull(context);
         mPackageName = context.getApplicationContext().getOpPackageName();
-        mAttributionTag = context.getApplicationContext().getAttributionTag();
     }
 
     /**
@@ -308,13 +311,36 @@ public class AudioDeviceVolumeManager {
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setDeviceVolume(@NonNull VolumeInfo vi, @NonNull AudioDeviceAttributes ada) {
         try {
-            getService().setDeviceVolume(vi, ada, mPackageName, mAttributionTag);
+            getService().setDeviceVolume(vi, ada, mPackageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
     }
 
     /**
+     * @hide
+     * Returns the volume on the given audio device for the given volume information.
+     * For instance if using a {@link VolumeInfo} configured for {@link AudioManager#STREAM_ALARM},
+     * it will return the alarm volume. When no volume index has ever been set for the given
+     * device, the default volume will be returned (the volume setting that would have been
+     * applied if playback for that use case had started).
+     * @param vi the volume information, only stream-based volumes are supported. Information
+     *           other than the stream type is ignored.
+     * @param ada the device for which volume is to be retrieved
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull VolumeInfo getDeviceVolume(@NonNull VolumeInfo vi,
+            @NonNull AudioDeviceAttributes ada) {
+        try {
+            return getService().getDeviceVolume(vi, ada, mPackageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return VolumeInfo.getDefaultVolumeInfo();
+    }
+
+    /**
+     * @hide
      * Return human-readable name for volume behavior
      * @param behavior one of the volume behaviors defined in AudioManager
      * @return a string for the given behavior

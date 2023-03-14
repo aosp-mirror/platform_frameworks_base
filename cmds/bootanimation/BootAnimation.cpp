@@ -132,14 +132,14 @@ static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
     uniform sampler2D uTexture;
     uniform float uFade;
     uniform float uColorProgress;
-    uniform vec4 uStartColor0;
-    uniform vec4 uStartColor1;
-    uniform vec4 uStartColor2;
-    uniform vec4 uStartColor3;
-    uniform vec4 uEndColor0;
-    uniform vec4 uEndColor1;
-    uniform vec4 uEndColor2;
-    uniform vec4 uEndColor3;
+    uniform vec3 uStartColor0;
+    uniform vec3 uStartColor1;
+    uniform vec3 uStartColor2;
+    uniform vec3 uStartColor3;
+    uniform vec3 uEndColor0;
+    uniform vec3 uEndColor1;
+    uniform vec3 uEndColor2;
+    uniform vec3 uEndColor3;
     varying highp vec2 vUv;
     void main() {
         vec4 mask = texture2D(uTexture, vUv);
@@ -152,12 +152,12 @@ static const char IMAGE_FRAG_DYNAMIC_COLORING_SHADER_SOURCE[] = R"(
             * step(cWhiteMaskThreshold, g)
             * step(cWhiteMaskThreshold, b)
             * step(cWhiteMaskThreshold, a);
-        vec4 color = r * mix(uStartColor0, uEndColor0, uColorProgress)
+        vec3 color = r * mix(uStartColor0, uEndColor0, uColorProgress)
                 + g * mix(uStartColor1, uEndColor1, uColorProgress)
                 + b * mix(uStartColor2, uEndColor2, uColorProgress)
                 + a * mix(uStartColor3, uEndColor3, uColorProgress);
-        color = mix(color, vec4(vec3((r + g + b + a) * 0.25), 1.0), useWhiteMask);
-        gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade)) * color.a;
+        color = mix(color, vec3((r + g + b + a) * 0.25), useWhiteMask);
+        gl_FragColor = vec4(color.x, color.y, color.z, (1.0 - uFade));
     })";
 static const char IMAGE_FRAG_SHADER_SOURCE[] = R"(
     precision mediump float;
@@ -584,6 +584,15 @@ status_t BootAnimation::readyToRun() {
     mFlingerSurface = s;
     mTargetInset = -1;
 
+    // Rotate the boot animation according to the value specified in the sysprop
+    // ro.bootanim.set_orientation_<display_id>. Four values are supported: ORIENTATION_0,
+    // ORIENTATION_90, ORIENTATION_180 and ORIENTATION_270.
+    // If the value isn't specified or is ORIENTATION_0, nothing will be changed.
+    // This is needed to support having boot animation in orientations different from the natural
+    // device orientation. For example, on tablets that may want to keep natural orientation
+    // portrait for applications compatibility and to have the boot animation in landscape.
+    rotateAwayFromNaturalOrientationIfNeeded();
+
     projectSceneToWindow();
 
     // Register a display event receiver
@@ -595,6 +604,50 @@ status_t BootAnimation::readyToRun() {
             new DisplayEventCallback(this), nullptr);
 
     return NO_ERROR;
+}
+
+void BootAnimation::rotateAwayFromNaturalOrientationIfNeeded() {
+    const auto orientation = parseOrientationProperty();
+
+    if (orientation == ui::ROTATION_0) {
+        // Do nothing if the sysprop isn't set or is set to ROTATION_0.
+        return;
+    }
+
+    if (orientation == ui::ROTATION_90 || orientation == ui::ROTATION_270) {
+        std::swap(mWidth, mHeight);
+        std::swap(mInitWidth, mInitHeight);
+        mFlingerSurfaceControl->updateDefaultBufferSize(mWidth, mHeight);
+    }
+
+    Rect displayRect(0, 0, mWidth, mHeight);
+    Rect layerStackRect(0, 0, mWidth, mHeight);
+
+    SurfaceComposerClient::Transaction t;
+    t.setDisplayProjection(mDisplayToken, orientation, layerStackRect, displayRect);
+    t.apply();
+}
+
+ui::Rotation BootAnimation::parseOrientationProperty() {
+    const auto displayIds = SurfaceComposerClient::getPhysicalDisplayIds();
+    if (displayIds.size() == 0) {
+        return ui::ROTATION_0;
+    }
+    const auto displayId = displayIds[0];
+    const auto syspropName = [displayId] {
+        std::stringstream ss;
+        ss << "ro.bootanim.set_orientation_" << displayId.value;
+        return ss.str();
+    }();
+    const auto syspropValue = android::base::GetProperty(syspropName, "ORIENTATION_0");
+    if (syspropValue == "ORIENTATION_90") {
+        return ui::ROTATION_90;
+    } else if (syspropValue == "ORIENTATION_180") {
+        return ui::ROTATION_180;
+    } else if (syspropValue == "ORIENTATION_270") {
+        return ui::ROTATION_270;
+    }
+    return ui::ROTATION_0;
 }
 
 void BootAnimation::projectSceneToWindow() {
@@ -1446,12 +1499,12 @@ void BootAnimation::initDynamicColors() {
     for (int i = 0; i < DYNAMIC_COLOR_COUNT; i++) {
         float *startColor = mAnimation->startColors[i];
         float *endColor = mAnimation->endColors[i];
-        glUniform4f(glGetUniformLocation(mImageShader,
+        glUniform3f(glGetUniformLocation(mImageShader,
             (U_START_COLOR_PREFIX + std::to_string(i)).c_str()),
-            startColor[0], startColor[1], startColor[2], 1 /* alpha */);
-        glUniform4f(glGetUniformLocation(mImageShader,
+            startColor[0], startColor[1], startColor[2]);
+        glUniform3f(glGetUniformLocation(mImageShader,
             (U_END_COLOR_PREFIX + std::to_string(i)).c_str()),
-            endColor[0], endColor[1], endColor[2], 1 /* alpha */);
+            endColor[0], endColor[1], endColor[2]);
     }
     mImageColorProgressLocation = glGetUniformLocation(mImageShader, U_COLOR_PROGRESS);
 }

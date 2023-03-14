@@ -1,10 +1,52 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
     android:viewportHeight="24"
-    android:tint="?attr/colorControlNormal">
-  <path
-      android:fillColor="@android:color/white"
-      android:pathData="M20,8.69L20,4h-4.69L12,0.69 8.69,4L4,4v4.69L0.69,12 4,15.31L4,20h4.69L12,23.31 15.31,20L20,20v-4.69L23.31,12 20,8.69zM18,14.48L18,18h-3.52L12,20.48 9.52,18L6,18v-3.52L3.52,12 6,9.52L6,6h3.52L12,3.52 14.48,6L18,6v3.52L20.48,12 18,14.48zM12,9c1.65,0 3,1.35 3,3s-1.35,3 -3,3 -3,-1.35 -3,-3 1.35,-3 3,-3m0,-2c-2.76,0 -5,2.24 -5,5s2.24,5 5,5 5,-2.24 5,-5 -2.24,-5 -5,-5z"/>
+    android:viewportWidth="24">
+    <group android:name="_R_G">
+        <group
+            android:name="_R_G_L_1_G_N_1_T_0"
+            android:scaleX="0.1"
+            android:scaleY="0.1"
+            android:translateX="12"
+            android:translateY="12">
+            <group android:name="_R_G_L_1_G">
+                <path
+                    android:name="_R_G_L_1_G_D_0_P_0"
+                    android:fillAlpha="1"
+                    android:fillColor="#ffffff"
+                    android:fillType="nonZero"
+                    android:pathData=" M66.67 -27.59 C66.67,-27.59 66.67,-66.67 66.67,-66.67 C66.67,-66.67 27.59,-66.67 27.59,-66.67 C27.59,-66.67 0,-94.25 0,-94.25 C0,-94.25 -27.58,-66.67 -27.58,-66.67 C-27.58,-66.67 -66.66,-66.67 -66.66,-66.67 C-66.66,-66.67 -66.66,-27.59 -66.66,-27.59 C-66.66,-27.59 -94.25,0 -94.25,0 C-94.25,0 -66.66,27.58 -66.66,27.58 C-66.66,27.58 -66.66,66.66 -66.66,66.66 C-66.66,66.66 -27.58,66.66 -27.58,66.66 C-27.58,66.66 0,94.25 0,94.25 C0,94.25 27.59,66.66 27.59,66.66 C27.59,66.66 66.67,66.66 66.67,66.66 C66.67,66.66 66.67,27.58 66.67,27.58 C66.67,27.58 94.25,0 94.25,0 C94.25,0 66.67,-27.59 66.67,-27.59c  M50 20.66 C50,20.66 50,50 50,50 C50,50 20.67,50 20.67,50 C20.67,50 0,70.66 0,70.66 C0,70.66 -20.66,50 -20.66,50 C-20.66,50 -50,50 -50,50 C-50,50 -50,20.66 -50,20.66 C-50,20.66 -70.66,0 -70.66,0 C-70.66,0 -50,-20.67 -50,-20.67 C-50,-20.67 -50,-50 -50,-50 C-50,-50 -20.66,-50 -20.66,-50 C-20.66,-50 0,-70.67 0,-70.67 C0,-70.67 20.67,-50 20.67,-50 C20.67,-50 50,-50 50,-50 C50,-50 50,-20.67 50,-20.67 C50,-20.67 70.67,0 70.67,0 C70.67,0 50,20.66 50,20.66c " />
+            </group>
+        </group>
+        <group
+            android:name="_R_G_L_0_G"
+            android:scaleX="0.1"
+            android:scaleY="0.1"
+            android:translateX="12"
+            android:translateY="12">
+            <group android:name="_R_G_L_0_C_0_G">
+                <clip-path
+                    android:name="_R_G_L_0_C_0"
+                    android:pathData=" M-63 -50.5 C-63,-50.5 -63,48 -63,48 C-63,48 42.5,48 42.5,48 C42.5,48 42.5,-50.5 42.5,-50.5 C42.5,-50.5 -63,-50.5 -63,-50.5c " />
+                <group android:name="_R_G_L_0_C_0_G_G">
+                    <path
+                        android:name="_R_G_L_0_G_G_0_D_0_P_0"
+                        android:pathData=" M0 -32.5 C17.95,-32.5 32.5,-17.95 32.5,0 C32.5,17.95 17.95,32.5 0,32.5 C-17.95,32.5 -32.5,17.95 -32.5,0 C-32.5,-17.95 -17.95,-32.5 0,-32.5c "
+                        android:strokeAlpha="1"
+                        android:strokeColor="#ffffff"
+                        android:strokeLineCap="round"
+                        android:strokeLineJoin="round"
+                        android:strokeWidth="17" />
+                    <path
+                        android:name="_R_G_L_0_G_G_0_D_1_P_0"
+                        android:fillAlpha="0"
+                        android:fillColor="#ffffff"
+                        android:fillType="nonZero"
+                        android:pathData=" M0 -32.5 C17.95,-32.5 32.5,-17.95 32.5,0 C32.5,17.95 17.95,32.5 0,32.5 C-17.95,32.5 -32.5,17.95 -32.5,0 C-32.5,-17.95 -17.95,-32.5 0,-32.5c " />
+                </group>
+            </group>
+        </group>
+    </group>
+    <group android:name="time_group" />
 </vector>

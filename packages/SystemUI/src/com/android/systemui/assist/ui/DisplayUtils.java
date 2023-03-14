@@ -21,6 +21,8 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Surface;
 
+import com.android.systemui.R;
+
 /**
  * Utility class for determining screen and corner dimensions.
  */
@@ -82,17 +84,13 @@ public class DisplayUtils {
      * where the curve ends), in pixels.
      */
     public static int getCornerRadiusBottom(Context context) {
-        int radius = 0;
-
-        int resourceId = context.getResources().getIdentifier("config_rounded_mask_size_bottom",
-                "dimen", "com.android.systemui");
-        if (resourceId > 0) {
-            radius = context.getResources().getDimensionPixelSize(resourceId);
-        }
+        int radius = context.getResources().getDimensionPixelSize(
+                R.dimen.config_rounded_mask_size_bottom);
 
         if (radius == 0) {
             radius = getCornerRadiusDefault(context);
         }
+
         return radius;
     }
 
@@ -101,28 +99,17 @@ public class DisplayUtils {
      * the curve ends), in pixels.
      */
     public static int getCornerRadiusTop(Context context) {
-        int radius = 0;
-
-        int resourceId = context.getResources().getIdentifier("config_rounded_mask_size_top",
-                "dimen", "com.android.systemui");
-        if (resourceId > 0) {
-            radius = context.getResources().getDimensionPixelSize(resourceId);
-        }
+        int radius = context.getResources().getDimensionPixelSize(
+                R.dimen.config_rounded_mask_size_top);
 
         if (radius == 0) {
             radius = getCornerRadiusDefault(context);
         }
+
         return radius;
     }
 
     private static int getCornerRadiusDefault(Context context) {
-        int radius = 0;
-
-        int resourceId = context.getResources().getIdentifier("config_rounded_mask_size",
-                "dimen", "com.android.systemui");
-        if (resourceId > 0) {
-            radius = context.getResources().getDimensionPixelSize(resourceId);
-        }
-        return radius;
+        return context.getResources().getDimensionPixelSize(R.dimen.config_rounded_mask_size);
     }
 }

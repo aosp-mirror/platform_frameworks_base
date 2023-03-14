@@ -16,32 +16,71 @@ package com.android.systemui.utils.leaks;
 
 import android.testing.LeakCheck;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.systemui.statusbar.policy.FlashlightController;
 import com.android.systemui.statusbar.policy.FlashlightController.FlashlightListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FakeFlashlightController extends BaseLeakChecker<FlashlightListener>
         implements FlashlightController {
+
+    private final List<FlashlightListener> callbacks = new ArrayList<>();
+
+    @VisibleForTesting
+    public boolean isAvailable;
+    @VisibleForTesting
+    public boolean isEnabled;
+    @VisibleForTesting
+    public boolean hasFlashlight;
+
     public FakeFlashlightController(LeakCheck test) {
         super(test, "flashlight");
     }
 
+    @VisibleForTesting
+    public void onFlashlightAvailabilityChanged(boolean newValue) {
+        callbacks.forEach(
+                flashlightListener -> flashlightListener.onFlashlightAvailabilityChanged(newValue)
+        );
+    }
+
+    @VisibleForTesting
+    public void onFlashlightError() {
+        callbacks.forEach(FlashlightListener::onFlashlightError);
+    }
+
     @Override
     public boolean hasFlashlight() {
-        return false;
+        return hasFlashlight;
     }
 
     @Override
     public void setFlashlight(boolean newState) {
-
+        callbacks.forEach(flashlightListener -> flashlightListener.onFlashlightChanged(newState));
     }
 
     @Override
     public boolean isAvailable() {
-        return false;
+        return isAvailable;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return isEnabled;
+    }
+
+    @Override
+    public void addCallback(FlashlightListener listener) {
+        super.addCallback(listener);
+        callbacks.add(listener);
+    }
+
+    @Override
+    public void removeCallback(FlashlightListener listener) {
+        super.removeCallback(listener);
+        callbacks.remove(listener);
     }
 }

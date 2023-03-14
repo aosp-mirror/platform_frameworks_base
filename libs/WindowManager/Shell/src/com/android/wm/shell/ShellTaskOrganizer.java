@@ -16,14 +16,12 @@
 
 package com.android.wm.shell;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
-import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TASK_ORG;
 import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
@@ -48,7 +46,6 @@ import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
 import android.window.TaskOrganizer;
-import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -567,6 +564,22 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         }
     }
 
+    /**
+     * Return list of {@link RunningTaskInfo}s for the given display.
+     *
+     * @return filtered list of tasks or empty list
+     */
+    public ArrayList<RunningTaskInfo> getRunningTasks(int displayId) {
+        ArrayList<RunningTaskInfo> result = new ArrayList<>();
+        for (int i = 0; i < mTasks.size(); i++) {
+            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
+            if (taskInfo.displayId == displayId) {
+                result.add(taskInfo);
+            }
+        }
+        return result;
+    }
+
     /** Gets running task by taskId. Returns {@code null} if no such task observed. */
     @Nullable
     public RunningTaskInfo getRunningTaskInfo(int taskId) {
@@ -691,57 +704,6 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
             return;
         }
         taskListener.reparentChildSurfaceToTask(taskId, sc, t);
-    }
-
-    /**
-     * Create a {@link WindowContainerTransaction} to clear task bounds.
-     *
-     * Only affects tasks that have {@link RunningTaskInfo#getActivityType()} set to
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
-     *
-     * @param displayId display id for tasks that will have bounds cleared
-     * @return {@link WindowContainerTransaction} with pending operations to clear bounds
-     */
-    public WindowContainerTransaction prepareClearBoundsForStandardTasks(int displayId) {
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "prepareClearBoundsForTasks: displayId=%d", displayId);
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        for (int i = 0; i < mTasks.size(); i++) {
-            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
-            if ((taskInfo.displayId == displayId) && (taskInfo.getActivityType()
-                    == WindowConfiguration.ACTIVITY_TYPE_STANDARD)) {
-                ProtoLog.d(WM_SHELL_DESKTOP_MODE, "clearing bounds for token=%s taskInfo=%s",
-                        taskInfo.token, taskInfo);
-                wct.setBounds(taskInfo.token, null);
-            }
-        }
-        return wct;
-    }
-
-    /**
-     * Create a {@link WindowContainerTransaction} to clear task level freeform setting.
-     *
-     * Only affects tasks that have {@link RunningTaskInfo#getActivityType()} set to
-     * {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD}.
-     *
-     * @param displayId display id for tasks that will have windowing mode reset to {@link
-     *                  WindowConfiguration#WINDOWING_MODE_UNDEFINED}
-     * @return {@link WindowContainerTransaction} with pending operations to clear windowing mode
-     */
-    public WindowContainerTransaction prepareClearFreeformForStandardTasks(int displayId) {
-        ProtoLog.d(WM_SHELL_DESKTOP_MODE, "prepareClearFreeformForTasks: displayId=%d", displayId);
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        for (int i = 0; i < mTasks.size(); i++) {
-            RunningTaskInfo taskInfo = mTasks.valueAt(i).getTaskInfo();
-            if (taskInfo.displayId == displayId
-                    && taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                    && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD) {
-                ProtoLog.d(WM_SHELL_DESKTOP_MODE,
-                        "clearing windowing mode for token=%s taskInfo=%s", taskInfo.token,
-                        taskInfo);
-                wct.setWindowingMode(taskInfo.token, WINDOWING_MODE_UNDEFINED);
-            }
-        }
-        return wct;
     }
 
     private void logSizeCompatRestartButtonEventReported(@NonNull TaskAppearedInfo info,

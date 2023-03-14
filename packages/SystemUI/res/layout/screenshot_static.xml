@@ -44,7 +44,7 @@
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintWidth_percent="1.0"
         app:layout_constraintWidth_max="wrap"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/screenshot_message_container"
         app:layout_constraintStart_toEndOf="@+id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="parent">
         <LinearLayout
@@ -70,7 +70,7 @@
         android:alpha="0"
         android:background="@drawable/overlay_border"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/screenshot_message_container"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_end"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview_top"/>
     <androidx.constraintlayout.widget.Barrier
@@ -100,11 +100,22 @@
         android:background="@drawable/overlay_preview_background"
         android:adjustViewBounds="true"
         android:clickable="true"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
         app:layout_constraintStart_toStartOf="@id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"
-        app:layout_constraintTop_toTopOf="@id/screenshot_preview_border">
-    </ImageView>
+        app:layout_constraintTop_toTopOf="@id/screenshot_preview_border"/>
+    <ImageView
+        android:id="@+id/screenshot_badge"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:padding="4dp"
+        android:visibility="gone"
+        android:background="@drawable/overlay_badge_background"
+        android:elevation="8dp"
+        android:src="@drawable/overlay_cancel"
+        app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
+        app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"/>
     <FrameLayout
         android:id="@+id/screenshot_dismiss_button"
         android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
@@ -132,4 +143,58 @@
         app:layout_constraintStart_toStartOf="@id/screenshot_preview"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview"
         android:elevation="7dp"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/screenshot_message_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/overlay_action_container_margin_horizontal"
+        android:layout_marginVertical="4dp"
+        android:paddingHorizontal="@dimen/overlay_action_container_padding_right"
+        android:paddingVertical="@dimen/overlay_action_container_padding_vertical"
+        android:elevation="4dp"
+        android:background="@drawable/action_chip_container_background"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/screenshot_message_icon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:paddingEnd="4dp"
+            android:src="@drawable/ic_work_app_badge"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/screenshot_message_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:id="@+id/screenshot_message_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/screenshot_message_icon"
+            app:layout_constraintEnd_toStartOf="@id/message_dismiss_button"/>
+
+        <FrameLayout
+            android:id="@+id/message_dismiss_button"
+            android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
+            android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
+            app:layout_constraintStart_toEndOf="@id/screenshot_message_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="@string/screenshot_dismiss_work_profile">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/overlay_dismiss_button_margin"
+                android:src="@drawable/overlay_cancel"/>
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.android.systemui.screenshot.DraggableConstraintLayout>

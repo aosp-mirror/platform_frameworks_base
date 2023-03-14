@@ -1951,6 +1951,17 @@ public class CarrierConfigManager {
             "nr_advanced_threshold_bandwidth_khz_int";
 
     /**
+     * Indicating whether to include LTE cell bandwidths when determining whether the aggregated
+     * cell bandwidth meets the required threshold for NR advanced.
+     *
+     * @see TelephonyDisplayInfo#OVERRIDE_NETWORK_TYPE_NR_ADVANCED
+     *
+     * @hide
+     */
+    public static final String KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL =
+            "include_lte_for_nr_advanced_threshold_bandwidth_bool";
+
+    /**
      * Boolean indicating if operator name should be shown in the status bar
      * @hide
      */
@@ -9007,6 +9018,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
+        sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
         sDefaults.putIntArray(KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY,
                 new int[]{CARRIER_NR_AVAILABILITY_NSA, CARRIER_NR_AVAILABILITY_SA});
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);

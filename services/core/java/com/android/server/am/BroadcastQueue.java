@@ -45,10 +45,10 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ApplicationExitInfo;
 import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
-import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -519,7 +519,7 @@ public final class BroadcastQueue {
             final Object curReceiver = r.receivers.get(curIndex);
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED, r.curApp.uid,
                     r.callingUid == -1 ? Process.SYSTEM_UID : r.callingUid,
-                    ActivityManagerService.getShortAction(r.intent.getAction()),
+                    r.intent.getAction(),
                     curReceiver instanceof BroadcastFilter
                     ? BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME
                     : BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__MANIFEST,
@@ -665,18 +665,14 @@ public final class BroadcastQueue {
                     thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
                             data, extras, ordered, sticky, sendingUser,
                             app.mState.getReportedProcState());
-                // TODO: Uncomment this when (b/28322359) is fixed and we aren't getting
-                // DeadObjectException when the process isn't actually dead.
-                //} catch (DeadObjectException ex) {
-                // Failed to call into the process.  It's dying so just let it die and move on.
-                //    throw ex;
                 } catch (RemoteException ex) {
                     // Failed to call into the process. It's either dying or wedged. Kill it gently.
                     synchronized (mService) {
-                        Slog.w(TAG, "Can't deliver broadcast to " + app.processName
-                                + " (pid " + app.getPid() + "). Crashing it.");
-                        app.scheduleCrashLocked("can't deliver broadcast",
-                                CannotDeliverBroadcastException.TYPE_ID, /* extras=*/ null);
+                        final String msg = "Failed to schedule " + intent + " to " + receiver
+                                + " via " + app + ": " + ex;
+                        Slog.w(TAG, msg);
+                        app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
+                                ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
                     }
                     throw ex;
                 }
@@ -692,7 +688,7 @@ public final class BroadcastQueue {
             FrameworkStatsLog.write(BROADCAST_DELIVERY_EVENT_REPORTED,
                     receiverUid == -1 ? Process.SYSTEM_UID : receiverUid,
                     callingUid == -1 ? Process.SYSTEM_UID : callingUid,
-                    ActivityManagerService.getShortAction(intent.getAction()),
+                    intent.getAction(),
                     BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
                     BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                     dispatchDelay, receiveDelay, 0 /* finish_delay */);
@@ -1890,8 +1886,11 @@ public final class BroadcastQueue {
                 processCurBroadcastLocked(r, app);
                 return;
             } catch (RemoteException e) {
-                Slog.w(TAG, "Exception when sending broadcast to "
-                      + r.curComponent, e);
+                final String msg = "Failed to schedule " + r.intent + " to " + info
+                        + " via " + app + ": " + e;
+                Slog.w(TAG, msg);
+                app.killLocked("Can't deliver broadcast", ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_UNDELIVERED_BROADCAST, true);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Failed sending broadcast to "
                         + r.curComponent + " with " + r.intent, e);

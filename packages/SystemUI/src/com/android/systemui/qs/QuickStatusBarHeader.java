@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.DisplayCutout;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
@@ -231,6 +232,16 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        // If using combined headers, only react to touches inside QuickQSPanel
+        if (!mUseCombinedQSHeader || event.getY() > mHeaderQsPanel.getTop()) {
+            return super.onTouchEvent(event);
+        } else {
+            return false;
+        }
+    }
+
     void updateResources() {
         Resources resources = mContext.getResources();
         boolean largeScreenHeaderActive =
@@ -277,8 +288,15 @@ public class QuickStatusBarHeader extends FrameLayout {
         }
 
         MarginLayoutParams qqsLP = (MarginLayoutParams) mHeaderQsPanel.getLayoutParams();
-        qqsLP.topMargin = largeScreenHeaderActive || !mUseCombinedQSHeader ? mContext.getResources()
-                .getDimensionPixelSize(R.dimen.qqs_layout_margin_top) : qsOffsetHeight;
+        if (largeScreenHeaderActive) {
+            qqsLP.topMargin = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.qqs_layout_margin_top);
+        } else if (!mUseCombinedQSHeader) {
+            qqsLP.topMargin = qsOffsetHeight;
+        } else {
+            qqsLP.topMargin = mContext.getResources()
+                    .getDimensionPixelSize(R.dimen.large_screen_shade_header_min_height);
+        }
         mHeaderQsPanel.setLayoutParams(qqsLP);
 
         updateBatteryMode();
@@ -410,9 +428,9 @@ public class QuickStatusBarHeader extends FrameLayout {
         // If forceExpanded (we are opening QS from lockscreen), the animators have been set to
         // position = 1f.
         if (forceExpanded) {
-            setTranslationY(panelTranslationY);
+            setAlpha(expansionFraction);
         } else {
-            setTranslationY(0);
+            setAlpha(1);
         }
 
         mKeyguardExpansionFraction = keyguardExpansionFraction;

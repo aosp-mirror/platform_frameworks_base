@@ -417,7 +417,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
     }
 
     @Override
-    public void onTrustChanged(boolean enabled, int userId, int flags,
+    public void onTrustChanged(boolean enabled, boolean newlyUnlocked, int userId, int flags,
             List<String> trustGrantedMessages) {
         mUserHasTrust.put(userId, enabled);
     }

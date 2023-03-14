@@ -20,7 +20,7 @@ import android.content.Context
 import android.database.ContentObserver
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
+import com.android.systemui.util.settings.GlobalSettings
 
 /**
  * Class to track the availability of [DemoMode]. Use this class to track the availability and
@@ -29,7 +29,10 @@ import android.provider.Settings
  * This class works by wrapping a content observer for the relevant keys related to DemoMode
  * availability and current on/off state, and triggering callbacks.
  */
-abstract class DemoModeAvailabilityTracker(val context: Context) {
+abstract class DemoModeAvailabilityTracker(
+    val context: Context,
+    val globalSettings: GlobalSettings,
+) {
     var isInDemoMode = false
     var isDemoModeAvailable = false
 
@@ -41,9 +44,9 @@ abstract class DemoModeAvailabilityTracker(val context: Context) {
     fun startTracking() {
         val resolver = context.contentResolver
         resolver.registerContentObserver(
-                Settings.Global.getUriFor(DEMO_MODE_ALLOWED), false, allowedObserver)
+                globalSettings.getUriFor(DEMO_MODE_ALLOWED), false, allowedObserver)
         resolver.registerContentObserver(
-                Settings.Global.getUriFor(DEMO_MODE_ON), false, onObserver)
+                globalSettings.getUriFor(DEMO_MODE_ON), false, onObserver)
     }
 
     fun stopTracking() {
@@ -57,12 +60,11 @@ abstract class DemoModeAvailabilityTracker(val context: Context) {
     abstract fun onDemoModeFinished()
 
     private fun checkIsDemoModeAllowed(): Boolean {
-        return Settings.Global
-                .getInt(context.contentResolver, DEMO_MODE_ALLOWED, 0) != 0
+        return globalSettings.getInt(DEMO_MODE_ALLOWED, 0) != 0
     }
 
     private fun checkIsDemoModeOn(): Boolean {
-        return Settings.Global.getInt(context.contentResolver, DEMO_MODE_ON, 0) != 0
+        return globalSettings.getInt(DEMO_MODE_ON, 0) != 0
     }
 
     private val allowedObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {

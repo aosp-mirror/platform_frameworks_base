@@ -44,9 +44,11 @@
                 </xs:element>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
-                <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
+                <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="autoBrightness" name="autoBrightness" minOccurs="0"
-                            maxOccurs="1" />
+                            maxOccurs="1"/>
+                <xs:element type="refreshRateConfigs" name="refreshRate" minOccurs="0"
+                            maxOccurs="1"/>
                 <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastDecrease">
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -70,6 +72,9 @@
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="lightSensor">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="sensorDetails" name="screenOffBrightnessSensor">
                     <xs:annotation name="final"/>
                 </xs:element>
                 <xs:element type="sensorDetails" name="proxSensor">
@@ -105,6 +110,11 @@
                 <!-- Set of thresholds that dictate the change needed for ambient brightness
                 adaptations while in idle mode -->
                 <xs:element type="thresholds" name="ambientBrightnessChangeThresholdsIdle" minOccurs="0" maxOccurs="1">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <!-- Table that translates sensor values from the screenOffBrightnessSensor
+                to lux values; -1 means the lux reading is not available. -->
+                <xs:element type="integer-array" name="screenOffBrightnessSensorValueToLux">
                     <xs:annotation name="final"/>
                 </xs:element>
             </xs:sequence>
@@ -324,7 +334,7 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
-      </xs:complexType>
+    </xs:complexType>
 
     <!-- Thresholds for brightness changes. -->
     <xs:complexType name="thresholds">
@@ -351,9 +361,39 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:sequence>
+            <!--  Thresholds as tenths of percent of current brightness level, at each level of
+                brightness -->
+            <xs:element name="brightnessThresholdPoints" type="thresholdPoints" maxOccurs="1" minOccurs="0">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="thresholdPoints">
+        <xs:sequence>
+            <xs:element type="thresholdPoint" name="brightnessThresholdPoint" maxOccurs="unbounded" minOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="thresholdPoint">
+        <xs:sequence>
+            <xs:element type="nonNegativeDecimal" name="threshold">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="percentage">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="autoBrightness">
+        <xs:attribute name="enabled" type="xs:boolean" use="optional" default="true"/>
         <xs:sequence>
             <!-- Sets the debounce for autoBrightness brightening in millis-->
             <xs:element name="brighteningLightDebounceMillis" type="xs:nonNegativeInteger"
@@ -420,6 +460,43 @@
                         minOccurs="1" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refreshRateConfigs">
+        <xs:element name="lowerBlockingZoneConfigs" type="blockingZoneConfig"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="higherBlockingZoneConfigs" type="blockingZoneConfig"
+                    minOccurs="0" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="blockingZoneConfig">
+        <xs:element name="defaultRefreshRate" type="xs:nonNegativeInteger"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="blockingZoneThreshold" type="blockingZoneThreshold"
+                    minOccurs="1" maxOccurs="1">
+            <xs:annotation name="final"/>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:complexType name="blockingZoneThreshold">
+        <xs:sequence>
+            <xs:element name="displayBrightnessPoint" type="displayBrightnessPoint"
+                        minOccurs="1" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="integer-array">
+        <xs:sequence>
+            <xs:element name="item" type="xs:nonNegativeInteger" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 </xs:schema>

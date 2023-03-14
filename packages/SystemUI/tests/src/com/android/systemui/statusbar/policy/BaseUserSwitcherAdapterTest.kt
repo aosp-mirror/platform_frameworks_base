@@ -237,7 +237,7 @@ class BaseUserSwitcherAdapterTest : SysuiTestCase() {
     fun refresh() {
         underTest.refresh()
 
-        verify(controller).refreshUsers(UserHandle.USER_NULL)
+        verify(controller).refreshUsers()
     }
 
     private fun createUserRecord(

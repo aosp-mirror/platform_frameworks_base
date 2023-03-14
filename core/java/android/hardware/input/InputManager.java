@@ -30,6 +30,7 @@ import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.hardware.BatteryState;
 import android.hardware.SensorManager;
 import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
@@ -66,6 +67,7 @@ import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
 import android.view.WindowManager.LayoutParams;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
@@ -74,6 +76,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Provides information about input devices and available key layouts.
@@ -110,6 +114,14 @@ public final class InputManager {
     private final Object mTabletModeLock = new Object();
     private TabletModeChangedListener mTabletModeChangedListener;
     private List<OnTabletModeChangedListenerDelegate> mOnTabletModeChangedListeners;
+
+    private final Object mBatteryListenersLock = new Object();
+    // Maps a deviceId whose battery is currently being monitored to an entry containing the
+    // registered listeners for that device.
+    @GuardedBy("mBatteryListenersLock")
+    private SparseArray<RegisteredBatteryListeners> mBatteryListeners;
+    @GuardedBy("mBatteryListenersLock")
+    private IInputDeviceBatteryListener mInputDeviceBatteryListener;
 
     private InputDeviceSensorManager mInputDeviceSensorManager;
     /**
@@ -1752,6 +1764,177 @@ public final class InputManager {
     }
 
     /**
+     * Adds a battery listener to be notified about {@link BatteryState} changes for an input
+     * device. The same listener can be registered for multiple input devices.
+     * The listener will be notified of the initial battery state of the device after it is
+     * successfully registered.
+     * @param deviceId the input device that should be monitored
+     * @param executor an executor on which the callback will be called
+     * @param listener the {@link InputDeviceBatteryListener}
+     * @see #removeInputDeviceBatteryListener(int, InputDeviceBatteryListener)
+     * @hide
+     */
+    public void addInputDeviceBatteryListener(int deviceId, @NonNull Executor executor,
+            @NonNull InputDeviceBatteryListener listener) {
+        Objects.requireNonNull(executor, "executor should not be null");
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mBatteryListenersLock) {
+            if (mBatteryListeners == null) {
+                mBatteryListeners = new SparseArray<>();
+                mInputDeviceBatteryListener = new LocalInputDeviceBatteryListener();
+            }
+            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
+            if (listenersForDevice == null) {
+                // The deviceId is currently not being monitored for battery changes.
+                // Start monitoring the device.
+                listenersForDevice = new RegisteredBatteryListeners();
+                mBatteryListeners.put(deviceId, listenersForDevice);
+                try {
+                    mIm.registerBatteryListener(deviceId, mInputDeviceBatteryListener);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            } else {
+                // The deviceId is already being monitored for battery changes.
+                // Ensure that the listener is not already registered.
+                for (InputDeviceBatteryListenerDelegate delegate : listenersForDevice.mDelegates) {
+                    if (Objects.equals(listener, delegate.mListener)) {
+                        throw new IllegalArgumentException(
+                                "Attempting to register an InputDeviceBatteryListener that has "
+                                        + "already been registered for deviceId: "
+                                        + deviceId);
+                    }
+                }
+            }
+            final InputDeviceBatteryListenerDelegate delegate =
+                    new InputDeviceBatteryListenerDelegate(listener, executor);
+            listenersForDevice.mDelegates.add(delegate);
+
+            // Notify the listener immediately if we already have the latest battery state.
+            if (listenersForDevice.mLatestBatteryState != null) {
+                delegate.notifyBatteryStateChanged(listenersForDevice.mLatestBatteryState);
+            }
+        }
+    }
+
+    /**
+     * Pilfer pointers from an input channel.
+     *
+     * Takes all the current pointer event streams that are currently being sent to the given
+     * input channel and generates appropriate cancellations for all other windows that are
+     * receiving these pointers.
+     *
+     * This API is intended to be used in conjunction with spy windows. When a spy window pilfers
+     * pointers, the foreground windows and all other spy windows that are receiving any of the
+     * pointers that are currently being dispatched to the pilfering window will have those pointers
+     * canceled. Only the pilfering window will continue to receive events for the affected pointers
+     * until the pointer is lifted.
+     *
+     * This method should be used with caution as unexpected pilfering can break fundamental user
+     * interactions.
+     *
+     * @see android.os.InputConfig#SPY
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MONITOR_INPUT)
+    public void pilferPointers(IBinder inputChannelToken) {
+        try {
+            mIm.pilferPointers(inputChannelToken);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a previously registered battery listener for an input device.
+     * @see #addInputDeviceBatteryListener(int, Executor, InputDeviceBatteryListener)
+     * @hide
+     */
+    public void removeInputDeviceBatteryListener(int deviceId,
+            @NonNull InputDeviceBatteryListener listener) {
+        Objects.requireNonNull(listener, "listener should not be null");
+
+        synchronized (mBatteryListenersLock) {
+            if (mBatteryListeners == null) {
+                return;
+            }
+            RegisteredBatteryListeners listenersForDevice = mBatteryListeners.get(deviceId);
+            if (listenersForDevice == null) {
+                // The deviceId is not currently being monitored.
+                return;
+            }
+            final List<InputDeviceBatteryListenerDelegate> delegates =
+                    listenersForDevice.mDelegates;
+            for (int i = 0; i < delegates.size();) {
+                if (Objects.equals(listener, delegates.get(i).mListener)) {
+                    delegates.remove(i);
+                    continue;
+                }
+                i++;
+            }
+            if (!delegates.isEmpty()) {
+                return;
+            }
+
+            // There are no more battery listeners for this deviceId. Stop monitoring this device.
+            mBatteryListeners.remove(deviceId);
+            try {
+                mIm.unregisterBatteryListener(deviceId, mInputDeviceBatteryListener);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            if (mBatteryListeners.size() == 0) {
+                // There are no more devices being monitored, so the registered
+                // IInputDeviceBatteryListener will be automatically dropped by the server.
+                mBatteryListeners = null;
+                mInputDeviceBatteryListener = null;
+            }
+        }
+    }
+
+    /**
+     * Whether stylus has ever been used on device (false by default).
+     * @hide
+     */
+    public boolean isStylusEverUsed(@NonNull Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                        Settings.Global.STYLUS_EVER_USED, 0) == 1;
+    }
+
+    /**
+     * Set whether stylus has ever been used on device.
+     * Should only ever be set to true once after stylus first usage.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void setStylusEverUsed(@NonNull Context context, boolean stylusEverUsed) {
+        Settings.Global.putInt(context.getContentResolver(),
+                Settings.Global.STYLUS_EVER_USED, stylusEverUsed ? 1 : 0);
+    }
+
+    /**
+     * A callback used to be notified about battery state changes for an input device. The
+     * {@link #onBatteryStateChanged(int, long, BatteryState)} method will be called once after the
+     * listener is successfully registered to provide the initial battery state of the device.
+     * @see InputDevice#getBatteryState()
+     * @see #addInputDeviceBatteryListener(int, Executor, InputDeviceBatteryListener)
+     * @see #removeInputDeviceBatteryListener(int, InputDeviceBatteryListener)
+     * @hide
+     */
+    public interface InputDeviceBatteryListener {
+        /**
+         * Called when the battery state of an input device changes.
+         * @param deviceId the input device for which the battery changed.
+         * @param eventTimeMillis the time (in ms) when the battery change took place.
+         *        This timestamp is in the {@link SystemClock#uptimeMillis()} time base.
+         * @param batteryState the new battery state, never null.
+         */
+        void onBatteryStateChanged(
+                int deviceId, long eventTimeMillis, @NonNull BatteryState batteryState);
+    }
+
+    /**
      * Listens for changes in input devices.
      */
     public interface InputDeviceListener {
@@ -1858,6 +2041,78 @@ public final class InputManager {
                     boolean inTabletMode = (boolean) args.arg1;
                     mListener.onTabletModeChanged(whenNanos, inTabletMode);
                     break;
+            }
+        }
+    }
+
+    private static final class LocalBatteryState extends BatteryState {
+        final int mDeviceId;
+        final boolean mIsPresent;
+        final int mStatus;
+        final float mCapacity;
+        final long mEventTime;
+
+        LocalBatteryState(int deviceId, boolean isPresent, int status, float capacity,
+                long eventTime) {
+            mDeviceId = deviceId;
+            mIsPresent = isPresent;
+            mStatus = status;
+            mCapacity = capacity;
+            mEventTime = eventTime;
+        }
+
+        @Override
+        public boolean isPresent() {
+            return mIsPresent;
+        }
+
+        @Override
+        public int getStatus() {
+            return mStatus;
+        }
+
+        @Override
+        public float getCapacity() {
+            return mCapacity;
+        }
+    }
+
+    private static final class RegisteredBatteryListeners {
+        final List<InputDeviceBatteryListenerDelegate> mDelegates = new ArrayList<>();
+        LocalBatteryState mLatestBatteryState;
+    }
+
+    private static final class InputDeviceBatteryListenerDelegate {
+        final InputDeviceBatteryListener mListener;
+        final Executor mExecutor;
+
+        InputDeviceBatteryListenerDelegate(InputDeviceBatteryListener listener, Executor executor) {
+            mListener = listener;
+            mExecutor = executor;
+        }
+
+        void notifyBatteryStateChanged(LocalBatteryState batteryState) {
+            mExecutor.execute(() ->
+                    mListener.onBatteryStateChanged(batteryState.mDeviceId, batteryState.mEventTime,
+                            batteryState));
+        }
+    }
+
+    private class LocalInputDeviceBatteryListener extends IInputDeviceBatteryListener.Stub {
+        @Override
+        public void onBatteryStateChanged(int deviceId, boolean isBatteryPresent, int status,
+                float capacity, long eventTime) {
+            synchronized (mBatteryListenersLock) {
+                if (mBatteryListeners == null) return;
+                final RegisteredBatteryListeners entry = mBatteryListeners.get(deviceId);
+                if (entry == null) return;
+
+                entry.mLatestBatteryState =
+                        new LocalBatteryState(
+                                deviceId, isBatteryPresent, status, capacity, eventTime);
+                for (InputDeviceBatteryListenerDelegate delegate : entry.mDelegates) {
+                    delegate.notifyBatteryStateChanged(entry.mLatestBatteryState);
+                }
             }
         }
     }

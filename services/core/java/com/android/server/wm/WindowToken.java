@@ -258,7 +258,7 @@ class WindowToken extends WindowContainer<WindowState> {
      * @return The scale for applications running in compatibility mode. Multiply the size in the
      *         application by this scale will be the size in the screen.
      */
-    float getSizeCompatScale() {
+    float getCompatScale() {
         return mDisplayContent.mCompatibleScreenScale;
     }
 
@@ -588,9 +588,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 .setCallsite("WindowToken.getOrCreateFixedRotationLeash")
                 .build();
         t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
-        t.show(leash);
         t.reparent(getSurfaceControl(), leash);
-        t.setAlpha(getSurfaceControl(), 1.f);
         mFixedRotationTransformLeash = leash;
         updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
         return mFixedRotationTransformLeash;

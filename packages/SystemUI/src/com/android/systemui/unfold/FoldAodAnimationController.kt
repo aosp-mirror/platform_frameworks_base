@@ -16,6 +16,7 @@
 
 package com.android.systemui.unfold
 
+import android.annotation.BinderThread
 import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.PowerManager
@@ -41,7 +42,6 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 /**
@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 class FoldAodAnimationController
 @Inject
 constructor(
-    @Main private val executor: DelayableExecutor,
+    @Main private val mainExecutor: DelayableExecutor,
     private val context: Context,
     private val deviceStateManager: DeviceStateManager,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
@@ -89,9 +89,10 @@ constructor(
     override fun initialize(centralSurfaces: CentralSurfaces, lightRevealScrim: LightRevealScrim) {
         this.centralSurfaces = centralSurfaces
 
-        deviceStateManager.registerCallback(executor, FoldListener())
+        deviceStateManager.registerCallback(mainExecutor, FoldListener())
         wakefulnessLifecycle.addObserver(this)
 
+        // TODO(b/254878364): remove this call to NPVC.getView()
         centralSurfaces.notificationPanelViewController.view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) { listenForDozing(this) }
         }
@@ -138,7 +139,8 @@ constructor(
      * @param onReady callback when the animation is ready
      * @see [com.android.systemui.keyguard.KeyguardViewMediator]
      */
-    fun onScreenTurningOn(onReady: Runnable) {
+    @BinderThread
+    fun onScreenTurningOn(onReady: Runnable) = mainExecutor.execute {
         if (shouldPlayAnimation) {
             // The device was not dozing and going to sleep after folding, play the animation
 
@@ -157,6 +159,7 @@ constructor(
             // We don't need to wait for the scrim as it is already displayed
             // but we should wait for the initial animation preparations to be drawn
             // (setting initial alpha/translation)
+            // TODO(b/254878364): remove this call to NPVC.getView()
             OneShotPreDrawListener.add(
                 centralSurfaces.notificationPanelViewController.view,
                 onReady
@@ -177,12 +180,13 @@ constructor(
         }
     }
 
-    fun onScreenTurnedOn() {
+    @BinderThread
+    fun onScreenTurnedOn() = mainExecutor.execute {
         if (shouldPlayAnimation) {
             cancelAnimation?.run()
 
             // Post starting the animation to the next frame to avoid junk due to inset changes
-            cancelAnimation = executor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
+            cancelAnimation = mainExecutor.executeDelayed(startAnimationRunnable, /* delayMillis= */ 0)
             shouldPlayAnimation = false
         }
     }
