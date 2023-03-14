@@ -43,6 +43,8 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -132,6 +134,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
         when(mKeyguardTransitionInteractor.getLockscreenToDreamingTransition())
                 .thenReturn(emptyFlow());
 
+        FakeFeatureFlags featureFlags = new FakeFeatureFlags();
+        featureFlags.set(Flags.TRACKPAD_GESTURE_BACK, false);
         mController = new NotificationShadeWindowViewController(
                 mLockscreenShadeTransitionController,
                 new FalsingCollectorFake(),
@@ -156,7 +160,8 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mAlternateBouncerInteractor,
                 mUdfpsOverlayInteractor,
                 mKeyguardTransitionInteractor,
-                mPrimaryBouncerToGoneTransitionViewModel
+                mPrimaryBouncerToGoneTransitionViewModel,
+                featureFlags
         );
         mController.setupExpandedStatusBar();
         mController.setDragDownHelper(mDragDownHelper);
