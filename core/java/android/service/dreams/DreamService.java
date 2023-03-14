@@ -1362,6 +1362,11 @@ public class DreamService extends Service implements Window.Callback {
                 if (!ActivityTaskManager.getService().startDreamActivity(i)) {
                     detach();
                 }
+            } catch (SecurityException e) {
+                Log.w(mTag,
+                        "Received SecurityException trying to start DreamActivity. "
+                        + "Aborting dream start.");
+                detach();
             } catch (RemoteException e) {
                 Log.w(mTag, "Could not connect to activity task manager to start dream activity");
                 e.rethrowFromSystemServer();
