@@ -844,4 +844,44 @@
 
     <!-- Configuration to set Learn more in device logs as URL link -->
     <bool name="log_access_confirmation_learn_more_as_link">true</bool>
+
+    <!-- [START] MULTI SHADE -->
+    <!-- Whether the device should use dual shade. If false, the device uses single shade. -->
+    <bool name="dual_shade_enabled">true</bool>
+    <!--
+    When in dual shade, where should the horizontal split be on the screen to help determine whether
+    the user is pulling down the left shade or the right shade. Must be between 0.0 and 1.0,
+    inclusive. In other words: how much of the left-hand side of the screen, when pulled down on,
+    would reveal the left-hand side shade.
+
+    More concretely:
+    A value of 0.67 means that the left two-thirds of the screen are dedicated to the left-hand side
+    shade and the remaining one-third of the screen on the right is dedicated to the right-hand side
+    shade.
+    -->
+    <dimen name="dual_shade_split_fraction">0.67</dimen>
+    <!-- Width of the left-hand side shade. -->
+    <dimen name="left_shade_width">436dp</dimen>
+    <!-- Width of the right-hand side shade. -->
+    <dimen name="right_shade_width">436dp</dimen>
+    <!--
+    Opaque version of the scrim that shows up behind dual shades. The alpha channel is driven
+    programmatically.
+    -->
+    <color name="opaque_scrim">#D9D9D9</color>
+    <!-- Maximum opacity when the scrim that shows up behind the dual shades is fully visible. -->
+    <dimen name="dual_shade_scrim_alpha">0.1</dimen>
+    <!--
+    The amount that the user must swipe down when the shade is fully collapsed to automatically
+    expand once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully collapsed once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_expand_threshold">0.5</dimen>
+    <!--
+    The amount that the user must swipe up when the shade is fully expanded to automatically
+    collapse once the user lets go of the shade. If the user swipes less than this amount, the shade
+    will automatically revert back to fully expanded once the user stops swiping.
+    -->
+    <dimen name="shade_swipe_collapse_threshold">0.5</dimen>
+    <!-- [END] MULTI SHADE -->
 </resources>
