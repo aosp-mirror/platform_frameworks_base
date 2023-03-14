@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.phone;
 import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN;
 import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -729,30 +728,62 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAlternateBouncerOnTouch_actionDown_doesNotHandleTouch() {
+    public void testAlternateBouncerOnTouch_actionDownThenUp_noMinTimeShown_noHideAltBouncer() {
+        reset(mAlternateBouncerInteractor);
+
         // GIVEN the alternate bouncer has shown for a minimum amount of time
-        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(false);
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
-        // WHEN ACTION_DOWN touch event comes
-        boolean touchHandled = mStatusBarKeyguardViewManager.onTouch(
+        // WHEN ACTION_DOWN and ACTION_UP touch event comes
+        boolean touchHandledDown = mStatusBarKeyguardViewManager.onTouch(
                 MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
+        boolean touchHandledUp = mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
 
-        // THEN the touch is not handled
-        assertFalse(touchHandled);
+        // THEN the touches are handled (doesn't let touches through to underlying views)
+        assertTrue(touchHandledDown);
+        assertTrue(touchHandledUp);
+
+        // THEN alternate bouncer does NOT attempt to hide since min showing time wasn't met
+        verify(mAlternateBouncerInteractor, never()).hide();
     }
 
     @Test
-    public void testAlternateBouncerOnTouch_actionUp_handlesTouch() {
+    public void testAlternateBouncerOnTouch_actionDownThenUp_handlesTouch_hidesAltBouncer() {
+        reset(mAlternateBouncerInteractor);
+
         // GIVEN the alternate bouncer has shown for a minimum amount of time
         when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
-        // WHEN ACTION_UP touch event comes
-        boolean touchHandled = mStatusBarKeyguardViewManager.onTouch(
+        // WHEN ACTION_DOWN and ACTION_UP touch event comes
+        boolean touchHandledDown = mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0));
+        boolean touchHandledUp = mStatusBarKeyguardViewManager.onTouch(
                 MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
 
-        // THEN the touch is handled
-        assertTrue(touchHandled);
+        // THEN the touches are handled
+        assertTrue(touchHandledDown);
+        assertTrue(touchHandledUp);
+
+        // THEN alternate bouncer attempts to hide
+        verify(mAlternateBouncerInteractor).hide();
+    }
+
+    @Test
+    public void testAlternateBouncerOnTouch_actionUp_doesNotHideAlternateBouncer() {
+        reset(mAlternateBouncerInteractor);
+
+        // GIVEN the alternate bouncer has shown for a minimum amount of time
+        when(mAlternateBouncerInteractor.hasAlternateBouncerShownWithMinTime()).thenReturn(true);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
+
+        // WHEN only ACTION_UP touch event comes
+        mStatusBarKeyguardViewManager.onTouch(
+                MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0));
+
+        // THEN the alternateBouncer doesn't hide
+        verify(mAlternateBouncerInteractor, never()).hide();
     }
 }
