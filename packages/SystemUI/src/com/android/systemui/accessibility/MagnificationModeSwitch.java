@@ -401,7 +401,7 @@ class MagnificationModeSwitch implements MagnificationGestureDetector.OnGestureL
 
     private static ImageView createView(Context context) {
         ImageView imageView = new ImageView(context);
-        imageView.setScaleType(ImageView.ScaleType.CENTER);
+        imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setClickable(true);
         imageView.setFocusable(true);
         imageView.setAlpha(0f);

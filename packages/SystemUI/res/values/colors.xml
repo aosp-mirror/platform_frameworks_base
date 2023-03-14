@@ -162,7 +162,6 @@
 
     <!-- Window magnification colors -->
     <color name="magnification_border_color">#F29900</color>
-    <color name="magnification_switch_button_color">#7F000000</color>
     <color name="magnification_drag_corner_background">#E5FFFFFF</color>
     <color name="magnification_drag_handle_stroke">#000000</color>
     <color name="magnification_drag_handle_background_change">#111111</color>
