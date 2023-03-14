@@ -67,6 +67,7 @@ class SplitScreenTransitions {
 
     DismissTransition mPendingDismiss = null;
     TransitSession mPendingEnter = null;
+    TransitSession mPendingRecent = null;
     TransitSession mPendingResize = null;
 
     private IBinder mAnimatingTransition = null;
@@ -256,6 +257,10 @@ class SplitScreenTransitions {
         return mPendingEnter != null && mPendingEnter.mTransition == transition;
     }
 
+    boolean isPendingRecent(IBinder transition) {
+        return mPendingRecent != null && mPendingRecent.mTransition == transition;
+    }
+
     boolean isPendingDismiss(IBinder transition) {
         return mPendingDismiss != null && mPendingDismiss.mTransition == transition;
     }
@@ -268,6 +273,8 @@ class SplitScreenTransitions {
     private TransitSession getPendingTransition(IBinder transition) {
         if (isPendingEnter(transition)) {
             return mPendingEnter;
+        } else if (isPendingRecent(transition)) {
+            return mPendingRecent;
         } else if (isPendingDismiss(transition)) {
             return mPendingDismiss;
         } else if (isPendingResize(transition)) {
@@ -351,9 +358,31 @@ class SplitScreenTransitions {
                 + " deduced Resize split screen");
     }
 
+    void setRecentTransition(@NonNull IBinder transition,
+            @Nullable RemoteTransition remoteTransition,
+            @Nullable TransitionFinishedCallback finishCallback) {
+        mPendingRecent = new TransitSession(transition, null /* consumedCb */, finishCallback);
+
+        if (remoteTransition != null) {
+            // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)
+            mPendingRemoteHandler = new OneShotRemoteHandler(
+                    mTransitions.getMainExecutor(), remoteTransition);
+            mPendingRemoteHandler.setTransition(transition);
+        }
+
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
+                + " deduced Enter recent panel");
+    }
+
     void mergeAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
             IBinder mergeTarget, Transitions.TransitionFinishCallback finishCallback) {
         if (mergeTarget != mAnimatingTransition) return;
+
+        if (isPendingEnter(transition) && isPendingRecent(mergeTarget)) {
+            // Since there's an entering transition merged, recent transition no longer
+            // need to handle entering split screen after the transition finished.
+            mPendingRecent.setFinishedCallback(null);
+        }
 
         if (mActiveRemoteHandler != null) {
             mActiveRemoteHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
@@ -391,6 +420,10 @@ class SplitScreenTransitions {
         } else if (isPendingDismiss(transition)) {
             mPendingDismiss.onConsumed(aborted);
             mPendingDismiss = null;
+        } else if (isPendingRecent(transition)) {
+            mPendingRecent.onConsumed(aborted);
+            mPendingRecent = null;
+            mPendingRemoteHandler = null;
         } else if (isPendingResize(transition)) {
             mPendingResize.onConsumed(aborted);
             mPendingResize = null;
@@ -404,6 +437,9 @@ class SplitScreenTransitions {
         if (isPendingEnter(mAnimatingTransition)) {
             mPendingEnter.onFinished(wct, mFinishTransaction);
             mPendingEnter = null;
+        } else if (isPendingRecent(mAnimatingTransition)) {
+            mPendingRecent.onFinished(wct, mFinishTransaction);
+            mPendingRecent = null;
         } else if (isPendingDismiss(mAnimatingTransition)) {
             mPendingDismiss.onFinished(wct, mFinishTransaction);
             mPendingDismiss = null;
@@ -513,7 +549,7 @@ class SplitScreenTransitions {
     }
 
     /** Calls when the transition finished. */
-    public interface TransitionFinishedCallback {
+    interface TransitionFinishedCallback {
         void onFinished(WindowContainerTransaction wct, SurfaceControl.Transaction t);
     }
 
