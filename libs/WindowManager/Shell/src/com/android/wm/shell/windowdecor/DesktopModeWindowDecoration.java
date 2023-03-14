@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -46,6 +47,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 
 /**
  * Defines visuals and behaviors of a window decoration of a caption bar and shadows. It works with
@@ -93,6 +95,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
         mDesktopActive = DesktopModeStatus.isActive(mContext);
+    }
+
+    @Override
+    protected Configuration getConfigurationWithOverrides(
+            ActivityManager.RunningTaskInfo taskInfo) {
+        Configuration configuration = taskInfo.getConfiguration();
+        if (DesktopTasksController.isDesktopDensityOverrideSet()) {
+            // Density is overridden for desktop tasks. Keep system density for window decoration.
+            configuration.densityDpi = mContext.getResources().getConfiguration().densityDpi;
+        }
+        return configuration;
     }
 
     void setCaptionListeners(

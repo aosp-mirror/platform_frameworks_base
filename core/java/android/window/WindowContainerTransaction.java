@@ -122,6 +122,19 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets the densityDpi value in the configuration for the given container.
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setDensityDpi(@NonNull WindowContainerToken container,
+            int densityDpi) {
+        Change chg = getOrCreateChange(container.asBinder());
+        chg.mConfiguration.densityDpi = densityDpi;
+        chg.mConfigSetMask |= ActivityInfo.CONFIG_DENSITY;
+        return this;
+    }
+
+    /**
      * Notify {@link com.android.server.wm.PinnedTaskController} that the picture-in-picture task
      * has finished the enter animation with the given bounds.
      */
