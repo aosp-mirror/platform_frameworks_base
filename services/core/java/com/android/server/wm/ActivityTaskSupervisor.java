@@ -1666,7 +1666,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             String callerActivityClassName) {
         // We may have already checked that the callingUid has additional clearTask privileges, and
         // cleared the calling identify. If so, we infer we do not need further restrictions here.
-        if (callingUid == SYSTEM_UID) {
+        if (callingUid == SYSTEM_UID || !task.isVisible() || task.inMultiWindowMode()) {
             return;
         }
 
@@ -1772,13 +1772,19 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return new Pair<>(true, true);
         }
 
+        // Always allow actual top activity to clear task
+        ActivityRecord topActivity = task.getTopMostActivity();
+        if (topActivity != null && topActivity.isUid(uid)) {
+            return new Pair<>(true, true);
+        }
+
         // Consider the source activity, whether or not it is finishing. Do not consider any other
         // finishing activity.
         Predicate<ActivityRecord> topOfStackPredicate = (ar) -> ar.equals(sourceRecord)
                 || (!ar.finishing && !ar.isAlwaysOnTop());
 
         // Check top of stack (or the first task fragment for embedding).
-        ActivityRecord topActivity = task.getActivity(topOfStackPredicate);
+        topActivity = task.getActivity(topOfStackPredicate);
         if (topActivity == null) {
             return new Pair<>(false, false);
         }
