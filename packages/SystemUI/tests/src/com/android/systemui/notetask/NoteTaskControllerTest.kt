@@ -216,6 +216,41 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun showNoteTaskWithUser_keyguardIsLocked_shouldStartActivityWithExpectedUserAndLogUiEvent() {
+        val user10 = UserHandle.of(/* userId= */ 10)
+        val expectedInfo =
+            noteTaskInfo.copy(
+                entryPoint = NoteTaskEntryPoint.TAIL_BUTTON,
+                isKeyguardLocked = true,
+            )
+        whenever(keyguardManager.isKeyguardLocked).thenReturn(expectedInfo.isKeyguardLocked)
+        whenever(resolver.resolveInfo(any(), any())).thenReturn(expectedInfo)
+
+        createNoteTaskController()
+            .showNoteTaskAsUser(
+                entryPoint = expectedInfo.entryPoint!!,
+                user = user10,
+            )
+
+        val intentCaptor = argumentCaptor<Intent>()
+        val userCaptor = argumentCaptor<UserHandle>()
+        verify(context).startActivityAsUser(capture(intentCaptor), capture(userCaptor))
+        intentCaptor.value.let { intent ->
+            assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
+            assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_TASK).isEqualTo(FLAG_ACTIVITY_NEW_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_MULTIPLE_TASK)
+                .isEqualTo(FLAG_ACTIVITY_MULTIPLE_TASK)
+            assertThat(intent.flags and FLAG_ACTIVITY_NEW_DOCUMENT)
+                .isEqualTo(FLAG_ACTIVITY_NEW_DOCUMENT)
+            assertThat(intent.getBooleanExtra(Intent.EXTRA_USE_STYLUS_MODE, false)).isTrue()
+        }
+        assertThat(userCaptor.value).isEqualTo(user10)
+        verify(eventLogger).logNoteTaskOpened(expectedInfo)
+        verifyZeroInteractions(bubbles)
+    }
+
+    @Test
     fun showNoteTask_keyguardIsUnlocked_shouldStartBubblesWithoutLoggingUiEvent() {
         val expectedInfo =
             noteTaskInfo.copy(
