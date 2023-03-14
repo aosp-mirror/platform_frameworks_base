@@ -21,11 +21,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.tests.enforcepermission.IProtected;
 import android.util.Log;
@@ -125,5 +127,62 @@ public class ServiceTest {
     public void testImmediatePermissionGrantedAndImplicitNestedGranted_succeeds()
             throws RemoteException {
         mServiceConnection.get().ProtectedByInternetAndReadSyncSettingsImplicitly();
+    }
+
+    @Test
+    public void testAppOpPermissionGranted_succeeds() throws RemoteException {
+        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+        appOpsManager.setUidMode(AppOpsManager.OP_TURN_SCREEN_ON,
+                Process.myUid(), AppOpsManager.MODE_ALLOWED);
+
+        mServiceConnection.get().ProtectedByTurnScreenOn();
+    }
+
+    @Test
+    public void testAppOpPermissionDenied_fails() throws RemoteException {
+        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+        appOpsManager.setUidMode(AppOpsManager.OP_TURN_SCREEN_ON,
+                Process.myUid(), AppOpsManager.MODE_ERRORED);
+
+        final Exception ex = assertThrows(SecurityException.class,
+                () -> mServiceConnection.get().ProtectedByTurnScreenOn());
+        assertThat(ex.getMessage(), containsString("TURN_SCREEN_ON"));
+    }
+
+    @Test
+    public void testRuntimePermissionGranted_succeeds() throws RemoteException {
+        mServiceConnection.get().ProtectedByReadContacts();
+    }
+
+    @Test
+    public void testRuntimePermissionDenied_fails() throws RemoteException {
+        final Exception ex = assertThrows(SecurityException.class,
+                () -> mServiceConnection.get().ProtectedByReadCalendar());
+        assertThat(ex.getMessage(), containsString("READ_CALENDAR"));
+    }
+
+    @Test
+    public void testAllOfPermissionGranted_succeeds() throws RemoteException {
+        mServiceConnection.get().ProtectedByInternetAndReadSyncSettings();
+    }
+
+    @Test
+    public void testAllOfPermissionDenied_fails() throws RemoteException {
+        final Exception ex = assertThrows(SecurityException.class,
+                () -> mServiceConnection.get().ProtectedByInternetAndVibrate());
+        assertThat(ex.getMessage(), containsString("VIBRATE"));
+    }
+
+    @Test
+    public void testAnyOfPermissionGranted_succeeds() throws RemoteException {
+        mServiceConnection.get().ProtectedByInternetOrVibrate();
+    }
+
+    @Test
+    public void testAnyOfPermissionDenied_fails() throws RemoteException {
+        final Exception ex = assertThrows(SecurityException.class,
+                () -> mServiceConnection.get().ProtectedByAccessWifiStateOrVibrate());
+        assertThat(ex.getMessage(), containsString("VIBRATE"));
+        assertThat(ex.getMessage(), containsString("ACCESS_WIFI_STATE"));
     }
 }

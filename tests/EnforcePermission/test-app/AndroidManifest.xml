@@ -16,9 +16,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="android.tests.enforcepermission.tests">
 
-    <!-- Expected for the tests (not actually used) -->
+    <!-- Expected permissions for the tests (not actually used). These
+         are granted automatically at runtime by Tradefed (see
+         GrantPermissionPreparer). -->
+    <!-- normal -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <!-- normal|appops -->
+    <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
+    <!-- dangerous -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <!-- Used by the tests to activate/deactivate AppOps -->
+    <uses-permission android:name="android.permission.MANAGE_APP_OPS_MODES" />
+    <uses-permission android:name="android.permission.MANAGE_APPOPS" />
 
     <queries>
         <package android:name="android.tests.enforcepermission.service" />
