@@ -23,6 +23,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.MANAGE_USERS;
+import static android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
 import static android.app.ActivityManager.INSTR_FLAG_ALWAYS_CHECK_SIGNATURE;
@@ -32,6 +33,7 @@ import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_NO_RESTART;
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_ALL;
+import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
@@ -60,9 +62,22 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
+import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_BTOP;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_TOP;
+import static android.os.PowerExemptionManager.REASON_START_ACTIVITY_FLAG;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
+import static android.os.PowerExemptionManager.REASON_UID_VISIBLE;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
+import static android.os.PowerExemptionManager.getReasonCodeFromProcState;
 import static android.os.Process.BLUETOOTH_UID;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -6538,6 +6553,143 @@ public class ActivityManagerService extends IActivityManager.Stub
             uidRecord.forEachProcess(mGetBackgroundStartPrivilegesFunctor);
             return mGetBackgroundStartPrivilegesFunctor.getResult();
         }
+    }
+
+    /**
+     * Returns true if the reasonCode is included in the base set of reasons an app may be
+     * allowed to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     * This is a shortcut and <b>DOES NOT</b> include all reasons.
+     * Use {@link #canScheduleUserInitiatedJobs(int, int, String)} to cover all cases.
+     */
+    private boolean doesReasonCodeAllowSchedulingUserInitiatedJobs(int reasonCode) {
+        switch (reasonCode) {
+            case REASON_PROC_STATE_PERSISTENT:
+            case REASON_PROC_STATE_PERSISTENT_UI:
+            case REASON_PROC_STATE_TOP:
+            case REASON_PROC_STATE_BTOP:
+            case REASON_UID_VISIBLE:
+            case REASON_SYSTEM_UID:
+            case REASON_START_ACTIVITY_FLAG:
+            case REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD:
+            case REASON_SYSTEM_ALERT_WINDOW_PERMISSION:
+            case REASON_COMPANION_DEVICE_MANAGER:
+            case REASON_BACKGROUND_ACTIVITY_PERMISSION:
+            case REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION:
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if the ProcessRecord has some conditions that allow the app to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     * This is a shortcut and <b>DOES NOT</b> include all reasons.
+     * Use {@link #canScheduleUserInitiatedJobs(int, int, String)} to cover all cases.
+     */
+    @GuardedBy(anyOf = {"this", "mProcLock"})
+    private boolean isProcessInStateToScheduleUserInitiatedJobsLocked(
+            @Nullable ProcessRecord pr, long nowElapsed) {
+        if (pr == null) {
+            return false;
+        }
+
+        final BackgroundStartPrivileges backgroundStartPrivileges =
+                pr.getBackgroundStartPrivileges();
+        // Is the allow activity background start flag on?
+        if (backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
+            // REASON_START_ACTIVITY_FLAG;
+            return true;
+        }
+
+        final ProcessStateRecord state = pr.mState;
+        final int procstate = state.getCurProcState();
+        if (procstate <= PROCESS_STATE_BOUND_TOP) {
+            if (doesReasonCodeAllowSchedulingUserInitiatedJobs(
+                    getReasonCodeFromProcState(procstate))) {
+                return true;
+            }
+        }
+
+        final long lastInvisibleTime = state.getLastInvisibleTime();
+        if (lastInvisibleTime > 0 && lastInvisibleTime < Long.MAX_VALUE) {
+            final long timeSinceVisibleMs = nowElapsed - lastInvisibleTime;
+            if (timeSinceVisibleMs < mConstants.mVisibleToInvisibleUijScheduleGraceDurationMs) {
+                // REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns whether the app in question is in a state where we allow scheduling a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     */
+    // TODO(262260570): log allow reason to an atom
+    private boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName) {
+        synchronized (this) {
+            final ProcessRecord processRecord;
+            synchronized (mPidsSelfLocked) {
+                processRecord = mPidsSelfLocked.get(pid);
+            }
+
+            final long nowElapsed = SystemClock.elapsedRealtime();
+            final BackgroundStartPrivileges backgroundStartPrivileges;
+            if (processRecord != null) {
+                if (isProcessInStateToScheduleUserInitiatedJobsLocked(processRecord, nowElapsed)) {
+                    return true;
+                }
+                backgroundStartPrivileges = processRecord.getBackgroundStartPrivileges();
+            } else {
+                backgroundStartPrivileges = getBackgroundStartPrivileges(uid);
+            }
+            // Is the allow activity background start flag on?
+            if (backgroundStartPrivileges.allowsBackgroundActivityStarts()) {
+                // REASON_START_ACTIVITY_FLAG;
+                return true;
+            }
+
+            // We allow scheduling a user-initiated job when the app is in the TOP or a
+            // Background Activity Launch approved state. These are cases that indicate the user
+            // has interacted with the app and therefore it is reasonable to believe the app may
+            // attempt to schedule a user-initiated job in response to the user interaction.
+            // As of Android UDC, the conditions required to grant a while-in-use permission
+            // covers the majority of those cases, and so we piggyback on that logic as the base.
+            // Missing cases are added after.
+            if (mServices.canAllowWhileInUsePermissionInFgsLocked(
+                    pid, uid, pkgName, processRecord, backgroundStartPrivileges)) {
+                return true;
+            }
+
+            final UidRecord uidRecord = mProcessList.getUidRecordLOSP(uid);
+            if (uidRecord != null) {
+                for (int i = uidRecord.getNumOfProcs() - 1; i >= 0; --i) {
+                    ProcessRecord pr = uidRecord.getProcessRecordByIndex(i);
+                    if (isProcessInStateToScheduleUserInitiatedJobsLocked(pr, nowElapsed)) {
+                        return true;
+                    }
+                }
+            }
+
+            if (mAtmInternal.hasSystemAlertWindowPermission(uid, pid, pkgName)) {
+                // REASON_SYSTEM_ALERT_WINDOW_PERMISSION;
+                return true;
+            }
+
+            final int userId = UserHandle.getUserId(uid);
+            final boolean isCompanionApp = mInternal.isAssociatedCompanionApp(userId, uid);
+            if (isCompanionApp) {
+                if (checkPermission(REQUEST_COMPANION_RUN_IN_BACKGROUND, pid, uid)
+                        == PERMISSION_GRANTED) {
+                    // REASON_COMPANION_DEVICE_MANAGER;
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -18154,6 +18306,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public BackgroundStartPrivileges getBackgroundStartPrivileges(int uid) {
             return ActivityManagerService.this.getBackgroundStartPrivileges(uid);
+        }
+
+        @Override
+        public boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName) {
+            return ActivityManagerService.this.canScheduleUserInitiatedJobs(uid, pid, pkgName);
         }
 
         public void reportCurKeyguardUsageEvent(boolean keyguardShowing) {

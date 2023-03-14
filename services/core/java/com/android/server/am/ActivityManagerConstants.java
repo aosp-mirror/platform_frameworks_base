@@ -118,6 +118,8 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_PROCESS_CRASH_COUNT_LIMIT = "process_crash_count_limit";
     static final String KEY_BOOT_TIME_TEMP_ALLOWLIST_DURATION = "boot_time_temp_allowlist_duration";
     static final String KEY_FG_TO_BG_FGS_GRACE_DURATION = "fg_to_bg_fgs_grace_duration";
+    static final String KEY_VISIBLE_TO_INVISIBLE_UIJ_SCHEDULE_GRACE_DURATION =
+            "vis_to_invis_uij_schedule_grace_duration";
     static final String KEY_FGS_START_FOREGROUND_TIMEOUT = "fgs_start_foreground_timeout";
     static final String KEY_FGS_ATOM_SAMPLE_RATE = "fgs_atom_sample_rate";
     static final String KEY_FGS_START_ALLOWED_LOG_SAMPLE_RATE = "fgs_start_allowed_log_sample_rate";
@@ -191,6 +193,8 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final int DEFAULT_PROCESS_CRASH_COUNT_LIMIT = 12;
     private static final int DEFAULT_BOOT_TIME_TEMP_ALLOWLIST_DURATION = 20 * 1000;
     private static final long DEFAULT_FG_TO_BG_FGS_GRACE_DURATION = 5 * 1000;
+    private static final long DEFAULT_VISIBLE_TO_INVISIBLE_UIJ_SCHEDULE_GRACE_DURATION =
+            DEFAULT_FG_TO_BG_FGS_GRACE_DURATION;
     private static final int DEFAULT_FGS_START_FOREGROUND_TIMEOUT_MS = 10 * 1000;
     private static final float DEFAULT_FGS_ATOM_SAMPLE_RATE = 1; // 100 %
     private static final float DEFAULT_FGS_START_ALLOWED_LOG_SAMPLE_RATE = 0.25f; // 25%
@@ -680,6 +684,15 @@ final class ActivityManagerConstants extends ContentObserver {
     volatile long mFgToBgFgsGraceDuration = DEFAULT_FG_TO_BG_FGS_GRACE_DURATION;
 
     /**
+     * The grace period in milliseconds to allow a process to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}
+     * after switching from visible to a non-visible state.
+     * Currently it's only applicable to its activities.
+     */
+    volatile long mVisibleToInvisibleUijScheduleGraceDurationMs =
+            DEFAULT_VISIBLE_TO_INVISIBLE_UIJ_SCHEDULE_GRACE_DURATION;
+
+    /**
      * When service started from background, before the timeout it can be promoted to FGS by calling
      * Service.startForeground().
      */
@@ -1121,6 +1134,9 @@ final class ActivityManagerConstants extends ContentObserver {
                                 updateBootTimeTempAllowListDuration();
                                 break;
                             case KEY_FG_TO_BG_FGS_GRACE_DURATION:
+                                updateFgToBgFgsGraceDuration();
+                                break;
+                            case KEY_VISIBLE_TO_INVISIBLE_UIJ_SCHEDULE_GRACE_DURATION:
                                 updateFgToBgFgsGraceDuration();
                                 break;
                             case KEY_FGS_START_FOREGROUND_TIMEOUT:
@@ -1596,6 +1612,13 @@ final class ActivityManagerConstants extends ContentObserver {
                 DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 KEY_FG_TO_BG_FGS_GRACE_DURATION,
                 DEFAULT_FG_TO_BG_FGS_GRACE_DURATION);
+    }
+
+    private void updateVisibleToInvisibleUijScheduleGraceDuration() {
+        mVisibleToInvisibleUijScheduleGraceDurationMs = DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                KEY_VISIBLE_TO_INVISIBLE_UIJ_SCHEDULE_GRACE_DURATION,
+                DEFAULT_VISIBLE_TO_INVISIBLE_UIJ_SCHEDULE_GRACE_DURATION);
     }
 
     private void updateFgsStartForegroundTimeout() {

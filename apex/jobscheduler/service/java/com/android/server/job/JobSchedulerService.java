@@ -31,7 +31,6 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
-import android.app.BackgroundStartPrivileges;
 import android.app.IUidObserver;
 import android.app.compat.CompatChanges;
 import android.app.job.IJobScheduler;
@@ -3782,7 +3781,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             return canPersist;
         }
 
-        private int validateJob(@NonNull JobInfo job, int callingUid, int sourceUserId,
+        private int validateJob(@NonNull JobInfo job, int callingUid, int callingPid,
+                int sourceUserId,
                 @Nullable String sourcePkgName, @Nullable JobWorkItem jobWorkItem) {
             final boolean rejectNegativeNetworkEstimates = CompatChanges.isChangeEnabled(
                             JobInfo.REJECT_NEGATIVE_NETWORK_ESTIMATES, callingUid);
@@ -3815,6 +3815,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
                 // We aim to check the permission of both the source and calling app so that apps
                 // don't attempt to bypass the permission by using other apps to do the work.
+                boolean isInStateToScheduleUiJobSource = false;
+                final String callingPkgName = job.getService().getPackageName();
                 if (sourceUid != -1) {
                     // Check the permission of the source app.
                     final int sourceResult =
@@ -3822,8 +3824,13 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (sourceResult != JobScheduler.RESULT_SUCCESS) {
                         return sourceResult;
                     }
+                    final int sourcePid =
+                            callingUid == sourceUid && callingPkgName.equals(sourcePkgName)
+                                    ? callingPid : -1;
+                    isInStateToScheduleUiJobSource = isInStateToScheduleUserInitiatedJobs(
+                            sourceUid, sourcePid, sourcePkgName);
                 }
-                final String callingPkgName = job.getService().getPackageName();
+                boolean isInStateToScheduleUiJobCalling = false;
                 if (callingUid != sourceUid || !callingPkgName.equals(sourcePkgName)) {
                     // Source app is different from calling app. Make sure the calling app also has
                     // the permission.
@@ -3832,25 +3839,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (callingResult != JobScheduler.RESULT_SUCCESS) {
                         return callingResult;
                     }
+                    // Avoid rechecking the state if the source app is able to schedule the job.
+                    if (!isInStateToScheduleUiJobSource) {
+                        isInStateToScheduleUiJobCalling = isInStateToScheduleUserInitiatedJobs(
+                                callingUid, callingPid, callingPkgName);
+                    }
                 }
 
-                final int uid = sourceUid != -1 ? sourceUid : callingUid;
-                final int procState = mActivityManagerInternal.getUidProcessState(uid);
-                if (DEBUG) {
-                    Slog.d(TAG, "Uid " + uid + " proc state="
-                            + ActivityManager.procStateToString(procState));
-                }
-                if (procState != ActivityManager.PROCESS_STATE_TOP) {
-                    final BackgroundStartPrivileges bsp =
-                            mActivityManagerInternal.getBackgroundStartPrivileges(uid);
-                    if (DEBUG) {
-                        Slog.d(TAG, "Uid " + uid + ": " + bsp);
-                    }
-                    if (!bsp.allowsBackgroundActivityStarts()) {
-                        Slog.e(TAG,
-                                "Uid " + uid + " not in a state to schedule user-initiated jobs");
-                        return JobScheduler.RESULT_FAILURE;
-                    }
+                if (!isInStateToScheduleUiJobSource && !isInStateToScheduleUiJobCalling) {
+                    Slog.e(TAG, "Uid(s) " + sourceUid + "/" + callingUid
+                            + " not in a state to schedule user-initiated jobs");
+                    return JobScheduler.RESULT_FAILURE;
                 }
             }
             if (jobWorkItem != null) {
@@ -3896,6 +3895,24 @@ public class JobSchedulerService extends com.android.server.SystemService
             return JobScheduler.RESULT_SUCCESS;
         }
 
+        private boolean isInStateToScheduleUserInitiatedJobs(int uid, int pid, String pkgName) {
+            final int procState = mActivityManagerInternal.getUidProcessState(uid);
+            if (DEBUG) {
+                Slog.d(TAG, "Uid " + uid + " proc state="
+                        + ActivityManager.procStateToString(procState));
+            }
+            if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                return true;
+            }
+            final boolean canScheduleUiJobsInBg =
+                    mActivityManagerInternal.canScheduleUserInitiatedJobs(uid, pid, pkgName);
+            if (DEBUG) {
+                Slog.d(TAG, "Uid " + uid
+                        + " AM.canScheduleUserInitiatedJobs= " + canScheduleUiJobsInBg);
+            }
+            return canScheduleUiJobsInBg;
+        }
+
         // IJobScheduler implementation
         @Override
         public int schedule(String namespace, JobInfo job) throws RemoteException {
@@ -3908,7 +3925,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             enforceValidJobRequest(uid, pid, job);
 
-            final int result = validateJob(job, uid, -1, null, null);
+            final int result = validateJob(job, uid, pid, -1, null, null);
             if (result != JobScheduler.RESULT_SUCCESS) {
                 return result;
             }
@@ -3941,7 +3958,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
-            final int result = validateJob(job, uid, -1, null, work);
+            final int result = validateJob(job, uid, pid, -1, null, work);
             if (result != JobScheduler.RESULT_SUCCESS) {
                 return result;
             }
@@ -3963,6 +3980,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         public int scheduleAsPackage(String namespace, JobInfo job, String packageName, int userId,
                 String tag) throws RemoteException {
             final int callerUid = Binder.getCallingUid();
+            final int callerPid = Binder.getCallingPid();
             if (DEBUG) {
                 Slog.d(TAG, "Caller uid " + callerUid + " scheduling job: " + job.toString()
                         + " on behalf of " + packageName + "/");
@@ -3979,7 +3997,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         + " not permitted to schedule jobs for other apps");
             }
 
-            int result = validateJob(job, callerUid, userId, packageName, null);
+            int result = validateJob(job, callerUid, callerPid, userId, packageName, null);
             if (result != JobScheduler.RESULT_SUCCESS) {
                 return result;
             }

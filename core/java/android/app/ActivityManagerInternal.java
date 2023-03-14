@@ -474,6 +474,12 @@ public abstract class ActivityManagerInternal {
     public abstract BackgroundStartPrivileges getBackgroundStartPrivileges(int uid);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
 
+    /**
+     * Returns whether the app is in a state where it is allowed to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     */
+    public abstract boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName);
+
     /** @see com.android.server.am.ActivityManagerService#monitor */
     public abstract void monitor();
 
