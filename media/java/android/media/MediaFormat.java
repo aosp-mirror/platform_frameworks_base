@@ -1210,7 +1210,7 @@ public final class MediaFormat {
 
     /**
      * A key describing the desired bitrate mode to be used by an encoder.
-     * Constants are declared in {@link MediaCodecInfo.CodecCapabilities}.
+     * Constants are declared in {@link MediaCodecInfo.EncoderCapabilities}.
      *
      * @see MediaCodecInfo.EncoderCapabilities#isBitrateModeSupported(int)
      */
