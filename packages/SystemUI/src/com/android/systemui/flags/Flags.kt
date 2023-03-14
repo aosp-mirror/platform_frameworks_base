@@ -136,7 +136,7 @@ object Flags {
 
     // TODO(b/254512676): Tracking Bug
     @JvmField
-    val LOCKSCREEN_CUSTOM_CLOCKS = unreleasedFlag(207, "lockscreen_custom_clocks", teamfood = true)
+    val LOCKSCREEN_CUSTOM_CLOCKS = unreleasedFlag(207, "lockscreen_custom_clocks")
 
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
@@ -244,6 +244,11 @@ object Flags {
     // TODO(b/270223352): Tracking Bug
     @JvmField
     val HIDE_SMARTSPACE_ON_DREAM_OVERLAY = unreleasedFlag(404, "hide_smartspace_on_dream_overlay")
+
+    // TODO(b/271460958): Tracking Bug
+    @JvmField
+    val SHOW_WEATHER_COMPLICATION_ON_DREAM_OVERLAY = unreleasedFlag(405,
+        "show_weather_complication_on_dream_overlay")
 
     // 500 - quick settings
 

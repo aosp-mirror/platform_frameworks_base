@@ -131,7 +131,17 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mSurfaceControlViewHostFactory = surfaceControlViewHostFactory;
 
         mDisplay = mDisplayController.getDisplay(mTaskInfo.displayId);
-        mDecorWindowContext = mContext.createConfigurationContext(mTaskInfo.getConfiguration());
+        mDecorWindowContext = mContext.createConfigurationContext(
+                getConfigurationWithOverrides(mTaskInfo));
+    }
+
+    /**
+     * Get {@link Configuration} from supplied {@link RunningTaskInfo}.
+     *
+     * Allows values to be overridden before returning the configuration.
+     */
+    protected Configuration getConfigurationWithOverrides(RunningTaskInfo taskInfo) {
+        return taskInfo.getConfiguration();
     }
 
     /**
@@ -165,7 +175,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         outResult.mRootView = rootView;
         rootView = null; // Clear it just in case we use it accidentally
-        final Configuration taskConfig = mTaskInfo.getConfiguration();
+        final Configuration taskConfig = getConfigurationWithOverrides(mTaskInfo);
         if (oldTaskConfig.densityDpi != taskConfig.densityDpi
                 || mDisplay == null
                 || mDisplay.getDisplayId() != mTaskInfo.displayId) {

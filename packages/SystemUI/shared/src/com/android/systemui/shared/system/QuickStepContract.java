@@ -115,6 +115,26 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE = 1 << 26;
     // Device dreaming state
     public static final int SYSUI_STATE_DEVICE_DREAMING = 1 << 27;
+    // Whether the screen is currently on. Note that the screen is considered on while turning on,
+    // but not while turning off.
+    public static final int SYSUI_STATE_SCREEN_ON = 1 << 28;
+    // Whether the screen is currently transitioning into the state indicated by
+    // SYSUI_STATE_SCREEN_ON.
+    public static final int SYSUI_STATE_SCREEN_TRANSITION = 1 << 29;
+
+    // Mask for SystemUiStateFlags to isolate SYSUI_STATE_SCREEN_ON and
+    // SYSUI_STATE_SCREEN_TRANSITION, to match SCREEN_STATE_*
+    public static final int SYSUI_STATE_SCREEN_STATE_MASK =
+            SYSUI_STATE_SCREEN_ON | SYSUI_STATE_SCREEN_TRANSITION;
+    // Screen is off.
+    public static final int SCREEN_STATE_OFF = 0;
+    // Screen is on.
+    public static final int SCREEN_STATE_ON = SYSUI_STATE_SCREEN_ON;
+    // Screen is still on, but transitioning to turn off.
+    public static final int SCREEN_STATE_TURNING_OFF = SYSUI_STATE_SCREEN_TRANSITION;
+    // Screen was off and is now turning on.
+    public static final int SCREEN_STATE_TURNING_ON =
+            SYSUI_STATE_SCREEN_TRANSITION | SYSUI_STATE_SCREEN_ON;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -144,7 +164,9 @@ public class QuickStepContract {
             SYSUI_STATE_IMMERSIVE_MODE,
             SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
             SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
-            SYSUI_STATE_DEVICE_DREAMING
+            SYSUI_STATE_DEVICE_DREAMING,
+            SYSUI_STATE_SCREEN_ON,
+            SYSUI_STATE_SCREEN_TRANSITION,
     })
     public @interface SystemUiStateFlags {}
 
@@ -183,6 +205,10 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE) != 0
                 ? "freeform_active_in_desktop_mode" : "");
         str.add((flags & SYSUI_STATE_DEVICE_DREAMING) != 0 ? "device_dreaming" : "");
+        str.add("screen_"
+                + ((flags & SYSUI_STATE_SCREEN_TRANSITION) != 0 ? "turning_" : "")
+                + ((flags & SYSUI_STATE_SCREEN_ON) != 0 ? "on" : "off"));
+
         return str.toString();
     }
 

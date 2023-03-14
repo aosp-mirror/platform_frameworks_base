@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.content.Context
 import android.content.IntentFilter
-import android.telephony.CellSignalStrength
 import android.telephony.CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
 import android.telephony.CellSignalStrengthCdma
 import android.telephony.ServiceState
@@ -28,12 +27,12 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyDisplayInfo
 import android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE
 import android.telephony.TelephonyManager
-import android.telephony.TelephonyManager.ERI_OFF
+import android.telephony.TelephonyManager.ERI_FLASH
+import android.telephony.TelephonyManager.ERI_ON
 import android.telephony.TelephonyManager.EXTRA_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import com.android.settingslib.Utils
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
@@ -59,16 +58,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -100,8 +97,6 @@ class MobileConnectionRepositoryImpl(
         }
     }
 
-    private val telephonyCallbackEvent = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-
     /**
      * This flow defines the single shared connection to system_server via TelephonyCallback. Any
      * new callback should be added to this listener and funneled through callbackEvents via a data
@@ -109,9 +104,15 @@ class MobileConnectionRepositoryImpl(
      *
      * The reason we need to do this is because TelephonyManager limits the number of registered
      * listeners per-process, so we don't want to create a new listener for every callback.
+     *
+     * A note on the design for back pressure here: We use the [coalesce] operator here to change
+     * the backpressure strategy to store exactly the last callback event of _each type_ here, as
+     * opposed to the default strategy which is to drop the oldest event (regardless of type). This
+     * means that we should never miss any single event as long as the flow has been started.
      */
-    private val callbackEvents: SharedFlow<CallbackEvent> =
-        conflatedCallbackFlow {
+    private val callbackEvents: StateFlow<TelephonyCallbackState> = run {
+        val initial = TelephonyCallbackState()
+        callbackFlow {
                 val callback =
                     object :
                         TelephonyCallback(),
@@ -165,48 +166,50 @@ class MobileConnectionRepositoryImpl(
                 telephonyManager.registerTelephonyCallback(bgDispatcher.asExecutor(), callback)
                 awaitClose { telephonyManager.unregisterTelephonyCallback(callback) }
             }
-            .shareIn(scope, SharingStarted.WhileSubscribed())
+            .scan(initial = initial) { state, event -> state.applyEvent(event) }
+            .stateIn(scope = scope, started = SharingStarted.WhileSubscribed(), initial)
+    }
 
     override val isEmergencyOnly =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .mapNotNull { it.onServiceStateChanged }
             .map { it.serviceState.isEmergencyOnly }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isRoaming =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .mapNotNull { it.onServiceStateChanged }
             .map { it.serviceState.roaming }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val operatorAlphaShort =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .mapNotNull { it.onServiceStateChanged }
             .map { it.serviceState.operatorAlphaShort }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     override val isInService =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnServiceStateChanged>()
+            .mapNotNull { it.onServiceStateChanged }
             .map { Utils.isInService(it.serviceState) }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isGsm =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnSignalStrengthChanged>()
+            .mapNotNull { it.onSignalStrengthChanged }
             .map { it.signalStrength.isGsm }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val cdmaLevel =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnSignalStrengthChanged>()
+            .mapNotNull { it.onSignalStrengthChanged }
             .map {
                 it.signalStrength.getCellSignalStrengths(CellSignalStrengthCdma::class.java).let {
                     strengths ->
                     if (strengths.isNotEmpty()) {
                         strengths[0].level
                     } else {
-                        CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN
+                        SIGNAL_STRENGTH_NONE_OR_UNKNOWN
                     }
                 }
             }
@@ -214,19 +217,19 @@ class MobileConnectionRepositoryImpl(
 
     override val primaryLevel =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnSignalStrengthChanged>()
+            .mapNotNull { it.onSignalStrengthChanged }
             .map { it.signalStrength.level }
             .stateIn(scope, SharingStarted.WhileSubscribed(), SIGNAL_STRENGTH_NONE_OR_UNKNOWN)
 
     override val dataConnectionState =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnDataConnectionStateChanged>()
+            .mapNotNull { it.onDataConnectionStateChanged }
             .map { it.dataState.toDataConnectionType() }
             .stateIn(scope, SharingStarted.WhileSubscribed(), Disconnected)
 
     override val dataActivityDirection =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnDataActivity>()
+            .mapNotNull { it.onDataActivity }
             .map { it.direction.toMobileDataActivityModel() }
             .stateIn(
                 scope,
@@ -236,28 +239,26 @@ class MobileConnectionRepositoryImpl(
 
     override val carrierNetworkChangeActive =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnCarrierNetworkChange>()
+            .mapNotNull { it.onCarrierNetworkChange }
             .map { it.active }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val resolvedNetworkType =
         callbackEvents
-            .filterIsInstance<CallbackEvent.OnDisplayInfoChanged>()
+            .mapNotNull { it.onDisplayInfoChanged }
             .map {
-                if (it.telephonyDisplayInfo.networkType == NETWORK_TYPE_UNKNOWN) {
-                    UnknownNetworkType
-                } else if (
-                    it.telephonyDisplayInfo.overrideNetworkType == OVERRIDE_NETWORK_TYPE_NONE
-                ) {
-                    DefaultNetworkType(
-                        mobileMappingsProxy.toIconKey(it.telephonyDisplayInfo.networkType)
-                    )
-                } else {
+                if (it.telephonyDisplayInfo.overrideNetworkType != OVERRIDE_NETWORK_TYPE_NONE) {
                     OverrideNetworkType(
                         mobileMappingsProxy.toIconKeyOverride(
                             it.telephonyDisplayInfo.overrideNetworkType
                         )
                     )
+                } else if (it.telephonyDisplayInfo.networkType != NETWORK_TYPE_UNKNOWN) {
+                    DefaultNetworkType(
+                        mobileMappingsProxy.toIconKey(it.telephonyDisplayInfo.networkType)
+                    )
+                } else {
+                    UnknownNetworkType
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), UnknownNetworkType)
@@ -282,7 +283,10 @@ class MobileConnectionRepositoryImpl(
 
     override val cdmaRoaming: StateFlow<Boolean> =
         telephonyPollingEvent
-            .mapLatest { telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber != ERI_OFF }
+            .mapLatest {
+                val cdmaEri = telephonyManager.cdmaEnhancedRoamingIndicatorDisplayNumber
+                cdmaEri == ERI_ON || cdmaEri == ERI_FLASH
+            }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val networkName: StateFlow<NetworkNameModel> =
@@ -300,7 +304,8 @@ class MobileConnectionRepositoryImpl(
     override val dataEnabled = run {
         val initial = telephonyManager.isDataConnectionAllowed
         callbackEvents
-            .mapNotNull { (it as? CallbackEvent.OnDataEnabledChanged)?.enabled }
+            .mapNotNull { it.onDataEnabledChanged }
+            .map { it.enabled }
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 
@@ -344,12 +349,41 @@ class MobileConnectionRepositoryImpl(
  * Wrap every [TelephonyCallback] we care about in a data class so we can accept them in a single
  * shared flow and then split them back out into other flows.
  */
-private sealed interface CallbackEvent {
+sealed interface CallbackEvent {
+    data class OnCarrierNetworkChange(val active: Boolean) : CallbackEvent
+    data class OnDataActivity(val direction: Int) : CallbackEvent
+    data class OnDataConnectionStateChanged(val dataState: Int) : CallbackEvent
+    data class OnDataEnabledChanged(val enabled: Boolean) : CallbackEvent
+    data class OnDisplayInfoChanged(val telephonyDisplayInfo: TelephonyDisplayInfo) : CallbackEvent
     data class OnServiceStateChanged(val serviceState: ServiceState) : CallbackEvent
     data class OnSignalStrengthChanged(val signalStrength: SignalStrength) : CallbackEvent
-    data class OnDataConnectionStateChanged(val dataState: Int) : CallbackEvent
-    data class OnDataActivity(val direction: Int) : CallbackEvent
-    data class OnCarrierNetworkChange(val active: Boolean) : CallbackEvent
-    data class OnDisplayInfoChanged(val telephonyDisplayInfo: TelephonyDisplayInfo) : CallbackEvent
-    data class OnDataEnabledChanged(val enabled: Boolean) : CallbackEvent
+}
+
+/**
+ * A simple box type for 1-to-1 mapping of [CallbackEvent] to the batched event. Used in conjunction
+ * with [scan] to make sure we don't drop important callbacks due to late subscribers
+ */
+data class TelephonyCallbackState(
+    val onDataActivity: CallbackEvent.OnDataActivity? = null,
+    val onCarrierNetworkChange: CallbackEvent.OnCarrierNetworkChange? = null,
+    val onDataConnectionStateChanged: CallbackEvent.OnDataConnectionStateChanged? = null,
+    val onDataEnabledChanged: CallbackEvent.OnDataEnabledChanged? = null,
+    val onDisplayInfoChanged: CallbackEvent.OnDisplayInfoChanged? = null,
+    val onServiceStateChanged: CallbackEvent.OnServiceStateChanged? = null,
+    val onSignalStrengthChanged: CallbackEvent.OnSignalStrengthChanged? = null,
+) {
+    fun applyEvent(event: CallbackEvent): TelephonyCallbackState {
+        return when (event) {
+            is CallbackEvent.OnCarrierNetworkChange -> copy(onCarrierNetworkChange = event)
+            is CallbackEvent.OnDataActivity -> copy(onDataActivity = event)
+            is CallbackEvent.OnDataConnectionStateChanged ->
+                copy(onDataConnectionStateChanged = event)
+            is CallbackEvent.OnDataEnabledChanged -> copy(onDataEnabledChanged = event)
+            is CallbackEvent.OnDisplayInfoChanged -> copy(onDisplayInfoChanged = event)
+            is CallbackEvent.OnServiceStateChanged -> {
+                copy(onServiceStateChanged = event)
+            }
+            is CallbackEvent.OnSignalStrengthChanged -> copy(onSignalStrengthChanged = event)
+        }
+    }
 }
