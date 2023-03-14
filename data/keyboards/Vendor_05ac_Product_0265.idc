@@ -13,9 +13,9 @@
 # limitations under the License.
 
 #
-# Apple Magic Trackpad 2 configuration file
-#   Bluetooth vendor ID 004c
-#   USB vendor ID 05ac
+# Apple Magic Trackpad 2 (USB) configuration file
+#
+# WHEN MODIFYING, also change the Bluetooth file (Vendor_004c_Product_0265.idc)
 #
 
 gestureProp.Pressure_Calibration_Offset = 30
