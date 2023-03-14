@@ -465,7 +465,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
 
     /** @see IActivityManager#notifyLockedProfile(int) */
-    public abstract void notifyLockedProfile(@UserIdInt int userId, int currentUserId);
+    public abstract void notifyLockedProfile(@UserIdInt int userId);
 
     /** @see IActivityManager#startConfirmDeviceCredentialIntent(Intent, Bundle) */
     public abstract void startConfirmDeviceCredentialIntent(Intent intent, Bundle options);

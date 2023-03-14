@@ -7284,7 +7284,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void notifyLockedProfile(@UserIdInt int userId) {
-        mAtmInternal.notifyLockedProfile(userId, mUserController.getCurrentUserId());
+        mAtmInternal.notifyLockedProfile(userId);
     }
 
     @Override
