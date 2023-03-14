@@ -1012,6 +1012,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (isTopActivityLaunchedBehind()) {
             return TASK_FRAGMENT_VISIBILITY_VISIBLE;
         }
+        final Task thisTask = asTask();
+        if (thisTask != null && mTransitionController.isTransientHide(thisTask)) {
+            return TASK_FRAGMENT_VISIBILITY_VISIBLE;
+        }
 
         boolean gotTranslucentFullscreen = false;
         boolean gotTranslucentAdjacent = false;
