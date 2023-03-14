@@ -195,6 +195,8 @@ public class ScreenshotHelper {
                         UserHandle.CURRENT)) {
                     mScreenshotConnection = conn;
                     handler.postDelayed(mScreenshotTimeout, timeoutMs);
+                } else {
+                    mContext.unbindService(conn);
                 }
             } else {
                 Messenger messenger = new Messenger(mScreenshotService);
