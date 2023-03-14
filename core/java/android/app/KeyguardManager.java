@@ -155,6 +155,15 @@ public class KeyguardManager {
             "android.app.extra.START_LOCKSCREEN_VALIDATION_REQUEST";
 
     /**
+     * A {@link RemoteLockscreenValidationSession} extra to be sent along with
+     * {@link #ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL} containing the data needed to prompt for
+     * a remote device's lock screen.
+     * @hide
+     */
+    public static final String EXTRA_REMOTE_LOCKSCREEN_VALIDATION_SESSION =
+            "android.app.extra.REMOTE_LOCKSCREEN_VALIDATION_SESSION";
+
+    /**
      * Result code returned by the activity started by
      * {@link #createConfirmFactoryResetCredentialIntent} or
      * {@link #createConfirmDeviceCredentialForRemoteValidationIntent}
@@ -359,8 +368,7 @@ public class KeyguardManager {
     /**
      * Get an Intent to launch an activity to prompt the user to confirm the
      * credentials (pin, pattern or password) of a remote device.
-     * @param startLockscreenValidationRequest contains information necessary to start remote device
-     *                                         credential validation.
+     * @param session contains information necessary to start remote device credential validation.
      * @param remoteLockscreenValidationServiceComponent
      *          the {@link ComponentName} of the implementation of
      *          {@link android.service.remotelockscreenvalidation.RemoteLockscreenValidationService}
@@ -376,15 +384,14 @@ public class KeyguardManager {
     @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
     @NonNull
     public Intent createConfirmDeviceCredentialForRemoteValidationIntent(
-            @NonNull StartLockscreenValidationRequest startLockscreenValidationRequest,
+            @NonNull RemoteLockscreenValidationSession session,
             @NonNull ComponentName remoteLockscreenValidationServiceComponent,
             @Nullable CharSequence title,
             @Nullable CharSequence description,
             @Nullable CharSequence checkboxLabel,
             @Nullable CharSequence alternateButtonLabel) {
         Intent intent = new Intent(ACTION_CONFIRM_REMOTE_DEVICE_CREDENTIAL)
-                .putExtra(
-                        EXTRA_START_LOCKSCREEN_VALIDATION_REQUEST, startLockscreenValidationRequest)
+                .putExtra(EXTRA_REMOTE_LOCKSCREEN_VALIDATION_SESSION, session)
                 .putExtra(Intent.EXTRA_COMPONENT_NAME, remoteLockscreenValidationServiceComponent)
                 .putExtra(EXTRA_TITLE, title)
                 .putExtra(EXTRA_DESCRIPTION, description)
@@ -1157,7 +1164,7 @@ public class KeyguardManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.CHECK_REMOTE_LOCKSCREEN)
     @NonNull
-    public StartLockscreenValidationRequest startRemoteLockscreenValidation() {
+    public RemoteLockscreenValidationSession startRemoteLockscreenValidation() {
         return mLockPatternUtils.startRemoteLockscreenValidation();
     }
 
@@ -1165,11 +1172,10 @@ public class KeyguardManager {
      * Verifies credentials guess from a remote device.
      *
      * <p>Secret must be encrypted using {@code SecureBox} library
-     * with public key from {@code StartLockscreenValidationRequest}
+     * with public key from {@code RemoteLockscreenValidationSession}
      * and header set to {@code "encrypted_remote_credentials"} in UTF-8 encoding.
      *
-     * @throws IllegalStateException if there is no active lock screen validation session or
-     * there was a decryption error.
+     * @throws IllegalStateException if there was a decryption error.
      *
      * @hide
      */
