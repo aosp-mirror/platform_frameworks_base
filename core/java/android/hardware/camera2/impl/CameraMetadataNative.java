@@ -1618,15 +1618,20 @@ public class CameraMetadataNative implements Parcelable {
     }
 
     private StreamConfigurationMap getStreamConfigurationMapMaximumResolution() {
-        if (!isUltraHighResolutionSensor()) {
-            return null;
-        }
         StreamConfiguration[] configurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] minFrameDurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_MIN_FRAME_DURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] stallDurations = getBase(
                 CameraCharacteristics.SCALER_AVAILABLE_STALL_DURATIONS_MAXIMUM_RESOLUTION);
+        // If the at least these keys haven't been advertised, there cannot be a meaningful max
+        // resolution StreamConfigurationMap
+        if (configurations == null ||
+                minFrameDurations == null ||
+                stallDurations == null) {
+            return null;
+        }
+
         StreamConfiguration[] depthConfigurations = getBase(
                 CameraCharacteristics.DEPTH_AVAILABLE_DEPTH_STREAM_CONFIGURATIONS_MAXIMUM_RESOLUTION);
         StreamConfigurationDuration[] depthMinFrameDurations = getBase(
