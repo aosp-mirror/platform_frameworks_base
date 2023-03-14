@@ -451,7 +451,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
     protected void updateClipping() {
         if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
-            int bottom = Math.max(Math.max(getActualHeight() + getExtraBottomPadding()
+            int bottom = Math.max(Math.max(getActualHeight()
                     - mClipBottomAmount, top), mMinimumHeightForClipping);
             mClipRect.set(Integer.MIN_VALUE, top, Integer.MAX_VALUE, bottom);
             setClipBounds(mClipRect);
@@ -589,13 +589,6 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
 
     public ViewGroup getTransientContainer() {
         return mTransientContainer;
-    }
-
-    /**
-     * @return padding used to alter how much of the view is clipped.
-     */
-    public int getExtraBottomPadding() {
-        return 0;
     }
 
     /**
