@@ -37,7 +37,6 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -75,7 +74,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
     private final NotificationListContainer mListContainer;
     private final RemoteInputViewSubcomponent.Factory mRemoteInputViewSubcomponentFactory;
     private final ActivatableNotificationViewController mActivatableNotificationViewController;
-    private final NotificationMediaManager mMediaManager;
     private final PluginManager mPluginManager;
     private final SystemClock mClock;
     private final String mAppName;
@@ -138,7 +136,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
             MetricsLogger metricsLogger,
             NotificationRowLogger logBufferLogger,
             NotificationListContainer listContainer,
-            NotificationMediaManager mediaManager,
             SmartReplyConstants smartReplyConstants,
             SmartReplyController smartReplyController,
             PluginManager pluginManager,
@@ -168,7 +165,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
         mListContainer = listContainer;
         mRemoteInputViewSubcomponentFactory = rivSubcomponentFactory;
         mActivatableNotificationViewController = activatableNotificationViewController;
-        mMediaManager = mediaManager;
         mPluginManager = pluginManager;
         mClock = clock;
         mAppName = appName;
@@ -216,7 +212,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mHeadsUpManager,
                 mRowContentBindStage,
                 mOnExpandClickListener,
-                mMediaManager,
                 mOnFeedbackClickListener,
                 mFalsingManager,
                 mFalsingCollector,

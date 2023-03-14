@@ -26,10 +26,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
-import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -38,12 +36,9 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.Trace;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -87,7 +82,6 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -142,8 +136,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final boolean DEBUG = Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_ONMEASURE =
             Compile.IS_DEBUG && Log.isLoggable(TAG, Log.VERBOSE);
-    private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
-    private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
     public static final float DEFAULT_HEADER_VISIBLE_AMOUNT = 1.0f;
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
@@ -279,7 +271,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mShowNoBackground;
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
-    private View.OnClickListener mOnAppClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
     private boolean mIsInlineReplyAnimationFlagEnabled = false;
@@ -372,7 +363,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
     private NotificationInlineImageResolver mImageResolver;
-    private NotificationMediaManager mMediaManager;
     @Nullable
     private OnExpansionChangedListener mExpansionChangedListener;
     @Nullable
@@ -381,32 +371,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private float mTopRoundnessDuringLaunchAnimation;
     private float mBottomRoundnessDuringLaunchAnimation;
     private float mSmallRoundness;
-
-    /**
-     * Returns whether the given {@code statusBarNotification} is a system notification.
-     * <b>Note</b>, this should be run in the background thread if possible as it makes multiple IPC
-     * calls.
-     */
-    private static Boolean isSystemNotification(Context context, StatusBarNotification sbn) {
-        INotificationManager iNm = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-
-        boolean isSystem = false;
-        try {
-            isSystem = iNm.isPermissionFixed(sbn.getPackageName(), sbn.getUserId());
-        } catch (RemoteException e) {
-            Log.e(TAG, "cannot reach NMS");
-        }
-        RoleManager rm = context.getSystemService(RoleManager.class);
-        List<String> fixedRoleHolders = new ArrayList<>();
-        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_DIALER));
-        fixedRoleHolders.addAll(rm.getRoleHolders(RoleManager.ROLE_EMERGENCY));
-        if (fixedRoleHolders.contains(sbn.getPackageName())) {
-            isSystem = true;
-        }
-
-        return isSystem;
-    }
 
     public NotificationContentView[] getLayouts() {
         return Arrays.copyOf(mLayouts, mLayouts.length);
@@ -793,11 +757,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setRemoteInputController(RemoteInputController r) {
         mPrivateLayout.setRemoteInputController(r);
-    }
-
-
-    String getAppName() {
-        return mAppName;
     }
 
     public void addChildNotification(ExpandableNotificationRow row) {
@@ -1273,10 +1232,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public HeadsUpManager getHeadsUpManager() {
-        return mHeadsUpManager;
-    }
-
     public void setGutsView(MenuItem item) {
         if (getGuts() != null && item.getGutsView() instanceof NotificationGuts.GutsContent) {
             getGuts().setGutsContent((NotificationGuts.GutsContent) item.getGutsView());
@@ -1706,7 +1661,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             HeadsUpManager headsUpManager,
             RowContentBindStage rowContentBindStage,
             OnExpandClickListener onExpandClickListener,
-            NotificationMediaManager notificationMediaManager,
             CoordinateOnClickListener onFeedbackClickListener,
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
@@ -1738,7 +1692,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mHeadsUpManager = headsUpManager;
         mRowContentBindStage = rowContentBindStage;
         mOnExpandClickListener = onExpandClickListener;
-        mMediaManager = notificationMediaManager;
         setOnFeedbackClickListener(onFeedbackClickListener);
         mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
@@ -2928,22 +2881,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateClickAndFocus();
     }
 
-    public static void applyTint(View v, int color) {
-        int alpha;
-        if (color != 0) {
-            alpha = COLORED_DIVIDER_ALPHA;
-        } else {
-            color = 0xff000000;
-            alpha = DEFAULT_DIVIDER_ALPHA;
-        }
-        if (v.getBackground() instanceof ColorDrawable) {
-            ColorDrawable background = (ColorDrawable) v.getBackground();
-            background.mutate();
-            background.setColor(color);
-            background.setAlpha(alpha);
-        }
-    }
-
     public int getMaxExpandHeight() {
         return mPrivateLayout.getExpandHeight();
     }
@@ -3258,10 +3195,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public NotificationContentView getShowingLayout() {
         return shouldShowPublic() ? mPublicLayout : mPrivateLayout;
-    }
-
-    public View getExpandedContentView() {
-        return getPrivateLayout().getExpandedChild();
     }
 
     public void setLegacy(boolean legacy) {
