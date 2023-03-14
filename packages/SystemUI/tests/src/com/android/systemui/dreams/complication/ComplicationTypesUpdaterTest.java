@@ -17,7 +17,6 @@
 package com.android.systemui.dreams.complication;
 
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,7 +35,7 @@ import com.android.systemui.condition.SelfExecutingMonitor;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -57,8 +56,7 @@ public class ComplicationTypesUpdaterTest extends SysuiTestCase {
     private Context mContext;
     @Mock
     private DreamBackend mDreamBackend;
-    @Mock
-    private SecureSettings mSecureSettings;
+    private FakeSettings mSecureSettings;
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
     @Captor
@@ -74,6 +72,7 @@ public class ComplicationTypesUpdaterTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(mDreamBackend.getEnabledComplications()).thenReturn(new HashSet<>());
+        mSecureSettings = new FakeSettings();
 
         mMonitor = SelfExecutingMonitor.createInstance();
         mController = new ComplicationTypesUpdater(mDreamBackend, mExecutor,
@@ -100,19 +99,15 @@ public class ComplicationTypesUpdaterTest extends SysuiTestCase {
         when(mDreamBackend.getEnabledComplications()).thenReturn(new HashSet<>(Arrays.asList(
                 DreamBackend.COMPLICATION_TYPE_TIME, DreamBackend.COMPLICATION_TYPE_WEATHER,
                 DreamBackend.COMPLICATION_TYPE_AIR_QUALITY)));
-        final ContentObserver settingsObserver = captureSettingsObserver();
-        settingsObserver.onChange(false);
+
+        // Update the setting to trigger any content observers
+        mSecureSettings.putBoolForUser(
+                Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED, true,
+                UserHandle.myUserId());
         mExecutor.runAllReady();
 
         verify(mDreamOverlayStateController).setAvailableComplicationTypes(
                 Complication.COMPLICATION_TYPE_TIME | Complication.COMPLICATION_TYPE_WEATHER
                         | Complication.COMPLICATION_TYPE_AIR_QUALITY);
-    }
-
-    private ContentObserver captureSettingsObserver() {
-        verify(mSecureSettings).registerContentObserverForUser(
-                eq(Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED),
-                mSettingsObserverCaptor.capture(), eq(UserHandle.myUserId()));
-        return mSettingsObserverCaptor.getValue();
     }
 }
