@@ -23,6 +23,7 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputDeviceIdentifier;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -686,7 +687,7 @@ class InputController {
             mListener = new InputManager.InputDeviceListener() {
                 @Override
                 public void onInputDeviceAdded(int deviceId) {
-                    final InputDevice device = InputManager.getInstance().getInputDevice(
+                    final InputDevice device = InputManagerGlobal.getInstance().getInputDevice(
                             deviceId);
                     Objects.requireNonNull(device, "Newly added input device was null.");
                     if (!device.getName().equals(deviceName)) {
