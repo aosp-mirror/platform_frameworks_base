@@ -161,9 +161,8 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
-     * Returns the recording session associated with this VirtualDisplay. Only used for
+     * Returns the recording session associated with this {@link VirtualDisplay}. Only used for
      * recording via {@link MediaProjection}.
-     *
      * @hide
      */
     @Nullable
