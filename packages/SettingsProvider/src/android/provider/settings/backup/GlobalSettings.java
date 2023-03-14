@@ -49,6 +49,7 @@ public class GlobalSettings {
         Settings.Global.CHARGING_SOUNDS_ENABLED,
         Settings.Global.USB_MASS_STORAGE_ENABLED,
         Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+        Settings.Global.NETWORK_AVOID_BAD_WIFI,
         Settings.Global.WIFI_WAKEUP_ENABLED,
         Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
         Settings.Global.USE_OPEN_WIFI_PACKAGE,
