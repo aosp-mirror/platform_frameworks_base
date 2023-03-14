@@ -40,6 +40,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+import static com.android.server.wm.BackgroundActivityStartController.BAL_BLOCK;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 
 import android.Manifest;
@@ -544,15 +545,17 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
         return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */);
+                true /* isCheckingForFgsStart */) != BAL_BLOCK;
     }
 
-    boolean areBackgroundActivityStartsAllowed(int appSwitchState) {
+    @BackgroundActivityStartController.BalCode
+    int areBackgroundActivityStartsAllowed(int appSwitchState) {
         return areBackgroundActivityStartsAllowed(appSwitchState,
                 false /* isCheckingForFgsStart */);
     }
 
-    private boolean areBackgroundActivityStartsAllowed(int appSwitchState,
+    @BackgroundActivityStartController.BalCode
+    private int areBackgroundActivityStartsAllowed(int appSwitchState,
             boolean isCheckingForFgsStart) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
                 appSwitchState, isCheckingForFgsStart, hasActivityInVisibleTask(),

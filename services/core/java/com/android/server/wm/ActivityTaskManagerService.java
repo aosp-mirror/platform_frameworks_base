@@ -2182,10 +2182,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (appThread != null) {
             callerApp = getProcessController(appThread);
         }
-        final ActivityStarter starter = getActivityStartController().obtainStarter(
-                null /* intent */, "moveTaskToFront");
-        if (starter.shouldAbortBackgroundActivityStart(callingUid, callingPid, callingPackage, -1,
-                -1, callerApp, null, false, null, null)) {
+        final BackgroundActivityStartController balController =
+                getActivityStartController().getBackgroundActivityLaunchController();
+        if (balController.shouldAbortBackgroundActivityStart(
+                callingUid,
+                callingPid,
+                callingPackage,
+                -1,
+                -1,
+                callerApp,
+                null,
+                false,
+                null,
+                null)) {
             if (!isBackgroundActivityStartsEnabled()) {
                 return;
             }
