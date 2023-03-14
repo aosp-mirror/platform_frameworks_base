@@ -98,6 +98,7 @@ import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.android.internal.app.IBatteryStats;
@@ -393,6 +394,13 @@ public class FrameworkServicesModule {
     @Singleton
     public LayoutInflater providerLayoutInflater(Context context) {
         return LayoutInflater.from(context);
+    }
+
+    /** */
+    @Provides
+    @Singleton
+    public AsyncLayoutInflater provideAsyncLayoutInflater(Context context) {
+        return new AsyncLayoutInflater(context);
     }
 
     @Provides
