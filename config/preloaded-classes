@@ -14414,7 +14414,6 @@ java.util.ImmutableCollections$Set0
 java.util.ImmutableCollections$Set1
 java.util.ImmutableCollections$Set2
 java.util.ImmutableCollections$SetN
-java.util.ImmutableCollections
 java.util.InputMismatchException
 java.util.Iterator
 java.util.JumboEnumSet$EnumSetIterator
