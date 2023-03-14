@@ -251,11 +251,6 @@ class ActivityClientController extends IActivityClientController.Stub {
                     // {@link #restartActivityProcessIfVisible}.
                     restartingName = r.app.mName;
                     restartingUid = r.app.mUid;
-                    // Make EnsureActivitiesVisibleHelper#makeVisibleAndRestartIfNeeded not skip
-                    // restarting non-top activity.
-                    if (r != r.getTask().topRunningActivity()) {
-                        r.setVisibleRequested(false);
-                    }
                 }
                 r.activityStopped(icicle, persistentState, description);
             }
