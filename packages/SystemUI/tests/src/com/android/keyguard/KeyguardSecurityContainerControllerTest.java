@@ -66,6 +66,7 @@ import com.android.systemui.biometrics.SideFpsUiRequestSource;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -619,10 +620,23 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
     @Test
     public void testReinflateViewFlipper() {
-        mKeyguardSecurityContainerController.reinflateViewFlipper();
+        mKeyguardSecurityContainerController.reinflateViewFlipper(() -> {});
         verify(mKeyguardSecurityViewFlipperController).clearViews();
         verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
                 any(KeyguardSecurityCallback.class));
+    }
+
+    @Test
+    public void testReinflateViewFlipper_asyncBouncerFlagOn() {
+        when(mFeatureFlags.isEnabled(Flags.ASYNC_INFLATE_BOUNCER)).thenReturn(true);
+        KeyguardSecurityViewFlipperController.OnViewInflatedListener onViewInflatedListener =
+                () -> {
+                };
+        mKeyguardSecurityContainerController.reinflateViewFlipper(onViewInflatedListener);
+        verify(mKeyguardSecurityViewFlipperController).clearViews();
+        verify(mKeyguardSecurityViewFlipperController).asynchronouslyInflateView(
+                any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class), eq(onViewInflatedListener));
     }
 
     @Test
