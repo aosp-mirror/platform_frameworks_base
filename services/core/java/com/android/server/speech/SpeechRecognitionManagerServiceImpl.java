@@ -193,24 +193,10 @@ final class SpeechRecognitionManagerServiceImpl extends
                         @Override
                         public void triggerModelDownload(
                                 Intent recognizerIntent,
-                                AttributionSource attributionSource) {
-                            service.triggerModelDownload(recognizerIntent, attributionSource);
-                        }
-
-                        @Override
-                        public void setModelDownloadListener(
-                                Intent recognizerIntent,
                                 AttributionSource attributionSource,
-                                IModelDownloadListener listener) throws RemoteException {
-                            service.setModelDownloadListener(
+                                IModelDownloadListener listener) {
+                            service.triggerModelDownload(
                                     recognizerIntent, attributionSource, listener);
-                        }
-
-                        @Override
-                        public void clearModelDownloadListener(
-                                Intent recognizerIntent,
-                                AttributionSource attributionSource) throws RemoteException {
-                            service.clearModelDownloadListener(recognizerIntent, attributionSource);
                         }
                     });
                 } catch (RemoteException e) {
