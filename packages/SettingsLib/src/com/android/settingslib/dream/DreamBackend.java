@@ -31,13 +31,15 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.util.ArraySet;
 import android.util.Log;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -116,7 +118,7 @@ public class DreamBackend {
     private final boolean mDreamsActivatedOnSleepByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
     private final Set<ComponentName> mDisabledDreams;
-    private final Set<Integer> mSupportedComplications;
+    private Set<Integer> mSupportedComplications;
     private static DreamBackend sInstance;
 
     public static DreamBackend getInstance(Context context) {
@@ -281,13 +283,36 @@ public class DreamBackend {
 
     /** Gets all complications which have been enabled by the user. */
     public Set<Integer> getEnabledComplications() {
-        return getComplicationsEnabled() ? mSupportedComplications : Collections.emptySet();
+        final Set<Integer> enabledComplications =
+                getComplicationsEnabled()
+                        ? new ArraySet<>(mSupportedComplications) : new ArraySet<>();
+
+        if (!getHomeControlsEnabled()) {
+            enabledComplications.remove(COMPLICATION_TYPE_HOME_CONTROLS);
+        } else if (mSupportedComplications.contains(COMPLICATION_TYPE_HOME_CONTROLS)) {
+            // Add home control type to list of enabled complications, even if other complications
+            // have been disabled.
+            enabledComplications.add(COMPLICATION_TYPE_HOME_CONTROLS);
+        }
+        return enabledComplications;
     }
 
     /** Sets complication enabled state. */
     public void setComplicationsEnabled(boolean enabled) {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.SCREENSAVER_COMPLICATIONS_ENABLED, enabled ? 1 : 0);
+    }
+
+    /** Sets whether home controls are enabled by the user on the dream */
+    public void setHomeControlsEnabled(boolean enabled) {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED, enabled ? 1 : 0);
+    }
+
+    /** Gets whether home controls button is enabled on the dream */
+    private boolean getHomeControlsEnabled() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED, 1) == 1;
     }
 
     /**
@@ -302,6 +327,14 @@ public class DreamBackend {
     /** Gets all dream complications which are supported on this device. **/
     public Set<Integer> getSupportedComplications() {
         return mSupportedComplications;
+    }
+
+    /**
+     * Sets the list of supported complications. Should only be used in tests.
+     */
+    @VisibleForTesting
+    public void setSupportedComplications(Set<Integer> complications) {
+        mSupportedComplications = complications;
     }
 
     public boolean isEnabled() {
