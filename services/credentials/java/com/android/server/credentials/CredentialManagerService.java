@@ -41,6 +41,7 @@ import android.credentials.IClearCredentialStateCallback;
 import android.credentials.ICreateCredentialCallback;
 import android.credentials.ICredentialManager;
 import android.credentials.IGetCredentialCallback;
+import android.credentials.IGetPendingCredentialCallback;
 import android.credentials.ISetEnabledProvidersCallback;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
@@ -435,6 +436,17 @@ public final class CredentialManagerService
                             timestampBegan);
 
             processGetCredential(request, callback, session);
+            return cancelTransport;
+        }
+
+        @Override
+        public ICancellationSignal executeGetPendingCredential(
+                GetCredentialRequest request,
+                IGetPendingCredentialCallback callback,
+                final String callingPackage) {
+            // TODO(b/273308895): implement
+
+            ICancellationSignal cancelTransport = CancellationSignal.createTransport();
             return cancelTransport;
         }
 
