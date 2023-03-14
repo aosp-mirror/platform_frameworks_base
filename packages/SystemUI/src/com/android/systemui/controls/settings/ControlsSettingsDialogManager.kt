@@ -155,17 +155,18 @@ internal constructor(
         d.show()
     }
 
-    private fun turnOnSettingSecurely(settings: List<String>) {
+    private fun turnOnSettingSecurely(settings: List<String>, onComplete: () -> Unit) {
         val action =
             ActivityStarter.OnDismissAction {
                 settings.forEach { setting ->
                     secureSettings.putIntForUser(setting, 1, userTracker.userId)
                 }
+                onComplete()
                 true
             }
         activityStarter.dismissKeyguardThenExecute(
             action,
-            /* cancel */ null,
+            /* cancel */ onComplete,
             /* afterKeyguardGone */ true
         )
     }
@@ -186,7 +187,11 @@ internal constructor(
                 if (!showDeviceControlsInLockscreen) {
                     settings.add(Settings.Secure.LOCKSCREEN_SHOW_CONTROLS)
                 }
-                turnOnSettingSecurely(settings)
+                // If we are toggling the flag, we want to call onComplete after the keyguard is
+                // dismissed (and the setting is turned on), to pass the correct value.
+                turnOnSettingSecurely(settings, onComplete)
+            } else {
+                onComplete()
             }
             if (attempts != MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG) {
                 prefs
@@ -194,7 +199,6 @@ internal constructor(
                     .putInt(PREFS_SETTINGS_DIALOG_ATTEMPTS, MAX_NUMBER_ATTEMPTS_CONTROLS_DIALOG)
                     .apply()
             }
-            onComplete()
         }
 
         override fun onCancel(dialog: DialogInterface?) {
