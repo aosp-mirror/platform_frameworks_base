@@ -491,8 +491,11 @@ public abstract class UserManagerInternal {
     public abstract boolean isUserVisible(@UserIdInt int userId, int displayId);
 
     /**
-     * Returns the display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
-     * user is not assigned to any display.
+     * Returns the main display id assigned to the user, or {@code Display.INVALID_DISPLAY} if the
+     * user is not assigned to any main display.
+     *
+     * <p>In the context of multi-user multi-display, there can be multiple main displays, at most
+     * one per each zone. Main displays are where UI is launched which a user interacts with.
      *
      * <p>The current foreground user and its running profiles are associated with the
      * {@link android.view.Display#DEFAULT_DISPLAY default display}, while other users would only be
@@ -503,7 +506,18 @@ public abstract class UserManagerInternal {
      *
      * <p>If the user is a profile and is running, it's assigned to its parent display.
      */
+    // TODO(b/272366483) rename this method to avoid confusion with getDisplaysAssignedTOUser().
     public abstract int getDisplayAssignedToUser(@UserIdInt int userId);
+
+    /**
+     * Returns all display ids assigned to the user including {@link
+     * #assignUserToExtraDisplay(int, int) extra displays}, or {@code null} if there is no display
+     * assigned to the specified user.
+     *
+     * <p>Note that this method is different from {@link #getDisplayAssignedToUser(int)}, which
+     * returns a main display only.
+     */
+    public abstract @Nullable int[] getDisplaysAssignedToUser(@UserIdInt int userId);
 
     /**
      * Returns the main user (i.e., not a profile) that is assigned to the display, or the
