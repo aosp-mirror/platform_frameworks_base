@@ -137,6 +137,12 @@ interface ClockAnimations {
     fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
 
     /**
+     * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
+     * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
+     */
+    fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
+
+    /**
      * Whether this clock has a custom position update animation. If true, the keyguard will call
      * `onPositionUpdated` to notify the clock of a position update animation. If false, a default
      * animation will be used (e.g. a simple translation).
