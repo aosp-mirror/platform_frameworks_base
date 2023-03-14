@@ -1341,6 +1341,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     /**
+     * Destroys the WindwoProcessController, after the process has been removed.
+     */
+    void destroy() {
+        unregisterConfigurationListeners();
+    }
+
+    /**
      * Check if activity configuration override for the activity process needs an update and perform
      * if needed. By default we try to override the process configuration to match the top activity
      * config to increase app compatibility with multi-window and multi-display. The process will

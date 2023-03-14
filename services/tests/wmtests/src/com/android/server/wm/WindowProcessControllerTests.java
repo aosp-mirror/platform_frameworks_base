@@ -158,6 +158,17 @@ public class WindowProcessControllerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDestroy_unregistersDisplayAreaListener() {
+        final TestDisplayContent testDisplayContent1 = createTestDisplayContentInContainer();
+        final DisplayArea imeContainer1 = testDisplayContent1.getImeContainer();
+        mWpc.registerDisplayAreaConfigurationListener(imeContainer1);
+
+        mWpc.destroy();
+
+        assertNull(mWpc.getDisplayArea());
+    }
+
+    @Test
     public void testSetRunningRecentsAnimation() {
         mWpc.setRunningRecentsAnimation(true);
         mWpc.setRunningRecentsAnimation(false);
