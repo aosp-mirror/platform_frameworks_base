@@ -238,7 +238,7 @@ public final class CameraManager {
 
     /**
      * Similar to getCameraIdList(). However, getCamerIdListNoLazy() necessarily communicates with
-     * cameraserver in order to get the list of camera ids. This is to faciliate testing since some
+     * cameraserver in order to get the list of camera ids. This is to facilitate testing since some
      * camera ids may go 'offline' without callbacks from cameraserver because of changes in
      * SYSTEM_CAMERA permissions (though this is not a changeable permission, tests may call
      * adopt(drop)ShellPermissionIdentity() and effectively change their permissions). This call
@@ -542,7 +542,7 @@ public final class CameraManager {
         }
 
         // Query the characteristics of all physical sub-cameras, and combine the multi-resolution
-        // stream configurations. Alternatively, for ultra-high resolution camera, direclty use
+        // stream configurations. Alternatively, for ultra-high resolution camera, directly use
         // its multi-resolution stream configurations. Note that framework derived formats such as
         // HEIC and DEPTH_JPEG aren't supported as multi-resolution input or output formats.
         Set<String> physicalCameraIds = info.getPhysicalCameraIds();
@@ -809,7 +809,7 @@ public final class CameraManager {
      * Opening the same camera ID twice in the same application will similarly cause the
      * {@link android.hardware.camera2.CameraDevice.StateCallback#onDisconnected} callback
      * being fired for the {@link CameraDevice} from the first open call and all ongoing tasks
-     * being droppped.</p>
+     * being dropped.</p>
      *
      * <p>Once the camera is successfully opened, {@link CameraDevice.StateCallback#onOpened} will
      * be invoked with the newly opened {@link CameraDevice}. The camera device can then be set up
@@ -1613,7 +1613,7 @@ public final class CameraManager {
         private final Set<Set<String>> mConcurrentCameraIdCombinations =
                 new ArraySet<Set<String>>();
 
-        // Registered availablility callbacks and their executors
+        // Registered availability callbacks and their executors
         private final ArrayMap<AvailabilityCallback, Executor> mCallbackMap =
             new ArrayMap<AvailabilityCallback, Executor>();
 
@@ -2698,7 +2698,7 @@ public final class CameraManager {
                 // Tell listeners that the cameras and torch modes are unavailable and schedule a
                 // reconnection to camera service. When camera service is reconnected, the camera
                 // and torch statuses will be updated.
-                // Iterate from the end to the beginning befcause onStatusChangedLocked removes
+                // Iterate from the end to the beginning because onStatusChangedLocked removes
                 // entries from the ArrayMap.
                 for (int i = mDeviceStatus.size() - 1; i >= 0; i--) {
                     String cameraId = mDeviceStatus.keyAt(i);
