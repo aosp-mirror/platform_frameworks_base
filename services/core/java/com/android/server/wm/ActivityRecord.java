@@ -9074,6 +9074,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final boolean wasInPictureInPicture = inPinnedWindowingMode();
         final DisplayContent display = mDisplayContent;
+        final int activityType = getActivityType();
         if (wasInPictureInPicture && attachedToProcess() && display != null) {
             // If the PIP activity is changing to fullscreen with display orientation change, the
             // fixed rotation will take effect that requires to send fixed rotation adjustments
@@ -9097,6 +9098,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         } else {
             super.onConfigurationChanged(newParentConfig);
+        }
+        if (activityType != ACTIVITY_TYPE_UNDEFINED
+                && activityType != getActivityType()) {
+            Slog.w(TAG, "Can't change activity type once set: " + this
+                    + " activityType=" + activityTypeToString(getActivityType()));
         }
 
         // Configuration's equality doesn't consider seq so if only seq number changes in resolved
