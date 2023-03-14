@@ -155,6 +155,14 @@ public class KeyguardManager {
             "android.app.extra.REMOTE_LOCKSCREEN_VALIDATION_SESSION";
 
     /**
+     * A boolean indicating that credential confirmation activity should be a task overlay.
+     * {@link #ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER}.
+     * @hide
+     */
+    public static final String EXTRA_FORCE_TASK_OVERLAY =
+            "android.app.KeyguardManager.FORCE_TASK_OVERLAY";
+
+    /**
      * Result code returned by the activity started by
      * {@link #createConfirmFactoryResetCredentialIntent} or
      * {@link #createConfirmDeviceCredentialForRemoteValidationIntent}
