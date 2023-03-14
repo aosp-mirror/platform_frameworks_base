@@ -53,6 +53,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipAnimationController;
@@ -115,6 +116,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private Optional<OneHandedController> mMockOneHandedController;
     @Mock private PipParamsChangedForwarder mMockPipParamsChangedForwarder;
     @Mock private DisplayInsetsController mMockDisplayInsetsController;
+    @Mock private TabletopModeController mMockTabletopModeController;
 
     @Mock private DisplayLayout mMockDisplayLayout1;
     @Mock private DisplayLayout mMockDisplayLayout2;
@@ -137,7 +139,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipTaskOrganizer, mMockPipTransitionState, mMockPipTouchHandler,
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mMockPipParamsChangedForwarder,
-                mMockDisplayInsetsController, mMockOneHandedController, mMockExecutor);
+                mMockDisplayInsetsController, mMockTabletopModeController,
+                mMockOneHandedController, mMockExecutor);
         mShellInit.init();
         when(mMockPipBoundsAlgorithm.getSnapAlgorithm()).thenReturn(mMockPipSnapAlgorithm);
         when(mMockPipTouchHandler.getMotionHelper()).thenReturn(mMockPipMotionHelper);
@@ -228,7 +231,8 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipTaskOrganizer, mMockPipTransitionState, mMockPipTouchHandler,
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mMockPipParamsChangedForwarder,
-                mMockDisplayInsetsController, mMockOneHandedController, mMockExecutor));
+                mMockDisplayInsetsController, mMockTabletopModeController,
+                mMockOneHandedController, mMockExecutor));
     }
 
     @Test
