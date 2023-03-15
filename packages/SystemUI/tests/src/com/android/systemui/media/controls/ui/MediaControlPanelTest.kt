@@ -94,7 +94,6 @@ import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -1763,7 +1762,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun tapContentView_showOverLockscreen_openActivity() {
         // WHEN we are on lockscreen and this activity can show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
-        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
 
         val clickIntent = mock(Intent::class.java)
         val pendingIntent = mock(PendingIntent::class.java)
@@ -1774,16 +1773,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(data, KEY)
         verify(viewHolder.player).setOnClickListener(captor.capture())
 
-        // THEN it shows without dismissing keyguard first
+        // THEN it sends the PendingIntent without dismissing keyguard first,
+        // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(activityStarter).startActivity(eq(clickIntent), eq(true), nullable(), eq(true))
+        verify(pendingIntent).send()
+        verify(pendingIntent, never()).getIntent()
+        verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }
 
     @Test
     fun tapContentView_noShowOverLockscreen_dismissKeyguard() {
         // WHEN we are on lockscreen and the activity cannot show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
-        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(false)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
+            .thenReturn(false)
 
         val clickIntent = mock(Intent::class.java)
         val pendingIntent = mock(PendingIntent::class.java)
