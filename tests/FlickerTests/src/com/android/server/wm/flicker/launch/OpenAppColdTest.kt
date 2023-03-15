@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.launch
 
+import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -71,6 +72,10 @@ open class OpenAppColdTest(flicker: FlickerTest) : OpenAppFromLauncherTransition
 
     /** {@inheritDoc} */
     @Presubmit @Test override fun appLayerReplacesLauncher() = super.appLayerReplacesLauncher()
+
+    @Postsubmit
+    @Test
+    override fun navBarLayerPositionAtStartAndEnd() = super.navBarLayerPositionAtStartAndEnd()
 
     companion object {
         /**
