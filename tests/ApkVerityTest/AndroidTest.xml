@@ -16,6 +16,11 @@
 <configuration description="APK fs-verity integration/regression test">
     <option name="test-suite-tag" value="apct" />
 
+    <object type="module_controller" class="com.android.tradefed.testtype.suite.module.ShippingApiLevelModuleController">
+        <!-- fs-verity is required since R/30 -->
+        <option name="vsr-min-api-level" value="30" />
+    </object>
+
     <!-- This test requires root to write against block device. -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
 
