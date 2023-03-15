@@ -989,9 +989,16 @@ public class ApplicationExitInfoTest {
     private ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, Integer definingUid,
             int connectionGroup, int procState, long pss, long rss,
             String processName, String packageName) {
+        return makeProcessRecord(pid, uid, packageUid, definingUid, connectionGroup,
+                procState, pss, rss, processName, packageName, mAms);
+    }
+
+    static ProcessRecord makeProcessRecord(int pid, int uid, int packageUid, Integer definingUid,
+            int connectionGroup, int procState, long pss, long rss,
+            String processName, String packageName, ActivityManagerService ams) {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
-        ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
+        ProcessRecord app = new ProcessRecord(ams, ai, processName, uid);
         app.setPid(pid);
         app.info.uid = packageUid;
         if (definingUid != null) {

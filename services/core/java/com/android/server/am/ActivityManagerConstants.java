@@ -248,7 +248,16 @@ final class ActivityManagerConstants extends ContentObserver {
 
     private static final long DEFAULT_SERVICE_BIND_ALMOST_PERCEPTIBLE_TIMEOUT_MS = 15 * 1000;
 
-    // Flag stored in the DeviceConfig API.
+    /**
+     * Default value to {@link #SERVICE_TIMEOUT}.
+     */
+    private static final long DEFAULT_SERVICE_TIMEOUT = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    /**
+     * Default value to {@link #SERVICE_BACKGROUND_TIMEOUT}.
+     */
+    private static final long DEFAULT_SERVICE_BACKGROUND_TIMEOUT = DEFAULT_SERVICE_TIMEOUT * 10;
+
     /**
      * Maximum number of cached processes.
      */
@@ -505,6 +514,12 @@ final class ActivityManagerConstants extends ContentObserver {
     // That is, when multiple services are restarting, we won't allow each
     // to restart less than this amount of time from the last one.
     public long SERVICE_MIN_RESTART_TIME_BETWEEN = DEFAULT_SERVICE_MIN_RESTART_TIME_BETWEEN;
+
+    // How long we wait for a service to finish executing.
+    long SERVICE_TIMEOUT = DEFAULT_SERVICE_TIMEOUT;
+
+    // How long we wait for a service to finish executing.
+    long SERVICE_BACKGROUND_TIMEOUT = DEFAULT_SERVICE_BACKGROUND_TIMEOUT;
 
     // Maximum amount of time for there to be no activity on a service before
     // we consider it non-essential and allow its process to go on the
