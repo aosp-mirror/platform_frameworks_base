@@ -232,11 +232,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
-        mService.setWillReplaceWindows(appToken, childrenOnly);
-    }
-
-    @Override
     public boolean cancelDraw(IWindow window) {
         return mService.cancelDraw(this, window);
     }

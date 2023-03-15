@@ -163,14 +163,6 @@ class WallpaperController {
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
                 + " mDrawState=" + w.mWinAnimator.mDrawState);
 
-        if (w.mWillReplaceWindow && mWallpaperTarget == null
-                && !mFindResults.useTopWallpaperAsTarget) {
-            // When we are replacing a window and there was wallpaper before replacement, we want to
-            // keep the window until the new windows fully appear and can determine the visibility,
-            // to avoid flickering.
-            mFindResults.setUseTopWallpaperAsTarget(true);
-        }
-
         final WindowContainer animatingContainer = w.mActivityRecord != null
                 ? w.mActivityRecord.getAnimatingContainer() : null;
         final boolean keyguardGoingAwayWithWallpaper = (animatingContainer != null

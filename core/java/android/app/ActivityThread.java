@@ -5840,26 +5840,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
         r.activity.mChangingConfigurations = true;
 
-        // If we are preserving the main window across relaunches we would also like to preserve
-        // the children. However the client side view system does not support preserving
-        // the child views so we notify the window manager to expect these windows to
-        // be replaced and defer requests to destroy or hide them. This way we can achieve
-        // visual continuity. It's important that we do this here prior to pause and destroy
-        // as that is when we may hide or remove the child views.
-        //
-        // There is another scenario, if we have decided locally to relaunch the app from a
-        // call to recreate, then none of the windows will be prepared for replacement or
-        // preserved by the server, so we want to notify it that we are preparing to replace
-        // everything
-        try {
-            if (r.mPreserveWindow) {
-                WindowManagerGlobal.getWindowSession().prepareToReplaceWindows(
-                        r.token, true /* childrenOnly */);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
         handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
                 pendingActions, tmp.startsNotResumed, tmp.overrideConfig, "handleRelaunchActivity");
     }
