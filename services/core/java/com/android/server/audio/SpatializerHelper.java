@@ -1066,7 +1066,7 @@ public class SpatializerHelper {
         if (transform.length != 6) {
             throw new IllegalArgumentException("invalid array size" + transform.length);
         }
-        if (!checkSpatForHeadTracking("setGlobalTransform")) {
+        if (!checkSpatializerForHeadTracking("setGlobalTransform")) {
             return;
         }
         try {
@@ -1077,7 +1077,7 @@ public class SpatializerHelper {
     }
 
     synchronized void recenterHeadTracker() {
-        if (!checkSpatForHeadTracking("recenterHeadTracker")) {
+        if (!checkSpatializerForHeadTracking("recenterHeadTracker")) {
             return;
         }
         try {
@@ -1087,8 +1087,30 @@ public class SpatializerHelper {
         }
     }
 
+    synchronized void setDisplayOrientation(float displayOrientation) {
+        if (!checkSpatializer("setDisplayOrientation")) {
+            return;
+        }
+        try {
+            mSpat.setDisplayOrientation(displayOrientation);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setDisplayOrientation", e);
+        }
+    }
+
+    synchronized void setFoldState(boolean folded) {
+        if (!checkSpatializer("setFoldState")) {
+            return;
+        }
+        try {
+            mSpat.setFoldState(folded);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setFoldState", e);
+        }
+    }
+
     synchronized void setDesiredHeadTrackingMode(@Spatializer.HeadTrackingModeSet int mode) {
-        if (!checkSpatForHeadTracking("setDesiredHeadTrackingMode")) {
+        if (!checkSpatializerForHeadTracking("setDesiredHeadTrackingMode")) {
             return;
         }
         if (mode != Spatializer.HEAD_TRACKING_MODE_DISABLED) {
@@ -1186,7 +1208,7 @@ public class SpatializerHelper {
         return mHeadTrackerAvailable;
     }
 
-    private boolean checkSpatForHeadTracking(String funcName) {
+    private boolean checkSpatializer(String funcName) {
         switch (mState) {
             case STATE_UNINITIALIZED:
             case STATE_NOT_SUPPORTED:
@@ -1197,14 +1219,18 @@ public class SpatializerHelper {
             case STATE_ENABLED_AVAILABLE:
                 if (mSpat == null) {
                     // try to recover by resetting the native spatializer state
-                    Log.e(TAG, "checkSpatForHeadTracking(): "
-                            + "native spatializer should not be null in state: " + mState);
+                    Log.e(TAG, "checkSpatializer(): called from " + funcName
+                            + "(), native spatializer should not be null in state: " + mState);
                     postReset();
                     return false;
                 }
                 break;
         }
-        return mIsHeadTrackingSupported;
+        return true;
+    }
+
+    private boolean checkSpatializerForHeadTracking(String funcName) {
+        return checkSpatializer(funcName) && mIsHeadTrackingSupported;
     }
 
     private void dispatchActualHeadTrackingMode(int newMode) {
