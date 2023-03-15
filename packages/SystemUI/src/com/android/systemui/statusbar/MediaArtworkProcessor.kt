@@ -21,20 +21,17 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Point
 import android.graphics.Rect
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicBlur
 import android.util.Log
 import android.util.MathUtils
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
+import com.google.android.renderscript.Toolkit
 import javax.inject.Inject
 
 private const val TAG = "MediaArtworkProcessor"
 private const val COLOR_ALPHA = (255 * 0.7f).toInt()
-private const val BLUR_RADIUS = 25f
+private const val BLUR_RADIUS = 25
 private const val DOWNSAMPLE = 6
 
 @SysUISingleton
@@ -47,10 +44,6 @@ class MediaArtworkProcessor @Inject constructor() {
         if (mArtworkCache != null) {
             return mArtworkCache
         }
-        val renderScript = RenderScript.create(context)
-        val blur = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript))
-        var input: Allocation? = null
-        var output: Allocation? = null
         var inBitmap: Bitmap? = null
         try {
             @Suppress("DEPRECATION")
@@ -66,18 +59,8 @@ class MediaArtworkProcessor @Inject constructor() {
                 inBitmap = oldIn.copy(Bitmap.Config.ARGB_8888, false /* isMutable */)
                 oldIn.recycle()
             }
-            val outBitmap = Bitmap.createBitmap(inBitmap.width, inBitmap.height,
-                    Bitmap.Config.ARGB_8888)
 
-            input = Allocation.createFromBitmap(renderScript, inBitmap,
-                    Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_GRAPHICS_TEXTURE)
-            output = Allocation.createFromBitmap(renderScript, outBitmap)
-
-            blur.setRadius(BLUR_RADIUS)
-            blur.setInput(input)
-            blur.forEach(output)
-            output.copyTo(outBitmap)
-
+            val outBitmap = Toolkit.blur(inBitmap, BLUR_RADIUS)
             val swatch = MediaNotificationProcessor.findBackgroundSwatch(artwork)
 
             val canvas = Canvas(outBitmap)
@@ -87,9 +70,6 @@ class MediaArtworkProcessor @Inject constructor() {
             Log.e(TAG, "error while processing artwork", ex)
             return null
         } finally {
-            input?.destroy()
-            output?.destroy()
-            blur.destroy()
             inBitmap?.recycle()
         }
     }
