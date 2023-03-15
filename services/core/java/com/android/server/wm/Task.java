@@ -3398,8 +3398,10 @@ class Task extends TaskFragment {
 
         final boolean isTopActivityResumed = top != null
                 && top.getOrganizedTask() == this && top.isState(RESUMED);
-        // Whether the direct top activity is in size compat mode on foreground.
-        info.topActivityInSizeCompat = isTopActivityResumed && top.inSizeCompatMode();
+        final boolean isTopActivityVisible = top != null
+                && top.getOrganizedTask() == this && top.isVisible();
+        // Whether the direct top activity is in size compat mode
+        info.topActivityInSizeCompat = isTopActivityVisible && top.inSizeCompatMode();
         if (info.topActivityInSizeCompat
                 && mWmService.mLetterboxConfiguration.isTranslucentLetterboxingEnabled()) {
             // We hide the restart button in case of transparent activities.
