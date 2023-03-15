@@ -68,9 +68,7 @@ public abstract class SharedConnectivityService extends Service {
             new RemoteCallbackList<>();
     private List<HotspotNetwork> mHotspotNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
-    private SharedConnectivitySettingsState mSettingsState =
-            new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(false)
-                    .setExtras(Bundle.EMPTY).build();
+    private SharedConnectivitySettingsState mSettingsState = null;
     private HotspotNetworkConnectionStatus mHotspotNetworkConnectionStatus =
             new HotspotNetworkConnectionStatus.Builder()
                     .setStatus(HotspotNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
@@ -202,6 +200,13 @@ public abstract class SharedConnectivityService extends Service {
             @Override
             public SharedConnectivitySettingsState getSettingsState() {
                 checkPermissions();
+                // Done lazily since creating it needs a context.
+                if (mSettingsState == null) {
+                    mSettingsState = new SharedConnectivitySettingsState
+                            .Builder(getApplicationContext())
+                            .setInstantTetherEnabled(false)
+                            .setExtras(Bundle.EMPTY).build();
+                }
                 return mSettingsState;
             }
 
