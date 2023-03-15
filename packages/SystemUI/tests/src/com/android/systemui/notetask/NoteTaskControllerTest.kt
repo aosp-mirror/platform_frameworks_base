@@ -232,7 +232,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
 
         verifyZeroInteractions(context)
         val intentCaptor = argumentCaptor<Intent>()
-        verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
+        verify(bubbles).showOrHideAppBubble(capture(intentCaptor), eq(userTracker.userHandle))
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
@@ -366,7 +366,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
 
         val intentCaptor = argumentCaptor<Intent>()
-        verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
+        verify(bubbles).showOrHideAppBubble(capture(intentCaptor), eq(userTracker.userHandle))
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)
@@ -389,7 +389,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         createNoteTaskController().showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
 
         val intentCaptor = argumentCaptor<Intent>()
-        verify(bubbles).showOrHideAppBubble(capture(intentCaptor))
+        verify(bubbles).showOrHideAppBubble(capture(intentCaptor), eq(userTracker.userHandle))
         intentCaptor.value.let { intent ->
             assertThat(intent.action).isEqualTo(Intent.ACTION_CREATE_NOTE)
             assertThat(intent.`package`).isEqualTo(NOTES_PACKAGE_NAME)

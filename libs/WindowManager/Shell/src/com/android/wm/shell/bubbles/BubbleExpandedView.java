@@ -236,12 +236,17 @@ public class BubbleExpandedView extends LinearLayout {
                     fillInIntent.addFlags(FLAG_ACTIVITY_MULTIPLE_TASK);
 
                     if (mBubble.isAppBubble()) {
-                        PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                        Context context =
+                                mContext.createContextAsUser(
+                                        mBubble.getUser(), Context.CONTEXT_RESTRICTED);
+                        PendingIntent pi = PendingIntent.getActivity(
+                                context,
+                                /* requestCode= */ 0,
                                 mBubble.getAppBubbleIntent()
                                         .addFlags(FLAG_ACTIVITY_NEW_DOCUMENT)
                                         .addFlags(FLAG_ACTIVITY_MULTIPLE_TASK),
                                 PendingIntent.FLAG_IMMUTABLE,
-                                null);
+                                /* options= */ null);
                         mTaskView.startActivity(pi, /* fillInIntent= */ null, options,
                                 launchBounds);
                     } else if (!mIsOverflow && mBubble.hasMetadataShortcutId()) {
