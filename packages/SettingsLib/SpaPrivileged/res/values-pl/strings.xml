@@ -23,5 +23,5 @@
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"Dozwolone"</string>
     <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"Niedozwolone"</string>
     <string name="version_text" msgid="4001669804596458577">"wersja <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>
-    <string name="cloned_app_info_label" msgid="1765651167024478391">"Klonuj: <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <string name="cloned_app_info_label" msgid="1765651167024478391">"Klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
 </resources>
