@@ -209,6 +209,8 @@ class LinkCommand : public Command {
     AddOptionalFlag("--compile-sdk-version-name",
         "Version name to inject into the AndroidManifest.xml if none is present.",
         &options_.manifest_fixer_options.compile_sdk_version_codename);
+    AddOptionalFlagList("--fingerprint-prefix", "Fingerprint prefix to add to install constraints.",
+                        &options_.manifest_fixer_options.fingerprint_prefixes);
     AddOptionalSwitch("--shared-lib", "Generates a shared Android runtime library.",
         &shared_lib_);
     AddOptionalSwitch("--static-lib", "Generate a static Android library.", &static_lib_);
